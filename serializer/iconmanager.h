@@ -2,7 +2,6 @@
 * @file  iconmanager.h
 * @brief Header implementing a class to manage icons.
 *
-*
 * @section License
 *
 * Copyright (C) 2013 Josh Ventura <JoshV10@gmail.com>

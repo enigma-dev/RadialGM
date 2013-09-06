@@ -2,7 +2,6 @@
 * @file  mainwindow.cpp
 * @brief Source implementing a class for the main window.
 *
-*
 * @section License
 *
 * Copyright (C) 2013 Robert B. Colton

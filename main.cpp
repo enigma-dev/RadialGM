@@ -2,7 +2,6 @@
 * @file  main.cpp
 * @brief Source implementing the main entry point of the application.
 *
-*
 * @section License
 *
 * Copyright (C) 2013 Robert B. Colton
@@ -21,9 +20,6 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
-
-
-
 
 #include "mainwindow.h"
 #include <QApplication>

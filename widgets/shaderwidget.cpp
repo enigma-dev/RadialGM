@@ -2,7 +2,6 @@
 * @file  shaderwidget.cpp
 * @brief Header implementing a class to create a shader editor.
 *
-*
 * @section License
 *
 * Copyright (C) 2013 Robert B. Colton
