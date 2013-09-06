@@ -2,7 +2,6 @@
 * @file  roomwidget.cpp
 * @brief Source implementing a class to create a room editor.
 *
-*
 * @section License
 *
 * Copyright (C) 2013 Robert B. Colton

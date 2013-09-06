@@ -1,0 +1,247 @@
+QWidget
+{
+	color: #e0e0e0;
+}
+QMainWindow, QDialog
+{
+	background-color: #2c2c2c;
+}
+QTreeView
+{
+	background-color: #2c2c2c;
+	border: 1px solid #525252;
+	outline: 1px solid white;
+}
+QToolBar
+{
+	background-color: #525252;
+	border: 1px solid #646464;
+}
+QMenuBar
+{
+	background-color: #323232;
+	border-top: 1px solid #454545;
+	border-bottom: 1px solid #2d2d2d;
+	font-size: 15px;
+	padding-left: 5px;
+	padding-top: 1px;
+}
+QMenuBar::item
+{
+	background-color: #323232;
+	color: #e0e0e0;
+	padding-left: 6px;
+	padding-right: 7px;
+	margin-top: 1px;
+}
+QMenuBar::item:selected
+{
+	border: 1px solid #7a7a7a;
+}
+QDockWidget
+{
+	border: 1px solid #3f3f3f;
+	color: #e0e0e0;
+	background-color: #323232;
+	titlebar-close-icon: url();
+	icon-size: 13px;
+	width: 13px;
+}
+QDockWidget::title
+{
+	background-color: #525252;
+	text-align: left;
+	padding-left: 4px;
+	border: 1px solid #3f3f3f;
+	icon-size: 13px;
+	width: 13px;
+	background-color: #323232;
+	border-top: 1px solid #454545;
+	border-bottom: 1px solid #2d2d2d;
+}
+QDockWidget::close-button
+{
+	border: none;
+	background-image: url("skins/Jaylan GMSkin - psDark/controls/dockbutton_close.png");
+	background-repeat: none;
+	background-color: rgba(255, 255, 255, 0);
+}
+QDockWidget::close-button:hover
+{
+	border: none;
+	background-image: url("skins/Jaylan GMSkin - psDark/controls/dockbutton_close_hover.png");
+	background-repeat: none;
+	background-color: rgba(255, 255, 255, 0);
+}
+QDockWidget::close-button:pressed
+{
+	border: none;
+	background-image: url("skins/Jaylan GMSkin - psDark/controls/dockbutton_close_pressed.png");
+	background-repeat: none;
+	background-color: rgba(255, 255, 255, 0);
+}
+QDockWidget::float-button
+{
+	border: none;
+	background-color: rgba(255, 255, 255, 0);
+}
+QTabWidget::pane
+{
+	background-color: #525252;
+	border-top: 1px solid #6e6e6e;
+	border-left: 1px solid #636363;
+	border-bottom: 1px solid #454545;
+	border-right: 1px solid #484848;
+}
+QTabBar::tab
+{
+	border-top-width: 5px;
+	border-bottom-width: 1px;
+	border-left-width: 4px;
+	border-right-width: 4px;
+	border-image: url("skins/Jaylan GMSkin - psDark/controls/tab.png")  5 4 1 4;
+	height: 18px;
+	padding-left: 9px;
+	padding-right: 7px;
+	color: #e0e0e0;
+}
+QTabBar::tab:selected
+{
+	border-top-width: 5px;
+	border-bottom-width: 1px;
+	border-left-width: 4px;
+	border-right-width: 4px;
+	border-image: url("skins/Jaylan GMSkin - psDark/controls/tab_selected.png")  5 4 1 4;
+	height: 18px;
+	padding-left: 9px;
+	padding-right: 7px;
+	color: #e0e0e0;
+}
+QTabBar::close-button
+{
+	image: url("skins/Jaylan GMSkin - psDark/controls/dockbutton_close.png");
+}
+QTabBar::close-button:hover
+{
+	image: url("skins/Jaylan GMSkin - psDark/controls/dockbutton_close_hover.png");
+}
+QTabBar::tear
+{
+    background: blue;
+	background-color: yellow;
+}
+.QScrollArea QWidget, .NGMWelcomeWidget
+{
+	background-color: #525252;
+	border: none;
+}
+.QWidget
+{
+	background-color: #525252;
+}
+QPushButton
+{
+	padding: 0px 4px;
+	border-width: 3px;
+	border-image: url("skins/Jaylan GMSkin - psDark/controls/button.png")  3 3 3 3;
+}
+QPushButton:default
+{
+	border-image: url("skins/Jaylan GMSkin - psDark/controls/button_default.png")  3 3 3 3;
+}
+QPushButton:pressed
+{
+	border-image: url("skins/Jaylan GMSkin - psDark/controls/button_pressed.png")  3 3 3 3;
+}
+QPushButton:hover
+{
+	border-image: url("skins/Jaylan GMSkin - psDark/controls/button_hover.png")  3 3 3 3;
+}
+
+QCheckBox::indicator:unchecked
+{
+	image: url("skins/Jaylan GMSkin - psDark/controls/checkbox_unchecked.png");
+}
+
+QCheckBox::indicator:checked
+{
+	image: url("skins/Jaylan GMSkin - psDark/controls/checkbox_checked.png");
+}
+
+QCheckBox::indicator:indeterminate
+{
+	image: url("skins/Jaylan GMSkin - psDark/controls/checkbox_indeterminate.png");
+}
+
+QMenu
+{
+	background-color: #525252;
+	border: 3px solid #f0f0f0;
+}
+
+QMenu::item:selected
+{
+	background-color: #3a4057;
+}
+
+QProgressBar
+{
+	border-width: 3px;
+	border-image: url("skins/Jaylan GMSkin - psDark/controls/progress.png");
+	text-align: center;
+}
+
+QProgressBar::chunk
+{
+	width: 5px;
+	background-image: url("skins/Jaylan GMSkin - psDark/controls/progress_chunk.png");
+}
+
+QScrollBar
+{
+	background: #3d3d3d;
+	border-top: 1px solid #373737;
+	border-left: 1px solid #373737;
+	border-right: 1px solid #373737;
+}
+
+QScrollBar:vertical
+{
+	margin: 17px 0 17px 0;
+}
+QScrollBar::handle:vertical
+{
+	min-height: 17px;
+	border-width: 3px;
+	border-image: url("skins/Jaylan GMSkin - psDark/controls/button.png")  3 3 3 3;
+}
+QScrollBar::add-line:vertical
+{
+	height: 11px;
+	border-width: 3px;
+	border-image: url("skins/Jaylan GMSkin - psDark/controls/button.png")  3 3 3 3;
+	subcontrol-position: bottom;
+	subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:vertical
+{
+	height: 11px;
+	border-width: 3px;
+	border-image: url("skins/Jaylan GMSkin - psDark/controls/button.png")  3 3 3 3;
+	subcontrol-position: top;
+	subcontrol-origin: margin;
+}
+
+QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical
+{
+border: 2px solid grey;
+width: 3px;
+height: 3px;
+background: white;
+}
+
+QScrollBar::add-page, QScrollBar::sub-page
+{
+	background: none;
+}

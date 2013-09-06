@@ -39,7 +39,6 @@
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QProgressBar>
-#include "customwidgets/qttoolbar.h"
 #include "widgets/scriptwidget.h"
 #include "widgets/fontwidget.h"
 #include "widgets/pathwidget.h"
@@ -49,8 +48,6 @@
 #include "widgets/soundwidget.h"
 #include "widgets/roomwidget.h"
 #include "widgets/spritewidget.h"
-#include "widgets/modelwidget.h"
-#include "widgets/materialwidget.h"
 #include "dialogs/aboutdialog.h"
 
 namespace Ui {
@@ -72,16 +69,16 @@ public:
 
 private:
 
-    QtToolBar* fileToolbar;
+    QToolBar* fileToolbar;
     QAction* newAction;
     QAction* openAction;
     QAction* saveAction;
     QAction* saveAsAction;
-    QtToolBar* buildToolbar;
+    QToolBar* buildToolbar;
     QAction* runAction;
     QAction* debugAction;
     QAction* compileAction;
-    QtToolBar* resourceToolbar;
+    QToolBar* resourceToolbar;
     QAction* spriteAction;
     QAction* soundAction;
     QAction* backgroundAction;
@@ -91,7 +88,7 @@ private:
     QAction* timelineAction;
     QAction* objectAction;
     QAction* roomAction;
-    QtToolBar* settingsToolbar;
+    QToolBar* settingsToolbar;
     QAction* preferencesAction;
     QAction* gameSettingsAction;
     QAction* gameInformationAction;
@@ -125,6 +122,9 @@ public slots:
     void showLicenseDialog();
     void showAboutDialog();
     void toggleMdiTabs();
+    void toggleOutputMessages();
+    void toggleOutputLog();
+    void toggleHierarchy();
 };
 
 #endif // MAINWINDOW_H

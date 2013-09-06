@@ -47,6 +47,8 @@
         <file>lgm-about.png</file>
         <file>about.html</file>
         <file>icons/actions/link_break.png</file>
+        <file>darktheme.css</file>
+        <file>lgm-logo.png</file>
     </qresource>
     <qresource prefix="/resources">
         <file>icons/resources/timeline.png</file>

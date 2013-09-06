@@ -2,7 +2,6 @@
 * @file  scriptwidget.cpp
 * @brief Header implementing a class to create a script editor.
 *
-*
 * @section License
 *
 * Copyright (C) 2013 Robert B. Colton
@@ -65,7 +64,7 @@ ScriptWidget::ScriptWidget(QWidget *parent) :
     sciEditor->setMarginsForegroundColor(QColor("#bbbbbb"));
 
     QVBoxLayout *layout = new QVBoxLayout(this); // no initialization here
-    editToolbar = new QtToolBar(this);
+    editToolbar = new QToolBar(this);
     editToolbar->setFloatable(true);
     editToolbar->addAction(QIcon(":/icons/actions/accept.png"), "Save");
     editToolbar->addSeparator();
@@ -84,7 +83,7 @@ ScriptWidget::ScriptWidget(QWidget *parent) :
     editToolbar->addAction(QIcon(":/icons/actions/line-goto.png"), "Go to line");
     editToolbar->addSeparator();
     editToolbar->addWidget(new QLabel("Name:"));
-    //editToolbar->setActionWidgetSize(QSize(26, 26));
+    editToolbar->setStyleSheet(" QToolBar { height: 18px; width: 18px; icon-size: 18px; } ");
     QLineEdit* nameEdit = new QLineEdit(this);
     nameEdit->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     editToolbar->addWidget(nameEdit);

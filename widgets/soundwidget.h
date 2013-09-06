@@ -2,7 +2,6 @@
 * @file  soundwidget.h
 * @brief Header implementing a class to create a sound editor.
 *
-*
 * @section License
 *
 * Copyright (C) 2013 Robert B. Colton
