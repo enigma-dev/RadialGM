@@ -2,7 +2,6 @@
 * @file  objectwidget.h
 * @brief Header implementing a class to create an object editor.
 *
-*
 * @section License
 *
 * Copyright (C) 2013 Robert B. Colton

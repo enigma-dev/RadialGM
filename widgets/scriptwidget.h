@@ -2,7 +2,6 @@
 * @file  scriptwidget.h
 * @brief Header implementing a class to create a script editor.
 *
-*
 * @section License
 *
 * Copyright (C) 2013 Robert B. Colton
@@ -33,7 +32,6 @@
 #include <QLabel>
 #include <Qsci/qsciscintilla.h>
 #include <Qsci/qscilexercpp.h>
-#include "customwidgets/qttoolbar.h"
 
 class ScriptWidget : public QWidget
 {
@@ -45,7 +43,7 @@ public:
 
 private:
 
-    QtToolBar* editToolbar;
+    QToolBar* editToolbar;
     QsciScintilla* sciEditor;
 
     int BREAK_MARKER_NUM;

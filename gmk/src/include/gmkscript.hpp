@@ -1,11 +1,10 @@
 /**
-* @file  materialwidget.cpp
-* @brief Source implementing a class to create a material editor.
-*
+* @file  gmkscript.hpp
+* @brief GMK Script
 *
 * @section License
 *
-* Copyright (C) 2013 Robert B. Colton
+* Copyright (C) 2013 Zachary Reedy
 * This file is a part of the LateralGM IDE.
 *
 * This program is free software: you can redistribute it and/or modify
@@ -22,17 +21,30 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#include "materialwidget.h"
-#include "ui_materialwidget.h"
+#ifndef __GMK_SCRIPT_HPP
+#define __GMK_SCRIPT_HPP
 
-MaterialWidget::MaterialWidget(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::MaterialWidget)
+#include <gmkresource.hpp>
+
+namespace Gmk
 {
-    ui->setupUi(this);
+	class Script : public GmkResource
+	{
+	protected:
+		void WriteVer81(Stream* stream);
+		void ReadVer81(Stream* stream);
+
+		void WriteVer7(Stream* stream);
+		void ReadVer7(Stream* stream);
+
+	public:
+		std::string			value;
+
+		Script(GmkFile* gmk);
+		~Script();
+
+		int GetId() const;
+	};
 }
 
-MaterialWidget::~MaterialWidget()
-{
-    delete ui;
-}
+#endif

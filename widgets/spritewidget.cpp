@@ -2,7 +2,6 @@
 * @file  spritewidget.cpp
 * @brief Header implementing a class to create a sprite editor.
 *
-*
 * @section License
 *
 * Copyright (C) 2013 Robert B. Colton

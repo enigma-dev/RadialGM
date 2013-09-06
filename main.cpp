@@ -2,7 +2,6 @@
 * @file  main.cpp
 * @brief Source implementing the main entry point of the application.
 *
-*
 * @section License
 *
 * Copyright (C) 2013 Robert B. Colton
@@ -24,13 +23,22 @@
 
 #include "mainwindow.h"
 #include <QApplication>
+#include <QFile>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     // this style sheet removes those ugly borders on status bar items
-    a.setStyleSheet(" QTabBar::tab { height: 24px; } QStatusBar::item { border: 0px solid black; }");
+    //a.setStyleSheet("QTabBar::tab { height: 24px; } QStatusBar::item { border: 0px solid black; }");
 
+    //Uncomment this to test dark theme
+    /*
+    QFile File("darktheme.css");
+    File.open(QFile::ReadOnly);
+    QString StyleSheet = QLatin1String(File.readAll());
+
+    qApp->setStyleSheet(StyleSheet);
+    */
     MainWindow w;
     w.show();
     

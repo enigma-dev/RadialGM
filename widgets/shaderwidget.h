@@ -1,7 +1,6 @@
 /**
-* @file  modelwidget.h
-* @brief Header implementing a class to create a model editor.
-*
+* @file  shaderwidget.h
+* @brief Header implementing a class to create a shader editor.
 *
 * @section License
 *
@@ -22,46 +21,40 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef MODELWIDGET_H
-#define MODELWIDGET_H
+#ifndef SCRIPTFORM_H
+#define SCRIPTFORM_H
 
 #include <QWidget>
-#include <QSplitter>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QFormLayout>
-#include <QPushButton>
-#include <QLabel>
+#include <QGridLayout>
+#include <QIcon>
+#include <QToolBar>
 #include <QLineEdit>
-#include <QCheckBox>
-#include <QGraphicsView>
+#include <QLabel>
+#include <Qsci/qsciscintilla.h>
+#include <Qsci/qscilexercpp.h>
 
-class ModelWidget : public QWidget
+class ShaderWidget : public QWidget
 {
     Q_OBJECT
-    
+
 public:
-    explicit ModelWidget(QWidget *parent = 0);
-    ~ModelWidget();
-    
+    explicit ShaderWidget(QWidget *parent = 0);
+    ~ShaderWidget();
+
 private:
 
-    QPushButton* loadButton;
-    QPushButton* editButton;
-    QPushButton* saveButton;
+    QToolBar* editToolbar;
+    QsciScintilla* vsciEditor; // Scintilla editor for the vertex code
+    QsciScintilla* fsciEditor; // Scintilla editor for the fragment code
 
-    QLabel* nameLabel;
-    QLineEdit* nameEdit;
-    QLabel* sizeLabel;
+    int BREAK_MARKER_NUM;
 
-    QCheckBox* smoothCheckBox;
-    QCheckBox* transparentCheckBox;
-    QCheckBox* preloadCheckBox;
-    QCheckBox* tilesetCheckBox;
+    QMenu* editMenu;
 
-    QSplitter* horizontalSplitter;
-    QGraphicsView* backgroundPreviewer;
+public slots:
+    void on_vertex_margin_clicked(int nmargin, int nline, Qt::KeyboardModifiers modifiers);
+    void on_fragment_margin_clicked(int nmargin, int nline, Qt::KeyboardModifiers modifiers);
 
 };
 
-#endif // MODELWIDGET_H
+#endif // SCRIPTFORM_H

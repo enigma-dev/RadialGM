@@ -2,7 +2,6 @@
 * @file  backgroundwidget.h
 * @brief Header implementing a class to create a background editor.
 *
-*
 * @section License
 *
 * Copyright (C) 2013 Robert B. Colton

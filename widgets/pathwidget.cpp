@@ -2,7 +2,6 @@
 * @file  pathwidget.cpp
 * @brief Source implementing a class to create a path editor.
 *
-*
 * @section License
 *
 * Copyright (C) 2013 Robert B. Colton

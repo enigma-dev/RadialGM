@@ -1,11 +1,10 @@
 /**
-* @file  qttoolbar.h
-* @brief Header implementing a class for an advanced toolbar.
-*
+* @file  gmktrigger.hpp
+* @brief GMK Trigger
 *
 * @section License
 *
-* Copyright (C) 2013 Robert B. Colton
+* Copyright (C) 2013 Zachary Reedy
 * This file is a part of the LateralGM IDE.
 *
 * This program is free software: you can redistribute it and/or modify
@@ -22,24 +21,38 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef QTTOOLBAR_H
-#define QTTOOLBAR_H
+#ifndef __GMK_TRIGGER_HPP
+#define __GMK_TRIGGER_HPP
 
-#include <QToolBar>
+#include <gmkresource.hpp>
 
-class QtToolBar : public QToolBar
+namespace Gmk
 {
-    Q_OBJECT
-    
-public:
-    explicit QtToolBar(QWidget *parent = 0);
-    ~QtToolBar();
+	class Trigger : public GmkResource
+	{
+	public:
+		enum Moment
+		{
+			MomentMiddle,
+			MomentBegin,
+			MomentEnd
+		};
 
-    void addActionSized(QAction *action);
-    void setActionWidgetSize(QSize size);
-    void setDefaultActionSize(QSize size);
-private:
-    QSize defActionSize;
-};
+	protected:
+		void WriteVer81(Stream* stream);
+		void ReadVer81(Stream* stream);
 
-#endif // QTTOOLBAR_H
+		void WriteVer7(Stream* stream);
+		void ReadVer7(Stream* stream);
+
+	public:
+		std::string			condition;
+		unsigned int		momentOfChecking;
+		std::string			constantName;
+
+		Trigger(GmkFile* gmk);
+		~Trigger();
+	};
+}
+
+#endif

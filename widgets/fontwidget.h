@@ -2,7 +2,6 @@
 * @file  fontwidget.h
 * @brief Header implementing a class to create a font editor.
 *
-*
 * @section License
 *
 * Copyright (C) 2013 Robert B. Colton

@@ -1,11 +1,10 @@
 /**
-* @file  materialwidget.h
-* @brief Header implementing a class to create a material editor.
-*
+* @file  gmkexception.hpp
+* @brief GMK Exception
 *
 * @section License
 *
-* Copyright (C) 2013 Robert B. Colton
+* Copyright (C) 2013 Zachary Reedy
 * This file is a part of the LateralGM IDE.
 *
 * This program is free software: you can redistribute it and/or modify
@@ -22,25 +21,25 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef MATERIALWIDGET_H
-#define MATERIALWIDGET_H
+#ifndef __GMK_EXCEPTION_HPP
+#define __GMK_EXCEPTION_HPP
 
-#include <QWidget>
+#include <iostream>
+#include <exception>
 
-namespace Ui {
-class MaterialWidget;
+namespace Gmk
+{
+	class GmkException : public std::exception
+	{
+	private:
+		std::string message;
+
+	public:
+		GmkException(const std::string& _message);
+		~GmkException() throw();
+
+		const char* what() const throw();
+	};
 }
 
-class MaterialWidget : public QWidget
-{
-    Q_OBJECT
-    
-public:
-    explicit MaterialWidget(QWidget *parent = 0);
-    ~MaterialWidget();
-    
-private:
-    Ui::MaterialWidget *ui;
-};
-
-#endif // MATERIALWIDGET_H
+#endif
