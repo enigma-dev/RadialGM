@@ -31,6 +31,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(exitAction, SIGNAL(triggered()), this, SLOT(closeApplication()));
     QAction* mdiAction = new QAction("&Multiple Document Interface", this);
     connect(mdiAction, SIGNAL(triggered()), this, SLOT(toggleMdiTabs()));
+    QAction* hierarchyAction = new QAction("&Hierarchy", this);
+    connect(hierarchyAction, SIGNAL(triggered()), this, SLOT(toggleHierarchy()));
+    QAction* logAction = new QAction("&Output Log", this);
+    connect(logAction, SIGNAL(triggered()), this, SLOT(toggleOutputLog()));
+    QAction* msgsAction = new QAction("&Output Messages", this);
+    connect(msgsAction, SIGNAL(triggered()), this, SLOT(toggleOutputMessages()));
     QAction* licenseAction = new QAction("&License", this);
     connect(licenseAction, SIGNAL(triggered()), this, SLOT(showLicenseDialog()));
     QAction* aboutAction = new QAction("&About", this);
@@ -40,6 +46,9 @@ MainWindow::MainWindow(QWidget *parent) :
     fileMenu = new QMenu("&File", this);
     QMenu* viewMenu = new QMenu("&View", this);
     viewMenu->addAction(mdiAction);
+    viewMenu->addAction(hierarchyAction);
+    viewMenu->addAction(logAction);
+    viewMenu->addAction(msgsAction);
     editMenu = new QMenu("&Edit", this);
     resourceMenu = new QMenu("&Resources", this);
     windowMenu = new QMenu("&Window", this);
@@ -54,7 +63,7 @@ MainWindow::MainWindow(QWidget *parent) :
     mainMenuBar->addMenu(helpMenu);
     this->setMenuBar(mainMenuBar);
 
-    fileToolbar = new QtToolBar();
+    fileToolbar = new QToolBar();
     newAction = new QAction(QIcon(":/icons/actions/new.png"), "New", this);
     fileToolbar->addAction(newAction);
     fileMenu->addAction(newAction);
@@ -72,9 +81,9 @@ MainWindow::MainWindow(QWidget *parent) :
     fileMenu->addSeparator();
     fileMenu->addAction(exitAction);
     this->addToolBar(fileToolbar);
-    //fileToolbar->setIconSize(QSize(16, 16));
+    fileToolbar->setStyleSheet(" QToolButton { height: 18px; width: 18px; icon-size: 18px; } ");
 
-    buildToolbar = new QtToolBar(this);
+    buildToolbar = new QToolBar(this);
     runAction = new QAction(QIcon(":/icons/actions/execute.png"), "Execute", this);
     buildToolbar->addAction(runAction);
     debugAction = new QAction(QIcon(":/icons/actions/debug.png"), "Debug", this);
@@ -82,9 +91,9 @@ MainWindow::MainWindow(QWidget *parent) :
     compileAction = new QAction(QIcon(":/icons/actions/compile.png"), "Compile", this);
     buildToolbar->addAction(compileAction);
     this->addToolBar(buildToolbar);
-    //buildToolbar->setIconSize(QSize(16, 16));
+    buildToolbar->setStyleSheet(" QToolButton { height: 18px; width: 18px; icon-size: 18px; } ");
 
-    resourceToolbar = new QtToolBar(this);
+    resourceToolbar = new QToolBar(this);
     spriteAction = new QAction(QIcon(":/resources/icons/resources/sprite.png"), "New Sprite", this);
     resourceToolbar->addAction(spriteAction);
     soundAction = new QAction(QIcon(":/resources/icons/resources/sound.png"), "New Sound", this);
@@ -106,9 +115,9 @@ MainWindow::MainWindow(QWidget *parent) :
     roomAction = new QAction(QIcon(":/resources/icons/resources/room.png"), "New Room", this);
     resourceToolbar->addAction(roomAction);
     this->addToolBar(resourceToolbar);
-    //resourceToolbar->setIconSize(QSize(16, 16));
+    resourceToolbar->setStyleSheet(" QToolButton { height: 18px; width: 18px; icon-size: 18px; } ");
 
-    settingsToolbar = new QtToolBar(this);
+    settingsToolbar = new QToolBar(this);
     preferencesAction = new QAction(QIcon(":/icons/actions/preferences.png"), "Preferences", this);
     settingsToolbar->addAction(preferencesAction);
     gameSettingsAction = new QAction(QIcon(":/resources/icons/resources/gm.png"), "Global Game Settings", this);
@@ -120,11 +129,7 @@ MainWindow::MainWindow(QWidget *parent) :
     manualAction = new QAction(QIcon(":/icons/actions/manual.png"), "Manual", this);
     settingsToolbar->addAction(manualAction);
     this->addToolBar(settingsToolbar);
-
-    settingsToolbar->setActionWidgetSize(QSize(26, 26));
-    buildToolbar->setActionWidgetSize(QSize(26, 26));
-    fileToolbar->setActionWidgetSize(QSize(26, 26));
-    resourceToolbar->setActionWidgetSize(QSize(26, 26));
+    settingsToolbar->setStyleSheet(" QToolButton { height: 18px; width: 18px; icon-size: 18px; } ");
 
     hierarchyDock = new QDockWidget("Hierarchy", this, Qt::WindowTitleHint);
     hierarchyTree = new QTreeWidget(this);
@@ -135,8 +140,6 @@ MainWindow::MainWindow(QWidget *parent) :
     addResourceGroup("Paths");
     addResourceGroup("Scripts");
     addResourceGroup("Shaders");
-    addResourceGroup("Materials");
-    addResourceGroup("Models");
     addResourceGroup("Fonts");
     addResourceGroup("Timelines");
     addResourceGroup("Objects");
@@ -191,7 +194,6 @@ MainWindow::MainWindow(QWidget *parent) :
     SpriteWidget* spriteWidget = new SpriteWidget();
     RoomWidget* roomWidget = new RoomWidget();
     BackgroundWidget* backgroundWidget = new BackgroundWidget();
-    ModelWidget* modelWidget = new ModelWidget();
     mainMdiArea->addSubWindow(scriptWidget, Qt::Window);
     mainMdiArea->addSubWindow(fontWidget, Qt::Window);
    // mainMdiArea->addSubWindow(pathWidget, Qt::Window);
@@ -257,6 +259,31 @@ void MainWindow::toggleMdiTabs() {
     case QMdiArea::SubWindowView:
          mainMdiArea->setViewMode(QMdiArea::TabbedView);
         break;
+    }
+}
+
+void MainWindow::toggleHierarchy() {
+    if (hierarchyDock->isVisible()) {
+        hierarchyDock->hide();
+    } else {
+        hierarchyDock->show();
+    }
+
+}
+
+void MainWindow::toggleOutputLog() {
+    if (logDock->isVisible()) {
+        logDock->hide();
+    } else {
+        logDock->show();
+    }
+}
+
+void MainWindow::toggleOutputMessages() {
+    if (messagesDock->isVisible()) {
+        messagesDock->hide();
+    } else {
+        messagesDock->show();
     }
 }
 

@@ -22,6 +22,9 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
+
+
+
 #include "mainwindow.h"
 #include <QApplication>
 
@@ -29,7 +32,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     // this style sheet removes those ugly borders on status bar items
-    a.setStyleSheet(" QTabBar::tab { height: 24px; } QStatusBar::item { border: 0px solid black; }");
+    a.setStyleSheet("QTabBar::tab { height: 24px; } QStatusBar::item { border: 0px solid black; }");
 
     MainWindow w;
     w.show();

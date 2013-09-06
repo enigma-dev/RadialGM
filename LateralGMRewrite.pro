@@ -27,12 +27,9 @@ SOURCES += main.cpp\
     widgets/soundwidget.cpp \
     widgets/backgroundwidget.cpp \
     widgets/roomwidget.cpp \
-    widgets/modelwidget.cpp \
-    widgets/materialwidget.cpp \
-    customwidgets/qttoolbar.cpp \
     dialogs/aboutdialog.cpp \
-    serializer/serializer.cpp \
-    serializer/iconmanager.cpp
+    serializer/iconmanager.cpp \
+    widgets/shaderwidget.cpp
 
 HEADERS  += mainwindow.h \
     widgets/fontwidget.h \
@@ -44,12 +41,10 @@ HEADERS  += mainwindow.h \
     widgets/soundwidget.h \
     widgets/backgroundwidget.h \
     widgets/roomwidget.h \
-    widgets/modelwidget.h \
-    widgets/materialwidget.h \
-    customwidgets/qttoolbar.h \
     dialogs/aboutdialog.h \
     serializer/serializer.h \
-    serializer/iconmanager.h
+    serializer/iconmanager.h \
+    widgets/shaderwidget.h
 
 RESOURCES += \
     resources.qrc
@@ -60,5 +55,4 @@ FORMS += \
     widgets/pathwidget.ui \
     widgets/objectwidget.ui \
     widgets/spritewidget.ui \
-    widgets/roomwidget.ui \
-    widgets/materialwidget.ui
+    widgets/roomwidget.ui

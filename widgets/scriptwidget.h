@@ -33,7 +33,6 @@
 #include <QLabel>
 #include <Qsci/qsciscintilla.h>
 #include <Qsci/qscilexercpp.h>
-#include "customwidgets/qttoolbar.h"
 
 class ScriptWidget : public QWidget
 {
@@ -45,7 +44,7 @@ public:
 
 private:
 
-    QtToolBar* editToolbar;
+    QToolBar* editToolbar;
     QsciScintilla* sciEditor;
 
     int BREAK_MARKER_NUM;

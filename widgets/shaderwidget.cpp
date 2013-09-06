@@ -1,6 +1,6 @@
 /**
-* @file  scriptwidget.cpp
-* @brief Header implementing a class to create a script editor.
+* @file  shaderwidget.cpp
+* @brief Header implementing a class to create a shader editor.
 *
 *
 * @section License
@@ -22,47 +22,47 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#include "scriptwidget.h"
+#include "shaderwidget.h"
 
-ScriptWidget::ScriptWidget(QWidget *parent) :
+ShaderWidget::ShaderWidget(QWidget *parent) :
     QWidget(parent)
 {
     this->setWindowTitle("Script");
     this->setWindowIcon(QIcon(":/resources/icons/resources/script.png"));
-    sciEditor = new QsciScintilla(this);
+    vsciEditor = new QsciScintilla(this);
 
-    sciEditor->setFrameStyle(QsciScintilla::NoFrame);
+    vsciEditor->setFrameStyle(QsciScintilla::NoFrame);
     //sciEditor->setWrapMode(QsciScintilla::WrapCharacter);
 
-    sciEditor->setCaretLineVisible(true);
-    sciEditor->setCaretLineBackgroundColor(QColor("#ffe4e4"));
+    vsciEditor->setCaretLineVisible(true);
+    vsciEditor->setCaretLineBackgroundColor(QColor("#ffe4e4"));
 
     QFont font = QFont("Courier 10 Pitch", 10);
     font.setFixedPitch(true);
-    sciEditor->setFont(font);
+    vsciEditor->setFont(font);
     QsciLexerCPP lexer;
     lexer.setFont(font);
-    sciEditor->setLexer(&lexer);
+    vsciEditor->setLexer(&lexer);
     QFontMetrics fontmetrics = QFontMetrics(font);
-    sciEditor->setMarginWidth(0, fontmetrics.width("__")+8);
-    sciEditor->setMarginLineNumbers(0, true);
+    vsciEditor->setMarginWidth(0, fontmetrics.width("__")+8);
+    vsciEditor->setMarginLineNumbers(0, true);
     //sciEditor->setMarginsBackgroundColor(QColor("#dddddd"));
 
-    sciEditor->setMarginSensitivity(1, true);
+    vsciEditor->setMarginSensitivity(1, true);
     BREAK_MARKER_NUM = 8;
     //this->setMarginWidth();
-    connect(sciEditor,
+    connect(vsciEditor,
         SIGNAL(marginClicked(int, int, Qt::KeyboardModifiers)), this,
-                       SLOT(on_margin_clicked(int, int, Qt::KeyboardModifiers)));
-    sciEditor->markerDefine(QImage(":/icons/actions/link_break.png"),
+                       SLOT(on_vertex_margin_clicked(int, int, Qt::KeyboardModifiers)));
+    vsciEditor->markerDefine(QImage(":/icons/actions/link_break.png"),
         BREAK_MARKER_NUM);
-    sciEditor->setBraceMatching(QsciScintilla::SloppyBraceMatch);
+    vsciEditor->setBraceMatching(QsciScintilla::SloppyBraceMatch);
 
-    sciEditor->setFolding(QsciScintilla::BoxedTreeFoldStyle, 3);
+    vsciEditor->setFolding(QsciScintilla::BoxedTreeFoldStyle, 3);
     //this->setFoldMarginColors(QColor("#dddddd"), QColor("#dddddd"));
 
-    sciEditor->setMarginsFont(font);
-    sciEditor->setMarginsForegroundColor(QColor("#bbbbbb"));
+    vsciEditor->setMarginsFont(font);
+    vsciEditor->setMarginsForegroundColor(QColor("#bbbbbb"));
 
     QVBoxLayout *layout = new QVBoxLayout(this); // no initialization here
     editToolbar = new QToolBar(this);
@@ -84,28 +84,37 @@ ScriptWidget::ScriptWidget(QWidget *parent) :
     editToolbar->addAction(QIcon(":/icons/actions/line-goto.png"), "Go to line");
     editToolbar->addSeparator();
     editToolbar->addWidget(new QLabel("Name:"));
-    editToolbar->setStyleSheet(" QToolBar { height: 18px; width: 18px; icon-size: 18px; } ");
     QLineEdit* nameEdit = new QLineEdit(this);
     nameEdit->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     editToolbar->addWidget(nameEdit);
     layout->addWidget(editToolbar);
-    layout->addWidget(sciEditor); // layout is uninitialized and probably garbage
+    layout->addWidget(vsciEditor); // layout is uninitialized and probably garbage
     layout->setContentsMargins(0, 0, 0, 0);
     this->setLayout(layout);
 
    // sciEditor->setFixedHeight(300);
 }
 
-ScriptWidget::~ScriptWidget()
+ShaderWidget::~ShaderWidget()
 {
 
 }
 
-void ScriptWidget::on_margin_clicked(int nmargin, int nline, Qt::KeyboardModifiers modifiers) {
+void ShaderWidget::on_vertex_margin_clicked(int nmargin, int nline, Qt::KeyboardModifiers modifiers) {
     // Toggle marker for the line the margin was clicked on
-    if (sciEditor->markersAtLine(nline) != 0) {
-        sciEditor->markerDelete(nline, BREAK_MARKER_NUM);
+    if (vsciEditor->markersAtLine(nline) != 0) {
+        vsciEditor->markerDelete(nline, BREAK_MARKER_NUM);
     } else {
-        sciEditor->markerAdd(nline, BREAK_MARKER_NUM);
+        vsciEditor->markerAdd(nline, BREAK_MARKER_NUM);
     }
 }
+
+void ShaderWidget::on_fragment_margin_clicked(int nmargin, int nline, Qt::KeyboardModifiers modifiers) {
+    // Toggle marker for the line the margin was clicked on
+    if (fsciEditor->markersAtLine(nline) != 0) {
+        fsciEditor->markerDelete(nline, BREAK_MARKER_NUM);
+    } else {
+        fsciEditor->markerAdd(nline, BREAK_MARKER_NUM);
+    }
+}
+

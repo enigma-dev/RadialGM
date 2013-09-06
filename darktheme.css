@@ -1,0 +1,10 @@
+QWidget { background: gray; color: white; }
+QMenuBar, QMenuBar::item { background: #4D4D4D; color: white; }
+QToolBar { background: gray; color: white; border: 0px solid #575757; }
+QMenuBar::item:selected { background: #385C80; color: white; }
+QMenuBar::item:hover { background: cyan; color: white; }
+QTabBar::tab { background: gray; color: white; border: 1px solid #575757; padding: 2px; }
+QTabBar::tab:selected { background: #385C80; color: white; }
+QTabBar::tab:hover { background: cyan; color: white; }
+QDockWidget, QHeaderView::section { background: #4D4D4D; }
+QTabBar::tab { height: 24px; } QStatusBar::item { border: 0px solid black; }
