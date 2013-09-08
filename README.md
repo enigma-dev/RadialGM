@@ -5,6 +5,6 @@ as bring new capabilities. The project is compiled with Qt Creator 5.1 and uses 
 
 Development Team
 ==================
-Robert B. Colton - Project founder and lead developer
-Josh Ventura - Project leader, wrote the serializer.
-Zachary Reedy - Wrote the GMK API
+* Robert B. Colton - Project founder and lead developer.
+* Josh Ventura - Project leader, wrote the serializer.
+* Zachary Reedy - Wrote the GMK API.
