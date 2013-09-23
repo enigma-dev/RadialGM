@@ -21,6 +21,9 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
+#include <QFileDialog>
+#include <QDesktopServices>
+#include <QUrl>
 #include "mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -36,10 +39,18 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(logAction, SIGNAL(triggered()), this, SLOT(toggleOutputLog()));
     QAction* msgsAction = new QAction("&Output Messages", this);
     connect(msgsAction, SIGNAL(triggered()), this, SLOT(toggleOutputMessages()));
+    QAction* cascadeAction = new QAction(QIcon(":/icons/actions/cascade.png"), "&Cascade", this);
+    connect(cascadeAction, SIGNAL(triggered()), this, SLOT(cascadeWindows()));
+    QAction* closeAction = new QAction("&Close", this);
+    connect(closeAction, SIGNAL(triggered()), this, SLOT(closeWindow()));
+    QAction* closeAllAction = new QAction("&Close All", this);
+    connect(closeAllAction, SIGNAL(triggered()), this, SLOT(closeAllWindows()));
     QAction* licenseAction = new QAction("&License", this);
     connect(licenseAction, SIGNAL(triggered()), this, SLOT(showLicenseDialog()));
     QAction* aboutAction = new QAction("&About", this);
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(showAboutDialog()));
+    manualAction = new QAction(QIcon(":/icons/actions/manual.png"), "Manual", this);
+    connect(manualAction, SIGNAL(triggered()), this, SLOT(showManual()));
 
     mainMenuBar = new QMenuBar(this);
     fileMenu = new QMenu("&File", this);
@@ -51,9 +62,13 @@ MainWindow::MainWindow(QWidget *parent) :
     editMenu = new QMenu("&Edit", this);
     resourceMenu = new QMenu("&Resources", this);
     windowMenu = new QMenu("&Window", this);
+    windowMenu->addAction(cascadeAction);
+    windowMenu->addAction(closeAction);
+    windowMenu->addAction(closeAllAction);
     helpMenu = new QMenu("&Help", this);
     helpMenu->addAction(licenseAction);
     helpMenu->addAction(aboutAction);
+    helpMenu->addAction(manualAction);
     mainMenuBar->addMenu(fileMenu);
     mainMenuBar->addMenu(viewMenu);
     mainMenuBar->addMenu(editMenu);
@@ -67,12 +82,14 @@ MainWindow::MainWindow(QWidget *parent) :
     fileToolbar->addAction(newAction);
     fileMenu->addAction(newAction);
     openAction = new QAction(QIcon(":/icons/actions/open.png"), "Open", this);
+    connect(openAction, SIGNAL(triggered()), this, SLOT(showOpenDialog()));
     fileToolbar->addAction(openAction);
     fileMenu->addAction(openAction);
     saveAction = new QAction(QIcon(":/icons/actions/save.png"), "Save", this);
     fileToolbar->addAction(saveAction);
     fileMenu->addAction(saveAction);
     saveAsAction = new QAction(QIcon(":/icons/actions/save-as.png"), "Save As", this);
+    connect(saveAsAction, SIGNAL(triggered()), this, SLOT(showSaveDialog()));
     fileToolbar->addAction(saveAsAction);
     fileMenu->addAction(saveAsAction);
     fileMenu->addSeparator();
@@ -125,7 +142,6 @@ MainWindow::MainWindow(QWidget *parent) :
     settingsToolbar->addAction(gameInformationAction);
     extensionsAction = new QAction(QIcon(":/resources/icons/resources/extension.png"), "Extensions", this);
     settingsToolbar->addAction(extensionsAction);
-    manualAction = new QAction(QIcon(":/icons/actions/manual.png"), "Manual", this);
     settingsToolbar->addAction(manualAction);
     this->addToolBar(settingsToolbar);
     settingsToolbar->setStyleSheet(" QToolButton { height: 18px; width: 18px; icon-size: 18px; } ");
@@ -248,6 +264,18 @@ void MainWindow::showAboutDialog() {
     aboutDialog->show(":/about.html", "About");
 }
 
+void MainWindow::showOpenDialog() {
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Project"), "", tr("All Files (*.*);;GMK Files (*.gmk)"));
+}
+
+void MainWindow::showSaveDialog() {
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save Project"), "", tr("All Files (*.*);;GMK Files (*.gmk)"));
+}
+
+void MainWindow::showManual() {
+    QDesktopServices::openUrl(QUrl("http://enigma-dev.org/docs/Wiki/Main_Page"));
+}
+
 void MainWindow::toggleMdiTabs() {
 
     mainMdiArea->setDocumentMode(true);
@@ -284,6 +312,18 @@ void MainWindow::toggleOutputMessages() {
     } else {
         messagesDock->show();
     }
+}
+
+void MainWindow::closeAllWindows() {
+    mainMdiArea->closeAllSubWindows();
+}
+
+void MainWindow::closeWindow() {
+    mainMdiArea->closeActiveSubWindow();
+}
+
+void MainWindow::cascadeWindows() {
+    mainMdiArea->cascadeSubWindows();
 }
 
 void MainWindow::outputClear(bool clearLog, bool clearMessages)
