@@ -121,6 +121,14 @@ public slots:
     void closeApplication();
     void showLicenseDialog();
     void showAboutDialog();
+    void showOpenDialog();
+    void showSaveDialog();
+    void showManual();
+
+    void cascadeWindows();
+    void closeAllWindows();
+    void closeWindow();
+
     void toggleMdiTabs();
     void toggleOutputMessages();
     void toggleOutputLog();
