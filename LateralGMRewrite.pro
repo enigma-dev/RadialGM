@@ -51,7 +51,17 @@ SOURCES += mainwindow.cpp \
     gmk/src/gmktrigger.cpp \
     # gmk/src/main.cpp \
     gmk/src/stream.cpp \
-    main.cpp
+    main.cpp \
+    resource/gmobject.cpp \
+    resource/sprite.cpp \
+    resource/background.cpp \
+    resource/shader.cpp \
+    resource/timeline.cpp \
+    resource/path.cpp \
+    resource/room.cpp \
+    resource/sound.cpp \
+    resource/font.cpp \
+    resource/script.cpp
 
 HEADERS  += mainwindow.h \
     widgets/fontwidget.h \
@@ -89,7 +99,17 @@ HEADERS  += mainwindow.h \
     gmk/src/include/gmktrigger.hpp \
     gmk/src/include/stream.hpp \
     gmk/lib/zlib/zconf.h \
-    gmk/lib/zlib/zlib.h
+    gmk/lib/zlib/zlib.h \
+    resource/gmobject.h \
+    resource/sprite.h \
+    resource/background.h \
+    resource/shader.h \
+    resource/timeline.h \
+    resource/path.h \
+    resource/room.h \
+    resource/sound.h \
+    resource/font.h \
+    resource/script.h
 
 RESOURCES += \
     resources.qrc

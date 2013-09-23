@@ -54,10 +54,10 @@ namespace Serializer
     where "[plugin]" is the name of the plugin that created the ID, and "[brief]" is a one-word description of its contents.
    */
   namespace SerialUUID {
-    const string object("ngm-object");
-    const string image("ngm-image");
-    const string animation("ngm-animation");
-    const string blob("ngm-blob");
+    const string object("lgm-object");
+    const string image("lgm-image");
+    const string animation("lgm-animation");
+    const string blob("lgm-blob");
   }
 
   struct IOHandler {
