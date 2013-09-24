@@ -1,6 +1,6 @@
 /**
-* @file  objectwidget.h
-* @brief Header implementing a class to create an object editor.
+* @file  projectmanager.cpp
+* @brief Source implementing a class for a project manager.
 *
 * @section License
 *
@@ -21,40 +21,8 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef OBJECTWIDGET_H
-#define OBJECTWIDGET_H
+#include "projectmanager.h"
 
-#include <QWidget>
-#include <QSplitter>
-#include <QPushButton>
-#include <QCheckBox>
-#include <QComboBox>
-#include <QGroupBox>
-#include <QFormLayout>
-#include <QGridLayout>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QTreeWidget>
-
-class ObjectWidget : public QWidget
+ProjectManager::ProjectManager()
 {
-    Q_OBJECT
-    
-public:
-    explicit ObjectWidget(QWidget *parent = 0);
-    ~ObjectWidget();
-    
-    QSplitter* mainSplitter;
-    QLineEdit* nameEdit;
-    QHBoxLayout* mainLayout;
-    QTreeWidget* eventTree;
-
-    void addEvent(QString name, QIcon icon);
-
-private:
-
-};
-
-#endif // OBJECTWIDGET_H
+}

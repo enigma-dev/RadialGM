@@ -1,6 +1,6 @@
 /**
-* @file  objectwidget.h
-* @brief Header implementing a class to create an object editor.
+* @file  preferencesdialog.h
+* @brief Header implementing a class for a preferences dialog.
 *
 * @section License
 *
@@ -21,40 +21,25 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef OBJECTWIDGET_H
-#define OBJECTWIDGET_H
+#ifndef PREFERENCESDIALOG_H
+#define PREFERENCESDIALOG_H
 
-#include <QWidget>
-#include <QSplitter>
-#include <QPushButton>
-#include <QCheckBox>
-#include <QComboBox>
-#include <QGroupBox>
-#include <QFormLayout>
-#include <QGridLayout>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QTreeWidget>
+#include <QDialog>
 
-class ObjectWidget : public QWidget
+namespace Ui {
+class PreferencesDialog;
+}
+
+class PreferencesDialog : public QDialog
 {
     Q_OBJECT
     
 public:
-    explicit ObjectWidget(QWidget *parent = 0);
-    ~ObjectWidget();
+    explicit PreferencesDialog(QWidget *parent = 0);
+    ~PreferencesDialog();
     
-    QSplitter* mainSplitter;
-    QLineEdit* nameEdit;
-    QHBoxLayout* mainLayout;
-    QTreeWidget* eventTree;
-
-    void addEvent(QString name, QIcon icon);
-
 private:
-
+    Ui::PreferencesDialog *ui;
 };
 
-#endif // OBJECTWIDGET_H
+#endif // PREFERENCESDIALOG_H
