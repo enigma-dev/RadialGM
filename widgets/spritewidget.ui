@@ -33,7 +33,7 @@
      </property>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -457,7 +457,7 @@
             <string>...</string>
            </property>
            <property name="icon">
-            <iconset resource="../LGMIcons.qrc">
+            <iconset resource="../resources.qrc">
              <normaloff>:/icons/actions/sound-play.png</normaloff>:/icons/actions/sound-play.png</iconset>
            </property>
           </widget>
@@ -471,7 +471,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../LGMIcons.qrc"/>
+  <include location="../resources.qrc"/>
  </resources>
  <connections/>
 </ui>

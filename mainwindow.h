@@ -49,6 +49,7 @@
 #include "widgets/roomwidget.h"
 #include "widgets/spritewidget.h"
 #include "dialogs/aboutdialog.h"
+#include "dialogs/preferencesdialog.h"
 
 namespace Ui {
 class MainWindow;
@@ -96,6 +97,7 @@ private:
     QAction* manualAction;
 
     AboutDialog* aboutDialog;
+    PreferencesDialog* prefsDialog;
 
     QStatusBar* mainStatusBar;
     QProgressBar* mainProgressBar;
@@ -121,6 +123,7 @@ public slots:
     void closeApplication();
     void showLicenseDialog();
     void showAboutDialog();
+    void showPreferencesDialog();
     void showOpenDialog();
     void showSaveDialog();
     void showManual();

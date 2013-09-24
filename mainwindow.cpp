@@ -49,6 +49,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(licenseAction, SIGNAL(triggered()), this, SLOT(showLicenseDialog()));
     QAction* aboutAction = new QAction("&About", this);
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(showAboutDialog()));
+    preferencesAction = new QAction(QIcon(":/icons/actions/preferences.png"), "Preferences", this);
+    connect(preferencesAction, SIGNAL(triggered()), this, SLOT(showPreferencesDialog()));
     manualAction = new QAction(QIcon(":/icons/actions/manual.png"), "Manual", this);
     connect(manualAction, SIGNAL(triggered()), this, SLOT(showManual()));
 
@@ -93,6 +95,8 @@ MainWindow::MainWindow(QWidget *parent) :
     fileToolbar->addAction(saveAsAction);
     fileMenu->addAction(saveAsAction);
     fileMenu->addSeparator();
+    fileMenu->addAction(preferencesAction);
+    fileMenu->addSeparator();
     // add recent projects list
     fileMenu->addSeparator();
     fileMenu->addAction(exitAction);
@@ -134,7 +138,6 @@ MainWindow::MainWindow(QWidget *parent) :
     resourceToolbar->setStyleSheet(" QToolButton { height: 18px; width: 18px; icon-size: 18px; } ");
 
     settingsToolbar = new QToolBar(this);
-    preferencesAction = new QAction(QIcon(":/icons/actions/preferences.png"), "Preferences", this);
     settingsToolbar->addAction(preferencesAction);
     gameSettingsAction = new QAction(QIcon(":/resources/icons/resources/gm.png"), "Global Game Settings", this);
     settingsToolbar->addAction(gameSettingsAction);
@@ -228,7 +231,7 @@ MainWindow::MainWindow(QWidget *parent) :
    // mainProgressBar->setValue(75);
    // mainStatusBar->addWidget(mainProgressBar);
 
-    this->setWindowIcon(QIcon("lgm-logo.png"));
+    this->setWindowIcon(QIcon(":/lgm-logo.png"));
     this->setWindowTitle("LateralGM - <new game>");
     this->resize(1000, 600);
 
@@ -239,6 +242,7 @@ MainWindow::MainWindow(QWidget *parent) :
     outputMessage("obj_gun", "Draw Event", "Lorem ipsum dollar sit amit...");
 
     aboutDialog = NULL;
+    prefsDialog = NULL;
 }
 
 MainWindow::~MainWindow()
@@ -262,6 +266,13 @@ void MainWindow::showAboutDialog() {
         aboutDialog = new AboutDialog();
     }
     aboutDialog->show(":/about.html", "About");
+}
+
+void MainWindow::showPreferencesDialog() {
+    if (prefsDialog == NULL) {
+        prefsDialog = new PreferencesDialog();
+    }
+    prefsDialog->show();
 }
 
 void MainWindow::showOpenDialog() {
@@ -360,7 +371,6 @@ void MainWindow::outputMessage(QString origin, QString location, QString descrip
 void MainWindow::addResourceGroup(QString name)
 {
     QTreeWidgetItem* treeItem = new QTreeWidgetItem();
-    treeItem = new QTreeWidgetItem();
     treeItem->setText(0, name);
     treeItem->setIcon(0, QIcon(":/resources/icons/resources/group.png"));
     hierarchyTree->addTopLevelItem(treeItem);
@@ -369,7 +379,6 @@ void MainWindow::addResourceGroup(QString name)
 void MainWindow::addResource(QString name, QIcon icon)
 {
     QTreeWidgetItem* treeItem = new QTreeWidgetItem();
-    treeItem = new QTreeWidgetItem();
     treeItem->setText(0, name);
     treeItem->setIcon(0, icon);
     hierarchyTree->addTopLevelItem(treeItem);
