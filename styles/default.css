@@ -1,0 +1,7 @@
+QTabBar::tab { 
+  height: 24px; 
+} 
+
+QStatusBar::item { 
+  border: 0px solid black; 
+}

@@ -61,7 +61,10 @@ SOURCES += mainwindow.cpp \
     resource/room.cpp \
     resource/sound.cpp \
     resource/font.cpp \
-    resource/script.cpp
+    resource/script.cpp \
+    serializer/projectmanager.cpp \
+    dialogs/preferencesdialog.cpp \
+    serializer/resourcenode.cpp
 
 HEADERS  += mainwindow.h \
     widgets/fontwidget.h \
@@ -109,7 +112,10 @@ HEADERS  += mainwindow.h \
     resource/room.h \
     resource/sound.h \
     resource/font.h \
-    resource/script.h
+    resource/script.h \
+    serializer/projectmanager.h \
+    dialogs/preferencesdialog.h \
+    serializer/resourcenode.h
 
 RESOURCES += \
     resources.qrc
@@ -124,6 +130,15 @@ OTHER_FILES += \
 
 FORMS += \
     widgets/pathwidget.ui \
-    widgets/objectwidget.ui \
     widgets/spritewidget.ui \
-    widgets/roomwidget.ui
+    widgets/roomwidget.ui \
+    dialogs/preferencesdialog.ui
+
+VERSION = 0.0.1.0
+QMAKE_TARGET_COMPANY = The LateralGM Development Team
+QMAKE_TARGET_PRODUCT = LateralGM IDE
+QMAKE_TARGET_DESCRIPTION = The free and open source game maker.
+QMAKE_TARGET_COPYRIGHT = Copyright (C) 2013 The LateralGM Development Team
+
+ICON = lgm-logo.svg
+RC_FILE = myapp.rc

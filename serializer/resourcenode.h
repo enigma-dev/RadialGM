@@ -1,6 +1,6 @@
 /**
-* @file  objectwidget.h
-* @brief Header implementing a class to create an object editor.
+* @file  resourcenode.h
+* @brief Header implementing a class for a resource node.
 *
 * @section License
 *
@@ -21,40 +21,13 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef OBJECTWIDGET_H
-#define OBJECTWIDGET_H
+#ifndef RESOURCENODE_H
+#define RESOURCENODE_H
 
-#include <QWidget>
-#include <QSplitter>
-#include <QPushButton>
-#include <QCheckBox>
-#include <QComboBox>
-#include <QGroupBox>
-#include <QFormLayout>
-#include <QGridLayout>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QTreeWidget>
-
-class ObjectWidget : public QWidget
+class ResourceNode
 {
-    Q_OBJECT
-    
 public:
-    explicit ObjectWidget(QWidget *parent = 0);
-    ~ObjectWidget();
-    
-    QSplitter* mainSplitter;
-    QLineEdit* nameEdit;
-    QHBoxLayout* mainLayout;
-    QTreeWidget* eventTree;
-
-    void addEvent(QString name, QIcon icon);
-
-private:
-
+    ResourceNode();
 };
 
-#endif // OBJECTWIDGET_H
+#endif // RESOURCENODE_H

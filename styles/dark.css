@@ -235,13 +235,21 @@ QScrollBar::sub-line:vertical
 
 QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical
 {
-border: 2px solid grey;
-width: 3px;
-height: 3px;
-background: white;
+	border: 2px solid grey;
+	width: 3px;
+	height: 3px;
+	background: white;
 }
 
 QScrollBar::add-page, QScrollBar::sub-page
 {
 	background: none;
+}
+
+QTabBar::tab { 
+	height: 24px; 
+} 
+
+QStatusBar::item { 
+	border: 0px solid black; 
 }
