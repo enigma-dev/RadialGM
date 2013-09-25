@@ -1,5 +1,5 @@
 /**
-* @file  gmkfont.hpp
+* @file  gmkfont.h
 * @brief GMK Font
 *
 * @section License
@@ -21,10 +21,10 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef __GMK_FONT_HPP
-#define __GMK_FONT_HPP
+#ifndef __GMK_FONT_H
+#define __GMK_FONT_H
 
-#include <gmkresource.hpp>
+#include <gmkresource.h>
 
 namespace Gmk
 {

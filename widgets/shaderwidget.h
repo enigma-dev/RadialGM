@@ -21,8 +21,8 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef SCRIPTFORM_H
-#define SCRIPTFORM_H
+#ifndef SHADERFORM_H
+#define SHADERFORM_H
 
 #include <QWidget>
 #include <QGridLayout>
@@ -30,6 +30,8 @@
 #include <QToolBar>
 #include <QLineEdit>
 #include <QLabel>
+#include <QTableWidget>
+#include <QComboBox>
 #include <Qsci/qsciscintilla.h>
 #include <Qsci/qscilexercpp.h>
 
@@ -50,6 +52,8 @@ private:
     int BREAK_MARKER_NUM;
 
     QMenu* editMenu;
+
+    QsciScintilla* createEditor();
 
 public slots:
     void on_vertex_margin_clicked(int nmargin, int nline, Qt::KeyboardModifiers modifiers);

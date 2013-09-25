@@ -24,9 +24,9 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
-#include <stream.hpp>
-#include <gmk.hpp>
-#include <gmkrypt.hpp>
+#include <stream.h>
+#include <gmk.h>
+#include <gmkrypt.h>
 
 namespace Gmk
 {

@@ -1,6 +1,6 @@
 /**
-* @file  gmksound.hpp
-* @brief GMK Sound
+* @file  gmkbackground.h
+* @brief GMK Background
 *
 * @section License
 *
@@ -21,34 +21,15 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef __GMK_SOUND_HPP
-#define __GMK_SOUND_HPP
+#ifndef __GMK_BACKGROUND_H
+#define __GMK_BACKGROUND_H
 
-#include <gmkresource.hpp>
+#include <gmkresource.h>
 
 namespace Gmk
 {
-	class Sound : public GmkResource
+	class Background : public GmkResource
 	{
-	public:
-		enum Kind
-		{
-			KindNormal,
-			KindBackground,
-			Kind3D,
-			KindMultimedia
-		};
-
-		enum Effect
-		{
-			EffectNone				= 0x00,
-			EffectChorus			= 0x01,
-			EffectEcho				= 0x02,
-			EffectFlanger			= 0x04,
-			EffectGargle			= 0x08,
-			EffectReverb			= 0x10
-		};
-
 	protected:
 		void WriteVer81(Stream* stream);
 		void ReadVer81(Stream* stream);
@@ -57,17 +38,22 @@ namespace Gmk
 		void ReadVer7(Stream* stream);
 
 	public:
-		unsigned int			kind;
-		std::string				extension;
-		std::string				filename;
-		Stream*					data;
-		unsigned int			effects;
-		double					volume;
-		double					pan;
+		bool					transparent;
+		bool					smoothEdges;
 		bool					preload;
+		bool					useAsTileset;
+		unsigned int			tileWidth;
+		unsigned int			tileHeight;
+		unsigned int			tileHorizontalOffset;
+		unsigned int			tileVerticalOffset;
+		unsigned int			tileHorizontalSeperation;
+		unsigned int			tileVerticalSeperation;
+		unsigned int			width;
+		unsigned int			height;
+		Stream*					data;
 
-		Sound(GmkFile* gmk);
-		~Sound();
+		Background(GmkFile* gmk);
+		~Background();
 
 		int GetId() const;
 	};

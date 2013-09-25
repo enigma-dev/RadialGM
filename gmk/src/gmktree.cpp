@@ -21,8 +21,8 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#include <gmktree.hpp>
-#include <gmk.hpp>
+#include <gmktree.h>
+#include <gmk.h>
 
 namespace Gmk
 {

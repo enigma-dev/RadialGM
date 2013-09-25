@@ -21,8 +21,8 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#include <gmkscript.hpp>
-#include <gmk.hpp>
+#include <gmkscript.h>
+#include <gmk.h>
 
 namespace Gmk
 {

@@ -39,8 +39,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(logAction, SIGNAL(triggered()), this, SLOT(toggleOutputLog()));
     QAction* msgsAction = new QAction("&Output Messages", this);
     connect(msgsAction, SIGNAL(triggered()), this, SLOT(toggleOutputMessages()));
+    QAction* restoreAction = new QAction("&Restore Layout", this);
+    connect(restoreAction, SIGNAL(triggered()), this, SLOT(restoreLayout()));
     QAction* cascadeAction = new QAction(QIcon(":/icons/actions/cascade.png"), "&Cascade", this);
     connect(cascadeAction, SIGNAL(triggered()), this, SLOT(cascadeWindows()));
+    QAction* tileAction = new QAction("&Tile", this);
+    connect(tileAction, SIGNAL(triggered()), this, SLOT(tileWindows()));
     QAction* closeAction = new QAction("&Close", this);
     connect(closeAction, SIGNAL(triggered()), this, SLOT(closeWindow()));
     QAction* closeAllAction = new QAction("&Close All", this);
@@ -58,13 +62,17 @@ MainWindow::MainWindow(QWidget *parent) :
     fileMenu = new QMenu("&File", this);
     QMenu* viewMenu = new QMenu("&View", this);
     viewMenu->addAction(mdiAction);
+    viewMenu->addSeparator();
     viewMenu->addAction(hierarchyAction);
     viewMenu->addAction(logAction);
     viewMenu->addAction(msgsAction);
+    viewMenu->addSeparator();
+    viewMenu->addAction(restoreAction);
     editMenu = new QMenu("&Edit", this);
     resourceMenu = new QMenu("&Resources", this);
     windowMenu = new QMenu("&Window", this);
     windowMenu->addAction(cascadeAction);
+    windowMenu->addAction(tileAction);
     windowMenu->addAction(closeAction);
     windowMenu->addAction(closeAllAction);
     helpMenu = new QMenu("&Help", this);
@@ -80,6 +88,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setMenuBar(mainMenuBar);
 
     fileToolbar = new QToolBar();
+    fileToolbar->setObjectName("fileToolbar");
     newAction = new QAction(QIcon(":/icons/actions/new.png"), "New", this);
     fileToolbar->addAction(newAction);
     fileMenu->addAction(newAction);
@@ -91,6 +100,7 @@ MainWindow::MainWindow(QWidget *parent) :
     fileToolbar->addAction(saveAction);
     fileMenu->addAction(saveAction);
     saveAsAction = new QAction(QIcon(":/icons/actions/save-as.png"), "Save As", this);
+
     connect(saveAsAction, SIGNAL(triggered()), this, SLOT(showSaveDialog()));
     fileToolbar->addAction(saveAsAction);
     fileMenu->addAction(saveAsAction);
@@ -104,6 +114,7 @@ MainWindow::MainWindow(QWidget *parent) :
     fileToolbar->setStyleSheet(" QToolButton { height: 18px; width: 18px; icon-size: 18px; } ");
 
     buildToolbar = new QToolBar(this);
+    buildToolbar->setObjectName("buildToolbar");
     runAction = new QAction(QIcon(":/icons/actions/execute.png"), "Execute", this);
     buildToolbar->addAction(runAction);
     debugAction = new QAction(QIcon(":/icons/actions/debug.png"), "Debug", this);
@@ -114,30 +125,42 @@ MainWindow::MainWindow(QWidget *parent) :
     buildToolbar->setStyleSheet(" QToolButton { height: 18px; width: 18px; icon-size: 18px; } ");
 
     resourceToolbar = new QToolBar(this);
+    resourceToolbar->setObjectName("resourceToolbar");
     spriteAction = new QAction(QIcon(":/resources/icons/resources/sprite.png"), "New Sprite", this);
+    connect(spriteAction, SIGNAL(triggered()), this, SLOT(addSprite()));
     resourceToolbar->addAction(spriteAction);
     soundAction = new QAction(QIcon(":/resources/icons/resources/sound.png"), "New Sound", this);
+    connect(soundAction, SIGNAL(triggered()), this, SLOT(addSound()));
     resourceToolbar->addAction(soundAction);
     backgroundAction = new QAction(QIcon(":/resources/icons/resources/background.png"), "New Background", this);
+    connect(backgroundAction, SIGNAL(triggered()), this, SLOT(addBackground()));
     resourceToolbar->addAction(backgroundAction);
     pathAction = new QAction(QIcon(":/resources/icons/resources/path.png"), "New Path", this);
+    connect(pathAction, SIGNAL(triggered()), this, SLOT(addPath()));
     resourceToolbar->addAction(pathAction);
     scriptAction = new QAction(QIcon(":/resources/icons/resources/script.png"), "New Script", this);
+    connect(scriptAction, SIGNAL(triggered()), this, SLOT(addScript()));
     resourceToolbar->addAction(scriptAction);
     QAction* shaderAction = new QAction(QIcon(":/resources/icons/resources/shader.png"), "New Shader", this);
+    connect(shaderAction, SIGNAL(triggered()), this, SLOT(addShader()));
     resourceToolbar->addAction(shaderAction);
     fontAction = new QAction(QIcon(":/resources/icons/resources/font.png"), "New Font", this);
+    connect(fontAction, SIGNAL(triggered()), this, SLOT(addFont()));
     resourceToolbar->addAction(fontAction);
     timelineAction = new QAction(QIcon(":/resources/icons/resources/timeline.png"), "New Timeline", this);
+    connect(timelineAction, SIGNAL(triggered()), this, SLOT(addTimeline()));
     resourceToolbar->addAction(timelineAction);
     objectAction = new QAction(QIcon(":/resources/icons/resources/object.png"), "New Object", this);
+    connect(objectAction, SIGNAL(triggered()), this, SLOT(addObject()));
     resourceToolbar->addAction(objectAction);
     roomAction = new QAction(QIcon(":/resources/icons/resources/room.png"), "New Room", this);
+    connect(roomAction, SIGNAL(triggered()), this, SLOT(addRoom()));
     resourceToolbar->addAction(roomAction);
     this->addToolBar(resourceToolbar);
     resourceToolbar->setStyleSheet(" QToolButton { height: 18px; width: 18px; icon-size: 18px; } ");
 
     settingsToolbar = new QToolBar(this);
+    settingsToolbar->setObjectName("settingsToolbar");
     settingsToolbar->addAction(preferencesAction);
     gameSettingsAction = new QAction(QIcon(":/resources/icons/resources/gm.png"), "Global Game Settings", this);
     settingsToolbar->addAction(gameSettingsAction);
@@ -150,6 +173,7 @@ MainWindow::MainWindow(QWidget *parent) :
     settingsToolbar->setStyleSheet(" QToolButton { height: 18px; width: 18px; icon-size: 18px; } ");
 
     hierarchyDock = new QDockWidget("Hierarchy", this, Qt::WindowTitleHint);
+    hierarchyDock->setObjectName("hierarchyDock");
     hierarchyTree = new QTreeWidget(this);
     hierarchyTree->header()->setVisible(false);
     addResourceGroup("Sprites");
@@ -176,10 +200,12 @@ MainWindow::MainWindow(QWidget *parent) :
     setCorner( Qt::BottomRightCorner, Qt::RightDockWidgetArea );
 
     logDock = new QDockWidget("Log", this, Qt::WindowTitleHint);
+    logDock->setObjectName("logDock");
     logText = new QTextEdit(this);
     logText->setReadOnly(true);
     logDock->setWidget(logText);
     messagesDock = new QDockWidget("Messages", this, Qt::WindowTitleHint);
+    messagesDock->setObjectName("messagesDock");
     messagesTable = new QTableWidget(this);
     messagesTable->setColumnCount(4);
     messagesTable->setRowCount(0);
@@ -197,31 +223,9 @@ MainWindow::MainWindow(QWidget *parent) :
     tabifyDockWidget(logDock, messagesDock);
 
     mainMdiArea = new QMdiArea(this);
-    // MDIArea's can bet set to tabs, interesting...
-    //mainMdiArea->setDocumentMode(true);
-    //mainMdiArea->setViewMode(QMdiArea::TabbedView);
     mainMdiArea->setBackground(QBrush(QPixmap("lgm1.png")));
     mainMdiArea->setTabsClosable(true);
-
-    ScriptWidget* scriptWidget = new ScriptWidget();
-    FontWidget* fontWidget = new FontWidget();
-    PathWidget* pathWidget = new PathWidget();
-    ObjectWidget* objectWidget = new ObjectWidget();
-    TimelineWidget* timelineWidget = new TimelineWidget();
-    SoundWidget* soundWidget = new SoundWidget();
-    SpriteWidget* spriteWidget = new SpriteWidget();
-    RoomWidget* roomWidget = new RoomWidget();
-    BackgroundWidget* backgroundWidget = new BackgroundWidget();
-    mainMdiArea->addSubWindow(scriptWidget, Qt::Window);
-    mainMdiArea->addSubWindow(fontWidget, Qt::Window);
-   // mainMdiArea->addSubWindow(pathWidget, Qt::Window);
-    mainMdiArea->addSubWindow(objectWidget, Qt::Window);
-   // mainMdiArea->addSubWindow(timelineWidget, Qt::Window);
-    //mainMdiArea->addSubWindow(modelWidget, Qt::Window);
-   // mainMdiArea->addSubWindow(soundWidget, Qt::Window);
-   // mainMdiArea->addSubWindow(spriteWidget, Qt::Window);
-   // mainMdiArea->addSubWindow(roomWidget, Qt::Window);
-     //mainMdiArea->addSubWindow(backgroundWidget, Qt::Window);
+    mainMdiArea->setDocumentMode(true);
     this->setCentralWidget(mainMdiArea);
 
     mainStatusBar = new QStatusBar(this);
@@ -243,6 +247,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     aboutDialog = NULL;
     prefsDialog = NULL;
+
+    this->setObjectName("mainWindow");
+    defaultState = this->saveState();
+    this->readSettings();
 }
 
 MainWindow::~MainWindow()
@@ -251,7 +259,12 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::closeApplication() {
+    this->writeSettings();
     this->close();
+}
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+
 }
 
 void MainWindow::showLicenseDialog() {
@@ -277,6 +290,8 @@ void MainWindow::showPreferencesDialog() {
 
 void MainWindow::showOpenDialog() {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Project"), "", tr("All Files (*.*);;GMK Files (*.gmk)"));
+    currentFile = new ProjectManager();
+    currentFile->LoadGMK(fileName);
 }
 
 void MainWindow::showSaveDialog() {
@@ -288,7 +303,6 @@ void MainWindow::showManual() {
 }
 
 void MainWindow::toggleMdiTabs() {
-
     mainMdiArea->setDocumentMode(true);
     switch (mainMdiArea->viewMode()) {
     case QMdiArea::TabbedView:
@@ -325,6 +339,66 @@ void MainWindow::toggleOutputMessages() {
     }
 }
 
+void MainWindow::addSprite() {
+    SpriteWidget* editorWidget = new SpriteWidget();
+    mainMdiArea->addSubWindow(editorWidget, Qt::Window);
+    editorWidget->show();
+}
+
+void MainWindow::addBackground() {
+    BackgroundWidget* editorWidget = new BackgroundWidget();
+    mainMdiArea->addSubWindow(editorWidget, Qt::Window);
+    editorWidget->show();
+}
+
+void MainWindow::addSound() {
+    SoundWidget* editorWidget = new SoundWidget();
+    mainMdiArea->addSubWindow(editorWidget, Qt::Window);
+    editorWidget->show();
+}
+
+void MainWindow::addFont() {
+    FontWidget* editorWidget = new FontWidget();
+    mainMdiArea->addSubWindow(editorWidget, Qt::Window);
+    editorWidget->show();
+}
+
+void MainWindow::addShader() {
+    ShaderWidget* editorWidget = new ShaderWidget();
+    mainMdiArea->addSubWindow(editorWidget, Qt::Window);
+    editorWidget->show();
+}
+
+void MainWindow::addTimeline() {
+    TimelineWidget* editorWidget = new TimelineWidget();
+    mainMdiArea->addSubWindow(editorWidget, Qt::Window);
+    editorWidget->show();
+}
+
+void MainWindow::addObject() {
+    ObjectWidget* editorWidget = new ObjectWidget();
+    mainMdiArea->addSubWindow(editorWidget, Qt::Window);
+    editorWidget->show();
+}
+
+void MainWindow::addRoom() {
+    RoomWidget* editorWidget = new RoomWidget();
+    mainMdiArea->addSubWindow(editorWidget, Qt::Window);
+    editorWidget->show();
+}
+
+void MainWindow::addPath() {
+    PathWidget* editorWidget = new PathWidget();
+    mainMdiArea->addSubWindow(editorWidget, Qt::Window);
+    editorWidget->show();
+}
+
+void MainWindow::addScript() {
+    ScriptWidget* editorWidget = new ScriptWidget();
+    mainMdiArea->addSubWindow(editorWidget, Qt::Window);
+    editorWidget->show();
+}
+
 void MainWindow::closeAllWindows() {
     mainMdiArea->closeAllSubWindows();
 }
@@ -333,8 +407,16 @@ void MainWindow::closeWindow() {
     mainMdiArea->closeActiveSubWindow();
 }
 
+void MainWindow::restoreLayout() {
+    this->restoreState(defaultState);
+}
+
 void MainWindow::cascadeWindows() {
     mainMdiArea->cascadeSubWindows();
+}
+
+void MainWindow::tileWindows() {
+    mainMdiArea->tileSubWindows();
 }
 
 void MainWindow::outputClear(bool clearLog, bool clearMessages)
@@ -382,4 +464,18 @@ void MainWindow::addResource(QString name, QIcon icon)
     treeItem->setText(0, name);
     treeItem->setIcon(0, icon);
     hierarchyTree->addTopLevelItem(treeItem);
+}
+
+void MainWindow::readSettings()
+{
+    QSettings settings("LateralGMTeam", "LateralGM");
+    restoreGeometry(settings.value("mainWindow/geometry").toByteArray());
+    restoreState(settings.value("mainWindowState").toByteArray());
+}
+
+void MainWindow::writeSettings()
+{
+    QSettings settings("LateralGMTeam", "LateralGM");
+   settings.setValue("mainWindow/geometry", saveGeometry());
+    settings.setValue("mainWindowState", saveState());
 }

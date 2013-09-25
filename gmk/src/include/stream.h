@@ -1,5 +1,5 @@
 /**
-* @file  stream.hpp
+* @file  stream.h
 * @brief Binary file stream helper
 *
 * @section License
@@ -21,8 +21,8 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef __GMK_STREAM_HPP
-#define __GMK_STREAM_HPP
+#ifndef __GMK_STREAM_H
+#define __GMK_STREAM_H
 
 #include <iostream>
 #include <fstream>

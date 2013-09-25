@@ -1,5 +1,5 @@
 /**
-* @file  gmkresource.hpp
+* @file  gmkresource.h
 * @brief GMK Resource
 *
 * @section License
@@ -21,14 +21,14 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef __GMK_RESOURCE_HPP
-#define __GMK_RESOURCE_HPP
+#ifndef __GMK_RESOURCE_H
+#define __GMK_RESOURCE_H
 
 #include <iostream>
 #include <vector>
 #include <string>
-#include <stream.hpp>
-#include <gmkcommon.hpp>
+#include <stream.h>
+#include <gmkcommon.h>
 
 namespace Gmk
 {

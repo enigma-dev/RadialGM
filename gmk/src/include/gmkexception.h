@@ -1,6 +1,6 @@
 /**
-* @file  gmkincludefile.hpp
-* @brief GMK Include File
+* @file  gmkexception.h
+* @brief GMK Exception
 *
 * @section License
 *
@@ -21,45 +21,24 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef __GMK_INCLUDE_FILE_HPP
-#define __GMK_INCLUDE_FILE_HPP
+#ifndef __GMK_EXCEPTION_H
+#define __GMK_EXCEPTION_H
 
-#include <gmkresource.hpp>
+#include <iostream>
+#include <exception>
 
 namespace Gmk
 {
-	class IncludeFile : public GmkResource
+	class GmkException : public std::exception
 	{
-	public:
-		enum ExportKind
-		{
-			EkDont,
-			EkTempDirectory,
-			EkWorkingDirectory,
-			EkFollowingFolder
-		};
-
-	protected:
-		void WriteVer81(Stream* stream);
-		void ReadVer81(Stream* stream);
-
-		void WriteVer7(Stream* stream);
-		void ReadVer7(Stream* stream);
+	private:
+		std::string message;
 
 	public:
-		std::string				filename;
-		std::string				filepath;
-		bool					originalFile;
-		unsigned int			originalFileSize;
-		Stream*					data;
-		unsigned int			exportKind;
-		std::string				exportPath;
-		bool					overwrite;
-		bool					freeMemory;
-		bool					removeAtEndOfGame;
+		GmkException(const std::string& _message);
+		~GmkException() throw();
 
-		IncludeFile(GmkFile* gmk);
-		~IncludeFile();
+		const char* what() const throw();
 	};
 }
 

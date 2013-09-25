@@ -80,27 +80,6 @@ HEADERS  += mainwindow.h \
     serializer/serializer.h \
     serializer/iconmanager.h \
     widgets/shaderwidget.h \
-    gmk/src/include/gmk.hpp \
-    gmk/src/include/gmkaction.hpp \
-    gmk/src/include/gmkbackground.hpp \
-    gmk/src/include/gmkcommon.hpp \
-    gmk/src/include/gmkexception.hpp \
-    gmk/src/include/gmkfont.hpp \
-    gmk/src/include/gmkgameinfo.hpp \
-    gmk/src/include/gmkincludefile.hpp \
-    gmk/src/include/gmkobject.hpp \
-    gmk/src/include/gmkpath.hpp \
-    gmk/src/include/gmkresource.hpp \
-    gmk/src/include/gmkroom.hpp \
-    gmk/src/include/gmkrypt.hpp \
-    gmk/src/include/gmkscript.hpp \
-    gmk/src/include/gmksettings.hpp \
-    gmk/src/include/gmksound.hpp \
-    gmk/src/include/gmksprite.hpp \
-    gmk/src/include/gmktimeline.hpp \
-    gmk/src/include/gmktree.hpp \
-    gmk/src/include/gmktrigger.hpp \
-    gmk/src/include/stream.hpp \
     gmk/lib/zlib/zconf.h \
     gmk/lib/zlib/zlib.h \
     resource/gmobject.h \
@@ -115,7 +94,28 @@ HEADERS  += mainwindow.h \
     resource/script.h \
     serializer/projectmanager.h \
     dialogs/preferencesdialog.h \
-    serializer/resourcenode.h
+    serializer/resourcenode.h \
+    gmk/src/include/stream.h \
+    gmk/src/include/gmktrigger.h \
+    gmk/src/include/gmktree.h \
+    gmk/src/include/gmktimeline.h \
+    gmk/src/include/gmksprite.h \
+    gmk/src/include/gmksound.h \
+    gmk/src/include/gmksettings.h \
+    gmk/src/include/gmkscript.h \
+    gmk/src/include/gmkrypt.h \
+    gmk/src/include/gmkroom.h \
+    gmk/src/include/gmkresource.h \
+    gmk/src/include/gmkpath.h \
+    gmk/src/include/gmkobject.h \
+    gmk/src/include/gmkincludefile.h \
+    gmk/src/include/gmkgameinfo.h \
+    gmk/src/include/gmkfont.h \
+    gmk/src/include/gmkexception.h \
+    gmk/src/include/gmkcommon.h \
+    gmk/src/include/gmkbackground.h \
+    gmk/src/include/gmkaction.h \
+    gmk/src/include/gmk.h
 
 RESOURCES += \
     resources.qrc

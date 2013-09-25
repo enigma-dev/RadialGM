@@ -1,6 +1,6 @@
 /**
-* @file  gmkscript.hpp
-* @brief GMK Script
+* @file gmksprite.h
+* @brief GMK Sprite
 *
 * @section License
 *
@@ -21,15 +21,37 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef __GMK_SCRIPT_HPP
-#define __GMK_SCRIPT_HPP
+#ifndef __GMK_SPRITE_H
+#define __GMK_SPRITE_H
 
-#include <gmkresource.hpp>
+#include <gmkresource.h>
 
 namespace Gmk
 {
-	class Script : public GmkResource
+	class Sprite : public GmkResource
 	{
+	public:
+		enum Shape
+		{
+			ShapePrecise,
+			ShapeRectangle,
+			ShapeDisc,
+			ShapeDiamond
+		};
+
+		enum BoundingBox
+ 		{
+			BbAutomatic,
+			BbFull,
+			BbManual
+		};
+
+		typedef struct _Subimage
+		{
+			unsigned int width, height;
+			Stream* data;
+		} Subimage;
+
 	protected:
 		void WriteVer81(Stream* stream);
 		void ReadVer81(Stream* stream);
@@ -38,10 +60,26 @@ namespace Gmk
 		void ReadVer7(Stream* stream);
 
 	public:
-		std::string			value;
+		unsigned int			width;
+		unsigned int			height;
+		int						bboxLeft;
+		int						bboxRight;
+		int						bboxBottom;
+		int						bboxTop;
+		unsigned int			originX;
+		unsigned int			originY;
+		std::vector<Subimage>	subimages;
+		unsigned int			maskShape;
+		unsigned int			alphaTolerance;
+		bool					preciseCollisionChecking;
+		bool					seperateMasks;
+		bool					transparent;
+		bool					smoothEdges;
+		unsigned int			boundingBox;
+		bool					preload;
 
-		Script(GmkFile* gmk);
-		~Script();
+		Sprite(GmkFile* gmk);
+		~Sprite();
 
 		int GetId() const;
 	};

@@ -1,6 +1,6 @@
 /**
-* @file  gmkbackground.hpp
-* @brief GMK Background
+* @file  gmkrypt.h
+* @brief GMKrypt support
 *
 * @section License
 *
@@ -21,41 +21,29 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef __GMK_BACKGROUND_HPP
-#define __GMK_BACKGROUND_HPP
+#ifndef __GMK_GMKRYPT_H
+#define __GMK_GMKRYPT_H
 
-#include <gmkresource.hpp>
+#include <stream.h>
 
 namespace Gmk
 {
-	class Background : public GmkResource
+	class Gmkrypt
 	{
-	protected:
-		void WriteVer81(Stream* stream);
-		void ReadVer81(Stream* stream);
+	private:
+		int seed;
+		int table[2][256];
 
-		void WriteVer7(Stream* stream);
-		void ReadVer7(Stream* stream);
+		void GenerateSwapTable();
 
 	public:
-		bool					transparent;
-		bool					smoothEdges;
-		bool					preload;
-		bool					useAsTileset;
-		unsigned int			tileWidth;
-		unsigned int			tileHeight;
-		unsigned int			tileHorizontalOffset;
-		unsigned int			tileVerticalOffset;
-		unsigned int			tileHorizontalSeperation;
-		unsigned int			tileVerticalSeperation;
-		unsigned int			width;
-		unsigned int			height;
-		Stream*					data;
+		Gmkrypt(int _seed);
+		~Gmkrypt();
 
-		Background(GmkFile* gmk);
-		~Background();
+		Stream* Encrypt(Stream* stream);
+		Stream* Decrypt(Stream* stream);
 
-		int GetId() const;
+		static int ReadSeedFromJunkyard(Stream* stream);
 	};
 }
 

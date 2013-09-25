@@ -22,7 +22,18 @@
 **/
 
 #include "projectmanager.h"
+#include <string>
+#include <QDebug>
 
 ProjectManager::ProjectManager()
 {
+}
+
+void ProjectManager::LoadGMK(QString filename) {
+    gmk = new Gmk::GmkFile();
+    std::string file = filename.toUtf8().constData();
+    qDebug() << filename;
+    gmk->Load(file);
+    //gmk->Save(FILENAME_OUT);
+    delete gmk;
 }
