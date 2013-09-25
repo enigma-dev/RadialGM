@@ -21,8 +21,8 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#include <gmktimeline.hpp>
-#include <gmk.hpp>
+#include <gmktimeline.h>
+#include <gmk.h>
 
 namespace Gmk
 {

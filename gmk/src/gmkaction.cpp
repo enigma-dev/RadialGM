@@ -23,8 +23,8 @@
 
 #include <cstdlib>
 #include <sstream>
-#include <gmkaction.hpp>
-#include <gmk.hpp>
+#include <gmkaction.h>
+#include <gmk.h>
 
 namespace Gmk
 {

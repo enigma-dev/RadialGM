@@ -21,8 +21,8 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#include <gmkroom.hpp>
-#include <gmk.hpp>
+#include <gmkroom.h>
+#include <gmk.h>
 
 namespace Gmk
 {

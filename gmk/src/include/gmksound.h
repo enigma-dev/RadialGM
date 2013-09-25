@@ -1,6 +1,6 @@
 /**
-* @file gmksprite.hpp
-* @brief GMK Sprite
+* @file  gmksound.h
+* @brief GMK Sound
 *
 * @section License
 *
@@ -21,36 +21,33 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef __GMK_SPRITE_HPP
-#define __GMK_SPRITE_HPP
+#ifndef __GMK_SOUND_H
+#define __GMK_SOUND_H
 
-#include <gmkresource.hpp>
+#include <gmkresource.h>
 
 namespace Gmk
 {
-	class Sprite : public GmkResource
+	class Sound : public GmkResource
 	{
 	public:
-		enum Shape
+		enum Kind
 		{
-			ShapePrecise,
-			ShapeRectangle,
-			ShapeDisc,
-			ShapeDiamond
+			KindNormal,
+			KindBackground,
+			Kind3D,
+			KindMultimedia
 		};
 
-		enum BoundingBox
- 		{
-			BbAutomatic,
-			BbFull,
-			BbManual
-		};
-
-		typedef struct _Subimage
+		enum Effect
 		{
-			unsigned int width, height;
-			Stream* data;
-		} Subimage;
+			EffectNone				= 0x00,
+			EffectChorus			= 0x01,
+			EffectEcho				= 0x02,
+			EffectFlanger			= 0x04,
+			EffectGargle			= 0x08,
+			EffectReverb			= 0x10
+		};
 
 	protected:
 		void WriteVer81(Stream* stream);
@@ -60,26 +57,17 @@ namespace Gmk
 		void ReadVer7(Stream* stream);
 
 	public:
-		unsigned int			width;
-		unsigned int			height;
-		int						bboxLeft;
-		int						bboxRight;
-		int						bboxBottom;
-		int						bboxTop;
-		unsigned int			originX;
-		unsigned int			originY;
-		std::vector<Subimage>	subimages;
-		unsigned int			maskShape;
-		unsigned int			alphaTolerance;
-		bool					preciseCollisionChecking;
-		bool					seperateMasks;
-		bool					transparent;
-		bool					smoothEdges;
-		unsigned int			boundingBox;
+		unsigned int			kind;
+		std::string				extension;
+		std::string				filename;
+		Stream*					data;
+		unsigned int			effects;
+		double					volume;
+		double					pan;
 		bool					preload;
 
-		Sprite(GmkFile* gmk);
-		~Sprite();
+		Sound(GmkFile* gmk);
+		~Sound();
 
 		int GetId() const;
 	};

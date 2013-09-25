@@ -1,6 +1,6 @@
 /**
-* @file  gmkexception.hpp
-* @brief GMK Exception
+* @file  gmkpath.h
+* @brief GMK Path
 *
 * @section License
 *
@@ -21,24 +21,56 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef __GMK_EXCEPTION_HPP
-#define __GMK_EXCEPTION_HPP
+#ifndef __GMK_PATH_H
+#define __GMK_PATH_H
 
-#include <iostream>
-#include <exception>
+#include <gmkresource.h>
+#include <gmkroom.h>
 
 namespace Gmk
 {
-	class GmkException : public std::exception
+	class Path : public GmkResource
 	{
+	public:
+		static const int RoomIndexNone				= -1;
+
+		enum ConnectionKind
+		{
+			KindStraight,
+			KindSmooth
+		};
+
+		typedef struct _Point
+ 		{
+			double		x;
+			double		y;
+			double		speed;
+	 	} Point;
+
 	private:
-		std::string message;
+		int						roomIndex;
+
+	protected:
+		void WriteVer81(Stream* stream);
+		void ReadVer81(Stream* stream);
+
+		void WriteVer7(Stream* stream);
+		void ReadVer7(Stream* stream);
 
 	public:
-		GmkException(const std::string& _message);
-		~GmkException() throw();
+		unsigned int			connectionKind;
+		bool					closed;
+		unsigned int			precision;
+		Room*					room;
+		unsigned int			snapX;
+		unsigned int			snapY;
+		std::vector<Point>		points;
 
-		const char* what() const throw();
+		Path(GmkFile* gmk);
+		~Path();
+
+		int GetId() const;
+		void Finalize();
 	};
 }
 

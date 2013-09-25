@@ -1,5 +1,5 @@
 /**
-* @file  gmkobject.hpp
+* @file  gmkobject.h
 * @brief GMK Object
 *
 * @section License
@@ -21,12 +21,12 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef __GMK_OBJECT_HPP
-#define __GMK_OBJECT_HPP
+#ifndef __GMK_OBJECT_H
+#define __GMK_OBJECT_H
 
-#include <gmkresource.hpp>
-#include <gmkaction.hpp>
-#include <gmksprite.hpp>
+#include <gmkresource.h>
+#include <gmkaction.h>
+#include <gmksprite.h>
 
 namespace Gmk
 {

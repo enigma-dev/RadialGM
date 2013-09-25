@@ -39,7 +39,9 @@
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QProgressBar>
+#include <QSettings>
 #include "widgets/scriptwidget.h"
+#include "widgets/shaderwidget.h"
 #include "widgets/fontwidget.h"
 #include "widgets/pathwidget.h"
 #include "widgets/objectwidget.h"
@@ -50,6 +52,7 @@
 #include "widgets/spritewidget.h"
 #include "dialogs/aboutdialog.h"
 #include "dialogs/preferencesdialog.h"
+#include "serializer/projectmanager.h"
 
 namespace Ui {
 class MainWindow;
@@ -116,11 +119,19 @@ private:
     QTreeWidget* hierarchyTree;
     QMdiArea* mainMdiArea;
 
+    ProjectManager* currentFile;
+
+    QByteArray defaultState;
+
     void addResource(QString name, QIcon icon);
     void addResourceGroup(QString name);
 
+    void readSettings();
+    void writeSettings();
+
 public slots:
     void closeApplication();
+    void closeEvent(QCloseEvent *event);
     void showLicenseDialog();
     void showAboutDialog();
     void showPreferencesDialog();
@@ -128,7 +139,20 @@ public slots:
     void showSaveDialog();
     void showManual();
 
+    void addSprite();
+    void addBackground();
+    void addSound();
+    void addFont();
+    void addShader();
+    void addTimeline();
+    void addObject();
+    void addRoom();
+    void addPath();
+    void addScript();
+
+    void restoreLayout();
     void cascadeWindows();
+    void tileWindows();
     void closeAllWindows();
     void closeWindow();
 

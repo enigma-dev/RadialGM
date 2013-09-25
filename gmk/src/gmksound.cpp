@@ -21,8 +21,8 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#include <gmksound.hpp>
-#include <gmk.hpp>
+#include <gmksound.h>
+#include <gmk.h>
 
 namespace Gmk
 {

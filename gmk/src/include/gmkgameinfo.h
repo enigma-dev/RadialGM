@@ -1,6 +1,6 @@
 /**
-* @file gmkcommon.hpp
-* @brief GMK Common Definitions
+* @file  gmkgameinfo.h
+* @brief GMK Game Information
 *
 * @section License
 *
@@ -21,22 +21,39 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef __GMK_COMMON_HPP
-#define __GMK_COMMON_HPP
+#ifndef __GMK_GAME_INFORMATION_H
+#define __GMK_GAME_INFORMATION_H
 
-#include <gmkexception.hpp>
+#include <gmkresource.h>
 
 namespace Gmk
 {
-	typedef enum _Version
+	class GameInformation : public GmkResource
 	{
-		VerUnknown,
-		Ver53a,
-		Ver61,
-		Ver7,
-		Ver8,
-		Ver81								// GM 8.1.141 (r11549)
-	} Version;
+	protected:
+		void WriteVer81(Stream* stream);
+		void ReadVer81(Stream* stream);
+
+		void WriteVer7(Stream* stream);
+		void ReadVer7(Stream* stream);
+
+	public:
+		unsigned int			backgroundColor;
+		bool					showInSeperateWindow;
+		std::string				caption;
+		int						left;
+		int						top;
+		int						width;
+		int						height;
+		bool					showBorder;
+		bool					sizeable;
+		bool					alwaysOnTop;
+		bool					freeze;
+		std::string				information;
+
+		GameInformation(GmkFile* gmk);
+		~GameInformation();
+	};
 }
 
 #endif

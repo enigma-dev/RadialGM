@@ -1,6 +1,6 @@
 /**
-* @file  gmktrigger.hpp
-* @brief GMK Trigger
+* @file gmkcommon.h
+* @brief GMK Common Definitions
 *
 * @section License
 *
@@ -21,38 +21,22 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef __GMK_TRIGGER_HPP
-#define __GMK_TRIGGER_HPP
+#ifndef __GMK_COMMON_H
+#define __GMK_COMMON_H
 
-#include <gmkresource.hpp>
+#include <gmkexception.h>
 
 namespace Gmk
 {
-	class Trigger : public GmkResource
+	typedef enum _Version
 	{
-	public:
-		enum Moment
-		{
-			MomentMiddle,
-			MomentBegin,
-			MomentEnd
-		};
-
-	protected:
-		void WriteVer81(Stream* stream);
-		void ReadVer81(Stream* stream);
-
-		void WriteVer7(Stream* stream);
-		void ReadVer7(Stream* stream);
-
-	public:
-		std::string			condition;
-		unsigned int		momentOfChecking;
-		std::string			constantName;
-
-		Trigger(GmkFile* gmk);
-		~Trigger();
-	};
+		VerUnknown,
+		Ver53a,
+		Ver61,
+		Ver7,
+		Ver8,
+		Ver81								// GM 8.1.141 (r11549)
+	} Version;
 }
 
 #endif

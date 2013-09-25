@@ -23,7 +23,7 @@
 
 #include <cstdlib>
 #include <cstring>
-#include <stream.hpp>
+#include <stream.h>
 #include <zlib.h>
 
 namespace Gmk
