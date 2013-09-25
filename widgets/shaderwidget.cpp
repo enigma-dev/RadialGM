@@ -26,42 +26,11 @@
 ShaderWidget::ShaderWidget(QWidget *parent) :
     QWidget(parent)
 {
-    this->setWindowTitle("Script");
-    this->setWindowIcon(QIcon(":/resources/icons/resources/script.png"));
-    vsciEditor = new QsciScintilla(this);
+    this->setWindowTitle("Shader");
+    this->setWindowIcon(QIcon(":/resources/icons/resources/shader.png"));
 
-    vsciEditor->setFrameStyle(QsciScintilla::NoFrame);
-    //sciEditor->setWrapMode(QsciScintilla::WrapCharacter);
-
-    vsciEditor->setCaretLineVisible(true);
-    vsciEditor->setCaretLineBackgroundColor(QColor("#ffe4e4"));
-
-    QFont font = QFont("Courier 10 Pitch", 10);
-    font.setFixedPitch(true);
-    vsciEditor->setFont(font);
-    QsciLexerCPP lexer;
-    lexer.setFont(font);
-    vsciEditor->setLexer(&lexer);
-    QFontMetrics fontmetrics = QFontMetrics(font);
-    vsciEditor->setMarginWidth(0, fontmetrics.width("__")+8);
-    vsciEditor->setMarginLineNumbers(0, true);
-    //sciEditor->setMarginsBackgroundColor(QColor("#dddddd"));
-
-    vsciEditor->setMarginSensitivity(1, true);
-    BREAK_MARKER_NUM = 8;
-    //this->setMarginWidth();
-    connect(vsciEditor,
-        SIGNAL(marginClicked(int, int, Qt::KeyboardModifiers)), this,
-                       SLOT(on_vertex_margin_clicked(int, int, Qt::KeyboardModifiers)));
-    vsciEditor->markerDefine(QImage(":/icons/actions/link_break.png"),
-        BREAK_MARKER_NUM);
-    vsciEditor->setBraceMatching(QsciScintilla::SloppyBraceMatch);
-
-    vsciEditor->setFolding(QsciScintilla::BoxedTreeFoldStyle, 3);
-    //this->setFoldMarginColors(QColor("#dddddd"), QColor("#dddddd"));
-
-    vsciEditor->setMarginsFont(font);
-    vsciEditor->setMarginsForegroundColor(QColor("#bbbbbb"));
+    vsciEditor = createEditor();
+    fsciEditor = createEditor();
 
     QVBoxLayout *layout = new QVBoxLayout(this); // no initialization here
     editToolbar = new QToolBar(this);
@@ -86,8 +55,20 @@ ShaderWidget::ShaderWidget(QWidget *parent) :
     QLineEdit* nameEdit = new QLineEdit(this);
     nameEdit->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     editToolbar->addWidget(nameEdit);
+    editToolbar->addSeparator();
+    editToolbar->addWidget(new QLabel("Type:"));
+    QComboBox* typeCombo = new QComboBox();
+    typeCombo->addItem("GLSLES");
+    typeCombo->addItem("GLSL");
+    typeCombo->addItem("HLSL11");
+    typeCombo->addItem("HLSL9");
+    editToolbar->addWidget(typeCombo);
+    editToolbar->setStyleSheet(" QToolBar { height: 18px; width: 18px; icon-size: 18px; } ");
     layout->addWidget(editToolbar);
-    layout->addWidget(vsciEditor); // layout is uninitialized and probably garbage
+    QTabWidget* mainTabWidget = new QTabWidget();
+    mainTabWidget->addTab(vsciEditor, "Vertex");
+    mainTabWidget->addTab(fsciEditor, "Fragment");
+    layout->addWidget(mainTabWidget); // layout is uninitialized and probably garbage
     layout->setContentsMargins(0, 0, 0, 0);
     this->setLayout(layout);
 
@@ -97,6 +78,45 @@ ShaderWidget::ShaderWidget(QWidget *parent) :
 ShaderWidget::~ShaderWidget()
 {
 
+}
+
+QsciScintilla* ShaderWidget::createEditor() {
+    QsciScintilla* editor = new QsciScintilla(this);
+
+    editor->setFrameStyle(QsciScintilla::NoFrame);
+    //editor->setWrapMode(QsciScintilla::WrapCharacter);
+
+    editor->setCaretLineVisible(true);
+    editor->setCaretLineBackgroundColor(QColor("#ffe4e4"));
+
+    QFont font = QFont("Courier 10 Pitch", 10);
+    font.setFixedPitch(true);
+    editor->setFont(font);
+    QsciLexerCPP lexer;
+    lexer.setFont(font);
+    editor->setLexer(&lexer);
+    QFontMetrics fontmetrics = QFontMetrics(font);
+    editor->setMarginWidth(0, fontmetrics.width("__")+8);
+    editor->setMarginLineNumbers(0, true);
+    //sciEditor->setMarginsBackgroundColor(QColor("#dddddd"));
+
+    editor->setMarginSensitivity(1, true);
+    BREAK_MARKER_NUM = 8;
+    //this->setMarginWidth();
+    connect(editor,
+        SIGNAL(marginClicked(int, int, Qt::KeyboardModifiers)), this,
+                       SLOT(on_vertex_margin_clicked(int, int, Qt::KeyboardModifiers)));
+    editor->markerDefine(QImage(":/icons/actions/link_break.png"),
+        BREAK_MARKER_NUM);
+    editor->setBraceMatching(QsciScintilla::SloppyBraceMatch);
+
+    editor->setFolding(QsciScintilla::BoxedTreeFoldStyle, 3);
+    //this->setFoldMarginColors(QColor("#dddddd"), QColor("#dddddd"));
+
+    editor->setMarginsFont(font);
+    editor->setMarginsForegroundColor(QColor("#bbbbbb"));
+
+    return editor;
 }
 
 void ShaderWidget::on_vertex_margin_clicked(int nmargin, int nline, Qt::KeyboardModifiers modifiers) {

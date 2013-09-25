@@ -1,6 +1,6 @@
 /**
-* @file  gmkpath.hpp
-* @brief GMK Path
+* @file  gmktimeline.h
+* @brief GMK Timeline
 *
 * @section License
 *
@@ -21,34 +21,22 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef __GMK_PATH_HPP
-#define __GMK_PATH_HPP
+#ifndef __GMK_TIMELINE_H
+#define __GMK_TIMELINE_H
 
-#include <gmkresource.hpp>
-#include <gmkroom.hpp>
+#include <gmkresource.h>
+#include <gmkaction.h>
 
 namespace Gmk
 {
-	class Path : public GmkResource
+	class Timeline : public GmkResource
 	{
 	public:
-		static const int RoomIndexNone				= -1;
-
-		enum ConnectionKind
+		typedef struct _Moment
 		{
-			KindStraight,
-			KindSmooth
-		};
-
-		typedef struct _Point
- 		{
-			double		x;
-			double		y;
-			double		speed;
-	 	} Point;
-
-	private:
-		int						roomIndex;
+			unsigned int			position;
+			std::vector<Action*>	actions;
+		} Moment;
 
 	protected:
 		void WriteVer81(Stream* stream);
@@ -58,16 +46,10 @@ namespace Gmk
 		void ReadVer7(Stream* stream);
 
 	public:
-		unsigned int			connectionKind;
-		bool					closed;
-		unsigned int			precision;
-		Room*					room;
-		unsigned int			snapX;
-		unsigned int			snapY;
-		std::vector<Point>		points;
+		std::vector<Moment>		moments;
 
-		Path(GmkFile* gmk);
-		~Path();
+		Timeline(GmkFile* gmk);
+		~Timeline();
 
 		int GetId() const;
 		void Finalize();

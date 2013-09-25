@@ -21,8 +21,8 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#include <gmksprite.hpp>
-#include <gmk.hpp>
+#include <gmksprite.h>
+#include <gmk.h>
 
 namespace Gmk
 {

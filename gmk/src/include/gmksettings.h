@@ -1,5 +1,5 @@
 /**
-* @file  gmksettings.hpp
+* @file  gmksettings.h
 * @brief GMK Settings
 *
 * @section License
@@ -21,10 +21,10 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef __GMK_SETTINGS_HPP
-#define __GMK_SETTINGS_HPP
+#ifndef __GMK_SETTINGS_H
+#define __GMK_SETTINGS_H
 
-#include <gmkresource.hpp>
+#include <gmkresource.h>
 
 namespace Gmk
 {

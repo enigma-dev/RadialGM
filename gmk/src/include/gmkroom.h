@@ -1,5 +1,5 @@
 /**
-* @file  gmkroom.hpp
+* @file  gmkroom.h
 * @brief GMK Room
 *
 * @section License
@@ -21,12 +21,12 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef __GMK_ROOM_HPP
-#define __GMK_ROOM_HPP
+#ifndef __GMK_ROOM_H
+#define __GMK_ROOM_H
 
-#include <gmkresource.hpp>
-#include <gmkbackground.hpp>
-#include <gmkobject.hpp>
+#include <gmkresource.h>
+#include <gmkbackground.h>
+#include <gmkobject.h>
 
 namespace Gmk
 {

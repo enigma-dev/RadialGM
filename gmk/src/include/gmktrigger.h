@@ -1,6 +1,6 @@
 /**
-* @file  gmkrypt.hpp
-* @brief GMKrypt support
+* @file  gmktrigger.h
+* @brief GMK Trigger
 *
 * @section License
 *
@@ -21,29 +21,37 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef __GMK_GMKRYPT_HPP
-#define __GMK_GMKRYPT_HPP
+#ifndef __GMK_TRIGGER_H
+#define __GMK_TRIGGER_H
 
-#include <stream.hpp>
+#include <gmkresource.h>
 
 namespace Gmk
 {
-	class Gmkrypt
+	class Trigger : public GmkResource
 	{
-	private:
-		int seed;
-		int table[2][256];
+	public:
+		enum Moment
+		{
+			MomentMiddle,
+			MomentBegin,
+			MomentEnd
+		};
 
-		void GenerateSwapTable();
+	protected:
+		void WriteVer81(Stream* stream);
+		void ReadVer81(Stream* stream);
+
+		void WriteVer7(Stream* stream);
+		void ReadVer7(Stream* stream);
 
 	public:
-		Gmkrypt(int _seed);
-		~Gmkrypt();
+		std::string			condition;
+		unsigned int		momentOfChecking;
+		std::string			constantName;
 
-		Stream* Encrypt(Stream* stream);
-		Stream* Decrypt(Stream* stream);
-
-		static int ReadSeedFromJunkyard(Stream* stream);
+		Trigger(GmkFile* gmk);
+		~Trigger();
 	};
 }
 

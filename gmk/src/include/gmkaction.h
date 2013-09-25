@@ -1,5 +1,5 @@
 /**
-* @file  gmkaction.hpp
+* @file  gmkaction.h
 * @brief GMK Action
 *
 * @section License
@@ -20,10 +20,10 @@
 * You should have received a copy of the GNU General Public License
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
-#ifndef __GMK_ACTION_HPP
-#define __GMK_ACTION_HPP
+#ifndef __GMK_ACTION_H
+#define __GMK_ACTION_H
 
-#include <gmkresource.hpp>
+#include <gmkresource.h>
 
 namespace Gmk
 {

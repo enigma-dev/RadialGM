@@ -1,5 +1,5 @@
 /**
-* @file  gmktree.hpp
+* @file  gmktree.h
 * @brief GMK Resource Tree
 *
 * @section License
@@ -21,10 +21,10 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef __GMK_TREE_HPP
-#define __GMK_TREE_HPP
+#ifndef __GMK_TREE_H
+#define __GMK_TREE_H
 
-#include <gmkresource.hpp>
+#include <gmkresource.h>
 
 namespace Gmk
 {

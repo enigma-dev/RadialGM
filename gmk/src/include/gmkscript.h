@@ -1,6 +1,6 @@
 /**
-* @file  gmktimeline.hpp
-* @brief GMK Timeline
+* @file  gmkscript.h
+* @brief GMK Script
 *
 * @section License
 *
@@ -21,23 +21,15 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef __GMK_TIMELINE_HPP
-#define __GMK_TIMELINE_HPP
+#ifndef __GMK_SCRIPT_H
+#define __GMK_SCRIPT_H
 
-#include <gmkresource.hpp>
-#include <gmkaction.hpp>
+#include <gmkresource.h>
 
 namespace Gmk
 {
-	class Timeline : public GmkResource
+	class Script : public GmkResource
 	{
-	public:
-		typedef struct _Moment
-		{
-			unsigned int			position;
-			std::vector<Action*>	actions;
-		} Moment;
-
 	protected:
 		void WriteVer81(Stream* stream);
 		void ReadVer81(Stream* stream);
@@ -46,13 +38,12 @@ namespace Gmk
 		void ReadVer7(Stream* stream);
 
 	public:
-		std::vector<Moment>		moments;
+		std::string			value;
 
-		Timeline(GmkFile* gmk);
-		~Timeline();
+		Script(GmkFile* gmk);
+		~Script();
 
 		int GetId() const;
-		void Finalize();
 	};
 }
 

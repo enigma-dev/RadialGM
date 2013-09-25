@@ -21,8 +21,8 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#include <gmkfont.hpp>
-#include <gmk.hpp>
+#include <gmkfont.h>
+#include <gmk.h>
 
 namespace Gmk
 {

@@ -21,8 +21,8 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef _NGM_ICONMANAGER__HPP
-#define _NGM_ICONMANAGER__HPP
+#ifndef _NGM_ICONMANAGER__H
+#define _NGM_ICONMANAGER__H
 
 #include <map>
 #include <vector>
@@ -81,4 +81,4 @@ class IconManager: public QObject
 
 };
 
-#endif // _NGM_ICONMANAGER__HPP
+#endif // _NGM_ICONMANAGER__H

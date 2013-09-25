@@ -1,6 +1,6 @@
 /**
-* @file  gmkgameinfo.hpp
-* @brief GMK Game Information
+* @file  gmkincludefile.h
+* @brief GMK Include File
 *
 * @section License
 *
@@ -21,15 +21,24 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef __GMK_GAME_INFORMATION_HPP
-#define __GMK_GAME_INFORMATION_HPP
+#ifndef __GMK_INCLUDE_FILE_H
+#define __GMK_INCLUDE_FILE_H
 
-#include <gmkresource.hpp>
+#include <gmkresource.h>
 
 namespace Gmk
 {
-	class GameInformation : public GmkResource
+	class IncludeFile : public GmkResource
 	{
+	public:
+		enum ExportKind
+		{
+			EkDont,
+			EkTempDirectory,
+			EkWorkingDirectory,
+			EkFollowingFolder
+		};
+
 	protected:
 		void WriteVer81(Stream* stream);
 		void ReadVer81(Stream* stream);
@@ -38,21 +47,19 @@ namespace Gmk
 		void ReadVer7(Stream* stream);
 
 	public:
-		unsigned int			backgroundColor;
-		bool					showInSeperateWindow;
-		std::string				caption;
-		int						left;
-		int						top;
-		int						width;
-		int						height;
-		bool					showBorder;
-		bool					sizeable;
-		bool					alwaysOnTop;
-		bool					freeze;
-		std::string				information;
+		std::string				filename;
+		std::string				filepath;
+		bool					originalFile;
+		unsigned int			originalFileSize;
+		Stream*					data;
+		unsigned int			exportKind;
+		std::string				exportPath;
+		bool					overwrite;
+		bool					freeMemory;
+		bool					removeAtEndOfGame;
 
-		GameInformation(GmkFile* gmk);
-		~GameInformation();
+		IncludeFile(GmkFile* gmk);
+		~IncludeFile();
 	};
 }
 

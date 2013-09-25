@@ -1,5 +1,5 @@
 /**
-* @file  gmk.hpp
+* @file  gmk.h
 * @brief Game Maker Kompressed and enKrypted format to piss of Klam
 *
 * @section License
@@ -21,27 +21,27 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef __GMK_GMK_HPP
-#define __GMK_GMK_HPP
+#ifndef __GMK_GMK_H
+#define __GMK_GMK_H
 
 #include <iostream>
 #include <vector>
-#include <gmkcommon.hpp>
-#include <gmkresource.hpp>
-#include <gmksettings.hpp>
-#include <gmktrigger.hpp>
-#include <gmksound.hpp>
-#include <gmksprite.hpp>
-#include <gmkbackground.hpp>
-#include <gmkpath.hpp>
-#include <gmkscript.hpp>
-#include <gmkfont.hpp>
-#include <gmktimeline.hpp>
-#include <gmkobject.hpp>
-#include <gmkroom.hpp>
-#include <gmkincludefile.hpp>
-#include <gmkgameinfo.hpp>
-#include <gmktree.hpp>
+#include <gmkcommon.h>
+#include <gmkresource.h>
+#include <gmksettings.h>
+#include <gmktrigger.h>
+#include <gmksound.h>
+#include <gmksprite.h>
+#include <gmkbackground.h>
+#include <gmkpath.h>
+#include <gmkscript.h>
+#include <gmkfont.h>
+#include <gmktimeline.h>
+#include <gmkobject.h>
+#include <gmkroom.h>
+#include <gmkincludefile.h>
+#include <gmkgameinfo.h>
+#include <gmktree.h>
 
 namespace Gmk
 {

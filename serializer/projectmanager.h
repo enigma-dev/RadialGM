@@ -24,10 +24,16 @@
 #ifndef PROJECTMANAGER_H
 #define PROJECTMANAGER_H
 
+#include <QString>
+#include "gmk/src/include/gmk.h"
+
 class ProjectManager
 {
 public:
     ProjectManager();
+    Gmk::GmkFile* gmk;
+
+    void LoadGMK(QString filename);
 };
 
 #endif // PROJECTMANAGER_H
