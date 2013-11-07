@@ -38,6 +38,9 @@ public:
     explicit PreferencesDialog(QWidget *parent = 0);
     ~PreferencesDialog();
     
+private slots:
+    void applyChanges();
+
 private:
     Ui::PreferencesDialog *ui;
 };

@@ -21,6 +21,7 @@
 * along with this program. If not, see <http://www.gnu.org/licenses/>.
 **/
 
+#include <QStyleFactory>
 
 #include "preferencesdialog.h"
 #include "ui_preferencesdialog.h"
@@ -30,9 +31,21 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) :
     ui(new Ui::PreferencesDialog)
 {
     ui->setupUi(this);
+    connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(applyChanges()));
+
+    QStringList styles = QStyleFactory::keys();
+    for (int i = 0; i < styles.size(); ++i) {
+        ui->comboBox->addItem(styles.at(i));
+    }
 }
 
 PreferencesDialog::~PreferencesDialog()
 {
     delete ui;
+}
+
+void PreferencesDialog::applyChanges() {
+    QApplication::setStyle(QStyleFactory::create(ui->comboBox->currentText().toLower()));
+    QApplication::aboutQt();
+    // ui->buttonBox;
 }
