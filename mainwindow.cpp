@@ -87,7 +87,7 @@ MainWindow::MainWindow(QWidget *parent) :
     mainMenuBar->addMenu(helpMenu);
     this->setMenuBar(mainMenuBar);
 
-    fileToolbar = new QToolBar();
+    fileToolbar = new QToolBar("File");
     fileToolbar->setObjectName("fileToolbar");
     newAction = new QAction(QIcon(":/icons/actions/new.png"), "New", this);
     fileToolbar->addAction(newAction);
@@ -113,7 +113,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->addToolBar(fileToolbar);
     fileToolbar->setStyleSheet(" QToolButton { height: 18px; width: 18px; icon-size: 18px; } ");
 
-    buildToolbar = new QToolBar(this);
+    buildToolbar = new QToolBar("Build");
     buildToolbar->setObjectName("buildToolbar");
     runAction = new QAction(QIcon(":/icons/actions/execute.png"), "Execute", this);
     buildToolbar->addAction(runAction);
@@ -124,7 +124,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->addToolBar(buildToolbar);
     buildToolbar->setStyleSheet(" QToolButton { height: 18px; width: 18px; icon-size: 18px; } ");
 
-    resourceToolbar = new QToolBar(this);
+    resourceToolbar = new QToolBar("Resource");
     resourceToolbar->setObjectName("resourceToolbar");
     spriteAction = new QAction(QIcon(":/resources/icons/resources/sprite.png"), "New Sprite", this);
     connect(spriteAction, SIGNAL(triggered()), this, SLOT(addSprite()));
@@ -159,7 +159,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->addToolBar(resourceToolbar);
     resourceToolbar->setStyleSheet(" QToolButton { height: 18px; width: 18px; icon-size: 18px; } ");
 
-    settingsToolbar = new QToolBar(this);
+    settingsToolbar = new QToolBar("Settings");
     settingsToolbar->setObjectName("settingsToolbar");
     settingsToolbar->addAction(preferencesAction);
     gameSettingsAction = new QAction(QIcon(":/resources/icons/resources/gm.png"), "Global Game Settings", this);
@@ -269,21 +269,21 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 
 void MainWindow::showLicenseDialog() {
     if (aboutDialog == NULL) {
-        aboutDialog = new AboutDialog();
+        aboutDialog = new AboutDialog(this);
     }
     aboutDialog->show(":/license.html", "License");
 }
 
 void MainWindow::showAboutDialog() {
     if (aboutDialog == NULL) {
-        aboutDialog = new AboutDialog();
+        aboutDialog = new AboutDialog(this);
     }
     aboutDialog->show(":/about.html", "About");
 }
 
 void MainWindow::showPreferencesDialog() {
     if (prefsDialog == NULL) {
-        prefsDialog = new PreferencesDialog();
+        prefsDialog = new PreferencesDialog(this);
     }
     prefsDialog->show();
 }
@@ -476,6 +476,6 @@ void MainWindow::readSettings()
 void MainWindow::writeSettings()
 {
     QSettings settings("LateralGMTeam", "LateralGM");
-   settings.setValue("mainWindow/geometry", saveGeometry());
+    settings.setValue("mainWindow/geometry", saveGeometry());
     settings.setValue("mainWindowState", saveState());
 }

@@ -23,6 +23,8 @@
 
 #include "mainwindow.h"
 #include <QApplication>
+#include <QStyleFactory>
+
 #include <QFile>
 
 int main(int argc, char *argv[])
@@ -34,7 +36,6 @@ int main(int argc, char *argv[])
     QString StyleSheet = QLatin1String(File.readAll());
 
     qApp->setStyleSheet(StyleSheet);
-
     MainWindow w;
     w.show();
     
