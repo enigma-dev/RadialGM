@@ -22,6 +22,7 @@
 **/
 
 #include <QStyleFactory>
+#include <QPushButton>
 
 #include "preferencesdialog.h"
 #include "ui_preferencesdialog.h"
@@ -31,7 +32,8 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) :
     ui(new Ui::PreferencesDialog)
 {
     ui->setupUi(this);
-    connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(applyChanges()));
+    QPushButton* applyButton = ui->buttonBox->button(QDialogButtonBox::Apply);
+    connect(applyButton, SIGNAL(clicked()), this, SLOT(applyChanges()));
 
     QStringList styles = QStyleFactory::keys();
     for (int i = 0; i < styles.size(); ++i) {
@@ -46,6 +48,4 @@ PreferencesDialog::~PreferencesDialog()
 
 void PreferencesDialog::applyChanges() {
     QApplication::setStyle(QStyleFactory::create(ui->comboBox->currentText().toLower()));
-    QApplication::aboutQt();
-    // ui->buttonBox;
 }

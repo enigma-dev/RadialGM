@@ -35,7 +35,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
     browser = new QTextEdit();
     browser->setReadOnly(true);
 
-    layout->setContentsMargins(3, 3, 3, 3);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(browser);
     this->setLayout(layout);
 }

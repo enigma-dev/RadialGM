@@ -55,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(showAboutDialog()));
     preferencesAction = new QAction(QIcon(":/icons/actions/preferences.png"), "Preferences", this);
     connect(preferencesAction, SIGNAL(triggered()), this, SLOT(showPreferencesDialog()));
-    manualAction = new QAction(QIcon(":/icons/actions/manual.png"), "Manual", this);
+    manualAction = new QAction(QIcon(":/icons/actions/manual.png"), "Documentation", this);
     connect(manualAction, SIGNAL(triggered()), this, SLOT(showManual()));
 
     mainMenuBar = new QMenuBar(this);

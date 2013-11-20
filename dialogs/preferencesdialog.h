@@ -38,7 +38,7 @@ public:
     explicit PreferencesDialog(QWidget *parent = 0);
     ~PreferencesDialog();
     
-private slots:
+public slots:
     void applyChanges();
 
 private:
