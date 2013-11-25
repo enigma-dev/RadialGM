@@ -36,11 +36,12 @@ ScriptWidget::ScriptWidget(QWidget *parent) :
     sciEditor->setCaretLineVisible(true);
     sciEditor->setCaretLineBackgroundColor(QColor("#ffe4e4"));
 
-    QFont font = QFont("Courier 10 Pitch", 10);
+    QFont font = QFont("Courier", 8);
     font.setFixedPitch(true);
-    sciEditor->setFont(font);
+    //sciEditor->setFont(font);
     QsciLexerCPP lexer;
     lexer.setFont(font);
+    lexer.setFoldCompact(false);
     sciEditor->setLexer(&lexer);
     QFontMetrics fontmetrics = QFontMetrics(font);
     sciEditor->setMarginWidth(0, fontmetrics.width("__")+8);
@@ -56,6 +57,7 @@ ScriptWidget::ScriptWidget(QWidget *parent) :
     sciEditor->markerDefine(QImage(":/icons/actions/link_break.png"),
         BREAK_MARKER_NUM);
     sciEditor->setBraceMatching(QsciScintilla::SloppyBraceMatch);
+    sciEditor->setWhitespaceVisibility(QsciScintilla::WsInvisible);
 
     sciEditor->setFolding(QsciScintilla::BoxedTreeFoldStyle, 3);
     //this->setFoldMarginColors(QColor("#dddddd"), QColor("#dddddd"));
