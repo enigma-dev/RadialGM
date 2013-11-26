@@ -29,6 +29,8 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
+    QAction* clearRecentFilesAction = new QAction("Clear", this);
+    connect(clearRecentFilesAction, SIGNAL(triggered()), this, SLOT(clearRecentFiles()));
     QAction* exitAction = new QAction("&Exit", this);
     connect(exitAction, SIGNAL(triggered()), this, SLOT(closeApplication()));
     QAction* mdiAction = new QAction("&Multiple Document Interface", this);
@@ -96,6 +98,21 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(openAction, SIGNAL(triggered()), this, SLOT(showOpenDialog()));
     fileToolbar->addAction(openAction);
     fileMenu->addAction(openAction);
+
+    for (int i = 0; i < MaxRecentFiles; ++i) {
+        recentFileActs[i] = new QAction(this);
+        recentFileActs[i]->setVisible(false);
+        connect(recentFileActs[i], SIGNAL(triggered()),
+                this, SLOT(cut()));
+    }
+    recentFilesMenu = new QMenu("&Recent Files");
+    for (int i = 0; i < MaxRecentFiles; ++i)
+        recentFilesMenu->addAction(recentFileActs[i]);
+    recentFilesMenu->addSeparator();
+    recentFilesMenu->addAction(clearRecentFilesAction);
+    fileMenu->addMenu(recentFilesMenu);
+    this->updateRecentFileActions();
+
     saveAction = new QAction(QIcon(":/icons/actions/save.png"), "Save", this);
     fileToolbar->addAction(saveAction);
     fileMenu->addAction(saveAction);
@@ -292,6 +309,17 @@ void MainWindow::showOpenDialog() {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Project"), "", tr("All Files (*.*);;GMK Files (*.gmk)"));
     currentFile = new ProjectManager();
     currentFile->LoadGMK(fileName);
+
+    QSettings settings("LateralGMTeam", "LateralGM");
+    QStringList files = settings.value("recentFileList").toStringList();
+    files.removeAll(fileName);
+    files.prepend(fileName);
+    while (files.size() > MaxRecentFiles)
+        files.removeLast();
+
+    settings.setValue("recentFileList", files);
+
+    this->updateRecentFileActions();
 }
 
 void MainWindow::showSaveDialog() {
@@ -478,4 +506,39 @@ void MainWindow::writeSettings()
     QSettings settings("LateralGMTeam", "LateralGM");
     settings.setValue("mainWindow/geometry", saveGeometry());
     settings.setValue("mainWindowState", saveState());
+}
+
+void MainWindow::updateRecentFileActions()
+{
+    QSettings settings("LateralGMTeam", "LateralGM");
+    QStringList files = settings.value("recentFileList").toStringList();
+
+    int numRecentFiles = qMin(files.size(), (int)MaxRecentFiles);
+
+    if (numRecentFiles == 0) {
+        recentFilesMenu->setEnabled(false);
+    } else {
+        recentFilesMenu->setEnabled(true);
+    }
+
+    for (int i = 0; i < numRecentFiles; ++i) {
+        //QString text = tr("&%1 %2").arg(i + 1).arg(strippedName(files[i]));
+        recentFileActs[i]->setText(files[i]);
+        recentFileActs[i]->setData(files[i]);
+        recentFileActs[i]->setVisible(true);
+    }
+    for (int j = numRecentFiles; j < MaxRecentFiles; ++j)
+        recentFileActs[j]->setVisible(false);
+}
+
+void MainWindow::clearRecentFiles() {
+    QSettings settings("LateralGMTeam", "LateralGM");
+    settings.setValue("recentFileList", 0);
+
+    this->updateRecentFileActions();
+}
+
+QString MainWindow::strippedName(const QString &fullFileName)
+{
+    return QFileInfo(fullFileName).fileName();
 }

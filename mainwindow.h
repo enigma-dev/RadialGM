@@ -71,6 +71,40 @@ public:
     void outputLine(QString text);
     void outputMessage(QString origin, QString location, QString description);
 
+public slots:
+    void closeApplication();
+    void closeEvent(QCloseEvent *event);
+    void showLicenseDialog();
+    void showAboutDialog();
+    void showPreferencesDialog();
+    void showOpenDialog();
+    void showSaveDialog();
+    void showManual();
+
+    void addSprite();
+    void addBackground();
+    void addSound();
+    void addFont();
+    void addShader();
+    void addTimeline();
+    void addObject();
+    void addRoom();
+    void addPath();
+    void addScript();
+
+    void restoreLayout();
+    void cascadeWindows();
+    void tileWindows();
+    void closeAllWindows();
+    void closeWindow();
+
+    void toggleMdiTabs();
+    void toggleOutputMessages();
+    void toggleOutputLog();
+    void toggleHierarchy();
+
+    void clearRecentFiles();
+
 private:
 
     QToolBar* fileToolbar;
@@ -106,6 +140,7 @@ private:
     QProgressBar* mainProgressBar;
     QMenuBar* mainMenuBar;
     QMenu* fileMenu;
+    QMenu* recentFilesMenu;
     QMenu* editMenu;
     QMenu* resourceMenu;
     QMenu* windowMenu;
@@ -129,37 +164,15 @@ private:
     void readSettings();
     void writeSettings();
 
-public slots:
-    void closeApplication();
-    void closeEvent(QCloseEvent *event);
-    void showLicenseDialog();
-    void showAboutDialog();
-    void showPreferencesDialog();
-    void showOpenDialog();
-    void showSaveDialog();
-    void showManual();
+    void loadFile(const QString &fileName);
+    void saveFile(const QString &fileName);
+    void setCurrentFile(const QString &fileName);
+    QString strippedName(const QString &fullFileName);
+    void updateRecentFileActions();
 
-    void addSprite();
-    void addBackground();
-    void addSound();
-    void addFont();
-    void addShader();
-    void addTimeline();
-    void addObject();
-    void addRoom();
-    void addPath();
-    void addScript();
+    enum { MaxRecentFiles = 5 };
+    QAction *recentFileActs[MaxRecentFiles];
 
-    void restoreLayout();
-    void cascadeWindows();
-    void tileWindows();
-    void closeAllWindows();
-    void closeWindow();
-
-    void toggleMdiTabs();
-    void toggleOutputMessages();
-    void toggleOutputLog();
-    void toggleHierarchy();
 };
 
 #endif // MAINWINDOW_H
