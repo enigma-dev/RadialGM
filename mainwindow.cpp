@@ -247,10 +247,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     mainStatusBar = new QStatusBar(this);
     this->setStatusBar(mainStatusBar);
-    mainStatusBar->addWidget(new QLabel("Ready"), 0);
-   // mainProgressBar = new QProgressBar();
-   // mainProgressBar->setValue(75);
-   // mainStatusBar->addWidget(mainProgressBar);
+    mainStatusBar->showMessage("Ready");
+    //mainProgressBar = new QProgressBar();
+    //mainProgressBar->setValue(75);
+    //mainStatusBar->addWidget(mainProgressBar);
 
     this->setWindowIcon(QIcon(":/lgm-logo.png"));
     this->setWindowTitle("LateralGM - <new game>");
@@ -483,6 +483,10 @@ void MainWindow::addResourceGroup(QString name)
     QTreeWidgetItem* treeItem = new QTreeWidgetItem();
     treeItem->setText(0, name);
     treeItem->setIcon(0, QIcon(":/resources/icons/resources/group.png"));
+
+    QFont fnt = treeItem->font(0);
+    fnt.setBold(true);
+    treeItem->setFont(0, fnt);
     hierarchyTree->addTopLevelItem(treeItem);
 }
 

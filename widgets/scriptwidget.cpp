@@ -91,7 +91,13 @@ ScriptWidget::ScriptWidget(QWidget *parent) :
     editToolbar->addWidget(nameEdit);
     layout->addWidget(editToolbar);
     layout->addWidget(sciEditor); // layout is uninitialized and probably garbage
+
+    QStatusBar* statusBar = new QStatusBar();
+    statusBar->showMessage("INS | UTF-8 | 1:1 | No Errors");
+    layout->addWidget(statusBar);
+
     layout->setContentsMargins(0, 0, 0, 0);
+
     this->setLayout(layout);
 
    // sciEditor->setFixedHeight(300);

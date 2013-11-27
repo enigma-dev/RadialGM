@@ -30,11 +30,12 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QFormLayout>
-#include <QPushButton>
 #include <QLabel>
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QGraphicsView>
+#include <QStatusBar>
+#include <QToolBar>
 
 class BackgroundWidget : public QWidget
 {
@@ -45,10 +46,6 @@ public:
     ~BackgroundWidget();
 
 private:
-
-    QPushButton* loadButton;
-    QPushButton* editButton;
-    QPushButton* saveButton;
 
     QLabel* nameLabel;
     QLineEdit* nameEdit;

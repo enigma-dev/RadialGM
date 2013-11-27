@@ -30,7 +30,7 @@ FontWidget::FontWidget(QWidget *parent) :
     this->setWindowTitle("Font");
 
     QVBoxLayout* widgetLayout = new QVBoxLayout();
-    widgetLayout->setContentsMargins(2, 2, 2, 2);
+    widgetLayout->setContentsMargins(3, 3, 3, 3);
 
     QFormLayout* editLayout = new QFormLayout();
     nameLabel = new QLabel("Name: ");

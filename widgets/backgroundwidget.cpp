@@ -32,19 +32,19 @@ BackgroundWidget::BackgroundWidget(QWidget *parent) :
 
     QVBoxLayout* propertiesLayout = new QVBoxLayout();
 
-    QPushButton* loadButton = new QPushButton("Load", this);
-    loadButton->setIcon(QIcon(":/icons/actions/open.png"));
-    QPushButton* editButton = new QPushButton("Edit", this);
-    QPushButton* saveButton = new QPushButton("Save", this);
-    saveButton->setIcon(QIcon(":/icons/actions/accept.png"));
-
     QLabel* nameLabel = new QLabel("Name: ");
     QLineEdit* nameEdit = new QLineEdit("bg_0", this);
-    QHBoxLayout* nameLayout = new QHBoxLayout();
-    nameLayout->addWidget(nameLabel);
-    nameLayout->addWidget(nameEdit);
 
-    QLabel* sizeLabel = new QLabel("Width: 0 Height: 0");
+    QToolBar* toolBar = new QToolBar();
+    toolBar->addAction(QIcon(":/icons/actions/accept.png"), "Save");
+    toolBar->addAction(QIcon(":/icons/actions/open.png"), "Load");
+    toolBar->addAction(QIcon(":/icons/actions/open.png"), "Edit");
+
+    toolBar->addSeparator();
+    toolBar->addWidget(nameLabel);
+    toolBar->addWidget(nameEdit);
+
+    toolBar->setStyleSheet(" QToolBar { height: 18px; width: 18px; icon-size: 18px; } ");
 
     QCheckBox* smoothCheckBox = new QCheckBox("Smooth", this);
     QCheckBox* transparentCheckBox = new QCheckBox("Transparent", this);
@@ -53,16 +53,10 @@ BackgroundWidget::BackgroundWidget(QWidget *parent) :
 
     QGraphicsView* backgroundPreviewer = new QGraphicsView(this);
 
-
-    propertiesLayout->addLayout(nameLayout);
-    propertiesLayout->addWidget(loadButton);
-    propertiesLayout->addWidget(editButton);
-    propertiesLayout->addWidget(sizeLabel);
     propertiesLayout->addWidget(smoothCheckBox);
     propertiesLayout->addWidget(transparentCheckBox);
     propertiesLayout->addWidget(preloadCheckBox);
     propertiesLayout->addWidget(tilesetCheckBox);
-    propertiesLayout->addWidget(saveButton);
     QSplitter* horizontalSplitter = new QSplitter(this);
     QWidget* propertiesWidget = new QWidget(this, Qt::WindowTitleHint);
     QFormLayout* propertiesFormLayout = new QFormLayout();
@@ -73,7 +67,11 @@ BackgroundWidget::BackgroundWidget(QWidget *parent) :
     horizontalSplitter->addWidget(backgroundPreviewer);
 
     QVBoxLayout* verticalLayout = new QVBoxLayout();
+    verticalLayout->addWidget(toolBar);
     verticalLayout->addWidget(horizontalSplitter);
+    QStatusBar* statusBar = new QStatusBar();
+    statusBar->showMessage("Width: 0 | Height: 0 | Memory: 0 B | Zoom: 100%");
+    verticalLayout->addWidget(statusBar);
     verticalLayout->setContentsMargins(2, 2, 2, 2);
     this->setLayout(verticalLayout);
 }

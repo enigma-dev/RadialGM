@@ -35,10 +35,7 @@
 #include <QPushButton>
 #include <QGraphicsView>
 #include <QListWidget>
-
-namespace Ui {
-class PathWidget;
-}
+#include <QSpinBox>
 
 class PathWidget : public QWidget
 {
@@ -50,8 +47,6 @@ public:
     
     QToolBar* editToolbar;
 
-private:
-    Ui::PathWidget *ui;
 };
 
 #endif // PATHWIDGET_H

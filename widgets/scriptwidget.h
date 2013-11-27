@@ -30,6 +30,7 @@
 #include <QToolBar>
 #include <QLineEdit>
 #include <QLabel>
+#include <QStatusBar>
 #include <Qsci/qsciscintilla.h>
 #include <Qsci/qscilexercpp.h>
 

@@ -22,12 +22,13 @@
 **/
 
 #include "pathwidget.h"
-#include "ui_pathwidget.h"
 
 PathWidget::PathWidget(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::PathWidget)
+    QWidget(parent)
 {
+    this->setWindowTitle("Path");
+    this->setWindowIcon(QIcon(":/resources/icons/resources/path.png"));
+
     QVBoxLayout* layout = new QVBoxLayout();
     this->setLayout(layout);
     editToolbar = new QToolBar(this);
@@ -44,12 +45,43 @@ PathWidget::PathWidget(QWidget *parent) :
     editToolbar->addWidget(new QCheckBox("Grid", this));
 
     layout->addWidget(editToolbar);
-    ui->setupUi(this);
-    layout->addWidget(ui->splitter);
+    QSplitter* splitter = new QSplitter();
+
+    QVBoxLayout* propLayout = new QVBoxLayout();
+    propLayout->setContentsMargins(0,0,0,0);
+
+    QHBoxLayout* cbLayout = new QHBoxLayout();
+    QCheckBox* smoothCB = new QCheckBox("Smooth");
+    cbLayout->addWidget(smoothCB);
+    QCheckBox* closedCB = new QCheckBox("Closed");
+    cbLayout->addWidget(closedCB);
+    propLayout->addLayout(cbLayout);
+
+    QToolBar* pointToolBar = new QToolBar();
+    propLayout->addWidget(pointToolBar);
+
+    QListWidget* pointList = new QListWidget();
+    propLayout->addWidget(pointList);
+
+    QGridLayout* gridLayout = new QGridLayout();
+    gridLayout->addWidget(new QLabel("X:"), 0, 0);
+    gridLayout->addWidget(new QSpinBox(), 0, 1);
+    gridLayout->addWidget(new QLabel("Y:"), 1, 0);
+    gridLayout->addWidget(new QSpinBox(), 1, 1);
+    gridLayout->addWidget(new QLabel("SP:"), 2, 0);
+    gridLayout->addWidget(new QSpinBox(), 2, 1);
+    propLayout->addLayout(gridLayout);
+
+    QWidget* propPanel = new QWidget();
+    propPanel->setLayout(propLayout);
+    splitter->addWidget(propPanel);
+    splitter->addWidget(new QGraphicsView());
+
+    layout->addWidget(splitter);
     layout->setContentsMargins(2, 2, 2, 2);
 }
 
 PathWidget::~PathWidget()
 {
-    delete ui;
+
 }

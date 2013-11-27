@@ -32,6 +32,7 @@
 #include <QLabel>
 #include <QTableWidget>
 #include <QComboBox>
+#include <QStatusBar>
 #include <Qsci/qsciscintilla.h>
 #include <Qsci/qscilexercpp.h>
 

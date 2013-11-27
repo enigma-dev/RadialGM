@@ -36,10 +36,9 @@
 #include <QGraphicsView>
 #include <QTableWidget>
 #include <QRadioButton>
-
-namespace Ui {
-class SpriteWidget;
-}
+#include <QCheckBox>
+#include <QGroupBox>
+#include <QSpinBox>
 
 class SpriteWidget : public QWidget
 {
@@ -48,9 +47,10 @@ class SpriteWidget : public QWidget
 public:
     explicit SpriteWidget(QWidget *parent = 0);
     ~SpriteWidget();
-    
+
 private:
-    Ui::SpriteWidget *ui;
+    QWidget* makePropertyPanel();
+    QWidget* makeEditorPanel();
 };
 
 #endif // SPRITEWIDGET_H

@@ -69,6 +69,11 @@ ShaderWidget::ShaderWidget(QWidget *parent) :
     mainTabWidget->addTab(vsciEditor, "Vertex");
     mainTabWidget->addTab(fsciEditor, "Fragment");
     layout->addWidget(mainTabWidget); // layout is uninitialized and probably garbage
+
+    QStatusBar* statusBar = new QStatusBar();
+    statusBar->showMessage("INS | UTF-8 | 1:1");
+    layout->addWidget(statusBar);
+
     layout->setContentsMargins(0, 0, 0, 0);
     this->setLayout(layout);
 
