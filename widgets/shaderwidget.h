@@ -33,6 +33,10 @@
 #include <QTableWidget>
 #include <QComboBox>
 #include <QStatusBar>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QTextStream>
+#include <QAction>
 #include <Qsci/qsciscintilla.h>
 #include <Qsci/qscilexercpp.h>
 
@@ -46,6 +50,7 @@ public:
 
 private:
 
+    QTabWidget* mainTabWidget;
     QToolBar* editToolbar;
     QsciScintilla* vsciEditor; // Scintilla editor for the vertex code
     QsciScintilla* fsciEditor; // Scintilla editor for the fragment code
@@ -57,9 +62,14 @@ private:
     QsciScintilla* createEditor();
 
 public slots:
-    void on_vertex_margin_clicked(int nmargin, int nline, Qt::KeyboardModifiers modifiers);
-    void on_fragment_margin_clicked(int nmargin, int nline, Qt::KeyboardModifiers modifiers);
-
+    void marginClicked(int nmargin, int nline, Qt::KeyboardModifiers modifiers);
+    void openFile();
+    void saveFile();
+    void undo();
+    void redo();
+    void cut();
+    void copy();
+    void paste();
 };
 
 #endif // SCRIPTFORM_H

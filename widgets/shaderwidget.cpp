@@ -37,16 +37,31 @@ ShaderWidget::ShaderWidget(QWidget *parent) :
     editToolbar->setFloatable(true);
     editToolbar->addAction(QIcon(":/icons/actions/accept.png"), "Save");
     editToolbar->addSeparator();
-    editToolbar->addAction(QIcon(":/icons/actions/save.png"), "Save to file");
-    editToolbar->addAction(QIcon(":/icons/actions/open.png"), "Load from file");
+    QAction* saveAction = new QAction(QIcon(":/icons/actions/save.png"), "Save to file", NULL);
+    connect(saveAction, SIGNAL(triggered()), this, SLOT(saveFile()));
+    editToolbar->addAction(saveAction);
+    QAction* openAction = new QAction(QIcon(":/icons/actions/open.png"), "Open from file", NULL);
+    connect(openAction, SIGNAL(triggered()), this, SLOT(openFile()));
+    editToolbar->addAction(openAction);
     editToolbar->addAction(QIcon(":/icons/actions/print.png"), "Print");
     editToolbar->addSeparator();
-    editToolbar->addAction(QIcon(":/icons/actions/undo.png"), "Undo");
-    editToolbar->addAction(QIcon(":/icons/actions/redo.png"), "Redo");
+    QAction* undoAction = new QAction(QIcon(":/icons/actions/undo.png"), "Undo", NULL);
+    connect(undoAction, SIGNAL(triggered()), this, SLOT(undo()));
+    editToolbar->addAction(undoAction);
+    QAction* redoAction = new QAction(QIcon(":/icons/actions/redo.png"), "Redo", NULL);
+    connect(redoAction, SIGNAL(triggered()), this, SLOT(redo()));
+    editToolbar->addAction(redoAction);
     editToolbar->addSeparator();
-    editToolbar->addAction(QIcon(":/icons/actions/cut.png"), "Cut");
-    editToolbar->addAction(QIcon(":/icons/actions/copy.png"), "Copy");
-    editToolbar->addAction(QIcon(":/icons/actions/paste.png"), "Paste");
+
+    QAction* cutAction = new QAction(QIcon(":/icons/actions/cut.png"), "Cut", NULL);
+    connect(cutAction, SIGNAL(triggered()), this, SLOT(cut()));
+    editToolbar->addAction(cutAction);
+    QAction* copyAction = new QAction(QIcon(":/icons/actions/copy.png"), "Copy", NULL);
+    connect(copyAction, SIGNAL(triggered()), this, SLOT(copy()));
+    editToolbar->addAction(copyAction);
+    QAction* pasteAction = new QAction(QIcon(":/icons/actions/paste.png"), "Paste", NULL);
+    connect(pasteAction, SIGNAL(triggered()), this, SLOT(paste()));
+    editToolbar->addAction(pasteAction);
     editToolbar->addSeparator();
     editToolbar->addAction(QIcon(":/icons/actions/find.png"), "Find and Replace");
     editToolbar->addAction(QIcon(":/icons/actions/line-goto.png"), "Go to line");
@@ -65,7 +80,7 @@ ShaderWidget::ShaderWidget(QWidget *parent) :
     editToolbar->addWidget(typeCombo);
     editToolbar->setStyleSheet(" QToolBar { height: 18px; width: 18px; icon-size: 18px; } ");
     layout->addWidget(editToolbar);
-    QTabWidget* mainTabWidget = new QTabWidget();
+    mainTabWidget = new QTabWidget();
     mainTabWidget->addTab(vsciEditor, "Vertex");
     mainTabWidget->addTab(fsciEditor, "Fragment");
     layout->addWidget(mainTabWidget); // layout is uninitialized and probably garbage
@@ -110,7 +125,7 @@ QsciScintilla* ShaderWidget::createEditor() {
     //this->setMarginWidth();
     connect(editor,
         SIGNAL(marginClicked(int, int, Qt::KeyboardModifiers)), this,
-                       SLOT(on_vertex_margin_clicked(int, int, Qt::KeyboardModifiers)));
+                       SLOT(marginClicked(int, int, Qt::KeyboardModifiers)));
     editor->markerDefine(QImage(":/icons/actions/link_break.png"),
         BREAK_MARKER_NUM);
     editor->setBraceMatching(QsciScintilla::SloppyBraceMatch);
@@ -124,21 +139,82 @@ QsciScintilla* ShaderWidget::createEditor() {
     return editor;
 }
 
-void ShaderWidget::on_vertex_margin_clicked(int nmargin, int nline, Qt::KeyboardModifiers modifiers) {
+void ShaderWidget::marginClicked(int nmargin, int nline, Qt::KeyboardModifiers modifiers) {
+    QsciScintilla* widget = reinterpret_cast<QsciScintilla *>( mainTabWidget->currentWidget() );
+    if (!widget) { return; }
+
     // Toggle marker for the line the margin was clicked on
-    if (vsciEditor->markersAtLine(nline) != 0) {
-        vsciEditor->markerDelete(nline, BREAK_MARKER_NUM);
+    if (widget->markersAtLine(nline) != 0) {
+        widget->markerDelete(nline, BREAK_MARKER_NUM);
     } else {
-        vsciEditor->markerAdd(nline, BREAK_MARKER_NUM);
+        widget->markerAdd(nline, BREAK_MARKER_NUM);
     }
 }
 
-void ShaderWidget::on_fragment_margin_clicked(int nmargin, int nline, Qt::KeyboardModifiers modifiers) {
-    // Toggle marker for the line the margin was clicked on
-    if (fsciEditor->markersAtLine(nline) != 0) {
-        fsciEditor->markerDelete(nline, BREAK_MARKER_NUM);
-    } else {
-        fsciEditor->markerAdd(nline, BREAK_MARKER_NUM);
+void ShaderWidget::openFile() {
+    QsciScintilla* widget = reinterpret_cast<QsciScintilla *>( mainTabWidget->currentWidget() );
+    if (!widget) { return; }
+
+    QString fname = QFileDialog::getOpenFileName(this);
+    if (fname.isEmpty()) { return; }
+    QFile file(fname);
+
+    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+        QMessageBox::critical(this, tr("Error"), tr("Could not open file for reading"));
+        return;
     }
+
+    QTextStream readStream(&file);
+    widget->setText(readStream.readAll());
+
+    file.close();
 }
 
+void ShaderWidget::saveFile() {
+    QsciScintilla* widget = reinterpret_cast<QsciScintilla *>( mainTabWidget->currentWidget() );
+    if (!widget) { return; }
+
+    QString fname = QFileDialog::getSaveFileName(this);
+    if (fname.isEmpty()) { return; }
+    QFile file(fname);
+
+    if (!file.open(QFile::WriteOnly | QFile::Text)) {
+        QMessageBox::critical(this, tr("Error"), tr("Could not open file for writing"));
+        return;
+    }
+
+    QTextStream writeStream(&file);
+    writeStream << widget->text();
+
+    file.close();
+}
+
+void ShaderWidget::undo() {
+    QsciScintilla* widget = reinterpret_cast<QsciScintilla *>( mainTabWidget->currentWidget() );
+    if (!widget) { return; }
+    widget->undo();
+}
+
+void ShaderWidget::redo() {
+    QsciScintilla* widget = reinterpret_cast<QsciScintilla *>( mainTabWidget->currentWidget() );
+    if (!widget) { return; }
+    widget->redo();
+}
+
+void ShaderWidget::cut() {
+    QsciScintilla* widget = reinterpret_cast<QsciScintilla *>( mainTabWidget->currentWidget() );
+    if (!widget) { return; }
+    widget->cut();
+}
+
+void ShaderWidget::copy() {
+    QsciScintilla* widget = reinterpret_cast<QsciScintilla *>( mainTabWidget->currentWidget() );
+    if (!widget) { return; }
+    widget->copy();
+}
+
+void ShaderWidget::paste() {
+    QsciScintilla* widget = reinterpret_cast<QsciScintilla *>( mainTabWidget->currentWidget() );
+    if (!widget) { return; }
+    widget->paste();
+}

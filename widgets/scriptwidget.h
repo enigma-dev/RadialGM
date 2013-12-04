@@ -31,6 +31,10 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QStatusBar>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QTextStream>
+#include <QAction>
 #include <Qsci/qsciscintilla.h>
 #include <Qsci/qscilexercpp.h>
 
@@ -53,7 +57,8 @@ private:
 
 public slots:
     void on_margin_clicked(int nmargin, int nline, Qt::KeyboardModifiers modifiers);
-
+    void openFile();
+    void saveFile();
 };
 
 #endif // SCRIPTFORM_H

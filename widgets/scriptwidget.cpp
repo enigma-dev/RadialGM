@@ -70,17 +70,35 @@ ScriptWidget::ScriptWidget(QWidget *parent) :
     editToolbar->setFloatable(true);
     editToolbar->addAction(QIcon(":/icons/actions/accept.png"), "Save");
     editToolbar->addSeparator();
-    editToolbar->addAction(QIcon(":/icons/actions/save.png"), "Save to file");
-    editToolbar->addAction(QIcon(":/icons/actions/open.png"), "Load from file");
+    QAction* saveAction = new QAction(QIcon(":/icons/actions/save.png"), "Save to file", NULL);
+    connect(saveAction, SIGNAL(triggered()), this, SLOT(saveFile()));
+    editToolbar->addAction(saveAction);
+    QAction* openAction = new QAction(QIcon(":/icons/actions/open.png"), "Open from file", NULL);
+    connect(openAction, SIGNAL(triggered()), this, SLOT(openFile()));
+    editToolbar->addAction(openAction);
+    //editToolbar->addAction(QIcon(":/icons/actions/open.png"), "Load from file");
     editToolbar->addAction(QIcon(":/icons/actions/print.png"), "Print");
     editToolbar->addSeparator();
-    editToolbar->addAction(QIcon(":/icons/actions/undo.png"), "Undo");
-    editToolbar->addAction(QIcon(":/icons/actions/redo.png"), "Redo");
+
+    QAction* undoAction = new QAction(QIcon(":/icons/actions/undo.png"), "Undo", NULL);
+    connect(undoAction, SIGNAL(triggered()), sciEditor, SLOT(undo()));
+    editToolbar->addAction(undoAction);
+    QAction* redoAction = new QAction(QIcon(":/icons/actions/redo.png"), "Redo", NULL);
+    connect(redoAction, SIGNAL(triggered()), sciEditor, SLOT(redo()));
+    editToolbar->addAction(redoAction);
     editToolbar->addSeparator();
-    editToolbar->addAction(QIcon(":/icons/actions/cut.png"), "Cut");
-    editToolbar->addAction(QIcon(":/icons/actions/copy.png"), "Copy");
-    editToolbar->addAction(QIcon(":/icons/actions/paste.png"), "Paste");
+
+    QAction* cutAction = new QAction(QIcon(":/icons/actions/cut.png"), "Cut", NULL);
+    connect(cutAction, SIGNAL(triggered()), sciEditor, SLOT(cut()));
+    editToolbar->addAction(cutAction);
+    QAction* copyAction = new QAction(QIcon(":/icons/actions/copy.png"), "Copy", NULL);
+    connect(copyAction, SIGNAL(triggered()), sciEditor, SLOT(copy()));
+    editToolbar->addAction(copyAction);
+    QAction* pasteAction = new QAction(QIcon(":/icons/actions/paste.png"), "Paste", NULL);
+    connect(pasteAction, SIGNAL(triggered()), sciEditor, SLOT(paste()));
+    editToolbar->addAction(pasteAction);
     editToolbar->addSeparator();
+
     editToolbar->addAction(QIcon(":/icons/actions/find.png"), "Find and Replace");
     editToolbar->addAction(QIcon(":/icons/actions/line-goto.png"), "Go to line");
     editToolbar->addSeparator();
@@ -115,4 +133,36 @@ void ScriptWidget::on_margin_clicked(int nmargin, int nline, Qt::KeyboardModifie
     } else {
         sciEditor->markerAdd(nline, BREAK_MARKER_NUM);
     }
+}
+
+void ScriptWidget::openFile() {
+    QString fname = QFileDialog::getOpenFileName(this);
+    if (fname.isEmpty()) { return; }
+    QFile file(fname);
+
+    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+        QMessageBox::critical(this, tr("Error"), tr("Could not open file for reading"));
+        return;
+    }
+
+    QTextStream readStream(&file);
+    sciEditor->setText(readStream.readAll());
+
+    file.close();
+}
+
+void ScriptWidget::saveFile() {
+    QString fname = QFileDialog::getSaveFileName(this);
+    if (fname.isEmpty()) { return; }
+    QFile file(fname);
+
+    if (!file.open(QFile::WriteOnly | QFile::Text)) {
+        QMessageBox::critical(this, tr("Error"), tr("Could not open file for writing"));
+        return;
+    }
+
+    QTextStream writeStream(&file);
+    writeStream << sciEditor->text();
+
+    file.close();
 }
