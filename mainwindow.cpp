@@ -182,6 +182,7 @@ MainWindow::MainWindow(QWidget *parent) :
     gameSettingsAction = new QAction(QIcon(":/resources/icons/resources/gm.png"), "Global Game Settings", this);
     settingsToolbar->addAction(gameSettingsAction);
     gameInformationAction = new QAction(QIcon(":/resources/icons/resources/info.png"), "Game Information", this);
+    connect(gameInformationAction, SIGNAL(triggered()), this, SLOT(showGameInformation()));
     settingsToolbar->addAction(gameInformationAction);
     extensionsAction = new QAction(QIcon(":/resources/icons/resources/extension.png"), "Extensions", this);
     settingsToolbar->addAction(extensionsAction);
@@ -264,6 +265,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     aboutDialog = NULL;
     prefsDialog = NULL;
+    infoEditor = NULL;
 
     this->setObjectName("mainWindow");
     defaultState = this->saveState();
@@ -304,6 +306,14 @@ void MainWindow::showPreferencesDialog() {
     }
     prefsDialog->show();
 }
+
+void MainWindow::showGameInformation() {
+    if (infoEditor == NULL) {
+        infoEditor = new GameInfoEditor(this);
+    }
+    infoEditor->show();
+}
+
 
 void MainWindow::showOpenDialog() {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Project"), "", tr("All Files (*.*);;GMK Files (*.gmk)"));

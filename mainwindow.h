@@ -50,6 +50,7 @@
 #include "widgets/soundwidget.h"
 #include "widgets/roomwidget.h"
 #include "widgets/spritewidget.h"
+#include "widgets/gameinfoeditor.h"
 #include "dialogs/aboutdialog.h"
 #include "dialogs/preferencesdialog.h"
 #include "serializer/projectmanager.h"
@@ -91,6 +92,8 @@ public slots:
     void addRoom();
     void addPath();
     void addScript();
+
+    void showGameInformation();
 
     void restoreLayout();
     void cascadeWindows();
@@ -135,6 +138,8 @@ private:
 
     AboutDialog* aboutDialog;
     PreferencesDialog* prefsDialog;
+
+    GameInfoEditor* infoEditor;
 
     QStatusBar* mainStatusBar;
     QProgressBar* mainProgressBar;

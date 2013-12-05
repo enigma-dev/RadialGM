@@ -64,7 +64,8 @@ SOURCES += mainwindow.cpp \
     resource/script.cpp \
     serializer/projectmanager.cpp \
     dialogs/preferencesdialog.cpp \
-    serializer/resourcenode.cpp
+    serializer/resourcenode.cpp \
+    widgets/gameinfoeditor.cpp
 
 HEADERS  += mainwindow.h \
     widgets/fontwidget.h \
@@ -115,7 +116,8 @@ HEADERS  += mainwindow.h \
     gmk/src/include/gmkcommon.h \
     gmk/src/include/gmkbackground.h \
     gmk/src/include/gmkaction.h \
-    gmk/src/include/gmk.h
+    gmk/src/include/gmk.h \
+    widgets/gameinfoeditor.h
 
 RESOURCES += \
     resources.qrc
