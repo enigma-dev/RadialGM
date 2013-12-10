@@ -36,6 +36,13 @@
 #include <QGraphicsView>
 #include <QStatusBar>
 #include <QToolBar>
+#include <QAction>
+#include <QScrollArea>
+#include <QScrollBar>
+#include <QFileDialog>
+#include <QPrinter>
+#include <QPrintDialog>
+#include <QMessageBox>
 
 class BackgroundWidget : public QWidget
 {
@@ -46,6 +53,12 @@ public:
     ~BackgroundWidget();
 
 private:
+#ifndef QT_NO_PRINTER
+    QPrinter printer;
+#endif
+
+    QAction* zoomInAction;
+    QAction* zoomOutAction;
 
     QLabel* nameLabel;
     QLineEdit* nameEdit;
@@ -57,7 +70,19 @@ private:
     QCheckBox* tilesetCheckBox;
 
     QSplitter* horizontalSplitter;
-    QGraphicsView* backgroundPreviewer;
+    QLabel* imageLabel;
+    QScrollArea *scrollArea;
+    double scaleFactor;
+
+    void scaleImage(double factor);
+    void adjustScrollBar(QScrollBar *scrollBar, double factor);
+
+private slots:
+    void zoomIn();
+    void zoomOut();
+    void openFile();
+    void saveFile();
+    void print();
 
 };
 

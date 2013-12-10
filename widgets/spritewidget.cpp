@@ -51,6 +51,7 @@ SpriteWidget::SpriteWidget(QWidget *parent) :
 
     QStatusBar* statusBar = new QStatusBar();
     statusBar->showMessage("Width: 0 | Height: 0 | Images: 0 | Memory: 0 B | Zoom: 100%");
+    statusBar->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
     mainLayout->addWidget(statusBar);
     this->setLayout(mainLayout);
 }
@@ -76,6 +77,7 @@ QWidget* SpriteWidget::makePropertyPanel() {
     layout->addLayout(cbLayout);
 
     QGroupBox* centerBox = new QGroupBox("Origin");
+    centerBox->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
     QVBoxLayout* centerVLayout = new QVBoxLayout();
     QHBoxLayout* centerHLayout = new QHBoxLayout();
     centerHLayout->addWidget(new QLabel("X:"));
