@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
+qtHaveModule(printsupport): QT += printsupport
 
 INCLUDEPATH += gmk/src/include/ gmk/lib/zlib
 

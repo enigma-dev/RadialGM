@@ -32,6 +32,11 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <QMessageBox>
+#ifndef QT_NO_PRINTER
+#include <QPrintDialog>
+#include <QPrinter>
+#include <QPrintPreviewDialog>
+#endif
 
 class GameInfoEditor : public QMainWindow
 {
@@ -42,11 +47,21 @@ public:
     ~GameInfoEditor();
     
 public slots:
-    void openFile();
-    void saveFile();
+    void fileOpen();
+    void fileSave();
+    void filePrint();
+    void filePrintPreview();
+
+    void textBold();
+    void textItalic();
+    void textUnderline();
 
 private:
     QTextEdit* textEditor;
+    void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
+
+private slots:
+    void printPreview(QPrinter *printer);
 };
 
 #endif // GAMEINFOEDITOR_H

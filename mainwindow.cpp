@@ -311,6 +311,8 @@ void MainWindow::showGameInformation() {
     if (infoEditor == NULL) {
         infoEditor = new GameInfoEditor(this);
     }
+    // QMainWindow can be added as a subwindow
+    //this->mainMdiArea->addSubWindow(infoEditor,Qt::SubWindow);
     infoEditor->show();
 }
 
