@@ -194,16 +194,25 @@ MainWindow::MainWindow(QWidget *parent) :
     hierarchyDock->setObjectName("hierarchyDock");
     hierarchyTree = new QTreeWidget(this);
     hierarchyTree->header()->setVisible(false);
-    addResourceGroup("Sprites");
-    addResourceGroup("Sounds");
-    addResourceGroup("Backgrounds");
-    addResourceGroup("Paths");
-    addResourceGroup("Scripts");
-    addResourceGroup("Shaders");
-    addResourceGroup("Fonts");
-    addResourceGroup("Timelines");
-    addResourceGroup("Objects");
-    addResourceGroup("Rooms");
+    spriteGroup = addResourceGroup("Sprites");
+    soundGroup = addResourceGroup("Sounds");
+    backgroundGroup = addResourceGroup("Backgrounds");
+    pathGroup = addResourceGroup("Paths");
+    scriptGroup = addResourceGroup("Scripts");
+    shaderGroup = addResourceGroup("Shaders");
+    fontGroup = addResourceGroup("Fonts");
+    timelineGroup = addResourceGroup("Timelines");
+    objectGroup = addResourceGroup("Objects");
+    roomGroup = addResourceGroup("Rooms");
+
+    //Example Populations, can reference folders via pointers or resourceItemMap
+    addResourceItem(objectGroup, "Object Ex1", QIcon(":/resources/icons/resources/info.png"));
+    QTreeWidgetItem* folder1 = addResourceFolder(objectGroup, "Folder 1");
+    addResourceItem(resourceItemMap[objectGroup]->at(0), "Object Ex2", QIcon(":/resources/icons/resources/info.png"));
+    QTreeWidgetItem* folder2 = addResourceFolder(folder1, "Folder 2");
+    addResourceItem(resourceItemMap[folder1]->at(0), "Object Ex3", QIcon(":/resources/icons/resources/info.png"));
+    addResourceItem(folder2, "Object Ex4", QIcon(":/resources/icons/resources/info.png"));
+
     addResource("Game Information", QIcon(":/resources/icons/resources/info.png"));
     addResource("Global Game Settings", QIcon(":/resources/icons/resources/gm.png"));
     addResource("Extensions", QIcon(":/resources/icons/resources/extension.png"));
@@ -490,7 +499,7 @@ void MainWindow::outputMessage(QString origin, QString location, QString descrip
     messagesTable->setItem(ind, 3, new QTableWidgetItem(description));
 }
 
-void MainWindow::addResourceGroup(QString name)
+QTreeWidgetItem* MainWindow::addResourceGroup(QString name)
 {
     QTreeWidgetItem* treeItem = new QTreeWidgetItem();
     treeItem->setText(0, name);
@@ -500,6 +509,8 @@ void MainWindow::addResourceGroup(QString name)
     fnt.setBold(true);
     treeItem->setFont(0, fnt);
     hierarchyTree->addTopLevelItem(treeItem);
+    resourceItemMap[treeItem] = new QList<QTreeWidgetItem*>;
+    return treeItem;
 }
 
 void MainWindow::addResource(QString name, QIcon icon)
@@ -508,6 +519,26 @@ void MainWindow::addResource(QString name, QIcon icon)
     treeItem->setText(0, name);
     treeItem->setIcon(0, icon);
     hierarchyTree->addTopLevelItem(treeItem);
+}
+
+QTreeWidgetItem* MainWindow::addResourceFolder(QTreeWidgetItem *node, QString name)
+{
+    QTreeWidgetItem* treeItem = new QTreeWidgetItem(node);
+    treeItem->setText(0, name);
+    treeItem->setIcon(0, QIcon(":/resources/icons/resources/group.png"));
+
+    QFont fnt = treeItem->font(0);
+    treeItem->setFont(0, fnt);
+    resourceItemMap[node]->append(treeItem);
+    resourceItemMap[treeItem] = new QList<QTreeWidgetItem*>;
+    return treeItem;
+}
+
+void MainWindow::addResourceItem(QTreeWidgetItem *node, QString name, QIcon icon)
+{
+    QTreeWidgetItem* treeItem = new QTreeWidgetItem(node);
+    treeItem->setText(0, name);
+    treeItem->setIcon(0, icon);
 }
 
 void MainWindow::readSettings()
