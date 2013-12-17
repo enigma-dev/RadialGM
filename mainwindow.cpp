@@ -337,7 +337,6 @@ void MainWindow::showGameInformation() {
 void MainWindow::showOpenDialog() {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Project"), "", tr("All Files (*.*);;GMK Files (*.gmk)"));
     currentFile = new ProjectManager();
-    currentFile->LoadGMK(fileName);
 
     QSettings settings("LateralGMTeam", "LateralGM");
     QStringList files = settings.value("recentFileList").toStringList();
