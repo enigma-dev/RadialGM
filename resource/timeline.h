@@ -24,7 +24,9 @@
 #ifndef TIMELINE_H
 #define TIMELINE_H
 
-class Timeline
+#include "resource.h"
+
+class Timeline : public Resource
 {
 public:
     Timeline();

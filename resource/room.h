@@ -24,7 +24,9 @@
 #ifndef ROOM_H
 #define ROOM_H
 
-class Room
+#include "resource.h"
+
+class Room : public Resource
 {
 public:
     Room();

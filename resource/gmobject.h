@@ -24,7 +24,9 @@
 #ifndef GMOBJECT_H
 #define GMOBJECT_H
 
-class GmObject
+#include "resource.h"
+
+class GmObject : public Resource
 {
 public:
     GmObject();

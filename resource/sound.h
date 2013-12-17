@@ -24,7 +24,9 @@
 #ifndef SOUND_H
 #define SOUND_H
 
-class Sound
+#include "resource.h"
+
+class Sound : public Resource
 {
 public:
     Sound();

@@ -24,7 +24,9 @@
 #ifndef SPRITE_H
 #define SPRITE_H
 
-class Sprite
+#include "resource.h"
+
+class Sprite : public Resource
 {
 public:
     Sprite();

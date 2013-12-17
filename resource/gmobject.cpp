@@ -23,6 +23,6 @@
 
 #include "gmobject.h"
 
-GmObject::GmObject()
+GmObject::GmObject() : Resource()
 {
 }

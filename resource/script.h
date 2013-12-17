@@ -24,7 +24,9 @@
 #ifndef SCRIPT_H
 #define SCRIPT_H
 
-class Script
+#include "resource.h"
+
+class Script : public Resource
 {
 public:
     Script();

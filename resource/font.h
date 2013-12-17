@@ -24,7 +24,9 @@
 #ifndef FONT_H
 #define FONT_H
 
-class Font
+#include "resource.h"
+
+class Font : public Resource
 {
 public:
     Font();

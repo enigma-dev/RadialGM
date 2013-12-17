@@ -24,7 +24,9 @@
 #ifndef BACKGROUND_H
 #define BACKGROUND_H
 
-class Background
+#include "resource.h"
+
+class Background : public Resource
 {
 public:
     Background();

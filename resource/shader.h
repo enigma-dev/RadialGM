@@ -24,7 +24,9 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-class Shader
+#include "resource.h"
+
+class Shader : public Resource
 {
 public:
     Shader();

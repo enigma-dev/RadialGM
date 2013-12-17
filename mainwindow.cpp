@@ -53,10 +53,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(closeAllAction, SIGNAL(triggered()), this, SLOT(closeAllWindows()));
     QAction* licenseAction = new QAction("&License", this);
     connect(licenseAction, SIGNAL(triggered()), this, SLOT(showLicenseDialog()));
-    QAction* aboutAction = new QAction("&About", this);
+    QAction* aboutAction = new QAction(QIcon(":/icons/actions/help.png"), "&About", this);
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(showAboutDialog()));
     preferencesAction = new QAction(QIcon(":/icons/actions/preferences.png"), "Preferences", this);
     connect(preferencesAction, SIGNAL(triggered()), this, SLOT(showPreferencesDialog()));
+    QAction* exploreLateralGMAction = new QAction("Explore LateralGM", this);
+    connect(exploreLateralGMAction, SIGNAL(triggered()), this, SLOT(exploreLateralGM()));
+    QAction* exploreProjectAction = new QAction("Explore Project", this);
+    connect(exploreProjectAction, SIGNAL(triggered()), this, SLOT(exploreProject()));
     manualAction = new QAction(QIcon(":/icons/actions/manual.png"), "Documentation", this);
     connect(manualAction, SIGNAL(triggered()), this, SLOT(showManual()));
 
@@ -80,6 +84,10 @@ MainWindow::MainWindow(QWidget *parent) :
     helpMenu = new QMenu("&Help", this);
     helpMenu->addAction(licenseAction);
     helpMenu->addAction(aboutAction);
+    helpMenu->addSeparator();
+    helpMenu->addAction(exploreLateralGMAction);
+    helpMenu->addAction(exploreProjectAction);
+    helpMenu->addSeparator();
     helpMenu->addAction(manualAction);
     mainMenuBar->addMenu(fileMenu);
     mainMenuBar->addMenu(viewMenu);

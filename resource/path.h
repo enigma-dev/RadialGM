@@ -24,7 +24,9 @@
 #ifndef PATH_H
 #define PATH_H
 
-class Path
+#include "resource.h"
+
+class Path : public Resource
 {
 public:
     Path();
