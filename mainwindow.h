@@ -158,13 +158,17 @@ private:
     QDockWidget* hierarchyDock;
     QTreeWidget* hierarchyTree;
     QMdiArea* mainMdiArea;
+    QTreeWidgetItem *spriteGroup, *soundGroup, *backgroundGroup, *pathGroup, *scriptGroup, *shaderGroup, *fontGroup, *timelineGroup, *objectGroup, *roomGroup;
+    QMap<QTreeWidgetItem *, QList<QTreeWidgetItem*>*> resourceItemMap;
 
     ProjectManager* currentFile;
 
     QByteArray defaultState;
 
+    QTreeWidgetItem *addResourceGroup(QString name);
     void addResource(QString name, QIcon icon);
-    void addResourceGroup(QString name);
+    QTreeWidgetItem* addResourceFolder(QTreeWidgetItem *node, QString name);
+    void addResourceItem(QTreeWidgetItem *node, QString name, QIcon icon);
 
     void readSettings();
     void writeSettings();
