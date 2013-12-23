@@ -9,7 +9,7 @@
 * @section License
 *
 * Copyright (C) 2013 Josh Ventura
-* This file is a part of the LateralGM IDE.
+* This file is a part of the RadialGM IDE.
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by

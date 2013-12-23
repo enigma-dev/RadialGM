@@ -5,7 +5,7 @@
 * @section License
 *
 * Copyright (C) 2013 Robert B. Colton
-* This file is a part of the LateralGM IDE.
+* This file is a part of the RadialGM IDE.
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,9 @@
 #ifndef RESOURCENODE_H
 #define RESOURCENODE_H
 
-class ResourceNode
+#include <QTreeWidgetItem>
+
+class ResourceNode : public QTreeWidgetItem
 {
 public:
     ResourceNode();

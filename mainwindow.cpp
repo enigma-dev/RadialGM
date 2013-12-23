@@ -5,7 +5,7 @@
 * @section License
 *
 * Copyright (C) 2013 Robert B. Colton
-* This file is a part of the LateralGM IDE.
+* This file is a part of the RadialGM IDE.
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -57,8 +57,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(showAboutDialog()));
     preferencesAction = new QAction(QIcon(":/icons/actions/preferences.png"), "Preferences", this);
     connect(preferencesAction, SIGNAL(triggered()), this, SLOT(showPreferencesDialog()));
-    QAction* exploreLateralGMAction = new QAction("Explore LateralGM", this);
-    connect(exploreLateralGMAction, SIGNAL(triggered()), this, SLOT(exploreLateralGM()));
+    QAction* exploreRadialGMAction = new QAction("Explore RadialGM", this);
+    connect(exploreRadialGMAction, SIGNAL(triggered()), this, SLOT(exploreRadialGM()));
     QAction* exploreProjectAction = new QAction("Explore Project", this);
     connect(exploreProjectAction, SIGNAL(triggered()), this, SLOT(exploreProject()));
     manualAction = new QAction(QIcon(":/icons/actions/manual.png"), "Documentation", this);
@@ -85,7 +85,7 @@ MainWindow::MainWindow(QWidget *parent) :
     helpMenu->addAction(licenseAction);
     helpMenu->addAction(aboutAction);
     helpMenu->addSeparator();
-    helpMenu->addAction(exploreLateralGMAction);
+    helpMenu->addAction(exploreRadialGMAction);
     helpMenu->addAction(exploreProjectAction);
     helpMenu->addSeparator();
     helpMenu->addAction(manualAction);
@@ -271,7 +271,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //mainStatusBar->addWidget(mainProgressBar);
 
     this->setWindowIcon(QIcon(":/lgm-logo.png"));
-    this->setWindowTitle("LateralGM - <new game>");
+    this->setWindowTitle("RadialGM - <new game>");
     this->resize(1000, 600);
 
     outputLine("test");
@@ -338,7 +338,7 @@ void MainWindow::showOpenDialog() {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Project"), "", tr("All Files (*.*);;GMK Files (*.gmk)"));
     currentFile = new ProjectManager();
 
-    QSettings settings("LateralGMTeam", "LateralGM");
+    QSettings settings("RadialGMTeam", "RadialGM");
     QStringList files = settings.value("recentFileList").toStringList();
     files.removeAll(fileName);
     files.prepend(fileName);
@@ -550,21 +550,21 @@ void MainWindow::addResourceItem(QTreeWidgetItem *node, QString name, QIcon icon
 
 void MainWindow::readSettings()
 {
-    QSettings settings("LateralGMTeam", "LateralGM");
+    QSettings settings("RadialGMTeam", "RadialGM");
     restoreGeometry(settings.value("mainWindow/geometry").toByteArray());
     restoreState(settings.value("mainWindowState").toByteArray());
 }
 
 void MainWindow::writeSettings()
 {
-    QSettings settings("LateralGMTeam", "LateralGM");
+    QSettings settings("RadialGMTeam", "RadialGM");
     settings.setValue("mainWindow/geometry", saveGeometry());
     settings.setValue("mainWindowState", saveState());
 }
 
 void MainWindow::updateRecentFileActions()
 {
-    QSettings settings("LateralGMTeam", "LateralGM");
+    QSettings settings("RadialGMTeam", "RadialGM");
     QStringList files = settings.value("recentFileList").toStringList();
 
     int numRecentFiles = qMin(files.size(), (int)MaxRecentFiles);
@@ -586,7 +586,7 @@ void MainWindow::updateRecentFileActions()
 }
 
 void MainWindow::clearRecentFiles() {
-    QSettings settings("LateralGMTeam", "LateralGM");
+    QSettings settings("RadialGMTeam", "RadialGM");
     settings.setValue("recentFileList", 0);
 
     this->updateRecentFileActions();
