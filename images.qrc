@@ -22,11 +22,11 @@
         <file alias="accept.png">Images/actions/accept.png</file>
         <file alias="open-image.png">Images/actions/open-image.png</file>
         <file alias="next.png">Images/actions/next.png</file>
-        <file alias="previous.png">images/actions/previous.png</file>
+        <file alias="previous.png">Images/actions/previous.png</file>
         <file alias="colorize.png">Images/actions/colorize.png</file>
-        <file alias="zoom.png">images/actions/zoom.png</file>
-        <file alias="zoom-in.png">images/actions/zoom-in.png</file>
-        <file alias="zoom-out.png">images/actions/zoom-out.png</file>
+        <file alias="zoom.png">Images/actions/zoom.png</file>
+        <file alias="zoom-in.png">Images/actions/zoom-in.png</file>
+        <file alias="zoom-out.png">Images/actions/zoom-out.png</file>
         <file alias="delete.png">Images/actions/delete.png</file>
         <file alias="add.png">Images/actions/add.png</file>
         <file alias="edit.png">Images/actions/edit.png</file>
