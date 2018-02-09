@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>BackgroundEditor</class>
+ <widget class="QWidget" name="BackgroundEditor">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>738</width>
+    <height>404</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Background</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../images.qrc">
+    <normaloff>:/resources/background.png</normaloff>:/resources/background.png</iconset>
+  </property>
+  <property name="Josh" stdset="0">
+   <string>helloenigmasssss</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,3">
+   <property name="spacing">
+    <number>4</number>
+   </property>
+   <property name="leftMargin">
+    <number>4</number>
+   </property>
+   <property name="topMargin">
+    <number>4</number>
+   </property>
+   <property name="rightMargin">
+    <number>4</number>
+   </property>
+   <property name="bottomMargin">
+    <number>4</number>
+   </property>
+   <item>
+    <widget class="QToolBar" name="mainToolBar">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="floatable">
+      <bool>true</bool>
+     </property>
+     <addaction name="actionSave"/>
+     <addaction name="separator"/>
+     <addaction name="actionNewImage"/>
+     <addaction name="actionLoadImage"/>
+     <addaction name="actionSaveImage"/>
+     <addaction name="actionEditImage"/>
+     <addaction name="separator"/>
+     <addaction name="actionZoom"/>
+     <addaction name="actionZoomIn"/>
+     <addaction name="actionZoomOut"/>
+     <addaction name="separator"/>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="clientLayout" stretch="0,0">
+     <property name="spacing">
+      <number>4</number>
+     </property>
+     <property name="sizeConstraint">
+      <enum>QLayout::SetDefaultConstraint</enum>
+     </property>
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <layout class="QVBoxLayout" name="propertiesLayout">
+       <property name="spacing">
+        <number>4</number>
+       </property>
+       <property name="sizeConstraint">
+        <enum>QLayout::SetDefaultConstraint</enum>
+       </property>
+       <property name="leftMargin">
+        <number>4</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>4</number>
+       </property>
+       <item>
+        <widget class="QCheckBox" name="smoothCheckBox">
+         <property name="text">
+          <string>Smooth edges</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="preloadCheckBox">
+         <property name="text">
+          <string>Preload texture</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="transparentCheckBox">
+         <property name="text">
+          <string>Transparent</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="tilesetGroupBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="title">
+          <string>Use as tileset</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+         <layout class="QFormLayout" name="formLayout">
+          <property name="fieldGrowthPolicy">
+           <enum>QFormLayout::ExpandingFieldsGrow</enum>
+          </property>
+          <property name="labelAlignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+          <property name="horizontalSpacing">
+           <number>4</number>
+          </property>
+          <property name="verticalSpacing">
+           <number>4</number>
+          </property>
+          <property name="leftMargin">
+           <number>4</number>
+          </property>
+          <property name="topMargin">
+           <number>4</number>
+          </property>
+          <property name="rightMargin">
+           <number>4</number>
+          </property>
+          <property name="bottomMargin">
+           <number>4</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="tileWidthLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Tile width</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="tileWidthSpinBox">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="wrapping">
+             <bool>true</bool>
+            </property>
+            <property name="frame">
+             <bool>true</bool>
+            </property>
+            <property name="buttonSymbols">
+             <enum>QAbstractSpinBox::UpDownArrows</enum>
+            </property>
+            <property name="minimum">
+             <number>-2147483647</number>
+            </property>
+            <property name="maximum">
+             <number>2147483647</number>
+            </property>
+            <property name="value">
+             <number>16</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="tileHeightLabel">
+            <property name="text">
+             <string>Tile height</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="tileHeightSpinBox">
+            <property name="wrapping">
+             <bool>true</bool>
+            </property>
+            <property name="frame">
+             <bool>true</bool>
+            </property>
+            <property name="minimum">
+             <number>-2147483647</number>
+            </property>
+            <property name="maximum">
+             <number>2147483647</number>
+            </property>
+            <property name="value">
+             <number>16</number>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="horizontalOffsetLabel">
+            <property name="text">
+             <string>Horizontal offset</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QSpinBox" name="horizontalOffsetSpinBox">
+            <property name="wrapping">
+             <bool>true</bool>
+            </property>
+            <property name="minimum">
+             <number>-2147483647</number>
+            </property>
+            <property name="maximum">
+             <number>2147483647</number>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="verticalOffsetLabel">
+            <property name="text">
+             <string>Vertical offset</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QSpinBox" name="verticalOffsetSpinBox">
+            <property name="wrapping">
+             <bool>true</bool>
+            </property>
+            <property name="minimum">
+             <number>-2147483647</number>
+            </property>
+            <property name="maximum">
+             <number>2147483647</number>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <spacer name="offsetSpacingSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>0</width>
+              <height>4</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="horizontalSpacingLabel">
+            <property name="text">
+             <string>Horizontal spacing</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QSpinBox" name="horizontalSpacingSpinBox">
+            <property name="wrapping">
+             <bool>true</bool>
+            </property>
+            <property name="minimum">
+             <number>-2147483647</number>
+            </property>
+            <property name="maximum">
+             <number>2147483647</number>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="0">
+           <widget class="QLabel" name="verticalSpacingLabel">
+            <property name="text">
+             <string>Vertical spacing</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="1">
+           <widget class="QSpinBox" name="verticalSpacingSpinBox">
+            <property name="wrapping">
+             <bool>true</bool>
+            </property>
+            <property name="minimum">
+             <number>-2147483647</number>
+            </property>
+            <property name="maximum">
+             <number>2147483647</number>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <spacer name="sizeOffsetSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>0</width>
+              <height>4</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QGraphicsView" name="imagePreview">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="backgroundBrush">
+        <brush brushstyle="NoBrush">
+         <color alpha="255">
+          <red>0</red>
+          <green>0</green>
+          <blue>0</blue>
+         </color>
+        </brush>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/accept.png</normaloff>:/actions/accept.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save and close</string>
+   </property>
+  </action>
+  <action name="actionNewImage">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/new.png</normaloff>:/actions/new.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Image</string>
+   </property>
+   <property name="toolTip">
+    <string>New Image</string>
+   </property>
+  </action>
+  <action name="actionLoadImage">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/open-image.png</normaloff>:/actions/open-image.png</iconset>
+   </property>
+   <property name="text">
+    <string>Load Image</string>
+   </property>
+   <property name="toolTip">
+    <string>Load Image</string>
+   </property>
+  </action>
+  <action name="actionSaveImage">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/save.png</normaloff>:/actions/save.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Image</string>
+   </property>
+   <property name="toolTip">
+    <string>Save Image</string>
+   </property>
+  </action>
+  <action name="actionEditImage">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/colorize.png</normaloff>:/actions/colorize.png</iconset>
+   </property>
+   <property name="text">
+    <string>Edit Image</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit Image</string>
+   </property>
+  </action>
+  <action name="actionZoom">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/zoom.png</normaloff>:/actions/zoom.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom</string>
+   </property>
+  </action>
+  <action name="actionZoomIn">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/zoom-in.png</normaloff>:/actions/zoom-in.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom In</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom In</string>
+   </property>
+  </action>
+  <action name="actionZoomOut">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/zoom-out.png</normaloff>:/actions/zoom-out.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom Out</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom Out</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="../images.qrc"/>
+ </resources>
+ <connections/>
+</ui>

@@ -1,15 +1,3 @@
 RadialGM
 ==================
-The C++ rewrite of LateralGM that hopes to fix many issues with the Java Runtime and improve performance as well 
-as bring new capabilities. The project is developed with Qt Creator/Qt Framework 5.2 and uses QScintilla for styled text highlighting.
-
-License
-==================
-The project and its source code are licensed under GNU GPL v3. For more information please see the included license file or 
-visit http://www.gnu.org/licenses/
-
-Development Team
-==================
-* Robert B. Colton - Project founder and lead developer.
-* Josh Ventura - Wrote the serializer.
-* Zachary Reedy - Wrote the GMK API.
+This project is an experimental C++ IDE for ENIGMA written in the [Qt Framework](https://www.qt.io/). The design of the program is a multilayer architecture using the [Google protocol buffer](https://developers.google.com/protocol-buffers/) format from ENIGMA's compiler backend for the data model layer in the resource editors. The resource editors are designed using Qt Creator or Qt Designer and saved in UI layout files. Their corresponding C++ classes bind the widgets in the layout files to the data model using QDataWidgetMapper and a custom resource model that hooks into arbitrary protobuf messages.

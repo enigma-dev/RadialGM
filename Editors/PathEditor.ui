@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PathEditor</class>
+ <widget class="QWidget" name="PathEditor">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>738</width>
+    <height>404</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Path</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../images.qrc">
+    <normaloff>:/resources/path.png</normaloff>:/resources/path.png</iconset>
+  </property>
+  <property name="Josh" stdset="0">
+   <string>helloenigmasssss</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,3">
+   <property name="spacing">
+    <number>4</number>
+   </property>
+   <property name="leftMargin">
+    <number>4</number>
+   </property>
+   <property name="topMargin">
+    <number>4</number>
+   </property>
+   <property name="rightMargin">
+    <number>4</number>
+   </property>
+   <property name="bottomMargin">
+    <number>4</number>
+   </property>
+   <item>
+    <widget class="QToolBar" name="mainToolBar">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="floatable">
+      <bool>true</bool>
+     </property>
+     <addaction name="actionSave"/>
+     <addaction name="separator"/>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="clientLayout" stretch="1,0">
+     <property name="spacing">
+      <number>4</number>
+     </property>
+     <property name="sizeConstraint">
+      <enum>QLayout::SetDefaultConstraint</enum>
+     </property>
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <layout class="QVBoxLayout" name="propertiesLayout">
+       <property name="spacing">
+        <number>4</number>
+       </property>
+       <property name="sizeConstraint">
+        <enum>QLayout::SetDefaultConstraint</enum>
+       </property>
+       <property name="leftMargin">
+        <number>4</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>4</number>
+       </property>
+      </layout>
+     </item>
+     <item>
+      <widget class="QGraphicsView" name="imagePreview">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="backgroundBrush">
+        <brush brushstyle="NoBrush">
+         <color alpha="255">
+          <red>0</red>
+          <green>0</green>
+          <blue>0</blue>
+         </color>
+        </brush>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/accept.png</normaloff>:/actions/accept.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save and close</string>
+   </property>
+  </action>
+  <action name="actionNewImage">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/new.png</normaloff>:/actions/new.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Image</string>
+   </property>
+   <property name="toolTip">
+    <string>New Image</string>
+   </property>
+  </action>
+  <action name="actionLoadImage">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/open-image.png</normaloff>:/actions/open-image.png</iconset>
+   </property>
+   <property name="text">
+    <string>Load Image</string>
+   </property>
+   <property name="toolTip">
+    <string>Load Image</string>
+   </property>
+  </action>
+  <action name="actionSaveImage">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/save.png</normaloff>:/actions/save.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Image</string>
+   </property>
+   <property name="toolTip">
+    <string>Save Image</string>
+   </property>
+  </action>
+  <action name="actionEditImage">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/colorize.png</normaloff>:/actions/colorize.png</iconset>
+   </property>
+   <property name="text">
+    <string>Edit Image</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit Image</string>
+   </property>
+  </action>
+  <action name="actionZoom">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/zoom.png</normaloff>:/actions/zoom.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom</string>
+   </property>
+  </action>
+  <action name="actionZoomIn">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/zoom-in.png</normaloff>:/actions/zoom-in.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom In</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom In</string>
+   </property>
+  </action>
+  <action name="actionZoomOut">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/zoom-out.png</normaloff>:/actions/zoom-out.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom Out</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom Out</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="../images.qrc"/>
+ </resources>
+ <connections/>
+</ui>
