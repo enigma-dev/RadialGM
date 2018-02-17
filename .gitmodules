@@ -1,0 +1,4 @@
+[submodule "Submodules/enigma-dev"]
+	path = Submodules/enigma-dev
+	url = https://github.com/enigma-dev/enigma-dev.git
+	branch = gmxProtoButt
