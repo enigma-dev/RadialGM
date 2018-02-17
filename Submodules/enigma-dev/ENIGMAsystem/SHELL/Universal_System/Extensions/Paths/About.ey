@@ -1,0 +1,12 @@
+%E-YAML
+---
+
+Name: Paths
+Identifier: Paths
+Description: Adds path functions and local variables.
+Icon: path.png
+
+Depends: None
+Dependencies: None
+Implement: extension_path
+

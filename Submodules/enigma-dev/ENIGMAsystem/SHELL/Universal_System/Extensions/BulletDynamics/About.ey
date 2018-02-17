@@ -1,0 +1,12 @@
+%E-YAML
+---
+
+Name: Bullet Dynamics
+Identifier: BulletDynamics
+Description: 3D physics simulation, collision detection, and real time destruction.
+Default: false
+Build-date: 6/18/2013
+Icon: bulletlogo.png
+
+Depends: None
+Dependencies: None

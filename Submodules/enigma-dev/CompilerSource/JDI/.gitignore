@@ -1,0 +1,10 @@
+bin
+obj
+docs
+JustDefineIt.depend
+JustDefineIt.layout
+.objs
+ValgrindOut.xml
+cachegrind.*
+src/User/token_cases.h
+src/User/token_cases.h

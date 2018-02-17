@@ -1,0 +1,12 @@
+%E-YAML
+---
+
+Name: Timelines
+Identifier: Timelines
+Description: Adds timeline local variables and functions.
+Icon: timeline.png
+
+Depends: None
+Dependencies: None
+Implements: extension_timelines
+
