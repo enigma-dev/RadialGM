@@ -2,31 +2,18 @@
 #include "ui_BackgroundEditor.h"
 #include "ResourceModel.h"
 
+#include "resources/Background.pb.h"
+
 #include <QDataWidgetMapper>
 
 #include <QDebug>
-
-// this Background class will be flatc codegen from --gen-object-api:
-struct Background {
-	enum {
-		VT_TILE_WIDTH,
-		VT_TILE_HEIGHT,
-		VT_NAME
-	};
-	std::string name = "hello";
-	int tileWidth = 32;
-	int tileHeight = 32;
-};
-
-union BackgroundFieldAddress {
-	int (Background::*int_field);
-	std::string (Background::*str_field);
-};
 
 BackgroundEditor::BackgroundEditor(QWidget *parent) :
 	QWidget(parent),
 	ui(new Ui::BackgroundEditor)
 {
+	using buffers::resources::Background;
+
 	ui->setupUi(this);
 	QGraphicsScene* scene = new QGraphicsScene(this);
 	QPixmap avatar("C:/Users/Owner/Desktop/bg_intro.png");
@@ -35,20 +22,14 @@ BackgroundEditor::BackgroundEditor(QWidget *parent) :
 
 	static Background* background = new Background(); // just here for me to test
 
-	// field offset, field address, field type
-	static FieldMap fieldMap({
-		{ Background::VT_TILE_WIDTH, { &background->tileHeight } },
-		{ Background::VT_TILE_HEIGHT, { &background->tileHeight } }
-	});
-
-	static ResourceModel* model = new ResourceModel(fieldMap);
+	static ResourceModel* model = new ResourceModel(background);
 
 	QDataWidgetMapper* mapper = new QDataWidgetMapper(this);
 	mapper->setOrientation(Qt::Vertical);
 	mapper->setModel(model);
 
-	mapper->addMapping(ui->tileWidthSpinBox, Background::VT_TILE_WIDTH);
-	mapper->addMapping(ui->tileHeightSpinBox, Background::VT_TILE_HEIGHT);
+	mapper->addMapping(ui->tileWidthSpinBox, Background::kTileWidthFieldNumber);
+	mapper->addMapping(ui->tileHeightSpinBox, Background::kTileHeightFieldNumber);
 	mapper->toFirst();
 }
 
