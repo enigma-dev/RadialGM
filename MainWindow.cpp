@@ -9,6 +9,8 @@
 #include "Editors/TimelineEditor.h"
 #include "Editors/RoomEditor.h"
 
+#include "gmx.h"
+
 #include <QtWidgets>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -37,6 +39,75 @@ MainWindow::~MainWindow()
 	delete ui;
 }
 
+void AddToTree(const buffers::TreeNode& node, QTreeWidgetItem* tree) {
+    for (const buffers::TreeNode& n : node.node()) {
+        QTreeWidgetItem *i = new QTreeWidgetItem();
+        i->setText(0, QString::fromStdString(n.name()));
+
+        switch(n.type()) {
+            case buffers::TreeNode::FOLDER: {
+                i->setIcon(0, QIcon(":/resources/group.png"));
+                break;
+            }
+            case buffers::TreeNode::SOUND: {
+                i->setIcon(0, QIcon(":/resources/sound.png"));
+                break;
+            }
+            case buffers::TreeNode::SPRITE: {
+                i->setIcon(0, QIcon(":/resources/sprite.png"));
+                break;
+            }
+            case buffers::TreeNode::BACKGROUND: {
+                i->setIcon(0, QIcon(":/resources/background.png"));
+                break;
+            }
+            case buffers::TreeNode::PATH: {
+                i->setIcon(0, QIcon(":/resources/path.png"));
+                break;
+            }
+            case buffers::TreeNode::SCRIPT: {
+                i->setIcon(0, QIcon(":/resources/script.png"));
+                break;
+            }
+            case buffers::TreeNode::SHADER: {
+                i->setIcon(0, QIcon(":/resources/shader.png"));
+                break;
+            }
+            case buffers::TreeNode::TIMELINE: {
+                i->setIcon(0, QIcon(":/resources/timeline.png"));
+                break;
+            }
+            case buffers::TreeNode::FONT: {
+                i->setIcon(0, QIcon(":/resources/font.png"));
+                break;
+            }
+        case buffers::TreeNode::OBJECT: {
+                i->setIcon(0, QIcon(":/resources/object.png"));
+                break;
+            }
+            case buffers::TreeNode::ROOM: {
+                i->setIcon(0, QIcon(":/resources/room.png"));
+                break;
+            }
+            case buffers::TreeNode::HELP: {
+                i->setIcon(0, QIcon(":/resources/info.png"));
+                break;
+            }
+            case buffers::TreeNode::CONFIG: {
+                i->setIcon(0, QIcon(":/resources/settings.png"));
+                break;
+            }
+            case buffers::TreeNode::INVALID: {
+                i->setIcon(0, QIcon(":/resources/info.png"));
+                break;
+            }
+        }
+
+        tree->addChild(i);
+        AddToTree(n, i);
+    }
+}
+
 void MainWindow::on_actionOpen_triggered()
 {
 	const QString fileName = QFileDialog::getOpenFileName(
@@ -45,6 +116,19 @@ void MainWindow::on_actionOpen_triggered()
 		"",
 		tr("ENIGMA (*.egm);;GameMaker: Studio (*.gmx);;All Files (*)")
 	);
+
+    game = gmx::LoadGMX(fileName.toStdString(), false);
+
+    ui->treeWidget->clear();
+
+    for (const buffers::TreeNode& n : game->treeroot().node()) {
+        QTreeWidgetItem *i = new QTreeWidgetItem();
+        i->setText(0, QString::fromStdString(n.name()));
+        i->setIcon(0, QIcon(":/resources/group.png"));
+        ui->treeWidget->addTopLevelItem(i);
+
+        AddToTree(n, i);
+    }
 }
 
 void MainWindow::on_actionPreferences_triggered()

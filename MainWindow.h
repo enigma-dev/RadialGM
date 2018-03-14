@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+#include "codegen/project.pb.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -35,10 +37,11 @@ private slots:
 	void on_actionCommunity_triggered();
 	void on_actionSubmitIssue_triggered();
 	void on_actionExploreENIGMA_triggered();
-	void on_actionAbout_triggered();
+    void on_actionAbout_triggered();
 
 private:
 	Ui::MainWindow *ui;
+    buffers::Project *game;
 
 	void openSubWindow(QWidget *editor);
 };
