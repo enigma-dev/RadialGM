@@ -64,11 +64,11 @@ QVariant ResourceModel::data(const QModelIndex &index, int role) const {
 		case google::protobuf::FieldDescriptor::CppType::CPPTYPE_INT32:
 			return refl->GetInt32(*protobuf, field);
 		case google::protobuf::FieldDescriptor::CppType::CPPTYPE_INT64:
-			return refl->GetInt64(*protobuf, field);
+			return static_cast<long long>(refl->GetInt64(*protobuf, field));
 		case google::protobuf::FieldDescriptor::CppType::CPPTYPE_UINT32:
 			return refl->GetUInt32(*protobuf, field);
 		case google::protobuf::FieldDescriptor::CppType::CPPTYPE_UINT64:
-			return refl->GetUInt64(*protobuf, field);
+			return static_cast<unsigned long long>(refl->GetUInt64(*protobuf, field));
 		case google::protobuf::FieldDescriptor::CppType::CPPTYPE_DOUBLE:
 			return refl->GetDouble(*protobuf, field);
 		case google::protobuf::FieldDescriptor::CppType::CPPTYPE_FLOAT:
