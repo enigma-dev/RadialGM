@@ -8,6 +8,7 @@
 #include "Editors/FontEditor.h"
 #include "Editors/TimelineEditor.h"
 #include "Editors/RoomEditor.h"
+#include "Editors/TreeModel.h"
 
 #include "gmx.h"
 
@@ -39,7 +40,7 @@ MainWindow::~MainWindow()
 	delete ui;
 }
 
-void AddToTree(const buffers::TreeNode& node, QTreeWidgetItem* tree) {
+/*void AddToTree(const buffers::TreeNode& node, QTreeWidgetItem* tree) {
     for (const buffers::TreeNode& n : node.node()) {
         QTreeWidgetItem *i = new QTreeWidgetItem();
         i->setText(0, QString::fromStdString(n.name()));
@@ -106,7 +107,7 @@ void AddToTree(const buffers::TreeNode& node, QTreeWidgetItem* tree) {
         tree->addChild(i);
         AddToTree(n, i);
     }
-}
+}*/
 
 void MainWindow::on_actionOpen_triggered()
 {
@@ -119,16 +120,17 @@ void MainWindow::on_actionOpen_triggered()
 
     game = gmx::LoadGMX(fileName.toStdString(), false);
 
-    ui->treeWidget->clear();
+    //ui->treeWidget->clear();
+    ui->treeView->setModel(new TreeModel(game->mutable_treeroot(), this));
 
-    for (const buffers::TreeNode& n : game->treeroot().node()) {
+    /*for (const buffers::TreeNode& n : game->treeroot().node()) {
         QTreeWidgetItem *i = new QTreeWidgetItem();
         i->setText(0, QString::fromStdString(n.name()));
         i->setIcon(0, QIcon(":/resources/group.png"));
         ui->treeWidget->addTopLevelItem(i);
 
         AddToTree(n, i);
-    }
+    }*/
 }
 
 void MainWindow::on_actionPreferences_triggered()

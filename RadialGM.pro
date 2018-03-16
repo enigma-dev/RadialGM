@@ -38,7 +38,8 @@ SOURCES += \
     Editors/PathEditor.cpp \
     Editors/TimelineEditor.cpp \
     Editors/RoomEditor.cpp \
-    Editors/ResourceModel.cpp
+    Editors/ResourceModel.cpp \
+    Editors/TreeModel.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -49,7 +50,8 @@ HEADERS += \
     Editors/PathEditor.h \
     Editors/TimelineEditor.h \
     Editors/RoomEditor.h \
-    Editors/ResourceModel.h
+    Editors/ResourceModel.h \
+    Editors/TreeModel.h
 
 FORMS += \
     MainWindow.ui \

@@ -88,7 +88,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>31</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -195,7 +195,7 @@
     <set>Qt::AllDockWidgetAreas</set>
    </property>
    <property name="windowTitle">
-    <string>Project</string>
+    <string>&amp;Project</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
@@ -261,191 +261,7 @@
       </layout>
      </item>
      <item>
-      <widget class="QTreeWidget" name="treeWidget">
-       <property name="rootIsDecorated">
-        <bool>true</bool>
-       </property>
-       <property name="uniformRowHeights">
-        <bool>false</bool>
-       </property>
-       <property name="allColumnsShowFocus">
-        <bool>false</bool>
-       </property>
-       <property name="headerHidden">
-        <bool>true</bool>
-       </property>
-       <property name="columnCount">
-        <number>1</number>
-       </property>
-       <attribute name="headerVisible">
-        <bool>false</bool>
-       </attribute>
-       <column>
-        <property name="text">
-         <string>1</string>
-        </property>
-       </column>
-       <item>
-        <property name="text">
-         <string>Sprites</string>
-        </property>
-        <property name="icon">
-         <iconset resource="images.qrc">
-          <normaloff>:/resources/group.png</normaloff>:/resources/group.png</iconset>
-        </property>
-        <item>
-         <property name="text">
-          <string>spr_0</string>
-         </property>
-        </item>
-       </item>
-       <item>
-        <property name="text">
-         <string>Sounds</string>
-        </property>
-        <property name="icon">
-         <iconset resource="images.qrc">
-          <normaloff>:/resources/group.png</normaloff>:/resources/group.png</iconset>
-        </property>
-        <item>
-         <property name="text">
-          <string>snd_0</string>
-         </property>
-        </item>
-       </item>
-       <item>
-        <property name="text">
-         <string>Backgrounds</string>
-        </property>
-        <property name="icon">
-         <iconset resource="images.qrc">
-          <normaloff>:/resources/group.png</normaloff>:/resources/group.png</iconset>
-        </property>
-        <item>
-         <property name="text">
-          <string>bg_floor</string>
-         </property>
-         <property name="icon">
-          <iconset resource="images.qrc">
-           <normaloff>:/resources/background.png</normaloff>:/resources/background.png</iconset>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>bg_wall</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>bg_ceiling</string>
-         </property>
-        </item>
-       </item>
-       <item>
-        <property name="text">
-         <string>Paths</string>
-        </property>
-        <property name="icon">
-         <iconset resource="images.qrc">
-          <normaloff>:/resources/group.png</normaloff>:/resources/group.png</iconset>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Scripts</string>
-        </property>
-        <property name="icon">
-         <iconset resource="images.qrc">
-          <normaloff>:/resources/group.png</normaloff>:/resources/group.png</iconset>
-        </property>
-        <item>
-         <property name="text">
-          <string>scr_0</string>
-         </property>
-        </item>
-       </item>
-       <item>
-        <property name="text">
-         <string>Shaders</string>
-        </property>
-        <property name="icon">
-         <iconset resource="images.qrc">
-          <normaloff>:/resources/group.png</normaloff>:/resources/group.png</iconset>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Fonts</string>
-        </property>
-        <property name="icon">
-         <iconset resource="images.qrc">
-          <normaloff>:/resources/group.png</normaloff>:/resources/group.png</iconset>
-        </property>
-        <item>
-         <property name="text">
-          <string>fnt_0</string>
-         </property>
-         <property name="icon">
-          <iconset resource="images.qrc">
-           <normaloff>:/resources/font.png</normaloff>:/resources/font.png</iconset>
-         </property>
-        </item>
-       </item>
-       <item>
-        <property name="text">
-         <string>Timelines</string>
-        </property>
-        <property name="icon">
-         <iconset resource="images.qrc">
-          <normaloff>:/resources/group.png</normaloff>:/resources/group.png</iconset>
-        </property>
-        <item>
-         <property name="text">
-          <string>tml_0</string>
-         </property>
-         <property name="icon">
-          <iconset resource="images.qrc">
-           <normaloff>:/resources/timeline.png</normaloff>:/resources/timeline.png</iconset>
-         </property>
-        </item>
-       </item>
-       <item>
-        <property name="text">
-         <string>Objects</string>
-        </property>
-        <property name="icon">
-         <iconset resource="images.qrc">
-          <normaloff>:/resources/group.png</normaloff>:/resources/group.png</iconset>
-        </property>
-        <item>
-         <property name="text">
-          <string>obj_player</string>
-         </property>
-         <property name="icon">
-          <iconset resource="images.qrc">
-           <normaloff>:/resources/object.png</normaloff>:/resources/object.png</iconset>
-         </property>
-        </item>
-       </item>
-       <item>
-        <property name="text">
-         <string>Rooms</string>
-        </property>
-        <property name="icon">
-         <iconset resource="images.qrc">
-          <normaloff>:/resources/group.png</normaloff>:/resources/group.png</iconset>
-        </property>
-        <item>
-         <property name="text">
-          <string>rm_main</string>
-         </property>
-         <property name="icon">
-          <iconset resource="images.qrc">
-           <normaloff>:/resources/room.png</normaloff>:/resources/room.png</iconset>
-         </property>
-        </item>
-       </item>
-      </widget>
+      <widget class="QTreeView" name="treeView"/>
      </item>
     </layout>
    </widget>
@@ -629,22 +445,22 @@
      <normaloff>:/actions/cascade.png</normaloff>:/actions/cascade.png</iconset>
    </property>
    <property name="text">
-    <string>Cascade</string>
+    <string>&amp;Cascade</string>
    </property>
   </action>
   <action name="actionTile">
    <property name="text">
-    <string>Tile</string>
+    <string>&amp;Tile</string>
    </property>
   </action>
   <action name="actionCloseAll">
    <property name="text">
-    <string>Close All</string>
+    <string>C&amp;lose All</string>
    </property>
   </action>
   <action name="actionCloseOthers">
    <property name="text">
-    <string>Close All Others</string>
+    <string>Close All &amp;Others</string>
    </property>
   </action>
   <action name="actionNext">
@@ -653,7 +469,7 @@
      <normaloff>:/actions/next.png</normaloff>:/actions/next.png</iconset>
    </property>
    <property name="text">
-    <string>Next</string>
+    <string>&amp;Next</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Tab</string>
@@ -665,7 +481,7 @@
      <normaloff>:/actions/previous.png</normaloff>:/actions/previous.png</iconset>
    </property>
    <property name="text">
-    <string>Previous</string>
+    <string>&amp;Previous</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+Tab</string>
@@ -676,7 +492,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Toggle Tabbed View</string>
+    <string>Toggle Tabbed &amp;View</string>
    </property>
   </action>
  </widget>
