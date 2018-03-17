@@ -2,13 +2,11 @@
 #include "ui_BackgroundEditor.h"
 #include "ResourceModel.h"
 
-#include "resources/Background.pb.h"
-
 #include <QDataWidgetMapper>
 
 #include <QDebug>
 
-BackgroundEditor::BackgroundEditor(QWidget *parent) :
+BackgroundEditor::BackgroundEditor(QWidget *parent, buffers::resources::Background* bkg) :
 	QWidget(parent),
 	ui(new Ui::BackgroundEditor)
 {
@@ -16,18 +14,16 @@ BackgroundEditor::BackgroundEditor(QWidget *parent) :
 
 	ui->setupUi(this);
 	QGraphicsScene* scene = new QGraphicsScene(this);
-	QPixmap avatar("C:/Users/Owner/Desktop/bg_intro.png");
+    QPixmap avatar(QString::fromStdString(bkg->image()));
 	scene->addPixmap(avatar);
 	ui->imagePreview->setScene(scene);
 
-	static Background* background = new Background(); // just here for me to test
-
-	static ResourceModel* model = new ResourceModel(background);
+    ResourceModel* model = new ResourceModel(bkg);
 
 	QDataWidgetMapper* mapper = new QDataWidgetMapper(this);
 	mapper->setOrientation(Qt::Vertical);
-	mapper->setModel(model);
 
+    mapper->setModel(model);
 	mapper->addMapping(ui->tileWidthSpinBox, Background::kTileWidthFieldNumber);
 	mapper->addMapping(ui->tileHeightSpinBox, Background::kTileHeightFieldNumber);
 	mapper->toFirst();

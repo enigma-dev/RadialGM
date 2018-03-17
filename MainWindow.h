@@ -41,6 +41,8 @@ private slots:
 	void on_actionExploreENIGMA_triggered();
     void on_actionAbout_triggered();
 
+    void on_treeView_doubleClicked(const QModelIndex &index);
+
 private:
 	Ui::MainWindow *ui;
     buffers::Project *game;

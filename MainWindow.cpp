@@ -19,20 +19,13 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     IconManager::Init();
 	ui->setupUi(this);
-	ui->mdiArea->setBackground(QImage(":/banner.png"));
-	openSubWindow(new BackgroundEditor(this));
-	openSubWindow(new BackgroundEditor(this));
-
-	openSubWindow(new ObjectEditor(this));
-	openSubWindow(new FontEditor(this));
-	openSubWindow(new TimelineEditor(this));
-	openSubWindow(new RoomEditor(this));
+    ui->mdiArea->setBackground(QImage(":/banner.png"));
 }
 
 void MainWindow::openSubWindow(QWidget *editor) {
-	QMdiSubWindow* subWindow = ui->mdiArea->addSubWindow(editor);
-	//subWindow->resize(editor->size());
-	subWindow->setWindowIcon(editor->windowIcon());
+    QMdiSubWindow* subWindow = ui->mdiArea->addSubWindow(editor);
+    subWindow->setWindowIcon(editor->windowIcon());
+    subWindow->show();
 }
 
 MainWindow::~MainWindow()
@@ -142,4 +135,53 @@ void MainWindow::on_actionAbout_triggered()
 	if (aboutBox.clickedButton() == aboutQtButton) {
 		QMessageBox::aboutQt(this, tr("About Qt"));
 	}
+}
+
+void MainWindow::on_treeView_doubleClicked(const QModelIndex &index)
+{
+    buffers::TreeNode *item = static_cast<buffers::TreeNode*>(index.internalPointer());
+
+    if (item->has_folder()) {
+        return;
+    }
+    if (item->has_background()) {
+        openSubWindow(new BackgroundEditor(this, item->mutable_background()));
+        return;
+    }
+    if (item->has_font()) {
+        openSubWindow(new FontEditor(this));
+        return;
+    }
+    if (item->has_object()) {
+        openSubWindow(new ObjectEditor(this));
+        return;
+    }
+    if (item->has_path()) {
+       // openSubWindow(new PathEditor(this));
+        return;
+    }
+    if (item->has_room()) {
+        openSubWindow(new RoomEditor(this));
+        return;
+    }
+    if (item->has_script()) {
+        //openSubWindow(new ScriptEditor(this));
+        return;
+    }
+    if (item->has_shader()) {
+        //openSubWindow(new ShaderEditor(this));
+        return;
+    }
+    if (item->has_sound()) {
+        //openSubWindow(new SoundEditor(this));
+        return;
+    }
+    if (item->has_sprite()) {
+        //openSubWindow(new SpriteEditor(this));
+        return;
+    }
+    if (item->has_timeline()) {
+        openSubWindow(new TimelineEditor(this));
+        return;
+    }
 }
