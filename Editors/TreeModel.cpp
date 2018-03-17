@@ -1,4 +1,7 @@
 #include "TreeModel.h"
+#include "IconManager.h"
+
+#include <QDebug>
 
 TreeModel::TreeModel(buffers::TreeNode* root, QObject *parent)
     : QAbstractItemModel(parent), root(root) {}
@@ -10,7 +13,7 @@ TreeModel::~TreeModel()
 
 int TreeModel::columnCount(const QModelIndex &parent) const
 {
-    return 3;
+    return 1;
 }
 
 QVariant TreeModel::data(const QModelIndex &index, int role) const
@@ -19,6 +22,37 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     buffers::TreeNode *item = static_cast<buffers::TreeNode*>(index.internalPointer());
+
+    if (role == Qt::DecorationRole) {
+        if (item->has_folder())
+            return IconManager::get_icon("group");
+        if (item->has_background())
+            return IconManager::get_icon("background");
+        if (item->has_font())
+            return IconManager::get_icon("font");
+        if (item->has_object())
+            return IconManager::get_icon("object");
+        if (item->has_path())
+            return IconManager::get_icon("path");
+        if (item->has_room())
+            return IconManager::get_icon("room");
+        if (item->has_script())
+            return IconManager::get_icon("script");
+        if (item->has_shader())
+            return IconManager::get_icon("shader");
+        if (item->has_sound())
+            return IconManager::get_icon("sound");
+        if (item->has_sprite())
+            return IconManager::get_icon("sprite");
+        if (item->has_timeline())
+            return IconManager::get_icon("timeline");
+
+        return IconManager::get_icon("info");
+    }
+
+    if (role != Qt::DisplayRole)
+        return QVariant();
+
     return QString::fromStdString(item->name());
 }
 
@@ -52,7 +86,7 @@ QModelIndex TreeModel::index(int row, int column, const QModelIndex &parent)
     else
         parentItem = static_cast<buffers::TreeNode*>(parent.internalPointer());
 
-    buffers::TreeNode *childItem = parentItem->mutable_node(row);
+    buffers::TreeNode *childItem = parentItem->mutable_child(row);
     if (childItem)
         return createIndex(row, column, childItem);
     else
@@ -71,7 +105,7 @@ QModelIndex TreeModel::parent(const QModelIndex &index) const
     if (parentItem == root)
         return QModelIndex();
 
-    return createIndex(parentItem->node_size(), 0, parentItem);
+    return createIndex(parentItem->child_size(), 0, parentItem);
 }
 
 int TreeModel::rowCount(const QModelIndex &parent) const
@@ -85,54 +119,5 @@ int TreeModel::rowCount(const QModelIndex &parent) const
     else
         parentItem = static_cast<buffers::TreeNode*>(parent.internalPointer());
 
-    return parentItem->node_size();
+    return parentItem->child_size();
 }
-
-/*void TreeModel::setupModelData(const QStringList &lines, TreeItem *parent)
-{
-    QList<TreeItem*> parents;
-    QList<int> indentations;
-    parents << parent;
-    indentations << 0;
-
-    int number = 0;
-
-    while (number < lines.count()) {
-        int position = 0;
-        while (position < lines[number].length()) {
-            if (lines[number].at(position) != ' ')
-                break;
-            position++;
-        }
-
-        QString lineData = lines[number].mid(position).trimmed();
-
-        if (!lineData.isEmpty()) {
-            // Read the column data from the rest of the line.
-            QStringList columnStrings = lineData.split("\t", QString::SkipEmptyParts);
-            QList<QVariant> columnData;
-            for (int column = 0; column < columnStrings.count(); ++column)
-                columnData << columnStrings[column];
-
-            if (position > indentations.last()) {
-                // The last child of the current parent is now the new parent
-                // unless the current parent has no children.
-
-                if (parents.last()->childCount() > 0) {
-                    parents << parents.last()->child(parents.last()->childCount()-1);
-                    indentations << position;
-                }
-            } else {
-                while (position < indentations.last() && parents.count() > 0) {
-                    parents.pop_back();
-                    indentations.pop_back();
-                }
-            }
-
-            // Append a new item to the current parent's list of children.
-            parents.last()->appendChild(new TreeItem(columnData, parents.last()));
-        }
-
-        ++number;
-    }
-}*/

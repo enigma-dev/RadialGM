@@ -26,7 +26,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 INCLUDEPATH += $$PWD/Submodules/enigma-dev/CommandLine/libGMX/ $$PWD/Submodules/enigma-dev/CommandLine/protos $$PWD/Submodules/enigma-dev/CommandLine/protos/codegen
-LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libGMX/ -lGMX -lprotobuf -Wl,--rpath=$$PWD/Submodules/enigma-dev/ -L$$PWD/Submodules/enigma-dev/ -lProtocols -lpugixml 
+LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libGMX/ -lGMX -lprotobuf -Wl,--rpath=$$PWD/Submodules/enigma-dev/ -L$$PWD/Submodules/enigma-dev/ -lProtocols -lpugixml
 
 SOURCES += \
         main.cpp \
@@ -39,7 +39,8 @@ SOURCES += \
     Editors/TimelineEditor.cpp \
     Editors/RoomEditor.cpp \
     Editors/ResourceModel.cpp \
-    Editors/TreeModel.cpp
+    Editors/TreeModel.cpp \
+    IconManager.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -51,7 +52,8 @@ HEADERS += \
     Editors/TimelineEditor.h \
     Editors/RoomEditor.h \
     Editors/ResourceModel.h \
-    Editors/TreeModel.h
+    Editors/TreeModel.h \
+    IconManager.h
 
 FORMS += \
     MainWindow.ui \

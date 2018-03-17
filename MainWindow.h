@@ -1,9 +1,11 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
+#include "Editors/TreeModel.h"
 
 #include "codegen/project.pb.h"
+
+#include <QMainWindow>
 
 namespace Ui {
 class MainWindow;
@@ -42,6 +44,7 @@ private slots:
 private:
 	Ui::MainWindow *ui;
     buffers::Project *game;
+    TreeModel *tree;
 
 	void openSubWindow(QWidget *editor);
 };
