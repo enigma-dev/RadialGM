@@ -11,6 +11,8 @@ namespace Ui {
 class MainWindow;
 }
 
+class ResourceModel;
+
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -19,6 +21,7 @@ public:
 	explicit MainWindow(QWidget *parent = 0);
 	~MainWindow();
 
+    //ResourceModel *dataModel() const;
 private slots:
 	// file menu
 	void on_actionOpen_triggered();
@@ -44,9 +47,9 @@ private slots:
     void on_treeView_doubleClicked(const QModelIndex &index);
 
 private:
-	Ui::MainWindow *ui;
-    buffers::Project *game;
-    TreeModel *tree;
+  Ui::MainWindow *ui;
+  buffers::Project *game;
+  TreeModel *tree;
 
 	void openSubWindow(QWidget *editor);
 };

@@ -2,11 +2,49 @@
 #include "ui_BackgroundEditor.h"
 #include "ResourceModel.h"
 
-#include <QDataWidgetMapper>
+#include "resources/Background.pb.h"
 
+#include "MainWindow.h"
+
+#include <QDataWidgetMapper>
+#include <QStyledItemDelegate>
+#include <QItemDelegate>
+#include <QItemEditorFactory>
 #include <QDebug>
 
-BackgroundEditor::BackgroundEditor(QWidget *parent, buffers::resources::Background* bkg) :
+class PropertyChangeEventFilter : public QObject
+{
+public:
+	PropertyChangeEventFilter(QObject *parent = 0): QObject(parent) {}
+
+	bool eventFilter(QObject *object, QEvent *event);
+};
+
+class ImmediateDataWidgetMapper : public QDataWidgetMapper
+{
+public:
+	ImmediateDataWidgetMapper(QWidget *parent = 0): QDataWidgetMapper(parent) {}
+
+	void addMapping(QWidget *widget, int section, const QByteArray &propertyName = "") {
+		QDataWidgetMapper::addMapping(widget, section, propertyName);
+		widget->installEventFilter(new PropertyChangeEventFilter(this));
+	}
+};
+
+bool PropertyChangeEventFilter::eventFilter(QObject *object, QEvent *event) {
+	if (event->type() == QEvent::DynamicPropertyChange) {
+		//auto *propertyChangeEvent = static_cast<QDynamicPropertyChangeEvent *>(event);
+		auto *mapper = reinterpret_cast<ImmediateDataWidgetMapper *>(parent());
+		auto *widget = reinterpret_cast<QWidget *>(object);
+		//qDebug() << propertyChangeEvent->propertyName();
+		mapper->itemDelegate()->commitData(widget);
+		mapper->itemDelegate()->closeEditor(widget, QAbstractItemDelegate::SubmitModelCache);
+		return true;
+	}
+	return false;
+}
+
+BackgroundEditor::BackgroundEditor(QWidget *parent, buffers::resources::Background *bkg) :
 	QWidget(parent),
 	ui(new Ui::BackgroundEditor)
 {
@@ -14,16 +52,19 @@ BackgroundEditor::BackgroundEditor(QWidget *parent, buffers::resources::Backgrou
 
 	ui->setupUi(this);
 	QGraphicsScene* scene = new QGraphicsScene(this);
-    QPixmap avatar(QString::fromStdString(bkg->image()));
+	QPixmap avatar("C:/Users/Owner/Desktop/bg_intro.png");
 	scene->addPixmap(avatar);
 	ui->imagePreview->setScene(scene);
 
-    ResourceModel* model = new ResourceModel(bkg);
-
-	QDataWidgetMapper* mapper = new QDataWidgetMapper(this);
+	ImmediateDataWidgetMapper* mapper = new ImmediateDataWidgetMapper(this);
 	mapper->setOrientation(Qt::Vertical);
+	auto *mainWindow = static_cast<MainWindow*>(parent);
+    mapper->setModel(new ResourceModel(bkg));
 
-    mapper->setModel(model);
+	mapper->addMapping(ui->smoothCheckBox, Background::kSmoothEdgesFieldNumber);
+	mapper->addMapping(ui->preloadCheckBox, Background::kPreloadFieldNumber);
+	mapper->addMapping(ui->transparentCheckBox, Background::kTransparentFieldNumber);
+	mapper->addMapping(ui->tilesetGroupBox, Background::kUseAsTilesetFieldNumber);
 	mapper->addMapping(ui->tileWidthSpinBox, Background::kTileWidthFieldNumber);
 	mapper->addMapping(ui->tileHeightSpinBox, Background::kTileHeightFieldNumber);
 	mapper->toFirst();
@@ -32,4 +73,9 @@ BackgroundEditor::BackgroundEditor(QWidget *parent, buffers::resources::Backgrou
 BackgroundEditor::~BackgroundEditor()
 {
 	delete ui;
+}
+
+void BackgroundEditor::on_actionSave_triggered()
+{
+	ui->smoothCheckBox->setAcceptDrops(!ui->smoothCheckBox->acceptDrops());
 }

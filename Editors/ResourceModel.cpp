@@ -3,7 +3,7 @@
 #include <QDebug>
 
 ResourceModel::ResourceModel(google::protobuf::Message *protobuf, QObject *parent) :
-	QAbstractListModel(parent), protobuf(protobuf) {}
+	QAbstractItemModel(parent), protobuf(protobuf) {}
 
 int ResourceModel::rowCount(const QModelIndex &parent) const {
 	Q_UNUSED(parent);
@@ -11,7 +11,13 @@ int ResourceModel::rowCount(const QModelIndex &parent) const {
 	return desc->field_count();
 }
 
+int ResourceModel::columnCount(const QModelIndex &parent) const {
+	return 1;
+}
+
 bool ResourceModel::setData(const QModelIndex &index, const QVariant &value, int role) {
+	//qDebug() << role;
+
 	const google::protobuf::Descriptor *desc = protobuf->GetDescriptor();
 	const google::protobuf::Reflection *refl = protobuf->GetReflection();
 	const google::protobuf::FieldDescriptor *field = desc->field(index.row());
@@ -49,11 +55,15 @@ bool ResourceModel::setData(const QModelIndex &index, const QVariant &value, int
 			refl->SetString(protobuf, field, value.toString().toStdString());
 		break;
 	}
+
 	emit dataChanged(index, index);
 	return true;
 }
 
 QVariant ResourceModel::data(const QModelIndex &index, int role) const {
+	if (role != Qt::DisplayRole && role != Qt::EditRole)
+		 return QVariant();
+
 	const google::protobuf::Descriptor *desc = protobuf->GetDescriptor();
 	const google::protobuf::Reflection *refl = protobuf->GetReflection();
 	const google::protobuf::FieldDescriptor *field = desc->field(index.row());
@@ -80,5 +90,28 @@ QVariant ResourceModel::data(const QModelIndex &index, int role) const {
 		case google::protobuf::FieldDescriptor::CppType::CPPTYPE_STRING:
 			return refl->GetString(*protobuf, field).c_str();
 	}
-    return 0;
+
+	return QVariant();
+}
+
+QModelIndex ResourceModel::parent(const QModelIndex &index) const {
+	return QModelIndex();
+}
+
+QVariant ResourceModel::headerData(int section, Qt::Orientation orientation,
+								   int role) const {
+	if (role != Qt::DisplayRole)
+		 return QVariant();
+	return "hey";
+}
+
+QModelIndex ResourceModel::index(int row, int column, const QModelIndex &parent) const {
+	return this->createIndex(row, column);
+}
+
+Qt::ItemFlags ResourceModel::flags(const QModelIndex &index) const {
+	if (!index.isValid())
+		return 0;
+
+	return QAbstractItemModel::flags(index);
 }

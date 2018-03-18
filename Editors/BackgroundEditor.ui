@@ -208,6 +208,9 @@
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::UpDownArrows</enum>
             </property>
+            <property name="accelerated">
+             <bool>true</bool>
+            </property>
             <property name="minimum">
              <number>-2147483647</number>
             </property>

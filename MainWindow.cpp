@@ -11,6 +11,9 @@
 #include "Editors/RoomEditor.h"
 #include "gmx.h"
 
+#include "Editors/ResourceModel.h"
+#include "resources/Background.pb.h"
+
 #include <QtWidgets>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -18,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui(new Ui::MainWindow)
 {
     IconManager::Init();
-	ui->setupUi(this);
+    ui->setupUi(this);
     ui->mdiArea->setBackground(QImage(":/banner.png"));
 }
 
@@ -32,6 +35,10 @@ MainWindow::~MainWindow()
 {
 	delete ui;
 }
+
+/*ResourceModel *MainWindow::dataModel() const {
+	return this->dataModel_;
+}*/
 
 void MainWindow::on_actionOpen_triggered()
 {

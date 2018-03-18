@@ -2,15 +2,15 @@
 #include "ui_PreferencesDialog.h"
 
 #include <QStyleFactory>
-#include <QDebug>
+
 PreferencesDialog::PreferencesDialog(QWidget *parent) :
 	QDialog(parent),
 	ui(new Ui::PreferencesDialog)
 {
 	ui->setupUi(this);
+	this->setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 
 	foreach (QString styleName, QStyleFactory::keys()) {
-		qDebug() << styleName;
 		ui->styleCombo->addItem(styleName);
 		if (style()->objectName().toLower() == styleName.toLower())
 			ui->styleCombo->setCurrentIndex(ui->styleCombo->count() - 1);

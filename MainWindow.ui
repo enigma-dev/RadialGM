@@ -261,7 +261,23 @@
       </layout>
      </item>
      <item>
-      <widget class="QTreeView" name="treeView"/>
+      <widget class="QTreeView" name="treeView">
+       <property name="rootIsDecorated">
+        <bool>true</bool>
+       </property>
+       <property name="uniformRowHeights">
+        <bool>false</bool>
+       </property>
+       <property name="itemsExpandable">
+        <bool>true</bool>
+       </property>
+       <property name="allColumnsShowFocus">
+        <bool>false</bool>
+       </property>
+       <property name="headerHidden">
+        <bool>false</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
