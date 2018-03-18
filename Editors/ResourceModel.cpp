@@ -80,5 +80,5 @@ QVariant ResourceModel::data(const QModelIndex &index, int role) const {
 		case google::protobuf::FieldDescriptor::CppType::CPPTYPE_STRING:
 			return refl->GetString(*protobuf, field).c_str();
 	}
-	return 0;
+    return 0;
 }

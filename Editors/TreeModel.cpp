@@ -8,7 +8,6 @@ TreeModel::TreeModel(buffers::TreeNode* root, QObject *parent)
 
 TreeModel::~TreeModel()
 {
-    delete root;
 }
 
 int TreeModel::columnCount(const QModelIndex &parent) const
