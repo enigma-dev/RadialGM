@@ -14,6 +14,8 @@ class BackgroundEditor : public QWidget
 public:
 	explicit BackgroundEditor(QWidget *parent = 0);
 	~BackgroundEditor();
+private slots:
+	void on_actionSave_triggered();
 
 private:
 	Ui::BackgroundEditor *ui;

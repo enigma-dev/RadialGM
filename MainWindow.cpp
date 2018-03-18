@@ -9,14 +9,25 @@
 #include "Editors/TimelineEditor.h"
 #include "Editors/RoomEditor.h"
 
+#include "Editors/ResourceModel.h"
+#include "resources/Background.pb.h"
+
 #include <QtWidgets>
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow)
 {
+	using buffers::resources::Background;
+
 	ui->setupUi(this);
 	ui->mdiArea->setBackground(QImage(":/banner.png"));
+
+	Background* background = new Background(); // just here for me to test
+	this->dataModel_ = new ResourceModel(background, this);
+
+	ui->treeView->setModel(this->dataModel_);
+
 	openSubWindow(new BackgroundEditor(this));
 	openSubWindow(new BackgroundEditor(this));
 
@@ -35,6 +46,10 @@ void MainWindow::openSubWindow(QWidget *editor) {
 MainWindow::~MainWindow()
 {
 	delete ui;
+}
+
+ResourceModel *MainWindow::dataModel() const {
+	return this->dataModel_;
 }
 
 void MainWindow::on_actionOpen_triggered()
