@@ -44,22 +44,22 @@ bool PropertyChangeEventFilter::eventFilter(QObject *object, QEvent *event) {
 	return false;
 }
 
-BackgroundEditor::BackgroundEditor(QWidget *parent, buffers::resources::Background *bkg) :
+using buffers::resources::Background;
+
+BackgroundEditor::BackgroundEditor(QWidget *parent, Background *bkg) :
 	QWidget(parent),
 	ui(new Ui::BackgroundEditor)
 {
-	using buffers::resources::Background;
-
 	ui->setupUi(this);
-	QGraphicsScene* scene = new QGraphicsScene(this);
-	QPixmap avatar("C:/Users/Owner/Desktop/bg_intro.png");
-	scene->addPixmap(avatar);
-	ui->imagePreview->setScene(scene);
 
-	ImmediateDataWidgetMapper* mapper = new ImmediateDataWidgetMapper(this);
+    scene = new QGraphicsScene(this);
+    image = QPixmap(QString::fromStdString(bkg->image()));
+
+    ImmediateDataWidgetMapper* mapper = new ImmediateDataWidgetMapper(this);
 	mapper->setOrientation(Qt::Vertical);
-	auto *mainWindow = static_cast<MainWindow*>(parent);
-    mapper->setModel(new ResourceModel(bkg));
+    ResourceModel* rm = new ResourceModel(bkg);
+    connect(rm, &ResourceModel::dataChanged, this, &BackgroundEditor::on_model_modified);
+    mapper->setModel(rm);
 
 	mapper->addMapping(ui->smoothCheckBox, Background::kSmoothEdgesFieldNumber);
 	mapper->addMapping(ui->preloadCheckBox, Background::kPreloadFieldNumber);
@@ -67,12 +67,44 @@ BackgroundEditor::BackgroundEditor(QWidget *parent, buffers::resources::Backgrou
 	mapper->addMapping(ui->tilesetGroupBox, Background::kUseAsTilesetFieldNumber);
 	mapper->addMapping(ui->tileWidthSpinBox, Background::kTileWidthFieldNumber);
 	mapper->addMapping(ui->tileHeightSpinBox, Background::kTileHeightFieldNumber);
-	mapper->toFirst();
+    mapper->addMapping(ui->horizontalOffsetSpinBox, Background::kHorizontalOffsetFieldNumber);
+    mapper->addMapping(ui->verticalOffsetSpinBox, Background::kVerticalOffsetFieldNumber);
+    mapper->addMapping(ui->horizontalSpacingSpinBox, Background::kHorizontalSpacingFieldNumber);
+    mapper->addMapping(ui->verticalSpacingSpinBox, Background::kVerticalSpacingFieldNumber);
+    mapper->toFirst();
+
+    draw();
 }
 
 BackgroundEditor::~BackgroundEditor()
 {
 	delete ui;
+}
+
+void BackgroundEditor::draw() {
+    scene->clear();
+    scene->addPixmap(image);
+
+    if (ui->tilesetGroupBox->isChecked()) {
+        unsigned hOff = ui->horizontalOffsetSpinBox->value();
+        unsigned vOff = ui->horizontalOffsetSpinBox->value();
+        unsigned w = ui->tileWidthSpinBox->value();
+        unsigned h = ui->tileHeightSpinBox->value();
+        unsigned hSpacing = ui->horizontalSpacingSpinBox->value();
+        unsigned vSpacing = ui->verticalSpacingSpinBox->value();
+
+        for (int x = hOff; x < image.width(); x+= w + hSpacing) {
+            for (int y = vOff; y < image.height(); y+= h + vSpacing) {
+                scene->addRect(x, y, w, h);
+            }
+        }
+    }
+
+    ui->imagePreview->setScene(scene);
+}
+
+void BackgroundEditor::on_model_modified() {
+    draw();
 }
 
 void BackgroundEditor::on_actionSave_triggered()

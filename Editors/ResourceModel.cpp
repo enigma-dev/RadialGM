@@ -20,7 +20,7 @@ bool ResourceModel::setData(const QModelIndex &index, const QVariant &value, int
 
 	const google::protobuf::Descriptor *desc = protobuf->GetDescriptor();
 	const google::protobuf::Reflection *refl = protobuf->GetReflection();
-	const google::protobuf::FieldDescriptor *field = desc->field(index.row());
+    const google::protobuf::FieldDescriptor *field = desc->FindFieldByNumber(index.row());
 
 	switch (field->cpp_type()) {
 		case google::protobuf::FieldDescriptor::CppType::CPPTYPE_MESSAGE: {
@@ -66,7 +66,7 @@ QVariant ResourceModel::data(const QModelIndex &index, int role) const {
 
 	const google::protobuf::Descriptor *desc = protobuf->GetDescriptor();
 	const google::protobuf::Reflection *refl = protobuf->GetReflection();
-	const google::protobuf::FieldDescriptor *field = desc->field(index.row());
+    const google::protobuf::FieldDescriptor *field = desc->FindFieldByNumber(index.row());
 
 	switch (field->cpp_type()) {
 		case google::protobuf::FieldDescriptor::CppType::CPPTYPE_MESSAGE:
