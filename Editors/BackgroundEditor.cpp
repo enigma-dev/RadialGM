@@ -1,5 +1,6 @@
 #include "BackgroundEditor.h"
 #include "ui_BackgroundEditor.h"
+#include "ui_AddImageDialog.h"
 #include "ResourceModel.h"
 
 #include "resources/Background.pb.h"
@@ -34,7 +35,8 @@ BackgroundEditor::BackgroundEditor(QWidget *parent, ResourceModel *model) :
     mapper->addMapping(ui->verticalSpacingSpinBox, Background::kVerticalSpacingFieldNumber);
     mapper->toFirst();
 
-    ui->backgroundRenderer->setImage(model->data(model->index(Background::kImageFieldNumber), Qt::DisplayRole).toString());
+    ui->backgroundRenderer->setTransparent(ui->transparentCheckBox->isChecked());
+    ui->backgroundRenderer->setImage(QPixmap(model->data(model->index(Background::kImageFieldNumber), Qt::DisplayRole).toString()));
     ui->backgroundRenderer->setGrid(ui->tilesetGroupBox->isChecked(),
                               ui->horizontalOffsetSpinBox->value(),
                               ui->verticalOffsetSpinBox->value(),
@@ -50,6 +52,7 @@ BackgroundEditor::~BackgroundEditor()
 }
 
 void BackgroundEditor::dataChanged(const QModelIndex& /*topLeft*/, const QModelIndex& /*bottomRight*/, const QVector<int>& /*roles*/) {
+    ui->backgroundRenderer->setTransparent(ui->transparentCheckBox->isChecked());
     ui->backgroundRenderer->setGrid(ui->tilesetGroupBox->isChecked(),
                               ui->horizontalOffsetSpinBox->value(),
                               ui->verticalOffsetSpinBox->value(),
@@ -62,4 +65,34 @@ void BackgroundEditor::dataChanged(const QModelIndex& /*topLeft*/, const QModelI
 void BackgroundEditor::on_actionSave_triggered()
 {
 	ui->smoothCheckBox->setAcceptDrops(!ui->smoothCheckBox->acceptDrops());
+}
+
+void BackgroundEditor::on_actionZoomIn_triggered()
+{
+    ui->backgroundRenderer->setZoom(ui->backgroundRenderer->getZoom()*2);
+}
+
+void BackgroundEditor::on_actionZoomOut_triggered()
+{
+    ui->backgroundRenderer->setZoom(ui->backgroundRenderer->getZoom()/2);
+}
+
+void BackgroundEditor::on_actionZoom_triggered()
+{
+    ui->backgroundRenderer->setZoom(1);
+}
+
+void BackgroundEditor::on_actionNewImage_triggered()
+{
+    QDialog *dialog = new QDialog(this, Qt::WindowStaysOnTopHint);
+    Ui::AddImageDialog dialogUI;
+    dialogUI.setupUi(dialog);
+    connect(dialog, &QDialog::accepted, this, [&]() {
+        qDebug() << dialogUI.widthSpinBox->value() << " ";
+         QPixmap img(dialogUI.widthSpinBox->value(), dialogUI.heightSpinBox->value());
+         img.fill(Qt::transparent);
+         ui->backgroundRenderer->setImage(img);
+    });
+
+    dialog->show();
 }
