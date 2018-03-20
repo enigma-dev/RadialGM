@@ -1,5 +1,5 @@
 #include "TreeModel.h"
-#include "IconManager.h"
+#include "ArtManager.h"
 
 #include <QDebug>
 
@@ -10,7 +10,7 @@ TreeModel::~TreeModel()
 {
 }
 
-int TreeModel::columnCount(const QModelIndex &parent) const
+int TreeModel::columnCount(const QModelIndex& /*parent*/) const
 {
     return 1;
 }
@@ -24,29 +24,29 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DecorationRole) {
         if (item->has_folder())
-            return IconManager::get_icon("group");
+            return ArtManager::get_icon("group");
         if (item->has_background())
-            return IconManager::get_icon("background");
+            return ArtManager::get_icon("background");
         if (item->has_font())
-            return IconManager::get_icon("font");
+            return ArtManager::get_icon("font");
         if (item->has_object())
-            return IconManager::get_icon("object");
+            return ArtManager::get_icon("object");
         if (item->has_path())
-            return IconManager::get_icon("path");
+            return ArtManager::get_icon("path");
         if (item->has_room())
-            return IconManager::get_icon("room");
+            return ArtManager::get_icon("room");
         if (item->has_script())
-            return IconManager::get_icon("script");
+            return ArtManager::get_icon("script");
         if (item->has_shader())
-            return IconManager::get_icon("shader");
+            return ArtManager::get_icon("shader");
         if (item->has_sound())
-            return IconManager::get_icon("sound");
+            return ArtManager::get_icon("sound");
         if (item->has_sprite())
-            return IconManager::get_icon("sprite");
+            return ArtManager::get_icon("sprite");
         if (item->has_timeline())
-            return IconManager::get_icon("timeline");
+            return ArtManager::get_icon("timeline");
 
-        return IconManager::get_icon("info");
+        return ArtManager::get_icon("info");
     }
 
     if (role != Qt::DisplayRole)
@@ -63,7 +63,7 @@ Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const
     return QAbstractItemModel::flags(index);
 }
 
-QVariant TreeModel::headerData(int section, Qt::Orientation orientation,
+QVariant TreeModel::headerData(int /*section*/, Qt::Orientation orientation,
                                int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)

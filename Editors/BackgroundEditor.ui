@@ -20,7 +20,7 @@
    <string>Background</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../images.qrc">
+   <iconset>
     <normaloff>:/resources/background.png</normaloff>:/resources/background.png</iconset>
   </property>
   <property name="Josh" stdset="0">
@@ -212,7 +212,7 @@
              <bool>true</bool>
             </property>
             <property name="minimum">
-             <number>-2147483647</number>
+             <number>0</number>
             </property>
             <property name="maximum">
              <number>2147483647</number>
@@ -238,7 +238,7 @@
              <bool>true</bool>
             </property>
             <property name="minimum">
-             <number>-2147483647</number>
+             <number>0</number>
             </property>
             <property name="maximum">
              <number>2147483647</number>
@@ -317,7 +317,7 @@
              <bool>true</bool>
             </property>
             <property name="minimum">
-             <number>-2147483647</number>
+             <number>0</number>
             </property>
             <property name="maximum">
              <number>2147483647</number>
@@ -337,7 +337,7 @@
              <bool>true</bool>
             </property>
             <property name="minimum">
-             <number>-2147483647</number>
+             <number>0</number>
             </property>
             <property name="maximum">
              <number>2147483647</number>
@@ -395,7 +395,7 @@
   </layout>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="../images.qrc">
+    <iconset>
      <normaloff>:/actions/accept.png</normaloff>:/actions/accept.png</iconset>
    </property>
    <property name="text">
@@ -404,7 +404,7 @@
   </action>
   <action name="actionNewImage">
    <property name="icon">
-    <iconset resource="../images.qrc">
+    <iconset>
      <normaloff>:/actions/new.png</normaloff>:/actions/new.png</iconset>
    </property>
    <property name="text">
@@ -416,7 +416,7 @@
   </action>
   <action name="actionLoadImage">
    <property name="icon">
-    <iconset resource="../images.qrc">
+    <iconset>
      <normaloff>:/actions/open-image.png</normaloff>:/actions/open-image.png</iconset>
    </property>
    <property name="text">
@@ -428,7 +428,7 @@
   </action>
   <action name="actionSaveImage">
    <property name="icon">
-    <iconset resource="../images.qrc">
+    <iconset>
      <normaloff>:/actions/save.png</normaloff>:/actions/save.png</iconset>
    </property>
    <property name="text">
@@ -440,7 +440,7 @@
   </action>
   <action name="actionEditImage">
    <property name="icon">
-    <iconset resource="../images.qrc">
+    <iconset>
      <normaloff>:/actions/colorize.png</normaloff>:/actions/colorize.png</iconset>
    </property>
    <property name="text">
@@ -452,7 +452,7 @@
   </action>
   <action name="actionZoom">
    <property name="icon">
-    <iconset resource="../images.qrc">
+    <iconset>
      <normaloff>:/actions/zoom.png</normaloff>:/actions/zoom.png</iconset>
    </property>
    <property name="text">
@@ -464,7 +464,7 @@
   </action>
   <action name="actionZoomIn">
    <property name="icon">
-    <iconset resource="../images.qrc">
+    <iconset>
      <normaloff>:/actions/zoom-in.png</normaloff>:/actions/zoom-in.png</iconset>
    </property>
    <property name="text">
@@ -476,7 +476,7 @@
   </action>
   <action name="actionZoomOut">
    <property name="icon">
-    <iconset resource="../images.qrc">
+    <iconset>
      <normaloff>:/actions/zoom-out.png</normaloff>:/actions/zoom-out.png</iconset>
    </property>
    <property name="text">
@@ -495,8 +495,6 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="../images.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

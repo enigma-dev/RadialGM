@@ -5,19 +5,16 @@
 ResourceModel::ResourceModel(google::protobuf::Message *protobuf, QObject *parent) :
     QAbstractItemModel(parent), protobuf(protobuf) {}
 
-int ResourceModel::rowCount(const QModelIndex &parent) const {
-	Q_UNUSED(parent);
+int ResourceModel::rowCount(const QModelIndex& /*parent*/) const {
 	const google::protobuf::Descriptor *desc = protobuf->GetDescriptor();
 	return desc->field_count();
 }
 
-int ResourceModel::columnCount(const QModelIndex &parent) const {
+int ResourceModel::columnCount(const QModelIndex& /*parent*/) const {
 	return 1;
 }
 
-bool ResourceModel::setData(const QModelIndex &index, const QVariant &value, int role) {
-	//qDebug() << role;
-
+bool ResourceModel::setData(const QModelIndex &index, const QVariant& value, int /*role*/) {
 	const google::protobuf::Descriptor *desc = protobuf->GetDescriptor();
 	const google::protobuf::Reflection *refl = protobuf->GetReflection();
     const google::protobuf::FieldDescriptor *field = desc->FindFieldByNumber(index.row());
@@ -94,18 +91,18 @@ QVariant ResourceModel::data(const QModelIndex &index, int role) const {
 	return QVariant();
 }
 
-QModelIndex ResourceModel::parent(const QModelIndex &index) const {
+QModelIndex ResourceModel::parent(const QModelIndex& /*index*/) const {
 	return QModelIndex();
 }
 
-QVariant ResourceModel::headerData(int section, Qt::Orientation orientation,
+QVariant ResourceModel::headerData(int /*section*/, Qt::Orientation /*orientation*/,
 								   int role) const {
 	if (role != Qt::DisplayRole)
 		 return QVariant();
 	return "hey";
 }
 
-QModelIndex ResourceModel::index(int row, int column, const QModelIndex &parent) const {
+QModelIndex ResourceModel::index(int row, int column, const QModelIndex& /*parent*/) const {
 	return this->createIndex(row, column);
 }
 

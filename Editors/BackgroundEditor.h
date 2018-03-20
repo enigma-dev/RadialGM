@@ -1,7 +1,7 @@
 #ifndef BACKGROUNDEDITOR_H
 #define BACKGROUNDEDITOR_H
 
-#include "resources/Background.pb.h"
+#include "ResourceModel.h"
 
 #include "BackgroundRenderer.h"
 
@@ -50,7 +50,7 @@ class BackgroundEditor : public QWidget
 	Q_OBJECT
 
 public:
-    explicit BackgroundEditor(QWidget *parent, buffers::resources::Background *bkg);
+    explicit BackgroundEditor(QWidget *parent, ResourceModel* model);
 	~BackgroundEditor();
 
 private slots:

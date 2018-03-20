@@ -1,7 +1,7 @@
 #include "BackgroundRenderer.h"
+#include "../ArtManager.h"
 
 #include <QPainter>
-#include <QBrush>
 
 BackgroundRenderer::BackgroundRenderer(QWidget *parent) : QWidget(parent) {
 }
@@ -31,8 +31,7 @@ void BackgroundRenderer::setGrid(bool visible, unsigned hOff, unsigned vOff, uns
 void BackgroundRenderer::paintEvent(QPaintEvent * /* event */)
 {
     QPainter painter(this);
-    QBrush brush = QBrush(Qt::black, QPixmap(":/transparent.png"));
-    painter.fillRect(QRectF(0, 0, image.width(), image.height()), brush);
+    painter.fillRect(QRectF(0, 0, image.width(), image.height()), ArtManager::get_transpareny_brush());
 
     painter.drawPixmap(0, 0, image);
 

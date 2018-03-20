@@ -10,7 +10,7 @@
 
 using buffers::resources::Background;
 
-BackgroundEditor::BackgroundEditor(QWidget *parent, Background *bkg) :
+BackgroundEditor::BackgroundEditor(QWidget *parent, ResourceModel *model) :
 	QWidget(parent),
 	ui(new Ui::BackgroundEditor)
 {
@@ -18,9 +18,9 @@ BackgroundEditor::BackgroundEditor(QWidget *parent, Background *bkg) :
 
     ImmediateDataWidgetMapper* mapper = new ImmediateDataWidgetMapper(this);
 	mapper->setOrientation(Qt::Vertical);
-	static ResourceModel* rm = new ResourceModel(bkg);
-	connect(rm, &ResourceModel::dataChanged, this, &BackgroundEditor::dataChanged);
-    mapper->setModel(rm);
+    //ResourceModel* rm = new ResourceModel(model);
+    connect(model, &ResourceModel::dataChanged, this, &BackgroundEditor::dataChanged);
+    mapper->setModel(model);
 
 	mapper->addMapping(ui->smoothCheckBox, Background::kSmoothEdgesFieldNumber);
     mapper->addMapping(ui->preloadCheckBox, Background::kPreloadFieldNumber);
@@ -34,7 +34,7 @@ BackgroundEditor::BackgroundEditor(QWidget *parent, Background *bkg) :
     mapper->addMapping(ui->verticalSpacingSpinBox, Background::kVerticalSpacingFieldNumber);
     mapper->toFirst();
 
-    ui->backgroundRenderer->setImage(QString::fromStdString(bkg->image()));
+    ui->backgroundRenderer->setImage(model->data(model->index(Background::kImageFieldNumber), Qt::DisplayRole).toString());
     ui->backgroundRenderer->setGrid(ui->tilesetGroupBox->isChecked(),
                               ui->horizontalOffsetSpinBox->value(),
                               ui->verticalOffsetSpinBox->value(),

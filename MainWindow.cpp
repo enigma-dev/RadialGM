@@ -1,6 +1,6 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
-#include "IconManager.h"
+#include "ArtManager.h"
 
 #include "Dialogs/PreferencesDialog.h"
 
@@ -20,14 +20,90 @@ MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow)
 {
-    IconManager::Init();
+    ArtManager::Init();
     ui->setupUi(this);
     ui->mdiArea->setBackground(QImage(":/banner.png"));
 }
 
-void MainWindow::openSubWindow(QWidget *editor) {
-    QMdiSubWindow* subWindow = ui->mdiArea->addSubWindow(editor);
-    subWindow->setWindowIcon(editor->windowIcon());
+void MainWindow::openSubWindow(buffers::TreeNode* item) {
+    if (!resourceModels.contains(item)) {
+        if (item->has_background()) {
+            resourceModels[item] = new ResourceModel(item->mutable_background());
+        }
+        else if (item->has_font()) {
+            resourceModels[item] = new ResourceModel(item->mutable_font());
+        }
+        else if (item->has_object()) {
+            resourceModels[item] = new ResourceModel(item->mutable_object());
+        }
+        else if (item->has_path()) {
+            resourceModels[item] = new ResourceModel(item->mutable_path());
+        }
+        else if (item->has_room()) {
+            resourceModels[item] = new ResourceModel(item->mutable_room());
+        }
+        else if (item->has_script()) {
+            resourceModels[item] = new ResourceModel(item->mutable_background());
+        }
+        else if (item->has_shader()) {
+            resourceModels[item] = new ResourceModel(item->mutable_shader());
+        }
+        else if (item->has_sound()) {
+            resourceModels[item] = new ResourceModel(item->mutable_sound());
+        }
+        else if (item->has_sprite()) {
+            resourceModels[item] = new ResourceModel(item->mutable_sprite());
+        }
+        else if (item->has_timeline()) {
+            resourceModels[item] = new ResourceModel(item->mutable_timeline());
+        }
+    }
+
+    QWidget* editorWidget;
+    if (item->has_background()) {
+        editorWidget = new BackgroundEditor(this, resourceModels[item]);
+        //return;
+    }
+    if (item->has_font()) {
+        //openSubWindow(new FontEditor(this));
+        //return;
+    }
+    if (item->has_object()) {
+        //openSubWindow(new ObjectEditor(this));
+        //return;
+    }
+    if (item->has_path()) {
+       // openSubWindow(new PathEditor(this));
+        //return;
+    }
+    if (item->has_room()) {
+        //openSubWindow(new RoomEditor(this));
+        //return;
+    }
+    if (item->has_script()) {
+        //openSubWindow(new ScriptEditor(this));
+        //return;
+    }
+    if (item->has_shader()) {
+        //openSubWindow(new ShaderEditor(this));
+        //return;
+    }
+    if (item->has_sound()) {
+        //openSubWindow(new SoundEditor(this));
+        //return;
+    }
+    if (item->has_sprite()) {
+        //openSubWindow(new SpriteEditor(this));
+        //return;
+    }
+    if (item->has_timeline()) {
+        //openSubWindow(new TimelineEditor(this));
+        //return;
+}
+
+    QMdiSubWindow* subWindow = ui->mdiArea->addSubWindow(editorWidget);
+    subWindow->setWindowIcon(editorWidget->windowIcon());
+    subWindow->setWindowTitle(QString::fromStdString(item->name()));
     subWindow->show();
 }
 
@@ -51,7 +127,8 @@ void MainWindow::on_actionOpen_triggered()
 		tr("ENIGMA (*.egm);;GameMaker: Studio (*.gmx);;All Files (*)")
 	);
 
-    openFile(fileName);
+    if (!fileName.isEmpty())
+        openFile(fileName);
 }
 
 void MainWindow::on_actionPreferences_triggered()
@@ -147,48 +224,11 @@ void MainWindow::on_actionAbout_triggered()
 void MainWindow::on_treeView_doubleClicked(const QModelIndex &index)
 {
     buffers::TreeNode *item = static_cast<buffers::TreeNode*>(index.internalPointer());
+    const QString name = QString::fromStdString(item->name());
 
     if (item->has_folder()) {
         return;
     }
-    if (item->has_background()) {
-        openSubWindow(new BackgroundEditor(this, item->mutable_background()));
-        return;
-    }
-    if (item->has_font()) {
-        openSubWindow(new FontEditor(this));
-        return;
-    }
-    if (item->has_object()) {
-        openSubWindow(new ObjectEditor(this));
-        return;
-    }
-    if (item->has_path()) {
-       // openSubWindow(new PathEditor(this));
-        return;
-    }
-    if (item->has_room()) {
-        openSubWindow(new RoomEditor(this));
-        return;
-    }
-    if (item->has_script()) {
-        //openSubWindow(new ScriptEditor(this));
-        return;
-    }
-    if (item->has_shader()) {
-        //openSubWindow(new ShaderEditor(this));
-        return;
-    }
-    if (item->has_sound()) {
-        //openSubWindow(new SoundEditor(this));
-        return;
-    }
-    if (item->has_sprite()) {
-        //openSubWindow(new SpriteEditor(this));
-        return;
-    }
-    if (item->has_timeline()) {
-        openSubWindow(new TimelineEditor(this));
-        return;
-    }
+
+    openSubWindow(item);
 }

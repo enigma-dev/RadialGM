@@ -51,8 +51,9 @@ private:
   Ui::MainWindow *ui;
   buffers::Project *game;
   TreeModel *tree;
+  QHash<buffers::TreeNode*,ResourceModel*> resourceModels;
 
-	void openSubWindow(QWidget *editor);
+  void openSubWindow(buffers::TreeNode *item);
 };
 
 #endif // MAINWINDOW_H
