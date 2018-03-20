@@ -1,6 +1,8 @@
 #ifndef PATHEDITOR_H
 #define PATHEDITOR_H
 
+#include "ResourceModel.h"
+
 #include <QWidget>
 
 namespace Ui {
@@ -12,7 +14,7 @@ class PathEditor : public QWidget
 	Q_OBJECT
 
 public:
-	explicit PathEditor(QWidget *parent = 0);
+    explicit PathEditor(QWidget *parent, ResourceModel *model);
 	~PathEditor();
 
 private:

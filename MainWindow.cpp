@@ -9,6 +9,7 @@
 #include "Editors/FontEditor.h"
 #include "Editors/TimelineEditor.h"
 #include "Editors/RoomEditor.h"
+#include "Editors/PathEditor.h"
 #include "gmx.h"
 
 #include "Editors/ResourceModel.h"
@@ -26,85 +27,85 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 void MainWindow::openSubWindow(buffers::TreeNode* item) {
-    if (!resourceModels.contains(item)) {
-        if (item->has_background()) {
-            resourceModels[item] = new ResourceModel(item->mutable_background());
-        }
-        else if (item->has_font()) {
-            resourceModels[item] = new ResourceModel(item->mutable_font());
-        }
-        else if (item->has_object()) {
-            resourceModels[item] = new ResourceModel(item->mutable_object());
-        }
-        else if (item->has_path()) {
-            resourceModels[item] = new ResourceModel(item->mutable_path());
-        }
-        else if (item->has_room()) {
-            resourceModels[item] = new ResourceModel(item->mutable_room());
-        }
-        else if (item->has_script()) {
-            resourceModels[item] = new ResourceModel(item->mutable_background());
-        }
-        else if (item->has_shader()) {
-            resourceModels[item] = new ResourceModel(item->mutable_shader());
-        }
-        else if (item->has_sound()) {
-            resourceModels[item] = new ResourceModel(item->mutable_sound());
-        }
-        else if (item->has_sprite()) {
-            resourceModels[item] = new ResourceModel(item->mutable_sprite());
-        }
-        else if (item->has_timeline()) {
-            resourceModels[item] = new ResourceModel(item->mutable_timeline());
-        }
-    }
 
-    QWidget* editorWidget;
     if (item->has_background()) {
-        editorWidget = new BackgroundEditor(this, resourceModels[item]);
-        //return;
-    }
-    if (item->has_font()) {
-        //openSubWindow(new FontEditor(this));
-        //return;
-    }
-    if (item->has_object()) {
-        //openSubWindow(new ObjectEditor(this));
-        //return;
-    }
-    if (item->has_path()) {
-       // openSubWindow(new PathEditor(this));
-        //return;
-    }
-    if (item->has_room()) {
-        //openSubWindow(new RoomEditor(this));
-        //return;
-    }
-    if (item->has_script()) {
-        //openSubWindow(new ScriptEditor(this));
-        //return;
-    }
-    if (item->has_shader()) {
-        //openSubWindow(new ShaderEditor(this));
-        //return;
-    }
-    if (item->has_sound()) {
-        //openSubWindow(new SoundEditor(this));
-        //return;
-    }
-    if (item->has_sprite()) {
-        //openSubWindow(new SpriteEditor(this));
-        //return;
-    }
-    if (item->has_timeline()) {
-        //openSubWindow(new TimelineEditor(this));
-        //return;
-}
+        if (!resourceModels.contains(item))
+            resourceModels[item] = new ResourceModel(item->mutable_background());
 
-    QMdiSubWindow* subWindow = ui->mdiArea->addSubWindow(editorWidget);
-    subWindow->setWindowIcon(editorWidget->windowIcon());
-    subWindow->setWindowTitle(QString::fromStdString(item->name()));
-    subWindow->show();
+        if (!subWindows.contains(item)) {
+            subWindows[item] = ui->mdiArea->addSubWindow(new BackgroundEditor(this, resourceModels[item]));
+        }
+    }
+    else if (item->has_font()) {
+        if (!resourceModels.contains(item))
+            resourceModels[item] = new ResourceModel(item->mutable_font());
+
+        if (!subWindows.contains(item))
+            subWindows[item] = ui->mdiArea->addSubWindow(new FontEditor(this, resourceModels[item]));
+    }
+    else if (item->has_object()) {
+        if (!resourceModels.contains(item))
+            resourceModels[item] = new ResourceModel(item->mutable_object());
+
+        if (!subWindows.contains(item))
+            subWindows[item] = ui->mdiArea->addSubWindow(new ObjectEditor(this, resourceModels[item]));
+    }
+    else if (item->has_path()) {
+        if (!resourceModels.contains(item))
+            resourceModels[item] = new ResourceModel(item->mutable_path());
+
+        if (!subWindows.contains(item))
+            subWindows[item] = ui->mdiArea->addSubWindow(new PathEditor(this, resourceModels[item]));
+    }
+    else if (item->has_room()) {
+        if (!resourceModels.contains(item))
+            resourceModels[item] = new ResourceModel(item->mutable_room());
+
+        if (!subWindows.contains(item))
+            subWindows[item] = ui->mdiArea->addSubWindow(new RoomEditor(this, resourceModels[item]));
+    }
+    else if (item->has_script()) {
+        /*if (!resourceModels.contains(item))
+            resourceModels[item] = new ResourceModel(item->mutable_background());
+
+        if (!subWindows.contains(item))1
+            subWindows[item] = ui->mdiArea->addSubWindow(new ScriptEditor(this, resourceModels[item]));*/
+    }
+    else if (item->has_shader()) {
+        /*if (!resourceModels.contains(item))
+            resourceModels[item] = new ResourceModel(item->mutable_shader());
+
+        if (!subWindows.contains(item))
+            subWindows[item] = ui->mdiArea->addSubWindow(new ShaderEditor(this, resourceModels[item]));*/
+    }
+    else if (item->has_sound()) {
+        /*if (!resourceModels.contains(item))
+            resourceModels[item] = new ResourceModel(item->mutable_sound());
+
+        if (!subWindows.contains(item))
+            subWindows[item] = ui->mdiArea->addSubWindow(new SoundEditor(this, resourceModels[item]));*/
+    }
+    else if (item->has_sprite()) {
+        /*if (!resourceModels.contains(item))
+            resourceModels[item] = new ResourceModel(item->mutable_sprite());
+
+        if (!subWindows.contains(item))
+            subWindows[item] = ui->mdiArea->addSubWindow(new SpriteEditor(this, resourceModels[item]));*/
+    }
+    else if (item->has_timeline()) {
+        if (!resourceModels.contains(item))
+            resourceModels[item] = new ResourceModel(item->mutable_timeline());
+
+        if (!subWindows.contains(item))
+            subWindows[item] = ui->mdiArea->addSubWindow(new TimelineEditor(this, resourceModels[item]));
+    }
+
+    if (subWindows[item] != nullptr) {
+        subWindows[item]->setWindowIcon(subWindows[item]->widget()->windowIcon());
+        subWindows[item]->setWindowTitle(QString::fromStdString(item->name()));
+        subWindows[item]->show();
+        subWindows[item]->raise();
+    }
 }
 
 MainWindow::~MainWindow()

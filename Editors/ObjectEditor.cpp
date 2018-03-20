@@ -1,7 +1,7 @@
 #include "ObjectEditor.h"
 #include "ui_ObjectEditor.h"
 
-ObjectEditor::ObjectEditor(QWidget *parent) :
+ObjectEditor::ObjectEditor(QWidget *parent, ResourceModel* /*model*/) :
 	QWidget(parent),
 	ui(new Ui::ObjectEditor)
 {

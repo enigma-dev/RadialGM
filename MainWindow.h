@@ -6,6 +6,7 @@
 #include "codegen/project.pb.h"
 
 #include <QMainWindow>
+#include <QMdiSubWindow>
 
 namespace Ui {
 class MainWindow;
@@ -52,6 +53,7 @@ private:
   buffers::Project *game;
   TreeModel *tree;
   QHash<buffers::TreeNode*,ResourceModel*> resourceModels;
+  QHash<buffers::TreeNode*,QMdiSubWindow*> subWindows;
 
   void openSubWindow(buffers::TreeNode *item);
 };

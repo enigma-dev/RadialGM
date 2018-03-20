@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
-CONFIG   += qscintilla2
+CONFIG   += c++11 qscintilla2
 
 win32:RC_ICONS += images/icon.ico
 

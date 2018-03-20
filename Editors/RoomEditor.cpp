@@ -5,7 +5,7 @@
 #include <Qsci/qscilexercpp.h>
 #include <QFontMetrics>
 
-RoomEditor::RoomEditor(QWidget *parent) :
+RoomEditor::RoomEditor(QWidget *parent, ResourceModel* /*model*/) :
 	QWidget(parent),
 	ui(new Ui::RoomEditor)
 {

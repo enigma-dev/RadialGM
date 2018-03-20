@@ -1,6 +1,8 @@
 #ifndef FONTEDITOR_H
 #define FONTEDITOR_H
 
+#include "ResourceModel.h"
+
 #include <QWidget>
 
 namespace Ui {
@@ -12,7 +14,7 @@ class FontEditor : public QWidget
 	Q_OBJECT
 
 public:
-	explicit FontEditor(QWidget *parent = 0);
+    explicit FontEditor(QWidget *parent, ResourceModel *model);
 	~FontEditor();
 
 private:
