@@ -3,7 +3,7 @@
 #include <QDebug>
 
 ResourceModel::ResourceModel(google::protobuf::Message *protobuf, QObject *parent) :
-	QAbstractItemModel(parent), protobuf(protobuf) {}
+    QAbstractItemModel(parent), protobuf(protobuf) {}
 
 int ResourceModel::rowCount(const QModelIndex &parent) const {
 	Q_UNUSED(parent);

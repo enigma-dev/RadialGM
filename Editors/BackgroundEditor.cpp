@@ -12,36 +12,35 @@
 #include <QItemEditorFactory>
 #include <QDebug>
 
+class ImmediateDataWidgetMapper;
+
 class PropertyChangeEventFilter : public QObject
 {
 public:
-	PropertyChangeEventFilter(QObject *parent = 0): QObject(parent) {}
+    PropertyChangeEventFilter(QObject *parent, ImmediateDataWidgetMapper* mapper): QObject(parent), mapper(mapper) {}
+    bool eventFilter(QObject *object, QEvent *event);
 
-	bool eventFilter(QObject *object, QEvent *event);
+private:
+    ImmediateDataWidgetMapper* mapper;
 };
 
 class ImmediateDataWidgetMapper : public QDataWidgetMapper
 {
 public:
-	ImmediateDataWidgetMapper(QWidget *parent = 0): QDataWidgetMapper(parent) {}
+    ImmediateDataWidgetMapper(QWidget *parent = 0): QDataWidgetMapper(parent) {}
 
-	void addMapping(QWidget *widget, int section, const QByteArray &propertyName = "") {
-		QDataWidgetMapper::addMapping(widget, section, propertyName);
-		widget->installEventFilter(new PropertyChangeEventFilter(this));
-	}
+    void addMapping(QWidget *widget, int section, const QByteArray &propertyName = "") {
+        QDataWidgetMapper::addMapping(widget, section, propertyName);
+        widget->installEventFilter(new PropertyChangeEventFilter(widget, this));
+    }
 };
 
-bool PropertyChangeEventFilter::eventFilter(QObject *object, QEvent *event) {
-	if (event->type() == QEvent::DynamicPropertyChange) {
-		//auto *propertyChangeEvent = static_cast<QDynamicPropertyChangeEvent *>(event);
-		auto *mapper = reinterpret_cast<ImmediateDataWidgetMapper *>(parent());
-		auto *widget = reinterpret_cast<QWidget *>(object);
-		//qDebug() << propertyChangeEvent->propertyName();
-		mapper->itemDelegate()->commitData(widget);
-		mapper->itemDelegate()->closeEditor(widget, QAbstractItemDelegate::SubmitModelCache);
-		return true;
-	}
-	return false;
+bool PropertyChangeEventFilter::eventFilter(QObject* object, QEvent *event) {
+    if (event->type() == QEvent::InputMethodQuery || event->type() == QEvent::MouseButtonPress) {
+        mapper->submit();
+        return QObject::eventFilter(object, event);
+    }
+    return false;
 }
 
 using buffers::resources::Background;
@@ -52,9 +51,6 @@ BackgroundEditor::BackgroundEditor(QWidget *parent, Background *bkg) :
 {
 	ui->setupUi(this);
 
-    scene = new QGraphicsScene(this);
-    image = QPixmap(QString::fromStdString(bkg->image()));
-
     ImmediateDataWidgetMapper* mapper = new ImmediateDataWidgetMapper(this);
 	mapper->setOrientation(Qt::Vertical);
     ResourceModel* rm = new ResourceModel(bkg);
@@ -62,7 +58,7 @@ BackgroundEditor::BackgroundEditor(QWidget *parent, Background *bkg) :
     mapper->setModel(rm);
 
 	mapper->addMapping(ui->smoothCheckBox, Background::kSmoothEdgesFieldNumber);
-	mapper->addMapping(ui->preloadCheckBox, Background::kPreloadFieldNumber);
+    mapper->addMapping(ui->preloadCheckBox, Background::kPreloadFieldNumber);
 	mapper->addMapping(ui->transparentCheckBox, Background::kTransparentFieldNumber);
 	mapper->addMapping(ui->tilesetGroupBox, Background::kUseAsTilesetFieldNumber);
 	mapper->addMapping(ui->tileWidthSpinBox, Background::kTileWidthFieldNumber);
@@ -73,7 +69,14 @@ BackgroundEditor::BackgroundEditor(QWidget *parent, Background *bkg) :
     mapper->addMapping(ui->verticalSpacingSpinBox, Background::kVerticalSpacingFieldNumber);
     mapper->toFirst();
 
-    draw();
+    ui->backgroundRenderer->setImage(QString::fromStdString(bkg->image()));
+    ui->backgroundRenderer->setGrid(ui->tilesetGroupBox->isChecked(),
+                              ui->horizontalOffsetSpinBox->value(),
+                              ui->verticalOffsetSpinBox->value(),
+                              ui->tileWidthSpinBox->value(),
+                              ui->tileHeightSpinBox->value(),
+                              ui->horizontalSpacingSpinBox->value(),
+                              ui->verticalSpacingSpinBox->value());
 }
 
 BackgroundEditor::~BackgroundEditor()
@@ -81,30 +84,14 @@ BackgroundEditor::~BackgroundEditor()
 	delete ui;
 }
 
-void BackgroundEditor::draw() {
-    scene->clear();
-    scene->addPixmap(image);
-
-    if (ui->tilesetGroupBox->isChecked()) {
-        unsigned hOff = ui->horizontalOffsetSpinBox->value();
-        unsigned vOff = ui->horizontalOffsetSpinBox->value();
-        unsigned w = ui->tileWidthSpinBox->value();
-        unsigned h = ui->tileHeightSpinBox->value();
-        unsigned hSpacing = ui->horizontalSpacingSpinBox->value();
-        unsigned vSpacing = ui->verticalSpacingSpinBox->value();
-
-        for (int x = hOff; x < image.width(); x+= w + hSpacing) {
-            for (int y = vOff; y < image.height(); y+= h + vSpacing) {
-                scene->addRect(x, y, w, h);
-            }
-        }
-    }
-
-    ui->imagePreview->setScene(scene);
-}
-
-void BackgroundEditor::on_model_modified() {
-    draw();
+void BackgroundEditor::on_model_modified(const QModelIndex& /*topLeft*/, const QModelIndex& /*bottomRight*/, const QVector<int>& /*roles*/) {
+    ui->backgroundRenderer->setGrid(ui->tilesetGroupBox->isChecked(),
+                              ui->horizontalOffsetSpinBox->value(),
+                              ui->verticalOffsetSpinBox->value(),
+                              ui->tileWidthSpinBox->value(),
+                              ui->tileHeightSpinBox->value(),
+                              ui->horizontalSpacingSpinBox->value(),
+                              ui->verticalSpacingSpinBox->value());
 }
 
 void BackgroundEditor::on_actionSave_triggered()

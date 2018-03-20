@@ -36,9 +36,11 @@ MainWindow::~MainWindow()
 	delete ui;
 }
 
-/*ResourceModel *MainWindow::dataModel() const {
-	return this->dataModel_;
-}*/
+void MainWindow::openFile(QString fName) {
+    game = gmx::LoadGMX(fName.toStdString(), false);
+    tree = new TreeModel(game->mutable_game()->mutable_root(), this);
+    ui->treeView->setModel(tree);
+}
 
 void MainWindow::on_actionOpen_triggered()
 {
@@ -49,9 +51,7 @@ void MainWindow::on_actionOpen_triggered()
 		tr("ENIGMA (*.egm);;GameMaker: Studio (*.gmx);;All Files (*)")
 	);
 
-    game = gmx::LoadGMX(fileName.toStdString(), false);
-    tree = new TreeModel(game->mutable_game()->mutable_root(), this);
-    ui->treeView->setModel(tree);
+    openFile(fileName);
 }
 
 void MainWindow::on_actionPreferences_triggered()

@@ -40,7 +40,8 @@ SOURCES += \
     Editors/RoomEditor.cpp \
     Editors/ResourceModel.cpp \
     Editors/TreeModel.cpp \
-    IconManager.cpp
+    IconManager.cpp \
+    Editors/BackgroundRenderer.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -53,7 +54,8 @@ HEADERS += \
     Editors/RoomEditor.h \
     Editors/ResourceModel.h \
     Editors/TreeModel.h \
-    IconManager.h
+    IconManager.h \
+    Editors/BackgroundRenderer.h
 
 FORMS += \
     MainWindow.ui \
