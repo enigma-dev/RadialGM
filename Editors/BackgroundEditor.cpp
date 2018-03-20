@@ -6,32 +6,7 @@
 
 #include "MainWindow.h"
 
-#include <QDataWidgetMapper>
-#include <QMetaObject>
-#include <QMetaProperty>
 #include <QPainter>
-
-class ImmediateDataWidgetMapper : public QDataWidgetMapper
-{
-public:
-	ImmediateDataWidgetMapper(QWidget *parent = 0): QDataWidgetMapper(parent) {}
-
-	void addMapping(QWidget *widget, int section, QByteArray propertyName = "") {
-		QDataWidgetMapper::addMapping(widget, section, propertyName);
-		propertyName = this->mappedPropertyName(widget);
-		auto widgetMetaObject = widget->metaObject();
-		auto property = widgetMetaObject->property(widgetMetaObject->indexOfProperty(propertyName));
-		auto itemDelegate = static_cast<QItemDelegate*>(this->itemDelegate());
-		DataPusher* dataPusher = new DataPusher(widget, itemDelegate);
-		auto dataPusherMetaObject = dataPusher->metaObject();
-		QMetaObject::connect(
-			widget,
-			property.notifySignalIndex(),
-			dataPusher,
-			dataPusherMetaObject->indexOfSlot("widgetChanged()")
-		);
-	}
-};
 
 using buffers::resources::Background;
 
