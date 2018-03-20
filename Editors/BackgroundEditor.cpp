@@ -7,41 +7,31 @@
 #include "MainWindow.h"
 
 #include <QDataWidgetMapper>
-#include <QStyledItemDelegate>
-#include <QItemDelegate>
-#include <QItemEditorFactory>
-#include <QDebug>
-
-class ImmediateDataWidgetMapper;
-
-class PropertyChangeEventFilter : public QObject
-{
-public:
-    PropertyChangeEventFilter(QObject *parent, ImmediateDataWidgetMapper* mapper): QObject(parent), mapper(mapper) {}
-    bool eventFilter(QObject *object, QEvent *event);
-
-private:
-    ImmediateDataWidgetMapper* mapper;
-};
+#include <QMetaObject>
+#include <QMetaProperty>
+#include <QPainter>
 
 class ImmediateDataWidgetMapper : public QDataWidgetMapper
 {
 public:
-    ImmediateDataWidgetMapper(QWidget *parent = 0): QDataWidgetMapper(parent) {}
+	ImmediateDataWidgetMapper(QWidget *parent = 0): QDataWidgetMapper(parent) {}
 
-    void addMapping(QWidget *widget, int section, const QByteArray &propertyName = "") {
-        QDataWidgetMapper::addMapping(widget, section, propertyName);
-        widget->installEventFilter(new PropertyChangeEventFilter(widget, this));
-    }
+	void addMapping(QWidget *widget, int section, QByteArray propertyName = "") {
+		QDataWidgetMapper::addMapping(widget, section, propertyName);
+		propertyName = this->mappedPropertyName(widget);
+		auto widgetMetaObject = widget->metaObject();
+		auto property = widgetMetaObject->property(widgetMetaObject->indexOfProperty(propertyName));
+		auto itemDelegate = static_cast<QItemDelegate*>(this->itemDelegate());
+		DataPusher* dataPusher = new DataPusher(widget, itemDelegate);
+		auto dataPusherMetaObject = dataPusher->metaObject();
+		QMetaObject::connect(
+			widget,
+			property.notifySignalIndex(),
+			dataPusher,
+			dataPusherMetaObject->indexOfSlot("widgetChanged()")
+		);
+	}
 };
-
-bool PropertyChangeEventFilter::eventFilter(QObject* object, QEvent *event) {
-    if (event->type() == QEvent::InputMethodQuery || event->type() == QEvent::MouseButtonPress) {
-        mapper->submit();
-        return QObject::eventFilter(object, event);
-    }
-    return false;
-}
 
 using buffers::resources::Background;
 
@@ -53,8 +43,8 @@ BackgroundEditor::BackgroundEditor(QWidget *parent, Background *bkg) :
 
     ImmediateDataWidgetMapper* mapper = new ImmediateDataWidgetMapper(this);
 	mapper->setOrientation(Qt::Vertical);
-    ResourceModel* rm = new ResourceModel(bkg);
-    connect(rm, &ResourceModel::dataChanged, this, &BackgroundEditor::on_model_modified);
+	static ResourceModel* rm = new ResourceModel(bkg);
+	connect(rm, &ResourceModel::dataChanged, this, &BackgroundEditor::dataChanged);
     mapper->setModel(rm);
 
 	mapper->addMapping(ui->smoothCheckBox, Background::kSmoothEdgesFieldNumber);
@@ -84,7 +74,7 @@ BackgroundEditor::~BackgroundEditor()
 	delete ui;
 }
 
-void BackgroundEditor::on_model_modified(const QModelIndex& /*topLeft*/, const QModelIndex& /*bottomRight*/, const QVector<int>& /*roles*/) {
+void BackgroundEditor::dataChanged(const QModelIndex& /*topLeft*/, const QModelIndex& /*bottomRight*/, const QVector<int>& /*roles*/) {
     ui->backgroundRenderer->setGrid(ui->tilesetGroupBox->isChecked(),
                               ui->horizontalOffsetSpinBox->value(),
                               ui->verticalOffsetSpinBox->value(),

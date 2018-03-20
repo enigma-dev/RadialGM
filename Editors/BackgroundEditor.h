@@ -5,8 +5,27 @@
 
 #include "BackgroundRenderer.h"
 
+#include <QItemDelegate>
+#include <QDebug>
+#include <QObject>
 #include <QWidget>
-#include <QPainter>
+
+class DataPusher : public QObject
+{
+	Q_OBJECT
+
+public:
+	DataPusher(QWidget *editor, QItemDelegate *delegate): QObject(editor),
+		editor(editor), delegate(delegate) {}
+public slots:
+	void widgetChanged() {
+		delegate->commitData(editor);
+		delegate->closeEditor(editor, QAbstractItemDelegate::SubmitModelCache);
+	}
+private:
+	QWidget* editor;
+	QItemDelegate* delegate;
+};
 
 namespace Ui {
 class BackgroundEditor;
@@ -21,7 +40,7 @@ public:
 	~BackgroundEditor();
 
 private slots:
-    void on_model_modified(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int> ());
+	void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int> ());
 	void on_actionSave_triggered();
 
 private:
