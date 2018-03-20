@@ -67,7 +67,7 @@ QVariant TreeModel::headerData(int section, Qt::Orientation orientation,
                                int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-        return QString::fromStdString(root->name());
+		return tr("Name");
 
     return QVariant();
 }

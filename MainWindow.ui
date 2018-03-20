@@ -88,7 +88,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>22</height>
+     <height>31</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -275,8 +275,11 @@
         <bool>false</bool>
        </property>
        <property name="headerHidden">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
+       <attribute name="headerVisible">
+        <bool>false</bool>
+       </attribute>
       </widget>
      </item>
     </layout>
