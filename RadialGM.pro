@@ -41,7 +41,8 @@ SOURCES += \
     Editors/ResourceModel.cpp \
     Editors/TreeModel.cpp \
     Editors/BackgroundRenderer.cpp \
-    ArtManager.cpp
+    ArtManager.cpp \
+    Editors/SpriteEditor.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -55,7 +56,8 @@ HEADERS += \
     Editors/ResourceModel.h \
     Editors/TreeModel.h \
     Editors/BackgroundRenderer.h \
-    ArtManager.h
+    ArtManager.h \
+    Editors/SpriteEditor.h
 
 FORMS += \
     MainWindow.ui \
@@ -66,7 +68,8 @@ FORMS += \
     Editors/PathEditor.ui \
     Editors/TimelineEditor.ui \
     Editors/RoomEditor.ui \
-    Dialogs/AddImageDialog.ui
+    Dialogs/AddImageDialog.ui \
+    Editors/SpriteEditor.ui
 
 RESOURCES += \
     images.qrc
