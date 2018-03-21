@@ -21,6 +21,7 @@
         <file alias="cascade.png">Images/actions/cascade.png</file>
         <file alias="accept.png">Images/actions/accept.png</file>
         <file alias="open-image.png">Images/actions/open-image.png</file>
+        <file alias="open-strip.png">Images/actions/open-strip.png</file>
         <file alias="next.png">Images/actions/next.png</file>
         <file alias="previous.png">Images/actions/previous.png</file>
         <file alias="colorize.png">Images/actions/colorize.png</file>

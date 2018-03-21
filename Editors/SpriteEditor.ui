@@ -498,7 +498,7 @@
   <action name="actionAddSpritesheetSubimages">
    <property name="icon">
     <iconset resource="../images.qrc">
-     <normaloff>:/actions/open-image.png</normaloff>:/actions/open-image.png</iconset>
+     <normaloff>:/actions/open-strip.png</normaloff>:/actions/open-strip.png</iconset>
    </property>
    <property name="text">
     <string>Add Spritesheet Subimages</string>
