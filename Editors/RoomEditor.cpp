@@ -5,7 +5,7 @@
 #include <Qsci/qsciscintilla.h>
 #include <QFontMetrics>
 
-RoomEditor::RoomEditor(QWidget* parent, ResourceModel* /*model*/) : QWidget(parent), ui(new Ui::RoomEditor) {
+RoomEditor::RoomEditor(QWidget* parent, ResourceModel* model) : BaseEditor(parent, model), ui(new Ui::RoomEditor) {
   ui->setupUi(this);
   QsciScintilla* textEdit = new QsciScintilla;
 

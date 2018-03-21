@@ -8,6 +8,7 @@
 #include "Editors/ObjectEditor.h"
 #include "Editors/PathEditor.h"
 #include "Editors/RoomEditor.h"
+#include "Editors/SpriteEditor.h"
 #include "Editors/TimelineEditor.h"
 
 #include "Components/ArtManager.h"
@@ -29,7 +30,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
   if (item->has_background()) {
     if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_background());
 
-	if (!subWindows.contains(item))
+    if (!subWindows.contains(item))
       subWindows[item] = ui->mdiArea->addSubWindow(new BackgroundEditor(this, resourceModels[item]));
   } else if (item->has_font()) {
     if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_font());
@@ -70,11 +71,10 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
         if (!subWindows.contains(item))
             subWindows[item] = ui->mdiArea->addSubWindow(new SoundEditor(this, resourceModels[item]));*/
   } else if (item->has_sprite()) {
-    /*if (!resourceModels.contains(item))
-            resourceModels[item] = new ResourceModel(item->mutable_sprite());
+    if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_sprite());
 
-        if (!subWindows.contains(item))
-            subWindows[item] = ui->mdiArea->addSubWindow(new SpriteEditor(this, resourceModels[item]));*/
+    if (!subWindows.contains(item))
+      subWindows[item] = ui->mdiArea->addSubWindow(new SpriteEditor(this, resourceModels[item]));
   } else if (item->has_timeline()) {
     if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_timeline());
 

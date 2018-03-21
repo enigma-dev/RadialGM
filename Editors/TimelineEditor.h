@@ -1,15 +1,13 @@
 #ifndef TIMELINEEDITOR_H
 #define TIMELINEEDITOR_H
 
-#include "Models/ResourceModel.h"
-
-#include <QWidget>
+#include "BaseEdtior.h"
 
 namespace Ui {
 class TimelineEditor;
 }
 
-class TimelineEditor : public QWidget {
+class TimelineEditor : public BaseEditor {
   Q_OBJECT
 
  public:

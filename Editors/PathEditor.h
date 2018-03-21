@@ -1,15 +1,13 @@
 #ifndef PATHEDITOR_H
 #define PATHEDITOR_H
 
-#include "Models/ResourceModel.h"
-
-#include <QWidget>
+#include "BaseEdtior.h"
 
 namespace Ui {
 class PathEditor;
 }
 
-class PathEditor : public QWidget {
+class PathEditor : public BaseEditor {
   Q_OBJECT
 
  public:

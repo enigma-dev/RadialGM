@@ -25,7 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-INCLUDEPATH += $$PWD/Submodules/enigma-dev/CommandLine/libGMX/ $$PWD/Submodules/enigma-dev/CommandLine/protos $$PWD/Submodules/enigma-dev/CommandLine/protos/codegen
+INCLUDEPATH += /usr/include/qt/ $$PWD/Submodules/enigma-dev/CommandLine/libGMX/ $$PWD/Submodules/enigma-dev/CommandLine/protos $$PWD/Submodules/enigma-dev/CommandLine/protos/codegen
 LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libGMX/ -lGMX -lprotobuf -Wl,--rpath=$$PWD/Submodules/enigma-dev/ -L$$PWD/Submodules/enigma-dev/ -lProtocols -lpugixml
 
 SOURCES += \
@@ -42,7 +42,9 @@ SOURCES += \
     Widgets/BackgroundRenderer.cpp \
     Models/ResourceModel.cpp \
     Models/TreeModel.cpp \
-    Components/ArtManager.cpp
+    Components/ArtManager.cpp \
+    Editors/BaseEditor.cpp \
+    Models/ImediateDataWidgetWrapper.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -57,7 +59,9 @@ HEADERS += \
     Widgets/BackgroundRenderer.h \
     Models/TreeModel.h \
     Models/ResourceModel.h \
-    Components/ArtManager.h
+    Components/ArtManager.h \
+    Editors/BaseEdtior.h \
+    Models/ImediateDataWidgetWrapper.h
 
 FORMS += \
     MainWindow.ui \
@@ -73,3 +77,5 @@ FORMS += \
 
 RESOURCES += \
     images.qrc
+
+DISTFILES +=
