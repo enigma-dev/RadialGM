@@ -409,6 +409,9 @@
      </item>
     </layout>
    </item>
+   <item>
+    <widget class="QStatusBar" name="statusBar"/>
+   </item>
   </layout>
   <action name="actionSave">
    <property name="icon">
