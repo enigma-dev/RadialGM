@@ -195,7 +195,7 @@
     <set>Qt::AllDockWidgetAreas</set>
    </property>
    <property name="windowTitle">
-    <string>Project</string>
+    <string>&amp;Project</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
@@ -275,8 +275,11 @@
         <bool>false</bool>
        </property>
        <property name="headerHidden">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
+       <attribute name="headerVisible">
+        <bool>false</bool>
+       </attribute>
       </widget>
      </item>
     </layout>
@@ -461,22 +464,22 @@
      <normaloff>:/actions/cascade.png</normaloff>:/actions/cascade.png</iconset>
    </property>
    <property name="text">
-    <string>Cascade</string>
+    <string>&amp;Cascade</string>
    </property>
   </action>
   <action name="actionTile">
    <property name="text">
-    <string>Tile</string>
+    <string>&amp;Tile</string>
    </property>
   </action>
   <action name="actionCloseAll">
    <property name="text">
-    <string>Close All</string>
+    <string>C&amp;lose All</string>
    </property>
   </action>
   <action name="actionCloseOthers">
    <property name="text">
-    <string>Close All Others</string>
+    <string>Close All &amp;Others</string>
    </property>
   </action>
   <action name="actionNext">
@@ -485,7 +488,7 @@
      <normaloff>:/actions/next.png</normaloff>:/actions/next.png</iconset>
    </property>
    <property name="text">
-    <string>Next</string>
+    <string>&amp;Next</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Tab</string>
@@ -497,7 +500,7 @@
      <normaloff>:/actions/previous.png</normaloff>:/actions/previous.png</iconset>
    </property>
    <property name="text">
-    <string>Previous</string>
+    <string>&amp;Previous</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+Tab</string>
@@ -508,7 +511,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Toggle Tabbed View</string>
+    <string>Toggle Tabbed &amp;View</string>
    </property>
   </action>
  </widget>

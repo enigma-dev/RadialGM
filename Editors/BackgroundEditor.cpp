@@ -1,81 +1,83 @@
 #include "BackgroundEditor.h"
-#include "ui_BackgroundEditor.h"
 #include "ResourceModel.h"
+#include "ui_AddImageDialog.h"
+#include "ui_BackgroundEditor.h"
 
 #include "resources/Background.pb.h"
 
 #include "MainWindow.h"
 
-#include <QDataWidgetMapper>
-#include <QStyledItemDelegate>
-#include <QItemDelegate>
-#include <QItemEditorFactory>
-#include <QDebug>
+#include <QPainter>
 
-class PropertyChangeEventFilter : public QObject
-{
-public:
-	PropertyChangeEventFilter(QObject *parent = 0): QObject(parent) {}
+using buffers::resources::Background;
 
-	bool eventFilter(QObject *object, QEvent *event);
-};
+BackgroundEditor::BackgroundEditor(QWidget* parent, ResourceModel* model)
+	: QWidget(parent), ui(new Ui::BackgroundEditor) {
+  ui->setupUi(this);
 
-class ImmediateDataWidgetMapper : public QDataWidgetMapper
-{
-public:
-	ImmediateDataWidgetMapper(QWidget *parent = 0): QDataWidgetMapper(parent) {}
+  ImmediateDataWidgetMapper* mapper = new ImmediateDataWidgetMapper(this);
+  mapper->setOrientation(Qt::Vertical);
+  //ResourceModel* rm = new ResourceModel(model);
+  connect(model, &ResourceModel::dataChanged, this, &BackgroundEditor::dataChanged);
+  mapper->setModel(model);
 
-	void addMapping(QWidget *widget, int section, const QByteArray &propertyName = "") {
-		QDataWidgetMapper::addMapping(widget, section, propertyName);
-		widget->installEventFilter(new PropertyChangeEventFilter(this));
-	}
-};
+  mapper->addMapping(ui->smoothCheckBox, Background::kSmoothEdgesFieldNumber);
+  mapper->addMapping(ui->preloadCheckBox, Background::kPreloadFieldNumber);
+  mapper->addMapping(ui->transparentCheckBox, Background::kTransparentFieldNumber);
+  mapper->addMapping(ui->tilesetGroupBox, Background::kUseAsTilesetFieldNumber);
+  mapper->addMapping(ui->tileWidthSpinBox, Background::kTileWidthFieldNumber);
+  mapper->addMapping(ui->tileHeightSpinBox, Background::kTileHeightFieldNumber);
+  mapper->addMapping(ui->horizontalOffsetSpinBox, Background::kHorizontalOffsetFieldNumber);
+  mapper->addMapping(ui->verticalOffsetSpinBox, Background::kVerticalOffsetFieldNumber);
+  mapper->addMapping(ui->horizontalSpacingSpinBox, Background::kHorizontalSpacingFieldNumber);
+  mapper->addMapping(ui->verticalSpacingSpinBox, Background::kVerticalSpacingFieldNumber);
+  mapper->toFirst();
 
-bool PropertyChangeEventFilter::eventFilter(QObject *object, QEvent *event) {
-	if (event->type() == QEvent::DynamicPropertyChange) {
-		//auto *propertyChangeEvent = static_cast<QDynamicPropertyChangeEvent *>(event);
-		auto *mapper = reinterpret_cast<ImmediateDataWidgetMapper *>(parent());
-		auto *widget = reinterpret_cast<QWidget *>(object);
-		//qDebug() << propertyChangeEvent->propertyName();
-		mapper->itemDelegate()->commitData(widget);
-		mapper->itemDelegate()->closeEditor(widget, QAbstractItemDelegate::SubmitModelCache);
-		return true;
-	}
-	return false;
+  ui->backgroundRenderer->setTransparent(ui->transparentCheckBox->isChecked());
+  ui->backgroundRenderer->setImage(
+	  QPixmap(model->data(model->index(Background::kImageFieldNumber), Qt::DisplayRole).toString()));
+  ui->backgroundRenderer->setGrid(ui->tilesetGroupBox->isChecked(), ui->horizontalOffsetSpinBox->value(),
+								  ui->verticalOffsetSpinBox->value(), ui->tileWidthSpinBox->value(),
+								  ui->tileHeightSpinBox->value(), ui->horizontalSpacingSpinBox->value(),
+								  ui->verticalSpacingSpinBox->value());
 }
 
-BackgroundEditor::BackgroundEditor(QWidget *parent) :
-	QWidget(parent),
-	ui(new Ui::BackgroundEditor)
-{
-	using buffers::resources::Background;
+BackgroundEditor::~BackgroundEditor() { delete ui; }
 
-	ui->setupUi(this);
-	QGraphicsScene* scene = new QGraphicsScene(this);
-	QPixmap avatar("C:/Users/Owner/Desktop/bg_intro.png");
-	scene->addPixmap(avatar);
-	ui->imagePreview->setScene(scene);
-
-	ImmediateDataWidgetMapper* mapper = new ImmediateDataWidgetMapper(this);
-	mapper->setOrientation(Qt::Vertical);
-	auto *mainWindow = static_cast<MainWindow*>(parent);
-	mapper->setModel(mainWindow->dataModel());
-
-	mapper->addMapping(ui->smoothCheckBox, Background::kSmoothEdgesFieldNumber);
-	mapper->addMapping(ui->preloadCheckBox, Background::kPreloadFieldNumber);
-	mapper->addMapping(ui->transparentCheckBox, Background::kTransparentFieldNumber);
-	mapper->addMapping(ui->tilesetGroupBox, Background::kUseAsTilesetFieldNumber);
-	mapper->addMapping(ui->tileWidthSpinBox, Background::kTileWidthFieldNumber);
-	mapper->addMapping(ui->tileHeightSpinBox, Background::kTileHeightFieldNumber);
-	mapper->toFirst();
+void BackgroundEditor::dataChanged(const QModelIndex& /*topLeft*/, const QModelIndex& /*bottomRight*/,
+								   const QVector<int>& /*roles*/) {
+  ui->backgroundRenderer->setTransparent(ui->transparentCheckBox->isChecked());
+  ui->backgroundRenderer->setGrid(ui->tilesetGroupBox->isChecked(), ui->horizontalOffsetSpinBox->value(),
+								  ui->verticalOffsetSpinBox->value(), ui->tileWidthSpinBox->value(),
+								  ui->tileHeightSpinBox->value(), ui->horizontalSpacingSpinBox->value(),
+								  ui->verticalSpacingSpinBox->value());
 }
 
-BackgroundEditor::~BackgroundEditor()
-{
-	delete ui;
+void BackgroundEditor::on_actionSave_triggered() {
+  ui->smoothCheckBox->setAcceptDrops(!ui->smoothCheckBox->acceptDrops());
 }
 
-void BackgroundEditor::on_actionSave_triggered()
-{
-	ui->smoothCheckBox->setAcceptDrops(!ui->smoothCheckBox->acceptDrops());
+void BackgroundEditor::on_actionZoomIn_triggered() {
+  ui->backgroundRenderer->setZoom(ui->backgroundRenderer->getZoom() * 2);
+}
+
+void BackgroundEditor::on_actionZoomOut_triggered() {
+  ui->backgroundRenderer->setZoom(ui->backgroundRenderer->getZoom() / 2);
+}
+
+void BackgroundEditor::on_actionZoom_triggered() { ui->backgroundRenderer->setZoom(1); }
+
+void BackgroundEditor::on_actionNewImage_triggered() {
+  QDialog* dialog = new QDialog(this);
+  dialog->setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+  dialog->setWindowFlag(Qt::MSWindowsFixedSizeDialogHint);
+  Ui::AddImageDialog dialogUI;
+  dialogUI.setupUi(dialog);
+  dialog->setFixedSize(dialog->size());
+  auto result = dialog->exec();
+  if (result != QDialog::Accepted) return;
+  qDebug() << dialogUI.widthSpinBox->value() << " ";
+  QPixmap img(dialogUI.widthSpinBox->value(), dialogUI.heightSpinBox->value());
+  img.fill(Qt::transparent);
+  ui->backgroundRenderer->setImage(img);
 }

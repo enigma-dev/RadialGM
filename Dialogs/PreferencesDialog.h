@@ -7,19 +7,18 @@ namespace Ui {
 class PreferencesDialog;
 }
 
-class PreferencesDialog : public QDialog
-{
-	Q_OBJECT
+class PreferencesDialog : public QDialog {
+  Q_OBJECT
 
-public:
-	explicit PreferencesDialog(QWidget *parent = 0);
-	~PreferencesDialog();
+ public:
+  explicit PreferencesDialog(QWidget *parent = 0);
+  ~PreferencesDialog();
 
-private slots:
-	void on_styleCombo_activated(const QString &styleName);
+ private slots:
+  void on_styleCombo_activated(const QString &styleName);
 
-private:
-	Ui::PreferencesDialog *ui;
+ private:
+  Ui::PreferencesDialog *ui;
 };
 
-#endif // PREFERENCESDIALOG_H
+#endif  // PREFERENCESDIALOG_H

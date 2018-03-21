@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
-CONFIG   += qscintilla2
+CONFIG   += c++11 qscintilla2
 
 win32:RC_ICONS += images/icon.ico
 
@@ -25,8 +25,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-INCLUDEPATH += $$PWD/Submodules/enigma-dev/CommandLine/libGMX/codegen
-LIBS += $$PWD/Submodules/enigma-dev/CommandLine/libGMX/libGMX.a -lprotobuf
+INCLUDEPATH += $$PWD/Submodules/enigma-dev/CommandLine/libGMX/ $$PWD/Submodules/enigma-dev/CommandLine/protos $$PWD/Submodules/enigma-dev/CommandLine/protos/codegen
+LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libGMX/ -lGMX -lprotobuf -Wl,--rpath=$$PWD/Submodules/enigma-dev/ -L$$PWD/Submodules/enigma-dev/ -lProtocols -lpugixml
 
 SOURCES += \
         main.cpp \
@@ -38,7 +38,10 @@ SOURCES += \
     Editors/PathEditor.cpp \
     Editors/TimelineEditor.cpp \
     Editors/RoomEditor.cpp \
-    Editors/ResourceModel.cpp
+    Editors/ResourceModel.cpp \
+    Editors/TreeModel.cpp \
+    Editors/BackgroundRenderer.cpp \
+    ArtManager.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -49,7 +52,10 @@ HEADERS += \
     Editors/PathEditor.h \
     Editors/TimelineEditor.h \
     Editors/RoomEditor.h \
-    Editors/ResourceModel.h
+    Editors/ResourceModel.h \
+    Editors/TreeModel.h \
+    Editors/BackgroundRenderer.h \
+    ArtManager.h
 
 FORMS += \
     MainWindow.ui \
@@ -59,7 +65,8 @@ FORMS += \
     Editors/FontEditor.ui \
     Editors/PathEditor.ui \
     Editors/TimelineEditor.ui \
-    Editors/RoomEditor.ui
+    Editors/RoomEditor.ui \
+    Dialogs/AddImageDialog.ui
 
 RESOURCES += \
     images.qrc

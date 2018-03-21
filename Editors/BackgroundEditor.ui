@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>738</width>
+    <width>720</width>
     <height>404</height>
    </rect>
   </property>
@@ -26,7 +26,7 @@
   <property name="Josh" stdset="0">
    <string>helloenigmasssss</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,3">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
    <property name="spacing">
     <number>4</number>
    </property>
@@ -167,7 +167,7 @@
            <number>4</number>
           </property>
           <property name="leftMargin">
-           <number>4</number>
+           <number>0</number>
           </property>
           <property name="topMargin">
            <number>4</number>
@@ -212,7 +212,7 @@
              <bool>true</bool>
             </property>
             <property name="minimum">
-             <number>-2147483647</number>
+             <number>0</number>
             </property>
             <property name="maximum">
              <number>2147483647</number>
@@ -238,7 +238,7 @@
              <bool>true</bool>
             </property>
             <property name="minimum">
-             <number>-2147483647</number>
+             <number>0</number>
             </property>
             <property name="maximum">
              <number>2147483647</number>
@@ -317,7 +317,7 @@
              <bool>true</bool>
             </property>
             <property name="minimum">
-             <number>-2147483647</number>
+             <number>0</number>
             </property>
             <property name="maximum">
              <number>2147483647</number>
@@ -337,7 +337,7 @@
              <bool>true</bool>
             </property>
             <property name="minimum">
-             <number>-2147483647</number>
+             <number>0</number>
             </property>
             <property name="maximum">
              <number>2147483647</number>
@@ -366,22 +366,28 @@
       </layout>
      </item>
      <item>
-      <widget class="QGraphicsView" name="imagePreview">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <widget class="QScrollArea" name="imagePreview">
+       <property name="widgetResizable">
+        <bool>true</bool>
        </property>
-       <property name="backgroundBrush">
-        <brush brushstyle="NoBrush">
-         <color alpha="255">
-          <red>0</red>
-          <green>0</green>
-          <blue>0</blue>
-         </color>
-        </brush>
-       </property>
+       <widget class="QWidget" name="scrollAreaWidget">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>438</width>
+          <height>354</height>
+         </rect>
+        </property>
+        <property name="autoFillBackground">
+         <bool>true</bool>
+        </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="BackgroundRenderer" name="backgroundRenderer" native="true"/>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </item>
     </layout>
@@ -481,6 +487,14 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>BackgroundRenderer</class>
+   <extends>QWidget</extends>
+   <header>Editors/BackgroundRenderer.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../images.qrc"/>
  </resources>
