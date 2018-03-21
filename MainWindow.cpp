@@ -27,9 +27,8 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
   if (item->has_background()) {
     if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_background());
 
-    if (!subWindows.contains(item)) {
+	if (!subWindows.contains(item))
       subWindows[item] = ui->mdiArea->addSubWindow(new BackgroundEditor(this, resourceModels[item]));
-    }
   } else if (item->has_font()) {
     if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_font());
 
@@ -81,12 +80,13 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
       subWindows[item] = ui->mdiArea->addSubWindow(new TimelineEditor(this, resourceModels[item]));
   }
 
-  if (subWindows[item] != nullptr) {
-    subWindows[item]->setWindowIcon(subWindows[item]->widget()->windowIcon());
-    subWindows[item]->setWindowTitle(QString::fromStdString(item->name()));
-    subWindows[item]->show();
-    subWindows[item]->raise();
-  }
+  auto subWindow = subWindows[item];
+  if (subWindow == nullptr) return;
+  subWindow->connect(subWindow, &QObject::destroyed, [=]() { subWindows.remove(item); });
+  subWindow->setWindowIcon(subWindows[item]->widget()->windowIcon());
+  subWindow->setWindowTitle(QString::fromStdString(item->name()));
+  subWindow->show();
+  subWindow->raise();
 }
 
 MainWindow::~MainWindow() { delete ui; }
