@@ -86,7 +86,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
   subWindow->setWindowIcon(subWindows[item]->widget()->windowIcon());
   subWindow->setWindowTitle(QString::fromStdString(item->name()));
   subWindow->show();
-  subWindow->raise();
+  ui->mdiArea->setActiveSubWindow(subWindow);
 }
 
 MainWindow::~MainWindow() { delete ui; }
