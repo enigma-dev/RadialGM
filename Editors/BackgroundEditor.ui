@@ -28,24 +28,24 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
    <property name="spacing">
-    <number>4</number>
+    <number>0</number>
    </property>
    <property name="leftMargin">
-    <number>4</number>
+    <number>0</number>
    </property>
    <property name="topMargin">
-    <number>4</number>
+    <number>0</number>
    </property>
    <property name="rightMargin">
-    <number>4</number>
+    <number>0</number>
    </property>
    <property name="bottomMargin">
-    <number>4</number>
+    <number>0</number>
    </property>
    <item>
     <widget class="QToolBar" name="mainToolBar">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -69,7 +69,6 @@
      <addaction name="actionZoom"/>
      <addaction name="actionZoomIn"/>
      <addaction name="actionZoomOut"/>
-     <addaction name="separator"/>
     </widget>
    </item>
    <item>
@@ -375,8 +374,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>438</width>
-          <height>354</height>
+          <width>446</width>
+          <height>366</height>
          </rect>
         </property>
         <property name="autoFillBackground">

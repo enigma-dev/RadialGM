@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>711</width>
-    <height>423</height>
+    <width>759</width>
+    <height>570</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,24 +15,24 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <property name="spacing">
-    <number>4</number>
+    <number>0</number>
    </property>
    <property name="leftMargin">
-    <number>4</number>
+    <number>0</number>
    </property>
    <property name="topMargin">
-    <number>4</number>
+    <number>0</number>
    </property>
    <property name="rightMargin">
-    <number>4</number>
+    <number>0</number>
    </property>
    <property name="bottomMargin">
-    <number>4</number>
+    <number>0</number>
    </property>
    <item>
     <widget class="QToolBar" name="mainToolBar">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -48,6 +48,13 @@
      </property>
      <addaction name="actionSave"/>
      <addaction name="separator"/>
+     <addaction name="actionLoadSubimages"/>
+     <addaction name="actionAddSubimages"/>
+     <addaction name="actionAddSpritesheetSubimages"/>
+     <addaction name="separator"/>
+     <addaction name="actionZoom"/>
+     <addaction name="actionZoomIn"/>
+     <addaction name="actionZoomOut"/>
     </widget>
    </item>
    <item>
@@ -141,6 +148,43 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="title">
+          <string>Collision Shape</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QRadioButton" name="radioButton">
+            <property name="text">
+             <string>Precise</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="radioButton_2">
+            <property name="text">
+             <string>Rectangle</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="radioButton_3">
+            <property name="text">
+             <string>Disk</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="radioButton_4">
+            <property name="text">
+             <string>Diamond</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -175,7 +219,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>532</width>
+           <width>588</width>
            <height>101</height>
           </rect>
          </property>
@@ -216,6 +260,35 @@
          <property name="spacing">
           <number>4</number>
          </property>
+         <item>
+          <widget class="QToolBar" name="mainToolBar">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+           <property name="floatable">
+            <bool>false</bool>
+           </property>
+           <addaction name="actionNewSubimage"/>
+           <addaction name="actionDeleteSubimages"/>
+           <addaction name="actionEditSubimages"/>
+           <addaction name="separator"/>
+           <addaction name="actionCut"/>
+           <addaction name="actionCopy"/>
+           <addaction name="actionPaste"/>
+           <addaction name="separator"/>
+           <addaction name="actionPreviousSubimage"/>
+           <addaction name="actionNextSubimage"/>
+          </widget>
+         </item>
          <item>
           <widget class="QListWidget" name="listWidget">
            <property name="sizePolicy">
@@ -278,7 +351,178 @@
      <normaloff>:/actions/accept.png</normaloff>:/actions/accept.png</iconset>
    </property>
    <property name="text">
-    <string>save</string>
+    <string>Save</string>
+   </property>
+   <property name="toolTip">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionNewSubimage">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/new.png</normaloff>:/actions/new.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Subimage</string>
+   </property>
+   <property name="toolTip">
+    <string>New Subimage</string>
+   </property>
+  </action>
+  <action name="actionDeleteSubimages">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/delete.png</normaloff>:/actions/delete.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete Subimages</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete Subimages</string>
+   </property>
+  </action>
+  <action name="actionEditSubimages">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/colorize.png</normaloff>:/actions/colorize.png</iconset>
+   </property>
+   <property name="text">
+    <string>Edit Subimages</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit Subimages</string>
+   </property>
+  </action>
+  <action name="actionCut">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/cut.png</normaloff>:/actions/cut.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cut</string>
+   </property>
+   <property name="toolTip">
+    <string>Cut</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/copy.png</normaloff>:/actions/copy.png</iconset>
+   </property>
+   <property name="text">
+    <string>Copy</string>
+   </property>
+   <property name="toolTip">
+    <string>Copy</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/paste.png</normaloff>:/actions/paste.png</iconset>
+   </property>
+   <property name="text">
+    <string>Paste</string>
+   </property>
+   <property name="toolTip">
+    <string>Paste</string>
+   </property>
+  </action>
+  <action name="actionPreviousSubimage">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/previous.png</normaloff>:/actions/previous.png</iconset>
+   </property>
+   <property name="text">
+    <string>Previous Subimage</string>
+   </property>
+   <property name="toolTip">
+    <string>Previous Subimage</string>
+   </property>
+  </action>
+  <action name="actionNextSubimage">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/next.png</normaloff>:/actions/next.png</iconset>
+   </property>
+   <property name="text">
+    <string>Next Subimage</string>
+   </property>
+   <property name="toolTip">
+    <string>Next Subimage</string>
+   </property>
+  </action>
+  <action name="actionLoadSubimages">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/open.png</normaloff>:/actions/open.png</iconset>
+   </property>
+   <property name="text">
+    <string>Load Subimages</string>
+   </property>
+   <property name="toolTip">
+    <string>Load Subimages</string>
+   </property>
+  </action>
+  <action name="actionAddSubimages">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/open-image.png</normaloff>:/actions/open-image.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Subimages</string>
+   </property>
+   <property name="toolTip">
+    <string>Add Subimages</string>
+   </property>
+  </action>
+  <action name="actionAddSpritesheetSubimages">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/open-image.png</normaloff>:/actions/open-image.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Spritesheet Subimages</string>
+   </property>
+   <property name="toolTip">
+    <string>Add Spritesheet Subimages</string>
+   </property>
+  </action>
+  <action name="actionZoom">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/zoom.png</normaloff>:/actions/zoom.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom</string>
+   </property>
+  </action>
+  <action name="actionZoomIn">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/zoom-in.png</normaloff>:/actions/zoom-in.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom In</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom In</string>
+   </property>
+  </action>
+  <action name="actionZoomOut">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/zoom-out.png</normaloff>:/actions/zoom-out.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom Out</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom Out</string>
    </property>
   </action>
  </widget>
