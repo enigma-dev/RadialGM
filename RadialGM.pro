@@ -65,7 +65,8 @@ FORMS += \
     Editors/FontEditor.ui \
     Editors/PathEditor.ui \
     Editors/TimelineEditor.ui \
-    Editors/RoomEditor.ui
+    Editors/RoomEditor.ui \
+    Dialogs/AddImageDialog.ui
 
 RESOURCES += \
     images.qrc

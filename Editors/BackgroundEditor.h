@@ -56,6 +56,11 @@ public:
 private slots:
 	void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int> ());
 	void on_actionSave_triggered();
+    void on_actionZoomIn_triggered();
+    void on_actionZoomOut_triggered();
+    void on_actionZoom_triggered();
+
+    void on_actionNewImage_triggered();
 
 private:
 	Ui::BackgroundEditor *ui;
