@@ -1,7 +1,7 @@
 #ifndef OBJECTEDITOR_H
 #define OBJECTEDITOR_H
 
-#include "ResourceModel.h"
+#include "Models/ResourceModel.h"
 
 #include <QWidget>
 

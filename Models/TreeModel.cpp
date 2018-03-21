@@ -1,5 +1,6 @@
 #include "TreeModel.h"
-#include "ArtManager.h"
+
+#include "Components/ArtManager.h"
 
 #include <QDebug>
 

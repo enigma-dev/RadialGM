@@ -1,5 +1,4 @@
 #include "MainWindow.h"
-#include "ArtManager.h"
 #include "ui_MainWindow.h"
 
 #include "Dialogs/PreferencesDialog.h"
@@ -10,9 +9,12 @@
 #include "Editors/PathEditor.h"
 #include "Editors/RoomEditor.h"
 #include "Editors/TimelineEditor.h"
-#include "gmx.h"
 
-#include "Editors/ResourceModel.h"
+#include "Components/ArtManager.h"
+
+#include "Models/ResourceModel.h"
+
+#include "gmx.h"
 #include "resources/Background.pb.h"
 
 #include <QtWidgets>

@@ -1,7 +1,7 @@
 #ifndef TIMELINEEDITOR_H
 #define TIMELINEEDITOR_H
 
-#include "ResourceModel.h"
+#include "Models/ResourceModel.h"
 
 #include <QWidget>
 

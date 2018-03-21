@@ -1,5 +1,6 @@
 #include "BackgroundRenderer.h"
-#include "../ArtManager.h"
+
+#include "Components/ArtManager.h"
 
 #include <QPainter>
 

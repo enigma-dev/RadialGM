@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "Editors/TreeModel.h"
+#include "Models/TreeModel.h"
 
 #include "codegen/project.pb.h"
 

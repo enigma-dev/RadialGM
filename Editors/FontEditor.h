@@ -1,7 +1,7 @@
 #ifndef FONTEDITOR_H
 #define FONTEDITOR_H
 
-#include "ResourceModel.h"
+#include "Models/ResourceModel.h"
 
 #include <QWidget>
 

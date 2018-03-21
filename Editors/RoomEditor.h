@@ -1,7 +1,7 @@
 #ifndef ROOMEDITOR_H
 #define ROOMEDITOR_H
 
-#include "ResourceModel.h"
+#include "Models/ResourceModel.h"
 
 #include <QWidget>
 

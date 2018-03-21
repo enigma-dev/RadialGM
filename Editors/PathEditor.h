@@ -1,7 +1,7 @@
 #ifndef PATHEDITOR_H
 #define PATHEDITOR_H
 
-#include "ResourceModel.h"
+#include "Models/ResourceModel.h"
 
 #include <QWidget>
 

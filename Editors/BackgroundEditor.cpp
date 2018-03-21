@@ -1,11 +1,12 @@
 #include "BackgroundEditor.h"
-#include "ResourceModel.h"
 #include "ui_AddImageDialog.h"
 #include "ui_BackgroundEditor.h"
 
-#include "resources/Background.pb.h"
+#include "Models/ResourceModel.h"
 
 #include "MainWindow.h"
+
+#include "resources/Background.pb.h"
 
 #include <QPainter>
 

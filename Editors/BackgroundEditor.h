@@ -1,9 +1,9 @@
 #ifndef BACKGROUNDEDITOR_H
 #define BACKGROUNDEDITOR_H
 
-#include "ResourceModel.h"
+#include "Models/ResourceModel.h"
 
-#include "BackgroundRenderer.h"
+#include "Widgets/BackgroundRenderer.h"
 
 #include <QDataWidgetMapper>
 #include <QItemDelegate>
