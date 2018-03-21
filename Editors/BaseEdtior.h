@@ -15,8 +15,8 @@ class BaseEditor : public QWidget {
   QVariant GetModelData(int index);
 
  protected slots:
-  void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
-                   const QVector<int> &roles = QVector<int>());
+  virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
+                           const QVector<int> &roles = QVector<int>());
 
  protected:
   ResourceModel *model;
