@@ -58,12 +58,12 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
+    <layout class="QHBoxLayout" name="contentLayout" stretch="0,1">
      <property name="spacing">
       <number>4</number>
      </property>
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <layout class="QVBoxLayout" name="propertiesLayout">
        <property name="spacing">
         <number>4</number>
        </property>
@@ -92,13 +92,13 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox">
+        <widget class="QGroupBox" name="originGroupBox">
          <property name="title">
           <string>Origin</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="3">
-           <widget class="QSpinBox" name="spinBox_2">
+           <widget class="QSpinBox" name="originYSpinBox">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -108,7 +108,7 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QSpinBox" name="spinBox">
+           <widget class="QSpinBox" name="originXSpinBox">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -118,21 +118,21 @@
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QLabel" name="label">
+           <widget class="QLabel" name="originXLabel">
             <property name="text">
              <string>X</string>
             </property>
            </widget>
           </item>
           <item row="0" column="2">
-           <widget class="QLabel" name="label_2">
+           <widget class="QLabel" name="originYLabel">
             <property name="text">
              <string>Y</string>
             </property>
            </widget>
           </item>
           <item row="1" column="0" colspan="4">
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="centerOriginButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -148,34 +148,34 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_2">
+        <widget class="QGroupBox" name="collisionShapeGroupBox">
          <property name="title">
           <string>Collision Shape</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
-           <widget class="QRadioButton" name="radioButton">
+           <widget class="QRadioButton" name="preciseRadioButton">
             <property name="text">
              <string>Precise</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="radioButton_2">
+           <widget class="QRadioButton" name="rectangleRadioButton">
             <property name="text">
              <string>Rectangle</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="radioButton_3">
+           <widget class="QRadioButton" name="diskRadioButton">
             <property name="text">
              <string>Disk</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="radioButton_4">
+           <widget class="QRadioButton" name="diamondRadioButton">
             <property name="text">
              <string>Diamond</string>
             </property>
@@ -200,7 +200,7 @@
       </layout>
      </item>
      <item>
-      <widget class="QSplitter" name="splitter">
+      <widget class="QSplitter" name="subimagesPreviewSplitter">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -243,7 +243,7 @@
            <number>4</number>
           </property>
           <item row="0" column="0">
-           <widget class="BackgroundRenderer" name="backgroundRenderer" native="true">
+           <widget class="BackgroundRenderer" name="subimagePreview" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -256,12 +256,12 @@
         </widget>
        </widget>
        <widget class="QWidget" name="verticalLayoutWidget">
-        <layout class="QVBoxLayout" name="verticalLayout">
+        <layout class="QVBoxLayout" name="subimagesLayout">
          <property name="spacing">
           <number>4</number>
          </property>
          <item>
-          <widget class="QToolBar" name="mainToolBar">
+          <widget class="QToolBar" name="subimagesToolbar">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -290,7 +290,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QListWidget" name="listWidget">
+          <widget class="QListWidget" name="subimagesList">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>

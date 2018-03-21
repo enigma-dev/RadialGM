@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>720</width>
+    <width>737</width>
     <height>404</height>
    </rect>
   </property>
@@ -72,7 +72,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="clientLayout" stretch="0,0">
+    <layout class="QHBoxLayout" name="contentLayout" stretch="0,1">
      <property name="spacing">
       <number>4</number>
      </property>
@@ -135,7 +135,7 @@
        <item>
         <widget class="QGroupBox" name="tilesetGroupBox">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+          <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -193,7 +193,7 @@
           <item row="0" column="1">
            <widget class="QSpinBox" name="tileWidthSpinBox">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -211,7 +211,7 @@
              <bool>true</bool>
             </property>
             <property name="minimum">
-             <number>0</number>
+             <number>-2147483647</number>
             </property>
             <property name="maximum">
              <number>2147483647</number>
@@ -237,7 +237,7 @@
              <bool>true</bool>
             </property>
             <property name="minimum">
-             <number>0</number>
+             <number>-2147483647</number>
             </property>
             <property name="maximum">
              <number>2147483647</number>
@@ -316,7 +316,7 @@
              <bool>true</bool>
             </property>
             <property name="minimum">
-             <number>0</number>
+             <number>-2147483647</number>
             </property>
             <property name="maximum">
              <number>2147483647</number>
@@ -336,7 +336,7 @@
              <bool>true</bool>
             </property>
             <property name="minimum">
-             <number>0</number>
+             <number>-2147483647</number>
             </property>
             <property name="maximum">
              <number>2147483647</number>
@@ -374,7 +374,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>446</width>
+          <width>463</width>
           <height>366</height>
          </rect>
         </property>
