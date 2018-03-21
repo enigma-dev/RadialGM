@@ -38,11 +38,11 @@ SOURCES += \
     Editors/PathEditor.cpp \
     Editors/TimelineEditor.cpp \
     Editors/RoomEditor.cpp \
-    Editors/ResourceModel.cpp \
-    Editors/TreeModel.cpp \
-    Editors/BackgroundRenderer.cpp \
-    ArtManager.cpp \
-    Editors/SpriteEditor.cpp
+    Editors/SpriteEditor.cpp \
+    Widgets/BackgroundRenderer.cpp \
+    Models/ResourceModel.cpp \
+    Models/TreeModel.cpp \
+    Components/ArtManager.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -53,11 +53,11 @@ HEADERS += \
     Editors/PathEditor.h \
     Editors/TimelineEditor.h \
     Editors/RoomEditor.h \
-    Editors/ResourceModel.h \
-    Editors/TreeModel.h \
-    Editors/BackgroundRenderer.h \
-    ArtManager.h \
-    Editors/SpriteEditor.h
+    Editors/SpriteEditor.h \
+    Widgets/BackgroundRenderer.h \
+    Models/TreeModel.h \
+    Models/ResourceModel.h \
+    Components/ArtManager.h
 
 FORMS += \
     MainWindow.ui \

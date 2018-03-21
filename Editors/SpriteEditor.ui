@@ -158,12 +158,18 @@
             <property name="text">
              <string>Precise</string>
             </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
            </widget>
           </item>
           <item>
            <widget class="QRadioButton" name="rectangleRadioButton">
             <property name="text">
              <string>Rectangle</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -211,8 +217,20 @@
         <enum>Qt::Vertical</enum>
        </property>
        <widget class="QScrollArea" name="imagePreview">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="sizeAdjustPolicy">
+         <enum>QAbstractScrollArea::AdjustIgnored</enum>
+        </property>
         <property name="widgetResizable">
          <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
         <widget class="QWidget" name="scrollAreaWidget">
          <property name="geometry">
@@ -245,7 +263,7 @@
           <item row="0" column="0">
            <widget class="BackgroundRenderer" name="subimagePreview" native="true">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
