@@ -9,16 +9,15 @@ namespace Ui {
 class PathEditor;
 }
 
-class PathEditor : public QWidget
-{
-	Q_OBJECT
+class PathEditor : public QWidget {
+  Q_OBJECT
 
-public:
-    explicit PathEditor(QWidget *parent, ResourceModel *model);
-	~PathEditor();
+ public:
+  explicit PathEditor(QWidget *parent, ResourceModel *model);
+  ~PathEditor();
 
-private:
-	Ui::PathEditor *ui;
+ private:
+  Ui::PathEditor *ui;
 };
 
-#endif // PATHEDITOR_H
+#endif  // PATHEDITOR_H

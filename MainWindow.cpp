@@ -25,67 +25,67 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 void MainWindow::openSubWindow(buffers::TreeNode *item) {
   if (item->has_background()) {
-	if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_background());
+    if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_background());
 
-	if (!subWindows.contains(item)) {
-	  subWindows[item] = ui->mdiArea->addSubWindow(new BackgroundEditor(this, resourceModels[item]));
+    if (!subWindows.contains(item)) {
+      subWindows[item] = ui->mdiArea->addSubWindow(new BackgroundEditor(this, resourceModels[item]));
     }
   } else if (item->has_font()) {
-	if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_font());
+    if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_font());
 
-	if (!subWindows.contains(item))
-	  subWindows[item] = ui->mdiArea->addSubWindow(new FontEditor(this, resourceModels[item]));
+    if (!subWindows.contains(item))
+      subWindows[item] = ui->mdiArea->addSubWindow(new FontEditor(this, resourceModels[item]));
   } else if (item->has_object()) {
-	if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_object());
+    if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_object());
 
-	if (!subWindows.contains(item))
-	  subWindows[item] = ui->mdiArea->addSubWindow(new ObjectEditor(this, resourceModels[item]));
+    if (!subWindows.contains(item))
+      subWindows[item] = ui->mdiArea->addSubWindow(new ObjectEditor(this, resourceModels[item]));
   } else if (item->has_path()) {
-	if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_path());
+    if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_path());
 
-	if (!subWindows.contains(item))
-	  subWindows[item] = ui->mdiArea->addSubWindow(new PathEditor(this, resourceModels[item]));
+    if (!subWindows.contains(item))
+      subWindows[item] = ui->mdiArea->addSubWindow(new PathEditor(this, resourceModels[item]));
   } else if (item->has_room()) {
-	if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_room());
+    if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_room());
 
-	if (!subWindows.contains(item))
-	  subWindows[item] = ui->mdiArea->addSubWindow(new RoomEditor(this, resourceModels[item]));
+    if (!subWindows.contains(item))
+      subWindows[item] = ui->mdiArea->addSubWindow(new RoomEditor(this, resourceModels[item]));
   } else if (item->has_script()) {
-	/*if (!resourceModels.contains(item))
+    /*if (!resourceModels.contains(item))
             resourceModels[item] = new ResourceModel(item->mutable_background());
 
         if (!subWindows.contains(item))1
             subWindows[item] = ui->mdiArea->addSubWindow(new ScriptEditor(this, resourceModels[item]));*/
   } else if (item->has_shader()) {
-	/*if (!resourceModels.contains(item))
+    /*if (!resourceModels.contains(item))
             resourceModels[item] = new ResourceModel(item->mutable_shader());
 
         if (!subWindows.contains(item))
             subWindows[item] = ui->mdiArea->addSubWindow(new ShaderEditor(this, resourceModels[item]));*/
   } else if (item->has_sound()) {
-	/*if (!resourceModels.contains(item))
+    /*if (!resourceModels.contains(item))
             resourceModels[item] = new ResourceModel(item->mutable_sound());
 
         if (!subWindows.contains(item))
             subWindows[item] = ui->mdiArea->addSubWindow(new SoundEditor(this, resourceModels[item]));*/
   } else if (item->has_sprite()) {
-	/*if (!resourceModels.contains(item))
+    /*if (!resourceModels.contains(item))
             resourceModels[item] = new ResourceModel(item->mutable_sprite());
 
         if (!subWindows.contains(item))
             subWindows[item] = ui->mdiArea->addSubWindow(new SpriteEditor(this, resourceModels[item]));*/
   } else if (item->has_timeline()) {
-	if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_timeline());
+    if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_timeline());
 
-	if (!subWindows.contains(item))
-	  subWindows[item] = ui->mdiArea->addSubWindow(new TimelineEditor(this, resourceModels[item]));
+    if (!subWindows.contains(item))
+      subWindows[item] = ui->mdiArea->addSubWindow(new TimelineEditor(this, resourceModels[item]));
   }
 
   if (subWindows[item] != nullptr) {
-	subWindows[item]->setWindowIcon(subWindows[item]->widget()->windowIcon());
-	subWindows[item]->setWindowTitle(QString::fromStdString(item->name()));
-	subWindows[item]->show();
-	subWindows[item]->raise();
+    subWindows[item]->setWindowIcon(subWindows[item]->widget()->windowIcon());
+    subWindows[item]->setWindowTitle(QString::fromStdString(item->name()));
+    subWindows[item]->show();
+    subWindows[item]->raise();
   }
 }
 
@@ -99,7 +99,7 @@ void MainWindow::openFile(QString fName) {
 
 void MainWindow::on_actionOpen_triggered() {
   const QString fileName = QFileDialog::getOpenFileName(this, tr("Open Project"), "",
-														tr("ENIGMA (*.egm);;GameMaker: Studio (*.gmx);;All Files (*)"));
+                                                        tr("ENIGMA (*.egm);;GameMaker: Studio (*.gmx);;All Files (*)"));
 
   if (!fileName.isEmpty()) openFile(fileName);
 }
@@ -149,12 +149,12 @@ void MainWindow::on_actionExploreENIGMA_triggered() { QDesktopServices::openUrl(
 
 void MainWindow::on_actionAbout_triggered() {
   QMessageBox aboutBox(QMessageBox::Information, tr("About"),
-					   tr("ENIGMA is a free, open-source, and cross-platform game engine."), QMessageBox::Ok, this, 0);
+                       tr("ENIGMA is a free, open-source, and cross-platform game engine."), QMessageBox::Ok, this, 0);
   QAbstractButton *aboutQtButton = aboutBox.addButton(tr("About Qt"), QMessageBox::HelpRole);
   aboutBox.exec();
 
   if (aboutBox.clickedButton() == aboutQtButton) {
-	QMessageBox::aboutQt(this, tr("About Qt"));
+    QMessageBox::aboutQt(this, tr("About Qt"));
   }
 }
 
@@ -163,7 +163,7 @@ void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
   const QString name = QString::fromStdString(item->name());
 
   if (item->has_folder()) {
-	return;
+    return;
   }
 
   openSubWindow(item);

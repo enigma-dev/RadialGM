@@ -9,16 +9,15 @@ namespace Ui {
 class TimelineEditor;
 }
 
-class TimelineEditor : public QWidget
-{
-	Q_OBJECT
+class TimelineEditor : public QWidget {
+  Q_OBJECT
 
-public:
-    explicit TimelineEditor(QWidget *parent, ResourceModel *model);
-	~TimelineEditor();
+ public:
+  explicit TimelineEditor(QWidget *parent, ResourceModel *model);
+  ~TimelineEditor();
 
-private:
-	Ui::TimelineEditor *ui;
+ private:
+  Ui::TimelineEditor *ui;
 };
 
-#endif // TIMELINEEDITOR_H
+#endif  // TIMELINEEDITOR_H

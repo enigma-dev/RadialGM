@@ -9,16 +9,15 @@ namespace Ui {
 class ObjectEditor;
 }
 
-class ObjectEditor : public QWidget
-{
-	Q_OBJECT
+class ObjectEditor : public QWidget {
+  Q_OBJECT
 
-public:
-    explicit ObjectEditor(QWidget *parent, ResourceModel *model);
-	~ObjectEditor();
+ public:
+  explicit ObjectEditor(QWidget *parent, ResourceModel *model);
+  ~ObjectEditor();
 
-private:
-	Ui::ObjectEditor *ui;
+ private:
+  Ui::ObjectEditor *ui;
 };
 
-#endif // OBJECTEDITOR_H
+#endif  // OBJECTEDITOR_H
