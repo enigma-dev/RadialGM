@@ -44,7 +44,7 @@ SOURCES += \
     Models/TreeModel.cpp \
     Components/ArtManager.cpp \
     Editors/BaseEditor.cpp \
-    Models/ImediateDataWidgetWrapper.cpp
+    Models/ImmediateDataWidgetMapper.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -61,7 +61,7 @@ HEADERS += \
     Models/ResourceModel.h \
     Components/ArtManager.h \
     Editors/BaseEdtior.h \
-    Models/ImediateDataWidgetWrapper.h
+    Models/ImmediateDataWidgetMapper.h
 
 FORMS += \
     MainWindow.ui \

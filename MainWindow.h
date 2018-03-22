@@ -50,7 +50,7 @@ class MainWindow : public QMainWindow {
  private:
   Ui::MainWindow *ui;
   buffers::Project *game;
-  TreeModel *tree;
+  TreeModel *treeModel;
   QHash<buffers::TreeNode *, ResourceModel *> resourceModels;
   QHash<buffers::TreeNode *, QMdiSubWindow *> subWindows;
 

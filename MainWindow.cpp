@@ -95,8 +95,20 @@ MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::openFile(QString fName) {
   game = gmx::LoadGMX(fName.toStdString(), false);
-  tree = new TreeModel(game->mutable_game()->mutable_root(), this);
-  ui->treeView->setModel(tree);
+  treeModel = new TreeModel(game->mutable_game()->mutable_root(), this);
+  ui->treeView->setModel(treeModel);
+  treeModel->connect(treeModel, &QAbstractItemModel::dataChanged,
+                     [=](const QModelIndex &topLeft, const QModelIndex &bottomRight) {
+                       for (int row = topLeft.row(); row <= bottomRight.row(); ++row) {
+                         for (int column = topLeft.column(); column <= bottomRight.column(); ++column) {
+                           auto index = topLeft.sibling(row, column);
+                           buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
+                           if (!subWindows.contains(item)) return;
+                           auto subWindow = subWindows[item];
+                           subWindow->setWindowTitle(QString::fromStdString(item->name()));
+                         }
+                       }
+                     });
 }
 
 void MainWindow::on_actionOpen_triggered() {

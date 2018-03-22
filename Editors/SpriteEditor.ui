@@ -325,7 +325,7 @@
             <enum>Qt::MoveAction</enum>
            </property>
            <property name="selectionMode">
-            <enum>QAbstractItemView::MultiSelection</enum>
+            <enum>QAbstractItemView::ContiguousSelection</enum>
            </property>
            <property name="flow">
             <enum>QListView::LeftToRight</enum>

@@ -10,28 +10,36 @@ TreeModel::~TreeModel() {}
 
 int TreeModel::columnCount(const QModelIndex & /*parent*/) const { return 1; }
 
+bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int role) {
+  if (!index.isValid() || role != Qt::EditRole) return false;
+  buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
+  item->set_name(value.toString().toStdString());
+  emit dataChanged(index, index);
+  return true;
+}
+
 QVariant TreeModel::data(const QModelIndex &index, int role) const {
   if (!index.isValid()) return QVariant();
 
   buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
 
   if (role == Qt::DecorationRole) {
-	if (item->has_folder()) return ArtManager::get_icon("group");
-	if (item->has_background()) return ArtManager::get_icon("background");
-	if (item->has_font()) return ArtManager::get_icon("font");
-	if (item->has_object()) return ArtManager::get_icon("object");
-	if (item->has_path()) return ArtManager::get_icon("path");
-	if (item->has_room()) return ArtManager::get_icon("room");
-	if (item->has_script()) return ArtManager::get_icon("script");
-	if (item->has_shader()) return ArtManager::get_icon("shader");
-	if (item->has_sound()) return ArtManager::get_icon("sound");
-	if (item->has_sprite()) return ArtManager::get_icon("sprite");
-	if (item->has_timeline()) return ArtManager::get_icon("timeline");
+    if (item->has_folder()) return ArtManager::get_icon("group");
+    if (item->has_background()) return ArtManager::get_icon("background");
+    if (item->has_font()) return ArtManager::get_icon("font");
+    if (item->has_object()) return ArtManager::get_icon("object");
+    if (item->has_path()) return ArtManager::get_icon("path");
+    if (item->has_room()) return ArtManager::get_icon("room");
+    if (item->has_script()) return ArtManager::get_icon("script");
+    if (item->has_shader()) return ArtManager::get_icon("shader");
+    if (item->has_sound()) return ArtManager::get_icon("sound");
+    if (item->has_sprite()) return ArtManager::get_icon("sprite");
+    if (item->has_timeline()) return ArtManager::get_icon("timeline");
 
-	return ArtManager::get_icon("info");
+    return ArtManager::get_icon("info");
   }
 
-  if (role != Qt::DisplayRole) return QVariant();
+  if (role != Qt::DisplayRole && role != Qt::EditRole) return QVariant();
 
   return QString::fromStdString(item->name());
 }
@@ -39,7 +47,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
 Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const {
   if (!index.isValid()) return 0;
 
-  return QAbstractItemModel::flags(index);
+  return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
 }
 
 QVariant TreeModel::headerData(int /*section*/, Qt::Orientation orientation, int role) const {
@@ -54,15 +62,15 @@ QModelIndex TreeModel::index(int row, int column, const QModelIndex &parent) con
   buffers::TreeNode *parentItem;
 
   if (!parent.isValid())
-	parentItem = root;
+    parentItem = root;
   else
-	parentItem = static_cast<buffers::TreeNode *>(parent.internalPointer());
+    parentItem = static_cast<buffers::TreeNode *>(parent.internalPointer());
 
   buffers::TreeNode *childItem = parentItem->mutable_child(row);
   if (childItem)
-	return createIndex(row, column, childItem);
+    return createIndex(row, column, childItem);
   else
-	return QModelIndex();
+    return QModelIndex();
 }
 
 QModelIndex TreeModel::parent(const QModelIndex &index) const {
@@ -81,9 +89,9 @@ int TreeModel::rowCount(const QModelIndex &parent) const {
   if (parent.column() > 0) return 0;
 
   if (!parent.isValid())
-	parentItem = root;
+    parentItem = root;
   else
-	parentItem = static_cast<buffers::TreeNode *>(parent.internalPointer());
+    parentItem = static_cast<buffers::TreeNode *>(parent.internalPointer());
 
   return parentItem->child_size();
 }
