@@ -7,11 +7,10 @@
 class BackgroundRenderer : public QWidget {
   Q_OBJECT
  public:
-  explicit BackgroundRenderer(QWidget *parent = nullptr);
+  explicit BackgroundRenderer(QWidget *parent);
   QSize sizeHint() const override;
   void setImage(QPixmap image);
-  void setGrid(bool visible, unsigned hOff, unsigned vOff, unsigned w, unsigned h, unsigned hSpacing,
-			   unsigned vSpacing);
+  void setGrid(bool visible, int hOff, int vOff, int w, int h, int hSpacing, int vSpacing);
   void setTransparent(bool transparent);
   void setZoom(qreal zoom);
   const qreal &getZoom() const;
@@ -27,12 +26,12 @@ class BackgroundRenderer : public QWidget {
   QColor transparencyColor;
   bool transparent;
   bool grid_visible;
-  unsigned grid_hOff;
-  unsigned grid_vOff;
-  unsigned grid_w;
-  unsigned grid_h;
-  unsigned grid_hSpacing;
-  unsigned grid_vSpacing;
+  int grid_hOff;
+  int grid_vOff;
+  int grid_w;
+  int grid_h;
+  int grid_hSpacing;
+  int grid_vSpacing;
   qreal zoom;
 };
 

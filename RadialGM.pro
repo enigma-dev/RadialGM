@@ -25,7 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-INCLUDEPATH += $$PWD/Submodules/enigma-dev/CommandLine/libGMX/ $$PWD/Submodules/enigma-dev/CommandLine/protos $$PWD/Submodules/enigma-dev/CommandLine/protos/codegen
+INCLUDEPATH += /usr/include/qt/ $$PWD/Submodules/enigma-dev/CommandLine/libGMX/ $$PWD/Submodules/enigma-dev/CommandLine/protos $$PWD/Submodules/enigma-dev/CommandLine/protos/codegen
 LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libGMX/ -lGMX -lprotobuf -Wl,--rpath=$$PWD/Submodules/enigma-dev/ -L$$PWD/Submodules/enigma-dev/ -lProtocols -lpugixml
 
 SOURCES += \
@@ -38,10 +38,13 @@ SOURCES += \
     Editors/PathEditor.cpp \
     Editors/TimelineEditor.cpp \
     Editors/RoomEditor.cpp \
-    Editors/ResourceModel.cpp \
-    Editors/TreeModel.cpp \
-    Editors/BackgroundRenderer.cpp \
-    ArtManager.cpp
+    Editors/SpriteEditor.cpp \
+    Widgets/BackgroundRenderer.cpp \
+    Models/TreeModel.cpp \
+    Components/ArtManager.cpp \
+    Editors/BaseEditor.cpp \
+    Models/ProtoModel.cpp \
+    Models/ImmediateMapper.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -52,10 +55,13 @@ HEADERS += \
     Editors/PathEditor.h \
     Editors/TimelineEditor.h \
     Editors/RoomEditor.h \
-    Editors/ResourceModel.h \
-    Editors/TreeModel.h \
-    Editors/BackgroundRenderer.h \
-    ArtManager.h
+    Editors/SpriteEditor.h \
+    Widgets/BackgroundRenderer.h \
+    Models/TreeModel.h \
+    Components/ArtManager.h \
+    Editors/BaseEdtior.h \
+    Models/ProtoModel.h \
+    Models/ImmediateMapper.h
 
 FORMS += \
     MainWindow.ui \
@@ -66,7 +72,10 @@ FORMS += \
     Editors/PathEditor.ui \
     Editors/TimelineEditor.ui \
     Editors/RoomEditor.ui \
-    Dialogs/AddImageDialog.ui
+    Dialogs/AddImageDialog.ui \
+    Editors/SpriteEditor.ui
 
 RESOURCES += \
     images.qrc
+
+DISTFILES +=

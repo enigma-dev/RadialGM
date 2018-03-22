@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>720</width>
+    <width>737</width>
     <height>404</height>
    </rect>
   </property>
@@ -28,24 +28,24 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
    <property name="spacing">
-    <number>4</number>
+    <number>0</number>
    </property>
    <property name="leftMargin">
-    <number>4</number>
+    <number>0</number>
    </property>
    <property name="topMargin">
-    <number>4</number>
+    <number>0</number>
    </property>
    <property name="rightMargin">
-    <number>4</number>
+    <number>0</number>
    </property>
    <property name="bottomMargin">
-    <number>4</number>
+    <number>0</number>
    </property>
    <item>
     <widget class="QToolBar" name="mainToolBar">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -57,7 +57,7 @@
       </size>
      </property>
      <property name="floatable">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
      <addaction name="actionSave"/>
      <addaction name="separator"/>
@@ -69,11 +69,10 @@
      <addaction name="actionZoom"/>
      <addaction name="actionZoomIn"/>
      <addaction name="actionZoomOut"/>
-     <addaction name="separator"/>
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="clientLayout" stretch="0,0">
+    <layout class="QHBoxLayout" name="contentLayout" stretch="0,1">
      <property name="spacing">
       <number>4</number>
      </property>
@@ -136,7 +135,7 @@
        <item>
         <widget class="QGroupBox" name="tilesetGroupBox">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+          <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -194,7 +193,7 @@
           <item row="0" column="1">
            <widget class="QSpinBox" name="tileWidthSpinBox">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -212,7 +211,7 @@
              <bool>true</bool>
             </property>
             <property name="minimum">
-             <number>0</number>
+             <number>-2147483647</number>
             </property>
             <property name="maximum">
              <number>2147483647</number>
@@ -238,7 +237,7 @@
              <bool>true</bool>
             </property>
             <property name="minimum">
-             <number>0</number>
+             <number>-2147483647</number>
             </property>
             <property name="maximum">
              <number>2147483647</number>
@@ -317,7 +316,7 @@
              <bool>true</bool>
             </property>
             <property name="minimum">
-             <number>0</number>
+             <number>-2147483647</number>
             </property>
             <property name="maximum">
              <number>2147483647</number>
@@ -337,7 +336,7 @@
              <bool>true</bool>
             </property>
             <property name="minimum">
-             <number>0</number>
+             <number>-2147483647</number>
             </property>
             <property name="maximum">
              <number>2147483647</number>
@@ -370,19 +369,37 @@
        <property name="widgetResizable">
         <bool>true</bool>
        </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
        <widget class="QWidget" name="scrollAreaWidget">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>438</width>
-          <height>354</height>
+          <width>463</width>
+          <height>366</height>
          </rect>
         </property>
         <property name="autoFillBackground">
          <bool>true</bool>
         </property>
         <layout class="QGridLayout" name="gridLayout">
+         <property name="leftMargin">
+          <number>4</number>
+         </property>
+         <property name="topMargin">
+          <number>4</number>
+         </property>
+         <property name="rightMargin">
+          <number>4</number>
+         </property>
+         <property name="bottomMargin">
+          <number>4</number>
+         </property>
+         <property name="spacing">
+          <number>2</number>
+         </property>
          <item row="0" column="0">
           <widget class="BackgroundRenderer" name="backgroundRenderer" native="true"/>
          </item>
@@ -391,6 +408,9 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QStatusBar" name="statusBar"/>
    </item>
   </layout>
   <action name="actionSave">
@@ -491,7 +511,7 @@
   <customwidget>
    <class>BackgroundRenderer</class>
    <extends>QWidget</extends>
-   <header>Editors/BackgroundRenderer.h</header>
+   <header>Widgets/BackgroundRenderer.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

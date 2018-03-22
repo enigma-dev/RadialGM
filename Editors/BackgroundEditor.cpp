@@ -1,25 +1,18 @@
 #include "BackgroundEditor.h"
-#include "ResourceModel.h"
+
 #include "ui_AddImageDialog.h"
 #include "ui_BackgroundEditor.h"
 
+#include "Models/ProtoModel.h"
 #include "resources/Background.pb.h"
-
-#include "MainWindow.h"
 
 #include <QPainter>
 
 using buffers::resources::Background;
 
 BackgroundEditor::BackgroundEditor(QWidget* parent, ResourceModel* model)
-	: QWidget(parent), ui(new Ui::BackgroundEditor) {
+    : BaseEditor(parent, model), ui(new Ui::BackgroundEditor) {
   ui->setupUi(this);
-
-  ImmediateDataWidgetMapper* mapper = new ImmediateDataWidgetMapper(this);
-  mapper->setOrientation(Qt::Vertical);
-  //ResourceModel* rm = new ResourceModel(model);
-  connect(model, &ResourceModel::dataChanged, this, &BackgroundEditor::dataChanged);
-  mapper->setModel(model);
 
   mapper->addMapping(ui->smoothCheckBox, Background::kSmoothEdgesFieldNumber);
   mapper->addMapping(ui->preloadCheckBox, Background::kPreloadFieldNumber);
@@ -34,23 +27,22 @@ BackgroundEditor::BackgroundEditor(QWidget* parent, ResourceModel* model)
   mapper->toFirst();
 
   ui->backgroundRenderer->setTransparent(ui->transparentCheckBox->isChecked());
-  ui->backgroundRenderer->setImage(
-	  QPixmap(model->data(model->index(Background::kImageFieldNumber), Qt::DisplayRole).toString()));
+  ui->backgroundRenderer->setImage(QPixmap(GetModelData(Background::kImageFieldNumber).toString()));
   ui->backgroundRenderer->setGrid(ui->tilesetGroupBox->isChecked(), ui->horizontalOffsetSpinBox->value(),
-								  ui->verticalOffsetSpinBox->value(), ui->tileWidthSpinBox->value(),
-								  ui->tileHeightSpinBox->value(), ui->horizontalSpacingSpinBox->value(),
-								  ui->verticalSpacingSpinBox->value());
+                                  ui->verticalOffsetSpinBox->value(), ui->tileWidthSpinBox->value(),
+                                  ui->tileHeightSpinBox->value(), ui->horizontalSpacingSpinBox->value(),
+                                  ui->verticalSpacingSpinBox->value());
 }
 
 BackgroundEditor::~BackgroundEditor() { delete ui; }
 
 void BackgroundEditor::dataChanged(const QModelIndex& /*topLeft*/, const QModelIndex& /*bottomRight*/,
-								   const QVector<int>& /*roles*/) {
+                                   const QVector<int>& /*roles*/) {
   ui->backgroundRenderer->setTransparent(ui->transparentCheckBox->isChecked());
   ui->backgroundRenderer->setGrid(ui->tilesetGroupBox->isChecked(), ui->horizontalOffsetSpinBox->value(),
-								  ui->verticalOffsetSpinBox->value(), ui->tileWidthSpinBox->value(),
-								  ui->tileHeightSpinBox->value(), ui->horizontalSpacingSpinBox->value(),
-								  ui->verticalSpacingSpinBox->value());
+                                  ui->verticalOffsetSpinBox->value(), ui->tileWidthSpinBox->value(),
+                                  ui->tileHeightSpinBox->value(), ui->horizontalSpacingSpinBox->value(),
+                                  ui->verticalSpacingSpinBox->value());
 }
 
 void BackgroundEditor::on_actionSave_triggered() {
@@ -76,7 +68,6 @@ void BackgroundEditor::on_actionNewImage_triggered() {
   dialog->setFixedSize(dialog->size());
   auto result = dialog->exec();
   if (result != QDialog::Accepted) return;
-  qDebug() << dialogUI.widthSpinBox->value() << " ";
   QPixmap img(dialogUI.widthSpinBox->value(), dialogUI.heightSpinBox->value());
   img.fill(Qt::transparent);
   ui->backgroundRenderer->setImage(img);

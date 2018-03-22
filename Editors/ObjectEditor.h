@@ -1,15 +1,13 @@
 #ifndef OBJECTEDITOR_H
 #define OBJECTEDITOR_H
 
-#include "ResourceModel.h"
-
-#include <QWidget>
+#include "BaseEdtior.h"
 
 namespace Ui {
 class ObjectEditor;
 }
 
-class ObjectEditor : public QWidget {
+class ObjectEditor : public BaseEditor {
   Q_OBJECT
 
  public:

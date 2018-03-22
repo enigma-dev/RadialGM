@@ -1,5 +1,4 @@
 #include "MainWindow.h"
-#include "ArtManager.h"
 #include "ui_MainWindow.h"
 
 #include "Dialogs/PreferencesDialog.h"
@@ -9,10 +8,14 @@
 #include "Editors/ObjectEditor.h"
 #include "Editors/PathEditor.h"
 #include "Editors/RoomEditor.h"
+#include "Editors/SpriteEditor.h"
 #include "Editors/TimelineEditor.h"
-#include "gmx.h"
 
-#include "Editors/ResourceModel.h"
+#include "Components/ArtManager.h"
+
+#include "Models/ProtoModel.h"
+
+#include "gmx.h"
 #include "resources/Background.pb.h"
 
 #include <QtWidgets>
@@ -27,9 +30,8 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
   if (item->has_background()) {
     if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_background());
 
-    if (!subWindows.contains(item)) {
+    if (!subWindows.contains(item))
       subWindows[item] = ui->mdiArea->addSubWindow(new BackgroundEditor(this, resourceModels[item]));
-    }
   } else if (item->has_font()) {
     if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_font());
 
@@ -69,11 +71,10 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
         if (!subWindows.contains(item))
             subWindows[item] = ui->mdiArea->addSubWindow(new SoundEditor(this, resourceModels[item]));*/
   } else if (item->has_sprite()) {
-    /*if (!resourceModels.contains(item))
-            resourceModels[item] = new ResourceModel(item->mutable_sprite());
+    if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_sprite());
 
-        if (!subWindows.contains(item))
-            subWindows[item] = ui->mdiArea->addSubWindow(new SpriteEditor(this, resourceModels[item]));*/
+    if (!subWindows.contains(item))
+      subWindows[item] = ui->mdiArea->addSubWindow(new SpriteEditor(this, resourceModels[item]));
   } else if (item->has_timeline()) {
     if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_timeline());
 
@@ -81,20 +82,33 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
       subWindows[item] = ui->mdiArea->addSubWindow(new TimelineEditor(this, resourceModels[item]));
   }
 
-  if (subWindows[item] != nullptr) {
-    subWindows[item]->setWindowIcon(subWindows[item]->widget()->windowIcon());
-    subWindows[item]->setWindowTitle(QString::fromStdString(item->name()));
-    subWindows[item]->show();
-    subWindows[item]->raise();
-  }
+  auto subWindow = subWindows[item];
+  if (subWindow == nullptr) return;
+  subWindow->connect(subWindow, &QObject::destroyed, [=]() { subWindows.remove(item); });
+  subWindow->setWindowIcon(subWindows[item]->widget()->windowIcon());
+  subWindow->setWindowTitle(QString::fromStdString(item->name()));
+  subWindow->show();
+  ui->mdiArea->setActiveSubWindow(subWindow);
 }
 
 MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::openFile(QString fName) {
   game = gmx::LoadGMX(fName.toStdString(), false);
-  tree = new TreeModel(game->mutable_game()->mutable_root(), this);
-  ui->treeView->setModel(tree);
+  treeModel = new TreeModel(game->mutable_game()->mutable_root(), this);
+  ui->treeView->setModel(treeModel);
+  treeModel->connect(treeModel, &QAbstractItemModel::dataChanged,
+                     [=](const QModelIndex &topLeft, const QModelIndex &bottomRight) {
+                       for (int row = topLeft.row(); row <= bottomRight.row(); ++row) {
+                         for (int column = topLeft.column(); column <= bottomRight.column(); ++column) {
+                           auto index = topLeft.sibling(row, column);
+                           buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
+                           if (!subWindows.contains(item)) return;
+                           auto subWindow = subWindows[item];
+                           subWindow->setWindowTitle(QString::fromStdString(item->name()));
+                         }
+                       }
+                     });
 }
 
 void MainWindow::on_actionOpen_triggered() {

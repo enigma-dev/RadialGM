@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "Editors/TreeModel.h"
+#include "Models/TreeModel.h"
 
 #include "codegen/project.pb.h"
 
@@ -50,7 +50,7 @@ class MainWindow : public QMainWindow {
  private:
   Ui::MainWindow *ui;
   buffers::Project *game;
-  TreeModel *tree;
+  TreeModel *treeModel;
   QHash<buffers::TreeNode *, ResourceModel *> resourceModels;
   QHash<buffers::TreeNode *, QMdiSubWindow *> subWindows;
 

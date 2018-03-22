@@ -8,9 +8,9 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) : QDialog(parent), ui(new 
   this->setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 
   foreach (QString styleName, QStyleFactory::keys()) {
-	ui->styleCombo->addItem(styleName);
-	if (style()->objectName().toLower() == styleName.toLower())
-	  ui->styleCombo->setCurrentIndex(ui->styleCombo->count() - 1);
+    ui->styleCombo->addItem(styleName);
+    if (style()->objectName().toLower() == styleName.toLower())
+      ui->styleCombo->setCurrentIndex(ui->styleCombo->count() - 1);
   }
 }
 

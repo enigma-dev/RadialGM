@@ -1,15 +1,13 @@
 #ifndef ROOMEDITOR_H
 #define ROOMEDITOR_H
 
-#include "ResourceModel.h"
-
-#include <QWidget>
+#include "BaseEdtior.h"
 
 namespace Ui {
 class RoomEditor;
 }
 
-class RoomEditor : public QWidget {
+class RoomEditor : public BaseEditor {
   Q_OBJECT
 
  public:
