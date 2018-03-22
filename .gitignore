@@ -1,3 +1,4 @@
 /build/
 /Submodules/
-/RadialGM.pro.user*
+
+*.pro.user
