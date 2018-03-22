@@ -1,8 +1,8 @@
 #ifndef BASEEDTIOR_H
 #define BASEEDTIOR_H
 
-#include "Models/ImmediateDataWidgetMapper.h"
-#include "Models/ResourceModel.h"
+#include "Models/ImmediateMapper.h"
+#include "Models/ProtoModel.h"
 
 #include <QObject>
 #include <QWidget>

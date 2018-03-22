@@ -1,4 +1,4 @@
-#include "ResourceModel.h"
+#include "ProtoModel.h"
 
 #include <QDebug>
 

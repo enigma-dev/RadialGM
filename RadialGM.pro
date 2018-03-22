@@ -40,11 +40,11 @@ SOURCES += \
     Editors/RoomEditor.cpp \
     Editors/SpriteEditor.cpp \
     Widgets/BackgroundRenderer.cpp \
-    Models/ResourceModel.cpp \
     Models/TreeModel.cpp \
     Components/ArtManager.cpp \
     Editors/BaseEditor.cpp \
-    Models/ImmediateDataWidgetMapper.cpp
+    Models/ProtoModel.cpp \
+    Models/ImmediateMapper.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -58,10 +58,10 @@ HEADERS += \
     Editors/SpriteEditor.h \
     Widgets/BackgroundRenderer.h \
     Models/TreeModel.h \
-    Models/ResourceModel.h \
     Components/ArtManager.h \
     Editors/BaseEdtior.h \
-    Models/ImmediateDataWidgetMapper.h
+    Models/ProtoModel.h \
+    Models/ImmediateMapper.h
 
 FORMS += \
     MainWindow.ui \

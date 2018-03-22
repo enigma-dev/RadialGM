@@ -3,7 +3,7 @@
 #include "ui_AddImageDialog.h"
 #include "ui_BackgroundEditor.h"
 
-#include "Models/ResourceModel.h"
+#include "Models/ProtoModel.h"
 #include "resources/Background.pb.h"
 
 #include <QPainter>

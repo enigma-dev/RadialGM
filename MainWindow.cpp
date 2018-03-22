@@ -13,7 +13,7 @@
 
 #include "Components/ArtManager.h"
 
-#include "Models/ResourceModel.h"
+#include "Models/ProtoModel.h"
 
 #include "gmx.h"
 #include "resources/Background.pb.h"

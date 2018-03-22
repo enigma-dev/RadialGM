@@ -1,4 +1,4 @@
-#include "ImmediateDataWidgetMapper.h"
+#include "ImmediateMapper.h"
 
 #include <QItemDelegate>
 #include <QMetaObject>
