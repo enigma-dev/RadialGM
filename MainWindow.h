@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "Models/ProtoModel.h"
 #include "Models/TreeModel.h"
 
 #include "codegen/project.pb.h"
@@ -12,17 +13,15 @@ namespace Ui {
 class MainWindow;
 }
 
-class ResourceModel;
-
 class MainWindow : public QMainWindow {
   Q_OBJECT
 
  public:
   explicit MainWindow(QWidget *parent = 0);
   ~MainWindow();
+  void closeEvent(QCloseEvent *event);
   void openFile(QString fName);
 
-  //ResourceModel *dataModel() const;
  private slots:
   // file menu
   void on_actionOpen_triggered();
@@ -51,7 +50,7 @@ class MainWindow : public QMainWindow {
   Ui::MainWindow *ui;
   buffers::Project *game;
   TreeModel *treeModel;
-  QHash<buffers::TreeNode *, ResourceModel *> resourceModels;
+  QHash<buffers::TreeNode *, ProtoModel *> resourceModels;
   QHash<buffers::TreeNode *, QMdiSubWindow *> subWindows;
 
   void openSubWindow(buffers::TreeNode *item);

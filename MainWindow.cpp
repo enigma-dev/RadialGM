@@ -13,8 +13,6 @@
 
 #include "Components/ArtManager.h"
 
-#include "Models/ProtoModel.h"
-
 #include "gmx.h"
 
 #include "resources/Background.pb.h"
@@ -27,29 +25,31 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->mdiArea->setBackground(QImage(":/banner.png"));
 }
 
+void MainWindow::closeEvent(QCloseEvent * /*event*/) { ui->mdiArea->closeAllSubWindows(); }
+
 void MainWindow::openSubWindow(buffers::TreeNode *item) {
   if (item->has_background()) {
-    if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_background());
+    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(item->mutable_background());
 
     if (!subWindows.contains(item))
       subWindows[item] = ui->mdiArea->addSubWindow(new BackgroundEditor(this, resourceModels[item]));
   } else if (item->has_font()) {
-    if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_font());
+    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(item->mutable_font());
 
     if (!subWindows.contains(item))
       subWindows[item] = ui->mdiArea->addSubWindow(new FontEditor(this, resourceModels[item]));
   } else if (item->has_object()) {
-    if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_object());
+    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(item->mutable_object());
 
     if (!subWindows.contains(item))
       subWindows[item] = ui->mdiArea->addSubWindow(new ObjectEditor(this, resourceModels[item]));
   } else if (item->has_path()) {
-    if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_path());
+    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(item->mutable_path());
 
     if (!subWindows.contains(item))
       subWindows[item] = ui->mdiArea->addSubWindow(new PathEditor(this, resourceModels[item]));
   } else if (item->has_room()) {
-    if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_room());
+    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(item->mutable_room());
 
     if (!subWindows.contains(item))
       subWindows[item] = ui->mdiArea->addSubWindow(new RoomEditor(this, resourceModels[item]));
@@ -72,12 +72,12 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
         if (!subWindows.contains(item))
             subWindows[item] = ui->mdiArea->addSubWindow(new SoundEditor(this, resourceModels[item]));*/
   } else if (item->has_sprite()) {
-    if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_sprite());
+    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(item->mutable_sprite());
 
     if (!subWindows.contains(item))
       subWindows[item] = ui->mdiArea->addSubWindow(new SpriteEditor(this, resourceModels[item]));
   } else if (item->has_timeline()) {
-    if (!resourceModels.contains(item)) resourceModels[item] = new ResourceModel(item->mutable_timeline());
+    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(item->mutable_timeline());
 
     if (!subWindows.contains(item))
       subWindows[item] = ui->mdiArea->addSubWindow(new TimelineEditor(this, resourceModels[item]));
@@ -86,6 +86,8 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
   auto subWindow = subWindows[item];
   if (subWindow == nullptr) return;
   subWindow->connect(subWindow, &QObject::destroyed, [=]() { subWindows.remove(item); });
+  subWindow->connect(static_cast<BaseEditor *>(subWindow->widget()), &BaseEditor::closing, subWindow,
+                     &QMdiSubWindow::close);
   subWindow->setWindowIcon(subWindows[item]->widget()->windowIcon());
   subWindow->setWindowTitle(QString::fromStdString(item->name()));
   subWindow->show();
@@ -114,7 +116,7 @@ void MainWindow::openFile(QString fName) {
 
 void MainWindow::on_actionOpen_triggered() {
   const QString fileName = QFileDialog::getOpenFileName(this, tr("Open Project"), "",
-                                                        tr("ENIGMA (*.egm);;GameMaker: Studio (*.gmx);;All Files (*)"));
+                                                        tr("GameMaker: Studio (*.project.gmx);;All Files (*)"));
 
   if (!fileName.isEmpty()) openFile(fileName);
 }

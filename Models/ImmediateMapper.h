@@ -10,6 +10,9 @@ class ImmediateDataWidgetMapper : public QDataWidgetMapper {
   ImmediateDataWidgetMapper(QObject *parent);
   void addMapping(QWidget *widget, int section, QByteArray propertyName = "");
 
+ public slots:
+  void toFirst();
+
  private slots:
   void widgetChanged();
 };

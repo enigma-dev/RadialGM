@@ -24,19 +24,19 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
   buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
 
   if (role == Qt::DecorationRole) {
-    if (item->has_folder()) return ArtManager::get_icon("group");
-    if (item->has_background()) return ArtManager::get_icon("background");
-    if (item->has_font()) return ArtManager::get_icon("font");
-    if (item->has_object()) return ArtManager::get_icon("object");
-    if (item->has_path()) return ArtManager::get_icon("path");
-    if (item->has_room()) return ArtManager::get_icon("room");
-    if (item->has_script()) return ArtManager::get_icon("script");
-    if (item->has_shader()) return ArtManager::get_icon("shader");
-    if (item->has_sound()) return ArtManager::get_icon("sound");
-    if (item->has_sprite()) return ArtManager::get_icon("sprite");
-    if (item->has_timeline()) return ArtManager::get_icon("timeline");
+    if (item->has_folder()) return ArtManager::GetIcon("group");
+    if (item->has_background()) return ArtManager::GetIcon("background");
+    if (item->has_font()) return ArtManager::GetIcon("font");
+    if (item->has_object()) return ArtManager::GetIcon("object");
+    if (item->has_path()) return ArtManager::GetIcon("path");
+    if (item->has_room()) return ArtManager::GetIcon("room");
+    if (item->has_script()) return ArtManager::GetIcon("script");
+    if (item->has_shader()) return ArtManager::GetIcon("shader");
+    if (item->has_sound()) return ArtManager::GetIcon("sound");
+    if (item->has_sprite()) return ArtManager::GetIcon("sprite");
+    if (item->has_timeline()) return ArtManager::GetIcon("timeline");
 
-    return ArtManager::get_icon("info");
+    return ArtManager::GetIcon("info");
   }
 
   if (role != Qt::DisplayRole && role != Qt::EditRole) return QVariant();

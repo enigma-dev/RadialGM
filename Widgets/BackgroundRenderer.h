@@ -11,7 +11,7 @@ class BackgroundRenderer : public QWidget {
  public:
   explicit BackgroundRenderer(QWidget *parent);
   QSize sizeHint() const override;
-  void SetResourceModel(ResourceModel *model);
+  void SetResourceModel(ProtoModel *model);
   bool SetImage(QString fName);
   bool SetImage(QPixmap image);
   void WriteImage(QString fName, QString type);
@@ -22,7 +22,7 @@ class BackgroundRenderer : public QWidget {
   void paintEvent(QPaintEvent *event) override;
 
  private:
-  ResourceModel *model;
+  ProtoModel *model;
   QPixmap pixmap;
   QPixmap transparentPixmap;
   QColor transparencyColor;

@@ -5,13 +5,15 @@
 
 #include <google/protobuf/message.h>
 
-class ResourceModel : public QAbstractItemModel {
+class ProtoModel : public QAbstractItemModel {
   Q_OBJECT
 
  public:
-  ResourceModel(google::protobuf::Message *protobuf, QObject *parent = nullptr);
+  ProtoModel(google::protobuf::Message *protobuf, QObject *parent = nullptr);
   void ReplaceBuffer(google::protobuf::Message *buffer);
   void RestoreBuffer();
+  void SetDirty(bool dirty);
+  bool IsDirty();
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   bool setData(const QModelIndex &index, const QVariant &value, int role) override;
@@ -23,6 +25,7 @@ class ResourceModel : public QAbstractItemModel {
   Qt::ItemFlags flags(const QModelIndex &index) const override;
 
  private:
+  bool dirty;
   google::protobuf::Message *protobuf;
   google::protobuf::Message *protobufBackup;
 };

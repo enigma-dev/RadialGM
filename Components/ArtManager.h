@@ -8,8 +8,8 @@
 class ArtManager {
  public:
   static void Init();
-  static const QIcon& get_icon(const QString& name);
-  static const QBrush& get_transpareny_brush();
+  static const QIcon& GetIcon(const QString& name);
+  static const QBrush& GetTransparenyBrush();
 
  private:
   ArtManager();
