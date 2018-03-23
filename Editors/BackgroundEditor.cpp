@@ -14,7 +14,7 @@
 
 using buffers::resources::Background;
 
-BackgroundEditor::BackgroundEditor(QWidget* parent, ResourceModel* model)
+BackgroundEditor::BackgroundEditor(QWidget* parent, ProtoModel* model)
     : BaseEditor(parent, model), ui(new Ui::BackgroundEditor) {
   ui->setupUi(this);
 
@@ -41,7 +41,8 @@ void BackgroundEditor::dataChanged(const QModelIndex& /*topLeft*/, const QModelI
 }
 
 void BackgroundEditor::on_actionSave_triggered() {
-  ui->smoothCheckBox->setAcceptDrops(!ui->smoothCheckBox->acceptDrops());
+  model->SetDirty(false);
+  close();
 }
 
 void BackgroundEditor::on_actionZoomIn_triggered() {

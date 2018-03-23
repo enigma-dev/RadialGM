@@ -11,7 +11,7 @@ class PathEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit PathEditor(QWidget *parent, ResourceModel *model);
+  explicit PathEditor(QWidget *parent, ProtoModel *model);
   ~PathEditor();
 
  private:

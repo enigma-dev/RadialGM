@@ -3,20 +3,24 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 
-BaseEditor::BaseEditor(QWidget* parent, ResourceModel* model)
+BaseEditor::BaseEditor(QWidget* parent, ProtoModel* model)
     : QWidget(parent), model(model), mapper(new ImmediateDataWidgetMapper(this)) {
   mapper->setOrientation(Qt::Vertical);
-  connect(model, &ResourceModel::dataChanged, this, &BaseEditor::dataChanged);
+  connect(model, &ProtoModel::dataChanged, this, &BaseEditor::dataChanged);
   mapper->setModel(model);
 }
 
 void BaseEditor::closeEvent(QCloseEvent* event) {
-  QMessageBox::StandardButton reply;
-  reply = QMessageBox::question(this, tr("Unsaved Changes"), tr("Would you like to save the changes?"),
-                                QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+  if (model->IsDirty()) {
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, tr("Unsaved Changes"), tr("Would you like to save the changes?"),
+                                  QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
 
-  if (reply == QMessageBox::Cancel) event->ignore();
-  if (reply == QMessageBox::No) model->RestoreBuffer();
+    if (reply == QMessageBox::Cancel) event->ignore();
+    if (reply == QMessageBox::No) model->RestoreBuffer();
+  }
+
+  emit closing();
 }
 
 void BaseEditor::ReplaceBuffer(google::protobuf::Message* buffer) { model->ReplaceBuffer(buffer); }

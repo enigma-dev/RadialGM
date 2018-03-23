@@ -2,7 +2,7 @@
 
 #include "ui_SpriteEditor.h"
 
-SpriteEditor::SpriteEditor(QWidget* parent, ResourceModel* model)
+SpriteEditor::SpriteEditor(QWidget* parent, ProtoModel* model)
     : BaseEditor(parent, model), ui(new Ui::SpriteEditor) {
   ui->setupUi(this);
 }

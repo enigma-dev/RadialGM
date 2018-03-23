@@ -11,7 +11,7 @@ class FontEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit FontEditor(QWidget *parent, ResourceModel *model);
+  explicit FontEditor(QWidget *parent, ProtoModel *model);
   ~FontEditor();
 
  private:
