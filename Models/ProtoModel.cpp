@@ -3,7 +3,17 @@
 #include <QDebug>
 
 ResourceModel::ResourceModel(google::protobuf::Message *protobuf, QObject *parent)
-    : QAbstractItemModel(parent), protobuf(protobuf) {}
+    : QAbstractItemModel(parent), protobuf(protobuf) {
+  protobufBackup = protobuf->New();
+  protobufBackup->CopyFrom(*protobuf);
+}
+
+void ResourceModel::ReplaceBuffer(google::protobuf::Message *buffer) {
+  protobuf->CopyFrom(*buffer);
+  emit dataChanged(index(0), index(rowCount()));
+}
+
+void ResourceModel::RestoreBuffer() { std::swap(protobuf, protobufBackup); }
 
 int ResourceModel::rowCount(const QModelIndex & /*parent*/) const {
   const google::protobuf::Descriptor *desc = protobuf->GetDescriptor();
@@ -53,6 +63,8 @@ bool ResourceModel::setData(const QModelIndex &index, const QVariant &value, int
   emit dataChanged(index, index);
   return true;
 }
+
+QVariant ResourceModel::data(int index) const { return data(this->index(index, 0, QModelIndex()), Qt::DisplayRole); }
 
 QVariant ResourceModel::data(const QModelIndex &index, int role) const {
   if (role != Qt::DisplayRole && role != Qt::EditRole) return QVariant();

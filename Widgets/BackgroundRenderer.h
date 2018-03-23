@@ -1,6 +1,8 @@
 #ifndef BACKGROUNDRENDERER_H
 #define BACKGROUNDRENDERER_H
 
+#include "Models/ProtoModel.h"
+
 #include <QObject>
 #include <QWidget>
 
@@ -9,29 +11,21 @@ class BackgroundRenderer : public QWidget {
  public:
   explicit BackgroundRenderer(QWidget *parent);
   QSize sizeHint() const override;
-  void setImage(QPixmap image);
-  void setGrid(bool visible, int hOff, int vOff, int w, int h, int hSpacing, int vSpacing);
-  void setTransparent(bool transparent);
-  void setZoom(qreal zoom);
-  const qreal &getZoom() const;
+  void SetResourceModel(ResourceModel *model);
+  bool SetImage(QString fName);
+  bool SetImage(QPixmap image);
+  void WriteImage(QString fName, QString type);
+  void SetZoom(qreal zoom);
+  const qreal &GetZoom() const;
 
  protected:
   void paintEvent(QPaintEvent *event) override;
 
- public slots:
-
  private:
+  ResourceModel *model;
   QPixmap pixmap;
   QPixmap transparentPixmap;
   QColor transparencyColor;
-  bool transparent;
-  bool grid_visible;
-  int grid_hOff;
-  int grid_vOff;
-  int grid_w;
-  int grid_h;
-  int grid_hSpacing;
-  int grid_vSpacing;
   qreal zoom;
 };
 

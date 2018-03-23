@@ -26,7 +26,7 @@
   <property name="Josh" stdset="0">
    <string>helloenigmasssss</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0">
    <property name="spacing">
     <number>0</number>
    </property>
@@ -141,7 +141,7 @@
           </sizepolicy>
          </property>
          <property name="title">
-          <string>Use as tileset</string>
+          <string>&amp;Use as tileset</string>
          </property>
          <property name="flat">
           <bool>true</bool>
@@ -377,8 +377,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>463</width>
-          <height>366</height>
+          <width>470</width>
+          <height>339</height>
          </rect>
         </property>
         <property name="autoFillBackground">

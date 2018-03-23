@@ -12,6 +12,9 @@ class BaseEditor : public QWidget {
 
  public:
   explicit BaseEditor(QWidget *parent, ResourceModel *model);
+  virtual void closeEvent(QCloseEvent *event);
+  void ReplaceBuffer(google::protobuf::Message *buffer);
+  void SetModelData(int index, const QVariant &value);
   QVariant GetModelData(int index);
 
  protected slots:

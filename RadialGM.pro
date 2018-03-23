@@ -44,7 +44,8 @@ SOURCES += \
     Components/ArtManager.cpp \
     Editors/BaseEditor.cpp \
     Models/ProtoModel.cpp \
-    Models/ImmediateMapper.cpp
+    Models/ImmediateMapper.cpp \
+    Components/Utility.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -61,7 +62,8 @@ HEADERS += \
     Components/ArtManager.h \
     Editors/BaseEdtior.h \
     Models/ProtoModel.h \
-    Models/ImmediateMapper.h
+    Models/ImmediateMapper.h \
+    Components/Utility.h
 
 FORMS += \
     MainWindow.ui \

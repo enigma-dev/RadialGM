@@ -16,6 +16,7 @@
 #include "Models/ProtoModel.h"
 
 #include "gmx.h"
+
 #include "resources/Background.pb.h"
 
 #include <QtWidgets>

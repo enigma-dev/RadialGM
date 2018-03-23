@@ -3,9 +3,13 @@
 #include "ui_AddImageDialog.h"
 #include "ui_BackgroundEditor.h"
 
-#include "Models/ProtoModel.h"
+#include "Components/Utility.h"
+
 #include "resources/Background.pb.h"
 
+#include "gmx.h"
+
+#include <QDesktopServices>
 #include <QPainter>
 
 using buffers::resources::Background;
@@ -13,6 +17,8 @@ using buffers::resources::Background;
 BackgroundEditor::BackgroundEditor(QWidget* parent, ResourceModel* model)
     : BaseEditor(parent, model), ui(new Ui::BackgroundEditor) {
   ui->setupUi(this);
+
+  ui->backgroundRenderer->SetResourceModel(model);
 
   mapper->addMapping(ui->smoothCheckBox, Background::kSmoothEdgesFieldNumber);
   mapper->addMapping(ui->preloadCheckBox, Background::kPreloadFieldNumber);
@@ -25,24 +31,13 @@ BackgroundEditor::BackgroundEditor(QWidget* parent, ResourceModel* model)
   mapper->addMapping(ui->horizontalSpacingSpinBox, Background::kHorizontalSpacingFieldNumber);
   mapper->addMapping(ui->verticalSpacingSpinBox, Background::kVerticalSpacingFieldNumber);
   mapper->toFirst();
-
-  ui->backgroundRenderer->setTransparent(ui->transparentCheckBox->isChecked());
-  ui->backgroundRenderer->setImage(QPixmap(GetModelData(Background::kImageFieldNumber).toString()));
-  ui->backgroundRenderer->setGrid(ui->tilesetGroupBox->isChecked(), ui->horizontalOffsetSpinBox->value(),
-                                  ui->verticalOffsetSpinBox->value(), ui->tileWidthSpinBox->value(),
-                                  ui->tileHeightSpinBox->value(), ui->horizontalSpacingSpinBox->value(),
-                                  ui->verticalSpacingSpinBox->value());
 }
 
 BackgroundEditor::~BackgroundEditor() { delete ui; }
 
 void BackgroundEditor::dataChanged(const QModelIndex& /*topLeft*/, const QModelIndex& /*bottomRight*/,
                                    const QVector<int>& /*roles*/) {
-  ui->backgroundRenderer->setTransparent(ui->transparentCheckBox->isChecked());
-  ui->backgroundRenderer->setGrid(ui->tilesetGroupBox->isChecked(), ui->horizontalOffsetSpinBox->value(),
-                                  ui->verticalOffsetSpinBox->value(), ui->tileWidthSpinBox->value(),
-                                  ui->tileHeightSpinBox->value(), ui->horizontalSpacingSpinBox->value(),
-                                  ui->verticalSpacingSpinBox->value());
+  ui->backgroundRenderer->update();
 }
 
 void BackgroundEditor::on_actionSave_triggered() {
@@ -50,14 +45,14 @@ void BackgroundEditor::on_actionSave_triggered() {
 }
 
 void BackgroundEditor::on_actionZoomIn_triggered() {
-  ui->backgroundRenderer->setZoom(ui->backgroundRenderer->getZoom() * 2);
+  ui->backgroundRenderer->SetZoom(ui->backgroundRenderer->GetZoom() * 2);
 }
 
 void BackgroundEditor::on_actionZoomOut_triggered() {
-  ui->backgroundRenderer->setZoom(ui->backgroundRenderer->getZoom() / 2);
+  ui->backgroundRenderer->SetZoom(ui->backgroundRenderer->GetZoom() / 2);
 }
 
-void BackgroundEditor::on_actionZoom_triggered() { ui->backgroundRenderer->setZoom(1); }
+void BackgroundEditor::on_actionZoom_triggered() { ui->backgroundRenderer->SetZoom(1); }
 
 void BackgroundEditor::on_actionNewImage_triggered() {
   QDialog* dialog = new QDialog(this);
@@ -70,5 +65,38 @@ void BackgroundEditor::on_actionNewImage_triggered() {
   if (result != QDialog::Accepted) return;
   QPixmap img(dialogUI.widthSpinBox->value(), dialogUI.heightSpinBox->value());
   img.fill(Qt::transparent);
-  ui->backgroundRenderer->setImage(img);
+  ui->backgroundRenderer->SetImage(img);
+}
+
+void BackgroundEditor::on_actionLoadImage_triggered() {
+  ImageDialog* dialog = new ImageDialog(this, "background");
+  dialog->exec();
+
+  if (dialog->selectedFiles().size() > 0) {
+    QString fName = dialog->selectedFiles()[0];
+    Background* bkg = gmx::LoadResource<Background>(fName.toStdString(), "background", false);
+    if (bkg != nullptr) {
+      QString lastImage = GetModelData(Background::kImageFieldNumber).toString();
+      ReplaceBuffer(bkg);
+      QString newImage = GetModelData(Background::kImageFieldNumber).toString();
+      if (!ui->backgroundRenderer->SetImage(newImage)) SetModelData(Background::kImageFieldNumber, lastImage);
+    } else {
+      if (ui->backgroundRenderer->SetImage(fName)) SetModelData(Background::kImageFieldNumber, fName);
+    }
+  }
+}
+
+void BackgroundEditor::on_actionSaveImage_triggered() {
+  ImageDialog* dialog = new ImageDialog(this, "background", true);
+  dialog->exec();
+
+  if (dialog->selectedFiles().size() > 0) {
+    QString fName = dialog->selectedFiles()[0];
+    ui->backgroundRenderer->WriteImage(fName, dialog->selectedMimeTypeFilter());
+  }
+}
+
+void BackgroundEditor::on_actionEditImage_triggered() {
+  QString fName = GetModelData(Background::kImageFieldNumber).toString();
+  QDesktopServices::openUrl(fName);  //TODO: file watcher reload
 }

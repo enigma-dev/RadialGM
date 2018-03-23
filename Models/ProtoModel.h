@@ -10,9 +10,12 @@ class ResourceModel : public QAbstractItemModel {
 
  public:
   ResourceModel(google::protobuf::Message *protobuf, QObject *parent = nullptr);
+  void ReplaceBuffer(google::protobuf::Message *buffer);
+  void RestoreBuffer();
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   bool setData(const QModelIndex &index, const QVariant &value, int role) override;
+  QVariant data(int index) const;
   QVariant data(const QModelIndex &index, int role) const override;
   QModelIndex parent(const QModelIndex &index) const override;
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -21,6 +24,7 @@ class ResourceModel : public QAbstractItemModel {
 
  private:
   google::protobuf::Message *protobuf;
+  google::protobuf::Message *protobufBackup;
 };
 
 #endif  // RESOURCEMODEL_H
