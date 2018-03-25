@@ -85,9 +85,11 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
 
   auto subWindow = subWindows[item];
   if (subWindow == nullptr) return;
-  subWindow->connect(subWindow, &QObject::destroyed, [=]() { subWindows.remove(item); });
-  subWindow->connect(static_cast<BaseEditor *>(subWindow->widget()), &BaseEditor::closing, subWindow,
-                     &QMdiSubWindow::close);
+  subWindow->connect(subWindow, &QObject::destroyed, [=]() {
+    subWindows.remove(item);
+    delete resourceModels[item];
+    resourceModels.remove(item);
+  });
   subWindow->setWindowIcon(subWindows[item]->widget()->windowIcon());
   subWindow->setWindowTitle(QString::fromStdString(item->name()));
   subWindow->show();

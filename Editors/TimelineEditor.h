@@ -1,7 +1,7 @@
 #ifndef TIMELINEEDITOR_H
 #define TIMELINEEDITOR_H
 
-#include "BaseEdtior.h"
+#include "BaseEditor.h"
 
 namespace Ui {
 class TimelineEditor;

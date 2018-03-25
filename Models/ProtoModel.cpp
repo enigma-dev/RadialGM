@@ -14,7 +14,11 @@ void ProtoModel::ReplaceBuffer(google::protobuf::Message *buffer) {
   emit dataChanged(index(0), index(rowCount()));
 }
 
-void ProtoModel::RestoreBuffer() { std::swap(protobuf, protobufBackup); }
+void ProtoModel::RestoreBuffer() {
+  //std::swap(protobuf, protobufBackup);
+  //protobufBackup->CopyFrom(*protobuf);
+  protobuf->CopyFrom(*protobufBackup);
+}
 
 int ProtoModel::rowCount(const QModelIndex & /*parent*/) const {
   const google::protobuf::Descriptor *desc = protobuf->GetDescriptor();
@@ -28,11 +32,10 @@ bool ProtoModel::IsDirty() { return dirty; }
 int ProtoModel::columnCount(const QModelIndex & /*parent*/) const { return 1; }
 
 bool ProtoModel::setData(const QModelIndex &index, const QVariant &value, int /*role*/) {
-  SetDirty(true);
-
   const google::protobuf::Descriptor *desc = protobuf->GetDescriptor();
   const google::protobuf::Reflection *refl = protobuf->GetReflection();
   const google::protobuf::FieldDescriptor *field = desc->FindFieldByNumber(index.row());
+  if (!field) return false;
 
   switch (field->cpp_type()) {
     case google::protobuf::FieldDescriptor::CppType::CPPTYPE_MESSAGE: {
@@ -67,6 +70,7 @@ bool ProtoModel::setData(const QModelIndex &index, const QVariant &value, int /*
       break;
   }
 
+  SetDirty(true);
   emit dataChanged(index, index);
   return true;
 }
@@ -79,6 +83,7 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
   const google::protobuf::Descriptor *desc = protobuf->GetDescriptor();
   const google::protobuf::Reflection *refl = protobuf->GetReflection();
   const google::protobuf::FieldDescriptor *field = desc->FindFieldByNumber(index.row());
+  if (!field) return QVariant();
 
   switch (field->cpp_type()) {
     case google::protobuf::FieldDescriptor::CppType::CPPTYPE_MESSAGE:
@@ -118,7 +123,7 @@ QModelIndex ProtoModel::index(int row, int column, const QModelIndex & /*parent*
 }
 
 Qt::ItemFlags ProtoModel::flags(const QModelIndex &index) const {
-  if (!index.isValid()) return 0;
+  if (!index.isValid()) return nullptr;
 
   return QAbstractItemModel::flags(index);
 }

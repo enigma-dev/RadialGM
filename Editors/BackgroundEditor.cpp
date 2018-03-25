@@ -42,7 +42,7 @@ void BackgroundEditor::dataChanged(const QModelIndex& /*topLeft*/, const QModelI
 
 void BackgroundEditor::on_actionSave_triggered() {
   model->SetDirty(false);
-  close();
+  this->parentWidget()->close();
 }
 
 void BackgroundEditor::on_actionZoomIn_triggered() {
@@ -75,7 +75,7 @@ void BackgroundEditor::on_actionLoadImage_triggered() {
 
   if (dialog->selectedFiles().size() > 0) {
     QString fName = dialog->selectedFiles()[0];
-    Background* bkg = gmx::LoadResource<Background>(fName.toStdString(), "background", false);
+    Background* bkg = gmx::LoadBackground(fName.toStdString());
     if (bkg != nullptr) {
       QString lastImage = GetModelData(Background::kImageFieldNumber).toString();
       ReplaceBuffer(bkg);

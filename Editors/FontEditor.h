@@ -1,7 +1,7 @@
 #ifndef FONTEDITOR_H
 #define FONTEDITOR_H
 
-#include "BaseEdtior.h"
+#include "BaseEditor.h"
 
 namespace Ui {
 class FontEditor;

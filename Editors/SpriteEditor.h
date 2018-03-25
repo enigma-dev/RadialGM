@@ -1,7 +1,7 @@
 #ifndef SPRITEEDITOR_H
 #define SPRITEEDITOR_H
 
-#include "BaseEdtior.h"
+#include "BaseEditor.h"
 
 namespace Ui {
 class SpriteEditor;

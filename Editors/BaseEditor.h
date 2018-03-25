@@ -18,9 +18,6 @@ class BaseEditor : public QWidget {
   void SetModelData(int index, const QVariant &value);
   QVariant GetModelData(int index);
 
- signals:
-  void closing();
-
  protected slots:
   virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
                            const QVector<int> &roles = QVector<int>());

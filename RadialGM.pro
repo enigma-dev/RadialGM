@@ -60,10 +60,10 @@ HEADERS += \
     Widgets/BackgroundRenderer.h \
     Models/TreeModel.h \
     Components/ArtManager.h \
-    Editors/BaseEdtior.h \
     Models/ProtoModel.h \
     Models/ImmediateMapper.h \
-    Components/Utility.h
+    Components/Utility.h \
+    Editors/BaseEditor.h
 
 FORMS += \
     MainWindow.ui \

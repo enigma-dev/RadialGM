@@ -1,7 +1,7 @@
 #ifndef OBJECTEDITOR_H
 #define OBJECTEDITOR_H
 
-#include "BaseEdtior.h"
+#include "BaseEditor.h"
 
 namespace Ui {
 class ObjectEditor;
