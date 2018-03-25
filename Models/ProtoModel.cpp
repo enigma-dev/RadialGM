@@ -1,7 +1,5 @@
 #include "ProtoModel.h"
 
-#include <QDebug>
-
 ProtoModel::ProtoModel(google::protobuf::Message *protobuf, QObject *parent)
     : QAbstractItemModel(parent), dirty(false), protobuf(protobuf) {
   protobufBackup = protobuf->New();
@@ -15,9 +13,8 @@ void ProtoModel::ReplaceBuffer(google::protobuf::Message *buffer) {
 }
 
 void ProtoModel::RestoreBuffer() {
-  //std::swap(protobuf, protobufBackup);
-  //protobufBackup->CopyFrom(*protobuf);
-  protobuf->CopyFrom(*protobufBackup);
+  std::swap(protobuf, protobufBackup);
+  protobufBackup->CopyFrom(*protobuf);
 }
 
 int ProtoModel::rowCount(const QModelIndex & /*parent*/) const {

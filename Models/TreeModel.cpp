@@ -2,8 +2,6 @@
 
 #include "Components/ArtManager.h"
 
-#include <QDebug>
-
 TreeModel::TreeModel(buffers::TreeNode *root, QObject *parent) : QAbstractItemModel(parent), root(root) {}
 
 TreeModel::~TreeModel() {}

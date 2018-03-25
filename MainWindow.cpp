@@ -59,7 +59,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
   // might not be set or its not a message
   if (!typeField || typeField->cpp_type() != FieldDescriptor::CppType::CPPTYPE_MESSAGE) return;
   Message *typeMessage = refl->MutableMessage(item, typeField);
-  if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(typeMessage);
+  if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(typeMessage, this);
   auto resourceModel = resourceModels[item];
 
   if (!subWindows.contains(item)) {
