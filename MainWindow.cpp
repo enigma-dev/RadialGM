@@ -97,7 +97,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
 MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::openFile(QString fName) {
-  game = gmx::LoadGMX(fName.toStdString(), false);
+  game = gmx::LoadGMX(fName.toStdString());
   treeModel = new TreeModel(game->mutable_game()->mutable_root(), this);
   ui->treeView->setModel(treeModel);
   treeModel->connect(treeModel, &QAbstractItemModel::dataChanged,
