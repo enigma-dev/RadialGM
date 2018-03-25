@@ -13,7 +13,7 @@ class BackgroundEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit BackgroundEditor(QWidget *parent, ResourceModel *model);
+  explicit BackgroundEditor(QWidget *parent, ProtoModel *model);
   ~BackgroundEditor();
 
  private slots:
@@ -24,6 +24,9 @@ class BackgroundEditor : public BaseEditor {
   void on_actionZoomOut_triggered();
   void on_actionZoom_triggered();
   void on_actionNewImage_triggered();
+  void on_actionLoadImage_triggered();
+  void on_actionSaveImage_triggered();
+  void on_actionEditImage_triggered();
 
  private:
   Ui::BackgroundEditor *ui;

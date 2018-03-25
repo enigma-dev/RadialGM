@@ -2,7 +2,7 @@
 
 #include "ui_TimelineEditor.h"
 
-TimelineEditor::TimelineEditor(QWidget* parent, ResourceModel* model)
+TimelineEditor::TimelineEditor(QWidget* parent, ProtoModel* model)
     : BaseEditor(parent, model), ui(new Ui::TimelineEditor) {
   ui->setupUi(this);
 }

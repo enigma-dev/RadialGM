@@ -2,17 +2,34 @@
 
 #include <QDebug>
 
-ResourceModel::ResourceModel(google::protobuf::Message *protobuf, QObject *parent)
-    : QAbstractItemModel(parent), protobuf(protobuf) {}
+ProtoModel::ProtoModel(google::protobuf::Message *protobuf, QObject *parent)
+    : QAbstractItemModel(parent), dirty(false), protobuf(protobuf) {
+  protobufBackup = protobuf->New();
+  protobufBackup->CopyFrom(*protobuf);
+}
 
-int ResourceModel::rowCount(const QModelIndex & /*parent*/) const {
+void ProtoModel::ReplaceBuffer(google::protobuf::Message *buffer) {
+  SetDirty(true);
+  protobuf->CopyFrom(*buffer);
+  emit dataChanged(index(0), index(rowCount()));
+}
+
+void ProtoModel::RestoreBuffer() { std::swap(protobuf, protobufBackup); }
+
+int ProtoModel::rowCount(const QModelIndex & /*parent*/) const {
   const google::protobuf::Descriptor *desc = protobuf->GetDescriptor();
   return desc->field_count();
 }
 
-int ResourceModel::columnCount(const QModelIndex & /*parent*/) const { return 1; }
+void ProtoModel::SetDirty(bool dirty) { this->dirty = dirty; }
 
-bool ResourceModel::setData(const QModelIndex &index, const QVariant &value, int /*role*/) {
+bool ProtoModel::IsDirty() { return dirty; }
+
+int ProtoModel::columnCount(const QModelIndex & /*parent*/) const { return 1; }
+
+bool ProtoModel::setData(const QModelIndex &index, const QVariant &value, int /*role*/) {
+  SetDirty(true);
+
   const google::protobuf::Descriptor *desc = protobuf->GetDescriptor();
   const google::protobuf::Reflection *refl = protobuf->GetReflection();
   const google::protobuf::FieldDescriptor *field = desc->FindFieldByNumber(index.row());
@@ -54,7 +71,9 @@ bool ResourceModel::setData(const QModelIndex &index, const QVariant &value, int
   return true;
 }
 
-QVariant ResourceModel::data(const QModelIndex &index, int role) const {
+QVariant ProtoModel::data(int index) const { return data(this->index(index, 0, QModelIndex()), Qt::DisplayRole); }
+
+QVariant ProtoModel::data(const QModelIndex &index, int role) const {
   if (role != Qt::DisplayRole && role != Qt::EditRole) return QVariant();
 
   const google::protobuf::Descriptor *desc = protobuf->GetDescriptor();
@@ -87,18 +106,18 @@ QVariant ResourceModel::data(const QModelIndex &index, int role) const {
   return QVariant();
 }
 
-QModelIndex ResourceModel::parent(const QModelIndex & /*index*/) const { return QModelIndex(); }
+QModelIndex ProtoModel::parent(const QModelIndex & /*index*/) const { return QModelIndex(); }
 
-QVariant ResourceModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int role) const {
+QVariant ProtoModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int role) const {
   if (role != Qt::DisplayRole) return QVariant();
   return "hey";
 }
 
-QModelIndex ResourceModel::index(int row, int column, const QModelIndex & /*parent*/) const {
+QModelIndex ProtoModel::index(int row, int column, const QModelIndex & /*parent*/) const {
   return this->createIndex(row, column);
 }
 
-Qt::ItemFlags ResourceModel::flags(const QModelIndex &index) const {
+Qt::ItemFlags ProtoModel::flags(const QModelIndex &index) const {
   if (!index.isValid()) return 0;
 
   return QAbstractItemModel::flags(index);

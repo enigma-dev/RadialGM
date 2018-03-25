@@ -2,7 +2,7 @@
 
 #include "ui_FontEditor.h"
 
-FontEditor::FontEditor(QWidget* parent, ResourceModel* model) : BaseEditor(parent, model), ui(new Ui::FontEditor) {
+FontEditor::FontEditor(QWidget* parent, ProtoModel* model) : BaseEditor(parent, model), ui(new Ui::FontEditor) {
   ui->setupUi(this);
 }
 

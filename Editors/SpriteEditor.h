@@ -11,7 +11,7 @@ class SpriteEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit SpriteEditor(QWidget *parent, ResourceModel *model);
+  explicit SpriteEditor(QWidget *parent, ProtoModel *model);
   ~SpriteEditor();
 
  private:
