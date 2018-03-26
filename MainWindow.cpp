@@ -29,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->mdiArea->setBackground(QImage(":/banner.png"));
 }
 
-void MainWindow::closeEvent(QCloseEvent * /*event*/) { ui->mdiArea->closeAllSubWindows(); }
+void MainWindow::closeEvent(QCloseEvent *event) { event->accept(); }
 
 template <typename T>
 T *EditorFactory(QWidget *parent, ProtoModel *model) {
@@ -59,25 +59,27 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
   // might not be set or its not a message
   if (!typeField || typeField->cpp_type() != FieldDescriptor::CppType::CPPTYPE_MESSAGE) return;
   Message *typeMessage = refl->MutableMessage(item, typeField);
-  if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(typeMessage, this);
-  auto resourceModel = resourceModels[item];
 
-  if (!subWindows.contains(item)) {
+  auto subWindow = subWindows[item];
+  if (!subWindows.contains(item) || subWindow == nullptr) {
     auto factoryFunction = factoryMap.find(item->type_case());
     if (factoryFunction == factoryMap.end()) return;  // no registered editor
-    QWidget *editor = factoryFunction->second(ui->mdiArea, resourceModel);
-    subWindows[item] = ui->mdiArea->addSubWindow(editor);
-  }
-  auto subWindow = subWindows[item];
 
-  if (subWindow == nullptr) return;
-  subWindow->connect(subWindow, &QObject::destroyed, [=]() {
-    subWindows.remove(item);
-    delete resourceModel;
-    resourceModels.remove(item);
-  });
-  subWindow->setWindowIcon(subWindow->widget()->windowIcon());
-  subWindow->setWindowTitle(QString::fromStdString(item->name()));
+    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(typeMessage);
+    auto resourceModel = resourceModels[item];
+
+    QWidget *editor = factoryFunction->second(ui->mdiArea, resourceModel);
+    resourceModel->setParent(editor);
+
+    subWindow = subWindows[item] = ui->mdiArea->addSubWindow(editor);
+    subWindow->connect(subWindow, &QObject::destroyed, [=]() {
+      subWindows.remove(item);
+      resourceModels.remove(item);
+    });
+    subWindow->setWindowIcon(subWindow->widget()->windowIcon());
+    subWindow->setWindowTitle(QString::fromStdString(item->name()));
+  }
+
   subWindow->show();
   ui->mdiArea->setActiveSubWindow(subWindow);
 }
