@@ -1,7 +1,7 @@
 #ifndef SPRITEEDITOR_H
 #define SPRITEEDITOR_H
 
-#include "BaseEdtior.h"
+#include "BaseEditor.h"
 
 namespace Ui {
 class SpriteEditor;
@@ -11,7 +11,7 @@ class SpriteEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit SpriteEditor(QWidget *parent, ResourceModel *model);
+  explicit SpriteEditor(QWidget *parent, ProtoModel *model);
   ~SpriteEditor();
 
  private:

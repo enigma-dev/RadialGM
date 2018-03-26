@@ -1,7 +1,7 @@
 #ifndef TIMELINEEDITOR_H
 #define TIMELINEEDITOR_H
 
-#include "BaseEdtior.h"
+#include "BaseEditor.h"
 
 namespace Ui {
 class TimelineEditor;
@@ -11,7 +11,7 @@ class TimelineEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit TimelineEditor(QWidget *parent, ResourceModel *model);
+  explicit TimelineEditor(QWidget *parent, ProtoModel *model);
   ~TimelineEditor();
 
  private:

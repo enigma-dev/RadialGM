@@ -1,5 +1,7 @@
 #include "ImmediateMapper.h"
 
+#include "ProtoModel.h"
+
 #include <QItemDelegate>
 #include <QMetaObject>
 #include <QMetaProperty>
@@ -20,4 +22,10 @@ void ImmediateDataWidgetMapper::addMapping(QWidget *widget, int section, QByteAr
   auto property = widgetMetaObject->property(widgetMetaObject->indexOfProperty(propertyName));
   auto metaObject = this->metaObject();
   QMetaObject::connect(widget, property.notifySignalIndex(), this, metaObject->indexOfSlot("widgetChanged()"));
+}
+
+void ImmediateDataWidgetMapper::toFirst() {
+  QDataWidgetMapper::toFirst();
+  // Mapper::toFirst triggers SetData and marks our model as dirty when it's really a virgin
+  static_cast<ProtoModel *>(model())->SetDirty(false);
 }

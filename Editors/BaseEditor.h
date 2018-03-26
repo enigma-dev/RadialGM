@@ -4,6 +4,7 @@
 #include "Models/ImmediateMapper.h"
 #include "Models/ProtoModel.h"
 
+#include <QMdiSubWindow>
 #include <QObject>
 #include <QWidget>
 
@@ -11,7 +12,11 @@ class BaseEditor : public QWidget {
   Q_OBJECT
 
  public:
-  explicit BaseEditor(QWidget *parent, ResourceModel *model);
+  explicit BaseEditor(QWidget *parent, ProtoModel *model);
+
+  virtual void closeEvent(QCloseEvent *event);
+  void ReplaceBuffer(google::protobuf::Message *buffer);
+  void SetModelData(int index, const QVariant &value);
   QVariant GetModelData(int index);
 
  protected slots:
@@ -19,7 +24,7 @@ class BaseEditor : public QWidget {
                            const QVector<int> &roles = QVector<int>());
 
  protected:
-  ResourceModel *model;
+  ProtoModel *model;
   ImmediateDataWidgetMapper *mapper;
 };
 

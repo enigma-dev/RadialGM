@@ -1,7 +1,7 @@
 #ifndef ROOMEDITOR_H
 #define ROOMEDITOR_H
 
-#include "BaseEdtior.h"
+#include "BaseEditor.h"
 
 namespace Ui {
 class RoomEditor;
@@ -11,7 +11,7 @@ class RoomEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit RoomEditor(QWidget *parent, ResourceModel *model);
+  explicit RoomEditor(QWidget *parent, ProtoModel *model);
   ~RoomEditor();
 
  private:
