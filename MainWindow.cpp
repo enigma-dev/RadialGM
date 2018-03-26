@@ -25,7 +25,20 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ArtManager::Init();
+
+  QString program = "./Submodules/enigma-dev/emake";
+  QStringList arguments;
+  arguments << "--server"
+            << "--quiet";
+  QProcess *myProcess = new QProcess(this);
+  myProcess->start(program, arguments);
+
   ui->setupUi(this);
+
+  setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
+  setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
+  setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
+  setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
   ui->mdiArea->setBackground(QImage(":/banner.png"));
 }
 
@@ -87,6 +100,8 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
 MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::openFile(QString fName) {
+  QFileInfo fileInfo(fName);
+  this->setWindowTitle(fileInfo.fileName() + " - ENIGMA");
   game = gmx::LoadGMX(fName.toStdString());
   treeModel = new TreeModel(game->mutable_game()->mutable_root(), this);
   ui->treeView->setModel(treeModel);
@@ -107,7 +122,6 @@ void MainWindow::openFile(QString fName) {
 void MainWindow::on_actionOpen_triggered() {
   const QString fileName = QFileDialog::getOpenFileName(this, tr("Open Project"), "",
                                                         tr("GameMaker: Studio (*.project.gmx);;All Files (*)"));
-
   if (!fileName.isEmpty()) openFile(fileName);
 }
 
@@ -156,7 +170,8 @@ void MainWindow::on_actionExploreENIGMA_triggered() { QDesktopServices::openUrl(
 
 void MainWindow::on_actionAbout_triggered() {
   QMessageBox aboutBox(QMessageBox::Information, tr("About"),
-                       tr("ENIGMA is a free, open-source, and cross-platform game engine."), QMessageBox::Ok, this, 0);
+                       tr("ENIGMA is a free, open-source, and cross-platform game engine."), QMessageBox::Ok, this,
+                       nullptr);
   QAbstractButton *aboutQtButton = aboutBox.addButton(tr("About Qt"), QMessageBox::HelpRole);
   aboutBox.exec();
 
