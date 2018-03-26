@@ -2,14 +2,9 @@
 
 #include "ui_SpriteEditor.h"
 
-<<<<<<< HEAD
-SpriteEditor::SpriteEditor(QWidget* parent, ProtoModel* model)
-    : BaseEditor(parent, model), ui(new Ui::SpriteEditor) {
-=======
 #include <QMessageBox>
 
 SpriteEditor::SpriteEditor(QWidget* parent, ProtoModel* model) : BaseEditor(parent, model), ui(new Ui::SpriteEditor) {
->>>>>>> SpriteEdit
   ui->setupUi(this);
 
   spriteModel =

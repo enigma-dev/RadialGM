@@ -60,7 +60,7 @@ bool SpriteModel::setData(const QModelIndex& index, const QVariant& value, int r
   return true;
 }
 
-bool SpriteModel::insertRows(int position, int rows, const QModelIndex& parent) {
+bool SpriteModel::insertRows(int position, int rows, const QModelIndex& /*parent*/) {
   beginInsertRows(QModelIndex(), position, position + rows - 1);
 
   QList<std::string> images;

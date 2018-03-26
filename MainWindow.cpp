@@ -19,77 +19,67 @@
 
 #include <QtWidgets>
 
+#include <functional>
+
+#undef GetMessage
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ArtManager::Init();
   ui->setupUi(this);
   ui->mdiArea->setBackground(QImage(":/banner.png"));
 }
 
-void MainWindow::closeEvent(QCloseEvent * /*event*/) { ui->mdiArea->closeAllSubWindows(); }
+void MainWindow::closeEvent(QCloseEvent *event) { event->accept(); }
+
+template <typename T>
+T *EditorFactory(QWidget *parent, ProtoModel *model) {
+  return new T(parent, model);
+}
 
 void MainWindow::openSubWindow(buffers::TreeNode *item) {
-  if (item->has_background()) {
-    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(item->mutable_background());
+  using namespace google::protobuf;
 
-    if (!subWindows.contains(item))
-      subWindows[item] = ui->mdiArea->addSubWindow(new BackgroundEditor(this, resourceModels[item]));
-  } else if (item->has_font()) {
-    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(item->mutable_font());
+  using TypeCase = buffers::TreeNode::TypeCase;
+  using FactoryFunction = std::function<BaseEditor *(QWidget * parent, ProtoModel * model)>;
+  using FactoryMap = std::unordered_map<TypeCase, FactoryFunction>;
 
-    if (!subWindows.contains(item))
-      subWindows[item] = ui->mdiArea->addSubWindow(new FontEditor(this, resourceModels[item]));
-  } else if (item->has_object()) {
-    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(item->mutable_object());
+  static FactoryMap factoryMap({{TypeCase::kSprite, EditorFactory<SpriteEditor>},
+                                {TypeCase::kBackground, EditorFactory<BackgroundEditor>},
+                                {TypeCase::kPath, EditorFactory<PathEditor>},
+                                {TypeCase::kFont, EditorFactory<FontEditor>},
+                                {TypeCase::kTimeline, EditorFactory<TimelineEditor>},
+                                {TypeCase::kObject, EditorFactory<ObjectEditor>},
+                                {TypeCase::kRoom, EditorFactory<RoomEditor>}});
 
-    if (!subWindows.contains(item))
-      subWindows[item] = ui->mdiArea->addSubWindow(new ObjectEditor(this, resourceModels[item]));
-  } else if (item->has_path()) {
-    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(item->mutable_path());
+  const Descriptor *desc = item->GetDescriptor();
+  const Reflection *refl = item->GetReflection();
 
-    if (!subWindows.contains(item))
-      subWindows[item] = ui->mdiArea->addSubWindow(new PathEditor(this, resourceModels[item]));
-  } else if (item->has_room()) {
-    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(item->mutable_room());
-
-    if (!subWindows.contains(item))
-      subWindows[item] = ui->mdiArea->addSubWindow(new RoomEditor(this, resourceModels[item]));
-  } else if (item->has_script()) {
-    /*if (!resourceModels.contains(item))
-            resourceModels[item] = new ResourceModel(item->mutable_background());
-
-        if (!subWindows.contains(item))1
-            subWindows[item] = ui->mdiArea->addSubWindow(new ScriptEditor(this, resourceModels[item]));*/
-  } else if (item->has_shader()) {
-    /*if (!resourceModels.contains(item))
-            resourceModels[item] = new ResourceModel(item->mutable_shader());
-
-        if (!subWindows.contains(item))
-            subWindows[item] = ui->mdiArea->addSubWindow(new ShaderEditor(this, resourceModels[item]));*/
-  } else if (item->has_sound()) {
-    /*if (!resourceModels.contains(item))
-            resourceModels[item] = new ResourceModel(item->mutable_sound());
-
-        if (!subWindows.contains(item))
-            subWindows[item] = ui->mdiArea->addSubWindow(new SoundEditor(this, resourceModels[item]));*/
-  } else if (item->has_sprite()) {
-    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(item->mutable_sprite());
-
-    if (!subWindows.contains(item))
-      subWindows[item] = ui->mdiArea->addSubWindow(new SpriteEditor(this, resourceModels[item]));
-  } else if (item->has_timeline()) {
-    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(item->mutable_timeline());
-
-    if (!subWindows.contains(item))
-      subWindows[item] = ui->mdiArea->addSubWindow(new TimelineEditor(this, resourceModels[item]));
-  }
+  const OneofDescriptor *typeOneof = desc->FindOneofByName("type");
+  const FieldDescriptor *typeField = refl->GetOneofFieldDescriptor(*item, typeOneof);
+  // might not be set or its not a message
+  if (!typeField || typeField->cpp_type() != FieldDescriptor::CppType::CPPTYPE_MESSAGE) return;
+  Message *typeMessage = refl->MutableMessage(item, typeField);
 
   auto subWindow = subWindows[item];
-  if (subWindow == nullptr) return;
-  subWindow->connect(subWindow, &QObject::destroyed, [=]() { subWindows.remove(item); });
-  subWindow->connect(static_cast<BaseEditor *>(subWindow->widget()), &BaseEditor::closing, subWindow,
-                     &QMdiSubWindow::close);
-  subWindow->setWindowIcon(subWindows[item]->widget()->windowIcon());
-  subWindow->setWindowTitle(QString::fromStdString(item->name()));
+  if (!subWindows.contains(item) || subWindow == nullptr) {
+    auto factoryFunction = factoryMap.find(item->type_case());
+    if (factoryFunction == factoryMap.end()) return;  // no registered editor
+
+    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(typeMessage);
+    auto resourceModel = resourceModels[item];
+
+    QWidget *editor = factoryFunction->second(ui->mdiArea, resourceModel);
+    resourceModel->setParent(editor);
+
+    subWindow = subWindows[item] = ui->mdiArea->addSubWindow(editor);
+    subWindow->connect(subWindow, &QObject::destroyed, [=]() {
+      subWindows.remove(item);
+      resourceModels.remove(item);
+    });
+    subWindow->setWindowIcon(subWindow->widget()->windowIcon());
+    subWindow->setWindowTitle(QString::fromStdString(item->name()));
+  }
+
   subWindow->show();
   ui->mdiArea->setActiveSubWindow(subWindow);
 }
@@ -97,7 +87,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
 MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::openFile(QString fName) {
-  game = gmx::LoadGMX(fName.toStdString(), false);
+  game = gmx::LoadGMX(fName.toStdString());
   treeModel = new TreeModel(game->mutable_game()->mutable_root(), this);
   ui->treeView->setModel(treeModel);
   treeModel->connect(treeModel, &QAbstractItemModel::dataChanged,

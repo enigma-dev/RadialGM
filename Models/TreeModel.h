@@ -9,8 +9,7 @@ class TreeModel : public QAbstractItemModel {
   Q_OBJECT
 
  public:
-  explicit TreeModel(buffers::TreeNode *root, QObject *parent = 0);
-  ~TreeModel();
+  explicit TreeModel(buffers::TreeNode *root, QObject *parent);
 
   bool setData(const QModelIndex &index, const QVariant &value, int role) override;
   QVariant data(const QModelIndex &index, int role) const override;

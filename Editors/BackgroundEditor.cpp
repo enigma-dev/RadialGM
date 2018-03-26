@@ -42,7 +42,7 @@ void BackgroundEditor::dataChanged(const QModelIndex& /*topLeft*/, const QModelI
 
 void BackgroundEditor::on_actionSave_triggered() {
   model->SetDirty(false);
-  close();
+  this->parentWidget()->close();
 }
 
 void BackgroundEditor::on_actionZoomIn_triggered() {
@@ -56,13 +56,13 @@ void BackgroundEditor::on_actionZoomOut_triggered() {
 void BackgroundEditor::on_actionZoom_triggered() { ui->backgroundRenderer->SetZoom(1); }
 
 void BackgroundEditor::on_actionNewImage_triggered() {
-  QDialog* dialog = new QDialog(this);
-  dialog->setWindowFlag(Qt::WindowContextHelpButtonHint, false);
-  dialog->setWindowFlag(Qt::MSWindowsFixedSizeDialogHint);
+  QDialog dialog(this);
+  dialog.setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+  dialog.setWindowFlag(Qt::MSWindowsFixedSizeDialogHint);
   Ui::AddImageDialog dialogUI;
-  dialogUI.setupUi(dialog);
-  dialog->setFixedSize(dialog->size());
-  auto result = dialog->exec();
+  dialogUI.setupUi(&dialog);
+  dialog.setFixedSize(dialog.size());
+  auto result = dialog.exec();
   if (result != QDialog::Accepted) return;
   QPixmap img(dialogUI.widthSpinBox->value(), dialogUI.heightSpinBox->value());
   img.fill(Qt::transparent);
@@ -75,7 +75,7 @@ void BackgroundEditor::on_actionLoadImage_triggered() {
 
   if (dialog->selectedFiles().size() > 0) {
     QString fName = dialog->selectedFiles()[0];
-    Background* bkg = gmx::LoadBackground(fName.toStdString(), false);
+    Background* bkg = gmx::LoadBackground(fName.toStdString());
     if (bkg != nullptr) {
       QString lastImage = GetModelData(Background::kImageFieldNumber).toString();
       ReplaceBuffer(bkg);

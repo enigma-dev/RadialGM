@@ -13,13 +13,11 @@ class BaseEditor : public QWidget {
 
  public:
   explicit BaseEditor(QWidget *parent, ProtoModel *model);
+
   virtual void closeEvent(QCloseEvent *event);
   void ReplaceBuffer(google::protobuf::Message *buffer);
   void SetModelData(int index, const QVariant &value);
   QVariant GetModelData(int index);
-
- signals:
-  void closing();
 
  protected slots:
   virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,

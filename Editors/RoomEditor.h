@@ -1,7 +1,7 @@
 #ifndef ROOMEDITOR_H
 #define ROOMEDITOR_H
 
-#include "BaseEdtior.h"
+#include "BaseEditor.h"
 
 namespace Ui {
 class RoomEditor;

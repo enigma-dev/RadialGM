@@ -1,7 +1,7 @@
 #ifndef BACKGROUNDEDITOR_H
 #define BACKGROUNDEDITOR_H
 
-#include "BaseEdtior.h"
+#include "BaseEditor.h"
 
 #include "Widgets/BackgroundRenderer.h"
 

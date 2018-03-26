@@ -1,7 +1,7 @@
 #ifndef PATHEDITOR_H
 #define PATHEDITOR_H
 
-#include "BaseEdtior.h"
+#include "BaseEditor.h"
 
 namespace Ui {
 class PathEditor;

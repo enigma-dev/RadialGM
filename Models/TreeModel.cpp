@@ -2,11 +2,7 @@
 
 #include "Components/ArtManager.h"
 
-#include <QDebug>
-
 TreeModel::TreeModel(buffers::TreeNode *root, QObject *parent) : QAbstractItemModel(parent), root(root) {}
-
-TreeModel::~TreeModel() {}
 
 int TreeModel::columnCount(const QModelIndex & /*parent*/) const { return 1; }
 
@@ -19,24 +15,29 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
 }
 
 QVariant TreeModel::data(const QModelIndex &index, int role) const {
+  using TypeCase = buffers::TreeNode::TypeCase;
+  using IconMap = std::unordered_map<TypeCase, QIcon>;
+
   if (!index.isValid()) return QVariant();
 
   buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
 
   if (role == Qt::DecorationRole) {
-    if (item->has_folder()) return ArtManager::GetIcon("group");
-    if (item->has_background()) return ArtManager::GetIcon("background");
-    if (item->has_font()) return ArtManager::GetIcon("font");
-    if (item->has_object()) return ArtManager::GetIcon("object");
-    if (item->has_path()) return ArtManager::GetIcon("path");
-    if (item->has_room()) return ArtManager::GetIcon("room");
-    if (item->has_script()) return ArtManager::GetIcon("script");
-    if (item->has_shader()) return ArtManager::GetIcon("shader");
-    if (item->has_sound()) return ArtManager::GetIcon("sound");
-    if (item->has_sprite()) return ArtManager::GetIcon("sprite");
-    if (item->has_timeline()) return ArtManager::GetIcon("timeline");
+    static IconMap iconMap({{TypeCase::kFolder, ArtManager::GetIcon("group")},
+                            {TypeCase::kSprite, ArtManager::GetIcon("sprite")},
+                            {TypeCase::kSound, ArtManager::GetIcon("sound")},
+                            {TypeCase::kBackground, ArtManager::GetIcon("background")},
+                            {TypeCase::kPath, ArtManager::GetIcon("path")},
+                            {TypeCase::kScript, ArtManager::GetIcon("script")},
+                            {TypeCase::kShader, ArtManager::GetIcon("shader")},
+                            {TypeCase::kFont, ArtManager::GetIcon("font")},
+                            {TypeCase::kTimeline, ArtManager::GetIcon("timeline")},
+                            {TypeCase::kObject, ArtManager::GetIcon("object")},
+                            {TypeCase::kRoom, ArtManager::GetIcon("room")}});
 
-    return ArtManager::GetIcon("info");
+    auto it = iconMap.find(item->type_case());
+    if (it == iconMap.end()) return ArtManager::GetIcon("info");
+    return it->second;
   }
 
   if (role != Qt::DisplayRole && role != Qt::EditRole) return QVariant();
@@ -45,15 +46,14 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
 }
 
 Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const {
-  if (!index.isValid()) return 0;
+  if (!index.isValid()) return nullptr;
 
   return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
 }
 
-QVariant TreeModel::headerData(int /*section*/, Qt::Orientation orientation, int role) const {
-  if (orientation == Qt::Horizontal && role == Qt::DisplayRole) return tr("Name");
-
-  return QVariant();
+QVariant TreeModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int role) const {
+  if (role != Qt::DisplayRole) return QVariant();
+  return tr("Name");
 }
 
 QModelIndex TreeModel::index(int row, int column, const QModelIndex &parent) const {

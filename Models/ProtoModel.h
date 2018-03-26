@@ -9,7 +9,7 @@ class ProtoModel : public QAbstractItemModel {
   Q_OBJECT
 
  public:
-  ProtoModel(google::protobuf::Message *protobuf, QObject *parent = nullptr);
+  explicit ProtoModel(google::protobuf::Message *protobuf, QObject *parent = nullptr);
   void ReplaceBuffer(google::protobuf::Message *buffer);
   void RestoreBuffer();
   google::protobuf::Message *GetBuffer();

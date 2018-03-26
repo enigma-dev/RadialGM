@@ -1,4 +1,4 @@
-#include "BaseEdtior.h"
+#include "BaseEditor.h"
 
 #include <QCloseEvent>
 #include <QMessageBox>

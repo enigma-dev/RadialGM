@@ -65,7 +65,8 @@ HEADERS += \
     Models/ProtoModel.h \
     Models/ImmediateMapper.h \
     Components/Utility.h \
-    Models/SpriteModel.h
+    Models/SpriteModel.h \
+    Editors/BaseEditor.h
 
 FORMS += \
     MainWindow.ui \
