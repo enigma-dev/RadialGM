@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>759</width>
-    <height>570</height>
+    <width>926</width>
+    <height>546</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -97,6 +97,13 @@
           <string>Origin</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="2">
+           <widget class="QLabel" name="originYLabel">
+            <property name="text">
+             <string>Y</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="3">
            <widget class="QSpinBox" name="originYSpinBox">
             <property name="sizePolicy">
@@ -121,13 +128,6 @@
            <widget class="QLabel" name="originXLabel">
             <property name="text">
              <string>X</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="originYLabel">
-            <property name="text">
-             <string>Y</string>
             </property>
            </widget>
           </item>
@@ -166,7 +166,7 @@
           <item>
            <widget class="QRadioButton" name="rectangleRadioButton">
             <property name="text">
-             <string>Rectangle</string>
+             <string>&amp;Rectangle</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -176,14 +176,14 @@
           <item>
            <widget class="QRadioButton" name="diskRadioButton">
             <property name="text">
-             <string>Disk</string>
+             <string>Dis&amp;k</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QRadioButton" name="diamondRadioButton">
             <property name="text">
-             <string>Diamond</string>
+             <string>Dia&amp;mond</string>
             </property>
            </widget>
           </item>
@@ -237,8 +237,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>588</width>
-           <height>101</height>
+           <width>759</width>
+           <height>68</height>
           </rect>
          </property>
          <property name="autoFillBackground">
@@ -308,52 +308,74 @@
           </widget>
          </item>
          <item>
-          <widget class="QListWidget" name="subimagesList">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
+          <widget class="QListView" name="subImageList">
+           <property name="palette">
+            <palette>
+             <active>
+              <colorrole role="Base">
+               <brush brushstyle="SolidPattern">
+                <color alpha="255">
+                 <red>243</red>
+                 <green>243</green>
+                 <blue>243</blue>
+                </color>
+               </brush>
+              </colorrole>
+             </active>
+             <inactive>
+              <colorrole role="Base">
+               <brush brushstyle="SolidPattern">
+                <color alpha="255">
+                 <red>243</red>
+                 <green>243</green>
+                 <blue>243</blue>
+                </color>
+               </brush>
+              </colorrole>
+             </inactive>
+             <disabled>
+              <colorrole role="Base">
+               <brush brushstyle="SolidPattern">
+                <color alpha="255">
+                 <red>239</red>
+                 <green>239</green>
+                 <blue>239</blue>
+                </color>
+               </brush>
+              </colorrole>
+             </disabled>
+            </palette>
            </property>
            <property name="dragEnabled">
             <bool>true</bool>
            </property>
            <property name="dragDropMode">
-            <enum>QAbstractItemView::InternalMove</enum>
+            <enum>QAbstractItemView::DragDrop</enum>
            </property>
            <property name="defaultDropAction">
             <enum>Qt::MoveAction</enum>
            </property>
            <property name="selectionMode">
-            <enum>QAbstractItemView::ContiguousSelection</enum>
+            <enum>QAbstractItemView::ExtendedSelection</enum>
            </property>
-           <property name="flow">
-            <enum>QListView::LeftToRight</enum>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <property name="movement">
+            <enum>QListView::Snap</enum>
            </property>
            <property name="resizeMode">
-            <enum>QListView::Fixed</enum>
+            <enum>QListView::Adjust</enum>
+           </property>
+           <property name="spacing">
+            <number>8</number>
            </property>
            <property name="viewMode">
             <enum>QListView::IconMode</enum>
            </property>
-           <item>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset resource="../images.qrc">
-              <normaloff>:/events/create.png</normaloff>:/events/create.png</iconset>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset resource="../images.qrc">
-              <normaloff>:/events/create.png</normaloff>:/events/create.png</iconset>
-            </property>
-           </item>
+           <property name="selectionRectVisible">
+            <bool>true</bool>
+           </property>
           </widget>
          </item>
         </layout>

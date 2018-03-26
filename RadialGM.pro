@@ -45,7 +45,8 @@ SOURCES += \
     Editors/BaseEditor.cpp \
     Models/ProtoModel.cpp \
     Models/ImmediateMapper.cpp \
-    Components/Utility.cpp
+    Components/Utility.cpp \
+    Models/SpriteModel.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -63,7 +64,8 @@ HEADERS += \
     Editors/BaseEdtior.h \
     Models/ProtoModel.h \
     Models/ImmediateMapper.h \
-    Components/Utility.h
+    Components/Utility.h \
+    Models/SpriteModel.h
 
 FORMS += \
     MainWindow.ui \
