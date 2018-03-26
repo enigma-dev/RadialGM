@@ -4,8 +4,6 @@
 
 TreeModel::TreeModel(buffers::TreeNode *root, QObject *parent) : QAbstractItemModel(parent), root(root) {}
 
-TreeModel::~TreeModel() {}
-
 int TreeModel::columnCount(const QModelIndex & /*parent*/) const { return 1; }
 
 bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int role) {
