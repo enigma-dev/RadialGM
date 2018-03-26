@@ -56,13 +56,13 @@ void BackgroundEditor::on_actionZoomOut_triggered() {
 void BackgroundEditor::on_actionZoom_triggered() { ui->backgroundRenderer->SetZoom(1); }
 
 void BackgroundEditor::on_actionNewImage_triggered() {
-  QDialog* dialog = new QDialog(this);
-  dialog->setWindowFlag(Qt::WindowContextHelpButtonHint, false);
-  dialog->setWindowFlag(Qt::MSWindowsFixedSizeDialogHint);
+  QDialog dialog(this);
+  dialog.setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+  dialog.setWindowFlag(Qt::MSWindowsFixedSizeDialogHint);
   Ui::AddImageDialog dialogUI;
-  dialogUI.setupUi(dialog);
-  dialog->setFixedSize(dialog->size());
-  auto result = dialog->exec();
+  dialogUI.setupUi(&dialog);
+  dialog.setFixedSize(dialog.size());
+  auto result = dialog.exec();
   if (result != QDialog::Accepted) return;
   QPixmap img(dialogUI.widthSpinBox->value(), dialogUI.heightSpinBox->value());
   img.fill(Qt::transparent);
