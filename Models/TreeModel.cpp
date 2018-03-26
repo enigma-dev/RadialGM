@@ -51,10 +51,9 @@ Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const {
   return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
 }
 
-QVariant TreeModel::headerData(int /*section*/, Qt::Orientation orientation, int role) const {
-  if (orientation == Qt::Horizontal && role == Qt::DisplayRole) return tr("Name");
-
-  return QVariant();
+QVariant TreeModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int role) const {
+  if (role != Qt::DisplayRole) return QVariant();
+  return tr("Name");
 }
 
 QModelIndex TreeModel::index(int row, int column, const QModelIndex &parent) const {

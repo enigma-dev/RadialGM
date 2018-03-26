@@ -115,7 +115,7 @@ QModelIndex ProtoModel::parent(const QModelIndex & /*index*/) const { return QMo
 
 QVariant ProtoModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int role) const {
   if (role != Qt::DisplayRole) return QVariant();
-  return "hey";
+  return tr("Field");
 }
 
 QModelIndex ProtoModel::index(int row, int column, const QModelIndex & /*parent*/) const {
