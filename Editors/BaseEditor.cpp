@@ -16,13 +16,14 @@ void BaseEditor::closeEvent(QCloseEvent* event) {
     reply = QMessageBox::question(this, tr("Unsaved Changes"), tr("Would you like to save the changes?"),
                                   QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
 
-    if (reply == QMessageBox::Cancel) event->ignore();
-    if (reply == QMessageBox::No) model->RestoreBuffer();
-
-    if (reply != QMessageBox::Cancel) emit closing();
-  } else {
-    emit closing();
+    if (reply == QMessageBox::Cancel) {
+      event->ignore();
+      return;
+    } else if (reply == QMessageBox::No)
+      model->RestoreBuffer();
   }
+
+  event->accept();
 }
 
 void BaseEditor::ReplaceBuffer(google::protobuf::Message* buffer) { model->ReplaceBuffer(buffer); }

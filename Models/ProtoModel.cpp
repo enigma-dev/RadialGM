@@ -8,6 +8,8 @@ ProtoModel::ProtoModel(google::protobuf::Message *protobuf, QObject *parent)
   protobufBackup->CopyFrom(*protobuf);
 }
 
+google::protobuf::Message *ProtoModel::GetBuffer() { return protobuf; }
+
 void ProtoModel::ReplaceBuffer(google::protobuf::Message *buffer) {
   SetDirty(true);
   protobuf->CopyFrom(*buffer);

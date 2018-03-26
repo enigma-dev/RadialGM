@@ -12,6 +12,7 @@ class ProtoModel : public QAbstractItemModel {
   ProtoModel(google::protobuf::Message *protobuf, QObject *parent = nullptr);
   void ReplaceBuffer(google::protobuf::Message *buffer);
   void RestoreBuffer();
+  google::protobuf::Message *GetBuffer();
   void SetDirty(bool dirty);
   bool IsDirty();
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
