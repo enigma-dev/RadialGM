@@ -1,7 +1,9 @@
 #include "PluginServer.h"
 
-PluginServer::PluginServer(const QApplication &app, MainWindow &mainWindow) : RGMPlugin(app, mainWindow) {
-  process = new QProcess(const_cast<QApplication *>(&app));
+#include <QFileDialog>
+
+PluginServer::PluginServer(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
+  process = new QProcess(this);
 
   connect(process, &QProcess::readyReadStandardOutput, this, &PluginServer::HandleOutput);
   connect(process, &QProcess::readyReadStandardError, this, &PluginServer::HandleError);
@@ -19,6 +21,20 @@ PluginServer::~PluginServer() {
   process->waitForFinished();
 }
 
-void PluginServer::HandleOutput() { mainWindow.HandleOutput(process->readAllStandardOutput()); }
+void PluginServer::Run(){
 
-void PluginServer::HandleError() { mainWindow.HandleError(process->readAllStandardError()); }
+};
+
+void PluginServer::Debug(){
+
+};
+
+void PluginServer::CreateExecutable() {
+  const QString& fileName =
+      QFileDialog::getSaveFileName(&mainWindow, tr("Create Executable"), "", tr("Executable (*.exe);;All Files (*)"));
+  //if (!fileName.isEmpty()) pluginServer->CreateExecutable(fileName);
+};
+
+void PluginServer::HandleOutput() { emit OutputRead(process->readAllStandardOutput()); }
+
+void PluginServer::HandleError() { emit ErrorRead(process->readAllStandardError()); }

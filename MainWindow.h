@@ -23,10 +23,6 @@ class MainWindow : public QMainWindow {
   void closeEvent(QCloseEvent *event);
   void openFile(QString fName);
 
- public slots:
-  void HandleOutput(QString output);
-  void HandleError(QString error);
-
  private slots:
   // file menu
   void on_actionOpen_triggered();

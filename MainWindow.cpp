@@ -13,6 +13,9 @@
 
 #include "Components/ArtManager.h"
 
+#include "Plugins/PluginServer.h"
+#include "Plugins/RGMPlugin.h"
+
 #include "gmx.h"
 
 #include "resources/Background.pb.h"
@@ -35,11 +38,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->setupUi(this);
 
   ui->mdiArea->setBackground(QImage(":/banner.png"));
+
+  RGMPlugin *pluginServer = new PluginServer(*this);
+  auto outputTextBrowser = this->ui->outputTextBrowser;
+  connect(pluginServer, &RGMPlugin::OutputRead, outputTextBrowser, &QTextBrowser::append);
+  connect(pluginServer, &RGMPlugin::ErrorRead, outputTextBrowser, &QTextBrowser::append);
+  connect(ui->actionRun, &QAction::triggered, pluginServer, &RGMPlugin::Run);
+  connect(ui->actionDebug, &QAction::triggered, pluginServer, &RGMPlugin::Debug);
+  connect(ui->actionCreateExecutable, &QAction::triggered, pluginServer, &RGMPlugin::CreateExecutable);
 }
-
-void MainWindow::HandleOutput(QString output) { this->ui->outputTextBrowser->append(output); }
-
-void MainWindow::HandleError(QString error) { this->ui->outputTextBrowser->append(error); }
 
 void MainWindow::closeEvent(QCloseEvent *event) { event->accept(); }
 
@@ -119,8 +126,8 @@ void MainWindow::openFile(QString fName) {
 }
 
 void MainWindow::on_actionOpen_triggered() {
-  const QString fileName = QFileDialog::getOpenFileName(this, tr("Open Project"), "",
-                                                        tr("GameMaker: Studio (*.project.gmx);;All Files (*)"));
+  const QString &fileName = QFileDialog::getOpenFileName(this, tr("Open Project"), "",
+                                                         tr("GameMaker: Studio (*.project.gmx);;All Files (*)"));
   if (!fileName.isEmpty()) openFile(fileName);
 }
 

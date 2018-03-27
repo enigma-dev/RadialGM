@@ -11,12 +11,20 @@ class RGMPlugin : public QObject {
  public:
   ~RGMPlugin();
 
+ signals:
+  void OutputRead(const QString &output);
+  void ErrorRead(const QString &error);
+
+ public slots:
+  virtual void Run() {}
+  virtual void Debug() {}
+  virtual void CreateExecutable() {}
+
  protected:
-  const QApplication &app;
   MainWindow &mainWindow;
 
  protected:
-  explicit RGMPlugin(const QApplication &app, MainWindow &mainWindow);
+  explicit RGMPlugin(MainWindow &mainWindow);
 };
 
 #endif  // RGMPLUGIN_H

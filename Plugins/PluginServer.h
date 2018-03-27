@@ -7,8 +7,13 @@
 
 class PluginServer : public RGMPlugin {
  public:
-  PluginServer(const QApplication &app, MainWindow &mainWindow);
+  PluginServer(MainWindow &mainWindow);
   ~PluginServer();
+
+ public slots:
+  void Run() override;
+  void Debug() override;
+  void CreateExecutable() override;
 
  private slots:
   void HandleOutput();
