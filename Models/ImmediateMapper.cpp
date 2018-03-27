@@ -24,8 +24,8 @@ void ImmediateDataWidgetMapper::addMapping(QWidget *widget, int section, QByteAr
   QMetaObject::connect(widget, property.notifySignalIndex(), this, metaObject->indexOfSlot("widgetChanged()"));
 }
 
-void ImmediateDataWidgetMapper::toFirst() {
-  QDataWidgetMapper::toFirst();
-  // Mapper::toFirst triggers SetData and marks our model as dirty when it's really a virgin
-  static_cast<ProtoModel *>(model())->SetDirty(false);
+void ImmediateDataWidgetMapper::setCurrentIndex(int index) {
+  this->itemDelegate()->blockSignals(true);
+  QDataWidgetMapper::setCurrentIndex(index);
+  this->itemDelegate()->blockSignals(false);
 }

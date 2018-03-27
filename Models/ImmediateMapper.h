@@ -12,7 +12,7 @@ class ImmediateDataWidgetMapper : public QDataWidgetMapper {
   void addMapping(QWidget *widget, int section, QByteArray propertyName = "");
 
  public slots:
-  void toFirst();
+  void setCurrentIndex(int index) override;  // toFirst(), toLast(), etc.
 
  private slots:
   void widgetChanged();
