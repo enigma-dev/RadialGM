@@ -45,7 +45,9 @@ SOURCES += \
     Editors/BaseEditor.cpp \
     Models/ProtoModel.cpp \
     Models/ImmediateMapper.cpp \
-    Components/Utility.cpp
+    Components/Utility.cpp \
+    Plugins/PluginServer.cpp \
+    Plugins/RGMPlugin.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -63,7 +65,9 @@ HEADERS += \
     Models/ProtoModel.h \
     Models/ImmediateMapper.h \
     Components/Utility.h \
-    Editors/BaseEditor.h
+    Editors/BaseEditor.h \
+    Plugins/PluginServer.h \
+    Plugins/RGMPlugin.h
 
 FORMS += \
     MainWindow.ui \

@@ -27,18 +27,6 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ArtManager::Init();
-
-  process = new QProcess(this);
-  connect(process, SIGNAL(readyReadStandardOutput()), this, SLOT(HandleOutput()));
-  connect(process, SIGNAL(readyReadStandardError()), this, SLOT(HandleOutput()));
-  process->setWorkingDirectory("../RadialGM/Submodules/enigma-dev");
-
-  QString program = "emake";
-  QStringList arguments;
-  arguments << "--server"
-            << "--quiet";
-  process->start(program, arguments);
-
   setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
   setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
   setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
@@ -49,11 +37,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->mdiArea->setBackground(QImage(":/banner.png"));
 }
 
-void MainWindow::HandleOutput() {
-  if (!process) return;
-  this->ui->outputTextBrowser->append(process->readAllStandardOutput());
-  this->ui->outputTextBrowser->append(process->readAllStandardError());
-}
+void MainWindow::HandleOutput(QString output) { this->ui->outputTextBrowser->append(output); }
+
+void MainWindow::HandleError(QString error) { this->ui->outputTextBrowser->append(error); }
 
 void MainWindow::closeEvent(QCloseEvent *event) { event->accept(); }
 
