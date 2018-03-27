@@ -23,6 +23,8 @@ class MainWindow : public QMainWindow {
   void closeEvent(QCloseEvent *event);
   void openFile(QString fName);
 
+  const buffers::Game &Game() { return this->project->game(); }
+
  private slots:
   // file menu
   void on_actionOpen_triggered();
@@ -54,7 +56,7 @@ class MainWindow : public QMainWindow {
   QHash<buffers::TreeNode *, ProtoModel *> resourceModels;
   QHash<buffers::TreeNode *, QMdiSubWindow *> subWindows;
 
-  buffers::Project *game;
+  buffers::Project *project;
 
   void openSubWindow(buffers::TreeNode *item);
 };

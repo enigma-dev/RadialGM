@@ -108,8 +108,8 @@ MainWindow::~MainWindow() { delete ui; }
 void MainWindow::openFile(QString fName) {
   QFileInfo fileInfo(fName);
   this->setWindowTitle(fileInfo.fileName() + " - ENIGMA");
-  game = gmx::LoadGMX(fName.toStdString());
-  treeModel = new TreeModel(game->mutable_game()->mutable_root(), this);
+  project = gmx::LoadGMX(fName.toStdString());
+  treeModel = new TreeModel(project->mutable_game()->mutable_root(), this);
   ui->treeView->setModel(treeModel);
   treeModel->connect(treeModel, &QAbstractItemModel::dataChanged,
                      [=](const QModelIndex &topLeft, const QModelIndex &bottomRight) {

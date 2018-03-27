@@ -5,6 +5,8 @@
 
 #include <QProcess>
 
+class CompilerClient;
+
 class ServerPlugin : public RGMPlugin {
  public:
   ServerPlugin(MainWindow &mainWindow);
@@ -21,6 +23,7 @@ class ServerPlugin : public RGMPlugin {
 
  private:
   QProcess *process;
+  CompilerClient *compilerClient;
 };
 
 #endif  // PLUGINSERVER_H
