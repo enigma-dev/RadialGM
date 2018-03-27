@@ -8,6 +8,7 @@
 
 #include <QMainWindow>
 #include <QMdiSubWindow>
+#include <QProcess>
 
 namespace Ui {
 class MainWindow;
@@ -23,6 +24,8 @@ class MainWindow : public QMainWindow {
   void openFile(QString fName);
 
  private slots:
+  void HandleOutput();
+
   // file menu
   void on_actionOpen_triggered();
   void on_actionPreferences_triggered();
@@ -48,10 +51,13 @@ class MainWindow : public QMainWindow {
 
  private:
   Ui::MainWindow *ui;
-  buffers::Project *game;
   TreeModel *treeModel;
+
   QHash<buffers::TreeNode *, ProtoModel *> resourceModels;
   QHash<buffers::TreeNode *, QMdiSubWindow *> subWindows;
+
+  buffers::Project *game;
+  QProcess *process;
 
   void openSubWindow(buffers::TreeNode *item);
 };

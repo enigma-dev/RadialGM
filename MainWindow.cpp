@@ -23,23 +23,36 @@
 
 #undef GetMessage
 
+#include <QDebug>
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ArtManager::Init();
 
-  QString program = "./Submodules/enigma-dev/emake";
+  process = new QProcess(this);
+  connect(process, SIGNAL(readyReadStandardOutput()), this, SLOT(HandleOutput()));
+  connect(process, SIGNAL(readyReadStandardError()), this, SLOT(HandleOutput()));
+  process->setWorkingDirectory("../RadialGM/Submodules/enigma-dev");
+
+  QString program = "emake";
   QStringList arguments;
   arguments << "--server"
             << "--quiet";
-  QProcess *myProcess = new QProcess(this);
-  myProcess->start(program, arguments);
-
-  ui->setupUi(this);
+  process->start(program, arguments);
 
   setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
   setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
   setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
   setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
+
+  ui->setupUi(this);
+
   ui->mdiArea->setBackground(QImage(":/banner.png"));
+}
+
+void MainWindow::HandleOutput() {
+  if (!process) return;
+  this->ui->outputTextBrowser->append(process->readAllStandardOutput());
+  this->ui->outputTextBrowser->append(process->readAllStandardError());
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) { event->accept(); }
