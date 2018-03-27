@@ -1,12 +1,12 @@
-#include "PluginServer.h"
+#include "ServerPlugin.h"
 
 #include <QFileDialog>
 
-PluginServer::PluginServer(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
+ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   process = new QProcess(this);
 
-  connect(process, &QProcess::readyReadStandardOutput, this, &PluginServer::HandleOutput);
-  connect(process, &QProcess::readyReadStandardError, this, &PluginServer::HandleError);
+  connect(process, &QProcess::readyReadStandardOutput, this, &ServerPlugin::HandleOutput);
+  connect(process, &QProcess::readyReadStandardError, this, &ServerPlugin::HandleError);
   process->setWorkingDirectory("../RadialGM/Submodules/enigma-dev");
 
   QString program = "emake";
@@ -16,25 +16,25 @@ PluginServer::PluginServer(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   process->start(program, arguments);
 }
 
-PluginServer::~PluginServer() {
+ServerPlugin::~ServerPlugin() {
   process->terminate();
   process->waitForFinished();
 }
 
-void PluginServer::Run(){
+void ServerPlugin::Run(){
 
 };
 
-void PluginServer::Debug(){
+void ServerPlugin::Debug(){
 
 };
 
-void PluginServer::CreateExecutable() {
+void ServerPlugin::CreateExecutable() {
   const QString& fileName =
       QFileDialog::getSaveFileName(&mainWindow, tr("Create Executable"), "", tr("Executable (*.exe);;All Files (*)"));
   //if (!fileName.isEmpty()) pluginServer->CreateExecutable(fileName);
 };
 
-void PluginServer::HandleOutput() { emit OutputRead(process->readAllStandardOutput()); }
+void ServerPlugin::HandleOutput() { emit OutputRead(process->readAllStandardOutput()); }
 
-void PluginServer::HandleError() { emit ErrorRead(process->readAllStandardError()); }
+void ServerPlugin::HandleError() { emit ErrorRead(process->readAllStandardError()); }

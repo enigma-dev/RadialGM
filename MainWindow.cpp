@@ -13,8 +13,8 @@
 
 #include "Components/ArtManager.h"
 
-#include "Plugins/PluginServer.h"
 #include "Plugins/RGMPlugin.h"
+#include "Plugins/ServerPlugin.h"
 
 #include "gmx.h"
 
@@ -39,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   ui->mdiArea->setBackground(QImage(":/banner.png"));
 
-  RGMPlugin *pluginServer = new PluginServer(*this);
+  RGMPlugin *pluginServer = new ServerPlugin(*this);
   auto outputTextBrowser = this->ui->outputTextBrowser;
   connect(pluginServer, &RGMPlugin::OutputRead, outputTextBrowser, &QTextBrowser::append);
   connect(pluginServer, &RGMPlugin::ErrorRead, outputTextBrowser, &QTextBrowser::append);

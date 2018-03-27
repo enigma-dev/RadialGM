@@ -5,10 +5,10 @@
 
 #include <QProcess>
 
-class PluginServer : public RGMPlugin {
+class ServerPlugin : public RGMPlugin {
  public:
-  PluginServer(MainWindow &mainWindow);
-  ~PluginServer();
+  ServerPlugin(MainWindow &mainWindow);
+  ~ServerPlugin() override;
 
  public slots:
   void Run() override;
