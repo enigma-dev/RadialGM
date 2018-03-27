@@ -7,7 +7,8 @@
 
 RoomEditor::RoomEditor(QWidget* parent, ProtoModel* model) : BaseEditor(parent, model), ui(new Ui::RoomEditor) {
   ui->setupUi(this);
-  QsciScintilla* textEdit = new QsciScintilla;
+
+  QsciScintilla* textEdit = new QsciScintilla(this);
 
   textEdit->setCaretLineVisible(true);
   textEdit->setCaretLineBackgroundColor(QColor("#ffe4e4"));

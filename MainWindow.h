@@ -23,7 +23,7 @@ class MainWindow : public QMainWindow {
   void closeEvent(QCloseEvent *event);
   void openFile(QString fName);
 
-  const buffers::Game &Game() { return this->project->game(); }
+  buffers::Game *Game() const { return this->project->mutable_game(); }
 
  private slots:
   // file menu

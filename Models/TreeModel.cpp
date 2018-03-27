@@ -2,7 +2,17 @@
 
 #include "Components/ArtManager.h"
 
-TreeModel::TreeModel(buffers::TreeNode *root, QObject *parent) : QAbstractItemModel(parent), root(root) {}
+TreeModel::TreeModel(buffers::TreeNode *root, QObject *parent) : QAbstractItemModel(parent), root(root) {
+  SetupParents(root);
+}
+
+void TreeModel::SetupParents(buffers::TreeNode *root) {
+  for (int i = 0; i < root->child_size(); ++i) {
+    auto child = root->mutable_child(i);
+    parents[child] = root;
+    SetupParents(child);
+  }
+}
 
 int TreeModel::columnCount(const QModelIndex & /*parent*/) const { return 1; }
 
@@ -77,7 +87,7 @@ QModelIndex TreeModel::parent(const QModelIndex &index) const {
   if (!index.isValid()) return QModelIndex();
 
   buffers::TreeNode *childItem = static_cast<buffers::TreeNode *>(index.internalPointer());
-  buffers::TreeNode *parentItem = childItem->mutable_parent();
+  buffers::TreeNode *parentItem = parents[childItem];
 
   if (parentItem == root) return QModelIndex();
 

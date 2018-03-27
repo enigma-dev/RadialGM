@@ -1,8 +1,11 @@
 #include "ServerPlugin.h"
 
+#if _WIN32_WINNT < 0x0600
 #define _WIN32_WINNT 0x0600
+#endif
 #include "server.grpc.pb.h"
 
+#include <QDebug>
 #include <QFileDialog>
 #include <QTemporaryFile>
 
@@ -18,19 +21,26 @@ class CompilerClient {
  public:
   explicit CompilerClient(std::shared_ptr<Channel> channel) : stub(Compiler::NewStub(channel)) {}
 
-  void CompileBuffer(const Game& game, std::string name, CompileMode mode) {
-    CompileRequest request;
-    request.set_name(name);
-    request.set_allocated_game(const_cast<Game*>(&game));
-    request.set_mode(mode);
+  void CompileBuffer(Game* game, CompileMode mode, std::string name) {
     ClientContext context;
-    stub->CompileBuffer(&context, request);
+    CompileRequest request;
+
+    request.mutable_game()->CopyFrom(*game);
+    request.set_name(name);
+    request.set_mode(mode);
+
+    std::unique_ptr<ClientReader<CompileReply> > reader(stub->CompileBuffer(&context, request));
+    CompileReply reply;
+    while (reader->Read(&reply)) {
+      qDebug() << reply.message().c_str() << reply.progress();
+    }
+    Status status = reader->Finish();
   }
 
-  void CompileBuffer(const Game& game, CompileMode mode) {
-    QTemporaryFile t(".exe");
+  void CompileBuffer(Game* game, CompileMode mode) {
+    QTemporaryFile t("enigma");
     if (!t.open()) return;
-    CompileBuffer(game, t.fileName().toStdString(), mode);
+    CompileBuffer(game, mode, t.fileName().toStdString());
   }
 
  private:
@@ -50,7 +60,10 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
             << "--quiet";
   process->start(program, arguments);
 
-  auto channel = grpc::CreateChannel("localhost:37818", grpc::InsecureChannelCredentials());
+  ChannelArguments channelArguments;
+  channelArguments.SetMaxSendMessageSize(-1);
+  channelArguments.SetMaxReceiveMessageSize(-1);
+  auto channel = CreateCustomChannel("localhost:37818", InsecureChannelCredentials(), channelArguments);
   compilerClient = new CompilerClient(channel);
 }
 
@@ -67,7 +80,7 @@ void ServerPlugin::CreateExecutable() {
   const QString& fileName =
       QFileDialog::getSaveFileName(&mainWindow, tr("Create Executable"), "", tr("Executable (*.exe);;All Files (*)"));
   if (!fileName.isEmpty())
-    compilerClient->CompileBuffer(mainWindow.Game(), fileName.toStdString(), CompileMode::COMPILE);
+    compilerClient->CompileBuffer(mainWindow.Game(), CompileMode::COMPILE, fileName.toStdString());
 };
 
 void ServerPlugin::HandleOutput() { emit OutputRead(process->readAllStandardOutput()); }
