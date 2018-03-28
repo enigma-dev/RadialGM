@@ -2,6 +2,8 @@
 
 #include "Components/ArtManager.h"
 
+#include <QFont>
+
 TreeModel::TreeModel(buffers::TreeNode *root, QObject *parent) : QAbstractItemModel(parent), root(root) {
   SetupParents(root);
 }
@@ -24,7 +26,6 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
   return true;
 }
 
-#include <QFont>
 QVariant TreeModel::data(const QModelIndex &index, int role) const {
   using TypeCase = buffers::TreeNode::TypeCase;
   using IconMap = std::unordered_map<TypeCase, QIcon>;
