@@ -1,7 +1,7 @@
 #ifndef FONTEDITOR_H
 #define FONTEDITOR_H
 
-#include "BaseEdtior.h"
+#include "BaseEditor.h"
 
 namespace Ui {
 class FontEditor;
@@ -11,11 +11,11 @@ class FontEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit FontEditor(QWidget *parent, ProtoModel *model);
+  explicit FontEditor(ProtoModel* model, QWidget* parent);
   ~FontEditor();
 
  private:
-  Ui::FontEditor *ui;
+  Ui::FontEditor* ui;
 };
 
 #endif  // FONTEDITOR_H

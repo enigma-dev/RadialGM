@@ -1,7 +1,7 @@
 #ifndef BACKGROUNDEDITOR_H
 #define BACKGROUNDEDITOR_H
 
-#include "BaseEdtior.h"
+#include "BaseEditor.h"
 
 #include "Widgets/BackgroundRenderer.h"
 
@@ -13,7 +13,7 @@ class BackgroundEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit BackgroundEditor(QWidget *parent, ProtoModel *model);
+  explicit BackgroundEditor(ProtoModel *model, QWidget *parent);
   ~BackgroundEditor();
 
  private slots:

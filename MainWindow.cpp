@@ -13,92 +13,104 @@
 
 #include "Components/ArtManager.h"
 
+#include "Plugins/RGMPlugin.h"
+#include "Plugins/ServerPlugin.h"
+
 #include "gmx.h"
 
 #include "resources/Background.pb.h"
 
 #include <QtWidgets>
 
+#include <functional>
+
+#undef GetMessage
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ArtManager::Init();
+
+  setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
+  setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
+  setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
+  setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
+
   ui->setupUi(this);
+
   ui->mdiArea->setBackground(QImage(":/banner.png"));
-}
 
-void MainWindow::closeEvent(QCloseEvent * /*event*/) { ui->mdiArea->closeAllSubWindows(); }
-
-void MainWindow::openSubWindow(buffers::TreeNode *item) {
-  if (item->has_background()) {
-    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(item->mutable_background());
-
-    if (!subWindows.contains(item))
-      subWindows[item] = ui->mdiArea->addSubWindow(new BackgroundEditor(this, resourceModels[item]));
-  } else if (item->has_font()) {
-    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(item->mutable_font());
-
-    if (!subWindows.contains(item))
-      subWindows[item] = ui->mdiArea->addSubWindow(new FontEditor(this, resourceModels[item]));
-  } else if (item->has_object()) {
-    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(item->mutable_object());
-
-    if (!subWindows.contains(item))
-      subWindows[item] = ui->mdiArea->addSubWindow(new ObjectEditor(this, resourceModels[item]));
-  } else if (item->has_path()) {
-    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(item->mutable_path());
-
-    if (!subWindows.contains(item))
-      subWindows[item] = ui->mdiArea->addSubWindow(new PathEditor(this, resourceModels[item]));
-  } else if (item->has_room()) {
-    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(item->mutable_room());
-
-    if (!subWindows.contains(item))
-      subWindows[item] = ui->mdiArea->addSubWindow(new RoomEditor(this, resourceModels[item]));
-  } else if (item->has_script()) {
-    /*if (!resourceModels.contains(item))
-            resourceModels[item] = new ResourceModel(item->mutable_background());
-
-        if (!subWindows.contains(item))1
-            subWindows[item] = ui->mdiArea->addSubWindow(new ScriptEditor(this, resourceModels[item]));*/
-  } else if (item->has_shader()) {
-    /*if (!resourceModels.contains(item))
-            resourceModels[item] = new ResourceModel(item->mutable_shader());
-
-        if (!subWindows.contains(item))
-            subWindows[item] = ui->mdiArea->addSubWindow(new ShaderEditor(this, resourceModels[item]));*/
-  } else if (item->has_sound()) {
-    /*if (!resourceModels.contains(item))
-            resourceModels[item] = new ResourceModel(item->mutable_sound());
-
-        if (!subWindows.contains(item))
-            subWindows[item] = ui->mdiArea->addSubWindow(new SoundEditor(this, resourceModels[item]));*/
-  } else if (item->has_sprite()) {
-    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(item->mutable_sprite());
-
-    if (!subWindows.contains(item))
-      subWindows[item] = ui->mdiArea->addSubWindow(new SpriteEditor(this, resourceModels[item]));
-  } else if (item->has_timeline()) {
-    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(item->mutable_timeline());
-
-    if (!subWindows.contains(item))
-      subWindows[item] = ui->mdiArea->addSubWindow(new TimelineEditor(this, resourceModels[item]));
-  }
-
-  auto subWindow = subWindows[item];
-  if (subWindow == nullptr) return;
-  subWindow->connect(subWindow, &QObject::destroyed, [=]() { subWindows.remove(item); });
-  subWindow->connect(static_cast<BaseEditor *>(subWindow->widget()), &BaseEditor::closing, subWindow,
-                     &QMdiSubWindow::close);
-  subWindow->setWindowIcon(subWindows[item]->widget()->windowIcon());
-  subWindow->setWindowTitle(QString::fromStdString(item->name()));
-  subWindow->show();
-  ui->mdiArea->setActiveSubWindow(subWindow);
+  RGMPlugin *pluginServer = new ServerPlugin(*this);
+  auto outputTextBrowser = this->ui->outputTextBrowser;
+  connect(pluginServer, &RGMPlugin::OutputRead, outputTextBrowser, &QTextBrowser::append);
+  connect(pluginServer, &RGMPlugin::ErrorRead, outputTextBrowser, &QTextBrowser::append);
+  connect(ui->actionRun, &QAction::triggered, pluginServer, &RGMPlugin::Run);
+  connect(ui->actionDebug, &QAction::triggered, pluginServer, &RGMPlugin::Debug);
+  connect(ui->actionCreateExecutable, &QAction::triggered, pluginServer, &RGMPlugin::CreateExecutable);
 }
 
 MainWindow::~MainWindow() { delete ui; }
 
+void MainWindow::closeEvent(QCloseEvent *event) { event->accept(); }
+
+template <typename T>
+T *EditorFactory(ProtoModel *model, QWidget *parent = nullptr) {
+  return new T(model, parent);
+}
+
+void MainWindow::openSubWindow(buffers::TreeNode *item) {
+  using namespace google::protobuf;
+
+  using TypeCase = buffers::TreeNode::TypeCase;
+  using FactoryFunction = std::function<BaseEditor *(ProtoModel * model, QWidget * parent)>;
+  using FactoryMap = std::unordered_map<TypeCase, FactoryFunction>;
+
+  static FactoryMap factoryMap({{TypeCase::kSprite, EditorFactory<SpriteEditor>},
+                                {TypeCase::kBackground, EditorFactory<BackgroundEditor>},
+                                {TypeCase::kPath, EditorFactory<PathEditor>},
+                                {TypeCase::kFont, EditorFactory<FontEditor>},
+                                {TypeCase::kTimeline, EditorFactory<TimelineEditor>},
+                                {TypeCase::kObject, EditorFactory<ObjectEditor>},
+                                {TypeCase::kRoom, EditorFactory<RoomEditor>}});
+
+  const Descriptor *desc = item->GetDescriptor();
+  const Reflection *refl = item->GetReflection();
+
+  const OneofDescriptor *typeOneof = desc->FindOneofByName("type");
+  const FieldDescriptor *typeField = refl->GetOneofFieldDescriptor(*item, typeOneof);
+  // might not be set or it's not a message
+  if (!typeField || typeField->cpp_type() != FieldDescriptor::CppType::CPPTYPE_MESSAGE) return;
+  Message *typeMessage = refl->MutableMessage(item, typeField);
+
+  auto subWindow = subWindows[item];
+  if (!subWindows.contains(item) || subWindow == nullptr) {
+    auto factoryFunction = factoryMap.find(item->type_case());
+    if (factoryFunction == factoryMap.end()) return;  // no registered editor
+
+    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(typeMessage);
+    auto resourceModel = resourceModels[item];
+
+    QWidget *editor = factoryFunction->second(resourceModel, nullptr);
+    resourceModel->setParent(editor);
+
+    subWindow = subWindows[item] = ui->mdiArea->addSubWindow(editor);
+    editor->setParent(subWindow);
+
+    subWindow->connect(subWindow, &QObject::destroyed, [=]() {
+      resourceModels.remove(item);
+      subWindows.remove(item);
+    });
+    subWindow->setWindowIcon(subWindow->widget()->windowIcon());
+    subWindow->setWindowTitle(QString::fromStdString(item->name()));
+  }
+
+  subWindow->show();
+  ui->mdiArea->setActiveSubWindow(subWindow);
+}
+
 void MainWindow::openFile(QString fName) {
-  game = gmx::LoadGMX(fName.toStdString(), false);
-  treeModel = new TreeModel(game->mutable_game()->mutable_root(), this);
+  QFileInfo fileInfo(fName);
+  this->setWindowTitle(fileInfo.fileName() + " - ENIGMA");
+  project = gmx::LoadGMX(fName.toStdString());
+  treeModel = new TreeModel(project->mutable_game()->mutable_root(), this);
   ui->treeView->setModel(treeModel);
   treeModel->connect(treeModel, &QAbstractItemModel::dataChanged,
                      [=](const QModelIndex &topLeft, const QModelIndex &bottomRight) {
@@ -115,9 +127,8 @@ void MainWindow::openFile(QString fName) {
 }
 
 void MainWindow::on_actionOpen_triggered() {
-  const QString fileName = QFileDialog::getOpenFileName(this, tr("Open Project"), "",
-                                                        tr("GameMaker: Studio (*.project.gmx);;All Files (*)"));
-
+  const QString &fileName = QFileDialog::getOpenFileName(this, tr("Open Project"), "",
+                                                         tr("GameMaker: Studio (*.project.gmx);;All Files (*)"));
   if (!fileName.isEmpty()) openFile(fileName);
 }
 
@@ -166,7 +177,8 @@ void MainWindow::on_actionExploreENIGMA_triggered() { QDesktopServices::openUrl(
 
 void MainWindow::on_actionAbout_triggered() {
   QMessageBox aboutBox(QMessageBox::Information, tr("About"),
-                       tr("ENIGMA is a free, open-source, and cross-platform game engine."), QMessageBox::Ok, this, 0);
+                       tr("ENIGMA is a free, open-source, and cross-platform game engine."), QMessageBox::Ok, this,
+                       nullptr);
   QAbstractButton *aboutQtButton = aboutBox.addButton(tr("About Qt"), QMessageBox::HelpRole);
   aboutBox.exec();
 

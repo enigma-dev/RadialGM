@@ -1,7 +1,7 @@
 #ifndef OBJECTEDITOR_H
 #define OBJECTEDITOR_H
 
-#include "BaseEdtior.h"
+#include "BaseEditor.h"
 
 namespace Ui {
 class ObjectEditor;
@@ -11,11 +11,11 @@ class ObjectEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit ObjectEditor(QWidget *parent, ProtoModel *model);
+  explicit ObjectEditor(ProtoModel* model, QWidget* parent);
   ~ObjectEditor();
 
  private:
-  Ui::ObjectEditor *ui;
+  Ui::ObjectEditor* ui;
 };
 
 #endif  // OBJECTEDITOR_H

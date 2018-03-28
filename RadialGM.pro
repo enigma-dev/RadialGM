@@ -26,7 +26,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 INCLUDEPATH += /usr/include/qt/ $$PWD/Submodules/enigma-dev/CommandLine/libGMX/ $$PWD/Submodules/enigma-dev/CommandLine/protos $$PWD/Submodules/enigma-dev/CommandLine/protos/codegen
-LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libGMX/ -lGMX -lprotobuf -Wl,--rpath=$$PWD/Submodules/enigma-dev/ -L$$PWD/Submodules/enigma-dev/ -lProtocols -lpugixml
+LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libGMX/ -lGMX -lprotobuf -Wl,--rpath=$$PWD/Submodules/enigma-dev/ -L$$PWD/Submodules/enigma-dev/ -lProtocols -lpugixml -lgrpc++
 
 SOURCES += \
         main.cpp \
@@ -46,6 +46,8 @@ SOURCES += \
     Models/ProtoModel.cpp \
     Models/ImmediateMapper.cpp \
     Components/Utility.cpp \
+    Plugins/RGMPlugin.cpp \
+    Plugins/ServerPlugin.cpp \
     Models/SpriteModel.cpp
 
 HEADERS += \
@@ -61,10 +63,12 @@ HEADERS += \
     Widgets/BackgroundRenderer.h \
     Models/TreeModel.h \
     Components/ArtManager.h \
-    Editors/BaseEdtior.h \
     Models/ProtoModel.h \
     Models/ImmediateMapper.h \
     Components/Utility.h \
+    Editors/BaseEditor.h \
+    Plugins/RGMPlugin.h \
+    Plugins/ServerPlugin.h \
     Models/SpriteModel.h
 
 FORMS += \

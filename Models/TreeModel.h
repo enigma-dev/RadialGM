@@ -4,13 +4,13 @@
 #include "treenode.pb.h"
 
 #include <QAbstractItemModel>
+#include <QHash>
 
 class TreeModel : public QAbstractItemModel {
   Q_OBJECT
 
  public:
-  explicit TreeModel(buffers::TreeNode *root, QObject *parent = 0);
-  ~TreeModel();
+  explicit TreeModel(buffers::TreeNode *root, QObject *parent);
 
   bool setData(const QModelIndex &index, const QVariant &value, int role) override;
   QVariant data(const QModelIndex &index, int role) const override;
@@ -22,9 +22,10 @@ class TreeModel : public QAbstractItemModel {
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
  private:
-  //void setupModelData(const QStringList &lines, TreeItem *parent);
-
   buffers::TreeNode *root;
+  QHash<buffers::TreeNode *, buffers::TreeNode *> parents;
+
+  void SetupParents(buffers::TreeNode *root);
 };
 
 #endif  // TREEMODEL_H

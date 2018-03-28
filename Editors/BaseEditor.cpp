@@ -1,13 +1,13 @@
-#include "BaseEdtior.h"
+#include "BaseEditor.h"
 
 #include <QCloseEvent>
 #include <QMessageBox>
 
-BaseEditor::BaseEditor(QWidget* parent, ProtoModel* model)
+BaseEditor::BaseEditor(ProtoModel* model, QWidget* parent)
     : QWidget(parent), model(model), mapper(new ImmediateDataWidgetMapper(this)) {
   mapper->setOrientation(Qt::Vertical);
-  connect(model, &ProtoModel::dataChanged, this, &BaseEditor::dataChanged);
   mapper->setModel(model);
+  connect(model, &ProtoModel::dataChanged, this, &BaseEditor::dataChanged);
 }
 
 void BaseEditor::closeEvent(QCloseEvent* event) {
@@ -16,11 +16,17 @@ void BaseEditor::closeEvent(QCloseEvent* event) {
     reply = QMessageBox::question(this, tr("Unsaved Changes"), tr("Would you like to save the changes?"),
                                   QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
 
-    if (reply == QMessageBox::Cancel) event->ignore();
-    if (reply == QMessageBox::No) model->RestoreBuffer();
+    if (reply == QMessageBox::Cancel) {
+      event->ignore();
+      return;
+    } else if (reply == QMessageBox::No) {
+      mapper->clearMapping();
+      model->RestoreBuffer();
+    }
   }
 
-  emit closing();
+  model->SetDirty(false);
+  event->accept();
 }
 
 void BaseEditor::ReplaceBuffer(google::protobuf::Message* buffer) { model->ReplaceBuffer(buffer); }
