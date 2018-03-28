@@ -24,6 +24,7 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
   return true;
 }
 
+#include <QFont>
 QVariant TreeModel::data(const QModelIndex &index, int role) const {
   using TypeCase = buffers::TreeNode::TypeCase;
   using IconMap = std::unordered_map<TypeCase, QIcon>;
@@ -31,7 +32,6 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
   if (!index.isValid()) return QVariant();
 
   buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
-
   if (role == Qt::DecorationRole) {
     static IconMap iconMap({{TypeCase::kFolder, ArtManager::GetIcon("group")},
                             {TypeCase::kSprite, ArtManager::GetIcon("sprite")},
@@ -48,11 +48,15 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
     auto it = iconMap.find(item->type_case());
     if (it == iconMap.end()) return ArtManager::GetIcon("info");
     return it->second;
+  } else if (role == Qt::EditRole || role == Qt::DisplayRole) {
+    return QString::fromStdString(item->name());
+  } else if (role == Qt::FontRole) {
+    QFont font;
+    if (item->type_case() == TypeCase::kFolder && item->child_size()) font.setBold(true);
+    return font;
   }
 
-  if (role != Qt::DisplayRole && role != Qt::EditRole) return QVariant();
-
-  return QString::fromStdString(item->name());
+  return QVariant();
 }
 
 Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const {
