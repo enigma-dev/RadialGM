@@ -72,6 +72,9 @@
         </color>
        </brush>
       </property>
+      <property name="activationOrder">
+       <enum>QMdiArea::ActivationHistoryOrder</enum>
+      </property>
       <property name="documentMode">
        <bool>false</bool>
       </property>

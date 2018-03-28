@@ -13,7 +13,7 @@ class BackgroundEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit BackgroundEditor(QWidget *parent, ProtoModel *model);
+  explicit BackgroundEditor(ProtoModel *model, QWidget *parent);
   ~BackgroundEditor();
 
  private slots:

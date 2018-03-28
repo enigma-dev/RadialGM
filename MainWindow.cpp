@@ -26,10 +26,9 @@
 
 #undef GetMessage
 
-#include <QDebug>
-
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ArtManager::Init();
+
   setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
   setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
   setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
@@ -48,18 +47,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->actionCreateExecutable, &QAction::triggered, pluginServer, &RGMPlugin::CreateExecutable);
 }
 
-void MainWindow::closeEvent(QCloseEvent *event) { QMainWindow::closeEvent(event); }
+MainWindow::~MainWindow() { delete ui; }
+
+void MainWindow::closeEvent(QCloseEvent *event) { event->accept(); }
 
 template <typename T>
-T *EditorFactory(QWidget *parent, ProtoModel *model) {
-  return new T(parent, model);
+T *EditorFactory(ProtoModel *model, QWidget *parent = nullptr) {
+  return new T(model, parent);
 }
 
 void MainWindow::openSubWindow(buffers::TreeNode *item) {
   using namespace google::protobuf;
 
   using TypeCase = buffers::TreeNode::TypeCase;
-  using FactoryFunction = std::function<BaseEditor *(QWidget * parent, ProtoModel * model)>;
+  using FactoryFunction = std::function<BaseEditor *(ProtoModel * model, QWidget * parent)>;
   using FactoryMap = std::unordered_map<TypeCase, FactoryFunction>;
 
   static FactoryMap factoryMap({{TypeCase::kSprite, EditorFactory<SpriteEditor>},
@@ -75,7 +76,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
 
   const OneofDescriptor *typeOneof = desc->FindOneofByName("type");
   const FieldDescriptor *typeField = refl->GetOneofFieldDescriptor(*item, typeOneof);
-  // might not be set or its not a message
+  // might not be set or it's not a message
   if (!typeField || typeField->cpp_type() != FieldDescriptor::CppType::CPPTYPE_MESSAGE) return;
   Message *typeMessage = refl->MutableMessage(item, typeField);
 
@@ -87,10 +88,12 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(typeMessage);
     auto resourceModel = resourceModels[item];
 
-    QWidget *editor = factoryFunction->second(ui->mdiArea, resourceModel);
+    QWidget *editor = factoryFunction->second(resourceModel, nullptr);
     resourceModel->setParent(editor);
 
     subWindow = subWindows[item] = ui->mdiArea->addSubWindow(editor);
+    editor->setParent(subWindow);
+
     subWindow->connect(subWindow, &QObject::destroyed, [=]() {
       resourceModels.remove(item);
       subWindows.remove(item);
@@ -102,8 +105,6 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
   subWindow->show();
   ui->mdiArea->setActiveSubWindow(subWindow);
 }
-
-MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::openFile(QString fName) {
   QFileInfo fileInfo(fName);

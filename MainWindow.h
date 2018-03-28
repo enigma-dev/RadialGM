@@ -50,11 +50,11 @@ class MainWindow : public QMainWindow {
   void on_treeView_doubleClicked(const QModelIndex &index);
 
  private:
-  Ui::MainWindow *ui;
-  TreeModel *treeModel;
-
   QHash<buffers::TreeNode *, ProtoModel *> resourceModels;
   QHash<buffers::TreeNode *, QMdiSubWindow *> subWindows;
+
+  TreeModel *treeModel;
+  Ui::MainWindow *ui;
 
   buffers::Project *project;
 
