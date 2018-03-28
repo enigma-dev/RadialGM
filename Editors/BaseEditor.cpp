@@ -25,6 +25,7 @@ void BaseEditor::closeEvent(QCloseEvent* event) {
     }
   }
 
+  model->SetDirty(false);
   event->accept();
 }
 

@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->actionCreateExecutable, &QAction::triggered, pluginServer, &RGMPlugin::CreateExecutable);
 }
 
-void MainWindow::closeEvent(QCloseEvent *event) { event->accept(); }
+void MainWindow::closeEvent(QCloseEvent *event) { QMainWindow::closeEvent(event); }
 
 template <typename T>
 T *EditorFactory(QWidget *parent, ProtoModel *model) {
@@ -92,8 +92,8 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
 
     subWindow = subWindows[item] = ui->mdiArea->addSubWindow(editor);
     subWindow->connect(subWindow, &QObject::destroyed, [=]() {
-      subWindows.remove(item);
       resourceModels.remove(item);
+      subWindows.remove(item);
     });
     subWindow->setWindowIcon(subWindow->widget()->windowIcon());
     subWindow->setWindowTitle(QString::fromStdString(item->name()));
