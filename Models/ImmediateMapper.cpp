@@ -57,7 +57,7 @@ void ImmediateDataWidgetMapper::setCurrentIndex(int index) {
   // when the current index changes all the widgets have to be reloaded from the model
   // we do not want them to signal property changes to us while they are reloading
   // so we have to block their signals until the current index is changed and then
-  // unblock them afterwards if there were not blocked when this method entered
+  // unblock them afterwards if they were not blocked when this method entered
   // NOTE: this probably is not threadsafe or reentrant, just like the rest of Qt
   // and any other GUI framework, so take care when synchronizing it with other threads
   QList<QWidget *> wasBlocked;
