@@ -52,7 +52,7 @@ MainWindow::~MainWindow() { delete ui; }
 void MainWindow::closeEvent(QCloseEvent *event) { event->accept(); }
 
 template <typename T>
-T *EditorFactory(ProtoModel *model, QWidget *parent = nullptr) {
+T *EditorFactory(ProtoModel *model, QWidget *parent) {
   return new T(model, parent);
 }
 
@@ -85,7 +85,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     auto factoryFunction = factoryMap.find(item->type_case());
     if (factoryFunction == factoryMap.end()) return;  // no registered editor
 
-    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(typeMessage);
+    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(typeMessage, nullptr);
     auto resourceModel = resourceModels[item];
 
     QWidget *editor = factoryFunction->second(resourceModel, nullptr);

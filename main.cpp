@@ -5,7 +5,7 @@
 int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
   a.setWindowIcon(QIcon(":/icon.ico"));
-  MainWindow w;
+  MainWindow w(nullptr);
   if (argc > 1) {
     w.openFile(QString(argv[1]));
   }
