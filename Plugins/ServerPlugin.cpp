@@ -56,6 +56,27 @@ class CompilerClient {
     Status status = reader->Finish();
   }
 
+  void SetDefinitions(std::string code, std::string yaml) {
+    qDebug() << "SetDefinitions()";
+    ClientContext context;
+    SetDefinitionsRequest definitionsRequest;
+
+    definitionsRequest.set_code(code);
+    definitionsRequest.set_yaml(yaml);
+
+    SyntaxError reply;
+    Status status = stub->SetDefinitions(&context, definitionsRequest, &reply);
+  }
+
+  void SyntaxCheck() {
+    qDebug() << "SyntaxCheck()";
+    ClientContext context;
+    SyntaxCheckRequest syntaxCheckRequest;
+
+    SyntaxError reply;
+    Status status = stub->SyntaxCheck(&context, syntaxCheckRequest, &reply);
+  }
+
  private:
   std::unique_ptr<Compiler::Stub> stub;
 };
