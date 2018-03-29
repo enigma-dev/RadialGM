@@ -43,6 +43,19 @@ class CompilerClient {
     CompileBuffer(game, mode, t.fileName().toStdString());
   }
 
+  void GetResources() {
+    qDebug() << "GetResources()";
+    ClientContext context;
+    Empty emptyRequest;
+
+    std::unique_ptr<ClientReader<Resource> > reader(stub->GetResources(&context, emptyRequest));
+    Resource resource;
+    while (reader->Read(&resource)) {
+      qDebug() << resource.name().c_str();
+    }
+    Status status = reader->Finish();
+  }
+
  private:
   std::unique_ptr<Compiler::Stub> stub;
 };
@@ -65,6 +78,7 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   channelArguments.SetMaxReceiveMessageSize(-1);
   auto channel = CreateCustomChannel("localhost:37818", InsecureChannelCredentials(), channelArguments);
   compilerClient = new CompilerClient(channel);
+  compilerClient->GetResources();
 }
 
 ServerPlugin::~ServerPlugin() {
