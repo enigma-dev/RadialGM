@@ -53,7 +53,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
     return QString::fromStdString(item->name());
   } else if (role == Qt::FontRole) {
     QFont font;
-    if (item->type_case() == TypeCase::kFolder && item->child_size()) font.setBold(true);
+    if (item->type_case() == TypeCase::kFolder && item->child_size()) font.setWeight(QFont::DemiBold);
     return font;
   }
 
