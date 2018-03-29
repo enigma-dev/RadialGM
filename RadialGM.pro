@@ -10,7 +10,12 @@ CONFIG   += c++11
 # Uncomment if you want QPlainTextEdit used in place of QScintilla
 #DEFINES += RGM_DISABLE_SYNTAXHIGHLIGHTING
 
-!contains(DEFINES, RGM_DISABLE_SYNTAXHIGHLIGHTING):CONFIG += qscintilla2
+contains(DEFINES, RGM_DISABLE_SYNTAXHIGHLIGHTING) {
+  SOURCES += Widgets/CodeWidgetPlain.cpp
+} else {
+  SOURCES += Widgets/CodeWidgetScintilla.cpp
+  CONFIG += qscintilla2
+}
 
 win32:RC_ICONS += images/icon.ico
 
@@ -82,7 +87,8 @@ HEADERS += \
     Components/Utility.h \
     Editors/BaseEditor.h \
     Plugins/RGMPlugin.h \
-    Plugins/ServerPlugin.h
+    Plugins/ServerPlugin.h \
+    Widgets/CodeWidget.h
 
 FORMS += \
     MainWindow.ui \
