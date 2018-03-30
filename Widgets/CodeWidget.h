@@ -2,10 +2,12 @@
 #define CODEWIDGET_H
 
 #include <QFont>
+#include <QWidget>
 
-class CodeWidget {
+class CodeWidget : public QWidget {
  public:
-  CodeWidget();
+  explicit CodeWidget(QWidget* parent);
+  ~CodeWidget();
 
  protected:
   QFont font;

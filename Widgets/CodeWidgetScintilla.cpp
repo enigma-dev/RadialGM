@@ -1,11 +1,12 @@
 #include "CodeWidget.h"
 
 #include <QFontMetrics>
+#include <QLayout>
 
 #include <Qsci/qscilexercpp.h>
 #include <Qsci/qsciscintilla.h>
 
-CodeWidget::CodeWidget() : font(QFont("Courier", 10)) {
+CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), font(QFont("Courier", 10)) {
   QFontMetrics fontMetrics(font);
   QsciScintilla* textEdit = new QsciScintilla(this);
 
@@ -20,3 +21,5 @@ CodeWidget::CodeWidget() : font(QFont("Courier", 10)) {
   textEdit->setLexer(lexer);
   this->layout()->addWidget(textEdit);
 }
+
+CodeWidget::~CodeWidget() {}
