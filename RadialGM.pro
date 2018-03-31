@@ -48,7 +48,8 @@ SOURCES += \
     Components/Utility.cpp \
     Plugins/RGMPlugin.cpp \
     Plugins/ServerPlugin.cpp \
-    Models/SpriteModel.cpp
+    Models/SpriteModel.cpp \
+    Widgets/InfiniteGrid.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -69,7 +70,8 @@ HEADERS += \
     Editors/BaseEditor.h \
     Plugins/RGMPlugin.h \
     Plugins/ServerPlugin.h \
-    Models/SpriteModel.h
+    Models/SpriteModel.h \
+    Widgets/InfiniteGrid.h
 
 FORMS += \
     MainWindow.ui \

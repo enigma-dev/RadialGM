@@ -13,9 +13,15 @@ SpriteEditor::SpriteEditor(ProtoModel* model, QWidget* parent) : BaseEditor(mode
   connect(spriteModel, &SpriteModel::MismatchedImageSize, this, &SpriteEditor::LoadedMismatedImage);
   ui->subImageList->setModel(spriteModel);
   ui->subImageList->setIconSize(spriteModel->GetIconSize());
+
+  connect(ui->subImagePreview, &InfiniteGrid::MouseMoved, this, &SpriteEditor::MouseMoved);
 }
 
 SpriteEditor::~SpriteEditor() { delete ui; }
+
+void SpriteEditor::MouseMoved(int x, int y) {
+  ui->statusBar->showMessage("x: " + QString::number(x) + " " + "y: " + QString::number(y));
+}
 
 void SpriteEditor::LoadedMismatedImage(QSize /*expectedSize*/, QSize /*actualSize*/) {
   QMessageBox::critical(this, tr("Failed to load image"), tr("Error mismatched size"), QMessageBox::Ok);

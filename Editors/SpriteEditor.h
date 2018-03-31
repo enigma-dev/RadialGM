@@ -17,6 +17,9 @@ class SpriteEditor : public BaseEditor {
   ~SpriteEditor();
   void LoadedMismatedImage(QSize expectedSize, QSize actualSize);
 
+ protected slots:
+  void MouseMoved(int x, int y);
+
  private:
   Ui::SpriteEditor* ui;
   SpriteModel* spriteModel;
