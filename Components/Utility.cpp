@@ -41,3 +41,16 @@ ImageDialog::ImageDialog(QWidget* parent, QString xmlExtension, bool writer) : Q
   setNameFilters(nameFilters);
   selectNameFilter(allSupportedFormatsFilter);
 }
+
+QPixmap CreateTransparentImage(const QPixmap& pixmap) {
+  QImage img = pixmap.toImage();
+  img = img.convertToFormat(QImage::Format_ARGB32);
+  QColor transparencyColor = img.pixelColor(0, img.height() - 1);
+  for (int x = 0; x < img.width(); ++x) {
+    for (int y = 0; y < img.height(); ++y) {
+      if (img.pixelColor(x, y) == transparencyColor) img.setPixelColor(x, y, Qt::transparent);
+    }
+  }
+
+  return QPixmap::fromImage(img);
+}

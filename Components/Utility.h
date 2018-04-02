@@ -17,4 +17,6 @@ T RoundNearest(int value, int multiple) {
                           static_cast<double>(multiple));
 }
 
+QPixmap CreateTransparentImage(const QPixmap& image);
+
 #endif  // UTILITY_H

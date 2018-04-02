@@ -15,6 +15,8 @@ SpriteEditor::SpriteEditor(ProtoModel* model, QWidget* parent) : BaseEditor(mode
   ui->subImageList->setIconSize(spriteModel->GetIconSize());
 
   connect(ui->subImagePreview, &InfiniteGrid::MouseMoved, this, &SpriteEditor::MouseMoved);
+
+  ui->subImagePreview->SetPixmap(spriteModel->data(spriteModel->index(0), SpriteRole::PixmapRole).value<QPixmap>());
 }
 
 SpriteEditor::~SpriteEditor() { delete ui; }

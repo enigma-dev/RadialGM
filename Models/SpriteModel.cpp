@@ -1,13 +1,16 @@
 #include "SpriteModel.h"
 
+#include "Components/Utility.h"
+
 #include <QIcon>
-#include <QImageReader>
 #include <QMimeData>
 
 #include <QDebug>
 
 SpriteModel::SpriteModel(google::protobuf::RepeatedPtrField<std::string>* protobuf, QObject* parent)
-    : QAbstractListModel(parent), protobuf(protobuf), maxIconSize(128, 128), minIconSize(16, 16) {}
+    : QAbstractListModel(parent), protobuf(protobuf), maxIconSize(128, 128), minIconSize(16, 16) {
+  for (int i = 0; i < protobuf->size(); ++i) AddImage(protobuf->Get(i));
+}
 
 void SpriteModel::SetMaxIconSize(unsigned width, unsigned height) {
   maxIconSize = QSize(static_cast<int>(width), static_cast<int>(height));
@@ -19,33 +22,52 @@ void SpriteModel::SetMinIconSize(unsigned width, unsigned height) {
 
 QSize SpriteModel::GetIconSize() { return data(index(0), Qt::SizeHintRole).toSize(); }
 
+void SpriteModel::AddImage(const std::string& fName) {
+  QString qstr = QString::fromStdString(fName);
+  if (!subImages.contains(qstr)) {
+    subImages[qstr].first = QPixmap(qstr);
+    subImages[qstr].second = CreateTransparentImage(subImages[qstr].first);
+  }
+}
+
 int SpriteModel::rowCount(const QModelIndex& /*parent*/) const { return protobuf->size(); }
+
 QVariant SpriteModel::data(const QModelIndex& index, int role) const {
-  if (role == Qt::DecorationRole)
-    return QIcon(QString::fromStdString(protobuf->Get(index.row())));
-  else if (role == Qt::BackgroundColorRole) {
-    return QVariant(QColor(Qt::yellow));
-  } else if (role == Qt::SizeHintRole) {
-    // Don't load image we just need size
-    QImageReader img(QString::fromStdString(protobuf->Get(index.row())));
-    QSize actualSize = img.size();
-    float aspectRatio = static_cast<float>(qMin(actualSize.width(), actualSize.height())) /
-                        qMax(actualSize.width(), actualSize.height());
-
-    int width = qMin(actualSize.width(), maxIconSize.width());
-    int height = qMin(actualSize.height(), maxIconSize.height());
-
-    if (actualSize.width() > maxIconSize.width() || actualSize.height() > maxIconSize.height()) {
-      if (actualSize.width() < actualSize.height()) width *= aspectRatio;
-      if (actualSize.width() > actualSize.height()) height *= aspectRatio;
+  switch (role) {
+    case Qt::DecorationRole: {
+      return QIcon(subImages[QString::fromStdString(protobuf->Get(index.row()))].first);
     }
 
-    return QSize(qMax(minIconSize.width(), width), qMax(minIconSize.height(), height));
+    case Qt::SizeHintRole: {
+      QSize actualSize = data(index, SpriteRole::PixmapRole).value<QPixmap>().size();
+      float aspectRatio = static_cast<float>(qMin(actualSize.width(), actualSize.height())) /
+                          qMax(actualSize.width(), actualSize.height());
 
-  } else if (role == Qt::UserRole) {
-    return QString::fromStdString(protobuf->Get(index.row()));
-  } else
-    return QVariant();
+      int width = qMin(actualSize.width(), maxIconSize.width());
+      int height = qMin(actualSize.height(), maxIconSize.height());
+
+      if (actualSize.width() > maxIconSize.width() || actualSize.height() > maxIconSize.height()) {
+        if (actualSize.width() < actualSize.height()) width *= aspectRatio;
+        if (actualSize.width() > actualSize.height()) height *= aspectRatio;
+      }
+
+      return QSize(qMax(minIconSize.width(), width), qMax(minIconSize.height(), height));
+    }
+
+    case SpriteRole::PixmapRole: {
+      return subImages[QString::fromStdString(protobuf->Get(index.row()))].first;
+    }
+
+    case SpriteRole::FileNameRole: {
+      return QString::fromStdString(protobuf->Get(index.row()));
+    }
+
+    case Qt::BackgroundColorRole: {
+      return QVariant(QColor(Qt::yellow));
+    }
+
+    default: { return QVariant(); }
+  }
 }
 
 bool SpriteModel::setData(const QModelIndex& index, const QVariant& value, int role) {

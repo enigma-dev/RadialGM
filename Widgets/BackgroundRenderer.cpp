@@ -1,6 +1,7 @@
 #include "BackgroundRenderer.h"
 
 #include "Components/ArtManager.h"
+#include "Components/Utility.h"
 
 #include "resources/Background.pb.h"
 
@@ -21,17 +22,7 @@ bool BackgroundRenderer::SetImage(QPixmap image) {
 
   zoom = 1;
   pixmap = image;
-
-  QImage img = pixmap.toImage();
-  img = img.convertToFormat(QImage::Format_ARGB32);
-  transparencyColor = img.pixelColor(0, img.height() - 1);
-  for (int x = 0; x < img.width(); ++x) {
-    for (int y = 0; y < img.height(); ++y) {
-      if (img.pixelColor(x, y) == transparencyColor) img.setPixelColor(x, y, Qt::transparent);
-    }
-  }
-
-  transparentPixmap = QPixmap::fromImage(img);
+  transparentPixmap = CreateTransparentImage(image);
   setFixedSize(pixmap.width() + 1, pixmap.height() + 1);
   update();
 
