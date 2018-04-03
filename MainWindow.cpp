@@ -13,6 +13,9 @@
 
 #include "Components/ArtManager.h"
 
+#include "Plugins/RGMPlugin.h"
+#include "Plugins/ServerPlugin.h"
+
 #include "gmx.h"
 
 #include "resources/Background.pb.h"
@@ -25,22 +28,39 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ArtManager::Init();
+
+  setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
+  setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
+  setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
+  setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
+
   ui->setupUi(this);
+
   ui->mdiArea->setBackground(QImage(":/banner.png"));
+
+  RGMPlugin *pluginServer = new ServerPlugin(*this);
+  auto outputTextBrowser = this->ui->outputTextBrowser;
+  connect(pluginServer, &RGMPlugin::OutputRead, outputTextBrowser, &QTextBrowser::append);
+  connect(pluginServer, &RGMPlugin::ErrorRead, outputTextBrowser, &QTextBrowser::append);
+  connect(ui->actionRun, &QAction::triggered, pluginServer, &RGMPlugin::Run);
+  connect(ui->actionDebug, &QAction::triggered, pluginServer, &RGMPlugin::Debug);
+  connect(ui->actionCreateExecutable, &QAction::triggered, pluginServer, &RGMPlugin::CreateExecutable);
 }
+
+MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::closeEvent(QCloseEvent *event) { event->accept(); }
 
 template <typename T>
-T *EditorFactory(QWidget *parent, ProtoModel *model) {
-  return new T(parent, model);
+T *EditorFactory(ProtoModel *model, QWidget *parent) {
+  return new T(model, parent);
 }
 
 void MainWindow::openSubWindow(buffers::TreeNode *item) {
   using namespace google::protobuf;
 
   using TypeCase = buffers::TreeNode::TypeCase;
-  using FactoryFunction = std::function<BaseEditor *(QWidget * parent, ProtoModel * model)>;
+  using FactoryFunction = std::function<BaseEditor *(ProtoModel * model, QWidget * parent)>;
   using FactoryMap = std::unordered_map<TypeCase, FactoryFunction>;
 
   static FactoryMap factoryMap({{TypeCase::kSprite, EditorFactory<SpriteEditor>},
@@ -56,7 +76,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
 
   const OneofDescriptor *typeOneof = desc->FindOneofByName("type");
   const FieldDescriptor *typeField = refl->GetOneofFieldDescriptor(*item, typeOneof);
-  // might not be set or its not a message
+  // might not be set or it's not a message
   if (!typeField || typeField->cpp_type() != FieldDescriptor::CppType::CPPTYPE_MESSAGE) return;
   Message *typeMessage = refl->MutableMessage(item, typeField);
 
@@ -65,16 +85,18 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     auto factoryFunction = factoryMap.find(item->type_case());
     if (factoryFunction == factoryMap.end()) return;  // no registered editor
 
-    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(typeMessage);
+    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(typeMessage, nullptr);
     auto resourceModel = resourceModels[item];
 
-    QWidget *editor = factoryFunction->second(ui->mdiArea, resourceModel);
+    QWidget *editor = factoryFunction->second(resourceModel, nullptr);
     resourceModel->setParent(editor);
 
     subWindow = subWindows[item] = ui->mdiArea->addSubWindow(editor);
+    editor->setParent(subWindow);
+
     subWindow->connect(subWindow, &QObject::destroyed, [=]() {
-      subWindows.remove(item);
       resourceModels.remove(item);
+      subWindows.remove(item);
     });
     subWindow->setWindowIcon(subWindow->widget()->windowIcon());
     subWindow->setWindowTitle(QString::fromStdString(item->name()));
@@ -84,11 +106,11 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
   ui->mdiArea->setActiveSubWindow(subWindow);
 }
 
-MainWindow::~MainWindow() { delete ui; }
-
 void MainWindow::openFile(QString fName) {
-  game = gmx::LoadGMX(fName.toStdString());
-  treeModel = new TreeModel(game->mutable_game()->mutable_root(), this);
+  QFileInfo fileInfo(fName);
+  this->setWindowTitle(fileInfo.fileName() + " - ENIGMA");
+  project = gmx::LoadGMX(fName.toStdString());
+  treeModel = new TreeModel(project->mutable_game()->mutable_root(), this);
   ui->treeView->setModel(treeModel);
   treeModel->connect(treeModel, &QAbstractItemModel::dataChanged,
                      [=](const QModelIndex &topLeft, const QModelIndex &bottomRight) {
@@ -105,9 +127,8 @@ void MainWindow::openFile(QString fName) {
 }
 
 void MainWindow::on_actionOpen_triggered() {
-  const QString fileName = QFileDialog::getOpenFileName(this, tr("Open Project"), "",
-                                                        tr("GameMaker: Studio (*.project.gmx);;All Files (*)"));
-
+  const QString &fileName = QFileDialog::getOpenFileName(this, tr("Open Project"), "",
+                                                         tr("GameMaker: Studio (*.project.gmx);;All Files (*)"));
   if (!fileName.isEmpty()) openFile(fileName);
 }
 
@@ -156,7 +177,8 @@ void MainWindow::on_actionExploreENIGMA_triggered() { QDesktopServices::openUrl(
 
 void MainWindow::on_actionAbout_triggered() {
   QMessageBox aboutBox(QMessageBox::Information, tr("About"),
-                       tr("ENIGMA is a free, open-source, and cross-platform game engine."), QMessageBox::Ok, this, 0);
+                       tr("ENIGMA is a free, open-source, and cross-platform game engine."), QMessageBox::Ok, this,
+                       nullptr);
   QAbstractButton *aboutQtButton = aboutBox.addButton(tr("About Qt"), QMessageBox::HelpRole);
   aboutBox.exec();
 

@@ -5,7 +5,17 @@
 #-------------------------------------------------
 
 QT       += core gui
-CONFIG   += c++11 qscintilla2
+CONFIG   += c++11
+
+# Uncomment if you want QPlainTextEdit used in place of QScintilla
+#DEFINES += RGM_DISABLE_SYNTAXHIGHLIGHTING
+
+contains(DEFINES, RGM_DISABLE_SYNTAXHIGHLIGHTING) {
+  SOURCES += Widgets/CodeWidgetPlain.cpp
+} else {
+  SOURCES += Widgets/CodeWidgetScintilla.cpp
+  CONFIG += qscintilla2
+}
 
 win32:RC_ICONS += images/icon.ico
 
@@ -25,8 +35,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-INCLUDEPATH += /usr/include/qt/ $$PWD/Submodules/enigma-dev/CommandLine/libGMX/ $$PWD/Submodules/enigma-dev/CommandLine/protos $$PWD/Submodules/enigma-dev/CommandLine/protos/codegen
-LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libGMX/ -lGMX -lprotobuf -Wl,--rpath=$$PWD/Submodules/enigma-dev/ -L$$PWD/Submodules/enigma-dev/ -lProtocols -lpugixml
+INCLUDEPATH += /usr/include/qt/ \
+               $$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
+               $$PWD/Submodules/enigma-dev/CommandLine/protos \
+               $$PWD/Submodules/enigma-dev/CommandLine/protos/codegen
+LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
+        -lEGM \
+        -lprotobuf \
+        -Wl,--rpath=$$PWD/Submodules/enigma-dev/ \
+        -L$$PWD/Submodules/enigma-dev/ \
+        -lProtocols \
+        -lpugixml \
+        -lgrpc++
 
 SOURCES += \
         main.cpp \
@@ -45,7 +65,9 @@ SOURCES += \
     Editors/BaseEditor.cpp \
     Models/ProtoModel.cpp \
     Models/ImmediateMapper.cpp \
-    Components/Utility.cpp
+    Components/Utility.cpp \
+    Plugins/RGMPlugin.cpp \
+    Plugins/ServerPlugin.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -63,7 +85,10 @@ HEADERS += \
     Models/ProtoModel.h \
     Models/ImmediateMapper.h \
     Components/Utility.h \
-    Editors/BaseEditor.h
+    Editors/BaseEditor.h \
+    Plugins/RGMPlugin.h \
+    Plugins/ServerPlugin.h \
+    Widgets/CodeWidget.h
 
 FORMS += \
     MainWindow.ui \

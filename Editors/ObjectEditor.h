@@ -11,11 +11,11 @@ class ObjectEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit ObjectEditor(QWidget *parent, ProtoModel *model);
+  explicit ObjectEditor(ProtoModel* model, QWidget* parent);
   ~ObjectEditor();
 
  private:
-  Ui::ObjectEditor *ui;
+  Ui::ObjectEditor* ui;
 };
 
 #endif  // OBJECTEDITOR_H

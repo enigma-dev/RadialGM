@@ -11,11 +11,11 @@ class PathEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit PathEditor(QWidget *parent, ProtoModel *model);
+  explicit PathEditor(ProtoModel* model, QWidget* parent);
   ~PathEditor();
 
  private:
-  Ui::PathEditor *ui;
+  Ui::PathEditor* ui;
 };
 
 #endif  // PATHEDITOR_H

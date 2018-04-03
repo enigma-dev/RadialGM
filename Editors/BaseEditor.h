@@ -12,7 +12,7 @@ class BaseEditor : public QWidget {
   Q_OBJECT
 
  public:
-  explicit BaseEditor(QWidget *parent, ProtoModel *model);
+  explicit BaseEditor(ProtoModel *model, QWidget *parent);
 
   virtual void closeEvent(QCloseEvent *event);
   void ReplaceBuffer(google::protobuf::Message *buffer);

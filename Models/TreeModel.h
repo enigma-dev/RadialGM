@@ -4,6 +4,7 @@
 #include "treenode.pb.h"
 
 #include <QAbstractItemModel>
+#include <QHash>
 
 class TreeModel : public QAbstractItemModel {
   Q_OBJECT
@@ -21,9 +22,10 @@ class TreeModel : public QAbstractItemModel {
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
  private:
-  //void setupModelData(const QStringList &lines, TreeItem *parent);
-
   buffers::TreeNode *root;
+  QHash<buffers::TreeNode *, buffers::TreeNode *> parents;
+
+  void SetupParents(buffers::TreeNode *root);
 };
 
 #endif  // TREEMODEL_H

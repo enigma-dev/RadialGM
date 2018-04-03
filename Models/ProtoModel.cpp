@@ -9,6 +9,8 @@ ProtoModel::ProtoModel(Message *protobuf, QObject *parent)
   protobufBackup->CopyFrom(*protobuf);
 }
 
+ProtoModel::~ProtoModel() { delete protobufBackup; }
+
 void ProtoModel::ReplaceBuffer(Message *buffer) {
   SetDirty(true);
   protobuf->CopyFrom(*buffer);
@@ -16,8 +18,9 @@ void ProtoModel::ReplaceBuffer(Message *buffer) {
 }
 
 void ProtoModel::RestoreBuffer() {
-  std::swap(protobuf, protobufBackup);
-  protobufBackup->CopyFrom(*protobuf);
+  SetDirty(false);
+  protobuf->CopyFrom(*protobufBackup);
+  emit dataChanged(index(0), index(rowCount()));
 }
 
 int ProtoModel::rowCount(const QModelIndex & /*parent*/) const {

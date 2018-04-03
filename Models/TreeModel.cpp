@@ -2,7 +2,19 @@
 
 #include "Components/ArtManager.h"
 
-TreeModel::TreeModel(buffers::TreeNode *root, QObject *parent) : QAbstractItemModel(parent), root(root) {}
+#include <QFont>
+
+TreeModel::TreeModel(buffers::TreeNode *root, QObject *parent) : QAbstractItemModel(parent), root(root) {
+  SetupParents(root);
+}
+
+void TreeModel::SetupParents(buffers::TreeNode *root) {
+  for (int i = 0; i < root->child_size(); ++i) {
+    auto child = root->mutable_child(i);
+    parents[child] = root;
+    SetupParents(child);
+  }
+}
 
 int TreeModel::columnCount(const QModelIndex & /*parent*/) const { return 1; }
 
@@ -21,7 +33,6 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
   if (!index.isValid()) return QVariant();
 
   buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
-
   if (role == Qt::DecorationRole) {
     static IconMap iconMap({{TypeCase::kFolder, ArtManager::GetIcon("group")},
                             {TypeCase::kSprite, ArtManager::GetIcon("sprite")},
@@ -38,11 +49,15 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
     auto it = iconMap.find(item->type_case());
     if (it == iconMap.end()) return ArtManager::GetIcon("info");
     return it->second;
+  } else if (role == Qt::EditRole || role == Qt::DisplayRole) {
+    return QString::fromStdString(item->name());
+  } else if (role == Qt::FontRole) {
+    QFont font;
+    if (item->type_case() == TypeCase::kFolder && item->child_size()) font.setWeight(QFont::DemiBold);
+    return font;
   }
 
-  if (role != Qt::DisplayRole && role != Qt::EditRole) return QVariant();
-
-  return QString::fromStdString(item->name());
+  return QVariant();
 }
 
 Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const {
@@ -77,7 +92,7 @@ QModelIndex TreeModel::parent(const QModelIndex &index) const {
   if (!index.isValid()) return QModelIndex();
 
   buffers::TreeNode *childItem = static_cast<buffers::TreeNode *>(index.internalPointer());
-  buffers::TreeNode *parentItem = childItem->mutable_parent();
+  buffers::TreeNode *parentItem = parents[childItem];
 
   if (parentItem == root) return QModelIndex();
 

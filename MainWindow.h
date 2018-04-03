@@ -8,6 +8,7 @@
 
 #include <QMainWindow>
 #include <QMdiSubWindow>
+#include <QProcess>
 
 namespace Ui {
 class MainWindow;
@@ -17,10 +18,12 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
  public:
-  explicit MainWindow(QWidget *parent = 0);
+  explicit MainWindow(QWidget *parent);
   ~MainWindow();
   void closeEvent(QCloseEvent *event);
   void openFile(QString fName);
+
+  buffers::Game *Game() const { return this->project->mutable_game(); }
 
  private slots:
   // file menu
@@ -47,11 +50,13 @@ class MainWindow : public QMainWindow {
   void on_treeView_doubleClicked(const QModelIndex &index);
 
  private:
-  Ui::MainWindow *ui;
-  buffers::Project *game;
-  TreeModel *treeModel;
   QHash<buffers::TreeNode *, ProtoModel *> resourceModels;
   QHash<buffers::TreeNode *, QMdiSubWindow *> subWindows;
+
+  TreeModel *treeModel;
+  Ui::MainWindow *ui;
+
+  buffers::Project *project;
 
   void openSubWindow(buffers::TreeNode *item);
 };
