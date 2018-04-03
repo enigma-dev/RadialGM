@@ -12,7 +12,7 @@
 
 InfiniteGrid::InfiniteGrid(QWidget *parent) : QWidget(parent) { setMouseTracking(true); }
 
-void InfiniteGrid::SetPixmap(QPixmap pixmap) { this->pixmap = pixmap; }
+void InfiniteGrid::SetPixmap(QPixmap pixmap) { this->pixmap = CreateTransparentImage(pixmap); }
 
 void InfiniteGrid::keyReleaseEvent(QKeyEvent *event) {
   if (event->key() == Qt::Key_Right || event->key() == Qt::Key_Right) hSpeed = 0;

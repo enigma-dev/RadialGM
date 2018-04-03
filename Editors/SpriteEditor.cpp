@@ -24,7 +24,7 @@ SpriteEditor::SpriteEditor(ProtoModel* model, QWidget* parent) : BaseEditor(mode
 SpriteEditor::~SpriteEditor() { delete ui; }
 
 void SpriteEditor::MouseMoved(int x, int y) {
-  ui->statusBar->showMessage("x: " + QString::number(x) + " " + "y: " + QString::number(y));
+  ui->statusBar->showMessage("X " + QString::number(x) + " " + "Y " + QString::number(y));
 }
 
 void SpriteEditor::LoadedMismatedImage(QSize /*expectedSize*/, QSize /*actualSize*/) {
