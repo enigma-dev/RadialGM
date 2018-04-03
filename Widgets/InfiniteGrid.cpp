@@ -31,10 +31,7 @@ void InfiniteGrid::keyPressEvent(QKeyEvent *event) {
   update();
 }
 
-void InfiniteGrid::mouseMoveEvent(QMouseEvent * /*event*/) {
-  setFocus();
-  update();
-}
+void InfiniteGrid::mouseMoveEvent(QMouseEvent * /*event*/) { update(); }
 
 void InfiniteGrid::update() {
   xPos += hSpeed;

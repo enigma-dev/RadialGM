@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../images.qrc">
+    <normaloff>:/resources/sprite.png</normaloff>:/resources/sprite.png</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <property name="spacing">
     <number>0</number>
@@ -66,10 +70,22 @@
       <widget class="QWidget" name="widget" native="true">
        <layout class="QVBoxLayout" name="propertiesLayout">
         <property name="spacing">
-         <number>4</number>
+         <number>2</number>
         </property>
         <property name="sizeConstraint">
          <enum>QLayout::SetDefaultConstraint</enum>
+        </property>
+        <property name="leftMargin">
+         <number>4</number>
+        </property>
+        <property name="topMargin">
+         <number>4</number>
+        </property>
+        <property name="rightMargin">
+         <number>4</number>
+        </property>
+        <property name="bottomMargin">
+         <number>4</number>
         </property>
         <item>
          <widget class="QGroupBox" name="originGroupBox">
@@ -77,6 +93,21 @@
            <string>Origin</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,1,0,1">
+           <property name="leftMargin">
+            <number>4</number>
+           </property>
+           <property name="topMargin">
+            <number>4</number>
+           </property>
+           <property name="rightMargin">
+            <number>4</number>
+           </property>
+           <property name="bottomMargin">
+            <number>4</number>
+           </property>
+           <property name="spacing">
+            <number>2</number>
+           </property>
            <item row="0" column="2">
             <widget class="QLabel" name="originYLabel">
              <property name="text">
@@ -146,50 +177,64 @@
             <string>Mask 0</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_2">
+            <property name="spacing">
+             <number>4</number>
+            </property>
+            <property name="leftMargin">
+             <number>4</number>
+            </property>
+            <property name="topMargin">
+             <number>4</number>
+            </property>
+            <property name="rightMargin">
+             <number>4</number>
+            </property>
+            <property name="bottomMargin">
+             <number>4</number>
+            </property>
             <item>
-             <layout class="QVBoxLayout" name="maskTabLayout">
+             <layout class="QHBoxLayout" name="maskSettingsLayout">
+              <property name="spacing">
+               <number>4</number>
+              </property>
               <item>
-               <layout class="QHBoxLayout" name="maskSettingsLayout">
+               <widget class="QComboBox" name="maskType">
                 <item>
-                 <widget class="QComboBox" name="maskType">
-                  <item>
-                   <property name="text">
-                    <string>Box</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Diamond</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Circle</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Ellipse</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>Polygon</string>
-                   </property>
-                  </item>
-                 </widget>
+                 <property name="text">
+                  <string>Box</string>
+                 </property>
                 </item>
                 <item>
-                 <widget class="QCheckBox" name="maskVisible">
-                  <property name="text">
-                   <string>Visible</string>
-                  </property>
-                  <property name="checked">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
+                 <property name="text">
+                  <string>Diamond</string>
+                 </property>
                 </item>
-               </layout>
+                <item>
+                 <property name="text">
+                  <string>Circle</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Ellipse</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Polygon</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="maskVisible">
+                <property name="text">
+                 <string>Visible</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -226,6 +271,18 @@
        <widget class="QWidget" name="verticalWidget" native="true">
         <layout class="QVBoxLayout" name="subimagesLayout">
          <property name="spacing">
+          <number>2</number>
+         </property>
+         <property name="leftMargin">
+          <number>4</number>
+         </property>
+         <property name="topMargin">
+          <number>4</number>
+         </property>
+         <property name="rightMargin">
+          <number>4</number>
+         </property>
+         <property name="bottomMargin">
           <number>4</number>
          </property>
          <item>
@@ -238,6 +295,9 @@
            </property>
            <property name="focusPolicy">
             <enum>Qt::ClickFocus</enum>
+           </property>
+           <property name="autoFillBackground">
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -271,44 +331,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QListView" name="subImageList">
-           <property name="palette">
-            <palette>
-             <active>
-              <colorrole role="Base">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>243</red>
-                 <green>243</green>
-                 <blue>243</blue>
-                </color>
-               </brush>
-              </colorrole>
-             </active>
-             <inactive>
-              <colorrole role="Base">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>243</red>
-                 <green>243</green>
-                 <blue>243</blue>
-                </color>
-               </brush>
-              </colorrole>
-             </inactive>
-             <disabled>
-              <colorrole role="Base">
-               <brush brushstyle="SolidPattern">
-                <color alpha="255">
-                 <red>239</red>
-                 <green>239</green>
-                 <blue>239</blue>
-                </color>
-               </brush>
-              </colorrole>
-             </disabled>
-            </palette>
-           </property>
+          <widget class="DragListView" name="subImageList">
            <property name="dragEnabled">
             <bool>true</bool>
            </property>
@@ -322,7 +345,13 @@
             <enum>QAbstractItemView::ExtendedSelection</enum>
            </property>
            <property name="selectionBehavior">
-            <enum>QAbstractItemView::SelectRows</enum>
+            <enum>QAbstractItemView::SelectItems</enum>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>64</width>
+             <height>64</height>
+            </size>
            </property>
            <property name="movement">
             <enum>QListView::Snap</enum>
@@ -333,8 +362,17 @@
            <property name="spacing">
             <number>8</number>
            </property>
+           <property name="gridSize">
+            <size>
+             <width>64</width>
+             <height>64</height>
+            </size>
+           </property>
            <property name="viewMode">
             <enum>QListView::IconMode</enum>
+           </property>
+           <property name="uniformItemSizes">
+            <bool>true</bool>
            </property>
            <property name="selectionRectVisible">
             <bool>true</bool>
@@ -538,6 +576,11 @@
    <extends>QWidget</extends>
    <header>Widgets/InfiniteGrid.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DragListView</class>
+   <extends>QListView</extends>
+   <header>Widgets/DragListView.h</header>
   </customwidget>
  </customwidgets>
  <resources>

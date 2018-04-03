@@ -4,6 +4,7 @@
 #include <QImageReader>
 #include <QImageWriter>
 #include <QMimeDatabase>
+#include <QPainter>
 
 ImageDialog::ImageDialog(QWidget* parent, QString xmlExtension, bool writer) : QFileDialog(parent, "Select image") {
   QString fileExt("*." + xmlExtension + ".gmx");
@@ -43,14 +44,25 @@ ImageDialog::ImageDialog(QWidget* parent, QString xmlExtension, bool writer) : Q
 }
 
 QPixmap CreateTransparentImage(const QPixmap& pixmap) {
-  QImage img = pixmap.toImage();
-  img = img.convertToFormat(QImage::Format_ARGB32);
-  QColor transparencyColor = img.pixelColor(0, img.height() - 1);
-  for (int x = 0; x < img.width(); ++x) {
-    for (int y = 0; y < img.height(); ++y) {
-      if (img.pixelColor(x, y) == transparencyColor) img.setPixelColor(x, y, Qt::transparent);
-    }
+  return CreateTransparentImage(pixmap, pixmap.width(), pixmap.height());
+}
+
+QPixmap CreateTransparentImage(const QPixmap& pixmap, int width, int height) {
+  QPixmap scaled(width, height);
+  QImage img = scaled.toImage();
+  QPainter painter(&img);
+  painter.drawTiledPixmap(img.rect(), QPixmap(":/transparent.png"));
+  if (pixmap.width() > pixmap.height()) {
+    painter.translate(0, height / 2 - (pixmap.height() * (width / pixmap.width())) / 2);
+    painter.scale(width / pixmap.width(), width / pixmap.width());
+
+  } else {
+    painter.translate(width / 2 - (pixmap.width() * (height / pixmap.height())) / 2, 0);
+    painter.scale(height / pixmap.height(), height / pixmap.height());
   }
+
+  painter.drawPixmap(pixmap.rect(), pixmap);
+  painter.end();
 
   return QPixmap::fromImage(img);
 }

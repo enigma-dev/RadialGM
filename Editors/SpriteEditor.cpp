@@ -9,6 +9,8 @@ SpriteEditor::SpriteEditor(ProtoModel* model, QWidget* parent) : BaseEditor(mode
 
   spriteModel =
       new SpriteModel(static_cast<buffers::resources::Sprite*>(model->GetBuffer())->mutable_subimages(), this);
+  //spriteModel->SetMinIconSize(32, 32);
+  //spriteModel->SetMaxIconSize(32, 32);
 
   connect(spriteModel, &SpriteModel::MismatchedImageSize, this, &SpriteEditor::LoadedMismatedImage);
   ui->subImageList->setModel(spriteModel);

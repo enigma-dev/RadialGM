@@ -25,8 +25,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-INCLUDEPATH += /usr/include/qt/ $$PWD/Submodules/enigma-dev/CommandLine/libGM/ $$PWD/Submodules/enigma-dev/CommandLine/protos $$PWD/Submodules/enigma-dev/CommandLine/protos/codegen
-LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libGM/ -lGM -lprotobuf -Wl,--rpath=$$PWD/Submodules/enigma-dev/ -L$$PWD/Submodules/enigma-dev/ -lProtocols -lpugixml -lgrpc++
+INCLUDEPATH += /usr/include/qt/ $$PWD/Submodules/enigma-dev/CommandLine/libEGM/ $$PWD/Submodules/enigma-dev/CommandLine/protos $$PWD/Submodules/enigma-dev/CommandLine/protos/codegen
+LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libEGM/ -lEGM -lprotobuf -Wl,--rpath=$$PWD/Submodules/enigma-dev/ -L$$PWD/Submodules/enigma-dev/ -lProtocols -lpugixml -lgrpc++
 
 SOURCES += \
         main.cpp \
@@ -49,7 +49,8 @@ SOURCES += \
     Plugins/RGMPlugin.cpp \
     Plugins/ServerPlugin.cpp \
     Models/SpriteModel.cpp \
-    Widgets/InfiniteGrid.cpp
+    Widgets/InfiniteGrid.cpp \
+    Widgets/DragListView.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -71,7 +72,8 @@ HEADERS += \
     Plugins/RGMPlugin.h \
     Plugins/ServerPlugin.h \
     Models/SpriteModel.h \
-    Widgets/InfiniteGrid.h
+    Widgets/InfiniteGrid.h \
+    Widgets/DragListView.h
 
 FORMS += \
     MainWindow.ui \

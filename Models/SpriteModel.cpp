@@ -25,8 +25,9 @@ QSize SpriteModel::GetIconSize() { return data(index(0), Qt::SizeHintRole).toSiz
 void SpriteModel::AddImage(const std::string& fName) {
   QString qstr = QString::fromStdString(fName);
   if (!subImages.contains(qstr)) {
-    subImages[qstr].first = QPixmap(qstr);
-    subImages[qstr].second = CreateTransparentImage(subImages[qstr].first);
+    QPixmap pixmap(qstr);
+    subImages[qstr].first = pixmap;
+    subImages[qstr].second = CreateTransparentImage(pixmap, 64, 64);
   }
 }
 
@@ -35,37 +36,14 @@ int SpriteModel::rowCount(const QModelIndex& /*parent*/) const { return protobuf
 QVariant SpriteModel::data(const QModelIndex& index, int role) const {
   switch (role) {
     case Qt::DecorationRole: {
-      return QIcon(subImages[QString::fromStdString(protobuf->Get(index.row()))].first);
+      return QIcon(subImages[QString::fromStdString(protobuf->Get(index.row()))].second);
     }
-
-    case Qt::SizeHintRole: {
-      QSize actualSize = data(index, SpriteRole::PixmapRole).value<QPixmap>().size();
-      float aspectRatio = static_cast<float>(qMin(actualSize.width(), actualSize.height())) /
-                          qMax(actualSize.width(), actualSize.height());
-
-      int width = qMin(actualSize.width(), maxIconSize.width());
-      int height = qMin(actualSize.height(), maxIconSize.height());
-
-      if (actualSize.width() > maxIconSize.width() || actualSize.height() > maxIconSize.height()) {
-        if (actualSize.width() < actualSize.height()) width *= aspectRatio;
-        if (actualSize.width() > actualSize.height()) height *= aspectRatio;
-      }
-
-      return QSize(qMax(minIconSize.width(), width), qMax(minIconSize.height(), height));
-    }
-
     case SpriteRole::PixmapRole: {
       return subImages[QString::fromStdString(protobuf->Get(index.row()))].first;
     }
-
     case SpriteRole::FileNameRole: {
       return QString::fromStdString(protobuf->Get(index.row()));
     }
-
-    case Qt::BackgroundColorRole: {
-      return QVariant(QColor(Qt::yellow));
-    }
-
     default: { return QVariant(); }
   }
 }
@@ -83,6 +61,7 @@ bool SpriteModel::setData(const QModelIndex& index, const QVariant& value, int r
 }
 
 bool SpriteModel::insertRows(int position, int rows, const QModelIndex& /*parent*/) {
+  qDebug() << "insertRows()" << position << rows;
   beginInsertRows(QModelIndex(), position, position + rows - 1);
 
   QList<std::string> images;

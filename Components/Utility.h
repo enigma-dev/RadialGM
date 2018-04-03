@@ -18,5 +18,6 @@ T RoundNearest(int value, int multiple) {
 }
 
 QPixmap CreateTransparentImage(const QPixmap& image);
+QPixmap CreateTransparentImage(const QPixmap& image, int width, int height);
 
 #endif  // UTILITY_H
