@@ -110,10 +110,10 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
 void MainWindow::openFile(QString fName) {
   QFileInfo fileInfo(fName);
   this->setWindowTitle(fileInfo.fileName() + " - ENIGMA");
-  if (fileInfo.suffix() == "gm81" || fileInfo.suffix() == "gmk" || fileInfo.suffix() == "gm6" ||
-      fileInfo.suffix() == "gmd") {
+  const QString suffix = fileInfo.suffix();
+  if (suffix == "gm81" || suffix == "gmk" || suffix == "gm6" || suffix == "gmd") {
     project = gmk::LoadGMK(fName.toStdString());
-  } else if (fileInfo.suffix() == "gmx") {
+  } else if (suffix == "gmx") {
     project = gmx::LoadGMX(fName.toStdString());
   }
   treeModel = new TreeModel(project->mutable_game()->mutable_root(), this);
