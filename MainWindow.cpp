@@ -16,6 +16,7 @@
 #include "Plugins/RGMPlugin.h"
 #include "Plugins/ServerPlugin.h"
 
+#include "gmk.h"
 #include "gmx.h"
 
 #include "resources/Background.pb.h"
@@ -109,7 +110,12 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
 void MainWindow::openFile(QString fName) {
   QFileInfo fileInfo(fName);
   this->setWindowTitle(fileInfo.fileName() + " - ENIGMA");
-  project = gmx::LoadGMX(fName.toStdString());
+  if (fileInfo.suffix() == "gm81" || fileInfo.suffix() == "gmk" || fileInfo.suffix() == "gm6" ||
+      fileInfo.suffix() == "gmd") {
+    project = gmk::LoadGMK(fName.toStdString());
+  } else if (fileInfo.suffix() == "gmx") {
+    project = gmx::LoadGMX(fName.toStdString());
+  }
   treeModel = new TreeModel(project->mutable_game()->mutable_root(), this);
   ui->treeView->setModel(treeModel);
   treeModel->connect(treeModel, &QAbstractItemModel::dataChanged,
@@ -127,8 +133,9 @@ void MainWindow::openFile(QString fName) {
 }
 
 void MainWindow::on_actionOpen_triggered() {
-  const QString &fileName = QFileDialog::getOpenFileName(this, tr("Open Project"), "",
-                                                         tr("GameMaker: Studio (*.project.gmx);;All Files (*)"));
+  const QString &fileName = QFileDialog::getOpenFileName(
+      this, tr("Open Project"), "",
+      tr("GameMaker: Studio (*.project.gmx);;Classic GameMaker Files (*.gm81 *.gmk *.gm6 *.gmd);;All Files (*)"));
   if (!fileName.isEmpty()) openFile(fileName);
 }
 
