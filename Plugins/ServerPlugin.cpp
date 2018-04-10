@@ -1,8 +1,9 @@
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0600  // at least windows vista required for grpc
+#endif
+
 #include "ServerPlugin.h"
 
-#if _WIN32_WINNT < 0x0600
-#define _WIN32_WINNT 0x0600
-#endif
 #include "server.grpc.pb.h"
 
 #include <QDebug>
