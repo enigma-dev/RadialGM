@@ -18,6 +18,7 @@
 
 #include "gmk.h"
 #include "gmx.h"
+#include "yyp.h"
 
 #include "resources/Background.pb.h"
 
@@ -115,6 +116,8 @@ void MainWindow::openFile(QString fName) {
     project = gmk::LoadGMK(fName.toStdString());
   } else if (suffix == "gmx") {
     project = gmx::LoadGMX(fName.toStdString());
+  } else if (suffix == "yyp") {
+    project = yyp::LoadYYP(fName.toStdString());
   }
   treeModel = new TreeModel(project->mutable_game()->mutable_root(), this);
   ui->treeView->setModel(treeModel);
@@ -135,7 +138,8 @@ void MainWindow::openFile(QString fName) {
 void MainWindow::on_actionOpen_triggered() {
   const QString &fileName = QFileDialog::getOpenFileName(
       this, tr("Open Project"), "",
-      tr("GameMaker: Studio (*.project.gmx);;Classic GameMaker Files (*.gm81 *.gmk *.gm6 *.gmd);;All Files (*)"));
+      tr("GameMaker: Studio 2 Projects (*.yyp);;GameMaker: Studio Projects (*.project.gmx);;Classic "
+         "GameMaker Files (*.gm81 *.gmk *.gm6 *.gmd);;All Files (*)"));
   if (!fileName.isEmpty()) openFile(fileName);
 }
 
