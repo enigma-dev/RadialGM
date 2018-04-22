@@ -8,9 +8,9 @@ QT       += core gui
 CONFIG   += c++11
 
 # Uncomment if you want QPlainTextEdit used in place of QScintilla
-#DEFINES += RGM_DISABLE_SYNTAXHIGHLIGHTING
+#CONFIG += RGM_DISABLE_SYNTAXHIGHLIGHTING
 
-contains(DEFINES, RGM_DISABLE_SYNTAXHIGHLIGHTING) {
+RGM_DISABLE_SYNTAXHIGHLIGHTING {
   SOURCES += Widgets/CodeWidgetPlain.cpp
 } else {
   SOURCES += Widgets/CodeWidgetScintilla.cpp
