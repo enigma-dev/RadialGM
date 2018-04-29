@@ -56,8 +56,8 @@ void MainWindow::readSettings() {
   QSettings settings("ENIGMA Dev Team", "RadialGM");
 
   settings.beginGroup("MainWindow");
-  restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
-  restoreState(settings.value("mainWindowState").toByteArray());
+  restoreGeometry(settings.value("geometry").toByteArray());
+  restoreState(settings.value("state").toByteArray());
   settings.endGroup();
 }
 
@@ -65,8 +65,8 @@ void MainWindow::writeSettings() {
   QSettings settings("ENIGMA Dev Team", "RadialGM");
 
   settings.beginGroup("MainWindow");
-  settings.setValue("mainWindowGeometry", saveGeometry());
-  settings.setValue("mainWindowState", saveState());
+  settings.setValue("geometry", saveGeometry());
+  settings.setValue("state", saveState());
   settings.endGroup();
 }
 
