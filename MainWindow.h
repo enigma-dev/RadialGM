@@ -59,6 +59,8 @@ class MainWindow : public QMainWindow {
   buffers::Project *project;
 
   void openSubWindow(buffers::TreeNode *item);
+  void readSettings();
+  void writeSettings();
 };
 
 #endif  // MAINWINDOW_H

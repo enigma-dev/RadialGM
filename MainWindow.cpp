@@ -37,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
   ui->setupUi(this);
+  this->readSettings();
 
   ui->mdiArea->setBackground(QImage(":/banner.png"));
 
@@ -51,7 +52,28 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 MainWindow::~MainWindow() { delete ui; }
 
-void MainWindow::closeEvent(QCloseEvent *event) { event->accept(); }
+void MainWindow::readSettings() {
+  QSettings settings("ENIGMA Dev Team", "RadialGM");
+
+  settings.beginGroup("MainWindow");
+  restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
+  restoreState(settings.value("mainWindowState").toByteArray());
+  settings.endGroup();
+}
+
+void MainWindow::writeSettings() {
+  QSettings settings("ENIGMA Dev Team", "RadialGM");
+
+  settings.beginGroup("MainWindow");
+  settings.setValue("mainWindowGeometry", saveGeometry());
+  settings.setValue("mainWindowState", saveState());
+  settings.endGroup();
+}
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+  this->writeSettings();
+  event->accept();
+}
 
 template <typename T>
 T *EditorFactory(ProtoModel *model, QWidget *parent) {
