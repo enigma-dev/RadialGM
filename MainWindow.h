@@ -49,6 +49,8 @@ class MainWindow : public QMainWindow {
 
   void on_treeView_doubleClicked(const QModelIndex &index);
 
+  void on_actionClearRecentMenu_triggered();
+
  private:
   QHash<buffers::TreeNode *, ProtoModel *> resourceModels;
   QHash<buffers::TreeNode *, QMdiSubWindow *> subWindows;
@@ -58,9 +60,16 @@ class MainWindow : public QMainWindow {
 
   buffers::Project *project;
 
+  static const int MaxRecentFiles = 10;
+  QAction *recentFileActs[MaxRecentFiles];
+
   void openSubWindow(buffers::TreeNode *item);
   void readSettings();
   void writeSettings();
+  bool hasRecentFiles();
+  void prependToRecentFiles(const QString &fileName);
+  void updateRecentFileActions();
+  void openRecentFile();
 };
 
 #endif  // MAINWINDOW_H
