@@ -160,7 +160,8 @@ void MainWindow::openFile(QString fName) {
 void MainWindow::on_actionOpen_triggered() {
   const QString &fileName = QFileDialog::getOpenFileName(
       this, tr("Open Project"), "",
-      tr("GameMaker: Studio 2 Projects (*.yyp);;GameMaker: Studio Projects (*.project.gmx);;Classic "
+      tr("All supported formats (*.yyp *.project.gmx *.gm81 *.gmk *.gm6 *.gmd);;GameMaker: Studio 2 Projects "
+         "(*.yyp);;GameMaker: Studio Projects (*.project.gmx);;Classic "
          "GameMaker Files (*.gm81 *.gmk *.gm6 *.gmd);;All Files (*)"));
   if (!fileName.isEmpty()) openFile(fileName);
 }
