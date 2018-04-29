@@ -102,7 +102,8 @@ void MainWindow::updateRecentFileActions() {
   int i = 0;
   for (; i < count; ++i) {
     const QString fileName = QFileInfo(recentFiles.at(i)).fileName();
-    recentFileActs[i]->setText(tr("&%1 %2").arg(i + 1).arg(fileName));
+    QString numberString = QString::number(i + 1);
+    recentFileActs[i]->setText(numberString.insert(numberString.length() - 1, '&') + " " + fileName);
     recentFileActs[i]->setData(recentFiles.at(i));
     recentFileActs[i]->setVisible(true);
   }
