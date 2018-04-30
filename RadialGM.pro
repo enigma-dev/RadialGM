@@ -21,8 +21,14 @@ win32:RC_ICONS += images/icon.ico
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = RadialGM
+TARGET = ENIGMA
 TEMPLATE = app
+VERSION = 0.0.1
+
+QMAKE_TARGET_COMPANY = ENIGMA Dev Team
+QMAKE_TARGET_PRODUCT = ENIGMA Development Environment
+QMAKE_TARGET_DESCRIPTION = ENIGMA Development Environment
+QMAKE_TARGET_COPYRIGHT = Copyright (C) 2007-2018
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings

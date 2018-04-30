@@ -204,6 +204,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
 void MainWindow::openFile(QString fName) {
   QFileInfo fileInfo(fName);
   const QString suffix = fileInfo.suffix();
+
   if (suffix == "gm81" || suffix == "gmk" || suffix == "gm6" || suffix == "gmd") {
     project = gmk::LoadGMK(fName.toStdString());
   } else if (suffix == "gmx") {
@@ -211,6 +212,7 @@ void MainWindow::openFile(QString fName) {
   } else if (suffix == "yyp") {
     project = yyp::LoadYYP(fName.toStdString());
   }
+
   if (!project) {
     QMessageBox::critical(this, tr("Failed To Open Project"), tr("There was a problem loading the project: ") + fName,
                           QMessageBox::Ok);
