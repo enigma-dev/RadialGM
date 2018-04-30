@@ -64,7 +64,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::readSettings() {
-  QSettings settings("ENIGMA Dev Team", "RadialGM");
+  QSettings settings;
 
   settings.beginGroup("MainWindow");
   restoreGeometry(settings.value("geometry").toByteArray());
@@ -76,7 +76,7 @@ static inline QString recentFilesKey() { return QStringLiteral("recentFileList")
 static inline QString fileKey() { return QStringLiteral("file"); }
 
 bool MainWindow::hasRecentFiles() {
-  QSettings settings("ENIGMA Dev Team", "RadialGM");
+  QSettings settings;
 
   const int count = settings.beginReadArray(recentFilesKey());
   settings.endArray();
@@ -95,7 +95,7 @@ static QStringList readRecentFiles(QSettings &settings) {
 }
 
 void MainWindow::updateRecentFileActions() {
-  QSettings settings("ENIGMA Dev Team", "RadialGM");
+  QSettings settings;
 
   const QStringList recentFiles = readRecentFiles(settings);
   const int count = qMin(int(MaxRecentFiles), recentFiles.size());
@@ -121,7 +121,7 @@ static void writeRecentFiles(const QStringList &files, QSettings &settings) {
 }
 
 void MainWindow::prependToRecentFiles(const QString &fileName) {
-  QSettings settings("ENIGMA Dev Team", "RadialGM");
+  QSettings settings;
 
   const QStringList oldRecentFiles = readRecentFiles(settings);
   QStringList recentFiles = oldRecentFiles;
@@ -133,7 +133,7 @@ void MainWindow::prependToRecentFiles(const QString &fileName) {
 }
 
 void MainWindow::writeSettings() {
-  QSettings settings("ENIGMA Dev Team", "RadialGM");
+  QSettings settings;
 
   settings.beginGroup("MainWindow");
   settings.setValue("geometry", saveGeometry());
@@ -318,7 +318,7 @@ void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
 }
 
 void MainWindow::on_actionClearRecentMenu_triggered() {
-  QSettings settings("ENIGMA Dev Team", "RadialGM");
+  QSettings settings;
 
   settings.beginWriteArray(recentFilesKey());
   settings.endArray();
