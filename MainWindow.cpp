@@ -203,7 +203,6 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
 
 void MainWindow::openFile(QString fName) {
   QFileInfo fileInfo(fName);
-  this->setWindowTitle(fileInfo.fileName() + " - ENIGMA");
   const QString suffix = fileInfo.suffix();
   if (suffix == "gm81" || suffix == "gmk" || suffix == "gm6" || suffix == "gmd") {
     project = gmk::LoadGMK(fName.toStdString());
@@ -218,6 +217,7 @@ void MainWindow::openFile(QString fName) {
     return;
   }
 
+  MainWindow::setWindowTitle(fileInfo.fileName() + " - ENIGMA");
   MainWindow::prependToRecentFiles(fName);
 
   treeModel = new TreeModel(project->mutable_game()->mutable_root(), this);
