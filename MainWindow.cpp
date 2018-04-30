@@ -72,6 +72,15 @@ void MainWindow::readSettings() {
   settings.endGroup();
 }
 
+void MainWindow::writeSettings() {
+  QSettings settings;
+
+  settings.beginGroup("MainWindow");
+  settings.setValue("geometry", saveGeometry());
+  settings.setValue("state", saveState());
+  settings.endGroup();
+}
+
 static inline QString recentFilesKey() { return QStringLiteral("recentFileList"); }
 static inline QString fileKey() { return QStringLiteral("file"); }
 
@@ -130,15 +139,6 @@ void MainWindow::prependToRecentFiles(const QString &fileName) {
   if (oldRecentFiles != recentFiles) writeRecentFiles(recentFiles, settings);
 
   this->ui->menuRecent->setEnabled(!recentFiles.isEmpty());
-}
-
-void MainWindow::writeSettings() {
-  QSettings settings;
-
-  settings.beginGroup("MainWindow");
-  settings.setValue("geometry", saveGeometry());
-  settings.setValue("state", saveState());
-  settings.endGroup();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -214,8 +214,8 @@ void MainWindow::openFile(QString fName) {
   }
 
   if (!project) {
-    QMessageBox::critical(this, tr("Failed To Open Project"), tr("There was a problem loading the project: ") + fName,
-                          QMessageBox::Ok);
+    QMessageBox::warning(this, tr("Failed To Open Project"), tr("There was a problem loading the project: ") + fName,
+                         QMessageBox::Ok);
     return;
   }
 
