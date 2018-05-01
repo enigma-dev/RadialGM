@@ -38,17 +38,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   ui->setupUi(this);
   this->readSettings();
-
-  connect(ui->menuRecent, &QMenu::aboutToShow, this, &MainWindow::updateRecentFileActions);
-  for (int i = 0; i < MaxRecentFiles; ++i) {
-    recentFileActs[i] = ui->menuRecent->addAction(QString(), this, &MainWindow::openRecentFile);
-    recentFileActs[i]->setVisible(false);
-  }
-
-  ui->menuRecent->addSeparator();
-  ui->menuRecent->addAction(ui->actionClearRecentMenu);
-
-  ui->menuRecent->setEnabled(this->hasRecentFiles());
+  this->recentFiles = new RecentFiles(this, this->ui->menuRecent, this->ui->actionClearRecentMenu);
 
   ui->mdiArea->setBackground(QImage(":/banner.png"));
 
@@ -79,66 +69,6 @@ void MainWindow::writeSettings() {
   settings.setValue("geometry", saveGeometry());
   settings.setValue("state", saveState());
   settings.endGroup();
-}
-
-static inline QString recentFilesKey() { return QStringLiteral("recentFileList"); }
-static inline QString fileKey() { return QStringLiteral("file"); }
-
-bool MainWindow::hasRecentFiles() {
-  QSettings settings;
-
-  const int count = settings.beginReadArray(recentFilesKey());
-  settings.endArray();
-  return count > 0;
-}
-
-static QStringList readRecentFiles(QSettings &settings) {
-  QStringList result;
-  const int count = settings.beginReadArray(recentFilesKey());
-  for (int i = 0; i < count; ++i) {
-    settings.setArrayIndex(i);
-    result.append(settings.value(fileKey()).toString());
-  }
-  settings.endArray();
-  return result;
-}
-
-void MainWindow::updateRecentFileActions() {
-  QSettings settings;
-
-  const QStringList recentFiles = readRecentFiles(settings);
-  const int count = qMin(int(MaxRecentFiles), recentFiles.size());
-  int i = 0;
-  for (; i < count; ++i) {
-    const QString fileName = QFileInfo(recentFiles.at(i)).fileName();
-    QString numberString = QString::number(i + 1);
-    recentFileActs[i]->setText(numberString.insert(numberString.length() - 1, '&') + " " + fileName);
-    recentFileActs[i]->setData(recentFiles.at(i));
-    recentFileActs[i]->setVisible(true);
-  }
-  for (; i < MaxRecentFiles; ++i) recentFileActs[i]->setVisible(false);
-}
-
-static void writeRecentFiles(const QStringList &files, QSettings &settings) {
-  const int count = files.size();
-  settings.beginWriteArray(recentFilesKey());
-  for (int i = 0; i < count; ++i) {
-    settings.setArrayIndex(i);
-    settings.setValue(fileKey(), files.at(i));
-  }
-  settings.endArray();
-}
-
-void MainWindow::prependToRecentFiles(const QString &fileName) {
-  QSettings settings;
-
-  const QStringList oldRecentFiles = readRecentFiles(settings);
-  QStringList recentFiles = oldRecentFiles;
-  recentFiles.removeAll(fileName);
-  recentFiles.prepend(fileName);
-  if (oldRecentFiles != recentFiles) writeRecentFiles(recentFiles, settings);
-
-  this->ui->menuRecent->setEnabled(!recentFiles.isEmpty());
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -220,7 +150,7 @@ void MainWindow::openFile(QString fName) {
   }
 
   MainWindow::setWindowTitle(fileInfo.fileName() + " - ENIGMA");
-  MainWindow::prependToRecentFiles(fName);
+  recentFiles->prependFile(fName);
 
   treeModel = new TreeModel(project->mutable_game()->mutable_root(), this);
   ui->treeView->setModel(treeModel);
@@ -236,10 +166,6 @@ void MainWindow::openFile(QString fName) {
                          }
                        }
                      });
-}
-
-void MainWindow::openRecentFile() {
-  if (const QAction *action = qobject_cast<const QAction *>(sender())) openFile(action->data().toString());
 }
 
 void MainWindow::on_actionOpen_triggered() {
@@ -317,15 +243,4 @@ void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
   openSubWindow(item);
 }
 
-void MainWindow::on_actionClearRecentMenu_triggered() {
-  QSettings settings;
-
-  settings.beginWriteArray(recentFilesKey());
-  settings.endArray();
-
-  for (int i = 0; i < MaxRecentFiles; ++i) {
-    recentFileActs[i]->setVisible(false);
-  }
-
-  ui->menuRecent->setEnabled(false);
-}
+void MainWindow::on_actionClearRecentMenu_triggered() { recentFiles->clear(); }

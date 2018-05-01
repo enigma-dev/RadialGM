@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
-CONFIG   += c++11
+CONFIG   += c++14
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -73,7 +73,8 @@ SOURCES += \
     Models/ImmediateMapper.cpp \
     Components/Utility.cpp \
     Plugins/RGMPlugin.cpp \
-    Plugins/ServerPlugin.cpp
+    Plugins/ServerPlugin.cpp \
+    Components/RecentFiles.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -94,7 +95,8 @@ HEADERS += \
     Editors/BaseEditor.h \
     Plugins/RGMPlugin.h \
     Plugins/ServerPlugin.h \
-    Widgets/CodeWidget.h
+    Widgets/CodeWidget.h \
+    Components/RecentFiles.h
 
 FORMS += \
     MainWindow.ui \
