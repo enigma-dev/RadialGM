@@ -56,6 +56,7 @@ MainWindow::~MainWindow() { delete ui; }
 void MainWindow::readSettings() {
   QSettings settings;
 
+  // Restore previous window and dock widget location / state
   settings.beginGroup("MainWindow");
   restoreGeometry(settings.value("geometry").toByteArray());
   restoreState(settings.value("state").toByteArray());
@@ -65,6 +66,7 @@ void MainWindow::readSettings() {
 void MainWindow::writeSettings() {
   QSettings settings;
 
+  // Save window and dock widget location / state for next session
   settings.beginGroup("MainWindow");
   settings.setValue("geometry", saveGeometry());
   settings.setValue("state", saveState());
