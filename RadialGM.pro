@@ -67,7 +67,8 @@ SOURCES += \
     Models/ImmediateMapper.cpp \
     Components/Utility.cpp \
     Plugins/RGMPlugin.cpp \
-    Plugins/ServerPlugin.cpp
+    Plugins/ServerPlugin.cpp \
+    Editors/SoundEditor.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -88,7 +89,8 @@ HEADERS += \
     Editors/BaseEditor.h \
     Plugins/RGMPlugin.h \
     Plugins/ServerPlugin.h \
-    Widgets/CodeWidget.h
+    Widgets/CodeWidget.h \
+    Editors/SoundEditor.h
 
 FORMS += \
     MainWindow.ui \
@@ -100,7 +102,8 @@ FORMS += \
     Editors/TimelineEditor.ui \
     Editors/RoomEditor.ui \
     Dialogs/AddImageDialog.ui \
-    Editors/SpriteEditor.ui
+    Editors/SpriteEditor.ui \
+    Editors/SoundEditor.ui
 
 RESOURCES += \
     images.qrc
