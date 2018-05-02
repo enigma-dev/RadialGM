@@ -48,13 +48,13 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
 
     auto it = iconMap.find(item->type_case());
     if (it == iconMap.end()) return ArtManager::GetIcon("info");
-    return it->second;
+    const QIcon &icon = it->second;
+    if (item->type_case() == TypeCase::kFolder && item->child_size() <= 0) {
+      return icon.pixmap(QSize(18, 18), QIcon::Disabled);
+    }
+    return icon;
   } else if (role == Qt::EditRole || role == Qt::DisplayRole) {
     return QString::fromStdString(item->name());
-  } else if (role == Qt::FontRole) {
-    QFont font;
-    if (item->type_case() == TypeCase::kFolder && item->child_size()) font.setWeight(QFont::DemiBold);
-    return font;
   }
 
   return QVariant();
