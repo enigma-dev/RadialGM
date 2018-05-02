@@ -114,7 +114,21 @@
        </property>
        <property name="icon">
         <iconset resource="../images.qrc">
-         <normaloff>:/actions/run.png</normaloff>:/actions/run.png</iconset>
+         <normaloff>:/actions/play.png</normaloff>:/actions/play.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="toolButton">
+       <property name="text">
+        <string>Loop Playback</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../images.qrc">
+         <normaloff>:/actions/loop.png</normaloff>:/actions/loop.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

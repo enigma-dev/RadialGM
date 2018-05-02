@@ -34,6 +34,9 @@
         <file alias="undo.png">Images/actions/undo.png</file>
         <file alias="redo.png">Images/actions/redo.png</file>
         <file alias="volume.png">Images/actions/volume.png</file>
+        <file alias="loop.png">Images/actions/loop.png</file>
+        <file alias="pause.png">Images/actions/pause.png</file>
+        <file alias="play.png">Images/actions/play.png</file>
     </qresource>
     <qresource prefix="/resources">
         <file alias="background.png">Images/resources/background.png</file>
