@@ -41,7 +41,7 @@
      <item>
       <widget class="QLabel" name="nameLabel">
        <property name="text">
-        <string>Name</string>
+        <string>&amp;Name</string>
        </property>
        <property name="buddy">
         <cstring>nameEdit</cstring>
@@ -68,7 +68,7 @@
         <string>Load Sound</string>
        </property>
        <property name="text">
-        <string>Load</string>
+        <string>&amp;Load</string>
        </property>
        <property name="icon">
         <iconset resource="../images.qrc">
@@ -82,7 +82,7 @@
         <string>Save Sound As</string>
        </property>
        <property name="text">
-        <string>Save As</string>
+        <string>Save &amp;As</string>
        </property>
        <property name="icon">
         <iconset resource="../images.qrc">
@@ -96,7 +96,7 @@
         <string>Edit Sound Externally</string>
        </property>
        <property name="text">
-        <string>Edit</string>
+        <string>&amp;Edit</string>
        </property>
        <property name="icon">
         <iconset resource="../images.qrc">
@@ -110,7 +110,7 @@
         <string>Preview Sound</string>
        </property>
        <property name="text">
-        <string>Preview</string>
+        <string>&amp;Preview</string>
        </property>
        <property name="icon">
         <iconset resource="../images.qrc">
@@ -124,7 +124,7 @@
         <string>Loop Playback</string>
        </property>
        <property name="text">
-        <string>Loop</string>
+        <string>&amp;Loop</string>
        </property>
        <property name="icon">
         <iconset resource="../images.qrc">
@@ -138,14 +138,14 @@
      <item>
       <widget class="QCheckBox" name="compressedCheckBox">
        <property name="text">
-        <string>Compressed</string>
+        <string> &amp;Compressed</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QCheckBox" name="streamedCheckBox">
        <property name="text">
-        <string>Streamed</string>
+        <string>&amp;Streamed</string>
        </property>
       </widget>
      </item>
@@ -174,11 +174,11 @@
        <property name="toolTip">
         <string>Volume</string>
        </property>
-       <property name="text">
-        <string/>
-       </property>
        <property name="pixmap">
         <pixmap resource="../images.qrc">:/actions/volume.png</pixmap>
+       </property>
+       <property name="buddy">
+        <cstring>volumeSlider</cstring>
        </property>
       </widget>
      </item>
@@ -244,6 +244,9 @@
        <property name="pixmap">
         <pixmap resource="../images.qrc">:/events/alarm.png</pixmap>
        </property>
+       <property name="buddy">
+        <cstring>playbackSlider</cstring>
+       </property>
       </widget>
      </item>
      <item>
@@ -282,7 +285,7 @@
      <item row="1" column="0">
       <widget class="QLabel" name="outputLabel">
        <property name="text">
-        <string>Output</string>
+        <string>&amp;Output</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -328,7 +331,7 @@
      <item row="3" column="0">
       <widget class="QLabel" name="qualityLabel">
        <property name="text">
-        <string>Quality</string>
+        <string>&amp;Quality</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -341,7 +344,7 @@
      <item row="1" column="2">
       <widget class="QLabel" name="sampleRateLabel">
        <property name="text">
-        <string>Sample rate</string>
+        <string>&amp;Sample rate</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -354,7 +357,7 @@
      <item row="3" column="2">
       <widget class="QLabel" name="bitRateLabel">
        <property name="text">
-        <string>Bit rate</string>
+        <string>&amp;Bit rate</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
