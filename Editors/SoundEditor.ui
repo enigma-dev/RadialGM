@@ -36,12 +36,15 @@
    <item>
     <layout class="QHBoxLayout" name="nameLayout">
      <property name="spacing">
-      <number>2</number>
+      <number>4</number>
      </property>
      <item>
       <widget class="QLabel" name="nameLabel">
        <property name="text">
         <string>Name</string>
+       </property>
+       <property name="buddy">
+        <cstring>nameEdit</cstring>
        </property>
       </widget>
      </item>
@@ -57,7 +60,7 @@
    <item>
     <layout class="QHBoxLayout" name="actionsLayout">
      <property name="spacing">
-      <number>2</number>
+      <number>4</number>
      </property>
      <item>
       <widget class="QToolButton" name="loadButton">
@@ -146,6 +149,9 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="volumeLayout">
+     <property name="spacing">
+      <number>4</number>
+     </property>
      <item>
       <widget class="QLabel" name="volumeLabel">
        <property name="text">
@@ -158,8 +164,29 @@
      </item>
      <item>
       <widget class="QSlider" name="volumeSlider">
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="value">
+        <number>100</number>
+       </property>
+       <property name="tracking">
+        <bool>true</bool>
+       </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="invertedAppearance">
+        <bool>false</bool>
+       </property>
+       <property name="invertedControls">
+        <bool>false</bool>
+       </property>
+       <property name="tickPosition">
+        <enum>QSlider::NoTicks</enum>
+       </property>
+       <property name="tickInterval">
+        <number>0</number>
        </property>
       </widget>
      </item>
@@ -177,6 +204,9 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="playbackLayout">
+     <property name="spacing">
+      <number>4</number>
+     </property>
      <item>
       <widget class="QLabel" name="playbackLabel">
        <property name="text">
@@ -189,6 +219,12 @@
      </item>
      <item>
       <widget class="QSlider" name="playbackSlider">
+       <property name="minimum">
+        <number>0</number>
+       </property>
+       <property name="value">
+        <number>20</number>
+       </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -205,6 +241,9 @@
    </item>
    <item>
     <layout class="QGridLayout" name="targetOptionsLayout" columnstretch="0,1,0,1">
+     <property name="spacing">
+      <number>4</number>
+     </property>
      <item row="1" column="0">
       <widget class="QLabel" name="outputLabel">
        <property name="text">
@@ -212,6 +251,9 @@
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+       <property name="buddy">
+        <cstring>outputCombo</cstring>
        </property>
       </widget>
      </item>
@@ -256,6 +298,9 @@
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
+       <property name="buddy">
+        <cstring>qualityCombo</cstring>
+       </property>
       </widget>
      </item>
      <item row="1" column="2">
@@ -266,6 +311,9 @@
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
+       <property name="buddy">
+        <cstring>sampleRateCombo</cstring>
+       </property>
       </widget>
      </item>
      <item row="3" column="2">
@@ -275,6 +323,9 @@
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+       <property name="buddy">
+        <cstring>bitRateCombo</cstring>
        </property>
       </widget>
      </item>
