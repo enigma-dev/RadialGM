@@ -61,8 +61,11 @@
      </property>
      <item>
       <widget class="QToolButton" name="loadButton">
+       <property name="toolTip">
+        <string>Load Sound</string>
+       </property>
        <property name="text">
-        <string>...</string>
+        <string>Load</string>
        </property>
        <property name="icon">
         <iconset resource="../images.qrc">
@@ -72,8 +75,11 @@
      </item>
      <item>
       <widget class="QToolButton" name="saveAsButton">
+       <property name="toolTip">
+        <string>Save Sound As</string>
+       </property>
        <property name="text">
-        <string>...</string>
+        <string>Save As</string>
        </property>
        <property name="icon">
         <iconset resource="../images.qrc">
@@ -83,8 +89,11 @@
      </item>
      <item>
       <widget class="QToolButton" name="editButton">
+       <property name="toolTip">
+        <string>Edit Sound Externally</string>
+       </property>
        <property name="text">
-        <string>...</string>
+        <string>Edit</string>
        </property>
        <property name="icon">
         <iconset resource="../images.qrc">
@@ -94,8 +103,11 @@
      </item>
      <item>
       <widget class="QToolButton" name="playButton">
+       <property name="toolTip">
+        <string>Preview Sound</string>
+       </property>
        <property name="text">
-        <string>...</string>
+        <string>Preview</string>
        </property>
        <property name="icon">
         <iconset resource="../images.qrc">
