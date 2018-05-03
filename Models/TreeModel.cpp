@@ -2,8 +2,6 @@
 
 #include "Components/ArtManager.h"
 
-#include <QFont>
-
 TreeModel::TreeModel(buffers::TreeNode *root, QObject *parent) : QAbstractItemModel(parent), root(root) {
   SetupParents(root);
 }
@@ -50,7 +48,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
     if (it == iconMap.end()) return ArtManager::GetIcon("info");
     const QIcon &icon = it->second;
     if (item->type_case() == TypeCase::kFolder && item->child_size() <= 0) {
-      return icon.pixmap(QSize(18, 18), QIcon::Disabled);
+      return icon.pixmap(icon.availableSizes().first(), QIcon::Disabled);
     }
     return icon;
   } else if (role == Qt::EditRole || role == Qt::DisplayRole) {
