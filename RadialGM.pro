@@ -7,6 +7,19 @@
 QT       += core gui
 CONFIG   += c++11
 
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+win32:RC_ICONS += images/icon.ico
+
+TARGET = ENIGMA
+TEMPLATE = app
+VERSION = 0.0.0.0
+
+QMAKE_TARGET_COMPANY = ENIGMA Dev Team
+QMAKE_TARGET_PRODUCT = ENIGMA Development Environment
+QMAKE_TARGET_DESCRIPTION = ENIGMA Development Environment
+QMAKE_TARGET_COPYRIGHT = "Copyright \\251 2007-2018 ENIGMA Dev Team"
+
 # Uncomment if you want QPlainTextEdit used in place of QScintilla
 #DEFINES += RGM_DISABLE_SYNTAXHIGHLIGHTING
 
@@ -16,13 +29,6 @@ contains(DEFINES, RGM_DISABLE_SYNTAXHIGHLIGHTING) {
   SOURCES += Widgets/CodeWidgetScintilla.cpp
   CONFIG += qscintilla2
 }
-
-win32:RC_ICONS += images/icon.ico
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
-TARGET = RadialGM
-TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -67,7 +73,8 @@ SOURCES += \
     Models/ImmediateMapper.cpp \
     Components/Utility.cpp \
     Plugins/RGMPlugin.cpp \
-    Plugins/ServerPlugin.cpp
+    Plugins/ServerPlugin.cpp \
+    Components/RecentFiles.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -88,7 +95,8 @@ HEADERS += \
     Editors/BaseEditor.h \
     Plugins/RGMPlugin.h \
     Plugins/ServerPlugin.h \
-    Widgets/CodeWidget.h
+    Widgets/CodeWidget.h \
+    Components/RecentFiles.h
 
 FORMS += \
     MainWindow.ui \

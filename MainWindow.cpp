@@ -16,7 +16,9 @@
 #include "Plugins/RGMPlugin.h"
 #include "Plugins/ServerPlugin.h"
 
+#include "gmk.h"
 #include "gmx.h"
+#include "yyp.h"
 
 #include "resources/Background.pb.h"
 
@@ -35,6 +37,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
   ui->setupUi(this);
+  this->readSettings();
+  this->recentFiles = new RecentFiles(this, this->ui->menuRecent, this->ui->actionClearRecentMenu);
 
   ui->mdiArea->setBackground(QImage(":/banner.png"));
 
@@ -49,7 +53,30 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 MainWindow::~MainWindow() { delete ui; }
 
-void MainWindow::closeEvent(QCloseEvent *event) { event->accept(); }
+void MainWindow::readSettings() {
+  QSettings settings;
+
+  // Restore previous window and dock widget location / state
+  settings.beginGroup("MainWindow");
+  restoreGeometry(settings.value("geometry").toByteArray());
+  restoreState(settings.value("state").toByteArray());
+  settings.endGroup();
+}
+
+void MainWindow::writeSettings() {
+  QSettings settings;
+
+  // Save window and dock widget location / state for next session
+  settings.beginGroup("MainWindow");
+  settings.setValue("geometry", saveGeometry());
+  settings.setValue("state", saveState());
+  settings.endGroup();
+}
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+  this->writeSettings();
+  event->accept();
+}
 
 template <typename T>
 T *EditorFactory(ProtoModel *model, QWidget *parent) {
@@ -108,8 +135,25 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
 
 void MainWindow::openFile(QString fName) {
   QFileInfo fileInfo(fName);
-  this->setWindowTitle(fileInfo.fileName() + " - ENIGMA");
-  project = gmx::LoadGMX(fName.toStdString());
+  const QString suffix = fileInfo.suffix();
+
+  if (suffix == "gm81" || suffix == "gmk" || suffix == "gm6" || suffix == "gmd") {
+    project = gmk::LoadGMK(fName.toStdString());
+  } else if (suffix == "gmx") {
+    project = gmx::LoadGMX(fName.toStdString());
+  } else if (suffix == "yyp") {
+    project = yyp::LoadYYP(fName.toStdString());
+  }
+
+  if (!project) {
+    QMessageBox::warning(this, tr("Failed To Open Project"), tr("There was a problem loading the project: ") + fName,
+                         QMessageBox::Ok);
+    return;
+  }
+
+  MainWindow::setWindowTitle(fileInfo.fileName() + " - ENIGMA");
+  recentFiles->prependFile(fName);
+
   treeModel = new TreeModel(project->mutable_game()->mutable_root(), this);
   ui->treeView->setModel(treeModel);
   treeModel->connect(treeModel, &QAbstractItemModel::dataChanged,
@@ -127,8 +171,11 @@ void MainWindow::openFile(QString fName) {
 }
 
 void MainWindow::on_actionOpen_triggered() {
-  const QString &fileName = QFileDialog::getOpenFileName(this, tr("Open Project"), "",
-                                                         tr("GameMaker: Studio (*.project.gmx);;All Files (*)"));
+  const QString &fileName = QFileDialog::getOpenFileName(
+      this, tr("Open Project"), "",
+      tr("All supported formats (*.yyp *.project.gmx *.gm81 *.gmk *.gm6 *.gmd);;GameMaker: Studio 2 Projects "
+         "(*.yyp);;GameMaker: Studio Projects (*.project.gmx);;Classic "
+         "GameMaker Files (*.gm81 *.gmk *.gm6 *.gmd);;All Files (*)"));
   if (!fileName.isEmpty()) openFile(fileName);
 }
 
@@ -197,3 +244,5 @@ void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
 
   openSubWindow(item);
 }
+
+void MainWindow::on_actionClearRecentMenu_triggered() { recentFiles->clear(); }
