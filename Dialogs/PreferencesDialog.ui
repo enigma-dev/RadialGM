@@ -131,8 +131,14 @@
           <number>0</number>
          </property>
          <widget class="QWidget" name="generalPage">
-          <layout class="QVBoxLayout" name="verticalLayout_3">
-           <property name="spacing">
+          <layout class="QFormLayout" name="formLayout_2">
+           <property name="labelAlignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="horizontalSpacing">
+            <number>4</number>
+           </property>
+           <property name="verticalSpacing">
             <number>4</number>
            </property>
            <property name="leftMargin">
@@ -147,24 +153,44 @@
            <property name="bottomMargin">
             <number>0</number>
            </property>
-           <item>
-            <widget class="QTabWidget" name="tabWidget">
-             <property name="autoFillBackground">
-              <bool>false</bool>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="documentationLineEdit"/>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="websiteLineEdit"/>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLineEdit" name="communityLineEdit"/>
+           </item>
+           <item row="3" column="1">
+            <widget class="QLineEdit" name="submitIssueLineEdit"/>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="documentationLabel">
+             <property name="text">
+              <string>Documentation URI</string>
              </property>
-             <property name="usesScrollButtons">
-              <bool>true</bool>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="websiteLabel">
+             <property name="text">
+              <string>Website URI</string>
              </property>
-             <widget class="QWidget" name="tab">
-              <attribute name="title">
-               <string>Tab 1</string>
-              </attribute>
-             </widget>
-             <widget class="QWidget" name="tab_2">
-              <attribute name="title">
-               <string>Tab 2</string>
-              </attribute>
-             </widget>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="communityLabel">
+             <property name="text">
+              <string>Community URI</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="submitIssueLabel">
+             <property name="text">
+              <string>Submit Issue URI</string>
+             </property>
             </widget>
            </item>
           </layout>
@@ -227,6 +253,45 @@
                <bold>false</bold>
               </font>
              </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="editorsPage">
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <property name="spacing">
+            <number>4</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QTabWidget" name="tabWidget">
+             <property name="autoFillBackground">
+              <bool>false</bool>
+             </property>
+             <property name="usesScrollButtons">
+              <bool>true</bool>
+             </property>
+             <widget class="QWidget" name="tab">
+              <attribute name="title">
+               <string>Tab 1</string>
+              </attribute>
+             </widget>
+             <widget class="QWidget" name="tab_2">
+              <attribute name="title">
+               <string>Tab 2</string>
+              </attribute>
+             </widget>
             </widget>
            </item>
           </layout>

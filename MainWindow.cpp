@@ -201,22 +201,33 @@ void MainWindow::on_actionNext_triggered() { ui->mdiArea->activateNextSubWindow(
 void MainWindow::on_actionPrevious_triggered() { ui->mdiArea->activatePreviousSubWindow(); }
 
 void MainWindow::on_actionDocumentation_triggered() {
-  QUrl documentationURL("https://enigma-dev.org/docs/Wiki/Main_Page", QUrl::TolerantMode);
+  QSettings settings;
+  const QString &documentationURI =
+      settings.value("Preferences/General/documentationURI", "https://enigma-dev.org/docs/Wiki/Main_Page").toString();
+  QUrl documentationURL(documentationURI, QUrl::TolerantMode);
   QDesktopServices::openUrl(documentationURL);
 }
 
 void MainWindow::on_actionWebsite_triggered() {
-  QUrl websiteURL("https://enigma-dev.org", QUrl::TolerantMode);
+  QSettings settings;
+  const QString &websiteURI = settings.value("Preferences/General/websiteURI", "https://enigma-dev.org").toString();
+  QUrl websiteURL(websiteURI, QUrl::TolerantMode);
   QDesktopServices::openUrl(websiteURL);
 }
 
 void MainWindow::on_actionCommunity_triggered() {
-  QUrl communityURL("https://enigma-dev.org/forums/", QUrl::TolerantMode);
+  QSettings settings;
+  const QString &communityURI =
+      settings.value("Preferences/General/communityURI", "https://enigma-dev.org/forums/").toString();
+  QUrl communityURL(communityURI, QUrl::TolerantMode);
   QDesktopServices::openUrl(communityURL);
 }
 
 void MainWindow::on_actionSubmitIssue_triggered() {
-  QUrl submitIssueURL("https://github.com/enigma-dev/RadialGM/issues", QUrl::TolerantMode);
+  QSettings settings;
+  const QString &submitIssueURI =
+      settings.value("Preferences/General/submitIssueURI", "https://github.com/enigma-dev/RadialGM/issues").toString();
+  QUrl submitIssueURL(submitIssueURI, QUrl::TolerantMode);
   QDesktopServices::openUrl(submitIssueURL);
 }
 

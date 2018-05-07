@@ -22,11 +22,19 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) : QDialog(parent), ui(new 
 PreferencesDialog::~PreferencesDialog() { delete ui; }
 
 static inline QString preferencesKey() { return QStringLiteral("Preferences"); }
+static inline QString generalKey() { return QStringLiteral("General"); }
 static inline QString appearanceKey() { return QStringLiteral("Appearance"); }
 
 void PreferencesDialog::apply() {
   QSettings settings;
   settings.beginGroup(preferencesKey());
+
+  settings.beginGroup(generalKey());
+  settings.setValue("documentationURI", ui->documentationLineEdit->text());
+  settings.setValue("websiteURI", ui->websiteLineEdit->text());
+  settings.setValue("communityURI", ui->communityLineEdit->text());
+  settings.setValue("submitIssueURI", ui->submitIssueLineEdit->text());
+  settings.endGroup();  // Preferences/General
 
   settings.beginGroup(appearanceKey());
   const QString &styleName = ui->styleCombo->currentText();
@@ -39,6 +47,20 @@ void PreferencesDialog::apply() {
 }
 
 void PreferencesDialog::reset() {
+  QSettings settings;
+  settings.beginGroup(preferencesKey());
+
+  settings.beginGroup(generalKey());
+  ui->documentationLineEdit->setText(
+      settings.value("documentationURI", "https://enigma-dev.org/docs/Wiki/Main_Page").toString());
+  ui->websiteLineEdit->setText(settings.value("websiteURI", "https://enigma-dev.org").toString());
+  ui->communityLineEdit->setText(settings.value("communityURI", "https://enigma-dev.org/forums/").toString());
+  ui->submitIssueLineEdit->setText(
+      settings.value("submitIssueURI", "https://github.com/enigma-dev/RadialGM/issues").toString());
+  settings.endGroup();  // Preferences/General
+
+  settings.endGroup();  // Preferences
+
   foreach (QString styleName, QStyleFactory::keys()) {
     if (style()->objectName().toLower() == styleName.toLower()) ui->styleCombo->setCurrentText(styleName);
   }
