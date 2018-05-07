@@ -1,6 +1,7 @@
 #ifndef PREFERENCESDIALOG_H
 #define PREFERENCESDIALOG_H
 
+#include <QAbstractButton>
 #include <QDialog>
 
 namespace Ui {
@@ -15,10 +16,17 @@ class PreferencesDialog : public QDialog {
   ~PreferencesDialog();
 
  private slots:
-  void on_styleCombo_activated(const QString &styleName);
+  void applyClicked();
+  void restoreDefaultsClicked();
+
+  void on_PreferencesDialog_accepted();
+  void on_PreferencesDialog_rejected();
 
  private:
   Ui::PreferencesDialog *ui;
+
+  void apply();
+  void reset();
 };
 
 #endif  // PREFERENCESDIALOG_H
