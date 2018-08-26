@@ -4,7 +4,7 @@
 
 #include "ServerPlugin.h"
 
-#include "server.grpc.pb.h"
+#include "codegen/server.grpc.pb.h"
 
 #include <QDebug>
 #include <QFileDialog>
