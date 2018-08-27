@@ -38,7 +38,7 @@ for:
       - platform: x86
   environment:
     # TODO: change to GitHub releases
-    DEPSURL: https://ci.appveyor.com/api/buildjobs/uw0lf6xbgwkfp443/artifacts/rgmdeps-x86.zip
+    DEPSURL: https://ci.appveyor.com/api/buildjobs/p137pn8p9m1qfxfe/artifacts/rgmdeps-x86.zip
   init:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
 - matrix:
