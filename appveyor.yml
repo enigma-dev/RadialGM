@@ -1,0 +1,45 @@
+# branches to build
+branches:
+  # whitelist
+  only:
+    - master
+
+# Build worker image (VM template)
+image: Visual Studio 2017
+
+# fetch repository as zip archive for faster clone
+shallow_clone: true
+clone_depth: 1
+
+platform:
+  - x86
+  - x64
+
+for:
+- matrix:
+    only:
+      - platform: x64
+  init:
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+- matrix:
+    only:
+      - platform: x86
+  init:
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
+
+install:
+
+artifacts:
+  - path: RadialGM-Win32-$(PLATFORM).zip
+    name: RadialGM-Win32-$(PLATFORM)
+
+deploy:
+  release: RadialGM-v$(appveyor_build_version)
+  provider: GitHub
+  auth_token:
+    secure: $(bot_push_on_green_token)
+  artifact: RadialGM-Win32-$(PLATFORM)
+  draft: false
+  prerelease: false
+  on:
+    branch: master
