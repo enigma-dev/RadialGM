@@ -46,6 +46,7 @@ for:
 
 install:
   - git submodule update --init --recursive
+  - vcpkg install protobuf:%TRIPLET_NAME%
   - appveyor DownloadFile %DEPSURL% -FileName vcpkgdeps.zip
   - 7z e -mmt vcpkgdeps.zip -y -o%VCPKG_DIR%\installed\%TRIPLET_NAME%
 
