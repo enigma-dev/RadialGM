@@ -50,7 +50,7 @@ for:
 install:
   - echo %DEPSURL%
   - appveyor DownloadFile %DEPSURL% -FileName vcpkgdeps.zip
-  - 7z e -mmt vcpkgdeps.zip -oC:\tools\vcpkg\installed\%TRIPLET_NAME%
+  - 7z e -mmt vcpkgdeps.zip -y -oC:\tools\vcpkg\installed\%TRIPLET_NAME%
 
 build_script:
   - mkdir enigma-dev/CommandLine/protos/build
