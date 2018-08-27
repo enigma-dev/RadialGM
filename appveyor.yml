@@ -8,10 +8,6 @@ branches:
 # Build worker image (VM template)
 image: Visual Studio 2017
 
-# fetch repository as zip archive for faster clone
-shallow_clone: true
-clone_depth: 1
-
 platform:
   - x86
   - x64
@@ -48,11 +44,11 @@ for:
     BUILD_TYPE: MinSizeRel
 
 install:
+  - git submodule update --init --recursive
   - appveyor DownloadFile %DEPSURL% -FileName vcpkgdeps.zip
   - 7z e -mmt vcpkgdeps.zip -y -oC:\tools\vcpkg\installed\%TRIPLET_NAME%
 
 build_script:
-  - git submodule init --recursive
   #- mkdir enigma-dev\CommandLine\protos\build
   - cd %APPVEYOR_BUILD_FOLDER%\Submodules\enigma-dev\CommandLine\protos
   - cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -Dprotobuf_generate_IMPORT_DIRS="C:\vcpkg\installed\%TRIPLET_NAME%\include" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="C:\vcpkg\scripts\buildsystems\vcpkg.cmake"
