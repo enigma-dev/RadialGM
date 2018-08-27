@@ -46,9 +46,9 @@ for:
 
 install:
   - git submodule update --init --recursive
-  - vcpkg install protobuf:%TRIPLET_NAME%
   - appveyor DownloadFile %DEPSURL% -FileName vcpkgdeps.zip
   - 7z e -mmt vcpkgdeps.zip -y -o%VCPKG_DIR%\installed\%TRIPLET_NAME%
+  - vcpkg install protobuf:%TRIPLET_NAME%
 
 build_script:
   #- mkdir enigma-dev\CommandLine\protos\build
