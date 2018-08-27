@@ -48,24 +48,23 @@ for:
     BUILD_TYPE: MinSizeRel
 
 install:
-  - cd %APPVEYOR_BUILD_FOLDER%
   - appveyor DownloadFile %DEPSURL% -FileName vcpkgdeps.zip
   - 7z e -mmt vcpkgdeps.zip -y -oC:\tools\vcpkg\installed\%TRIPLET_NAME%
 
 build_script:
-  - mkdir enigma-dev/CommandLine/protos/build
-  - cd enigma-dev/CommandLine/protos/build
+  - mkdir enigma-dev\CommandLine\protos\build
+  - cd enigma-dev\CommandLine\protos\build
   - cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -Dprotobuf_generate_IMPORT_DIRS="C:\vcpkg\installed\%TRIPLET_NAME%\include" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="C:\vcpkg\scripts\buildsystems\vcpkg.cmake" ..
   - cmake --build . --target install --config %BUILD_TYPE%
-  - mkdir enigma-dev/CommandLine/libEGM/build
-  - cd enigma-dev/CommandLine/libEGM/build
+  - mkdir enigma-dev\CommandLine\libEGM\build
+  - cd enigma-dev\CommandLine\libEGM\build
   - cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="C:\vcpkg\scripts\buildsystems\vcpkg.cmake" ..
   - cmake --build . --target install --config %BUILD_TYPE%
-  - mkdir RadialGM/build
-  - cd RadialGM/build
+  - mkdir RadialGM\build
+  - cd RadialGM\build
   - cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="C:\vcpkg\scripts\buildsystems\vcpkg.cmake" ..
   - cmake --build . --target ALL_BUILD --config %BUILD_TYPE%
-  - appveyor PushArtifact %BUILD_TYPE%/RadialGM.exe -FileName RadialGM-Win32-$(CONFIGURATION)-$(PLATFORM).exe -DeploymentName RadialGM
+  - appveyor PushArtifact %BUILD_TYPE%\RadialGM.exe -FileName RadialGM-Win32-$(CONFIGURATION)-$(PLATFORM).exe -DeploymentName RadialGM
 
 deploy:
   release: RadialGM-v$(appveyor_build_version)
