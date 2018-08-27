@@ -48,7 +48,8 @@ for:
     BUILD_TYPE: MinSizeRel
 
 install:
-  - appveyor DownloadFile $DEPSURL -FileName vcpkgdeps.zip
+  - echo $(DEPSURL)
+  - appveyor DownloadFile $(DEPSURL) -FileName vcpkgdeps.zip
   - 7z e -mmt vcpkgdeps.zip -oC:\tools\vcpkg\installed\$(TRIPLET_NAME)
 
 build_script:
