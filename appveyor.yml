@@ -17,6 +17,7 @@ configuration:
   - Release
 
 environment:
+  VCPKG_DIR: C:\tools\vcpkg
   TRIPLET_NAME: $(PLATFORM)-windows-static
   BUILD_TYPE: Debug
 
@@ -46,20 +47,20 @@ for:
 install:
   - git submodule update --init --recursive
   - appveyor DownloadFile %DEPSURL% -FileName vcpkgdeps.zip
-  - 7z e -mmt vcpkgdeps.zip -y -oC:\tools\vcpkg\installed\%TRIPLET_NAME%
+  - 7z e -mmt vcpkgdeps.zip -y -o%VCPKG_DIR%\installed\%TRIPLET_NAME%
 
 build_script:
   #- mkdir enigma-dev\CommandLine\protos\build
   - cd %APPVEYOR_BUILD_FOLDER%\Submodules\enigma-dev\CommandLine\protos
-  - cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -Dprotobuf_generate_IMPORT_DIRS="C:\vcpkg\installed\%TRIPLET_NAME%\include" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="C:\vcpkg\scripts\buildsystems\vcpkg.cmake"
+  - cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -Dprotobuf_generate_IMPORT_DIRS="%VCPKG_DIR%\installed\%TRIPLET_NAME%\include" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake"
   - cmake --build . --target install --config %BUILD_TYPE%
   #- mkdir enigma-dev\CommandLine\libEGM\build
   - cd %APPVEYOR_BUILD_FOLDER%\Submodules\enigma-dev\CommandLine\libEGM
-  - cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="C:\vcpkg\scripts\buildsystems\vcpkg.cmake"
+  - cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake"
   - cmake --build . --target install --config %BUILD_TYPE%
   #- mkdir RadialGM\build
   - cd %APPVEYOR_BUILD_FOLDER%
-  - cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="C:\vcpkg\scripts\buildsystems\vcpkg.cmake"
+  - cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake"
   - cmake --build . --target ALL_BUILD --config %BUILD_TYPE%
   - appveyor PushArtifact bin\%BUILD_TYPE%\RadialGM.exe -FileName RadialGM-Win32-$(CONFIGURATION)-$(PLATFORM).exe -DeploymentName RadialGM
 
