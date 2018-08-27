@@ -16,41 +16,64 @@ platform:
   - x86
   - x64
 
+configuration:
+  - Debug
+  - Release
+
+environment:
+  TRIPLET_NAME: $(PLATFORM)-windows-static
+  BUILD_TYPE: Debug
+
 for:
 - matrix:
     only:
       - platform: x64
-      # TODO: change to GitHub releases
-      - depsurl: https://ci.appveyor.com/api/buildjobs/xrs6idr9f2grmmy8/artifacts/rgmdeps-x64.zip
+  environment:
+    # TODO: change to GitHub releases
+    DEPSURL: https://ci.appveyor.com/api/buildjobs/xrs6idr9f2grmmy8/artifacts/rgmdeps-x64.zip
   init:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 - matrix:
     only:
       - platform: x86
-      # TODO: change to GitHub releases
-      - depsurl: https://ci.appveyor.com/api/buildjobs/uw0lf6xbgwkfp443/artifacts/rgmdeps-x86.zip
+  environment:
+    # TODO: change to GitHub releases
+    DEPSURL: https://ci.appveyor.com/api/buildjobs/uw0lf6xbgwkfp443/artifacts/rgmdeps-x86.zip
   init:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
+- matrix:
+    only:
+      - configuration: Release
+  environment:
+    BUILD_TYPE: MinSizeRel
 
 install:
   - cd C:\tools\vcpkg\installed
-  - appveyor DownloadFile $depsurl -FileName vcpkgdeps.zip
-  - 7z e -mmt vcpkgdeps.zip -o$(PLATFORM)-windows-static
+  - appveyor DownloadFile $DEPSURL -FileName vcpkgdeps.zip
+  - 7z e -mmt vcpkgdeps.zip -o$(TRIPLET_NAME)
   - cd %APPVEYOR_BUILD_FOLDER%
 
 build_script:
-  - echo Hello Build!
-
-artifacts:
-  - path: RadialGM-Win32-$(PLATFORM).zip
-    name: RadialGM-Win32-$(PLATFORM)
+  - mkdir enigma-dev/CommandLine/protos/build
+  - cd enigma-dev/CommandLine/protos/build
+  - cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) -Dprotobuf_generate_IMPORT_DIRS="C:\vcpkg\installed\$(TRIPLET_NAME)\include" -DVCPKG_TARGET_TRIPLET=$(TRIPLET_NAME) -DCMAKE_TOOLCHAIN_FILE="C:\vcpkg\scripts\buildsystems\vcpkg.cmake" ..
+  - cmake --build . --target install --config $(BUILD_TYPE)
+  - mkdir enigma-dev/CommandLine/libEGM/build
+  - cd enigma-dev/CommandLine/libEGM/build
+  - cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) -DVCPKG_TARGET_TRIPLET=$(TRIPLET_NAME) -DCMAKE_TOOLCHAIN_FILE="C:\vcpkg\scripts\buildsystems\vcpkg.cmake" ..
+  - cmake --build . --target install --config $(BUILD_TYPE)
+  - mkdir RadialGM/build
+  - cd RadialGM/build
+  - cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) -DVCPKG_TARGET_TRIPLET=$(TRIPLET_NAME) -DCMAKE_TOOLCHAIN_FILE="C:\vcpkg\scripts\buildsystems\vcpkg.cmake" ..
+  - cmake --build . --target ALL_BUILD --config $(BUILD_TYPE)
+  - appveyor PushArtifact $(BUILD_TYPE)/RadialGM.exe -FileName RadialGM-Win32-$(CONFIGURATION)-$(PLATFORM).exe -DeploymentName RadialGM
 
 deploy:
   release: RadialGM-v$(appveyor_build_version)
   provider: GitHub
   auth_token:
     secure: $(bot_push_on_green_token)
-  artifact: RadialGM-Win32-$(PLATFORM)
+  artifact: RadialGM
   draft: false
   prerelease: false
   on:
