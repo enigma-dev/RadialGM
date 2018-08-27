@@ -48,10 +48,8 @@ for:
     BUILD_TYPE: MinSizeRel
 
 install:
-  - cd C:\tools\vcpkg\installed
   - appveyor DownloadFile $DEPSURL -FileName vcpkgdeps.zip
-  - 7z e -mmt vcpkgdeps.zip -o$(TRIPLET_NAME)
-  - cd %APPVEYOR_BUILD_FOLDER%
+  - 7z e -mmt vcpkgdeps.zip -oC:\tools\vcpkg\installed\$(TRIPLET_NAME)
 
 build_script:
   - mkdir enigma-dev/CommandLine/protos/build
