@@ -1,4 +1,5 @@
-# branches to build
+# don't build "feature" branches
+skip_branch_with_pr: true
 branches:
   # whitelist
   only:
@@ -19,15 +20,26 @@ for:
 - matrix:
     only:
       - platform: x64
+      # TODO: change to GitHub releases
+      - depsurl: https://ci.appveyor.com/api/buildjobs/xrs6idr9f2grmmy8/artifacts/rgmdeps-x64.zip
   init:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 - matrix:
     only:
       - platform: x86
+      # TODO: change to GitHub releases
+      - depsurl: https://ci.appveyor.com/api/buildjobs/uw0lf6xbgwkfp443/artifacts/rgmdeps-x86.zip
   init:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
 
 install:
+  - cd C:\tools\vcpkg\installed
+  - appveyor DownloadFile $depsurl -FileName vcpkgdeps.zip
+  - 7z e -mmt vcpkgdeps.zip -o$(PLATFORM)-windows-static
+  - cd %APPVEYOR_BUILD_FOLDER%
+
+build_script:
+  - echo Hello Build!
 
 artifacts:
   - path: RadialGM-Win32-$(PLATFORM).zip
