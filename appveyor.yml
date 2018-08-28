@@ -8,6 +8,10 @@ branches:
 # Build worker image (VM template)
 image: Visual Studio 2017
 
+# since we're pushing releases we don't want infinite recursion
+# because the release pushes a tag, hence we aren't building on tags
+skip_tags: true
+
 platform:
   - x86
   - x64
@@ -25,17 +29,11 @@ for:
 - matrix:
     only:
       - platform: x64
-  environment:
-    # TODO: change to GitHub releases
-    DEPSURL: https://ci.appveyor.com/api/buildjobs/xrs6idr9f2grmmy8/artifacts/rgmdeps-x64.zip
   init:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 - matrix:
     only:
       - platform: x86
-  environment:
-    # TODO: change to GitHub releases
-    DEPSURL: https://ci.appveyor.com/api/buildjobs/p137pn8p9m1qfxfe/artifacts/rgmdeps-x86.zip
   init:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
 - matrix:
@@ -45,10 +43,23 @@ for:
     BUILD_TYPE: MinSizeRel
 
 install:
-  - git submodule update --init --recursive
+  #- git submodule update --init --recursive
+  - ps: |
+      # this gets the latest release of RadialGM-deps using GitHub API
+      $apiURL = "https://api.github.com/repos/enigma-dev/radialgm-deps/releases/latest"
+      $latest = Invoke-RestMethod -Method Get -Uri $apiURL
+      # find the asset whose name matches the architecture of this build
+      foreach ($asset in $latest.assets) {
+        Write-Host $asset.name
+      }
+
+      # download and extract the previous deps so we can amend them
+      #$artifactsURL = "https://ci.appveyor.com/api/buildjobs/$archive_job/artifacts/"
+      #appveyor DownloadFile ($artifactsURL + $env:ARTIFACT_NAME) -FileName $env:ARTIFACT_NAME
+      #7z e -mmt $env:ARTIFACT_NAME C:\tools\vcpkg\installed\$env:TRIPLET
+  - exit 1
   - appveyor DownloadFile %DEPSURL% -FileName vcpkgdeps.zip
   - 7z e -mmt vcpkgdeps.zip -y -o%VCPKG_DIR%\installed\%TRIPLET_NAME%
-  - vcpkg install protobuf:%TRIPLET_NAME%
 
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%\Submodules\enigma-dev\CommandLine\protos
