@@ -49,21 +49,22 @@ install:
       $apiURL = "https://api.github.com/repos/enigma-dev/radialgm-deps/releases/latest"
       $latest = Invoke-RestMethod -Method Get -Uri $apiURL
       # find the asset whose name matches the architecture of this build
+      $depsName = "rgmdeps-$env:platform.zip"
       foreach ($asset in $latest.assets) {
         Write-Host $asset.name
-        if ($asset.name -eq "rgmdeps-$env:platform.zip") {
-          $assetURL = $asset.browser_download_url
+        if ($asset.name -eq $depsName) {
+          $depsURL = $asset.browser_download_url
           break
         }
       }
-      Write-Host $assetURL
+      Write-Host $depsURL
 
-      # download and extract the previous deps so we can amend them
-      #appveyor DownloadFile ($artifactsURL + $env:ARTIFACT_NAME) -FileName $env:ARTIFACT_NAME
-      #7z e -mmt $env:ARTIFACT_NAME C:\tools\vcpkg\installed\$env:TRIPLET
+      # download and extract the deps matching this job's architecture
+      appveyor DownloadFile $depsURL -FileName $depsName
+      7z e -mmt $depsName C:\tools\vcpkg\installed\$env:TRIPLET
   - exit 1
-  - appveyor DownloadFile %DEPSURL% -FileName vcpkgdeps.zip
-  - 7z e -mmt vcpkgdeps.zip -y -o%VCPKG_DIR%\installed\%TRIPLET_NAME%
+  #- appveyor DownloadFile %DEPSURL% -FileName vcpkgdeps.zip
+  #- 7z e -mmt vcpkgdeps.zip -y -o%VCPKG_DIR%\installed\%TRIPLET_NAME%
 
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%\Submodules\enigma-dev\CommandLine\protos
