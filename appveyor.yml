@@ -51,10 +51,14 @@ install:
       # find the asset whose name matches the architecture of this build
       foreach ($asset in $latest.assets) {
         Write-Host $asset.name
+        if ($asset.name -eq "rgmdeps-$env:platform.zip") {
+          $assetURL = $asset.browser_download_url
+          break
+        }
       }
+      Write-Host $assetURL
 
       # download and extract the previous deps so we can amend them
-      #$artifactsURL = "https://ci.appveyor.com/api/buildjobs/$archive_job/artifacts/"
       #appveyor DownloadFile ($artifactsURL + $env:ARTIFACT_NAME) -FileName $env:ARTIFACT_NAME
       #7z e -mmt $env:ARTIFACT_NAME C:\tools\vcpkg\installed\$env:TRIPLET
   - exit 1
