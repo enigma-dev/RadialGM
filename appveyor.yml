@@ -76,7 +76,7 @@ build_script:
   - mkdir build && cd build
   - cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
   - cmake --build . --target ALL_BUILD --config %BUILD_TYPE%
-  - appveyor PushArtifact bin\%BUILD_TYPE%\RadialGM.exe -FileName RadialGM-Win32-$(CONFIGURATION)-$(PLATFORM).exe -DeploymentName RadialGM
+  - appveyor PushArtifact %BUILD_TYPE%\RadialGM.exe -FileName RadialGM-Win32-$(CONFIGURATION)-$(PLATFORM).exe -DeploymentName RadialGM
 
 deploy:
   release: RadialGM-v$(appveyor_build_version)
