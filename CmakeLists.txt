@@ -210,4 +210,4 @@ find_library(LIB_DOUBLE_CONVERSION NAMES double-conversion)
 target_link_libraries(${EXE} PRIVATE ${LIB_DOUBLE_CONVERSION})
 
 # Windows is a turd
-target_link_libraries(${EXE} PRIVATE Ws2_32 Wldap32 Crypt32 Winmm Userenv Netapi32 Mincore Dwmapi Imm32)
+target_link_libraries(${EXE} PRIVATE Ws2_32 Wldap32 Crypt32 Winmm Userenv Netapi32 version Dwmapi Imm32)
