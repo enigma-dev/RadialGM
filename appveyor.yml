@@ -61,7 +61,7 @@ install:
 
       # download and extract the deps matching this job's architecture
       appveyor DownloadFile $depsURL -FileName $depsName
-      7z e -mmt $depsName C:\tools\vcpkg\installed\$env:TRIPLET
+      7z x -mmt $depsName -oC:\tools\vcpkg
 
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%\Submodules\enigma-dev\CommandLine\protos
