@@ -17,36 +17,37 @@ platform:
   - x64
 
 configuration:
-  - Debug
   - Release
+  - Debug
 
 environment:
   VCPKG_DIR: C:\tools\vcpkg
   TRIPLET_NAME: $(PLATFORM)-windows-static
   BUILD_TYPE: Debug
+  GENERATOR: "Visual Studio 15 2017"
+
+init:
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
 
 for:
-- matrix:
-    only:
-      - platform: x64
-  init:
-  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
-  environment:
-    GENERATOR: "Visual Studio 15 2017 Win64"
-- matrix:
-    only:
-      - platform: x86
-  init:
-  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
-  environment:
-    GENERATOR: "Visual Studio 15 2017"
-- matrix:
-    only:
-      - configuration: Release
-  environment:
-    BUILD_TYPE: MinSizeRel
+  # override build type for release
+  - matrix:
+      only:
+        - configuration: Release
+    environment:
+      BUILD_TYPE: MinSizeRel
+  - matrix:
+      only:
+        - platform: x64
+    # override init and generator name for x64
+    init:
+      - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+    environment:
+      GENERATOR: "Visual Studio 15 2017 Win64"
 
 install:
+  - echo %BUILD_TYPE%
+  - exit 1
   - git submodule update --init --recursive
   - ps: |
       # this gets the latest release of RadialGM-deps using GitHub API
@@ -70,16 +71,16 @@ install:
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%\Submodules\enigma-dev\CommandLine\protos
   - mkdir build && cd build
-  - cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -Dprotobuf_generate_IMPORT_DIRS="%VCPKG_DIR%\installed\%TRIPLET_NAME%\include" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
-  - cmake --build . --target install --config %BUILD_TYPE%
+  - cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" -Dprotobuf_generate_IMPORT_DIRS="%VCPKG_DIR%\installed\%TRIPLET_NAME%\include" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
+  - cmake --build . --target install --config "%BUILD_TYPE%"
   - cd %APPVEYOR_BUILD_FOLDER%\Submodules\enigma-dev\CommandLine\libEGM
   - mkdir build && cd build
-  - cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
-  - cmake --build . --target install --config %BUILD_TYPE%
+  - cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
+  - cmake --build . --target install --config "%BUILD_TYPE%"
   - cd %APPVEYOR_BUILD_FOLDER%
   - mkdir build && cd build
-  - cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
-  - cmake --build . --target ALL_BUILD --config %BUILD_TYPE%
+  - cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
+  - cmake --build . --target ALL_BUILD --config "%BUILD_TYPE%"
   - appveyor PushArtifact %BUILD_TYPE%\RadialGM.exe -FileName RadialGM-Win32-%CONFIGURATION%-%PLATFORM%.exe -DeploymentName RadialGM
 
 deploy:
