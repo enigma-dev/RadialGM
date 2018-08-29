@@ -2,3 +2,4 @@
 // the static build of RadialGM that uses CMake
 #include <QtPlugin>
 Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin);
+Q_IMPORT_PLUGIN(QWindowsVistaStylePlugin);
