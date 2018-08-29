@@ -17,8 +17,8 @@ platform:
   - x64
 
 configuration:
-  - Release
   - Debug
+  - Release
 
 environment:
   VCPKG_DIR: C:\tools\vcpkg
@@ -39,8 +39,6 @@ init:
       }
 
 install:
-  - echo %BUILD_TYPE%
-  - exit 1
   - git submodule update --init --recursive
   - ps: |
       # this gets the latest release of RadialGM-deps using GitHub API
