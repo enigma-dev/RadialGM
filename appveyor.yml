@@ -31,6 +31,8 @@ for:
       - platform: x64
   init:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+  environment:
+    GENERATOR_SUFFIX: "Win64"
 - matrix:
     only:
       - platform: x86
@@ -66,15 +68,15 @@ install:
 build_script:
   - cd %APPVEYOR_BUILD_FOLDER%\Submodules\enigma-dev\CommandLine\protos
   - mkdir build && cd build
-  - cmake -G "Visual Studio 15 2017" -A %PLATFORM% -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -Dprotobuf_generate_IMPORT_DIRS="%VCPKG_DIR%\installed\%TRIPLET_NAME%\include" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
+  - cmake -G "Visual Studio 15 2017 %GENERATOR_SUFFIX%" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -Dprotobuf_generate_IMPORT_DIRS="%VCPKG_DIR%\installed\%TRIPLET_NAME%\include" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
   - cmake --build . --target install --config %BUILD_TYPE%
   - cd %APPVEYOR_BUILD_FOLDER%\Submodules\enigma-dev\CommandLine\libEGM
   - mkdir build && cd build
-  - cmake -G "Visual Studio 15 2017" -A %PLATFORM% -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
+  - cmake -G "Visual Studio 15 2017 %GENERATOR_SUFFIX%" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
   - cmake --build . --target install --config %BUILD_TYPE%
   - cd %APPVEYOR_BUILD_FOLDER%
   - mkdir build && cd build
-  - cmake -G "Visual Studio 15 2017" -A %PLATFORM% -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
+  - cmake -G "Visual Studio 15 2017 %GENERATOR_SUFFIX%" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
   - cmake --build . --target ALL_BUILD --config %BUILD_TYPE%
   - appveyor PushArtifact %BUILD_TYPE%\RadialGM.exe -FileName RadialGM-Win32-%CONFIGURATION%-%PLATFORM%.exe -DeploymentName RadialGM
 
