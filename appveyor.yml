@@ -28,6 +28,7 @@ environment:
 
 init:
   - if %PLATFORM% == x64 call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+  - if %PLATFORM% == x64 set GENERATOR="Visual Studio 15 2017 Win64"
   - if %PLATFORM% == x86 call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
   - ps: |
       if ($env:configuration -eq "Release") {
@@ -35,6 +36,8 @@ init:
       }
 
 install:
+  - echo %BUILD_TYPE%
+  - echo %GENERATOR%
   - git submodule update --init --recursive
   - ps: |
       # this gets the latest release of RadialGM-deps using GitHub API
