@@ -27,15 +27,11 @@ environment:
   GENERATOR: "Visual Studio 15 2017"
 
 init:
+  - if %PLATFORM% == x64 call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+  - if %PLATFORM% == x86 call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
   - ps: |
       if ($env:configuration -eq "Release") {
         $env:BUILD_TYPE = "MinSizeRel"
-      }
-      if ($env:platform -eq "x64") {
-        cmd.exe /C "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
-        $env:GENERATOR = "Visual Studio 15 2017 Win64"
-      } else {
-        cmd.exe /C "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
       }
 
 install:
