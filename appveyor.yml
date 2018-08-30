@@ -62,16 +62,16 @@ build_script:
   - echo %BUILD_TYPE%
   - cd %APPVEYOR_BUILD_FOLDER%\Submodules\enigma-dev\CommandLine\protos
   - mkdir build && cd build
-  - cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -Dprotobuf_generate_IMPORT_DIRS="%VCPKG_DIR%\installed\%TRIPLET_NAME%\include" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
-  - cmake --build . --target install --config %BUILD_TYPE%
+  - cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" -Dprotobuf_generate_IMPORT_DIRS="%VCPKG_DIR%\installed\%TRIPLET_NAME%\include" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
+  - cmake --build . --target install --config "%BUILD_TYPE%"
   - cd %APPVEYOR_BUILD_FOLDER%\Submodules\enigma-dev\CommandLine\libEGM
   - mkdir build && cd build
-  - cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
-  - cmake --build . --target install --config %BUILD_TYPE%
+  - cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
+  - cmake --build . --target install --config "%BUILD_TYPE%"
   - cd %APPVEYOR_BUILD_FOLDER%
   - mkdir build && cd build
-  - cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE=%BUILD_TYPE% -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
-  - cmake --build . --target ALL_BUILD --config %BUILD_TYPE%
+  - cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
+  - cmake --build . --target ALL_BUILD --config "%BUILD_TYPE%"
   - appveyor PushArtifact %BUILD_TYPE%\RadialGM.exe -FileName RadialGM-Win32-%CONFIGURATION%-%PLATFORM%.exe -DeploymentName RadialGM
 
 deploy:
