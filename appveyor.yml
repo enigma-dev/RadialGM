@@ -28,8 +28,8 @@ environment:
 
 init:
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %PLATFORM%
-  - if %PLATFORM% == x64 set GENERATOR="Visual Studio 15 2017 Win64"
-  - if %CONFIGURATION% == Release set BUILD_TYPE="MinSizeRel"
+  - if %PLATFORM% == x64 set GENERATOR=Visual Studio 15 2017 Win64
+  - if %CONFIGURATION% == Release set BUILD_TYPE=MinSizeRel
 
 install:
   - git submodule update --init --recursive
