@@ -43,8 +43,11 @@ set(RGM_SOURCES
     Plugins/RGMPlugin.cpp
     Plugins/ServerPlugin.cpp
     Components/RecentFiles.cpp
-    qtplugins.cpp
 )
+
+if (MSVC)
+  set(RGM_SOURCES ${RGM_SOURCES} qtplugins.cpp)
+endif()
 
 set(RGM_HEADERS
     MainWindow.h
@@ -94,7 +97,11 @@ set(EDITOR_SOURCES Widgets/CodeWidgetPlain.cpp)
 #endif()
 
 # Tell CMake to create the RadialGM executable
-add_executable(${EXE} WIN32 ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${RGM_RC})
+if(WIN32)
+  add_executable(${EXE} WIN32 ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${RGM_RC})
+else()
+  add_executable(${EXE} WIN32 ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${RGM_RC})
+endif(WIN32)
 
 message(STATUS "Initial build flags:")
 set(CompilerFlags
@@ -108,7 +115,9 @@ set(CompilerFlags
 	  CMAKE_CXX_FLAGS_RELWITHDEBINFO
         )
 foreach(CompilerFlag ${CompilerFlags})
-  string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
+  if(MSVC)
+	string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
+  endif(MSVC)
   message(STATUS "  '${CompilerFlag}': ${${CompilerFlag}}")
 endforeach()
 
@@ -149,10 +158,9 @@ find_library(LIB_GPR NAMES gpr)
 target_link_libraries(${EXE} PRIVATE ${LIB_GRPC_UNSECURE} ${LIB_GRPC} ${LIB_GPR})
 
 # Find Protobuf
-find_library(LIB_PROTOBUF NAMES libprotobufd)
-find_library(LIB_PROTOC NAMES libprotocd)
-find_library(LIB_PROTOLITE NAMES libprotobuf-lited)
-target_link_libraries(${EXE} PRIVATE ${LIB_PROTOC} ${LIB_PROTOBUF} ${LIB_PROTOLITE})
+include(FindProtobuf)
+include_directories(${Protobuf_INCLUDE_DIRS})
+target_link_libraries(${EXE} PRIVATE ${Protobuf_LIBRARIES})
 
 # Find OpenSSL
 find_package(OpenSSL REQUIRED)
@@ -160,30 +168,34 @@ target_link_libraries(${EXE} PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 
 # Find Qt
 find_package(Qt5 COMPONENTS Core Widgets Gui REQUIRED)
-target_link_libraries(${EXE} PRIVATE Qt5::Core Qt5::WinMain Qt5::Core Qt5::Widgets Qt5::Gui Qt5::Gui Qt5::QGifPlugin Qt5::QICOPlugin)
+target_link_libraries(${EXE} PRIVATE Qt5::Core Qt5::Core Qt5::Widgets Qt5::Gui Qt5::Gui Qt5::QGifPlugin Qt5::QICOPlugin)
 
-# Debug
-find_library(LIB_QT_PLATFORM_D NAMES Qt5PlatformCompositorSupportd)
-find_library(LIB_QT_FONT_D NAMES Qt5FontDatabaseSupportd)
-find_library(LIB_QT_UI_D NAMES Qt5WindowsUIAutomationSupportd)
-find_library(LIB_QT_EVENT_D NAMES Qt5EventDispatcherSupportd)
-find_library(LIB_QT_THEME_D NAMES Qt5ThemeSupportd)
-find_library(LIB_QT_WIN_D NAMES qwindowsd PATHS "${QT_DIR}/plugins/platforms")
-# Release
-find_library(LIB_QT_PLATFORM NAMES Qt5PlatformCompositorSupport)
-find_library(LIB_QT_FONT NAMES Qt5FontDatabaseSupport)
-find_library(LIB_QT_UI NAMES Qt5WindowsUIAutomationSupport)
-find_library(LIB_QT_EVENT NAMES Qt5EventDispatcherSupport)
-find_library(LIB_QT_THEME NAMES Qt5ThemeSupport)
-find_library(LIB_QT_WIN NAMES qwindows PATHS "${QT_DIR}/plugins/platforms")
 
-target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_QT_PLATFORM_D},${LIB_QT_PLATFORM}>"
-                      "$<IF:$<CONFIG:Debug>,${LIB_QT_FONT_D},${LIB_QT_FONT}>"
-                      "$<IF:$<CONFIG:Debug>,${LIB_QT_UI_D},${LIB_QT_UI}>"
-                      "$<IF:$<CONFIG:Debug>,${LIB_QT_EVENT_D},${LIB_QT_EVENT}>"
-                      "$<IF:$<CONFIG:Debug>,${LIB_QT_THEME_D},${LIB_QT_THEME}>"
-                      "$<IF:$<CONFIG:Debug>,${LIB_QT_WIN_D},${LIB_QT_WIN}>"
-					  )
+if(MSVC)
+	target_link_libraries(${EXE} PRIVATE Qt5::WinMain)
+	# Debug
+	find_library(LIB_QT_PLATFORM_D NAMES Qt5PlatformCompositorSupportd)
+	find_library(LIB_QT_FONT_D NAMES Qt5FontDatabaseSupportd)
+	find_library(LIB_QT_UI_D NAMES Qt5WindowsUIAutomationSupportd)
+	find_library(LIB_QT_EVENT_D NAMES Qt5EventDispatcherSupportd)
+	find_library(LIB_QT_THEME_D NAMES Qt5ThemeSupportd)
+	find_library(LIB_QT_WIN_D NAMES qwindowsd PATHS "${QT_DIR}/plugins/platforms")
+	# Release
+	find_library(LIB_QT_PLATFORM NAMES Qt5PlatformCompositorSupport)
+	find_library(LIB_QT_FONT NAMES Qt5FontDatabaseSupport)
+	find_library(LIB_QT_UI NAMES Qt5WindowsUIAutomationSupport)
+	find_library(LIB_QT_EVENT NAMES Qt5EventDispatcherSupport)
+	find_library(LIB_QT_THEME NAMES Qt5ThemeSupport)
+	find_library(LIB_QT_WIN NAMES qwindows PATHS "${QT_DIR}/plugins/platforms")
+
+	target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_QT_PLATFORM_D},${LIB_QT_PLATFORM}>"
+						  "$<IF:$<CONFIG:Debug>,${LIB_QT_FONT_D},${LIB_QT_FONT}>"
+						  "$<IF:$<CONFIG:Debug>,${LIB_QT_UI_D},${LIB_QT_UI}>"
+						  "$<IF:$<CONFIG:Debug>,${LIB_QT_EVENT_D},${LIB_QT_EVENT}>"
+						  "$<IF:$<CONFIG:Debug>,${LIB_QT_THEME_D},${LIB_QT_THEME}>"
+						  "$<IF:$<CONFIG:Debug>,${LIB_QT_WIN_D},${LIB_QT_WIN}>"
+						  )
+endif(MSVC)
 
 # Find FreeType
 find_package(Freetype REQUIRED)
@@ -202,5 +214,7 @@ target_link_libraries(${EXE} PRIVATE ${LIB_PCRE2})
 find_library(LIB_DOUBLE_CONVERSION NAMES double-conversion)
 target_link_libraries(${EXE} PRIVATE ${LIB_DOUBLE_CONVERSION})
 
-# Windows is a turd
-target_link_libraries(${EXE} PRIVATE Ws2_32 Wldap32 Crypt32 Winmm Userenv Netapi32 Mincore Dwmapi Imm32)
+if(WIN32)
+	# Windows is a turd
+	target_link_libraries(${EXE} PRIVATE Ws2_32 Wldap32 Crypt32 Winmm Userenv Netapi32 Mincore Dwmapi Imm32)
+endif(WIN32)
