@@ -6,7 +6,7 @@ branches:
     - master
 
 # Build worker image (VM template)
-image: Visual Studio 2017
+image: Previous Visual Studio 2017
 
 # since we're pushing releases we don't want infinite recursion
 # because the release pushes a tag, hence we aren't building on tags
