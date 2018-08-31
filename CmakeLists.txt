@@ -170,7 +170,6 @@ find_library(LIB_QT_EVENT_D NAMES Qt5EventDispatcherSupportd)
 find_library(LIB_QT_THEME_D NAMES Qt5ThemeSupportd)
 find_library(LIB_QT_ICO_D NAMES qicod PATHS "${QT_DIR}/plugins/imageformats")
 find_library(LIB_QT_GIF_D NAMES qgifd PATHS "${QT_DIR}/plugins/imageformats")
-find_library(LIB_QT_JPEG_D NAMES qjpegd PATHS "${QT_DIR}/plugins/imageformats")
 # Windows 10 SDK doesn't include a debug version of Uxtheme
 find_library(LIB_WIN_UXTHEME_D NAMES Uxtheme)
 find_library(LIB_QT_WINVISTASTYLE_D NAMES qwindowsvistastyled PATHS "${QT_DIR}/plugins/styles")
@@ -182,11 +181,9 @@ find_library(LIB_QT_UI NAMES Qt5WindowsUIAutomationSupport)
 find_library(LIB_QT_EVENT NAMES Qt5EventDispatcherSupport)
 find_library(LIB_QT_THEME NAMES Qt5ThemeSupport)
 # ICO is needed to set Win32 icon on the Window
-# also all 3 of these image plugins are very small
-# even combined they are only 300kb~
+# also all of these image plugins are very small about 100kb~ each
 find_library(LIB_QT_ICO NAMES qico PATHS "${QT_DIR}/plugins/imageformats")
 find_library(LIB_QT_GIF NAMES qgif PATHS "${QT_DIR}/plugins/imageformats")
-find_library(LIB_QT_JPEG NAMES qjpeg PATHS "${QT_DIR}/plugins/imageformats")
 find_library(LIB_WIN_UXTHEME NAMES Uxtheme)
 find_library(LIB_QT_WINVISTASTYLE NAMES qwindowsvistastyle PATHS "${QT_DIR}/plugins/styles")
 find_library(LIB_QT_WIN NAMES qwindows PATHS "${QT_DIR}/plugins/platforms")
@@ -198,7 +195,6 @@ target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_QT_PLATFORM_D},
                       "$<IF:$<CONFIG:Debug>,${LIB_QT_THEME_D},${LIB_QT_THEME}>"
                       "$<IF:$<CONFIG:Debug>,${LIB_QT_ICO_D},${LIB_QT_ICO}>"
                       "$<IF:$<CONFIG:Debug>,${LIB_QT_GIF_D},${LIB_QT_GIF}>"
-                      "$<IF:$<CONFIG:Debug>,${LIB_QT_JPEG_D},${LIB_QT_JPEG}>"
                       "$<IF:$<CONFIG:Debug>,${LIB_WIN_UXTHEME_D},${LIB_WIN_UXTHEME}>"
                       "$<IF:$<CONFIG:Debug>,${LIB_QT_WINVISTASTYLE_D},${LIB_QT_WINVISTASTYLE}>"
                       "$<IF:$<CONFIG:Debug>,${LIB_QT_WIN_D},${LIB_QT_WIN}>"
