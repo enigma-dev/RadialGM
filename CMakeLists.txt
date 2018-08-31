@@ -100,7 +100,7 @@ set(EDITOR_SOURCES Widgets/CodeWidgetPlain.cpp)
 if(WIN32)
   add_executable(${EXE} WIN32 ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${RGM_RC})
 else()
-  add_executable(${EXE} WIN32 ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${RGM_RC})
+  add_executable(${EXE} ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${RGM_RC})
 endif(WIN32)
 
 message(STATUS "Initial build flags:")
