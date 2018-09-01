@@ -1,7 +1,7 @@
 #ifndef TREEMODEL_H
 #define TREEMODEL_H
 
-#include "treenode.pb.h"
+#include "codegen/treenode.pb.h"
 
 #include <QAbstractItemModel>
 #include <QHash>

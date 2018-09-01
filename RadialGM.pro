@@ -11,12 +11,12 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 win32:RC_ICONS += images/icon.ico
 
-TARGET = ENIGMA
+TARGET = RadialGM
 TEMPLATE = app
 VERSION = 0.0.0.0
 
 QMAKE_TARGET_COMPANY = ENIGMA Dev Team
-QMAKE_TARGET_PRODUCT = ENIGMA Development Environment
+QMAKE_TARGET_PRODUCT = RadialGM IDE
 QMAKE_TARGET_DESCRIPTION = ENIGMA Development Environment
 QMAKE_TARGET_COPYRIGHT = "Copyright \\251 2007-2018 ENIGMA Dev Team"
 
