@@ -121,6 +121,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     resourceModel->setParent(editor);
 
     subWindow = subWindows[item] = ui->mdiArea->addSubWindow(editor);
+    subWindow->resize(subWindow->frameSize().expandedTo(editor->size()));
     editor->setParent(subWindow);
 
     subWindow->connect(subWindow, &QObject::destroyed, [=]() {

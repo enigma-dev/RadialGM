@@ -28,6 +28,7 @@ set(RGM_SOURCES
     Dialogs/PreferencesDialog.cpp
     Editors/BackgroundEditor.cpp
     Editors/ObjectEditor.cpp
+    Editors/SoundEditor.cpp
     Editors/FontEditor.cpp
     Editors/PathEditor.cpp
     Editors/TimelineEditor.cpp
@@ -51,6 +52,7 @@ set(RGM_HEADERS
     Dialogs/PreferencesDialog.h
     Editors/BackgroundEditor.h
     Editors/ObjectEditor.h
+    Editors/SoundEditor.h
     Editors/FontEditor.h
     Editors/PathEditor.h
     Editors/TimelineEditor.h

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>622</width>
-    <height>399</height>
+    <width>669</width>
+    <height>310</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -497,7 +497,7 @@
         <bool>false</bool>
        </property>
        <attribute name="headerVisible">
-        <bool>false</bool>
+        <bool>true</bool>
        </attribute>
        <attribute name="headerCascadingSectionResizes">
         <bool>false</bool>
