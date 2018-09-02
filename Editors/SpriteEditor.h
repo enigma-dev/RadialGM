@@ -15,11 +15,11 @@ class SpriteEditor : public BaseEditor {
  public:
   explicit SpriteEditor(ProtoModel* model, QWidget* parent);
   ~SpriteEditor();
-  void LoadedMismatedImage(QSize expectedSize, QSize actualSize);
+  void LoadedMismatchedImage(QSize expectedSize, QSize actualSize);
 
  private:
-  Ui::SpriteEditor *ui;
-  SpriteModel *spriteModel;
+  Ui::SpriteEditor* ui;
+  SpriteModel* spriteModel;
 };
 
 #endif  // SPRITEEDITOR_H

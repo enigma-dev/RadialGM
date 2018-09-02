@@ -23,9 +23,6 @@
    <iconset resource="../images.qrc">
     <normaloff>:/resources/background.png</normaloff>:/resources/background.png</iconset>
   </property>
-  <property name="Josh" stdset="0">
-   <string>helloenigmasssss</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0">
    <property name="spacing">
     <number>0</number>
