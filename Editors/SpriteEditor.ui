@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>926</width>
-    <height>675</height>
+    <width>785</width>
+    <height>618</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -66,6 +66,9 @@
      <property name="spacing">
       <number>4</number>
      </property>
+     <property name="rightMargin">
+      <number>4</number>
+     </property>
      <item>
       <layout class="QVBoxLayout" name="propertiesLayout">
        <property name="spacing">
@@ -84,23 +87,23 @@
         <number>4</number>
        </property>
        <item>
+        <widget class="QCheckBox" name="smoothCheckBox">
+         <property name="text">
+          <string>&amp;Smooth edges</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QCheckBox" name="transparentCheckBox">
          <property name="text">
-          <string>Transparent</string>
+          <string>&amp;Transparent</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QCheckBox" name="preloadCheckBox">
          <property name="text">
-          <string>Preload texture</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="smoothCheckBox">
-         <property name="text">
-          <string>Smooth edges</string>
+          <string>Pre&amp;load texture</string>
          </property>
         </widget>
        </item>
@@ -113,7 +116,10 @@
           <item row="0" column="2">
            <widget class="QLabel" name="originYLabel">
             <property name="text">
-             <string>Y</string>
+             <string>&amp;Y</string>
+            </property>
+            <property name="buddy">
+             <cstring>originYSpinBox</cstring>
             </property>
            </widget>
           </item>
@@ -140,7 +146,10 @@
           <item row="0" column="0">
            <widget class="QLabel" name="originXLabel">
             <property name="text">
-             <string>X</string>
+             <string>&amp;X</string>
+            </property>
+            <property name="buddy">
+             <cstring>originXSpinBox</cstring>
             </property>
            </widget>
           </item>
@@ -169,7 +178,7 @@
           <item>
            <widget class="QRadioButton" name="preciseRadioButton">
             <property name="text">
-             <string>Precise</string>
+             <string>&amp;Precise</string>
             </property>
             <property name="checked">
              <bool>false</bool>
@@ -189,7 +198,7 @@
           <item>
            <widget class="QRadioButton" name="diskRadioButton">
             <property name="text">
-             <string>Dis&amp;k</string>
+             <string>&amp;Disk</string>
             </property>
            </widget>
           </item>
@@ -250,8 +259,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>752</width>
-           <height>368</height>
+           <width>608</width>
+           <height>311</height>
           </rect>
          </property>
          <property name="autoFillBackground">
