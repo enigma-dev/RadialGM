@@ -8,6 +8,7 @@
 #include "Editors/ObjectEditor.h"
 #include "Editors/PathEditor.h"
 #include "Editors/RoomEditor.h"
+#include "Editors/SoundEditor.h"
 #include "Editors/SpriteEditor.h"
 #include "Editors/TimelineEditor.h"
 
@@ -91,6 +92,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
   using FactoryMap = std::unordered_map<TypeCase, FactoryFunction>;
 
   static FactoryMap factoryMap({{TypeCase::kSprite, EditorFactory<SpriteEditor>},
+                                {TypeCase::kSound, EditorFactory<SoundEditor>},
                                 {TypeCase::kBackground, EditorFactory<BackgroundEditor>},
                                 {TypeCase::kPath, EditorFactory<PathEditor>},
                                 {TypeCase::kFont, EditorFactory<FontEditor>},
@@ -119,6 +121,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     resourceModel->setParent(editor);
 
     subWindow = subWindows[item] = ui->mdiArea->addSubWindow(editor);
+    subWindow->resize(subWindow->frameSize().expandedTo(editor->size()));
     editor->setParent(subWindow);
 
     subWindow->connect(subWindow, &QObject::destroyed, [=]() {

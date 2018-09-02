@@ -100,7 +100,7 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   channelArguments.SetMaxReceiveMessageSize(-1);
   auto channel = CreateCustomChannel("localhost:37818", InsecureChannelCredentials(), channelArguments);
   compilerClient = new CompilerClient(channel);
-  compilerClient->GetResources();
+  //compilerClient->GetResources();
 }
 
 ServerPlugin::~ServerPlugin() {

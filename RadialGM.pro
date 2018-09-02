@@ -74,6 +74,7 @@ SOURCES += \
     Components/Utility.cpp \
     Plugins/RGMPlugin.cpp \
     Plugins/ServerPlugin.cpp \
+    Editors/SoundEditor.cpp \
     Components/RecentFiles.cpp
 
 HEADERS += \
@@ -96,6 +97,7 @@ HEADERS += \
     Plugins/RGMPlugin.h \
     Plugins/ServerPlugin.h \
     Widgets/CodeWidget.h \
+    Editors/SoundEditor.h \
     Components/RecentFiles.h
 
 FORMS += \
@@ -108,7 +110,8 @@ FORMS += \
     Editors/TimelineEditor.ui \
     Editors/RoomEditor.ui \
     Dialogs/AddImageDialog.ui \
-    Editors/SpriteEditor.ui
+    Editors/SpriteEditor.ui \
+    Editors/SoundEditor.ui
 
 RESOURCES += \
     images.qrc

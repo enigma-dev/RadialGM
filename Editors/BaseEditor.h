@@ -4,7 +4,6 @@
 #include "Models/ImmediateMapper.h"
 #include "Models/ProtoModel.h"
 
-#include <QMdiSubWindow>
 #include <QObject>
 #include <QWidget>
 
