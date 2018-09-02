@@ -13,7 +13,7 @@ class SpriteEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit SpriteEditor(QWidget *parent, ProtoModel *model);
+  explicit SpriteEditor(ProtoModel* model, QWidget* parent);
   ~SpriteEditor();
   void LoadedMismatedImage(QSize expectedSize, QSize actualSize);
 

@@ -3,11 +3,11 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 
-BaseEditor::BaseEditor(QWidget* parent, ProtoModel* model)
+BaseEditor::BaseEditor(ProtoModel* model, QWidget* parent)
     : QWidget(parent), model(model), mapper(new ImmediateDataWidgetMapper(this)) {
   mapper->setOrientation(Qt::Vertical);
-  connect(model, &ProtoModel::dataChanged, this, &BaseEditor::dataChanged);
   mapper->setModel(model);
+  connect(model, &ProtoModel::dataChanged, this, &BaseEditor::dataChanged);
 }
 
 void BaseEditor::closeEvent(QCloseEvent* event) {
@@ -19,10 +19,13 @@ void BaseEditor::closeEvent(QCloseEvent* event) {
     if (reply == QMessageBox::Cancel) {
       event->ignore();
       return;
-    } else if (reply == QMessageBox::No)
+    } else if (reply == QMessageBox::No) {
+      mapper->clearMapping();
       model->RestoreBuffer();
+    }
   }
 
+  model->SetDirty(false);
   event->accept();
 }
 

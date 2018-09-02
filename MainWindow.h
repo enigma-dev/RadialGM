@@ -4,10 +4,15 @@
 #include "Models/ProtoModel.h"
 #include "Models/TreeModel.h"
 
+class MainWindow;
+#include "Components/RecentFiles.h"
+
 #include "codegen/project.pb.h"
 
 #include <QMainWindow>
 #include <QMdiSubWindow>
+#include <QPointer>
+#include <QProcess>
 
 namespace Ui {
 class MainWindow;
@@ -17,9 +22,13 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
  public:
-  explicit MainWindow(QWidget *parent = 0);
+  explicit MainWindow(QWidget *parent);
   ~MainWindow();
   void closeEvent(QCloseEvent *event);
+
+  buffers::Game *Game() const { return this->project->mutable_game(); }
+
+ public slots:
   void openFile(QString fName);
 
  private slots:
@@ -46,14 +55,21 @@ class MainWindow : public QMainWindow {
 
   void on_treeView_doubleClicked(const QModelIndex &index);
 
+  void on_actionClearRecentMenu_triggered();
+
  private:
-  Ui::MainWindow *ui;
-  buffers::Project *game;
-  TreeModel *treeModel;
   QHash<buffers::TreeNode *, ProtoModel *> resourceModels;
   QHash<buffers::TreeNode *, QMdiSubWindow *> subWindows;
 
+  TreeModel *treeModel;
+  Ui::MainWindow *ui;
+
+  buffers::Project *project;
+  QPointer<RecentFiles> recentFiles;
+
   void openSubWindow(buffers::TreeNode *item);
+  void readSettings();
+  void writeSettings();
 };
 
 #endif  // MAINWINDOW_H
