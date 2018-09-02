@@ -1,9 +1,10 @@
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0600  // at least windows vista required for grpc
+#endif
+
 #include "ServerPlugin.h"
 
-#if _WIN32_WINNT < 0x0600
-#define _WIN32_WINNT 0x0600
-#endif
-#include "server.grpc.pb.h"
+#include "codegen/server.grpc.pb.h"
 
 #include <QDebug>
 #include <QFileDialog>
@@ -99,7 +100,7 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   channelArguments.SetMaxReceiveMessageSize(-1);
   auto channel = CreateCustomChannel("localhost:37818", InsecureChannelCredentials(), channelArguments);
   compilerClient = new CompilerClient(channel);
-  compilerClient->GetResources();
+  //compilerClient->GetResources();
 }
 
 ServerPlugin::~ServerPlugin() {

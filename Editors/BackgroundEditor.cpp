@@ -5,7 +5,7 @@
 
 #include "Components/Utility.h"
 
-#include "resources/Background.pb.h"
+#include "codegen/Background.pb.h"
 
 #include "gmx.h"
 

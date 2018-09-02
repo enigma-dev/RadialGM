@@ -97,15 +97,24 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>31</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>&amp;File</string>
     </property>
+    <widget class="QMenu" name="menuRecent">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="title">
+      <string>&amp;Recent</string>
+     </property>
+    </widget>
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
+    <addaction name="menuRecent"/>
     <addaction name="separator"/>
     <addaction name="actionSave"/>
     <addaction name="actionSaveAll"/>
@@ -160,6 +169,20 @@
     <property name="title">
      <string>&amp;Resources</string>
     </property>
+    <addaction name="actionCreate_Sprite"/>
+    <addaction name="actionCreate_Sound"/>
+    <addaction name="actionCreate_Background"/>
+    <addaction name="actionCreate_Path"/>
+    <addaction name="actionCreate_Script"/>
+    <addaction name="actionCreate_Shader"/>
+    <addaction name="actionCreate_Font"/>
+    <addaction name="actionCreate_Time_Line"/>
+    <addaction name="actionCreate_Object"/>
+    <addaction name="actionCreate_Room"/>
+    <addaction name="separator"/>
+    <addaction name="actionChange_Global_Game_Settings"/>
+    <addaction name="separator"/>
+    <addaction name="actionDefine_Macros"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuBuild"/>
@@ -193,7 +216,19 @@
    <addaction name="actionDebug"/>
    <addaction name="actionCreateExecutable"/>
    <addaction name="separator"/>
+   <addaction name="actionCreate_Sprite"/>
+   <addaction name="actionCreate_Sound"/>
+   <addaction name="actionCreate_Background"/>
+   <addaction name="actionCreate_Path"/>
+   <addaction name="actionCreate_Script"/>
+   <addaction name="actionCreate_Shader"/>
+   <addaction name="actionCreate_Font"/>
+   <addaction name="actionCreate_Object"/>
+   <addaction name="actionCreate_Time_Line"/>
+   <addaction name="actionCreate_Room"/>
+   <addaction name="separator"/>
    <addaction name="actionPreferences"/>
+   <addaction name="separator"/>
    <addaction name="actionDocumentation"/>
   </widget>
   <widget class="QDockWidget" name="outputDockWidget">
@@ -539,7 +574,7 @@
   </action>
   <action name="actionCloseAll">
    <property name="text">
-    <string>C&amp;lose All</string>
+    <string>Close &amp;All</string>
    </property>
   </action>
   <action name="actionCloseOthers">
@@ -577,6 +612,158 @@
    </property>
    <property name="text">
     <string>Toggle Tabbed &amp;View</string>
+   </property>
+  </action>
+  <action name="actionClearRecentMenu">
+   <property name="text">
+    <string>&amp;Clear Menu</string>
+   </property>
+   <property name="toolTip">
+    <string>Clear Menu</string>
+   </property>
+  </action>
+  <action name="actionCreate_Sprite">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/resources/sprite.png</normaloff>:/resources/sprite.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create Sprite</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionCreate_Sound">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/resources/sound.png</normaloff>:/resources/sound.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create Sound</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+U</string>
+   </property>
+  </action>
+  <action name="actionCreate_Background">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/resources/background.png</normaloff>:/resources/background.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create Background</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+B</string>
+   </property>
+  </action>
+  <action name="actionCreate_Path">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/resources/path.png</normaloff>:/resources/path.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create Path</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+P</string>
+   </property>
+  </action>
+  <action name="actionCreate_Script">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/resources/script.png</normaloff>:/resources/script.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create Script</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+C</string>
+   </property>
+  </action>
+  <action name="actionCreate_Shader">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/resources/shader.png</normaloff>:/resources/shader.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create Shader</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+A</string>
+   </property>
+  </action>
+  <action name="actionCreate_Font">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/resources/font.png</normaloff>:/resources/font.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create Font</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+F</string>
+   </property>
+  </action>
+  <action name="actionCreate_Time_Line">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/resources/timeline.png</normaloff>:/resources/timeline.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create Time Line</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+T</string>
+   </property>
+  </action>
+  <action name="actionCreate_Object">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/resources/object-empty.png</normaloff>:/resources/object-empty.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create Object</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+O</string>
+   </property>
+  </action>
+  <action name="actionCreate_Room">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/resources/room.png</normaloff>:/resources/room.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create Room</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+R</string>
+   </property>
+  </action>
+  <action name="actionChange_Global_Game_Settings">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/resources/settings.png</normaloff>:/resources/settings.png</iconset>
+   </property>
+   <property name="text">
+    <string>Change Global Game Settings</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+G</string>
+   </property>
+  </action>
+  <action name="actionDefine_Macros">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/resources/constants.png</normaloff>:/resources/constants.png</iconset>
+   </property>
+   <property name="text">
+    <string>Define Macros...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+N</string>
    </property>
   </action>
  </widget>

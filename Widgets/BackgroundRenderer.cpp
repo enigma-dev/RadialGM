@@ -2,7 +2,7 @@
 
 #include "Components/ArtManager.h"
 
-#include "resources/Background.pb.h"
+#include "codegen/Background.pb.h"
 
 #include <QMessageBox>
 #include <QPainter>
