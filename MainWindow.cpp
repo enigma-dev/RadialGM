@@ -21,8 +21,6 @@
 #include "gmx.h"
 #include "yyp.h"
 
-#include "codegen/Background.pb.h"
-
 #include <QtWidgets>
 
 #include <functional>

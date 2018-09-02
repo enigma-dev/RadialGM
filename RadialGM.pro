@@ -55,11 +55,13 @@ LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
         -lgrpc++
 
 SOURCES += \
-        main.cpp \
+    main.cpp \
     MainWindow.cpp \
     Dialogs/PreferencesDialog.cpp \
+    Editors/BaseEditor.cpp \
     Editors/BackgroundEditor.cpp \
     Editors/ObjectEditor.cpp \
+    Editors/SoundEditor.cpp \
     Editors/FontEditor.cpp \
     Editors/PathEditor.cpp \
     Editors/TimelineEditor.cpp \
@@ -68,22 +70,23 @@ SOURCES += \
     Widgets/BackgroundRenderer.cpp \
     Models/TreeModel.cpp \
     Components/ArtManager.cpp \
-    Editors/BaseEditor.cpp \
     Models/ProtoModel.cpp \
     Models/ImmediateMapper.cpp \
+    Models/SpriteModel.cpp \
     Components/Utility.cpp \
     Plugins/RGMPlugin.cpp \
     Plugins/ServerPlugin.cpp \
-    Editors/SoundEditor.cpp \
     Components/RecentFiles.cpp
 
 HEADERS += \
     MainWindow.h \
     Dialogs/PreferencesDialog.h \
+    Editors/BaseEditor.h \
     Editors/BackgroundEditor.h \
     Editors/ObjectEditor.h \
     Editors/FontEditor.h \
     Editors/PathEditor.h \
+    Editors/SoundEditor.h \
     Editors/TimelineEditor.h \
     Editors/RoomEditor.h \
     Editors/SpriteEditor.h \
@@ -92,24 +95,23 @@ HEADERS += \
     Components/ArtManager.h \
     Models/ProtoModel.h \
     Models/ImmediateMapper.h \
+    Models/SpriteModel.h \
     Components/Utility.h \
-    Editors/BaseEditor.h \
     Plugins/RGMPlugin.h \
     Plugins/ServerPlugin.h \
     Widgets/CodeWidget.h \
-    Editors/SoundEditor.h \
     Components/RecentFiles.h
 
 FORMS += \
     MainWindow.ui \
     Dialogs/PreferencesDialog.ui \
+    Dialogs/AddImageDialog.ui \
     Editors/BackgroundEditor.ui \
     Editors/ObjectEditor.ui \
     Editors/FontEditor.ui \
     Editors/PathEditor.ui \
     Editors/TimelineEditor.ui \
     Editors/RoomEditor.ui \
-    Dialogs/AddImageDialog.ui \
     Editors/SpriteEditor.ui \
     Editors/SoundEditor.ui
 

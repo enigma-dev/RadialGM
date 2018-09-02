@@ -3,6 +3,8 @@
 
 #include "BaseEditor.h"
 
+#include "Models/SpriteModel.h"
+
 namespace Ui {
 class SpriteEditor;
 }
@@ -13,9 +15,11 @@ class SpriteEditor : public BaseEditor {
  public:
   explicit SpriteEditor(ProtoModel* model, QWidget* parent);
   ~SpriteEditor();
+  void LoadedMismatchedImage(QSize expectedSize, QSize actualSize);
 
  private:
   Ui::SpriteEditor* ui;
+  SpriteModel* spriteModel;
 };
 
 #endif  // SPRITEEDITOR_H

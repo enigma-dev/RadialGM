@@ -23,6 +23,8 @@ void ProtoModel::RestoreBuffer() {
   emit dataChanged(index(0), index(rowCount()));
 }
 
+google::protobuf::Message *ProtoModel::GetBuffer() { return protobuf; }
+
 int ProtoModel::rowCount(const QModelIndex & /*parent*/) const {
   const Descriptor *desc = protobuf->GetDescriptor();
   return desc->field_count();
