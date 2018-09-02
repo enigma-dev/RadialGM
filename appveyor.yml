@@ -4,6 +4,10 @@ branches:
   # whitelist
   only:
     - master
+# only merge should increment build number
+pull_requests:
+  do_not_increment_build_number: true
+
 
 # Build worker image (VM template)
 image: Previous Visual Studio 2017
