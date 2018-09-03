@@ -11,12 +11,12 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 win32:RC_ICONS += images/icon.ico
 
-TARGET = ENIGMA
+TARGET = RadialGM
 TEMPLATE = app
 VERSION = 0.0.0.0
 
 QMAKE_TARGET_COMPANY = ENIGMA Dev Team
-QMAKE_TARGET_PRODUCT = ENIGMA Development Environment
+QMAKE_TARGET_PRODUCT = RadialGM IDE
 QMAKE_TARGET_DESCRIPTION = ENIGMA Development Environment
 QMAKE_TARGET_COPYRIGHT = "Copyright \\251 2007-2018 ENIGMA Dev Team"
 
@@ -55,11 +55,13 @@ LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
         -lgrpc++
 
 SOURCES += \
-        main.cpp \
+    main.cpp \
     MainWindow.cpp \
     Dialogs/PreferencesDialog.cpp \
+    Editors/BaseEditor.cpp \
     Editors/BackgroundEditor.cpp \
     Editors/ObjectEditor.cpp \
+    Editors/SoundEditor.cpp \
     Editors/FontEditor.cpp \
     Editors/PathEditor.cpp \
     Editors/TimelineEditor.cpp \
@@ -68,9 +70,9 @@ SOURCES += \
     Widgets/BackgroundRenderer.cpp \
     Models/TreeModel.cpp \
     Components/ArtManager.cpp \
-    Editors/BaseEditor.cpp \
     Models/ProtoModel.cpp \
     Models/ImmediateMapper.cpp \
+    Models/SpriteModel.cpp \
     Components/Utility.cpp \
     Plugins/RGMPlugin.cpp \
     Plugins/ServerPlugin.cpp \
@@ -79,10 +81,12 @@ SOURCES += \
 HEADERS += \
     MainWindow.h \
     Dialogs/PreferencesDialog.h \
+    Editors/BaseEditor.h \
     Editors/BackgroundEditor.h \
     Editors/ObjectEditor.h \
     Editors/FontEditor.h \
     Editors/PathEditor.h \
+    Editors/SoundEditor.h \
     Editors/TimelineEditor.h \
     Editors/RoomEditor.h \
     Editors/SpriteEditor.h \
@@ -91,8 +95,8 @@ HEADERS += \
     Components/ArtManager.h \
     Models/ProtoModel.h \
     Models/ImmediateMapper.h \
+    Models/SpriteModel.h \
     Components/Utility.h \
-    Editors/BaseEditor.h \
     Plugins/RGMPlugin.h \
     Plugins/ServerPlugin.h \
     Widgets/CodeWidget.h \
@@ -101,14 +105,15 @@ HEADERS += \
 FORMS += \
     MainWindow.ui \
     Dialogs/PreferencesDialog.ui \
+    Dialogs/AddImageDialog.ui \
     Editors/BackgroundEditor.ui \
     Editors/ObjectEditor.ui \
     Editors/FontEditor.ui \
     Editors/PathEditor.ui \
     Editors/TimelineEditor.ui \
     Editors/RoomEditor.ui \
-    Dialogs/AddImageDialog.ui \
-    Editors/SpriteEditor.ui
+    Editors/SpriteEditor.ui \
+    Editors/SoundEditor.ui
 
 RESOURCES += \
     images.qrc

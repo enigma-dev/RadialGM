@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SoundEditor</class>
+ <widget class="QWidget" name="SoundEditor">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>200</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="sizeIncrement">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="baseSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>snd_0</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../images.qrc">
+    <normaloff>:/resources/sound.png</normaloff>:/resources/sound.png</iconset>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>4</number>
+   </property>
+   <property name="leftMargin">
+    <number>4</number>
+   </property>
+   <property name="topMargin">
+    <number>4</number>
+   </property>
+   <property name="rightMargin">
+    <number>4</number>
+   </property>
+   <property name="bottomMargin">
+    <number>4</number>
+   </property>
+   <item>
+    <layout class="QHBoxLayout" name="nameLayout">
+     <property name="spacing">
+      <number>4</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="nameLabel">
+       <property name="text">
+        <string>&amp;Name</string>
+       </property>
+       <property name="buddy">
+        <cstring>nameEdit</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="nameEdit">
+       <property name="text">
+        <string>snd_0</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="actionsLayout">
+     <property name="spacing">
+      <number>4</number>
+     </property>
+     <item>
+      <widget class="QToolButton" name="loadButton">
+       <property name="toolTip">
+        <string>Load Sound</string>
+       </property>
+       <property name="text">
+        <string>&amp;Load</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../images.qrc">
+         <normaloff>:/actions/open.png</normaloff>:/actions/open.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="saveAsButton">
+       <property name="toolTip">
+        <string>Save Sound As</string>
+       </property>
+       <property name="text">
+        <string>Save &amp;As</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../images.qrc">
+         <normaloff>:/actions/save.png</normaloff>:/actions/save.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="editButton">
+       <property name="toolTip">
+        <string>Edit Sound Externally</string>
+       </property>
+       <property name="text">
+        <string>&amp;Edit</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../images.qrc">
+         <normaloff>:/actions/edit.png</normaloff>:/actions/edit.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="playButton">
+       <property name="toolTip">
+        <string>Preview Sound</string>
+       </property>
+       <property name="text">
+        <string>&amp;Preview</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../images.qrc">
+         <normaloff>:/actions/play.png</normaloff>:/actions/play.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="toolButton">
+       <property name="toolTip">
+        <string>Loop Playback</string>
+       </property>
+       <property name="text">
+        <string>&amp;Loop</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../images.qrc">
+         <normaloff>:/actions/loop.png</normaloff>:/actions/loop.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="volumeLayout">
+     <property name="spacing">
+      <number>4</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="volumeLabel">
+       <property name="toolTip">
+        <string>Volume</string>
+       </property>
+       <property name="pixmap">
+        <pixmap resource="../images.qrc">:/actions/volume.png</pixmap>
+       </property>
+       <property name="buddy">
+        <cstring>volumeSlider</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="volumeSlider">
+       <property name="toolTip">
+        <string>Volume</string>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="value">
+        <number>100</number>
+       </property>
+       <property name="tracking">
+        <bool>true</bool>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="invertedAppearance">
+        <bool>false</bool>
+       </property>
+       <property name="invertedControls">
+        <bool>false</bool>
+       </property>
+       <property name="tickPosition">
+        <enum>QSlider::NoTicks</enum>
+       </property>
+       <property name="tickInterval">
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="volumeSpinBox">
+       <property name="toolTip">
+        <string>Volume</string>
+       </property>
+       <property name="maximum">
+        <double>1.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>1.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="playbackLayout">
+     <property name="spacing">
+      <number>4</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="playbackLabel">
+       <property name="toolTip">
+        <string>Playback Position</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap resource="../images.qrc">:/events/alarm.png</pixmap>
+       </property>
+       <property name="buddy">
+        <cstring>playbackSlider</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="playbackSlider">
+       <property name="toolTip">
+        <string>Playback Position</string>
+       </property>
+       <property name="minimum">
+        <number>0</number>
+       </property>
+       <property name="value">
+        <number>20</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="playbackPositionLabel">
+       <property name="toolTip">
+        <string>Playback Position</string>
+       </property>
+       <property name="text">
+        <string>0.13/0.78s</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QPushButton" name="saveButton">
+     <property name="text">
+      <string>Save</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../images.qrc">
+       <normaloff>:/actions/accept.png</normaloff>:/actions/accept.png</iconset>
+     </property>
+     <property name="default">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../images.qrc"/>
+ </resources>
+ <connections/>
+</ui>
