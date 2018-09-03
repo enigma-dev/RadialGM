@@ -2,6 +2,7 @@
 #include "ui_MainWindow.h"
 
 #include "Dialogs/PreferencesDialog.h"
+#include "Dialogs/PreferencesKeys.h"
 
 #include "Editors/BackgroundEditor.h"
 #include "Editors/FontEditor.h"
@@ -202,34 +203,23 @@ void MainWindow::on_actionNext_triggered() { ui->mdiArea->activateNextSubWindow(
 void MainWindow::on_actionPrevious_triggered() { ui->mdiArea->activatePreviousSubWindow(); }
 
 void MainWindow::on_actionDocumentation_triggered() {
-  QSettings settings;
-  const QString &documentationURI =
-      settings.value("Preferences/General/documentationURI", "https://enigma-dev.org/docs/Wiki/Main_Page").toString();
-  QUrl documentationURL(documentationURI, QUrl::TolerantMode);
-  QDesktopServices::openUrl(documentationURL);
+  QUrl url(documentationURL(), QUrl::TolerantMode);
+  QDesktopServices::openUrl(url);
 }
 
 void MainWindow::on_actionWebsite_triggered() {
-  QSettings settings;
-  const QString &websiteURI = settings.value("Preferences/General/websiteURI", "https://enigma-dev.org").toString();
-  QUrl websiteURL(websiteURI, QUrl::TolerantMode);
-  QDesktopServices::openUrl(websiteURL);
+  QUrl url(websiteURL(), QUrl::TolerantMode);
+  QDesktopServices::openUrl(url);
 }
 
 void MainWindow::on_actionCommunity_triggered() {
-  QSettings settings;
-  const QString &communityURI =
-      settings.value("Preferences/General/communityURI", "https://enigma-dev.org/forums/").toString();
-  QUrl communityURL(communityURI, QUrl::TolerantMode);
-  QDesktopServices::openUrl(communityURL);
+  QUrl url(communityURL(), QUrl::TolerantMode);
+  QDesktopServices::openUrl(url);
 }
 
 void MainWindow::on_actionSubmitIssue_triggered() {
-  QSettings settings;
-  const QString &submitIssueURI =
-      settings.value("Preferences/General/submitIssueURI", "https://github.com/enigma-dev/RadialGM/issues").toString();
-  QUrl submitIssueURL(submitIssueURI, QUrl::TolerantMode);
-  QDesktopServices::openUrl(submitIssueURL);
+  QUrl url(submitIssueURL(), QUrl::TolerantMode);
+  QDesktopServices::openUrl(url);
 }
 
 void MainWindow::on_actionExploreENIGMA_triggered() { QDesktopServices::openUrl(QUrl(".", QUrl::TolerantMode)); }

@@ -1,6 +1,7 @@
 #include "PreferencesDialog.h"
 #include "ui_PreferencesDialog.h"
 
+#include "PreferencesKeys.h"
 #include "main.h"
 
 #include <QPushButton>
@@ -23,26 +24,21 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) : QDialog(parent), ui(new 
 
 PreferencesDialog::~PreferencesDialog() { delete ui; }
 
-static inline QString preferencesKey() { return QStringLiteral("Preferences"); }
-static inline QString generalKey() { return QStringLiteral("General"); }
-static inline QString appearanceKey() { return QStringLiteral("Appearance"); }
-
 void PreferencesDialog::apply() {
   QSettings settings;
   settings.beginGroup(preferencesKey());
 
   settings.beginGroup(generalKey());
-  settings.setValue("documentationURI", ui->documentationLineEdit->text());
-  settings.setValue("websiteURI", ui->websiteLineEdit->text());
-  settings.setValue("communityURI", ui->communityLineEdit->text());
-  settings.setValue("submitIssueURI", ui->submitIssueLineEdit->text());
+  settings.setValue(documentationURLKey(), ui->documentationLineEdit->text());
+  settings.setValue(websiteURLKey(), ui->websiteLineEdit->text());
+  settings.setValue(communityURLKey(), ui->communityLineEdit->text());
+  settings.setValue(submitIssueURLKey(), ui->submitIssueLineEdit->text());
   settings.endGroup();  // Preferences/General
 
   settings.beginGroup(appearanceKey());
   const QString &styleName = ui->styleCombo->currentText();
-  settings.setValue("styleName", styleName);
-  QStyle *style = QStyleFactory::create(styleName);
-  if (style) QApplication::setStyle(style);
+  settings.setValue(styleNameKey(), styleName);
+  QApplication::setStyle(styleName);
   settings.endGroup();  // Preferences/Appearance
 
   settings.endGroup();  // Preferences
@@ -53,12 +49,10 @@ void PreferencesDialog::reset() {
   settings.beginGroup(preferencesKey());
 
   settings.beginGroup(generalKey());
-  ui->documentationLineEdit->setText(
-      settings.value("documentationURI", "https://enigma-dev.org/docs/Wiki/Main_Page").toString());
-  ui->websiteLineEdit->setText(settings.value("websiteURI", "https://enigma-dev.org").toString());
-  ui->communityLineEdit->setText(settings.value("communityURI", "https://enigma-dev.org/forums/").toString());
-  ui->submitIssueLineEdit->setText(
-      settings.value("submitIssueURI", "https://github.com/enigma-dev/RadialGM/issues").toString());
+  ui->documentationLineEdit->setText(documentationURL());
+  ui->websiteLineEdit->setText(websiteURL());
+  ui->communityLineEdit->setText(communityURL());
+  ui->submitIssueLineEdit->setText(submitIssueURL());
   settings.endGroup();  // Preferences/General
 
   settings.endGroup();  // Preferences

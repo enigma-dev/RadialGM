@@ -101,7 +101,8 @@ HEADERS += \
     Plugins/ServerPlugin.h \
     Widgets/CodeWidget.h \
     Components/RecentFiles.h \
-    main.h
+    main.h \
+    Dialogs/PreferencesKeys.h
 
 FORMS += \
     MainWindow.ui \

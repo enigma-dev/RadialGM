@@ -52,6 +52,7 @@ set(RGM_HEADERS
     main.h
     MainWindow.h
     Dialogs/PreferencesDialog.h
+    Dialogs/PreferencesKeys.h
     Editors/BaseEditor.h
     Editors/BackgroundEditor.h
     Editors/ObjectEditor.h

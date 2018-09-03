@@ -1,6 +1,8 @@
 #include "main.h"
 #include "MainWindow.h"
 
+#include "Dialogs/PreferencesKeys.h"
+
 #include <QApplication>
 #include <QSettings>
 #include <QStyle>
@@ -18,10 +20,10 @@ int main(int argc, char *argv[]) {
   defaultStyle = a.style()->objectName();
 
   QSettings settings;
-  settings.beginGroup("Preferences");
+  settings.beginGroup(preferencesKey());
 
-  settings.beginGroup("Appearance");
-  const QString &styleName = settings.value("styleName").toString();
+  settings.beginGroup(appearanceKey());
+  const QString &styleName = settings.value(styleNameKey()).toString();
   QApplication::setStyle(styleName);
   settings.endGroup();  // Preferences/Appearance
 
