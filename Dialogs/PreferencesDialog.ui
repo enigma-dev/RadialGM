@@ -168,28 +168,28 @@
            <item row="0" column="0">
             <widget class="QLabel" name="documentationLabel">
              <property name="text">
-              <string>Documentation URI</string>
+              <string>Documentation URL</string>
              </property>
             </widget>
            </item>
            <item row="1" column="0">
             <widget class="QLabel" name="websiteLabel">
              <property name="text">
-              <string>Website URI</string>
+              <string>Website URL</string>
              </property>
             </widget>
            </item>
            <item row="2" column="0">
             <widget class="QLabel" name="communityLabel">
              <property name="text">
-              <string>Community URI</string>
+              <string>Community URL</string>
              </property>
             </widget>
            </item>
            <item row="3" column="0">
             <widget class="QLabel" name="submitIssueLabel">
              <property name="text">
-              <string>Submit Issue URI</string>
+              <string>Submit Issue URL</string>
              </property>
             </widget>
            </item>
