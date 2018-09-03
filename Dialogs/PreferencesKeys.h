@@ -3,7 +3,11 @@
 
 #include <QString>
 
-// key helpers to prevent typos and promote consistency
+// these are settings key helpers to prevent typos and promote
+// consistency, or at least turn such mistakes into compile-time
+// errors and not difficult-to-diagnose issues at runtime
+// NOTE: some QSettings implementations are case sensitive
+// (e.g, macOS) while others are case insensitive (e.g, Windows)
 inline QString preferencesKey() { return QStringLiteral("Preferences"); }
 
 inline QString generalKey() { return QStringLiteral("General"); }
