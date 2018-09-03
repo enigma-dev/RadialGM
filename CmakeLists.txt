@@ -49,6 +49,7 @@ set(RGM_SOURCES
 )
 
 set(RGM_HEADERS
+    main.h
     MainWindow.h
     Dialogs/PreferencesDialog.h
     Editors/BaseEditor.h

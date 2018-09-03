@@ -1,6 +1,8 @@
 #include "PreferencesDialog.h"
 #include "ui_PreferencesDialog.h"
 
+#include "main.h"
+
 #include <QPushButton>
 #include <QSettings>
 #include <QStyleFactory>
@@ -70,15 +72,9 @@ void PreferencesDialog::applyClicked() { this->apply(); }
 
 void PreferencesDialog::restoreDefaultsClicked() {
   QSettings settings;
-  settings.beginGroup(preferencesKey());
-  settings.remove("");
+  settings.remove(preferencesKey());
 
-  settings.beginGroup(appearanceKey());
-  // TODO: Find a way to actually restore the default style
-  QApplication::setStyle("");
-  settings.endGroup();  // Preferences/Appearance
-
-  settings.endGroup();  // Preferences
+  QApplication::setStyle(defaultStyle);
 
   this->reset();
 }

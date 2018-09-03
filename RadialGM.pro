@@ -100,7 +100,8 @@ HEADERS += \
     Plugins/RGMPlugin.h \
     Plugins/ServerPlugin.h \
     Widgets/CodeWidget.h \
-    Components/RecentFiles.h
+    Components/RecentFiles.h \
+    main.h
 
 FORMS += \
     MainWindow.ui \
