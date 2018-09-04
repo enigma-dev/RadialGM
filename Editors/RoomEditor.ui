@@ -17,7 +17,7 @@
    <iconset resource="../images.qrc">
     <normaloff>:/resources/room.png</normaloff>:/resources/room.png</iconset>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2">
+  <layout class="QVBoxLayout" name="verticalLayout_7">
    <property name="spacing">
     <number>4</number>
    </property>
@@ -25,7 +25,7 @@
     <number>4</number>
    </property>
    <property name="topMargin">
-    <number>0</number>
+    <number>4</number>
    </property>
    <property name="rightMargin">
     <number>4</number>
@@ -33,27 +33,6 @@
    <property name="bottomMargin">
     <number>4</number>
    </property>
-   <item>
-    <widget class="QToolBar" name="mainToolBar">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>24</width>
-       <height>24</height>
-      </size>
-     </property>
-     <property name="floatable">
-      <bool>false</bool>
-     </property>
-     <addaction name="actionSave"/>
-     <addaction name="separator"/>
-    </widget>
-   </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
      <property name="spacing">
@@ -86,6 +65,162 @@
         <attribute name="title">
          <string>Layers</string>
         </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_6">
+         <property name="spacing">
+          <number>4</number>
+         </property>
+         <property name="leftMargin">
+          <number>4</number>
+         </property>
+         <property name="topMargin">
+          <number>4</number>
+         </property>
+         <property name="rightMargin">
+          <number>4</number>
+         </property>
+         <property name="bottomMargin">
+          <number>4</number>
+         </property>
+         <item>
+          <widget class="QTreeWidget" name="treeWidget">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>1</verstretch>
+            </sizepolicy>
+           </property>
+           <attribute name="headerVisible">
+            <bool>false</bool>
+           </attribute>
+           <column>
+            <property name="text">
+             <string>Name</string>
+            </property>
+           </column>
+           <item>
+            <property name="text">
+             <string>Background 0</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Background 1</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>NPC</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>Enemy 1</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Enemy 2</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>New Item</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>New Item</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>New Item</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>New Item</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>New Item</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>New Item</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>New Item</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>New Item</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>New Item</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>New Item</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>New Item</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>New Item</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>New Item</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>New Item</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>New Item</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>New Item</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>New Item</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>New Item</string>
+             </property>
+            </item>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QStackedWidget" name="stackedWidget">
+           <widget class="QWidget" name="page"/>
+           <widget class="QWidget" name="page_2"/>
+          </widget>
+         </item>
+        </layout>
        </widget>
        <widget class="QWidget" name="settingsTab">
         <attribute name="title">
@@ -129,6 +264,9 @@
              <property name="text">
               <string>Width</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
             </widget>
            </item>
            <item row="2" column="1">
@@ -139,6 +277,9 @@
              <property name="text">
               <string>Height</string>
              </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
             </widget>
            </item>
            <item row="3" column="1">
@@ -148,6 +289,9 @@
             <widget class="QLabel" name="label_16">
              <property name="text">
               <string>Speed</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
            </item>
@@ -161,6 +305,9 @@
             <widget class="QLabel" name="label_14">
              <property name="text">
               <string>Name</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
            </item>
@@ -235,6 +382,9 @@
            <property name="flat">
             <bool>true</bool>
            </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
            <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,1,0,1">
             <property name="leftMargin">
              <number>4</number>
@@ -253,43 +403,83 @@
             </property>
             <item row="0" column="2">
              <widget class="QLabel" name="label_20">
+              <property name="toolTip">
+               <string>Cell Width</string>
+              </property>
               <property name="text">
                <string>W</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
             <item row="0" column="0">
              <widget class="QLabel" name="label_18">
+              <property name="toolTip">
+               <string>X Offset</string>
+              </property>
               <property name="text">
                <string>X</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QSpinBox" name="spinBox_16"/>
+             <widget class="QSpinBox" name="spinBox_16">
+              <property name="toolTip">
+               <string>X Offset</string>
+              </property>
+             </widget>
             </item>
             <item row="0" column="3">
-             <widget class="QSpinBox" name="spinBox_17"/>
+             <widget class="QSpinBox" name="spinBox_17">
+              <property name="toolTip">
+               <string>Cell Width</string>
+              </property>
+             </widget>
             </item>
             <item row="1" column="2">
              <widget class="QLabel" name="label_21">
+              <property name="toolTip">
+               <string>Cell Height</string>
+              </property>
               <property name="text">
                <string>H</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
             <item row="1" column="0">
              <widget class="QLabel" name="label_19">
+              <property name="toolTip">
+               <string>Y Offset</string>
+              </property>
               <property name="text">
                <string>Y</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QSpinBox" name="spinBox_18"/>
+             <widget class="QSpinBox" name="spinBox_18">
+              <property name="toolTip">
+               <string>Y Offset</string>
+              </property>
+             </widget>
             </item>
             <item row="1" column="3">
-             <widget class="QSpinBox" name="spinBox_19"/>
+             <widget class="QSpinBox" name="spinBox_19">
+              <property name="toolTip">
+               <string>Cell Height</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
@@ -775,6 +965,9 @@
                 <property name="text">
                  <string>Border</string>
                 </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
                </widget>
               </item>
               <item row="0" column="2">
@@ -784,6 +977,9 @@
                 </property>
                 <property name="text">
                  <string>Speed</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -816,32 +1012,73 @@
       </widget>
      </item>
      <item>
-      <widget class="QGraphicsView" name="graphicsView">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <property name="spacing">
+        <number>4</number>
        </property>
-       <property name="backgroundBrush">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>136</red>
-          <green>136</green>
-          <blue>136</blue>
-         </color>
-        </brush>
-       </property>
-       <property name="foregroundBrush">
-        <brush brushstyle="NoBrush">
-         <color alpha="255">
-          <red>0</red>
-          <green>0</green>
-          <blue>0</blue>
-         </color>
-        </brush>
-       </property>
-      </widget>
+       <item>
+        <widget class="QToolBar" name="mainToolBar">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>24</width>
+           <height>24</height>
+          </size>
+         </property>
+         <property name="floatable">
+          <bool>false</bool>
+         </property>
+         <addaction name="actionSave"/>
+         <addaction name="separator"/>
+         <addaction name="actionUndo"/>
+         <addaction name="actionRedo"/>
+         <addaction name="separator"/>
+         <addaction name="actionCut"/>
+         <addaction name="actionCopy"/>
+         <addaction name="actionPaste"/>
+         <addaction name="separator"/>
+         <addaction name="actionSelectionMode"/>
+         <addaction name="actionSnapToGrid"/>
+         <addaction name="separator"/>
+         <addaction name="actionZoom"/>
+         <addaction name="actionZoomIn"/>
+         <addaction name="actionZoomOut"/>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGraphicsView" name="graphicsView">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="backgroundBrush">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>136</red>
+            <green>136</green>
+            <blue>136</blue>
+           </color>
+          </brush>
+         </property>
+         <property name="foregroundBrush">
+          <brush brushstyle="NoBrush">
+           <color alpha="255">
+            <red>0</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </brush>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
@@ -856,6 +1093,120 @@
    </property>
    <property name="toolTip">
     <string>Save</string>
+   </property>
+  </action>
+  <action name="actionSelectionMode">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/events/mouse.png</normaloff>:/events/mouse.png</iconset>
+   </property>
+   <property name="text">
+    <string>Selection Mode</string>
+   </property>
+   <property name="toolTip">
+    <string>Selection Mode</string>
+   </property>
+  </action>
+  <action name="actionZoomIn">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/zoom-in.png</normaloff>:/actions/zoom-in.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom In</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom In</string>
+   </property>
+  </action>
+  <action name="actionZoomOut">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/zoom-out.png</normaloff>:/actions/zoom-out.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom Out</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom Out</string>
+   </property>
+  </action>
+  <action name="actionZoom">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/zoom.png</normaloff>:/actions/zoom.png</iconset>
+   </property>
+   <property name="text">
+    <string>Zoom</string>
+   </property>
+  </action>
+  <action name="actionSnapToGrid">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/snap-to-grid.png</normaloff>:/actions/snap-to-grid.png</iconset>
+   </property>
+   <property name="text">
+    <string>Snap to Grid</string>
+   </property>
+   <property name="toolTip">
+    <string>Snap to Grid</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/undo.png</normaloff>:/actions/undo.png</iconset>
+   </property>
+   <property name="text">
+    <string>Undo</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/redo.png</normaloff>:/actions/redo.png</iconset>
+   </property>
+   <property name="text">
+    <string>Redo</string>
+   </property>
+  </action>
+  <action name="actionCut">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/cut.png</normaloff>:/actions/cut.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cut</string>
+   </property>
+   <property name="toolTip">
+    <string>Cut</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/copy.png</normaloff>:/actions/copy.png</iconset>
+   </property>
+   <property name="text">
+    <string>Copy</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/paste.png</normaloff>:/actions/paste.png</iconset>
+   </property>
+   <property name="text">
+    <string>Paste</string>
+   </property>
+   <property name="toolTip">
+    <string>Paste</string>
    </property>
   </action>
  </widget>
