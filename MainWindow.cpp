@@ -2,6 +2,7 @@
 #include "ui_MainWindow.h"
 
 #include "Dialogs/PreferencesDialog.h"
+#include "Dialogs/PreferencesKeys.h"
 
 #include "Editors/BackgroundEditor.h"
 #include "Editors/FontEditor.h"
@@ -202,23 +203,23 @@ void MainWindow::on_actionNext_triggered() { ui->mdiArea->activateNextSubWindow(
 void MainWindow::on_actionPrevious_triggered() { ui->mdiArea->activatePreviousSubWindow(); }
 
 void MainWindow::on_actionDocumentation_triggered() {
-  QUrl documentationURL("https://enigma-dev.org/docs/Wiki/Main_Page", QUrl::TolerantMode);
-  QDesktopServices::openUrl(documentationURL);
+  QUrl url(documentationURL(), QUrl::TolerantMode);
+  QDesktopServices::openUrl(url);
 }
 
 void MainWindow::on_actionWebsite_triggered() {
-  QUrl websiteURL("https://enigma-dev.org", QUrl::TolerantMode);
-  QDesktopServices::openUrl(websiteURL);
+  QUrl url(websiteURL(), QUrl::TolerantMode);
+  QDesktopServices::openUrl(url);
 }
 
 void MainWindow::on_actionCommunity_triggered() {
-  QUrl communityURL("https://enigma-dev.org/forums/", QUrl::TolerantMode);
-  QDesktopServices::openUrl(communityURL);
+  QUrl url(communityURL(), QUrl::TolerantMode);
+  QDesktopServices::openUrl(url);
 }
 
 void MainWindow::on_actionSubmitIssue_triggered() {
-  QUrl submitIssueURL("https://github.com/enigma-dev/RadialGM/issues", QUrl::TolerantMode);
-  QDesktopServices::openUrl(submitIssueURL);
+  QUrl url(submitIssueURL(), QUrl::TolerantMode);
+  QDesktopServices::openUrl(url);
 }
 
 void MainWindow::on_actionExploreENIGMA_triggered() { QDesktopServices::openUrl(QUrl(".", QUrl::TolerantMode)); }
