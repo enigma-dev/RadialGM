@@ -34,12 +34,12 @@
     <number>4</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
+    <layout class="QHBoxLayout" name="contentLayout" stretch="0,1">
      <property name="spacing">
       <number>4</number>
      </property>
      <item>
-      <widget class="QTabWidget" name="tabWidget">
+      <widget class="QTabWidget" name="propertiesTabWidget">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -47,7 +47,7 @@
         </sizepolicy>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>2</number>
        </property>
        <property name="elideMode">
         <enum>Qt::ElideNone</enum>
@@ -82,7 +82,7 @@
           <number>4</number>
          </property>
          <item>
-          <widget class="QTreeWidget" name="treeWidget">
+          <widget class="QTreeWidget" name="layersTreeWidget">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
@@ -215,7 +215,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QStackedWidget" name="stackedWidget">
+          <widget class="QStackedWidget" name="layerPropertiesStackWidget">
            <widget class="QWidget" name="page"/>
            <widget class="QWidget" name="page_2"/>
           </widget>
@@ -243,12 +243,12 @@
           <number>4</number>
          </property>
          <item>
-          <layout class="QGridLayout" name="gridLayout_5" columnstretch="0,1,0">
+          <layout class="QGridLayout" name="settingsGridLayout" columnstretch="0,1,0">
            <property name="spacing">
             <number>4</number>
            </property>
            <item row="2" column="0">
-            <widget class="QLabel" name="label_15">
+            <widget class="QLabel" name="widthLabel">
              <property name="toolTip">
               <string>Width</string>
              </property>
@@ -261,7 +261,7 @@
             </widget>
            </item>
            <item row="3" column="2">
-            <widget class="QToolButton" name="toolButton_2">
+            <widget class="QToolButton" name="creationToolButton">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -284,7 +284,7 @@
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QSpinBox" name="spinBox_15">
+            <widget class="QSpinBox" name="speedSpinBox">
              <property name="toolTip">
               <string>Frames per second</string>
              </property>
@@ -294,7 +294,7 @@
             </widget>
            </item>
            <item row="3" column="0">
-            <widget class="QLabel" name="label_17">
+            <widget class="QLabel" name="heightLabel">
              <property name="toolTip">
               <string>Height</string>
              </property>
@@ -307,7 +307,7 @@
             </widget>
            </item>
            <item row="3" column="1">
-            <widget class="QSpinBox" name="spinBox_14">
+            <widget class="QSpinBox" name="heightSpinBox">
              <property name="toolTip">
               <string>Height</string>
              </property>
@@ -320,7 +320,7 @@
             </widget>
            </item>
            <item row="2" column="2">
-            <widget class="QCheckBox" name="checkBox_4">
+            <widget class="QCheckBox" name="persistentCheckBox">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -333,7 +333,7 @@
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="label_16">
+            <widget class="QLabel" name="speedLabel">
              <property name="text">
               <string>Speed</string>
              </property>
@@ -343,7 +343,7 @@
             </widget>
            </item>
            <item row="2" column="1">
-            <widget class="QSpinBox" name="spinBox_13">
+            <widget class="QSpinBox" name="widthSpinBox">
              <property name="toolTip">
               <string>Width</string>
              </property>
@@ -356,7 +356,7 @@
             </widget>
            </item>
            <item row="1" column="2">
-            <widget class="QCheckBox" name="checkBox_5">
+            <widget class="QCheckBox" name="clearCheckBox">
              <property name="toolTip">
               <string>Clear Display Buffer</string>
              </property>
@@ -369,7 +369,7 @@
             </widget>
            </item>
            <item row="0" column="0">
-            <widget class="QLabel" name="label_14">
+            <widget class="QLabel" name="nameLabel">
              <property name="text">
               <string>Name</string>
              </property>
@@ -384,7 +384,7 @@
           </layout>
          </item>
          <item>
-          <widget class="QGroupBox" name="groupBox_4">
+          <widget class="QGroupBox" name="captionGroupBox">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -414,13 +414,13 @@
              <number>4</number>
             </property>
             <item>
-             <widget class="QLineEdit" name="lineEdit_2"/>
+             <widget class="QLineEdit" name="captionLineEdit"/>
             </item>
            </layout>
           </widget>
          </item>
          <item>
-          <widget class="QGroupBox" name="groupBox_5">
+          <widget class="QGroupBox" name="gridGroupBox">
            <property name="title">
             <string>Show Grid</string>
            </property>
@@ -447,12 +447,12 @@
              <number>4</number>
             </property>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <layout class="QHBoxLayout" name="gridColorLayout">
               <property name="spacing">
                <number>4</number>
               </property>
               <item>
-               <widget class="QLabel" name="label_25">
+               <widget class="QLabel" name="colorLabel">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                   <horstretch>0</horstretch>
@@ -465,7 +465,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QToolButton" name="toolButton_3">
+               <widget class="QToolButton" name="gridColorButton">
                 <property name="toolTip">
                  <string>Choose Grid Color</string>
                 </property>
@@ -488,7 +488,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QCheckBox" name="checkBox_7">
+               <widget class="QCheckBox" name="xorCheckBox">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -504,7 +504,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QCheckBox" name="checkBox_6">
+               <widget class="QCheckBox" name="isometricCheckBox">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -519,12 +519,12 @@
              </layout>
             </item>
             <item>
-             <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,1,0,1">
+             <layout class="QGridLayout" name="gridDimensionsLayout" columnstretch="0,1,0,1">
               <property name="spacing">
                <number>4</number>
               </property>
               <item row="2" column="0">
-               <widget class="QLabel" name="label_19">
+               <widget class="QLabel" name="gridYLabel">
                 <property name="toolTip">
                  <string>Y Offset</string>
                 </property>
@@ -537,14 +537,14 @@
                </widget>
               </item>
               <item row="2" column="1">
-               <widget class="QSpinBox" name="spinBox_18">
+               <widget class="QSpinBox" name="gridYSpinBox">
                 <property name="toolTip">
                  <string>Y Offset</string>
                 </property>
                </widget>
               </item>
               <item row="2" column="2">
-               <widget class="QLabel" name="label_21">
+               <widget class="QLabel" name="gridHLabel">
                 <property name="toolTip">
                  <string>Cell Height</string>
                 </property>
@@ -557,7 +557,7 @@
                </widget>
               </item>
               <item row="2" column="3">
-               <widget class="QSpinBox" name="spinBox_19">
+               <widget class="QSpinBox" name="gridHSpinBox">
                 <property name="toolTip">
                  <string>Cell Height</string>
                 </property>
@@ -567,7 +567,7 @@
                </widget>
               </item>
               <item row="1" column="0">
-               <widget class="QLabel" name="label_18">
+               <widget class="QLabel" name="gridXLabel">
                 <property name="toolTip">
                  <string>X Offset</string>
                 </property>
@@ -580,7 +580,7 @@
                </widget>
               </item>
               <item row="1" column="2">
-               <widget class="QLabel" name="label_20">
+               <widget class="QLabel" name="gridWLabel">
                 <property name="toolTip">
                  <string>Cell Width</string>
                 </property>
@@ -593,14 +593,14 @@
                </widget>
               </item>
               <item row="1" column="1">
-               <widget class="QSpinBox" name="spinBox_16">
+               <widget class="QSpinBox" name="gridXSpinBox">
                 <property name="toolTip">
                  <string>X Offset</string>
                 </property>
                </widget>
               </item>
               <item row="1" column="3">
-               <widget class="QSpinBox" name="spinBox_17">
+               <widget class="QSpinBox" name="gridWSpinBox">
                 <property name="toolTip">
                  <string>Cell Width</string>
                 </property>
@@ -615,7 +615,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QGroupBox" name="groupBox_6">
+          <widget class="QGroupBox" name="physicsGroupBox">
            <property name="title">
             <string>Physics World</string>
            </property>
@@ -654,40 +654,40 @@
              <number>4</number>
             </property>
             <item row="0" column="0">
-             <widget class="QLabel" name="label_22">
+             <widget class="QLabel" name="pixelsPerMeterLabel">
               <property name="text">
                <string>Pixels per meter</string>
               </property>
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QSpinBox" name="spinBox_22"/>
+             <widget class="QSpinBox" name="pixelsPerMeterSpinBox"/>
             </item>
             <item row="1" column="0">
-             <widget class="QLabel" name="label_23">
+             <widget class="QLabel" name="gravityXLabel">
               <property name="text">
                <string>Gravity X</string>
               </property>
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QSpinBox" name="spinBox_20"/>
+             <widget class="QSpinBox" name="gravityXSpinBox"/>
             </item>
             <item row="2" column="0">
-             <widget class="QLabel" name="label_24">
+             <widget class="QLabel" name="gravityYLabel">
               <property name="text">
                <string>Gravity Y</string>
               </property>
              </widget>
             </item>
             <item row="2" column="1">
-             <widget class="QSpinBox" name="spinBox_21"/>
+             <widget class="QSpinBox" name="gravityYSpinBox"/>
             </item>
            </layout>
           </widget>
          </item>
          <item>
-          <spacer name="verticalSpacer_2">
+          <spacer name="settingsVerticalSpacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
@@ -722,14 +722,14 @@
           <number>4</number>
          </property>
          <item>
-          <widget class="QCheckBox" name="checkBox">
+          <widget class="QCheckBox" name="enableViewsCheckBox">
            <property name="text">
             <string>Enable the use of views</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="checkBox_2">
+          <widget class="QCheckBox" name="clearViewportCheckBox">
            <property name="text">
             <string>Clear viewport background</string>
            </property>
@@ -739,19 +739,19 @@
           </widget>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <layout class="QHBoxLayout" name="currentViewLayout">
            <property name="spacing">
             <number>4</number>
            </property>
            <item>
-            <widget class="QLabel" name="label">
+            <widget class="QLabel" name="currentViewLabel">
              <property name="text">
               <string>Current</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QComboBox" name="comboBox">
+            <widget class="QComboBox" name="currentViewComboBox">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>1</horstretch>
@@ -811,14 +811,14 @@
           </layout>
          </item>
          <item>
-          <widget class="QCheckBox" name="checkBox_3">
+          <widget class="QCheckBox" name="viewVisibleCheckBox">
            <property name="text">
             <string>Visible when room starts</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QGroupBox" name="groupBox">
+          <widget class="QGroupBox" name="cameraGroupBox">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -854,7 +854,7 @@
              <number>4</number>
             </property>
             <item row="1" column="0">
-             <widget class="QLabel" name="label_2">
+             <widget class="QLabel" name="cameraXLabel">
               <property name="text">
                <string>X</string>
               </property>
@@ -864,7 +864,7 @@
              </widget>
             </item>
             <item row="2" column="0">
-             <widget class="QLabel" name="label_3">
+             <widget class="QLabel" name="cameraYLabel">
               <property name="text">
                <string>Y</string>
               </property>
@@ -874,7 +874,7 @@
              </widget>
             </item>
             <item row="1" column="2">
-             <widget class="QLabel" name="label_4">
+             <widget class="QLabel" name="cameraWidthLabel">
               <property name="text">
                <string>Width</string>
               </property>
@@ -884,7 +884,7 @@
              </widget>
             </item>
             <item row="2" column="2">
-             <widget class="QLabel" name="label_5">
+             <widget class="QLabel" name="cameraHeightLabel">
               <property name="text">
                <string>Height</string>
               </property>
@@ -894,13 +894,13 @@
              </widget>
             </item>
             <item row="2" column="1">
-             <widget class="QSpinBox" name="spinBox_2"/>
+             <widget class="QSpinBox" name="cameraYSpinBox"/>
             </item>
             <item row="1" column="1">
-             <widget class="QSpinBox" name="spinBox"/>
+             <widget class="QSpinBox" name="cameraXSpinBox"/>
             </item>
             <item row="1" column="3">
-             <widget class="QSpinBox" name="spinBox_3">
+             <widget class="QSpinBox" name="cameraWidthSpinBox">
               <property name="maximum">
                <number>10000</number>
               </property>
@@ -910,7 +910,7 @@
              </widget>
             </item>
             <item row="2" column="3">
-             <widget class="QSpinBox" name="spinBox_4">
+             <widget class="QSpinBox" name="cameraHeightSpinBox">
               <property name="maximum">
                <number>10000</number>
               </property>
@@ -923,7 +923,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QGroupBox" name="groupBox_2">
+          <widget class="QGroupBox" name="viewportGroupBox">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -953,7 +953,7 @@
              <number>4</number>
             </property>
             <item row="0" column="0">
-             <widget class="QLabel" name="label_8">
+             <widget class="QLabel" name="viewportXLabel">
               <property name="text">
                <string>X</string>
               </property>
@@ -963,10 +963,10 @@
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QSpinBox" name="spinBox_6"/>
+             <widget class="QSpinBox" name="viewportXSpinBox"/>
             </item>
             <item row="0" column="2">
-             <widget class="QLabel" name="label_6">
+             <widget class="QLabel" name="viewportWidthLabel">
               <property name="text">
                <string>Width</string>
               </property>
@@ -976,7 +976,7 @@
              </widget>
             </item>
             <item row="0" column="3">
-             <widget class="QSpinBox" name="spinBox_8">
+             <widget class="QSpinBox" name="viewportWidthSpinBox">
               <property name="maximum">
                <number>100000</number>
               </property>
@@ -986,7 +986,7 @@
              </widget>
             </item>
             <item row="1" column="0">
-             <widget class="QLabel" name="label_9">
+             <widget class="QLabel" name="viewportYLabel">
               <property name="text">
                <string>Y</string>
               </property>
@@ -996,10 +996,10 @@
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QSpinBox" name="spinBox_5"/>
+             <widget class="QSpinBox" name="viewportYSpinBox"/>
             </item>
             <item row="1" column="2">
-             <widget class="QLabel" name="label_7">
+             <widget class="QLabel" name="viewportHeightLabel">
               <property name="text">
                <string>Height</string>
               </property>
@@ -1009,7 +1009,7 @@
              </widget>
             </item>
             <item row="1" column="3">
-             <widget class="QSpinBox" name="spinBox_7">
+             <widget class="QSpinBox" name="viewportHeightSpinBox">
               <property name="maximum">
                <number>1000000</number>
               </property>
@@ -1022,7 +1022,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QGroupBox" name="groupBox_3">
+          <widget class="QGroupBox" name="followingGroupBox">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -1052,12 +1052,12 @@
              <number>4</number>
             </property>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <layout class="QHBoxLayout" name="followingHorizontalLayout">
               <property name="spacing">
                <number>4</number>
               </property>
               <item>
-               <widget class="QToolButton" name="toolButton">
+               <widget class="QToolButton" name="followingToolButton">
                 <property name="text">
                  <string>Object</string>
                 </property>
@@ -1071,7 +1071,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QComboBox" name="comboBox_2">
+               <widget class="QComboBox" name="followingComboBox">
                 <item>
                  <property name="text">
                   <string>&lt;no object&gt;</string>
@@ -1082,12 +1082,12 @@
              </layout>
             </item>
             <item>
-             <layout class="QGridLayout" name="gridLayout_3" columnstretch="0,1,1">
+             <layout class="QGridLayout" name="followingGridLayout" columnstretch="0,1,1">
               <property name="spacing">
                <number>4</number>
               </property>
               <item row="2" column="0">
-               <widget class="QLabel" name="label_13">
+               <widget class="QLabel" name="followingVLabel">
                 <property name="toolTip">
                  <string>Vertical</string>
                 </property>
@@ -1100,14 +1100,14 @@
                </widget>
               </item>
               <item row="2" column="1">
-               <widget class="QSpinBox" name="spinBox_9">
+               <widget class="QSpinBox" name="followingVBorderSpinBox">
                 <property name="value">
                  <number>32</number>
                 </property>
                </widget>
               </item>
               <item row="1" column="0">
-               <widget class="QLabel" name="label_12">
+               <widget class="QLabel" name="followingHLabel">
                 <property name="toolTip">
                  <string>Horizontal</string>
                 </property>
@@ -1120,14 +1120,14 @@
                </widget>
               </item>
               <item row="1" column="1">
-               <widget class="QSpinBox" name="spinBox_10">
+               <widget class="QSpinBox" name="followingHBorderSpinBox">
                 <property name="value">
                  <number>32</number>
                 </property>
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QLabel" name="label_10">
+               <widget class="QLabel" name="followingBorderLabel">
                 <property name="toolTip">
                  <string>Border around the object</string>
                 </property>
@@ -1140,7 +1140,7 @@
                </widget>
               </item>
               <item row="0" column="2">
-               <widget class="QLabel" name="label_11">
+               <widget class="QLabel" name="followingSpeedLabel">
                 <property name="toolTip">
                  <string>Maximum speed</string>
                 </property>
@@ -1153,7 +1153,7 @@
                </widget>
               </item>
               <item row="1" column="2">
-               <widget class="QSpinBox" name="spinBox_12">
+               <widget class="QSpinBox" name="followingHSpeedSpinBox">
                 <property name="minimum">
                  <number>-99</number>
                 </property>
@@ -1163,7 +1163,7 @@
                </widget>
               </item>
               <item row="2" column="2">
-               <widget class="QSpinBox" name="spinBox_11">
+               <widget class="QSpinBox" name="followingVSpeedSpinBox">
                 <property name="minimum">
                  <number>-99</number>
                 </property>
@@ -1178,7 +1178,7 @@
           </widget>
          </item>
          <item>
-          <spacer name="verticalSpacer">
+          <spacer name="viewsVerticalSpacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
@@ -1195,7 +1195,7 @@
       </widget>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <layout class="QVBoxLayout" name="sceneLayout">
        <property name="spacing">
         <number>4</number>
        </property>
