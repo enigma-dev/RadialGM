@@ -25,6 +25,7 @@
 #include <QtWidgets>
 
 #include <functional>
+#include <unordered_map>
 
 #undef GetMessage
 

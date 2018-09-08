@@ -2,6 +2,8 @@
 
 #include "Components/ArtManager.h"
 
+#include <unordered_map>
+
 TreeModel::TreeModel(buffers::TreeNode *root, QObject *parent) : QAbstractItemModel(parent), root(root) {
   SetupParents(root);
 }
