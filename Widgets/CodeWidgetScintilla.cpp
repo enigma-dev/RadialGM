@@ -8,18 +8,27 @@
 
 CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), font(QFont("Courier", 10)) {
   QFontMetrics fontMetrics(font);
-  QsciScintilla* textEdit = new QsciScintilla(this);
+  QsciScintilla* codeEdit = new QsciScintilla(this);
+  this->textWidget = codeEdit;
 
-  textEdit->setCaretLineVisible(true);
-  textEdit->setCaretLineBackgroundColor(QColor("#ffe4e4"));
+  codeEdit->setCaretLineVisible(true);
+  codeEdit->setCaretLineBackgroundColor(QColor("#ffe4e4"));
 
-  textEdit->setMarginLineNumbers(0, true);
-  textEdit->setMarginWidth(0, fontMetrics.width("000"));
-  textEdit->setMarginsFont(font);
+  codeEdit->setMarginLineNumbers(0, true);
+  codeEdit->setMarginWidth(0, fontMetrics.width("000"));
+  codeEdit->setMarginsFont(font);
   QsciLexerCPP* lexer = new QsciLexerCPP();
   lexer->setDefaultFont(font);
-  textEdit->setLexer(lexer);
-  this->layout()->addWidget(textEdit);
+  codeEdit->setLexer(lexer);
+
+  QVBoxLayout* rootLayout = new QVBoxLayout(this);
+  rootLayout->setMargin(0);
+  rootLayout->addWidget(codeEdit);
+  this->setLayout(rootLayout);
 }
 
 CodeWidget::~CodeWidget() {}
+
+QString CodeWidget::code() const { return static_cast<QsciScintilla*>(this->textWidget)->text(); }
+
+void CodeWidget::setCode(QString code) { static_cast<QsciScintilla*>(this->textWidget)->setText(code); }

@@ -9,6 +9,7 @@
 #include "Editors/ObjectEditor.h"
 #include "Editors/PathEditor.h"
 #include "Editors/RoomEditor.h"
+#include "Editors/ScriptEditor.h"
 #include "Editors/SoundEditor.h"
 #include "Editors/SpriteEditor.h"
 #include "Editors/TimelineEditor.h"
@@ -95,6 +96,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
                                 {TypeCase::kBackground, EditorFactory<BackgroundEditor>},
                                 {TypeCase::kPath, EditorFactory<PathEditor>},
                                 {TypeCase::kFont, EditorFactory<FontEditor>},
+                                {TypeCase::kScript, EditorFactory<ScriptEditor>},
                                 {TypeCase::kTimeline, EditorFactory<TimelineEditor>},
                                 {TypeCase::kObject, EditorFactory<ObjectEditor>},
                                 {TypeCase::kRoom, EditorFactory<RoomEditor>}});

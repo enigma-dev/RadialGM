@@ -76,7 +76,9 @@ SOURCES += \
     Components/Utility.cpp \
     Plugins/RGMPlugin.cpp \
     Plugins/ServerPlugin.cpp \
-    Components/RecentFiles.cpp
+    Components/RecentFiles.cpp \
+    Editors/CodeEditor.cpp \
+    Editors/ScriptEditor.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -102,7 +104,9 @@ HEADERS += \
     Widgets/CodeWidget.h \
     Components/RecentFiles.h \
     main.h \
-    Dialogs/PreferencesKeys.h
+    Dialogs/PreferencesKeys.h \
+    Editors/CodeEditor.h \
+    Editors/ScriptEditor.h
 
 FORMS += \
     MainWindow.ui \
@@ -115,7 +119,8 @@ FORMS += \
     Editors/TimelineEditor.ui \
     Editors/RoomEditor.ui \
     Editors/SpriteEditor.ui \
-    Editors/SoundEditor.ui
+    Editors/SoundEditor.ui \
+    Editors/CodeEditor.ui
 
 RESOURCES += \
     images.qrc

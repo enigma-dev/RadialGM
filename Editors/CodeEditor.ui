@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CodeEditor</class>
+ <widget class="QWidget" name="CodeEditor">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>656</width>
+    <height>379</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Background</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../images.qrc">
+    <normaloff>:/resources/background.png</normaloff>:/resources/background.png</iconset>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QToolBar" name="mainToolBar">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="floatable">
+      <bool>false</bool>
+     </property>
+     <addaction name="actionSave"/>
+     <addaction name="separator"/>
+     <addaction name="actionNewSource"/>
+     <addaction name="actionLoadSource"/>
+     <addaction name="actionSaveSource"/>
+     <addaction name="separator"/>
+    </widget>
+   </item>
+   <item>
+    <widget class="CodeWidget" name="codeWidget" native="true"/>
+   </item>
+   <item>
+    <widget class="QStatusBar" name="statusBar"/>
+   </item>
+  </layout>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/accept.png</normaloff>:/actions/accept.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save and close</string>
+   </property>
+  </action>
+  <action name="actionNewSource">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/new.png</normaloff>:/actions/new.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Source</string>
+   </property>
+   <property name="toolTip">
+    <string>New Source</string>
+   </property>
+  </action>
+  <action name="actionLoadSource">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/open.png</normaloff>:/actions/open.png</iconset>
+   </property>
+   <property name="text">
+    <string>Load Source</string>
+   </property>
+   <property name="toolTip">
+    <string>Load Source</string>
+   </property>
+  </action>
+  <action name="actionSaveSource">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/save.png</normaloff>:/actions/save.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Source</string>
+   </property>
+   <property name="toolTip">
+    <string>Save Source</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CodeWidget</class>
+   <extends>QWidget</extends>
+   <header>Widgets/CodeWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../images.qrc"/>
+ </resources>
+ <connections/>
+</ui>
