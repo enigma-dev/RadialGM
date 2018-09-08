@@ -27,8 +27,6 @@ void ImmediateDataWidgetMapper::widgetChanged() {
   delegate->setModelData(editor, model, this->indexAt(this->mappedSection(editor)));
 }
 
-#include <QDebug>
-
 void ImmediateDataWidgetMapper::addMapping(QWidget *widget, int section, QByteArray propertyName) {
   // since QDataWidgetMapper makes its widget map private we have no way of
   // getting all of the widgets registered with this mapper
@@ -40,7 +38,6 @@ void ImmediateDataWidgetMapper::addMapping(QWidget *widget, int section, QByteAr
   // all widgets have several properties, but most have a "primary" property with which
   // the user interacts, i.e. "checked" for QCheckBox
   propertyName = this->mappedPropertyName(widget);
-  qDebug() << propertyName;
   // we use the widget's meta object in order to get us a signal that we can listen to
   // so we know when this property changes
   auto widgetMetaObject = widget->metaObject();
