@@ -78,7 +78,7 @@ bool SpriteModel::insertRows(int position, int rows, const QModelIndex& /*parent
   }
 
   for (int i = 0; i < rows; ++i) {
-    protobuf->Add("");
+    protobuf->Add();
   }
 
   for (int i = position; i < images.size(); ++i) {
