@@ -15,6 +15,13 @@ class CodeWidget : public QWidget {
   QString code() const;
   void setCode(QString);
 
+ public slots:
+  void undo();
+  void redo();
+  void cut();
+  void copy();
+  void paste();
+
  protected:
   QFont font;
   QWidget* textWidget = nullptr;

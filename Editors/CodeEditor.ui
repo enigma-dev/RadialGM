@@ -226,10 +226,98 @@
    <extends>QWidget</extends>
    <header>Widgets/CodeWidget.h</header>
    <container>1</container>
+   <slots>
+    <slot>cut()</slot>
+    <slot>copy()</slot>
+    <slot>paste()</slot>
+    <slot>undo()</slot>
+    <slot>redo()</slot>
+   </slots>
   </customwidget>
  </customwidgets>
  <resources>
   <include location="../images.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionCut</sender>
+   <signal>triggered()</signal>
+   <receiver>codeWidget</receiver>
+   <slot>cut()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>367</x>
+     <y>214</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionCopy</sender>
+   <signal>triggered()</signal>
+   <receiver>codeWidget</receiver>
+   <slot>copy()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>367</x>
+     <y>214</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPaste</sender>
+   <signal>triggered()</signal>
+   <receiver>codeWidget</receiver>
+   <slot>paste()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>367</x>
+     <y>214</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionUndo</sender>
+   <signal>triggered()</signal>
+   <receiver>codeWidget</receiver>
+   <slot>undo()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>367</x>
+     <y>214</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionRedo</sender>
+   <signal>triggered()</signal>
+   <receiver>codeWidget</receiver>
+   <slot>redo()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>367</x>
+     <y>214</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

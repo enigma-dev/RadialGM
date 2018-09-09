@@ -32,3 +32,13 @@ CodeWidget::~CodeWidget() {}
 QString CodeWidget::code() const { return static_cast<QsciScintilla*>(this->textWidget)->text(); }
 
 void CodeWidget::setCode(QString code) { static_cast<QsciScintilla*>(this->textWidget)->setText(code); }
+
+void CodeWidget::undo() { static_cast<QsciScintilla*>(this->textWidget)->undo(); }
+
+void CodeWidget::redo() { static_cast<QsciScintilla*>(this->textWidget)->redo(); }
+
+void CodeWidget::cut() { static_cast<QsciScintilla*>(this->textWidget)->cut(); }
+
+void CodeWidget::copy() { static_cast<QsciScintilla*>(this->textWidget)->copy(); }
+
+void CodeWidget::paste() { static_cast<QsciScintilla*>(this->textWidget)->paste(); }
