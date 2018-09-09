@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>656</width>
-    <height>379</height>
+    <width>735</width>
+    <height>425</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -61,7 +61,17 @@
      <addaction name="actionNewSource"/>
      <addaction name="actionLoadSource"/>
      <addaction name="actionSaveSource"/>
+     <addaction name="actionPrint"/>
      <addaction name="separator"/>
+     <addaction name="actionUndo"/>
+     <addaction name="actionRedo"/>
+     <addaction name="separator"/>
+     <addaction name="actionCut"/>
+     <addaction name="actionCopy"/>
+     <addaction name="actionPaste"/>
+     <addaction name="separator"/>
+     <addaction name="actionFindAndReplace"/>
+     <addaction name="actionGoToLine"/>
     </widget>
    </item>
    <item>
@@ -114,6 +124,99 @@
    </property>
    <property name="toolTip">
     <string>Save Source</string>
+   </property>
+  </action>
+  <action name="actionPrint">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/print.png</normaloff>:/actions/print.png</iconset>
+   </property>
+   <property name="text">
+    <string>Print</string>
+   </property>
+   <property name="toolTip">
+    <string>Print Source</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/undo.png</normaloff>:/actions/undo.png</iconset>
+   </property>
+   <property name="text">
+    <string>Undo</string>
+   </property>
+   <property name="toolTip">
+    <string>Undo Last Edit</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/redo.png</normaloff>:/actions/redo.png</iconset>
+   </property>
+   <property name="text">
+    <string>Redo</string>
+   </property>
+   <property name="toolTip">
+    <string>Redo Last Edit</string>
+   </property>
+  </action>
+  <action name="actionCut">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/cut.png</normaloff>:/actions/cut.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cut</string>
+   </property>
+   <property name="toolTip">
+    <string>Cut</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/copy.png</normaloff>:/actions/copy.png</iconset>
+   </property>
+   <property name="text">
+    <string>Copy</string>
+   </property>
+   <property name="toolTip">
+    <string>Copy</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/paste.png</normaloff>:/actions/paste.png</iconset>
+   </property>
+   <property name="text">
+    <string>Paste</string>
+   </property>
+  </action>
+  <action name="actionFindAndReplace">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/find.png</normaloff>:/actions/find.png</iconset>
+   </property>
+   <property name="text">
+    <string>Find and Replace</string>
+   </property>
+   <property name="toolTip">
+    <string>Find and Replace</string>
+   </property>
+  </action>
+  <action name="actionGoToLine">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/line-goto.png</normaloff>:/actions/line-goto.png</iconset>
+   </property>
+   <property name="text">
+    <string>Go to line</string>
+   </property>
+   <property name="toolTip">
+    <string>Go to line</string>
    </property>
   </action>
  </widget>
