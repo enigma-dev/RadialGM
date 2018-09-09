@@ -27,9 +27,11 @@ set(RGM_SOURCES
     MainWindow.cpp
     Dialogs/PreferencesDialog.cpp
     Editors/BaseEditor.cpp
+    Editors/CodeEditor.cpp
     Editors/BackgroundEditor.cpp
     Editors/ObjectEditor.cpp
     Editors/SoundEditor.cpp
+    Editors/ScriptEditor.cpp
     Editors/FontEditor.cpp
     Editors/PathEditor.cpp
     Editors/TimelineEditor.cpp
@@ -53,10 +55,12 @@ set(RGM_HEADERS
     MainWindow.h
     Dialogs/PreferencesDialog.h
     Dialogs/PreferencesKeys.h
+    Editors/CodeEditor.h
     Editors/BaseEditor.h
     Editors/BackgroundEditor.h
     Editors/ObjectEditor.h
     Editors/SoundEditor.h
+    Editors/ScriptEditor.h
     Editors/FontEditor.h
     Editors/PathEditor.h
     Editors/TimelineEditor.h
@@ -79,6 +83,7 @@ set(RGM_UI
     MainWindow.ui
     Dialogs/PreferencesDialog.ui
     Dialogs/AddImageDialog.ui
+    Editors/CodeEditor.ui
     Editors/BackgroundEditor.ui
     Editors/ObjectEditor.ui
     Editors/FontEditor.ui
@@ -101,7 +106,7 @@ set(EDITOR_SOURCES Widgets/CodeWidgetPlain.cpp)
 #endif()
 
 # Tell CMake to create the RadialGM executable
-add_executable(${EXE} WIN32 ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${RGM_RC})
+add_executable(${EXE} WIN32 ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${EDITOR_SOURCES} ${RGM_RC})
 
 message(STATUS "Initial build flags:")
 set(CompilerFlags
