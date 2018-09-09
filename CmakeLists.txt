@@ -100,10 +100,10 @@ set(RGM_RC
 
 # Check for QScintilla
 set(EDITOR_SOURCES Widgets/CodeWidgetPlain.cpp)
-#find_package(QScintilla)
-#if (QSCINTILLA_FOUND)
-#	set(EDITOR_SOURCES Widgets/CodeWidgetScintilla.cpp)
-#endif()
+find_package(qscintilla)
+if (QSCINTILLA_FOUND)
+	set(EDITOR_SOURCES Widgets/CodeWidgetScintilla.cpp)
+endif()
 
 # Tell CMake to create the RadialGM executable
 add_executable(${EXE} WIN32 ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${EDITOR_SOURCES} ${RGM_RC})
@@ -124,9 +124,9 @@ foreach(CompilerFlag ${CompilerFlags})
   message(STATUS "  '${CompilerFlag}': ${${CompilerFlag}}")
 endforeach()
 
-#if (QSCINTILLA_FOUND)
-#	target_link_libraries(${EXE} PRIVATE qscintilla)
-#endif()
+if (QSCINTILLA_FOUND)
+	target_link_libraries(${EXE} PRIVATE qscintilla)
+endif()
 
 # Find PugiXML
 find_library(LIB_PUGIXML NAMES pugixml)
