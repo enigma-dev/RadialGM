@@ -42,3 +42,7 @@ void CodeWidget::cut() { static_cast<QsciScintilla*>(this->textWidget)->cut(); }
 void CodeWidget::copy() { static_cast<QsciScintilla*>(this->textWidget)->copy(); }
 
 void CodeWidget::paste() { static_cast<QsciScintilla*>(this->textWidget)->paste(); }
+
+int CodeWidget::lineCount() { return static_cast<QsciScintilla*>(this->textWidget)->lines(); }
+
+void CodeWidget::gotoLine(int line) { static_cast<QsciScintilla*>(this->textWidget)->setCursorPosition(line - 1, 0); }

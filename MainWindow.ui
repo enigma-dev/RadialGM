@@ -87,6 +87,9 @@
       <property name="tabShape">
        <enum>QTabWidget::Rounded</enum>
       </property>
+      <property name="tabPosition">
+       <enum>QTabWidget::North</enum>
+      </property>
      </widget>
     </item>
    </layout>
@@ -97,7 +100,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>24</height>
+     <height>31</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

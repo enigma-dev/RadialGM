@@ -2,6 +2,8 @@
 
 #include <QLayout>
 #include <QPlainTextEdit>
+#include <QTextBlock>
+#include <QTextCursor>
 
 CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), font(QFont("Courier", 10)) {
   QPlainTextEdit* plainTextEdit = new QPlainTextEdit(this);
@@ -29,3 +31,11 @@ void CodeWidget::cut() { static_cast<QPlainTextEdit*>(this->textWidget)->cut(); 
 void CodeWidget::copy() { static_cast<QPlainTextEdit*>(this->textWidget)->copy(); }
 
 void CodeWidget::paste() { static_cast<QPlainTextEdit*>(this->textWidget)->paste(); }
+
+int CodeWidget::lineCount() { return static_cast<QPlainTextEdit*>(this->textWidget)->blockCount(); }
+
+void CodeWidget::gotoLine(int line) {
+  auto plainTextEdit = static_cast<QPlainTextEdit*>(this->textWidget);
+  QTextCursor textCursor(plainTextEdit->document()->findBlockByLineNumber(line - 1));
+  plainTextEdit->setTextCursor(textCursor);
+}

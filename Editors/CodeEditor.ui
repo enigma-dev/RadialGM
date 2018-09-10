@@ -21,7 +21,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../images.qrc">
-    <normaloff>:/resources/background.png</normaloff>:/resources/background.png</iconset>
+    <normaloff>:/resources/script.png</normaloff>:/resources/script.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
    <property name="spacing">
@@ -206,6 +206,9 @@
    <property name="toolTip">
     <string>Find and Replace</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionGoToLine">
    <property name="icon">
@@ -232,6 +235,11 @@
     <slot>paste()</slot>
     <slot>undo()</slot>
     <slot>redo()</slot>
+    <slot>newSource()</slot>
+    <slot>loadSource()</slot>
+    <slot>saveSource()</slot>
+    <slot>printSource()</slot>
+    <slot>gotoLineDialog()</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -308,6 +316,86 @@
    <signal>triggered()</signal>
    <receiver>codeWidget</receiver>
    <slot>redo()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>367</x>
+     <y>214</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionNewSource</sender>
+   <signal>triggered()</signal>
+   <receiver>codeWidget</receiver>
+   <slot>newSource()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>367</x>
+     <y>214</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLoadSource</sender>
+   <signal>triggered()</signal>
+   <receiver>codeWidget</receiver>
+   <slot>loadSource()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>367</x>
+     <y>214</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSaveSource</sender>
+   <signal>triggered()</signal>
+   <receiver>codeWidget</receiver>
+   <slot>saveSource()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>367</x>
+     <y>214</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPrint</sender>
+   <signal>triggered()</signal>
+   <receiver>codeWidget</receiver>
+   <slot>printSource()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>367</x>
+     <y>214</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionGoToLine</sender>
+   <signal>triggered()</signal>
+   <receiver>codeWidget</receiver>
+   <slot>gotoLineDialog()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>

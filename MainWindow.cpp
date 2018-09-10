@@ -61,6 +61,8 @@ void MainWindow::readSettings() {
   settings.beginGroup("MainWindow");
   restoreGeometry(settings.value("geometry").toByteArray());
   restoreState(settings.value("state").toByteArray());
+  ui->actionToggleTabbedView->setChecked(settings.value("tabbedView", false).toBool());
+  this->on_actionToggleTabbedView_triggered();
   settings.endGroup();
 }
 
@@ -71,6 +73,7 @@ void MainWindow::writeSettings() {
   settings.beginGroup("MainWindow");
   settings.setValue("geometry", saveGeometry());
   settings.setValue("state", saveState());
+  settings.setValue("tabbedView", ui->actionToggleTabbedView->isChecked());
   settings.endGroup();
 }
 
@@ -198,6 +201,10 @@ void MainWindow::on_actionCloseAll_triggered() { ui->mdiArea->closeAllSubWindows
 
 void MainWindow::on_actionToggleTabbedView_triggered() {
   ui->mdiArea->setViewMode(ui->actionToggleTabbedView->isChecked() ? QMdiArea::TabbedView : QMdiArea::SubWindowView);
+  QTabBar *tabBar = ui->mdiArea->findChild<QTabBar *>();
+  if (tabBar) {
+    tabBar->setExpanding(false);
+  }
 }
 
 void MainWindow::on_actionNext_triggered() { ui->mdiArea->activateNextSubWindow(); }
