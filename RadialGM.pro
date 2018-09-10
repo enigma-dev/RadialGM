@@ -21,9 +21,9 @@ QMAKE_TARGET_DESCRIPTION = ENIGMA Development Environment
 QMAKE_TARGET_COPYRIGHT = "Copyright \\251 2007-2018 ENIGMA Dev Team"
 
 # Uncomment if you want QPlainTextEdit used in place of QScintilla
-#CONFIG += RGM_DISABLE_SYNTAXHIGHLIGHTING
+#CONFIG += rgm_disable_syntaxhighlight
 
-RGM_DISABLE_SYNTAXHIGHLIGHTING {
+rgm_disable_syntaxhighlight {
   SOURCES += Widgets/CodeWidgetPlain.cpp
 } else {
   SOURCES += Widgets/CodeWidgetScintilla.cpp
