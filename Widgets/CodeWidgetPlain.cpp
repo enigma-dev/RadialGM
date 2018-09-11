@@ -2,6 +2,7 @@
 
 #include <QLayout>
 #include <QPlainTextEdit>
+#include <QPrintDialog>
 #include <QTextBlock>
 #include <QTextCursor>
 
@@ -38,4 +39,17 @@ void CodeWidget::gotoLine(int line) {
   auto plainTextEdit = static_cast<QPlainTextEdit*>(this->textWidget);
   QTextCursor textCursor(plainTextEdit->document()->findBlockByLineNumber(line - 1));
   plainTextEdit->setTextCursor(textCursor);
+}
+
+void CodeWidget::printSource() {
+  QPrinter printer;
+  QPrintDialog printDialog(&printer, this);
+  auto plainTextEdit = static_cast<QPlainTextEdit*>(this->textWidget);
+  if (plainTextEdit->textCursor().hasSelection()) printDialog.addEnabledOption(QAbstractPrintDialog::PrintSelection);
+  if (printDialog.exec() == QDialog::Accepted) this->print(&printer);
+}
+
+void CodeWidget::print(QPrinter* printer) {
+  auto plainTextEdit = static_cast<QPlainTextEdit*>(this->textWidget);
+  plainTextEdit->document()->print(printer);
 }

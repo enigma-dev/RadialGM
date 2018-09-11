@@ -1,10 +1,12 @@
 #include "CodeWidget.h"
 
 #include <Qsci/qscilexercpp.h>
+#include <Qsci/qsciprinter.h>
 #include <Qsci/qsciscintilla.h>
 
 #include <QFontMetrics>
 #include <QLayout>
+#include <QPrintDialog>
 
 namespace {
 QsciLexerCPP* cppLexer = nullptr;
@@ -60,3 +62,17 @@ void CodeWidget::paste() { static_cast<QsciScintilla*>(this->textWidget)->paste(
 int CodeWidget::lineCount() { return static_cast<QsciScintilla*>(this->textWidget)->lines(); }
 
 void CodeWidget::gotoLine(int line) { static_cast<QsciScintilla*>(this->textWidget)->setCursorPosition(line - 1, 0); }
+
+void CodeWidget::printSource() {
+  QsciPrinter sciPrinter;
+  QPrintDialog printDialog(&sciPrinter, this);
+  auto codeEdit = static_cast<QsciScintilla*>(this->textWidget);
+  if (codeEdit->hasSelectedText()) printDialog.addEnabledOption(QAbstractPrintDialog::PrintSelection);
+  if (printDialog.exec() == QDialog::Accepted) this->print(&sciPrinter);
+}
+
+void CodeWidget::print(QPrinter* printer) {
+  auto sciPrinter = static_cast<QsciPrinter*>(printer);
+  auto codeEdit = static_cast<QsciScintilla*>(this->textWidget);
+  sciPrinter->printRange(codeEdit);
+}

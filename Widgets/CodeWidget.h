@@ -5,6 +5,7 @@
 #include <QFont>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QPrinter>
 #include <QTextStream>
 #include <QWidget>
 
@@ -63,7 +64,7 @@ class CodeWidget : public QWidget {
     out << this->code();
   }
 
-  void printSource() {}
+  void printSource();
 
   void gotoLineDialog() {
     bool ok;
@@ -72,6 +73,7 @@ class CodeWidget : public QWidget {
     gotoLine(lineNumber);
   }
 
+  void print(QPrinter* printer);
   void undo();
   void redo();
   void cut();
