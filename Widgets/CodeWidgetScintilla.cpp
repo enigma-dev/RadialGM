@@ -1,13 +1,23 @@
 #include "CodeWidget.h"
 
-#include <QFontMetrics>
-#include <QLayout>
-
 #include <Qsci/qscilexercpp.h>
 #include <Qsci/qsciscintilla.h>
 
+#include <QFontMetrics>
+#include <QLayout>
+
+namespace {
+QsciLexerCPP* cppLexer = nullptr;
+}
+
 CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), font(QFont("Courier", 10)) {
   QFontMetrics fontMetrics(font);
+
+  if (cppLexer == nullptr) {
+    cppLexer = new QsciLexerCPP();
+    cppLexer->setFont(font);
+  }
+
   QsciScintilla* codeEdit = new QsciScintilla(this);
   this->textWidget = codeEdit;
 
@@ -15,11 +25,15 @@ CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), font(QFont("Courier",
   codeEdit->setCaretLineBackgroundColor(QColor("#ffe4e4"));
 
   codeEdit->setMarginLineNumbers(0, true);
-  codeEdit->setMarginWidth(0, fontMetrics.width("000"));
   codeEdit->setMarginsFont(font);
-  QsciLexerCPP* lexer = new QsciLexerCPP();
-  lexer->setDefaultFont(font);
-  codeEdit->setLexer(lexer);
+
+  codeEdit->setLexer(cppLexer);
+
+  connect(codeEdit, &QsciScintilla::textChanged, [=]() {
+    const int padding = 8;
+    auto maxLineString = QString::number(codeEdit->lines());
+    codeEdit->setMarginWidth(0, fontMetrics.width(maxLineString) + padding);
+  });
 
   QVBoxLayout* rootLayout = new QVBoxLayout(this);
   rootLayout->setMargin(0);
