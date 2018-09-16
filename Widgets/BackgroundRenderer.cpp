@@ -55,10 +55,10 @@ void BackgroundRenderer::WriteImage(QString fName, QString type) {
 QSize BackgroundRenderer::sizeHint() const { return QSize(pixmap.width(), pixmap.height()); }
 
 void BackgroundRenderer::SetZoom(qreal zoom) {
+  if (zoom > 3200) zoom = 3200;
+  if (zoom < 0.0625) zoom = 0.0625;
   this->zoom = zoom;
-  if (this->zoom > 3200) this->zoom = 3200;
-  if (this->zoom < 0.0625) this->zoom = 0.0625;
-  setFixedSize(static_cast<int>(pixmap.width() * this->zoom) + 1, static_cast<int>(pixmap.height() * this->zoom) + 1);
+  setFixedSize(static_cast<int>(pixmap.width() * zoom) + 1, static_cast<int>(pixmap.height() * zoom) + 1);
 }
 
 const qreal &BackgroundRenderer::GetZoom() const { return zoom; }
