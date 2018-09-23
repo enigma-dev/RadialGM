@@ -215,10 +215,6 @@ target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_QT_PLATFORM_D},
                       "$<IF:$<CONFIG:Debug>,${LIB_QT_WIN_D},${LIB_QT_WIN}>"
                       )
 
-if (LIB_QSCINTILLA)
-    #target_link_libraries(${EXE} PRIVATE ${LIB_QSCINTILLA})
-endif()
-
 # Find FreeType
 find_package(Freetype REQUIRED)
 include_directories(${FREETYPE_INCLUDE_DIRS})
@@ -242,3 +238,7 @@ target_link_libraries(${EXE} PRIVATE ${LIB_DOUBLE_CONVERSION})
 
 # Windows is a turd
 target_link_libraries(${EXE} PRIVATE Ws2_32 Wldap32 Crypt32 Winmm Userenv Netapi32 version Dwmapi Imm32)
+
+if (LIB_QSCINTILLA)
+    target_link_libraries(${EXE} PRIVATE ${LIB_QSCINTILLA})
+endif()
