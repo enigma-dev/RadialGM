@@ -167,8 +167,8 @@ find_package(OpenSSL REQUIRED)
 target_link_libraries(${EXE} PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 
 # Find Qt
-find_package(Qt5 COMPONENTS Core Widgets Gui REQUIRED)
-target_link_libraries(${EXE} PRIVATE Qt5::Core Qt5::WinMain Qt5::Core Qt5::Widgets Qt5::Gui Qt5::Gui)
+find_package(Qt5 Qt5PrintSupport COMPONENTS Core Widgets Gui REQUIRED)
+target_link_libraries(${EXE} PRIVATE Qt5::Core Qt5::WinMain Qt5::Core Qt5::Widgets Qt5::Gui Qt5::Gui Qt5::PrintSupport)
 
 # Debug
 find_library(LIB_QT_PLATFORM_D NAMES Qt5PlatformCompositorSupportd)
