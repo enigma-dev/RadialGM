@@ -206,10 +206,6 @@ find_library(LIB_WIN_UXTHEME NAMES Uxtheme)
 find_library(LIB_QT_WINVISTASTYLE NAMES qwindowsvistastyle PATHS "${QT_DIR}/plugins/styles")
 find_library(LIB_QT_WIN NAMES qwindows PATHS "${QT_DIR}/plugins/platforms")
 
-if (LIB_QSCINTILLA)
-    target_link_libraries(${EXE} PRIVATE ${LIB_QSCINTILLA})
-endif()
-
 target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_QT_PLATFORM_D},${LIB_QT_PLATFORM}>"
 #                      "$<IF:$<CONFIG:Debug>,${LIB_QT_FONT_D},${LIB_QT_FONT}>"
                       "$<IF:$<CONFIG:Debug>,${LIB_QT_UI_D},${LIB_QT_UI}>"
@@ -222,7 +218,11 @@ target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_QT_PLATFORM_D},
                       "$<IF:$<CONFIG:Debug>,${LIB_WIN_UXTHEME_D},${LIB_WIN_UXTHEME}>"
                       "$<IF:$<CONFIG:Debug>,${LIB_QT_WINVISTASTYLE_D},${LIB_QT_WINVISTASTYLE}>"
                       "$<IF:$<CONFIG:Debug>,${LIB_QT_WIN_D},${LIB_QT_WIN}>"
-					  )
+                      )
+
+if (LIB_QSCINTILLA)
+    target_link_libraries(${EXE} PRIVATE ${LIB_QSCINTILLA})
+endif()
 
 # Find JPEG
 find_library(LIB_JPEG NAMES jpeg)
