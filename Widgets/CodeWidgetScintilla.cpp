@@ -1,12 +1,12 @@
 #include "CodeWidget.h"
 
-#include <Qsci/qscilexercpp.h>
-#include <Qsci/qsciprinter.h>
-#include <Qsci/qsciscintilla.h>
-
 #include <QFontMetrics>
 #include <QLayout>
 #include <QPrintDialog>
+
+#include <Qsci/qscilexercpp.h>
+#include <Qsci/qsciprinter.h>
+#include <Qsci/qsciscintilla.h>
 
 namespace {
 QsciLexerCPP* cppLexer = nullptr;
