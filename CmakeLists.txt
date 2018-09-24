@@ -126,7 +126,7 @@ foreach(CompilerFlag ${CompilerFlags})
 endforeach()
 
 if (LIB_QSCINTILLA)
-    target_link_libraries(${EXE} PUBLIC ${LIB_QSCINTILLA})
+    target_link_libraries(${EXE} PRIVATE ${LIB_QSCINTILLA})
 endif()
 
 # Find PugiXML
