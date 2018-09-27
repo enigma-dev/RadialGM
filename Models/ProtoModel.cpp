@@ -7,6 +7,26 @@ ProtoModel::ProtoModel(Message *protobuf, QObject *parent)
     : QAbstractItemModel(parent), dirty(false), protobuf(protobuf) {
   protobufBackup = protobuf->New();
   protobufBackup->CopyFrom(*protobuf);
+
+  const Descriptor *desc = protobuf->GetDescriptor();
+  const Reflection *refl = protobuf->GetReflection();
+  for (int i = 0; i < desc->field_count(); i++) {
+    const google::protobuf::FieldDescriptor *field = desc->field(i);
+    const google::protobuf::OneofDescriptor *oneof = field->containing_oneof();
+    if (oneof && refl->HasOneof(*protobuf, oneof)) continue;
+
+    if (field->is_repeated()) {
+        if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
+          for (int j=0; j < refl->FieldSize(*protobuf, field); j++)
+            repeatedMessages[i].append(
+                        QVariant::fromValue(static_cast<void*>(new ProtoModel(refl->MutableMessage(protobuf, field),
+                                                                              nullptr))));
+        }
+
+    } else if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
+      messages.insert(i, new ProtoModel(refl->MutableMessage(protobuf, field), nullptr));
+    }
+  }
 }
 
 ProtoModel::~ProtoModel() { delete protobufBackup; }
@@ -90,9 +110,15 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
   const FieldDescriptor *field = desc->FindFieldByNumber(index.row());
   if (!field) return QVariant();
 
+  if (field->is_repeated()) {
+    if (field->cpp_type() == CppType::CPPTYPE_MESSAGE)
+        return repeatedMessages[index.row()];
+    else return QVariant();
+  }
+
   switch (field->cpp_type()) {
     case CppType::CPPTYPE_MESSAGE:
-      return refl->GetInt32(*protobuf, field);
+      return QVariant::fromValue(static_cast<void*>(messages[index.row()]));
     case CppType::CPPTYPE_INT32:
       return refl->GetInt32(*protobuf, field);
     case CppType::CPPTYPE_INT64:

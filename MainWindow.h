@@ -3,6 +3,7 @@
 
 #include "Models/ProtoModel.h"
 #include "Models/TreeModel.h"
+#include "Models/ResourceModelMap.h"
 
 class MainWindow;
 #include "Components/RecentFiles.h"
@@ -58,7 +59,7 @@ class MainWindow : public QMainWindow {
   void on_actionClearRecentMenu_triggered();
 
  private:
-  QHash<buffers::TreeNode *, ProtoModel *> resourceModels;
+  ResourceModelMap* resourceMap;
   QHash<buffers::TreeNode *, QMdiSubWindow *> subWindows;
 
   TreeModel *treeModel;

@@ -2,6 +2,8 @@
 #define RESOURCEMODEL_H
 
 #include <QAbstractItemModel>
+#include <QHash>
+#include <QList>
 
 #include <google/protobuf/message.h>
 
@@ -28,6 +30,8 @@ class ProtoModel : public QAbstractItemModel {
   Qt::ItemFlags flags(const QModelIndex &index) const override;
 
  private:
+  QHash<int, ProtoModel*> messages;
+  QHash<int, QList<QVariant>> repeatedMessages;
   bool dirty;
   google::protobuf::Message *protobuf;
   google::protobuf::Message *protobufBackup;

@@ -114,18 +114,20 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     auto factoryFunction = factoryMap.find(item->type_case());
     if (factoryFunction == factoryMap.end()) return;  // no registered editor
 
-    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(typeMessage, nullptr);
-    auto resourceModel = resourceModels[item];
+    //if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(typeMessage, nullptr);
+    //auto resourceModel = resourceModels[item];
 
-    QWidget *editor = factoryFunction->second(resourceModel, nullptr);
-    resourceModel->setParent(editor);
+    QVariant res = resourceMap->GetResourceByName(item->type_case(), item->name())->data(buffers::TreeNode::kBackground);
+    ProtoModel* resModel = static_cast<ProtoModel*>(res.value<void*>());
+    QWidget *editor = factoryFunction->second(resModel, nullptr);
+    //resourceModel->setParent(editor);
 
     subWindow = subWindows[item] = ui->mdiArea->addSubWindow(editor);
     subWindow->resize(subWindow->frameSize().expandedTo(editor->size()));
     editor->setParent(subWindow);
 
     subWindow->connect(subWindow, &QObject::destroyed, [=]() {
-      resourceModels.remove(item);
+      //resourceModels.remove(item);
       subWindows.remove(item);
     });
     subWindow->setWindowIcon(subWindow->widget()->windowIcon());
@@ -157,6 +159,7 @@ void MainWindow::openFile(QString fName) {
   MainWindow::setWindowTitle(fileInfo.fileName() + " - ENIGMA");
   recentFiles->prependFile(fName);
 
+  resourceMap = new ResourceModelMap(project->mutable_game()->mutable_root());
   treeModel = new TreeModel(project->mutable_game()->mutable_root(), this);
   ui->treeView->setModel(treeModel);
   treeModel->connect(treeModel, &QAbstractItemModel::dataChanged,

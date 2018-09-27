@@ -76,7 +76,8 @@ SOURCES += \
     Components/Utility.cpp \
     Plugins/RGMPlugin.cpp \
     Plugins/ServerPlugin.cpp \
-    Components/RecentFiles.cpp
+    Components/RecentFiles.cpp \
+    Models/ResourceModelMap.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -102,7 +103,8 @@ HEADERS += \
     Widgets/CodeWidget.h \
     Components/RecentFiles.h \
     main.h \
-    Dialogs/PreferencesKeys.h
+    Dialogs/PreferencesKeys.h \
+    Models/ResourceModelMap.h
 
 FORMS += \
     MainWindow.ui \
