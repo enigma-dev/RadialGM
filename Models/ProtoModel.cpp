@@ -18,7 +18,7 @@ ProtoModel::ProtoModel(Message *protobuf, QObject *parent)
     if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
         if (field->is_repeated()) {
           for (int j=0; j < refl->FieldSize(*protobuf, field); j++) {
-            ProtoModel* subModel = new ProtoModel(refl->MutableRepeatedMessage(protobuf, field, j), nullptr);
+            ProtoModel* subModel = new ProtoModel(refl->MutableRepeatedMessage(protobuf, field, j), this);
             repeatedMessages[i].append(QVariant::fromValue(static_cast<void*>(subModel)));
           }
         } else {
@@ -27,7 +27,7 @@ ProtoModel::ProtoModel(Message *protobuf, QObject *parent)
             field = refl->GetOneofFieldDescriptor(*protobuf, oneof);
             if (field->cpp_type() != CppType::CPPTYPE_MESSAGE) continue; // is prolly folder
           }
-          ProtoModel* subModel = new ProtoModel(refl->MutableMessage(protobuf, field), nullptr);
+          ProtoModel* subModel = new ProtoModel(refl->MutableMessage(protobuf, field), this);
           messages[i] = QVariant::fromValue(static_cast<void*>(subModel));
         }
     }
