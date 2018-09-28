@@ -22,6 +22,11 @@ ProtoModel::ProtoModel(Message *protobuf, QObject *parent)
             repeatedMessages[i].append(QVariant::fromValue(static_cast<void*>(subModel)));
           }
         } else {
+          const google::protobuf::OneofDescriptor *oneof = field->containing_oneof();
+          if (oneof && refl->HasOneof(*protobuf, oneof)) {
+            field = refl->GetOneofFieldDescriptor(*protobuf, oneof);
+            if (field->cpp_type() != CppType::CPPTYPE_MESSAGE) continue; // is prolly folder
+          }
           ProtoModel* subModel = new ProtoModel(refl->MutableMessage(protobuf, field), nullptr);
           messages[i] = QVariant::fromValue(static_cast<void*>(subModel));
         }

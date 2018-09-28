@@ -100,34 +100,21 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
                                 {TypeCase::kObject, EditorFactory<ObjectEditor>},
                                 {TypeCase::kRoom, EditorFactory<RoomEditor>}});
 
-  const Descriptor *desc = item->GetDescriptor();
-  const Reflection *refl = item->GetReflection();
-
-  const OneofDescriptor *typeOneof = desc->FindOneofByName("type");
-  const FieldDescriptor *typeField = refl->GetOneofFieldDescriptor(*item, typeOneof);
-  // might not be set or it's not a message
-  if (!typeField || typeField->cpp_type() != FieldDescriptor::CppType::CPPTYPE_MESSAGE) return;
-  Message *typeMessage = refl->MutableMessage(item, typeField);
-
   auto subWindow = subWindows[item];
   if (!subWindows.contains(item) || subWindow == nullptr) {
     auto factoryFunction = factoryMap.find(item->type_case());
     if (factoryFunction == factoryMap.end()) return;  // no registered editor
 
-    //if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(typeMessage, nullptr);
-    //auto resourceModel = resourceModels[item];
-
     ProtoModel* treeNode = resourceMap->GetResourceByName(item->type_case(), item->name());
     ProtoModel* resModel = static_cast<ProtoModel*>(treeNode->data(buffers::TreeNode::kBackgroundFieldNumber).value<void*>());
     QWidget *editor = factoryFunction->second(resModel, nullptr);
-    //resourceModel->setParent(editor);
+    resModel->setParent(editor);
 
     subWindow = subWindows[item] = ui->mdiArea->addSubWindow(editor);
     subWindow->resize(subWindow->frameSize().expandedTo(editor->size()));
     editor->setParent(subWindow);
 
     subWindow->connect(subWindow, &QObject::destroyed, [=]() {
-      //resourceModels.remove(item);
       subWindows.remove(item);
     });
     subWindow->setWindowIcon(subWindow->widget()->windowIcon());
