@@ -1,5 +1,7 @@
 #include "ProtoModel.h"
 
+#include <iostream>
+
 using namespace google::protobuf;
 using CppType = FieldDescriptor::CppType;
 
@@ -12,19 +14,17 @@ ProtoModel::ProtoModel(Message *protobuf, QObject *parent)
   const Reflection *refl = protobuf->GetReflection();
   for (int i = 0; i < desc->field_count(); i++) {
     const google::protobuf::FieldDescriptor *field = desc->field(i);
-    const google::protobuf::OneofDescriptor *oneof = field->containing_oneof();
-    if (oneof && refl->HasOneof(*protobuf, oneof)) continue;
 
-    if (field->is_repeated()) {
-        if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
-          for (int j=0; j < refl->FieldSize(*protobuf, field); j++)
-            repeatedMessages[i].append(
-                        QVariant::fromValue(static_cast<void*>(new ProtoModel(refl->MutableMessage(protobuf, field),
-                                                                              nullptr))));
+    if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
+        if (field->is_repeated()) {
+          for (int j=0; j < refl->FieldSize(*protobuf, field); j++) {
+            ProtoModel* subModel = new ProtoModel(refl->MutableRepeatedMessage(protobuf, field, j), nullptr);
+            repeatedMessages[i].append(QVariant::fromValue(static_cast<void*>(subModel)));
+          }
+        } else {
+          ProtoModel* subModel = new ProtoModel(refl->MutableMessage(protobuf, field), nullptr);
+          messages[i] = QVariant::fromValue(static_cast<void*>(subModel));
         }
-
-    } else if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
-      messages.insert(i, new ProtoModel(refl->MutableMessage(protobuf, field), nullptr));
     }
   }
 }
@@ -110,15 +110,12 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
   const FieldDescriptor *field = desc->FindFieldByNumber(index.row());
   if (!field) return QVariant();
 
-  if (field->is_repeated()) {
-    if (field->cpp_type() == CppType::CPPTYPE_MESSAGE)
-        return repeatedMessages[index.row()];
-    else return QVariant();
-  }
-
   switch (field->cpp_type()) {
     case CppType::CPPTYPE_MESSAGE:
-      return QVariant::fromValue(static_cast<void*>(messages[index.row()]));
+      if (field->is_repeated())
+        return repeatedMessages[index.row()];
+      else
+        return messages[index.row()];
     case CppType::CPPTYPE_INT32:
       return refl->GetInt32(*protobuf, field);
     case CppType::CPPTYPE_INT64:

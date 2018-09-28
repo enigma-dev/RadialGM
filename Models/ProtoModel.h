@@ -30,7 +30,7 @@ class ProtoModel : public QAbstractItemModel {
   Qt::ItemFlags flags(const QModelIndex &index) const override;
 
  private:
-  QHash<int, ProtoModel*> messages;
+  QHash<int, QVariant> messages; //where QVariant is ProtoModel*
   QHash<int, QList<QVariant>> repeatedMessages;
   bool dirty;
   google::protobuf::Message *protobuf;

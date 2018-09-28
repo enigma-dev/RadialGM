@@ -117,8 +117,8 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     //if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(typeMessage, nullptr);
     //auto resourceModel = resourceModels[item];
 
-    QVariant res = resourceMap->GetResourceByName(item->type_case(), item->name())->data(buffers::TreeNode::kBackground);
-    ProtoModel* resModel = static_cast<ProtoModel*>(res.value<void*>());
+    ProtoModel* treeNode = resourceMap->GetResourceByName(item->type_case(), item->name());
+    ProtoModel* resModel = static_cast<ProtoModel*>(treeNode->data(buffers::TreeNode::kBackgroundFieldNumber).value<void*>());
     QWidget *editor = factoryFunction->second(resModel, nullptr);
     //resourceModel->setParent(editor);
 

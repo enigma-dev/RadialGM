@@ -1,9 +1,11 @@
 #include "Models/ResourceModelMap.h"
+
 ResourceModelMap::ResourceModelMap(buffers::TreeNode *root) {
   recursiveBindRes(root);
 }
 
 void ResourceModelMap::recursiveBindRes(buffers::TreeNode *node) {
+
     for (int i=0; i < node->child_size(); ++i) {
       buffers::TreeNode* child = node->mutable_child(i);
       if (child->folder()) {
