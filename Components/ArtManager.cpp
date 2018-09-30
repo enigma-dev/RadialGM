@@ -18,6 +18,12 @@ void ArtManager::Init() {
 
 ArtManager::ArtManager() {}
 
-const QIcon& ArtManager::GetIcon(const QString& name) { return icons[name]; }
+
+const QIcon& ArtManager::GetIcon(const QString& name) {
+  if (!icons.contains(name))
+    icons[name] = QIcon(name);
+
+  return icons[name];
+}
 
 const QBrush& ArtManager::GetTransparenyBrush() { return transparenyBrush; }

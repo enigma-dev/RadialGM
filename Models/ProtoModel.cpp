@@ -153,10 +153,9 @@ ProtoModel* ProtoModel::GetSubModel(int fieldNum) {
 }
 
 QString ProtoModel::GetString(int fieldNum, int index) {
-    std::cout << "wut: " << fieldNum << std::endl;
-    std::cout << "wut2: " << repeatedMessages.empty() << std::endl;
-  //std::cout << repeatedMessages[fieldNum].size() << std::endl;
-  return "";//repeatedMessages[fieldNum][index].toString();
+  if (repeatedMessages.contains(fieldNum) && repeatedMessages[fieldNum].size() > index)
+    return repeatedMessages[fieldNum][index].toString();
+  else return "";
 }
 
 QModelIndex ProtoModel::parent(const QModelIndex & /*index*/) const { return QModelIndex(); }
