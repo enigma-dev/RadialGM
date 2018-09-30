@@ -26,7 +26,7 @@ class MainWindow : public QMainWindow {
   explicit MainWindow(QWidget *parent);
   ~MainWindow();
   void closeEvent(QCloseEvent *event);
-
+  static ResourceModelMap* resourceMap;
   buffers::Game *Game() const { return this->project->mutable_game(); }
 
  public slots:
@@ -59,7 +59,6 @@ class MainWindow : public QMainWindow {
   void on_actionClearRecentMenu_triggered();
 
  private:
-  ResourceModelMap* resourceMap;
   QHash<buffers::TreeNode *, QMdiSubWindow *> subWindows;
 
   TreeModel *treeModel;

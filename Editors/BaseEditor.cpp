@@ -7,7 +7,7 @@ BaseEditor::BaseEditor(ProtoModel* model, QWidget* parent)
     : QWidget(parent), model(model), mapper(new ImmediateDataWidgetMapper(this)) {
   mapper->setOrientation(Qt::Vertical);
   mapper->setModel(model);
-  connect(model, &ProtoModel::dataChanged, this, &BaseEditor::dataChanged);
+  //connect(model, &ProtoModel::dataChanged, this, &BaseEditor::dataChanged);
 }
 
 void BaseEditor::closeEvent(QCloseEvent* event) {

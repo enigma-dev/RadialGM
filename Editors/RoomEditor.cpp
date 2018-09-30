@@ -30,8 +30,10 @@ RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, p
   scene->addRect(scene->sceneRect(), QPen(Qt::gray), QBrush(Qt::gray));
 
   for (auto inst : room->instances()) {
-    const auto object_type = inst.object_type();
-    auto item = scene->addPixmap(QPixmap(":/resources/sprite.png"));
+    auto obj = MainWindow::resourceMap->GetResourceByName(buffers::TreeNode::kObject, inst.object_type());
+    auto spr = MainWindow::resourceMap->GetResourceByName(buffers::TreeNode::kSprite, obj->data(buffers::resources::Object::kSpriteNameFieldNumber).toString());
+    QString imgFile = spr->GetString(buffers::resources::Sprite::kSubimagesFieldNumber, 0);
+    auto item = scene->addPixmap(QPixmap(imgFile));
     item->setPos(inst.x(), inst.y());
     item->setRotation(inst.rotation());
     item->setTransform(item->transform().scale(inst.xscale(), inst.yscale()));

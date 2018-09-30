@@ -29,6 +29,8 @@
 
 #undef GetMessage
 
+ResourceModelMap* MainWindow::resourceMap = nullptr;
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ArtManager::Init();
 
@@ -84,21 +86,27 @@ T *EditorFactory(ProtoModel *model, QWidget *parent) {
   return new T(model, parent);
 }
 
+struct ResourceFactory {
+  std::function<BaseEditor*(ProtoModel* model, QWidget* parent)> func;
+  int field;
+};
+
 void MainWindow::openSubWindow(buffers::TreeNode *item) {
   using namespace google::protobuf;
 
   using TypeCase = buffers::TreeNode::TypeCase;
-  using FactoryFunction = std::function<BaseEditor *(ProtoModel * model, QWidget * parent)>;
-  using FactoryMap = std::unordered_map<TypeCase, FactoryFunction>;
+  using FactoryMap = std::unordered_map<TypeCase, ResourceFactory>;
 
-  static FactoryMap factoryMap({{TypeCase::kSprite, EditorFactory<SpriteEditor>},
-                                {TypeCase::kSound, EditorFactory<SoundEditor>},
-                                {TypeCase::kBackground, EditorFactory<BackgroundEditor>},
-                                {TypeCase::kPath, EditorFactory<PathEditor>},
-                                {TypeCase::kFont, EditorFactory<FontEditor>},
-                                {TypeCase::kTimeline, EditorFactory<TimelineEditor>},
-                                {TypeCase::kObject, EditorFactory<ObjectEditor>},
-                                {TypeCase::kRoom, EditorFactory<RoomEditor>}});
+  static FactoryMap factoryMap({
+    { TypeCase::kSprite,     { EditorFactory<SpriteEditor>,     buffers::TreeNode::kSpriteFieldNumber     } },
+    { TypeCase::kSound,      { EditorFactory<SoundEditor>,      buffers::TreeNode::kSoundFieldNumber      } },
+    { TypeCase::kBackground, { EditorFactory<BackgroundEditor>, buffers::TreeNode::kBackgroundFieldNumber } },
+    { TypeCase::kPath,       { EditorFactory<PathEditor>,       buffers::TreeNode::kPathFieldNumber       } },
+    { TypeCase::kFont,       { EditorFactory<FontEditor>,       buffers::TreeNode::kFontFieldNumber       } },
+    { TypeCase::kTimeline,   { EditorFactory<TimelineEditor>,   buffers::TreeNode::kTimelineFieldNumber   } },
+    { TypeCase::kObject,     { EditorFactory<ObjectEditor>,     buffers::TreeNode::kObjectFieldNumber     } },
+    { TypeCase::kRoom,       { EditorFactory<RoomEditor>,       buffers::TreeNode::kRoomFieldNumber       } }
+                              });
 
   auto subWindow = subWindows[item];
   if (!subWindows.contains(item) || subWindow == nullptr) {
@@ -106,9 +114,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     if (factoryFunction == factoryMap.end()) return;  // no registered editor
 
     ProtoModel* treeNode = resourceMap->GetResourceByName(item->type_case(), item->name());
-    ProtoModel* resModel = static_cast<ProtoModel*>(treeNode->data(buffers::TreeNode::kBackgroundFieldNumber).value<void*>());
-    QWidget *editor = factoryFunction->second(resModel, nullptr);
-    resModel->setParent(editor);
+    QWidget *editor = factoryFunction->second.func(treeNode->GetSubModel(factoryFunction->second.field), nullptr);
 
     subWindow = subWindows[item] = ui->mdiArea->addSubWindow(editor);
     subWindow->resize(subWindow->frameSize().expandedTo(editor->size()));

@@ -19,7 +19,7 @@ ProtoModel::ProtoModel(Message *protobuf, QObject *parent)
         if (field->is_repeated()) {
           for (int j=0; j < refl->FieldSize(*protobuf, field); j++) {
             ProtoModel* subModel = new ProtoModel(refl->MutableRepeatedMessage(protobuf, field, j), this);
-            repeatedMessages[i].append(QVariant::fromValue(static_cast<void*>(subModel)));
+            repeatedMessages[field->number()].append(QVariant::fromValue(static_cast<void*>(subModel)));
           }
         } else {
           const google::protobuf::OneofDescriptor *oneof = field->containing_oneof();
@@ -28,8 +28,12 @@ ProtoModel::ProtoModel(Message *protobuf, QObject *parent)
             if (field->cpp_type() != CppType::CPPTYPE_MESSAGE) continue; // is prolly folder
           }
           ProtoModel* subModel = new ProtoModel(refl->MutableMessage(protobuf, field), this);
-          messages[i] = QVariant::fromValue(static_cast<void*>(subModel));
+          messages[field->number()] = QVariant::fromValue(static_cast<void*>(subModel));
         }
+    } else if (field->cpp_type() == CppType::CPPTYPE_STRING && field->is_repeated()) {
+      for (int j=0; j < refl->FieldSize(*protobuf, field); j++) {
+        repeatedMessages[field->number()].append(QString::fromStdString(refl->GetRepeatedString(*protobuf, field, j)));
+      }
     }
   }
 }
@@ -142,6 +146,17 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
   }
 
   return QVariant();
+}
+
+ProtoModel* ProtoModel::GetSubModel(int fieldNum) {
+ return static_cast<ProtoModel*>(this->data(fieldNum).value<void*>());
+}
+
+QString ProtoModel::GetString(int fieldNum, int index) {
+    std::cout << "wut: " << fieldNum << std::endl;
+    std::cout << "wut2: " << repeatedMessages.empty() << std::endl;
+  //std::cout << repeatedMessages[fieldNum].size() << std::endl;
+  return "";//repeatedMessages[fieldNum][index].toString();
 }
 
 QModelIndex ProtoModel::parent(const QModelIndex & /*index*/) const { return QModelIndex(); }
