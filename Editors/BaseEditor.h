@@ -1,8 +1,7 @@
 #ifndef BASEEDTIOR_H
 #define BASEEDTIOR_H
 
-#include "Models/ImmediateMapper.h"
-#include "Models/ProtoModel.h"
+#include "Models/ModelMapper.h"
 
 #include <QObject>
 #include <QWidget>
@@ -18,13 +17,12 @@ class BaseEditor : public QWidget {
   void SetModelData(int index, const QVariant &value);
   QVariant GetModelData(int index);
 
- protected slots:
+ public slots:
   virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
                            const QVector<int> &roles = QVector<int>());
 
  protected:
-  ProtoModel *model;
-  ImmediateDataWidgetMapper *mapper;
+  ModelMapper* resMapper;
 };
 
 #endif  // BASEEDTIOR_H

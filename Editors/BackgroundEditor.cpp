@@ -20,17 +20,17 @@ BackgroundEditor::BackgroundEditor(ProtoModel* model, QWidget* parent)
 
   ui->backgroundRenderer->SetResourceModel(model);
 
-  mapper->addMapping(ui->smoothCheckBox, Background::kSmoothEdgesFieldNumber);
-  mapper->addMapping(ui->preloadCheckBox, Background::kPreloadFieldNumber);
-  mapper->addMapping(ui->transparentCheckBox, Background::kTransparentFieldNumber);
-  mapper->addMapping(ui->tilesetGroupBox, Background::kUseAsTilesetFieldNumber);
-  mapper->addMapping(ui->tileWidthSpinBox, Background::kTileWidthFieldNumber);
-  mapper->addMapping(ui->tileHeightSpinBox, Background::kTileHeightFieldNumber);
-  mapper->addMapping(ui->horizontalOffsetSpinBox, Background::kHorizontalOffsetFieldNumber);
-  mapper->addMapping(ui->verticalOffsetSpinBox, Background::kVerticalOffsetFieldNumber);
-  mapper->addMapping(ui->horizontalSpacingSpinBox, Background::kHorizontalSpacingFieldNumber);
-  mapper->addMapping(ui->verticalSpacingSpinBox, Background::kVerticalSpacingFieldNumber);
-  mapper->toFirst();
+  resMapper->addMapping(ui->smoothCheckBox, Background::kSmoothEdgesFieldNumber);
+  resMapper->addMapping(ui->preloadCheckBox, Background::kPreloadFieldNumber);
+  resMapper->addMapping(ui->transparentCheckBox, Background::kTransparentFieldNumber);
+  resMapper->addMapping(ui->tilesetGroupBox, Background::kUseAsTilesetFieldNumber);
+  resMapper->addMapping(ui->tileWidthSpinBox, Background::kTileWidthFieldNumber);
+  resMapper->addMapping(ui->tileHeightSpinBox, Background::kTileHeightFieldNumber);
+  resMapper->addMapping(ui->horizontalOffsetSpinBox, Background::kHorizontalOffsetFieldNumber);
+  resMapper->addMapping(ui->verticalOffsetSpinBox, Background::kVerticalOffsetFieldNumber);
+  resMapper->addMapping(ui->horizontalSpacingSpinBox, Background::kHorizontalSpacingFieldNumber);
+  resMapper->addMapping(ui->verticalSpacingSpinBox, Background::kVerticalSpacingFieldNumber);
+  resMapper->toFirst();
 }
 
 BackgroundEditor::~BackgroundEditor() { delete ui; }
@@ -41,7 +41,7 @@ void BackgroundEditor::dataChanged(const QModelIndex& /*topLeft*/, const QModelI
 }
 
 void BackgroundEditor::on_actionSave_triggered() {
-  model->SetDirty(false);
+  resMapper->SetDirty(false);
   this->parentWidget()->close();
 }
 

@@ -15,16 +15,16 @@ using namespace buffers::resources;
 RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, parent), ui(new Ui::RoomEditor) {
   ui->setupUi(this);
 
-  mapper->addMapping(ui->speedSpinBox, Room::kSpeedFieldNumber);
-  mapper->addMapping(ui->widthSpinBox, Room::kWidthFieldNumber);
-  mapper->addMapping(ui->heightSpinBox, Room::kHeightFieldNumber);
-  mapper->addMapping(ui->clearCheckBox, Room::kClearDisplayBufferFieldNumber);
-  mapper->addMapping(ui->persistentCheckBox, Room::kPersistentFieldNumber);
-  mapper->addMapping(ui->captionLineEdit, Room::kCaptionFieldNumber);
+  resMapper->addMapping(ui->speedSpinBox, Room::kSpeedFieldNumber);
+  resMapper->addMapping(ui->widthSpinBox, Room::kWidthFieldNumber);
+  resMapper->addMapping(ui->heightSpinBox, Room::kHeightFieldNumber);
+  resMapper->addMapping(ui->clearCheckBox, Room::kClearDisplayBufferFieldNumber);
+  resMapper->addMapping(ui->persistentCheckBox, Room::kPersistentFieldNumber);
+  resMapper->addMapping(ui->captionLineEdit, Room::kCaptionFieldNumber);
 
-  mapper->addMapping(ui->enableViewsCheckBox, Room::kEnableViewsFieldNumber);
-  mapper->addMapping(ui->clearViewportCheckBox, Room::kClearViewBackgroundFieldNumber);
-  mapper->toFirst();
+  resMapper->addMapping(ui->enableViewsCheckBox, Room::kEnableViewsFieldNumber);
+  resMapper->addMapping(ui->clearViewportCheckBox, Room::kClearViewBackgroundFieldNumber);
+  resMapper->toFirst();
 
   Room* room = static_cast<Room*>(model->GetBuffer());
 
@@ -34,7 +34,7 @@ RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, p
   if (room->show_color()) roomColor = room->color();
   scene->addRect(scene->sceneRect(), QPen(roomColor), QBrush(roomColor));
 
-  for (auto bkg : room->backgrounds()) {
+  for (auto bkg : room->backgrounds()) { //TODO: need to draw last if foreground
       if (bkg.visible()) {
         ProtoModel* bkgRes = MainWindow::resourceMap->GetResourceByName(buffers::TreeNode::kBackground,
                                                                         bkg.background_name());
