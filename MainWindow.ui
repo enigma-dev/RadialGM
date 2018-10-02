@@ -195,6 +195,9 @@
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
+   <property name="windowTitle">
+    <string>Toolbar</string>
+   </property>
    <property name="iconSize">
     <size>
      <width>24</width>
