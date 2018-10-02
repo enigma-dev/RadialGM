@@ -61,8 +61,7 @@ void MainWindow::readSettings() {
   settings.beginGroup("MainWindow");
   restoreGeometry(settings.value("geometry").toByteArray());
   restoreState(settings.value("state").toByteArray());
-  ui->actionToggleTabbedView->setChecked(settings.value("tabbedView", false).toBool());
-  this->on_actionToggleTabbedView_triggered();
+  setTabbedMode(settings.value("tabbedView", false).toBool());
   settings.endGroup();
 }
 
@@ -193,19 +192,30 @@ void MainWindow::on_actionPreferences_triggered() {
 
 void MainWindow::on_actionExit_triggered() { QApplication::exit(); }
 
-void MainWindow::on_actionCascade_triggered() { ui->mdiArea->cascadeSubWindows(); }
+void MainWindow::setTabbedMode(bool enabled) {
+  ui->actionToggleTabbedView->setChecked(enabled);
+  ui->mdiArea->setViewMode(enabled ? QMdiArea::TabbedView : QMdiArea::SubWindowView);
+  if (enabled) {
+    QTabBar *tabBar = ui->mdiArea->findChild<QTabBar *>();
+    if (tabBar) {
+      tabBar->setExpanding(false);
+    }
+  }
+}
 
-void MainWindow::on_actionTile_triggered() { ui->mdiArea->tileSubWindows(); }
+void MainWindow::on_actionCascade_triggered() {
+  this->setTabbedMode(false);
+  ui->mdiArea->cascadeSubWindows();
+}
+
+void MainWindow::on_actionTile_triggered() {
+  this->setTabbedMode(false);
+  ui->mdiArea->tileSubWindows();
+}
 
 void MainWindow::on_actionCloseAll_triggered() { ui->mdiArea->closeAllSubWindows(); }
 
-void MainWindow::on_actionToggleTabbedView_triggered() {
-  ui->mdiArea->setViewMode(ui->actionToggleTabbedView->isChecked() ? QMdiArea::TabbedView : QMdiArea::SubWindowView);
-  QTabBar *tabBar = ui->mdiArea->findChild<QTabBar *>();
-  if (tabBar) {
-    tabBar->setExpanding(false);
-  }
-}
+void MainWindow::on_actionToggleTabbedView_triggered() { this->setTabbedMode(ui->actionToggleTabbedView->isChecked()); }
 
 void MainWindow::on_actionNext_triggered() { ui->mdiArea->activateNextSubWindow(); }
 

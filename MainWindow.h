@@ -70,6 +70,7 @@ class MainWindow : public QMainWindow {
   void openSubWindow(buffers::TreeNode *item);
   void readSettings();
   void writeSettings();
+  void setTabbedMode(bool enabled);
 };
 
 #endif  // MAINWINDOW_H
