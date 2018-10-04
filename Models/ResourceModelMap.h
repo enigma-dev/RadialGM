@@ -16,7 +16,6 @@ public:
   ProtoModel* GetResourceByName(int type, const std::string& name);
 protected:
   void recursiveBindRes(buffers::TreeNode *node);
-  static QHash<int, int> _resTypeFields;
   QHash<int, QHash<QString, ProtoModel*>> _resources;
 };
 

@@ -90,7 +90,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
   using namespace google::protobuf;
 
   using TypeCase = buffers::TreeNode::TypeCase;
-  using FactoryMap = std::unordered_map<TypeCase, std::function<BaseEditor*(ProtoModel* model, QWidget* parent)>>;
+  using FactoryMap = std::unordered_map<TypeCase, std::function<BaseEditor*(ProtoModel* m, QWidget* p)>>;
 
   static FactoryMap factoryMap({
     { TypeCase::kSprite,     EditorFactory<SpriteEditor>     },
@@ -109,7 +109,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     if (factoryFunction == factoryMap.end()) return;  // no registered editor
 
     ProtoModel* res = resourceMap->GetResourceByName(item->type_case(), item->name());
-    QWidget *editor = factoryFunction->second(res, nullptr);
+    QWidget *editor = factoryFunction->second(res, this);
 
     subWindow = subWindows[item] = ui->mdiArea->addSubWindow(editor);
     subWindow->resize(subWindow->frameSize().expandedTo(editor->size()));

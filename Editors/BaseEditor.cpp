@@ -3,8 +3,12 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 
-BaseEditor::BaseEditor(ProtoModel* model, QWidget* parent)
-    : QWidget(parent), resMapper(new ModelMapper(model, this)) {
+BaseEditor::BaseEditor(ProtoModel* treeNodeModel, QWidget* parent) :
+    QWidget(parent),
+    nodeMapper(new ModelMapper(treeNodeModel, this)) {
+    buffers::TreeNode* n = static_cast<buffers::TreeNode*>(treeNodeModel->GetBuffer());
+    resMapper = new ModelMapper(treeNodeModel->GetSubModel(ResTypeFields[n->type_case()]), this);
+
 }
 
 void BaseEditor::closeEvent(QCloseEvent* event) {
@@ -17,8 +21,9 @@ void BaseEditor::closeEvent(QCloseEvent* event) {
       event->ignore();
       return;
     } else if (reply == QMessageBox::No) {
+      nodeMapper->clearMapping();
+      nodeMapper->RestoreBuffer();
       resMapper->clearMapping();
-      resMapper->RestoreBuffer();
     }
   }
 

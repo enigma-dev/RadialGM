@@ -10,10 +10,11 @@
 
 #include <algorithm>
 
-using namespace buffers::resources;
-
 RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, parent), ui(new Ui::RoomEditor) {
   ui->setupUi(this);
+
+  nodeMapper->addMapping(ui->roomName, TreeNode::kNameFieldNumber);
+  nodeMapper->toFirst();
 
   resMapper->addMapping(ui->speedSpinBox, Room::kSpeedFieldNumber);
   resMapper->addMapping(ui->widthSpinBox, Room::kWidthFieldNumber);
@@ -26,7 +27,9 @@ RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, p
   resMapper->addMapping(ui->clearViewportCheckBox, Room::kClearViewBackgroundFieldNumber);
   resMapper->toFirst();
 
-  Room* room = static_cast<Room*>(model->GetBuffer());
+  ProtoModel* roomModel = model->GetSubModel(TreeNode::kRoomFieldNumber);
+
+  Room* room = static_cast<Room*>(roomModel->GetBuffer());
 
   QGraphicsScene* scene = new QGraphicsScene(0, 0, room->width(), room->height(), this);
 
@@ -36,12 +39,12 @@ RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, p
 
   for (auto bkg : room->backgrounds()) { //TODO: need to draw last if foreground
       if (bkg.visible()) {
-        ProtoModel* bkgRes = MainWindow::resourceMap->GetResourceByName(buffers::TreeNode::kBackground,
-                                                                        bkg.background_name());
+        ProtoModel* bkgRes = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground,
+                               bkg.background_name())->GetSubModel(TreeNode::kBackgroundFieldNumber);
         if (bkgRes != nullptr) {
-          QString imgFile = bkgRes->data(buffers::resources::Background::kImageFieldNumber).toString();
-          int w = bkgRes->data(buffers::resources::Background::kWidthFieldNumber).toInt();
-          int h = bkgRes->data(buffers::resources::Background::kHeightFieldNumber).toInt();
+          QString imgFile = bkgRes->data(Background::kImageFieldNumber).toString();
+          int w = bkgRes->data(Background::kWidthFieldNumber).toInt();
+          int h = bkgRes->data(Background::kHeightFieldNumber).toInt();
           auto item = scene->addPixmap(ArtManager::GetIcon(imgFile).pixmap(w, h));
           item->setPos(bkg.x(), bkg.y());
           if (bkg.stretch()) {
@@ -74,40 +77,40 @@ RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, p
   }
 
 
-  google::protobuf::RepeatedField<buffers::resources::Room::Tile>
+  google::protobuf::RepeatedField<Room::Tile>
           sortedTiles(room->mutable_tiles()->begin(), room->mutable_tiles()->end());
 
   std::sort(sortedTiles.begin(), sortedTiles.end(),
-            [](const buffers::resources::Room::Tile& a, const buffers::resources::Room::Tile& b) {
+            [](const Room::Tile& a, const Room::Tile& b) {
                return a.depth() > b.depth();
             });
   for (auto tile : sortedTiles) {
 
-    ProtoModel* bkg = MainWindow::resourceMap->GetResourceByName(buffers::TreeNode::kBackground,
-                                                                 tile.background_name());
+    ProtoModel* bkg = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground,
+                        tile.background_name())->GetSubModel(TreeNode::kBackgroundFieldNumber);
     if (bkg != nullptr) {
-      QString imgFile = bkg->data(buffers::resources::Background::kImageFieldNumber).toString();
+      QString imgFile = bkg->data(Background::kImageFieldNumber).toString();
       int w = static_cast<int>(tile.width());
       int h = static_cast<int>(tile.height());
       auto item = scene->addPixmap(ArtManager::GetIcon(imgFile).pixmap(w, h));
       item->setPos(tile.x(), tile.y());
-      item->setOffset(tile.xoffset(), tile.yoffset());
+      item->setOffset(-tile.xoffset(), -tile.yoffset());
       qreal xscale = (tile.has_xscale()) ? tile.xscale() : 1;
       qreal yscale = (tile.has_yscale()) ? tile.yscale() : 1;
       item->setTransform(item->transform().scale(xscale, yscale));
     }
   }
 
-  google::protobuf::RepeatedField<buffers::resources::Room::Instance>
+  google::protobuf::RepeatedField<Room::Instance>
           sortedInstances(room->mutable_instances()->begin(), room->mutable_instances()->end());
 
   std::sort(sortedInstances.begin(), sortedInstances.end(),
-            [](const buffers::resources::Room::Instance& a, const buffers::resources::Room::Instance& b) {
-               ProtoModel* objA = MainWindow::resourceMap->GetResourceByName(buffers::TreeNode::kObject, a.object_type());
-               ProtoModel* objB = MainWindow::resourceMap->GetResourceByName(buffers::TreeNode::kObject, b.object_type());
+            [](const Room::Instance& a, const Room::Instance& b) {
+               ProtoModel* objA = MainWindow::resourceMap->GetResourceByName(TreeNode::kObject, a.object_type())->GetSubModel(TreeNode::kObjectFieldNumber);
+               ProtoModel* objB = MainWindow::resourceMap->GetResourceByName(TreeNode::kObject, b.object_type())->GetSubModel(TreeNode::kObjectFieldNumber);
                if (objA != nullptr && objB != nullptr)
-                 return objA->data(buffers::resources::Object::kDepthFieldNumber) >
-                         objB->data(buffers::resources::Object::kDepthFieldNumber);
+                 return objA->data(Object::kDepthFieldNumber) >
+                         objB->data(Object::kDepthFieldNumber);
                return false;
             });
   for (auto inst : sortedInstances) {
@@ -117,16 +120,17 @@ RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, p
     int xoff = 0;
     int yoff = 0;
 
-    ProtoModel* obj = MainWindow::resourceMap->GetResourceByName(buffers::TreeNode::kObject, inst.object_type());
+    ProtoModel* obj = MainWindow::resourceMap->GetResourceByName(TreeNode::kObject, inst.object_type());
     if (obj != nullptr) {
-      ProtoModel* spr = MainWindow::resourceMap->GetResourceByName(buffers::TreeNode::kSprite,
-                                           obj->data(buffers::resources::Object::kSpriteNameFieldNumber).toString());
+      obj = obj->GetSubModel(TreeNode::kObjectFieldNumber);
+      ProtoModel* spr = MainWindow::resourceMap->GetResourceByName(TreeNode::kSprite, obj->data(Object::kSpriteNameFieldNumber).toString());
       if (spr != nullptr) {
-        imgFile = spr->GetString(buffers::resources::Sprite::kSubimagesFieldNumber, 0);
-        w = spr->data(buffers::resources::Sprite::kWidthFieldNumber).toInt();
-        h = spr->data(buffers::resources::Sprite::kHeightFieldNumber).toInt();
-        xoff = spr->data(buffers::resources::Sprite::kOriginXFieldNumber).toInt();
-        yoff = spr->data(buffers::resources::Sprite::kOriginYFieldNumber).toInt();
+        spr = spr->GetSubModel(TreeNode::kSpriteFieldNumber);
+        imgFile = spr->GetString(Sprite::kSubimagesFieldNumber, 0);
+        w = spr->data(Sprite::kWidthFieldNumber).toInt();
+        h = spr->data(Sprite::kHeightFieldNumber).toInt();
+        xoff = spr->data(Sprite::kOriginXFieldNumber).toInt();
+        yoff = spr->data(Sprite::kOriginYFieldNumber).toInt();
       }
     }
 

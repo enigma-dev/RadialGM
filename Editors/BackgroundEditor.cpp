@@ -18,7 +18,7 @@ BackgroundEditor::BackgroundEditor(ProtoModel* model, QWidget* parent)
     : BaseEditor(model, parent), ui(new Ui::BackgroundEditor) {
   ui->setupUi(this);
 
-  ui->backgroundRenderer->SetResourceModel(model);
+  ui->backgroundRenderer->SetResourceModel(resMapper->GetModel());
 
   resMapper->addMapping(ui->smoothCheckBox, Background::kSmoothEdgesFieldNumber);
   resMapper->addMapping(ui->preloadCheckBox, Background::kPreloadFieldNumber);

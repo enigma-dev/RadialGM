@@ -18,6 +18,7 @@ public:
   void toFirst();
 
   // model
+  ProtoModel* GetModel();
   void RestoreBuffer();
   void ReplaceBuffer(google::protobuf::Message *buffer);
   void SetDirty(bool dirty);

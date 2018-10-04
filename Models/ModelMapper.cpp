@@ -11,6 +11,10 @@ ModelMapper::ModelMapper(ProtoModel* model, BaseEditor* parent) : model(model) {
 
 // mapper
 
+ProtoModel* ModelMapper::GetModel() {
+  return model;
+}
+
 void ModelMapper::addMapping(QWidget * widget, int section) {
   mapper->addMapping(widget, section);
 }

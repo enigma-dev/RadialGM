@@ -8,7 +8,7 @@ SpriteEditor::SpriteEditor(ProtoModel* model, QWidget* parent) : BaseEditor(mode
   ui->setupUi(this);
 
   spriteModel =
-      new SpriteModel(static_cast<buffers::resources::Sprite*>(model->GetBuffer())->mutable_subimages(), this);
+      new SpriteModel(static_cast<buffers::resources::Sprite*>(model->GetSubModel(TreeNode::kSpriteFieldNumber)->GetBuffer())->mutable_subimages(), this);
 
   connect(spriteModel, &SpriteModel::MismatchedImageSize, this, &SpriteEditor::LoadedMismatchedImage);
   ui->subImageList->setModel(spriteModel);
