@@ -12,7 +12,7 @@
 using TypeCase = buffers::TreeNode::TypeCase;
 using TreeNode = buffers::TreeNode;
 using Background = buffers::resources::Background;
-using Font =  buffers::resources::Font;
+using Font = buffers::resources::Font;
 using Object = buffers::resources::Object;
 using Path = buffers::resources::Path;
 using Room = buffers::resources::Room;
@@ -37,15 +37,19 @@ class ProtoModel : public QAbstractItemModel {
   bool setData(const QModelIndex &index, const QVariant &value, int role) override;
   QVariant data(int index) const;
   QVariant data(const QModelIndex &index, int role) const override;
-  ProtoModel* GetSubModel(int fieldNum);
+  ProtoModel *GetSubModel(int fieldNum);
   QString GetString(int fieldNum, int index);
   QModelIndex parent(const QModelIndex &index) const override;
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
   QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override;
   Qt::ItemFlags flags(const QModelIndex &index) const override;
 
+ signals:
+  virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
+                           const QVariant &oldValue = QVariant(0), const QVector<int> &roles = QVector<int>());
+
  private:
-  QHash<int, QVariant> messages; //where QVariant is ProtoModel*
+  QHash<int, QVariant> messages;  //where QVariant is ProtoModel*
   QHash<int, QList<QVariant>> repeatedMessages;
   bool dirty;
   google::protobuf::Message *protobuf;

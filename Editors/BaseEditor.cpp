@@ -3,12 +3,10 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 
-BaseEditor::BaseEditor(ProtoModel* treeNodeModel, QWidget* parent) :
-    QWidget(parent),
-    nodeMapper(new ModelMapper(treeNodeModel, this)) {
-    buffers::TreeNode* n = static_cast<buffers::TreeNode*>(treeNodeModel->GetBuffer());
-    resMapper = new ModelMapper(treeNodeModel->GetSubModel(ResTypeFields[n->type_case()]), this);
-
+BaseEditor::BaseEditor(ProtoModel* treeNodeModel, QWidget* parent)
+    : QWidget(parent), nodeMapper(new ModelMapper(treeNodeModel, this)) {
+  buffers::TreeNode* n = static_cast<buffers::TreeNode*>(treeNodeModel->GetBuffer());
+  resMapper = new ModelMapper(treeNodeModel->GetSubModel(ResTypeFields[n->type_case()]), this);
 }
 
 void BaseEditor::closeEvent(QCloseEvent* event) {
@@ -39,11 +37,11 @@ void BaseEditor::SetModelData(int index, const QVariant& value) {
 
 QVariant BaseEditor::GetModelData(int index) { return resMapper->data(resMapper->index(index), Qt::DisplayRole); }
 
-void BaseEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex& /*bottomRight*/,
+void BaseEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex& /*bottomRight*/, const QVariant& oldValue,
                              const QVector<int>& /*roles*/) {
   buffers::TreeNode* n = static_cast<buffers::TreeNode*>(nodeMapper->GetModel()->GetBuffer());
   if (n == topLeft.internalPointer() && topLeft.row() == TreeNode::kNameFieldNumber) {
     //name changed
-    std::cout << n->name() << std::endl;
+    std::cout << "new: " << n->name() << " old: " << oldValue.toString().toStdString() << std::endl;
   }
 }

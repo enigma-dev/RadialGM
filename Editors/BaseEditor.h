@@ -6,16 +6,14 @@
 #include <QObject>
 #include <QWidget>
 
-static const QHash<int, int> ResTypeFields = {
-    { TypeCase::kSprite,     TreeNode::kSpriteFieldNumber     },
-    { TypeCase::kSound,      TreeNode::kSoundFieldNumber      },
-    { TypeCase::kBackground, TreeNode::kBackgroundFieldNumber },
-    { TypeCase::kPath,       TreeNode::kPathFieldNumber       },
-    { TypeCase::kFont,       TreeNode::kFontFieldNumber       },
-    { TypeCase::kTimeline,   TreeNode::kTimelineFieldNumber   },
-    { TypeCase::kObject,     TreeNode::kObjectFieldNumber     },
-    { TypeCase::kRoom,       TreeNode::kRoomFieldNumber       }
-};
+static const QHash<int, int> ResTypeFields = {{TypeCase::kSprite, TreeNode::kSpriteFieldNumber},
+                                              {TypeCase::kSound, TreeNode::kSoundFieldNumber},
+                                              {TypeCase::kBackground, TreeNode::kBackgroundFieldNumber},
+                                              {TypeCase::kPath, TreeNode::kPathFieldNumber},
+                                              {TypeCase::kFont, TreeNode::kFontFieldNumber},
+                                              {TypeCase::kTimeline, TreeNode::kTimelineFieldNumber},
+                                              {TypeCase::kObject, TreeNode::kObjectFieldNumber},
+                                              {TypeCase::kRoom, TreeNode::kRoomFieldNumber}};
 
 class BaseEditor : public QWidget {
   Q_OBJECT
@@ -30,11 +28,11 @@ class BaseEditor : public QWidget {
 
  public slots:
   virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
-                           const QVector<int> &roles = QVector<int>());
+                           const QVariant &oldValue = QVariant(0), const QVector<int> &roles = QVector<int>());
 
  protected:
-  ModelMapper* nodeMapper;
-  ModelMapper* resMapper;
+  ModelMapper *nodeMapper;
+  ModelMapper *resMapper;
 };
 
 #endif  // BASEEDTIOR_H
