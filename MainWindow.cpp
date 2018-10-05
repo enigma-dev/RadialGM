@@ -115,9 +115,6 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     subWindow->resize(subWindow->frameSize().expandedTo(editor->size()));
     editor->setParent(subWindow);
 
-    subWindow->connect(subWindow, &QObject::destroyed, [=]() {
-      subWindows.remove(item);
-    });
     subWindow->setWindowIcon(subWindow->widget()->windowIcon());
     subWindow->setWindowTitle(QString::fromStdString(item->name()));
   }
@@ -147,8 +144,9 @@ void MainWindow::openFile(QString fName) {
   MainWindow::setWindowTitle(fileInfo.fileName() + " - ENIGMA");
   recentFiles->prependFile(fName);
 
-  resourceMap = new ResourceModelMap(project->mutable_game()->mutable_root());
-  treeModel = new TreeModel(project->mutable_game()->mutable_root(), this);
+  resourceMap = new ResourceModelMap(project->mutable_game()->mutable_root(), this);
+  treeModel = new TreeModel(project->mutable_game()->mutable_root(), resourceMap
+                            );
   ui->treeView->setModel(treeModel);
   treeModel->connect(treeModel, &QAbstractItemModel::dataChanged,
                      [=](const QModelIndex &topLeft, const QModelIndex &bottomRight) {

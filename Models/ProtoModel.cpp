@@ -166,7 +166,7 @@ QVariant ProtoModel::headerData(int /*section*/, Qt::Orientation /*orientation*/
 }
 
 QModelIndex ProtoModel::index(int row, int column, const QModelIndex & /*parent*/) const {
-  return this->createIndex(row, column);
+  return this->createIndex(row, column, static_cast<void*>(protobuf));
 }
 
 Qt::ItemFlags ProtoModel::flags(const QModelIndex &index) const {

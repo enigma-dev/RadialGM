@@ -3,21 +3,8 @@
 
 #include "Models/ModelMapper.h"
 
-#include "codegen/treenode.pb.h"
-
 #include <QObject>
 #include <QWidget>
-
-using TypeCase = buffers::TreeNode::TypeCase;
-using TreeNode = buffers::TreeNode;
-using Background = buffers::resources::Background;
-using Font =  buffers::resources::Font;
-using Object = buffers::resources::Object;
-using Path = buffers::resources::Path;
-using Room = buffers::resources::Room;
-using Sound = buffers::resources::Sound;
-using Sprite = buffers::resources::Sprite;
-using Timeline = buffers::resources::Timeline;
 
 static const QHash<int, int> ResTypeFields = {
     { TypeCase::kSprite,     TreeNode::kSpriteFieldNumber     },

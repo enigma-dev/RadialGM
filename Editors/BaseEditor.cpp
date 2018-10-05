@@ -39,5 +39,11 @@ void BaseEditor::SetModelData(int index, const QVariant& value) {
 
 QVariant BaseEditor::GetModelData(int index) { return resMapper->data(resMapper->index(index), Qt::DisplayRole); }
 
-void BaseEditor::dataChanged(const QModelIndex& /*topLeft*/, const QModelIndex& /*bottomRight*/,
-                             const QVector<int>& /*roles*/) {}
+void BaseEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex& /*bottomRight*/,
+                             const QVector<int>& /*roles*/) {
+  buffers::TreeNode* n = static_cast<buffers::TreeNode*>(nodeMapper->GetModel()->GetBuffer());
+  if (n == topLeft.internalPointer() && topLeft.row() == TreeNode::kNameFieldNumber) {
+    //name changed
+    std::cout << n->name() << std::endl;
+  }
+}

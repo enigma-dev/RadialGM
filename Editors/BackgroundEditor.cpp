@@ -35,8 +35,9 @@ BackgroundEditor::BackgroundEditor(ProtoModel* model, QWidget* parent)
 
 BackgroundEditor::~BackgroundEditor() { delete ui; }
 
-void BackgroundEditor::dataChanged(const QModelIndex& /*topLeft*/, const QModelIndex& /*bottomRight*/,
-                                   const QVector<int>& /*roles*/) {
+void BackgroundEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight,
+                                   const QVector<int>& roles) {
+  BaseEditor::dataChanged(topLeft, bottomRight, roles);
   ui->backgroundRenderer->update();
 }
 
