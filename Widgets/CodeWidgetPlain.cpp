@@ -11,6 +11,14 @@ CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), font(QFont("Courier",
   this->textWidget = plainTextEdit;
   plainTextEdit->setFont(font);
 
+  connect(plainTextEdit, &QPlainTextEdit::textChanged, this, &CodeWidget::codeChanged);
+  connect(plainTextEdit, &QPlainTextEdit::blockCountChanged, this, &CodeWidget::lineCountChanged);
+
+  connect(plainTextEdit, &QPlainTextEdit::cursorPositionChanged, [=]() {
+    QTextCursor cursor = plainTextEdit->textCursor();
+    emit cursorPositionChanged(cursor.blockNumber() + 1, cursor.positionInBlock() + 1);
+  });
+
   QVBoxLayout* rootLayout = new QVBoxLayout(this);
   rootLayout->setMargin(0);
   rootLayout->addWidget(plainTextEdit);

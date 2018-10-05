@@ -31,11 +31,17 @@ CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), font(QFont("Courier",
 
   codeEdit->setLexer(cppLexer);
 
-  connect(codeEdit, &QsciScintilla::textChanged, [=]() {
+  connect(codeEdit, &QsciScintilla::textChanged, this, &CodeWidget::codeChanged);
+
+  connect(codeEdit, &QsciScintilla::linesChanged, [=]() {
     const int padding = 8;
     auto maxLineString = QString::number(codeEdit->lines());
     codeEdit->setMarginWidth(0, fontMetrics.width(maxLineString) + padding);
+    emit lineCountChanged(codeEdit->lines());
   });
+
+  connect(codeEdit, &QsciScintilla::cursorPositionChanged,
+          [=](int line, int index) { emit cursorPositionChanged(line + 1, index + 1); });
 
   QVBoxLayout* rootLayout = new QVBoxLayout(this);
   rootLayout->setMargin(0);
