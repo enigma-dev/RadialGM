@@ -63,7 +63,9 @@ void ProtoModel::SetDirty(bool dirty) { this->dirty = dirty; }
 
 bool ProtoModel::IsDirty() { return dirty; }
 
-int ProtoModel::columnCount(const QModelIndex & /*parent*/) const { return 1; }
+int ProtoModel::columnCount(const QModelIndex & /*parent*/) const {
+  return 1;
+}
 
 bool ProtoModel::setData(const QModelIndex &index, const QVariant &value, int role) {
   const Descriptor *desc = protobuf->GetDescriptor();
@@ -161,11 +163,19 @@ QString ProtoModel::GetString(int fieldNum, int index) {
     return "";
 }
 
-QModelIndex ProtoModel::parent(const QModelIndex & /*index*/) const { return QModelIndex(); }
+QModelIndex ProtoModel::parent(const QModelIndex& index) const {
+  return QModelIndex();
+}
 
-QVariant ProtoModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int role) const {
+QVariant ProtoModel::headerData(int section, Qt::Orientation /*orientation*/, int role) const {
   if (role != Qt::DisplayRole) return QVariant();
-  return tr("Field");
+  const Descriptor *desc = protobuf->GetDescriptor();
+  const FieldDescriptor *field = desc->FindFieldByNumber(section);
+
+  if (field != nullptr)
+    return QString::fromStdString(field->name());
+
+  return "";
 }
 
 QModelIndex ProtoModel::index(int row, int column, const QModelIndex & /*parent*/) const {

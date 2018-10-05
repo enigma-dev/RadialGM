@@ -46,8 +46,11 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="tabShape">
+        <enum>QTabWidget::Rounded</enum>
+       </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <property name="elideMode">
         <enum>Qt::ElideNone</enum>
@@ -82,136 +85,13 @@
           <number>4</number>
          </property>
          <item>
-          <widget class="QTreeWidget" name="layersTreeWidget">
+          <widget class="QTableView" name="layersTableView">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
              <verstretch>1</verstretch>
             </sizepolicy>
            </property>
-           <attribute name="headerVisible">
-            <bool>false</bool>
-           </attribute>
-           <column>
-            <property name="text">
-             <string>Name</string>
-            </property>
-           </column>
-           <item>
-            <property name="text">
-             <string>Background 0</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Background 1</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>NPC</string>
-            </property>
-            <item>
-             <property name="text">
-              <string>Enemy 1</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Enemy 2</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>New Item</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>New Item</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>New Item</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>New Item</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>New Item</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>New Item</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>New Item</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>New Item</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>New Item</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>New Item</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>New Item</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>New Item</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>New Item</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>New Item</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>New Item</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>New Item</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>New Item</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>New Item</string>
-             </property>
-            </item>
-           </item>
           </widget>
          </item>
          <item>
