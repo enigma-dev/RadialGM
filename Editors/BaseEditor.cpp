@@ -43,5 +43,6 @@ void BaseEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex& /*bo
   if (n == topLeft.internalPointer() && topLeft.row() == TreeNode::kNameFieldNumber) {
     //name changed
     std::cout << "new: " << n->name() << " old: " << oldValue.toString().toStdString() << std::endl;
+    emit ResourceRenamed(n->type_case(), oldValue.toString(), QString::fromStdString(n->name()));
   }
 }

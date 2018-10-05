@@ -26,6 +26,9 @@ class BaseEditor : public QWidget {
   void SetModelData(int index, const QVariant &value);
   QVariant GetModelData(int index);
 
+ signals:
+  void ResourceRenamed(TypeCase type, const QString& oldName, const QString& newName);
+
  public slots:
   virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
                            const QVariant &oldValue = QVariant(0), const QVector<int> &roles = QVector<int>());

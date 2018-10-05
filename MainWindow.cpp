@@ -108,7 +108,10 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     if (factoryFunction == factoryMap.end()) return;  // no registered editor
 
     ProtoModel *res = resourceMap->GetResourceByName(item->type_case(), item->name());
-    QWidget *editor = factoryFunction->second(res, this);
+    BaseEditor *editor = factoryFunction->second(res, this);
+
+    connect(editor, &BaseEditor::ResourceRenamed, resourceMap, &ResourceModelMap::ResourceRenamed);
+    connect(editor, &BaseEditor::ResourceRenamed, [=]() { treeModel->dataChanged(QModelIndex(), QModelIndex()); });
 
     subWindow = subWindows[item] = ui->mdiArea->addSubWindow(editor);
     subWindow->resize(subWindow->frameSize().expandedTo(editor->size()));
