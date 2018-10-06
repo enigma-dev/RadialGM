@@ -177,8 +177,8 @@ QModelIndex ProtoModel::parent(const QModelIndex& index) const {
   return QModelIndex();
 }
 
-QVariant ProtoModel::headerData(int section, Qt::Orientation /*orientation*/, int role) const {
-  if (role != Qt::DisplayRole) return QVariant();
+QVariant ProtoModel::headerData(int section, Qt::Orientation orientation, int role) const {
+  if (role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal) return QVariant();
   const Descriptor *desc = protobuf->GetDescriptor();
   const FieldDescriptor *field = desc->FindFieldByNumber(section);
 

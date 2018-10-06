@@ -31,7 +31,8 @@ QModelIndex RepeatedProtoModel::parent(const QModelIndex& index) const {
 }
 
 QVariant RepeatedProtoModel::headerData(int section, Qt::Orientation orientation, int role) const {
-  return "";
+  ProtoModel* m = static_cast<ProtoModel*>(QObject::parent())->GetSubModel(field->number(), 0);
+  return m->headerData(section, orientation, role);
 }
 
 QModelIndex RepeatedProtoModel::index(int row, int column, const QModelIndex &parent) const {

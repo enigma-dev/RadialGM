@@ -106,7 +106,11 @@ RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, p
   for (int c = 0; c < m->columnCount(); ++c) {
     if (c != Room::Instance::kNameFieldNumber && c != Room::Instance::kObjectTypeFieldNumber && c != Room::Instance::kIdFieldNumber)
       ui->layersTableView->hideColumn(c);
+    else
+      ui->layersTableView->resizeColumnToContents(c);
   }
+
+  ui->layersTableView->horizontalHeader()->swapSections(Room::Instance::kNameFieldNumber, Room::Instance::kObjectTypeFieldNumber);
 
   google::protobuf::RepeatedField<Room::Instance>
           sortedInstances(room->mutable_instances()->begin(), room->mutable_instances()->end());

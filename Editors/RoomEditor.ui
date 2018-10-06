@@ -46,6 +46,12 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="minimumSize">
+        <size>
+         <width>320</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="tabShape">
         <enum>QTabWidget::Rounded</enum>
        </property>
@@ -91,6 +97,12 @@
              <horstretch>0</horstretch>
              <verstretch>1</verstretch>
             </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>259</width>
+             <height>0</height>
+            </size>
            </property>
           </widget>
          </item>
