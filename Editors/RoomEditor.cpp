@@ -101,8 +101,12 @@ RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, p
     }
   }
 
-  QVariant instance = resMapper->data(Room::kInstancesFieldNumber, 0);
-  ui->layersTableView->setModel(static_cast<ProtoModel*>(instance.value<void*>()));
+  RepeatedProtoModel* m = roomModel->GetRepeatedSubModel(Room::kInstancesFieldNumber);
+  ui->layersTableView->setModel(m);
+  for (int c = 0; c < m->columnCount(); ++c) {
+    if (c != Room::Instance::kNameFieldNumber && c != Room::Instance::kObjectTypeFieldNumber && c != Room::Instance::kIdFieldNumber)
+      ui->layersTableView->hideColumn(c);
+  }
 
   google::protobuf::RepeatedField<Room::Instance>
           sortedInstances(room->mutable_instances()->begin(), room->mutable_instances()->end());

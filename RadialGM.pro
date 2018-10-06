@@ -78,7 +78,8 @@ SOURCES += \
     Plugins/ServerPlugin.cpp \
     Components/RecentFiles.cpp \
     Models/ResourceModelMap.cpp \
-    Models/ModelMapper.cpp
+    Models/ModelMapper.cpp \
+    Models/RepeatedProtoModel.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -106,7 +107,8 @@ HEADERS += \
     main.h \
     Dialogs/PreferencesKeys.h \
     Models/ResourceModelMap.h \
-    Models/ModelMapper.h
+    Models/ModelMapper.h \
+    Models/RepeatedProtoModel.h
 
 FORMS += \
     MainWindow.ui \

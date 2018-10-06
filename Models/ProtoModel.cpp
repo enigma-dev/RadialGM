@@ -1,4 +1,5 @@
 #include "ProtoModel.h"
+#include "RepeatedProtoModel.h"
 
 #include <iostream>
 
@@ -17,6 +18,7 @@ ProtoModel::ProtoModel(Message *protobuf, QObject *parent)
 
     if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
       if (field->is_repeated()) {
+        repeatedModels[field->number()] = new RepeatedProtoModel(protobuf, field, this);
         for (int j = 0; j < refl->FieldSize(*protobuf, field); j++) {
           ProtoModel *subModel = new ProtoModel(refl->MutableRepeatedMessage(protobuf, field, j), this);
           repeatedMessages[field->number()].append(QVariant::fromValue(static_cast<void *>(subModel)));
@@ -152,8 +154,16 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
   return QVariant();
 }
 
+RepeatedProtoModel* ProtoModel::GetRepeatedSubModel(int fieldNum) {
+  return repeatedModels[fieldNum];
+}
+
 ProtoModel *ProtoModel::GetSubModel(int fieldNum) {
   return static_cast<ProtoModel *>(this->data(fieldNum).value<void *>());
+}
+
+ProtoModel *ProtoModel::GetSubModel(int fieldNum, int index) {
+  return static_cast<ProtoModel *>(repeatedMessages[fieldNum][index].value<void*>());
 }
 
 QString ProtoModel::GetString(int fieldNum, int index) {
@@ -184,6 +194,5 @@ QModelIndex ProtoModel::index(int row, int column, const QModelIndex & /*parent*
 
 Qt::ItemFlags ProtoModel::flags(const QModelIndex &index) const {
   if (!index.isValid()) return nullptr;
-
   return QAbstractItemModel::flags(index);
 }

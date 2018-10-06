@@ -1,13 +1,12 @@
 #ifndef RESOURCEMODEL_H
 #define RESOURCEMODEL_H
 
-#include <QAbstractItemModel>
+#include "codegen/treenode.pb.h"
+
+#include "RepeatedProtoModel.h"
+
 #include <QHash>
 #include <QList>
-
-#include <google/protobuf/message.h>
-
-#include "codegen/treenode.pb.h"
 
 using TypeCase = buffers::TreeNode::TypeCase;
 using TreeNode = buffers::TreeNode;
@@ -37,7 +36,9 @@ class ProtoModel : public QAbstractItemModel {
   bool setData(const QModelIndex &index, const QVariant &value, int role) override;
   QVariant data(int row, int column=0) const;
   QVariant data(const QModelIndex &index, int role) const override;
+  RepeatedProtoModel* GetRepeatedSubModel(int fieldNum);
   ProtoModel *GetSubModel(int fieldNum);
+  ProtoModel *GetSubModel(int fieldNum, int index);
   QString GetString(int fieldNum, int index);
   QModelIndex parent(const QModelIndex &index) const override;
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -45,12 +46,13 @@ class ProtoModel : public QAbstractItemModel {
   Qt::ItemFlags flags(const QModelIndex &index) const override;
 
  signals:
-  virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
+  void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
                            const QVariant &oldValue = QVariant(0), const QVector<int> &roles = QVector<int>());
 
  private:
   QHash<int, QVariant> messages;  //where QVariant is ProtoModel*
   QHash<int, QList<QVariant>> repeatedMessages;
+  QHash<int, RepeatedProtoModel*> repeatedModels;
   bool dirty;
   google::protobuf::Message *protobuf;
   google::protobuf::Message *protobufBackup;

@@ -41,6 +41,8 @@ QVariant ModelMapper::data(int row, int column) const { return model->data(row, 
 
 QVariant ModelMapper::data(const QModelIndex &index, int role) const { return model->data(index, role); }
 
+RepeatedProtoModel* ModelMapper::GetRepeatedSubModel(int fieldNum) { return model->GetRepeatedSubModel(fieldNum); }
+
 ProtoModel *ModelMapper::GetSubModel(int fieldNum) { return model->GetSubModel(fieldNum); }
 
 QString ModelMapper::GetString(int fieldNum, int index) { return model->GetString(fieldNum, index); }
