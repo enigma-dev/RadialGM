@@ -220,6 +220,12 @@ void MainWindow::on_actionTile_triggered() {
 
 void MainWindow::on_actionCloseAll_triggered() { ui->mdiArea->closeAllSubWindows(); }
 
+void MainWindow::on_actionCloseOthers_triggered() {
+  foreach (QMdiSubWindow *subWindow, ui->mdiArea->subWindowList()) {
+    if (subWindow != ui->mdiArea->activeSubWindow()) subWindow->close();
+  }
+}
+
 void MainWindow::on_actionToggleTabbedView_triggered() { this->setTabbedMode(ui->actionToggleTabbedView->isChecked()); }
 
 void MainWindow::on_actionNext_triggered() { ui->mdiArea->activateNextSubWindow(); }

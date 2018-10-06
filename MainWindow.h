@@ -34,6 +34,7 @@ class MainWindow : public QMainWindow {
  private slots:
   // file menu
   void on_actionOpen_triggered();
+  void on_actionClearRecentMenu_triggered();
   void on_actionPreferences_triggered();
   void on_actionExit_triggered();
 
@@ -42,6 +43,7 @@ class MainWindow : public QMainWindow {
   void on_actionTile_triggered();
   void on_actionToggleTabbedView_triggered();
   void on_actionCloseAll_triggered();
+  void on_actionCloseOthers_triggered();
   void on_actionNext_triggered();
   void on_actionPrevious_triggered();
 
@@ -54,8 +56,6 @@ class MainWindow : public QMainWindow {
   void on_actionAbout_triggered();
 
   void on_treeView_doubleClicked(const QModelIndex &index);
-
-  void on_actionClearRecentMenu_triggered();
 
  private:
   QHash<buffers::TreeNode *, ProtoModel *> resourceModels;
