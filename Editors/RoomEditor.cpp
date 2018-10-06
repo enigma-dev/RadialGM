@@ -101,8 +101,8 @@ RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, p
     }
   }
 
-  QList<QVariant> instances = resMapper->data(Room::kInstancesFieldNumber).toList();
-  ui->layersTableView->setModel(static_cast<ProtoModel*>(instances[0].value<void*>()));
+  QVariant instance = resMapper->data(Room::kInstancesFieldNumber, 0);
+  ui->layersTableView->setModel(static_cast<ProtoModel*>(instance.value<void*>()));
 
   google::protobuf::RepeatedField<Room::Instance>
           sortedInstances(room->mutable_instances()->begin(), room->mutable_instances()->end());

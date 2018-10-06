@@ -35,7 +35,7 @@ class ProtoModel : public QAbstractItemModel {
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   bool setData(const QModelIndex &index, const QVariant &value, int role) override;
-  QVariant data(int index) const;
+  QVariant data(int row, int column=0) const;
   QVariant data(const QModelIndex &index, int role) const override;
   ProtoModel *GetSubModel(int fieldNum);
   QString GetString(int fieldNum, int index);

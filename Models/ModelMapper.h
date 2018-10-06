@@ -26,7 +26,7 @@ public:
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
   int columnCount(const QModelIndex &parent = QModelIndex()) const;
   bool setData(const QModelIndex &index, const QVariant &value, int role);
-  QVariant data(int index) const;
+  QVariant data(int row, int column=0) const;
   QVariant data(const QModelIndex &index, int role) const;
   ProtoModel* GetSubModel(int fieldNum);
   QString GetString(int fieldNum, int index);

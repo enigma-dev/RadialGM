@@ -113,7 +113,7 @@ bool ProtoModel::setData(const QModelIndex &index, const QVariant &value, int ro
   return true;
 }
 
-QVariant ProtoModel::data(int index) const { return data(this->index(index, 0, QModelIndex()), Qt::DisplayRole); }
+QVariant ProtoModel::data(int row, int column) const { return data(this->index(row, column, QModelIndex()), Qt::DisplayRole); }
 
 QVariant ProtoModel::data(const QModelIndex &index, int role) const {
   if (role != Qt::DisplayRole && role != Qt::EditRole) return QVariant();
@@ -126,7 +126,7 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
   switch (field->cpp_type()) {
     case CppType::CPPTYPE_MESSAGE:
       if (field->is_repeated())
-        return repeatedMessages[index.row()];
+        return repeatedMessages[index.row()][index.column()];
       else
         return messages[index.row()];
     case CppType::CPPTYPE_INT32:
