@@ -1,5 +1,8 @@
 #include "RepeatedProtoModel.h"
 #include "ProtoModel.h"
+#include "Components/ArtManager.h"
+#include "ResourceModelMap.h"
+#include "MainWindow.h"
 
 RepeatedProtoModel::RepeatedProtoModel(Message *protobuf, const FieldDescriptor *field, ProtoModel *parent) :
    QAbstractItemModel(parent), protobuf(protobuf), field(field) {}
@@ -21,9 +24,20 @@ QVariant RepeatedProtoModel::data(int row, int column) const {
 }
 
 QVariant RepeatedProtoModel::data(const QModelIndex &index, int role) const {
-  if (role != Qt::DisplayRole && role != Qt::EditRole) return QVariant();
   ProtoModel* m = static_cast<ProtoModel*>(QObject::parent())->GetSubModel(field->number(), index.row());
-  return m->data(index.column());
+  QVariant data = m->data(index.column());
+  if (role == Qt::DecorationRole && field->name() == "instances" && index.column() == Room::Instance::kObjectTypeFieldNumber) {
+    auto obj = MainWindow::resourceMap->GetResourceByName(TreeNode::kObject, data.toString());
+    if (obj != nullptr) {
+      obj = obj->GetSubModel(TreeNode::kObjectFieldNumber);
+      ProtoModel* spr = MainWindow::resourceMap->GetResourceByName(TreeNode::kSprite, obj->data(Object::kSpriteNameFieldNumber).toString());
+      if (spr != nullptr) {
+        spr = spr->GetSubModel(TreeNode::kSpriteFieldNumber);
+        return ArtManager::GetIcon(spr->GetString(Sprite::kSubimagesFieldNumber, 0));
+      }
+    }
+  } else if (role != Qt::DisplayRole && role != Qt::EditRole) return QVariant();
+  else return data;
 }
 
 QModelIndex RepeatedProtoModel::parent(const QModelIndex& index) const {
