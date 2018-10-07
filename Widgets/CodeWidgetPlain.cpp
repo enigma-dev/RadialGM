@@ -43,6 +43,12 @@ void CodeWidget::paste() { static_cast<QPlainTextEdit*>(this->textWidget)->paste
 
 int CodeWidget::lineCount() { return static_cast<QPlainTextEdit*>(this->textWidget)->blockCount(); }
 
+QPair<int, int> CodeWidget::cursorPosition() {
+  auto plainTextEdit = static_cast<QPlainTextEdit*>(this->textWidget);
+  auto cursor = plainTextEdit->textCursor();
+  return QPair<int, int>(cursor.blockNumber() + 1, cursor.positionInBlock() + 1);
+}
+
 void CodeWidget::gotoLine(int line) {
   auto plainTextEdit = static_cast<QPlainTextEdit*>(this->textWidget);
   QTextCursor textCursor(plainTextEdit->document()->findBlockByLineNumber(line - 1));

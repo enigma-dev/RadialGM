@@ -17,9 +17,11 @@ class CodeEditor : public BaseEditor {
   explicit CodeEditor(ProtoModel *model, QWidget *parent);
   ~CodeEditor();
 
- private slots:
-  void updateCursorPositionLabel(int line, int index);
-  void updateLineCountLabel(int lines);
+ public slots:
+  void setCursorPositionLabel(int line, int index);
+  void setLineCountLabel(int lines);
+  void updateCursorPositionLabel();
+  void updateLineCountLabel();
 
  protected:
   Ui::CodeEditor *ui;

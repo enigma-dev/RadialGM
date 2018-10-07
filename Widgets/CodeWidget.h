@@ -22,6 +22,7 @@ class CodeWidget : public QWidget {
   QString code() const;
   void setCode(QString);
   int lineCount();
+  QPair<int, int> cursorPosition();
 
  public slots:
   void newSource() {

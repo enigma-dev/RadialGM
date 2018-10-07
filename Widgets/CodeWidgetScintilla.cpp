@@ -67,6 +67,13 @@ void CodeWidget::paste() { static_cast<QsciScintilla*>(this->textWidget)->paste(
 
 int CodeWidget::lineCount() { return static_cast<QsciScintilla*>(this->textWidget)->lines(); }
 
+QPair<int, int> CodeWidget::cursorPosition() {
+  auto sci = static_cast<QsciScintilla*>(this->textWidget);
+  int line, index;
+  sci->getCursorPosition(&line, &index);
+  return QPair<int, int>(line + 1, index + 1);
+}
+
 void CodeWidget::gotoLine(int line) { static_cast<QsciScintilla*>(this->textWidget)->setCursorPosition(line - 1, 0); }
 
 void CodeWidget::printSource() {

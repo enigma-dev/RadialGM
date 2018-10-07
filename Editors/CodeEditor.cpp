@@ -9,17 +9,24 @@ CodeEditor::CodeEditor(ProtoModel *model, QWidget *parent) : BaseEditor(model, p
   ui->statusBar->addWidget(lineCountLabel);
 
   // make sure we set the status labels at least once
-  updateCursorPositionLabel(1, 1);
-  updateLineCountLabel(1);
+  updateCursorPositionLabel();
+  updateLineCountLabel();
 
-  connect(ui->codeWidget, &CodeWidget::cursorPositionChanged, this, &CodeEditor::updateCursorPositionLabel);
-  connect(ui->codeWidget, &CodeWidget::lineCountChanged, this, &CodeEditor::updateLineCountLabel);
+  connect(ui->codeWidget, &CodeWidget::cursorPositionChanged, this, &CodeEditor::setCursorPositionLabel);
+  connect(ui->codeWidget, &CodeWidget::lineCountChanged, this, &CodeEditor::setLineCountLabel);
 }
 
 CodeEditor::~CodeEditor() { delete ui; }
 
-void CodeEditor::updateCursorPositionLabel(int line, int index) {
+void CodeEditor::setCursorPositionLabel(int line, int index) {
   this->cursorPositionLabel->setText(tr("Ln %0, Col %1").arg(line).arg(index));
 }
 
-void CodeEditor::updateLineCountLabel(int lines) { this->lineCountLabel->setText(tr("Lines %0").arg(lines)); }
+void CodeEditor::setLineCountLabel(int lines) { this->lineCountLabel->setText(tr("Lines %0").arg(lines)); }
+
+void CodeEditor::updateCursorPositionLabel() {
+  auto cursorPosition = this->ui->codeWidget->cursorPosition();
+  this->setCursorPositionLabel(cursorPosition.first, cursorPosition.second);
+}
+
+void CodeEditor::updateLineCountLabel() { this->setLineCountLabel(this->ui->codeWidget->lineCount()); }
