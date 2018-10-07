@@ -140,6 +140,9 @@
     </property>
    </widget>
    <widget class="QMenu" name="menuWindow">
+    <property name="tearOffEnabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>&amp;Window</string>
     </property>
@@ -152,6 +155,7 @@
     <addaction name="separator"/>
     <addaction name="actionNext"/>
     <addaction name="actionPrevious"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">

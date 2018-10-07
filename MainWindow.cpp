@@ -42,6 +42,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   this->recentFiles = new RecentFiles(this, this->ui->menuRecent, this->ui->actionClearRecentMenu);
 
   ui->mdiArea->setBackground(QImage(":/banner.png"));
+  connect(ui->menuWindow, &QMenu::aboutToShow, this, &MainWindow::updateWindowMenu);
 
   RGMPlugin *pluginServer = new ServerPlugin(*this);
   auto outputTextBrowser = this->ui->outputTextBrowser;
@@ -137,6 +138,29 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
 
   subWindow->show();
   ui->mdiArea->setActiveSubWindow(subWindow);
+}
+
+void MainWindow::updateWindowMenu() {
+  static QList<QAction *> windowActions;
+  foreach (auto action, windowActions) {
+    ui->menuWindow->removeAction(action);
+    windowActions.removeOne(action);
+  }
+  auto windows = ui->mdiArea->subWindowList();
+  for (int i = 0; i < windows.size(); ++i) {
+    QMdiSubWindow *mdiSubWindow = windows.at(i);
+
+    const auto windowTitle = mdiSubWindow->windowTitle();
+    QString numberString = QString::number(i + 1);
+    numberString = numberString.insert(numberString.length() - 1, '&');
+    QString text = tr("%1 %2").arg(numberString).arg(windowTitle);
+
+    QAction *action = ui->menuWindow->addAction(
+        text, mdiSubWindow, [this, mdiSubWindow]() { ui->mdiArea->setActiveSubWindow(mdiSubWindow); });
+    windowActions.append(action);
+    action->setCheckable(true);
+    action->setChecked(mdiSubWindow == ui->mdiArea->activeSubWindow());
+  }
 }
 
 void MainWindow::openFile(QString fName) {

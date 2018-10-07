@@ -46,6 +46,7 @@ class MainWindow : public QMainWindow {
   void on_actionCloseOthers_triggered();
   void on_actionNext_triggered();
   void on_actionPrevious_triggered();
+  void updateWindowMenu();
 
   // help menu
   void on_actionDocumentation_triggered();
