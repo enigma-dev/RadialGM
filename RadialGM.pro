@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui printsupport
 CONFIG   += c++11
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -21,9 +21,9 @@ QMAKE_TARGET_DESCRIPTION = ENIGMA Development Environment
 QMAKE_TARGET_COPYRIGHT = "Copyright \\251 2007-2018 ENIGMA Dev Team"
 
 # Uncomment if you want QPlainTextEdit used in place of QScintilla
-#DEFINES += RGM_DISABLE_SYNTAXHIGHLIGHTING
+#CONFIG += rgm_disable_syntaxhighlight
 
-contains(DEFINES, RGM_DISABLE_SYNTAXHIGHLIGHTING) {
+rgm_disable_syntaxhighlight {
   SOURCES += Widgets/CodeWidgetPlain.cpp
 } else {
   SOURCES += Widgets/CodeWidgetScintilla.cpp
@@ -68,6 +68,7 @@ SOURCES += \
     Editors/RoomEditor.cpp \
     Editors/SpriteEditor.cpp \
     Widgets/BackgroundRenderer.cpp \
+    Widgets/CodeWidget.cpp \
     Models/TreeModel.cpp \
     Components/ArtManager.cpp \
     Models/ProtoModel.cpp \
@@ -76,7 +77,9 @@ SOURCES += \
     Components/Utility.cpp \
     Plugins/RGMPlugin.cpp \
     Plugins/ServerPlugin.cpp \
-    Components/RecentFiles.cpp
+    Components/RecentFiles.cpp \
+    Editors/CodeEditor.cpp \
+    Editors/ScriptEditor.cpp \
 
 HEADERS += \
     MainWindow.h \
@@ -91,6 +94,7 @@ HEADERS += \
     Editors/RoomEditor.h \
     Editors/SpriteEditor.h \
     Widgets/BackgroundRenderer.h \
+    Widgets/CodeWidget.h \
     Models/TreeModel.h \
     Components/ArtManager.h \
     Models/ProtoModel.h \
@@ -99,10 +103,11 @@ HEADERS += \
     Components/Utility.h \
     Plugins/RGMPlugin.h \
     Plugins/ServerPlugin.h \
-    Widgets/CodeWidget.h \
     Components/RecentFiles.h \
     main.h \
-    Dialogs/PreferencesKeys.h
+    Dialogs/PreferencesKeys.h \
+    Editors/CodeEditor.h \
+    Editors/ScriptEditor.h
 
 FORMS += \
     MainWindow.ui \
@@ -115,7 +120,8 @@ FORMS += \
     Editors/TimelineEditor.ui \
     Editors/RoomEditor.ui \
     Editors/SpriteEditor.ui \
-    Editors/SoundEditor.ui
+    Editors/SoundEditor.ui \
+    Editors/CodeEditor.ui
 
 RESOURCES += \
     images.qrc

@@ -24,7 +24,31 @@ void ImmediateDataWidgetMapper::widgetChanged() {
   auto delegate = this->itemDelegate();
   auto editor = static_cast<QWidget *>(this->sender());
   auto model = this->model();
-  delegate->setModelData(editor, model, this->indexAt(this->mappedSection(editor)));
+
+  // temporarily remove the mapping to this widget while we
+  // synchronize the model to the widget's current state
+  // this avoids causing the widget to be set again
+  auto mappedSection = this->mappedSection(editor);
+  auto propertyName = this->mappedPropertyName(editor);
+  this->removeMapping(editor);
+
+  delegate->setModelData(editor, model, this->indexAt(mappedSection));
+
+  this->addMapping(editor, mappedSection, propertyName);
+}
+
+void ImmediateDataWidgetMapper::removeMapping(QWidget *widget) {
+  // remove the connection to the widget's property change meta signal
+  auto propertyName = this->mappedPropertyName(widget);
+  auto widgetMetaObject = widget->metaObject();
+  auto property = widgetMetaObject->property(widgetMetaObject->indexOfProperty(propertyName));
+  auto metaObject = this->metaObject();
+  QMetaObject::disconnect(widget, property.notifySignalIndex(), this, metaObject->indexOfSlot("widgetChanged()"));
+
+  // remove the internal widget mapper's event filters and such
+  QDataWidgetMapper::removeMapping(widget);
+  // disown this widget
+  this->widgetList.removeOne(widget);
 }
 
 void ImmediateDataWidgetMapper::addMapping(QWidget *widget, int section, QByteArray propertyName) {
@@ -47,9 +71,10 @@ void ImmediateDataWidgetMapper::addMapping(QWidget *widget, int section, QByteAr
 }
 
 void ImmediateDataWidgetMapper::clearMapping() {
-  // since we are keeping our own list to know what widgets were mapped with this mapper
-  // we have to clear it at the same time the QDataWidgetMapper clears its widget map
-  widgetList.clear();
+  // we have to use our own remove mapping since it does not override
+  // to ensure we are disconnected from the meta signal for the property change
+  foreach (auto widget, widgetList)
+    this->removeMapping(widget);
   QDataWidgetMapper::clearMapping();
 }
 

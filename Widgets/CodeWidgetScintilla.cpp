@@ -1,25 +1,91 @@
 #include "CodeWidget.h"
 
+#include <Qsci/qscilexercpp.h>
+#include <Qsci/qsciprinter.h>
+#include <Qsci/qsciscintilla.h>
+
 #include <QFontMetrics>
 #include <QLayout>
+#include <QPrintDialog>
 
-#include <Qsci/qscilexercpp.h>
-#include <Qsci/qsciscintilla.h>
+namespace {
+QsciLexerCPP* cppLexer = nullptr;
+}
 
 CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), font(QFont("Courier", 10)) {
   QFontMetrics fontMetrics(font);
-  QsciScintilla* textEdit = new QsciScintilla(this);
 
-  textEdit->setCaretLineVisible(true);
-  textEdit->setCaretLineBackgroundColor(QColor("#ffe4e4"));
+  if (cppLexer == nullptr) {
+    cppLexer = new QsciLexerCPP();
+    cppLexer->setFont(font);
+  }
 
-  textEdit->setMarginLineNumbers(0, true);
-  textEdit->setMarginWidth(0, fontMetrics.width("000"));
-  textEdit->setMarginsFont(font);
-  QsciLexerCPP* lexer = new QsciLexerCPP();
-  lexer->setDefaultFont(font);
-  textEdit->setLexer(lexer);
-  this->layout()->addWidget(textEdit);
+  QsciScintilla* codeEdit = new QsciScintilla(this);
+  this->textWidget = codeEdit;
+
+  codeEdit->setCaretLineVisible(true);
+  codeEdit->setCaretLineBackgroundColor(QColor("#ffe4e4"));
+
+  codeEdit->setMarginLineNumbers(0, true);
+  codeEdit->setMarginsFont(font);
+
+  codeEdit->setLexer(cppLexer);
+
+  connect(codeEdit, &QsciScintilla::textChanged, this, &CodeWidget::codeChanged);
+
+  connect(codeEdit, &QsciScintilla::linesChanged, [=]() {
+    const int padding = 8;
+    auto maxLineString = QString::number(codeEdit->lines());
+    codeEdit->setMarginWidth(0, fontMetrics.width(maxLineString) + padding);
+    emit lineCountChanged(codeEdit->lines());
+  });
+
+  connect(codeEdit, &QsciScintilla::cursorPositionChanged,
+          [=](int line, int index) { emit cursorPositionChanged(line + 1, index + 1); });
+
+  QVBoxLayout* rootLayout = new QVBoxLayout(this);
+  rootLayout->setMargin(0);
+  rootLayout->addWidget(codeEdit);
+  this->setLayout(rootLayout);
 }
 
 CodeWidget::~CodeWidget() {}
+
+QString CodeWidget::code() const { return static_cast<QsciScintilla*>(this->textWidget)->text(); }
+
+void CodeWidget::setCode(QString code) { static_cast<QsciScintilla*>(this->textWidget)->setText(code); }
+
+void CodeWidget::undo() { static_cast<QsciScintilla*>(this->textWidget)->undo(); }
+
+void CodeWidget::redo() { static_cast<QsciScintilla*>(this->textWidget)->redo(); }
+
+void CodeWidget::cut() { static_cast<QsciScintilla*>(this->textWidget)->cut(); }
+
+void CodeWidget::copy() { static_cast<QsciScintilla*>(this->textWidget)->copy(); }
+
+void CodeWidget::paste() { static_cast<QsciScintilla*>(this->textWidget)->paste(); }
+
+int CodeWidget::lineCount() { return static_cast<QsciScintilla*>(this->textWidget)->lines(); }
+
+QPair<int, int> CodeWidget::cursorPosition() {
+  auto sci = static_cast<QsciScintilla*>(this->textWidget);
+  int line, index;
+  sci->getCursorPosition(&line, &index);
+  return QPair<int, int>(line + 1, index + 1);
+}
+
+void CodeWidget::gotoLine(int line) { static_cast<QsciScintilla*>(this->textWidget)->setCursorPosition(line - 1, 0); }
+
+void CodeWidget::printSource() {
+  QsciPrinter sciPrinter;
+  QPrintDialog printDialog(&sciPrinter, this);
+  auto codeEdit = static_cast<QsciScintilla*>(this->textWidget);
+  if (codeEdit->hasSelectedText()) printDialog.addEnabledOption(QAbstractPrintDialog::PrintSelection);
+  if (printDialog.exec() == QDialog::Accepted) this->print(&sciPrinter);
+}
+
+void CodeWidget::print(QPrinter* printer) {
+  auto sciPrinter = static_cast<QsciPrinter*>(printer);
+  auto codeEdit = static_cast<QsciScintilla*>(this->textWidget);
+  sciPrinter->printRange(codeEdit);
+}

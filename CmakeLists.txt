@@ -27,9 +27,11 @@ set(RGM_SOURCES
     MainWindow.cpp
     Dialogs/PreferencesDialog.cpp
     Editors/BaseEditor.cpp
+    Editors/CodeEditor.cpp
     Editors/BackgroundEditor.cpp
     Editors/ObjectEditor.cpp
     Editors/SoundEditor.cpp
+    Editors/ScriptEditor.cpp
     Editors/FontEditor.cpp
     Editors/PathEditor.cpp
     Editors/TimelineEditor.cpp
@@ -43,6 +45,7 @@ set(RGM_SOURCES
     Components/Utility.cpp
     Components/RecentFiles.cpp
     Widgets/BackgroundRenderer.cpp
+    Widgets/CodeWidget.cpp
     Plugins/RGMPlugin.cpp
     Plugins/ServerPlugin.cpp
     qtplugins.cpp
@@ -53,10 +56,12 @@ set(RGM_HEADERS
     MainWindow.h
     Dialogs/PreferencesDialog.h
     Dialogs/PreferencesKeys.h
+    Editors/CodeEditor.h
     Editors/BaseEditor.h
     Editors/BackgroundEditor.h
     Editors/ObjectEditor.h
     Editors/SoundEditor.h
+    Editors/ScriptEditor.h
     Editors/FontEditor.h
     Editors/PathEditor.h
     Editors/TimelineEditor.h
@@ -79,6 +84,7 @@ set(RGM_UI
     MainWindow.ui
     Dialogs/PreferencesDialog.ui
     Dialogs/AddImageDialog.ui
+    Editors/CodeEditor.ui
     Editors/BackgroundEditor.ui
     Editors/ObjectEditor.ui
     Editors/FontEditor.ui
@@ -94,14 +100,15 @@ set(RGM_RC
 )
 
 # Check for QScintilla
-set(EDITOR_SOURCES Widgets/CodeWidgetPlain.cpp)
-#find_package(QScintilla)
-#if (QSCINTILLA_FOUND)
-#	set(EDITOR_SOURCES Widgets/CodeWidgetScintilla.cpp)
-#endif()
+find_library(LIB_QSCINTILLA NAMES qscintilla2)
+if (NOT LIB_QSCINTILLA)
+    set(EDITOR_SOURCES Widgets/CodeWidgetPlain.cpp)
+else()
+    set(EDITOR_SOURCES Widgets/CodeWidgetScintilla.cpp)
+endif()
 
 # Tell CMake to create the RadialGM executable
-add_executable(${EXE} WIN32 ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${RGM_RC})
+add_executable(${EXE} WIN32 ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${EDITOR_SOURCES} ${RGM_RC})
 
 message(STATUS "Initial build flags:")
 set(CompilerFlags
@@ -119,9 +126,9 @@ foreach(CompilerFlag ${CompilerFlags})
   message(STATUS "  '${CompilerFlag}': ${${CompilerFlag}}")
 endforeach()
 
-#if (QSCINTILLA_FOUND)
-#	target_link_libraries(${EXE} PRIVATE qscintilla)
-#endif()
+if (LIB_QSCINTILLA)
+    target_link_libraries(${EXE} PRIVATE ${LIB_QSCINTILLA})
+endif()
 
 # Find PugiXML
 find_library(LIB_PUGIXML NAMES pugixml)
@@ -165,8 +172,8 @@ find_package(OpenSSL REQUIRED)
 target_link_libraries(${EXE} PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 
 # Find Qt
-find_package(Qt5 COMPONENTS Core Widgets Gui REQUIRED)
-target_link_libraries(${EXE} PRIVATE Qt5::Core Qt5::WinMain Qt5::Core Qt5::Widgets Qt5::Gui Qt5::Gui)
+find_package(Qt5 COMPONENTS Core Widgets Gui PrintSupport REQUIRED)
+target_link_libraries(${EXE} PRIVATE Qt5::Core Qt5::WinMain Qt5::Core Qt5::Widgets Qt5::Gui Qt5::Gui Qt5::PrintSupport)
 
 # Debug
 find_library(LIB_QT_PLATFORM_D NAMES Qt5PlatformCompositorSupportd)
@@ -174,6 +181,7 @@ find_library(LIB_QT_FONT_D NAMES Qt5FontDatabaseSupportd)
 find_library(LIB_QT_UI_D NAMES Qt5WindowsUIAutomationSupportd)
 find_library(LIB_QT_EVENT_D NAMES Qt5EventDispatcherSupportd)
 find_library(LIB_QT_THEME_D NAMES Qt5ThemeSupportd)
+find_library(LIB_QT_PRINT_D NAMES Qt5PrintSupportd)
 find_library(LIB_QT_ICO_D NAMES qicod PATHS "${QT_DIR}/plugins/imageformats")
 find_library(LIB_QT_GIF_D NAMES qgifd PATHS "${QT_DIR}/plugins/imageformats")
 find_library(LIB_QT_JPEG_D NAMES qjpegd PATHS "${QT_DIR}/plugins/imageformats")
@@ -181,12 +189,14 @@ find_library(LIB_QT_JPEG_D NAMES qjpegd PATHS "${QT_DIR}/plugins/imageformats")
 find_library(LIB_WIN_UXTHEME_D NAMES Uxtheme)
 find_library(LIB_QT_WINVISTASTYLE_D NAMES qwindowsvistastyled PATHS "${QT_DIR}/plugins/styles")
 find_library(LIB_QT_WIN_D NAMES qwindowsd PATHS "${QT_DIR}/plugins/platforms")
+
 # Release
 find_library(LIB_QT_PLATFORM NAMES Qt5PlatformCompositorSupport)
 find_library(LIB_QT_FONT NAMES Qt5FontDatabaseSupport)
 find_library(LIB_QT_UI NAMES Qt5WindowsUIAutomationSupport)
 find_library(LIB_QT_EVENT NAMES Qt5EventDispatcherSupport)
 find_library(LIB_QT_THEME NAMES Qt5ThemeSupport)
+find_library(LIB_QT_PRINT NAMES Qt5PrintSupport)
 # ICO is needed to set Win32 icon on the Window
 # also all of these image plugins are very small about 100kb~ each
 find_library(LIB_QT_ICO NAMES qico PATHS "${QT_DIR}/plugins/imageformats")
@@ -201,13 +211,14 @@ target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_QT_PLATFORM_D},
                       "$<IF:$<CONFIG:Debug>,${LIB_QT_UI_D},${LIB_QT_UI}>"
                       "$<IF:$<CONFIG:Debug>,${LIB_QT_EVENT_D},${LIB_QT_EVENT}>"
                       "$<IF:$<CONFIG:Debug>,${LIB_QT_THEME_D},${LIB_QT_THEME}>"
+                      "$<IF:$<CONFIG:Debug>,${LIB_QT_PRINT_D},${LIB_QT_PRINT}>"
                       "$<IF:$<CONFIG:Debug>,${LIB_QT_ICO_D},${LIB_QT_ICO}>"
                       "$<IF:$<CONFIG:Debug>,${LIB_QT_GIF_D},${LIB_QT_GIF}>"
                       "$<IF:$<CONFIG:Debug>,${LIB_QT_JPEG_D},${LIB_QT_JPEG}>"
                       "$<IF:$<CONFIG:Debug>,${LIB_WIN_UXTHEME_D},${LIB_WIN_UXTHEME}>"
                       "$<IF:$<CONFIG:Debug>,${LIB_QT_WINVISTASTYLE_D},${LIB_QT_WINVISTASTYLE}>"
                       "$<IF:$<CONFIG:Debug>,${LIB_QT_WIN_D},${LIB_QT_WIN}>"
-					  )
+                      )
 
 # Find FreeType
 find_package(Freetype REQUIRED)
