@@ -140,9 +140,6 @@
     </property>
    </widget>
    <widget class="QMenu" name="menuWindow">
-    <property name="tearOffEnabled">
-     <bool>false</bool>
-    </property>
     <property name="title">
      <string>&amp;Window</string>
     </property>
