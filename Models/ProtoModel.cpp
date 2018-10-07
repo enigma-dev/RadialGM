@@ -65,9 +65,7 @@ void ProtoModel::SetDirty(bool dirty) { this->dirty = dirty; }
 
 bool ProtoModel::IsDirty() { return dirty; }
 
-int ProtoModel::columnCount(const QModelIndex & /*parent*/) const {
-  return 1;
-}
+int ProtoModel::columnCount(const QModelIndex & /*parent*/) const { return 1; }
 
 bool ProtoModel::setData(const QModelIndex &index, const QVariant &value, int role) {
   const Descriptor *desc = protobuf->GetDescriptor();
@@ -115,7 +113,9 @@ bool ProtoModel::setData(const QModelIndex &index, const QVariant &value, int ro
   return true;
 }
 
-QVariant ProtoModel::data(int row, int column) const { return data(this->index(row, column, QModelIndex()), Qt::DisplayRole); }
+QVariant ProtoModel::data(int row, int column) const {
+  return data(this->index(row, column, QModelIndex()), Qt::DisplayRole);
+}
 
 QVariant ProtoModel::data(const QModelIndex &index, int role) const {
   if (role != Qt::DisplayRole && role != Qt::EditRole) return QVariant();
@@ -123,7 +123,12 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
   const Descriptor *desc = protobuf->GetDescriptor();
   const Reflection *refl = protobuf->GetReflection();
   const FieldDescriptor *field = desc->FindFieldByNumber(index.row());
-  if (!field) return QVariant();
+  if (!field) {
+    if (index.row() == 0 && role == Qt::DisplayRole) {
+      return "Value";
+    }
+    return QVariant();
+  }
 
   switch (field->cpp_type()) {
     case CppType::CPPTYPE_MESSAGE:
@@ -154,16 +159,14 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
   return QVariant();
 }
 
-RepeatedProtoModel* ProtoModel::GetRepeatedSubModel(int fieldNum) {
-  return repeatedModels[fieldNum];
-}
+RepeatedProtoModel *ProtoModel::GetRepeatedSubModel(int fieldNum) { return repeatedModels[fieldNum]; }
 
 ProtoModel *ProtoModel::GetSubModel(int fieldNum) {
   return static_cast<ProtoModel *>(this->data(fieldNum).value<void *>());
 }
 
 ProtoModel *ProtoModel::GetSubModel(int fieldNum, int index) {
-  return static_cast<ProtoModel *>(repeatedMessages[fieldNum][index].value<void*>());
+  return static_cast<ProtoModel *>(repeatedMessages[fieldNum][index].value<void *>());
 }
 
 QString ProtoModel::GetString(int fieldNum, int index) {
@@ -173,17 +176,16 @@ QString ProtoModel::GetString(int fieldNum, int index) {
     return "";
 }
 
-QModelIndex ProtoModel::parent(const QModelIndex& index) const {
-  return QModelIndex();
-}
+QModelIndex ProtoModel::parent(const QModelIndex &index) const { return QModelIndex(); }
 
 QVariant ProtoModel::headerData(int section, Qt::Orientation orientation, int role) const {
-  if (role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal) return QVariant();
+  if (role != Qt::DisplayRole) return QVariant();
+  if (section == 0) return "Property";
+
   const Descriptor *desc = protobuf->GetDescriptor();
   const FieldDescriptor *field = desc->FindFieldByNumber(section);
 
-  if (field != nullptr)
-    return QString::fromStdString(field->name());
+  if (field != nullptr) return QString::fromStdString(field->name());
 
   return "";
 }
@@ -194,5 +196,5 @@ QModelIndex ProtoModel::index(int row, int column, const QModelIndex & /*parent*
 
 Qt::ItemFlags ProtoModel::flags(const QModelIndex &index) const {
   if (!index.isValid()) return nullptr;
-  return QAbstractItemModel::flags(index);
+  return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
 }

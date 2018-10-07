@@ -1,18 +1,18 @@
 #include "RepeatedProtoModel.h"
-#include "ProtoModel.h"
 #include "Components/ArtManager.h"
-#include "ResourceModelMap.h"
 #include "MainWindow.h"
+#include "ProtoModel.h"
+#include "ResourceModelMap.h"
 
-RepeatedProtoModel::RepeatedProtoModel(Message *protobuf, const FieldDescriptor *field, ProtoModel *parent) :
-   QAbstractItemModel(parent), protobuf(protobuf), field(field) {}
+RepeatedProtoModel::RepeatedProtoModel(Message *protobuf, const FieldDescriptor *field, ProtoModel *parent)
+    : QAbstractItemModel(parent), protobuf(protobuf), field(field) {}
 
-int RepeatedProtoModel::rowCount(const QModelIndex& /*parent*/) const {
+int RepeatedProtoModel::rowCount(const QModelIndex & /*parent*/) const {
   const Reflection *refl = protobuf->GetReflection();
   return refl->FieldSize(*protobuf, field);
 }
 
-int RepeatedProtoModel::columnCount(const QModelIndex& /*parent*/) const {
+int RepeatedProtoModel::columnCount(const QModelIndex & /*parent*/) const {
   const Descriptor *desc = protobuf->GetDescriptor();
   return desc->field_count();
 }
@@ -24,28 +24,31 @@ QVariant RepeatedProtoModel::data(int row, int column) const {
 }
 
 QVariant RepeatedProtoModel::data(const QModelIndex &index, int role) const {
-  ProtoModel* m = static_cast<ProtoModel*>(QObject::parent())->GetSubModel(field->number(), index.row());
+  ProtoModel *m = static_cast<ProtoModel *>(QObject::parent())->GetSubModel(field->number(), index.row());
   QVariant data = m->data(index.column());
-  if (role == Qt::DecorationRole && field->name() == "instances" && index.column() == Room::Instance::kObjectTypeFieldNumber) {
+  if (role == Qt::DecorationRole && field->name() == "instances" &&
+      index.column() == Room::Instance::kObjectTypeFieldNumber) {
     auto obj = MainWindow::resourceMap->GetResourceByName(TreeNode::kObject, data.toString());
     if (obj != nullptr) {
       obj = obj->GetSubModel(TreeNode::kObjectFieldNumber);
-      ProtoModel* spr = MainWindow::resourceMap->GetResourceByName(TreeNode::kSprite, obj->data(Object::kSpriteNameFieldNumber).toString());
+      ProtoModel *spr = MainWindow::resourceMap->GetResourceByName(
+          TreeNode::kSprite, obj->data(Object::kSpriteNameFieldNumber).toString());
       if (spr != nullptr) {
         spr = spr->GetSubModel(TreeNode::kSpriteFieldNumber);
         return ArtManager::GetIcon(spr->GetString(Sprite::kSubimagesFieldNumber, 0));
       }
     }
-  } else if (role != Qt::DisplayRole && role != Qt::EditRole) return QVariant();
-  else return data;
+  } else if (role != Qt::DisplayRole && role != Qt::EditRole)
+    return QVariant();
+  else
+    return data;
 }
 
-QModelIndex RepeatedProtoModel::parent(const QModelIndex& index) const {
-  return QModelIndex();
-}
+QModelIndex RepeatedProtoModel::parent(const QModelIndex &index) const { return QModelIndex(); }
 
 QVariant RepeatedProtoModel::headerData(int section, Qt::Orientation orientation, int role) const {
-  ProtoModel* m = static_cast<ProtoModel*>(QObject::parent())->GetSubModel(field->number(), 0);
+  if (role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal) return QVariant();
+  ProtoModel *m = static_cast<ProtoModel *>(QObject::parent())->GetSubModel(field->number(), 0);
   return m->headerData(section, orientation, role);
 }
 
