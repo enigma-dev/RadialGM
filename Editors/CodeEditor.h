@@ -2,7 +2,6 @@
 #define CODEEDITOR_H
 
 #include "BaseEditor.h"
-#include "ui_CodeEditor.h"
 
 #include <QLabel>
 
