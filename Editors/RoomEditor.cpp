@@ -97,20 +97,20 @@ RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, p
   }
 
   RepeatedProtoModel* m = roomModel->GetRepeatedSubModel(Room::kInstancesFieldNumber);
-  ui->layersTableView->setModel(m);
+  ui->layersAssetsView->setModel(m);
   auto currentInstanceModel = roomModel->data(Room::kInstancesFieldNumber, 0).value<void*>();
   ui->layersPropertiesView->setModel(static_cast<ProtoModel*>(currentInstanceModel));
 
   for (int c = 0; c < m->columnCount(); ++c) {
     if (c != Room::Instance::kNameFieldNumber && c != Room::Instance::kObjectTypeFieldNumber &&
         c != Room::Instance::kIdFieldNumber)
-      ui->layersTableView->hideColumn(c);
+      ui->layersAssetsView->hideColumn(c);
     else
-      ui->layersTableView->resizeColumnToContents(c);
+      ui->layersAssetsView->resizeColumnToContents(c);
   }
 
-  ui->layersTableView->horizontalHeader()->swapSections(Room::Instance::kNameFieldNumber,
-                                                        Room::Instance::kObjectTypeFieldNumber);
+  ui->layersAssetsView->horizontalHeader()->swapSections(Room::Instance::kNameFieldNumber,
+                                                         Room::Instance::kObjectTypeFieldNumber);
 
   google::protobuf::RepeatedField<Room::Instance> sortedInstances(room->mutable_instances()->begin(),
                                                                   room->mutable_instances()->end());
