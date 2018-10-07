@@ -45,6 +45,7 @@ set(RGM_SOURCES
     Components/Utility.cpp
     Components/RecentFiles.cpp
     Widgets/BackgroundRenderer.cpp
+    Widgets/CodeWidget.cpp
     Plugins/RGMPlugin.cpp
     Plugins/ServerPlugin.cpp
     qtplugins.cpp

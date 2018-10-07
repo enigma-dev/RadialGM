@@ -68,6 +68,7 @@ SOURCES += \
     Editors/RoomEditor.cpp \
     Editors/SpriteEditor.cpp \
     Widgets/BackgroundRenderer.cpp \
+    Widgets/CodeWidget.cpp \
     Models/TreeModel.cpp \
     Components/ArtManager.cpp \
     Models/ProtoModel.cpp \
@@ -78,7 +79,7 @@ SOURCES += \
     Plugins/ServerPlugin.cpp \
     Components/RecentFiles.cpp \
     Editors/CodeEditor.cpp \
-    Editors/ScriptEditor.cpp
+    Editors/ScriptEditor.cpp \
 
 HEADERS += \
     MainWindow.h \
@@ -93,6 +94,7 @@ HEADERS += \
     Editors/RoomEditor.h \
     Editors/SpriteEditor.h \
     Widgets/BackgroundRenderer.h \
+    Widgets/CodeWidget.h \
     Models/TreeModel.h \
     Components/ArtManager.h \
     Models/ProtoModel.h \
@@ -101,7 +103,6 @@ HEADERS += \
     Components/Utility.h \
     Plugins/RGMPlugin.h \
     Plugins/ServerPlugin.h \
-    Widgets/CodeWidget.h \
     Components/RecentFiles.h \
     main.h \
     Dialogs/PreferencesKeys.h \
