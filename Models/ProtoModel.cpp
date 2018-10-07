@@ -180,7 +180,7 @@ QModelIndex ProtoModel::parent(const QModelIndex &index) const { return QModelIn
 
 QVariant ProtoModel::headerData(int section, Qt::Orientation orientation, int role) const {
   if (role != Qt::DisplayRole) return QVariant();
-  if (section == 0) return "Property";
+  if (section == 0) return tr("Property");
 
   const Descriptor *desc = protobuf->GetDescriptor();
   const FieldDescriptor *field = desc->FindFieldByNumber(section);
@@ -196,5 +196,7 @@ QModelIndex ProtoModel::index(int row, int column, const QModelIndex & /*parent*
 
 Qt::ItemFlags ProtoModel::flags(const QModelIndex &index) const {
   if (!index.isValid()) return nullptr;
-  return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+  auto flags = QAbstractItemModel::flags(index);
+  if (index.row() > 0) flags |= Qt::ItemIsEditable;
+  return flags;
 }

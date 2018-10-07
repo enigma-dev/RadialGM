@@ -109,8 +109,8 @@ RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, p
       ui->layersAssetsView->resizeColumnToContents(c);
   }
 
-  ui->layersAssetsView->horizontalHeader()->swapSections(Room::Instance::kNameFieldNumber,
-                                                         Room::Instance::kObjectTypeFieldNumber);
+  ui->layersAssetsView->header()->swapSections(Room::Instance::kNameFieldNumber,
+                                               Room::Instance::kObjectTypeFieldNumber);
 
   google::protobuf::RepeatedField<Room::Instance> sortedInstances(room->mutable_instances()->begin(),
                                                                   room->mutable_instances()->end());
