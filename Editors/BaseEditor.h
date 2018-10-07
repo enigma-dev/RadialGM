@@ -11,6 +11,7 @@ static const QHash<int, int> ResTypeFields = {{TypeCase::kSprite, TreeNode::kSpr
                                               {TypeCase::kBackground, TreeNode::kBackgroundFieldNumber},
                                               {TypeCase::kPath, TreeNode::kPathFieldNumber},
                                               {TypeCase::kFont, TreeNode::kFontFieldNumber},
+                                              {TypeCase::kScript, TreeNode::kScriptFieldNumber},
                                               {TypeCase::kTimeline, TreeNode::kTimelineFieldNumber},
                                               {TypeCase::kObject, TreeNode::kObjectFieldNumber},
                                               {TypeCase::kRoom, TreeNode::kRoomFieldNumber}};
@@ -27,7 +28,7 @@ class BaseEditor : public QWidget {
   QVariant GetModelData(int index);
 
  signals:
-  void ResourceRenamed(TypeCase type, const QString& oldName, const QString& newName);
+  void ResourceRenamed(TypeCase type, const QString &oldName, const QString &newName);
 
  public slots:
   virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,

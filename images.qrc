@@ -38,6 +38,8 @@
         <file alias="pause.png">Images/actions/pause.png</file>
         <file alias="play.png">Images/actions/play.png</file>
         <file alias="snap-to-grid.png">Images/actions/snap-to-grid.png</file>
+        <file alias="print.png">Images/actions/print.png</file>
+        <file alias="line-goto.png">Images/actions/line-goto.png</file>
     </qresource>
     <qresource prefix="/resources">
         <file alias="background.png">Images/resources/background.png</file>

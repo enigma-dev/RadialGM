@@ -9,6 +9,7 @@
 #include "Editors/ObjectEditor.h"
 #include "Editors/PathEditor.h"
 #include "Editors/RoomEditor.h"
+#include "Editors/ScriptEditor.h"
 #include "Editors/SoundEditor.h"
 #include "Editors/SpriteEditor.h"
 #include "Editors/TimelineEditor.h"
@@ -44,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   this->recentFiles = new RecentFiles(this, this->ui->menuRecent, this->ui->actionClearRecentMenu);
 
   ui->mdiArea->setBackground(QImage(":/banner.png"));
+  connect(ui->menuWindow, &QMenu::aboutToShow, this, &MainWindow::updateWindowMenu);
 
   RGMPlugin *pluginServer = new ServerPlugin(*this);
   auto outputTextBrowser = this->ui->outputTextBrowser;
@@ -63,6 +65,7 @@ void MainWindow::readSettings() {
   settings.beginGroup("MainWindow");
   restoreGeometry(settings.value("geometry").toByteArray());
   restoreState(settings.value("state").toByteArray());
+  setTabbedMode(settings.value("tabbedView", false).toBool());
   settings.endGroup();
 }
 
@@ -73,6 +76,7 @@ void MainWindow::writeSettings() {
   settings.beginGroup("MainWindow");
   settings.setValue("geometry", saveGeometry());
   settings.setValue("state", saveState());
+  settings.setValue("tabbedView", ui->actionToggleTabbedView->isChecked());
   settings.endGroup();
 }
 
@@ -98,6 +102,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
                                 {TypeCase::kBackground, EditorFactory<BackgroundEditor>},
                                 {TypeCase::kPath, EditorFactory<PathEditor>},
                                 {TypeCase::kFont, EditorFactory<FontEditor>},
+                                {TypeCase::kScript, EditorFactory<ScriptEditor>},
                                 {TypeCase::kTimeline, EditorFactory<TimelineEditor>},
                                 {TypeCase::kObject, EditorFactory<ObjectEditor>},
                                 {TypeCase::kRoom, EditorFactory<RoomEditor>}});
@@ -125,6 +130,29 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
 
   subWindow->show();
   ui->mdiArea->setActiveSubWindow(subWindow);
+}
+
+void MainWindow::updateWindowMenu() {
+  static QList<QAction *> windowActions;
+  foreach (auto action, windowActions) {
+    ui->menuWindow->removeAction(action);
+    windowActions.removeOne(action);
+  }
+  auto windows = ui->mdiArea->subWindowList();
+  for (int i = 0; i < windows.size(); ++i) {
+    QMdiSubWindow *mdiSubWindow = windows.at(i);
+
+    const auto windowTitle = mdiSubWindow->windowTitle();
+    QString numberString = QString::number(i + 1);
+    numberString = numberString.insert(numberString.length() - 1, '&');
+    QString text = tr("%1 %2").arg(numberString).arg(windowTitle);
+
+    QAction *action = ui->menuWindow->addAction(
+        text, mdiSubWindow, [this, mdiSubWindow]() { ui->mdiArea->setActiveSubWindow(mdiSubWindow); });
+    windowActions.append(action);
+    action->setCheckable(true);
+    action->setChecked(mdiSubWindow == ui->mdiArea->activeSubWindow());
+  }
 }
 
 void MainWindow::openFile(QString fName) {
@@ -181,15 +209,36 @@ void MainWindow::on_actionPreferences_triggered() {
 
 void MainWindow::on_actionExit_triggered() { QApplication::exit(); }
 
-void MainWindow::on_actionCascade_triggered() { ui->mdiArea->cascadeSubWindows(); }
+void MainWindow::setTabbedMode(bool enabled) {
+  ui->actionToggleTabbedView->setChecked(enabled);
+  ui->mdiArea->setViewMode(enabled ? QMdiArea::TabbedView : QMdiArea::SubWindowView);
+  if (enabled) {
+    QTabBar *tabBar = ui->mdiArea->findChild<QTabBar *>();
+    if (tabBar) {
+      tabBar->setExpanding(false);
+    }
+  }
+}
 
-void MainWindow::on_actionTile_triggered() { ui->mdiArea->tileSubWindows(); }
+void MainWindow::on_actionCascade_triggered() {
+  this->setTabbedMode(false);
+  ui->mdiArea->cascadeSubWindows();
+}
+
+void MainWindow::on_actionTile_triggered() {
+  this->setTabbedMode(false);
+  ui->mdiArea->tileSubWindows();
+}
 
 void MainWindow::on_actionCloseAll_triggered() { ui->mdiArea->closeAllSubWindows(); }
 
-void MainWindow::on_actionToggleTabbedView_triggered() {
-  ui->mdiArea->setViewMode(ui->actionToggleTabbedView->isChecked() ? QMdiArea::TabbedView : QMdiArea::SubWindowView);
+void MainWindow::on_actionCloseOthers_triggered() {
+  foreach (QMdiSubWindow *subWindow, ui->mdiArea->subWindowList()) {
+    if (subWindow != ui->mdiArea->activeSubWindow()) subWindow->close();
+  }
 }
+
+void MainWindow::on_actionToggleTabbedView_triggered() { this->setTabbedMode(ui->actionToggleTabbedView->isChecked()); }
 
 void MainWindow::on_actionNext_triggered() { ui->mdiArea->activateNextSubWindow(); }
 

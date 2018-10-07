@@ -16,6 +16,7 @@ int main(int argc, char *argv[]) {
   a.setOrganizationDomain("enigma-dev.org");
   a.setApplicationName("RadialGM");
   a.setWindowIcon(QIcon(":/icon.ico"));
+  a.setAttribute(Qt::AA_DisableWindowContextHelpButton);
 
   defaultStyle = a.style()->objectName();
 

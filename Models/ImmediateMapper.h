@@ -11,6 +11,7 @@ class ImmediateDataWidgetMapper : public QDataWidgetMapper {
   explicit ImmediateDataWidgetMapper(QObject *parent);
 
   void addMapping(QWidget *widget, int section, QByteArray propertyName = "");
+  void removeMapping(QWidget *widget);
   void clearMapping();
   QModelIndex indexAt(int section);
 

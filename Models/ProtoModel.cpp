@@ -153,7 +153,7 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
     case CppType::CPPTYPE_ENUM:
       return refl->GetInt32(*protobuf, field);
     case CppType::CPPTYPE_STRING:
-      return refl->GetString(*protobuf, field).c_str();
+      return QString::fromStdString(refl->GetString(*protobuf, field));
   }
 
   return QVariant();
