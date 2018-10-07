@@ -127,11 +127,6 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     subWindow->resize(subWindow->frameSize().expandedTo(editor->size()));
     editor->setParent(subWindow);
 
-    connect(subWindow, &QMdiSubWindow::windowStateChanged, [=](Qt::WindowStates oldState, Qt::WindowStates newState) {
-      if (newState.testFlag(Qt::WindowMaximized) && !oldState.testFlag(Qt::WindowMaximized)) {
-        this->setTabbedMode(true);
-      }
-    });
     subWindow->connect(subWindow, &QObject::destroyed, [=]() {
       resourceModels.remove(item);
       subWindows.remove(item);
