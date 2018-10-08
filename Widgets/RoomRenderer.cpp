@@ -63,13 +63,14 @@ void RoomRenderer::paintTiles(QPainter& painter, Room* room) {
     QString imgFile = bkg->data(Background::kImageFieldNumber).toString();
     int w = static_cast<int>(tile.width());
     int h = static_cast<int>(tile.height());
-    /*
-                                     auto item = scene->addPixmap(ArtManager::GetIcon(imgFile).pixmap(w, h));
-                                     item->setPos(tile.x(), tile.y());
-                                     item->setOffset(-tile.xoffset(), -tile.yoffset());
-                                     qreal xscale = (tile.has_xscale()) ? tile.xscale() : 1;
-                                     qreal yscale = (tile.has_yscale()) ? tile.yscale() : 1;
-                                     item->setTransform(item->transform().scale(xscale, yscale));*/
+
+    QPixmap pixmap(imgFile);
+    QRect dest(tile.x(), tile.y(), w, h);
+    QRect src(tile.xoffset(), tile.yoffset(), w, h);
+    const QTransform transform = painter.transform();
+    painter.scale(tile.has_xscale() ? tile.xscale() : 1, tile.has_yscale() ? tile.yscale() : 1);
+    painter.drawPixmap(dest, pixmap, src);
+    painter.setTransform(transform);
   }
 }
 
@@ -151,15 +152,14 @@ void RoomRenderer::paintInstances(QPainter& painter, Room* room) {
 
     if (imgFile.isEmpty()) imgFile = "object";
 
-    /*
-                                         auto item = scene->addPixmap();
-                                         item->setPos(inst.x(), inst.y());
-                                         item->setOffset(-xoff, -yoff);
-                                         item->setRotation(inst.rotation());
-                                         item->setTransform(item->transform().scale(inst.xscale(), inst.yscale()));*/
-    QPixmap pixmap = ArtManager::GetIcon(imgFile).pixmap(w, h);
-    QRect dest(inst.x() - xoff, inst.y() - yoff, w * inst.xscale(), h * inst.yscale());
+    QPixmap pixmap(imgFile);
+    QRect dest(inst.x(), inst.y(), w, h);
+    const QTransform transform = painter.transform();
+    painter.translate(-xoff, -yoff);
+    painter.rotate(inst.rotation());
+    painter.scale(inst.xscale(), inst.yscale());
     painter.drawPixmap(dest, pixmap);
+    painter.setTransform(transform);
   }
 }
 
