@@ -25,7 +25,7 @@ class RoomRenderer : public QWidget {
   qreal zoom;
 
   void paintTiles(QPainter &painter, Room *room);
-  void paintBackgrounds(QPainter &painter, Room *room);
+  void paintBackgrounds(QPainter &painter, Room *room, bool foregrounds = false);
   void paintInstances(QPainter &painter, Room *room);
   void paintGrid(QPainter &painter, Room *room);
 };

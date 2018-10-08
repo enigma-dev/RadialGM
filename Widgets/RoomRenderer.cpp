@@ -45,9 +45,10 @@ void RoomRenderer::paintEvent(QPaintEvent* /* event */) {
   if (room->show_color()) roomColor = room->color();
   painter.fillRect(QRectF(0, 0, room->width(), room->height()), QBrush(roomColor));
 
-  this->paintBackgrounds(painter, room);
+  this->paintBackgrounds(painter, room, false);
   this->paintTiles(painter, room);
   this->paintInstances(painter, room);
+  this->paintBackgrounds(painter, room, true);
   this->paintGrid(painter, room);
 }
 
@@ -74,44 +75,34 @@ void RoomRenderer::paintTiles(QPainter& painter, Room* room) {
   }
 }
 
-void RoomRenderer::paintBackgrounds(QPainter& painter, Room* room) {
+void RoomRenderer::paintBackgrounds(QPainter& painter, Room* room, bool foregrounds) {
   for (auto bkg : room->backgrounds()) {  //TODO: need to draw last if foreground
-    if (bkg.visible()) {
-      ProtoModel* bkgRes = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, bkg.background_name())
-                               ->GetSubModel(TreeNode::kBackgroundFieldNumber);
-      if (!bkgRes) continue;
-      QString imgFile = bkgRes->data(Background::kImageFieldNumber).toString();
-      int w = bkgRes->data(Background::kWidthFieldNumber).toInt();
-      int h = bkgRes->data(Background::kHeightFieldNumber).toInt();
-      /*
-      auto item = scene->addPixmap(ArtManager::GetIcon(imgFile).pixmap(w, h));
-      item->setPos(bkg.x(), bkg.y());
-      if (bkg.stretch()) {
-        item->setTransform(item->transform().scale(room->width() / qreal(w), room->height() / qreal(h)));
-      } else {
-        if (bkg.htiled() && bkg.vtiled()) {
-          for (int i = 0; i < static_cast<int>(room->width()); i += w) {
-            for (int j = 0; j < static_cast<int>(room->height()); j += h) {
-              auto b = scene->addPixmap(ArtManager::GetIcon(imgFile).pixmap(w, h));
-              b->setPos(i, j);
-            }
-          }
-        } else {
-          if (bkg.htiled()) {
-            for (int i = w; i < static_cast<int>(room->width()); i += w) {
-              auto b = scene->addPixmap(ArtManager::GetIcon(imgFile).pixmap(w, h));
-              b->setPos(i, 0);
-            }
-          }
-          if (bkg.vtiled()) {
-            for (int i = h; i < static_cast<int>(room->height()); i += h) {
-              auto b = scene->addPixmap(ArtManager::GetIcon(imgFile).pixmap(w, h));
-              b->setPos(0, i);
-            }
-          }
-        }
-      }*/
+    if (!bkg.visible() || bkg.foreground() != foregrounds) continue;
+    ProtoModel* bkgRes = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, bkg.background_name())
+                             ->GetSubModel(TreeNode::kBackgroundFieldNumber);
+    if (!bkgRes) continue;
+    QString imgFile = bkgRes->data(Background::kImageFieldNumber).toString();
+    int w = bkgRes->data(Background::kWidthFieldNumber).toInt();
+    int h = bkgRes->data(Background::kHeightFieldNumber).toInt();
+    QPixmap pixmap(imgFile);
+    QRect dest(bkg.x(), bkg.y(), w, h);
+    QRect src(0, 0, w, h);
+    const QTransform transform = painter.transform();
+    if (bkg.stretch()) {
+      painter.scale(room->width() / qreal(w), room->height() / qreal(h));
     }
+    if (bkg.htiled()) {
+      dest.setX(0);
+      dest.setWidth(room->width());
+      src.setX(bkg.x());
+    }
+    if (bkg.vtiled()) {
+      dest.setY(0);
+      dest.setHeight(room->height());
+      src.setY(bkg.y());
+    }
+    painter.fillRect(dest, QBrush(pixmap));
+    painter.setTransform(transform);
   }
 }
 
