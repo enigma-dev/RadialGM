@@ -32,10 +32,6 @@ void RoomRenderer::paintEvent(QPaintEvent* /* event */) {
   unsigned roomWidth = model->data(Room::kWidthFieldNumber).toUInt(),
            roomHeight = model->data(Room::kHeightFieldNumber).toUInt();
 
-  painter.scale(4, 4);
-  painter.fillRect(this->rect(), ArtManager::GetTransparenyBrush());
-  painter.scale(0.25, 0.25);
-
   painter.scale(zoom, zoom);
 
   Room* room = static_cast<Room*>(model->GetBuffer());

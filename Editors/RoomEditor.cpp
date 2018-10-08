@@ -46,18 +46,15 @@ RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, p
   ui->layersAssetsView->header()->swapSections(Room::Instance::kNameFieldNumber,
                                                Room::Instance::kObjectTypeFieldNumber);
 
-  ui->roomPreview->viewport()->installEventFilter(this);
-  //ui->roomPreview->setBackgroundRole(QPalette::Dark);
+  ui->roomPreview->widget()->installEventFilter(this);
 }
 
 RoomEditor::~RoomEditor() { delete ui; }
-#include <QDebug>
+
 bool RoomEditor::eventFilter(QObject* obj, QEvent* event) {
-  if (obj == ui->roomPreview->viewport()) {
-    //TODO: fix the transparency pattern on viewport
-    qDebug() << "bing bing bing" << event->type();
+  if (obj == ui->roomPreview->widget()) {
     if (event->type() == QEvent::Paint) {
-      QPainter painter(ui->roomPreview->viewport());
+      QPainter painter(ui->roomPreview->widget());
       painter.scale(4, 4);
       painter.fillRect(painter.viewport(), ArtManager::GetTransparenyBrush());
       return false;
