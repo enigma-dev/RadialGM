@@ -64,42 +64,42 @@ void BackgroundRenderer::SetZoom(qreal zoom) {
 const qreal &BackgroundRenderer::GetZoom() const { return zoom; }
 
 void BackgroundRenderer::paintEvent(QPaintEvent * /* event */) {
-  if (model != nullptr) {
-    QPainter painter(this);
+  if (!model) return;
 
-    painter.fillRect(QRectF(0, 0, pixmap.width() * zoom, pixmap.height() * zoom), ArtManager::GetTransparenyBrush());
+  QPainter painter(this);
 
-    painter.scale(zoom, zoom);
-    bool transparent = model->data(Background::kTransparentFieldNumber).toBool();
-    painter.drawPixmap(0, 0, (transparent) ? transparentPixmap : pixmap);
+  painter.fillRect(QRectF(0, 0, pixmap.width() * zoom, pixmap.height() * zoom), ArtManager::GetTransparenyBrush());
 
-    bool gridVisible = model->data(Background::kUseAsTilesetFieldNumber).toBool();
-    int gridHorSpacing = model->data(Background::kHorizontalSpacingFieldNumber).toInt();
-    int gridVertSpacing = model->data(Background::kVerticalSpacingFieldNumber).toInt();
-    int gridHorOff = model->data(Background::kHorizontalOffsetFieldNumber).toInt();
-    int gridVertOff = model->data(Background::kVerticalOffsetFieldNumber).toInt();
-    int gridWidth = model->data(Background::kTileWidthFieldNumber).toInt();
-    int gridHeight = model->data(Background::kTileHeightFieldNumber).toInt();
+  painter.scale(zoom, zoom);
+  bool transparent = model->data(Background::kTransparentFieldNumber).toBool();
+  painter.drawPixmap(0, 0, (transparent) ? transparentPixmap : pixmap);
 
-    if (gridVisible) {
-      painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
-      painter.setPen(QColor(0xff, 0xff, 0xff));
+  bool gridVisible = model->data(Background::kUseAsTilesetFieldNumber).toBool();
+  int gridHorSpacing = model->data(Background::kHorizontalSpacingFieldNumber).toInt();
+  int gridVertSpacing = model->data(Background::kVerticalSpacingFieldNumber).toInt();
+  int gridHorOff = model->data(Background::kHorizontalOffsetFieldNumber).toInt();
+  int gridVertOff = model->data(Background::kVerticalOffsetFieldNumber).toInt();
+  int gridWidth = model->data(Background::kTileWidthFieldNumber).toInt();
+  int gridHeight = model->data(Background::kTileHeightFieldNumber).toInt();
 
-      if (gridHorSpacing != 0 || gridVertSpacing != 0) {
-        for (int x = gridHorOff; x < pixmap.width(); x += gridWidth + gridHorSpacing) {
-          for (int y = gridVertOff; y < pixmap.height(); y += gridHeight + gridVertSpacing) {
-            painter.drawRect(x, y, gridWidth, gridHeight);
-          }
+  if (gridVisible) {
+    painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
+    painter.setPen(QColor(0xff, 0xff, 0xff));
+
+    if (gridHorSpacing != 0 || gridVertSpacing != 0) {
+      for (int x = gridHorOff; x < pixmap.width(); x += gridWidth + gridHorSpacing) {
+        for (int y = gridVertOff; y < pixmap.height(); y += gridHeight + gridVertSpacing) {
+          painter.drawRect(x, y, gridWidth, gridHeight);
         }
       }
+    }
 
-      if (gridHorSpacing == 0) {
-        for (int x = gridHorOff; x <= pixmap.width(); x += gridWidth) painter.drawLine(x, 0, x, pixmap.height());
-      }
+    if (gridHorSpacing == 0) {
+      for (int x = gridHorOff; x <= pixmap.width(); x += gridWidth) painter.drawLine(x, 0, x, pixmap.height());
+    }
 
-      if (gridVertSpacing == 0) {
-        for (int y = gridVertOff; y <= pixmap.width(); y += gridHeight) painter.drawLine(0, y, pixmap.width(), y);
-      }
+    if (gridVertSpacing == 0) {
+      for (int y = gridVertOff; y <= pixmap.width(); y += gridHeight) painter.drawLine(0, y, pixmap.width(), y);
     }
   }
 }

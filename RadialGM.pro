@@ -82,7 +82,8 @@ SOURCES += \
     Editors/ScriptEditor.cpp \
     Models/ResourceModelMap.cpp \
     Models/ModelMapper.cpp \
-    Models/RepeatedProtoModel.cpp
+    Models/RepeatedProtoModel.cpp \
+    Widgets/RoomRenderer.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -113,7 +114,8 @@ HEADERS += \
     Editors/ScriptEditor.h \
     Models/ResourceModelMap.h \
     Models/ModelMapper.h \
-    Models/RepeatedProtoModel.h
+    Models/RepeatedProtoModel.h \
+    Widgets/RoomRenderer.h
 
 FORMS += \
     MainWindow.ui \
