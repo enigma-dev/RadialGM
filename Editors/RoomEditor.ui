@@ -1296,7 +1296,7 @@
             <x>0</x>
             <y>0</y>
             <width>671</width>
-            <height>603</height>
+            <height>569</height>
            </rect>
           </property>
           <property name="autoFillBackground">
@@ -1327,6 +1327,9 @@
           </layout>
          </widget>
         </widget>
+       </item>
+       <item>
+        <widget class="QStatusBar" name="statusBar"/>
        </item>
       </layout>
      </widget>
