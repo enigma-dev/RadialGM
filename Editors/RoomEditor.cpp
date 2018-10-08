@@ -64,8 +64,8 @@ bool RoomEditor::eventFilter(QObject* obj, QEvent* event) {
   return QWidget::eventFilter(obj, event);
 }
 
-void RoomEditor::on_actionZoomIn_triggered() { ui->roomRenderer->SetZoom(zoom * 2); }
+void RoomEditor::on_actionZoomIn_triggered() { ui->roomRenderer->SetZoom(ui->roomRenderer->GetZoom() * 2); }
 
-void RoomEditor::on_actionZoomOut_triggered() { ui->roomRenderer->SetZoom(zoom / 2); }
+void RoomEditor::on_actionZoomOut_triggered() { ui->roomRenderer->SetZoom(ui->roomRenderer->GetZoom() / 2); }
 
 void RoomEditor::on_actionZoom_triggered() { ui->roomRenderer->SetZoom(1.0); }

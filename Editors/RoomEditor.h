@@ -27,7 +27,6 @@ class RoomEditor : public BaseEditor {
 
  private:
   Ui::RoomEditor* ui;
-  qreal zoom = 1.0;
 
   bool eventFilter(QObject* obj, QEvent* event) override;
 };

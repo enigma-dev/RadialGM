@@ -4,12 +4,15 @@
 
 #include <QPainter>
 
-RoomRenderer::RoomRenderer(QWidget* parent) : QWidget(parent), model(nullptr), zoom(1) {}
+RoomRenderer::RoomRenderer(QWidget* parent) : QWidget(parent), model(nullptr) { this->SetZoom(1.0); }
 
-void RoomRenderer::SetResourceModel(ProtoModel* model) { this->model = model; }
+void RoomRenderer::SetResourceModel(ProtoModel* model) {
+  this->model = model;
+  this->SetZoom(1.0);
+}
 
 QSize RoomRenderer::sizeHint() const {
-  if (!model) return QSize();
+  if (!model) return QSize(640, 480);
   unsigned roomWidth = model->data(Room::kWidthFieldNumber).toUInt(),
            roomHeight = model->data(Room::kHeightFieldNumber).toUInt();
   return QSize(roomWidth, roomHeight);
@@ -19,9 +22,14 @@ void RoomRenderer::SetZoom(qreal zoom) {
   if (zoom > 3200) zoom = 3200;
   if (zoom < 0.0625) zoom = 0.0625;
   this->zoom = zoom;
-  unsigned roomWidth = model->data(Room::kWidthFieldNumber).toUInt(),
-           roomHeight = model->data(Room::kHeightFieldNumber).toUInt();
-  setFixedSize(static_cast<unsigned>(roomWidth * zoom) + 1, static_cast<unsigned>(roomHeight * zoom) + 1);
+  QSize size(640, 480);
+  if (model) {
+    size.setWidth(model->data(Room::kWidthFieldNumber).toUInt());
+    size.setHeight(model->data(Room::kHeightFieldNumber).toUInt());
+  }
+  size *= zoom;
+
+  setFixedSize(size);
 }
 
 const qreal& RoomRenderer::GetZoom() const { return zoom; }
@@ -37,7 +45,7 @@ void RoomRenderer::paintEvent(QPaintEvent* /* event */) {
   Room* room = static_cast<Room*>(model->GetBuffer());
   QColor roomColor = Qt::transparent;
   if (room->show_color()) roomColor = room->color();
-  painter.fillRect(QRectF(0, 0, room->width() * zoom, room->height() * zoom), QBrush(roomColor));
+  painter.fillRect(QRectF(0, 0, room->width(), room->height()), QBrush(roomColor));
 
   for (auto bkg : room->backgrounds()) {  //TODO: need to draw last if foreground
     if (bkg.visible()) {
