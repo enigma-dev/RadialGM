@@ -23,6 +23,11 @@ class RoomRenderer : public QWidget {
   ProtoModel *model;
   QPixmap transparentPixmap;
   qreal zoom;
+
+  void paintTiles(QPainter &painter, Room *room);
+  void paintBackgrounds(QPainter &painter, Room *room);
+  void paintInstances(QPainter &painter, Room *room);
+  void paintGrid(QPainter &painter, Room *room);
 };
 
 #endif  // ROOMRENDERER_H

@@ -37,8 +37,6 @@ const qreal& RoomRenderer::GetZoom() const { return zoom; }
 void RoomRenderer::paintEvent(QPaintEvent* /* event */) {
   if (!model) return;
   QPainter painter(this);
-  unsigned roomWidth = model->data(Room::kWidthFieldNumber).toUInt(),
-           roomHeight = model->data(Room::kHeightFieldNumber).toUInt();
 
   painter.scale(zoom, zoom);
 
@@ -47,6 +45,35 @@ void RoomRenderer::paintEvent(QPaintEvent* /* event */) {
   if (room->show_color()) roomColor = room->color();
   painter.fillRect(QRectF(0, 0, room->width(), room->height()), QBrush(roomColor));
 
+  this->paintBackgrounds(painter, room);
+  this->paintTiles(painter, room);
+  this->paintInstances(painter, room);
+  this->paintGrid(painter, room);
+}
+
+void RoomRenderer::paintTiles(QPainter& painter, Room* room) {
+  google::protobuf::RepeatedField<Room::Tile> sortedTiles(room->mutable_tiles()->begin(), room->mutable_tiles()->end());
+
+  std::sort(sortedTiles.begin(), sortedTiles.end(),
+            [](const Room::Tile& a, const Room::Tile& b) { return a.depth() > b.depth(); });
+  for (auto tile : sortedTiles) {
+    ProtoModel* bkg = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, tile.background_name())
+                          ->GetSubModel(TreeNode::kBackgroundFieldNumber);
+    if (!bkg) continue;
+    QString imgFile = bkg->data(Background::kImageFieldNumber).toString();
+    int w = static_cast<int>(tile.width());
+    int h = static_cast<int>(tile.height());
+    /*
+                                     auto item = scene->addPixmap(ArtManager::GetIcon(imgFile).pixmap(w, h));
+                                     item->setPos(tile.x(), tile.y());
+                                     item->setOffset(-tile.xoffset(), -tile.yoffset());
+                                     qreal xscale = (tile.has_xscale()) ? tile.xscale() : 1;
+                                     qreal yscale = (tile.has_yscale()) ? tile.yscale() : 1;
+                                     item->setTransform(item->transform().scale(xscale, yscale));*/
+  }
+}
+
+void RoomRenderer::paintBackgrounds(QPainter& painter, Room* room) {
   for (auto bkg : room->backgrounds()) {  //TODO: need to draw last if foreground
     if (bkg.visible()) {
       ProtoModel* bkgRes = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, bkg.background_name())
@@ -85,27 +112,9 @@ void RoomRenderer::paintEvent(QPaintEvent* /* event */) {
       }*/
     }
   }
+}
 
-  google::protobuf::RepeatedField<Room::Tile> sortedTiles(room->mutable_tiles()->begin(), room->mutable_tiles()->end());
-
-  std::sort(sortedTiles.begin(), sortedTiles.end(),
-            [](const Room::Tile& a, const Room::Tile& b) { return a.depth() > b.depth(); });
-  for (auto tile : sortedTiles) {
-    ProtoModel* bkg = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, tile.background_name())
-                          ->GetSubModel(TreeNode::kBackgroundFieldNumber);
-    if (!bkg) continue;
-    QString imgFile = bkg->data(Background::kImageFieldNumber).toString();
-    int w = static_cast<int>(tile.width());
-    int h = static_cast<int>(tile.height());
-    /*
-    auto item = scene->addPixmap(ArtManager::GetIcon(imgFile).pixmap(w, h));
-    item->setPos(tile.x(), tile.y());
-    item->setOffset(-tile.xoffset(), -tile.yoffset());
-    qreal xscale = (tile.has_xscale()) ? tile.xscale() : 1;
-    qreal yscale = (tile.has_yscale()) ? tile.yscale() : 1;
-    item->setTransform(item->transform().scale(xscale, yscale));*/
-  }
-
+void RoomRenderer::paintInstances(QPainter& painter, Room* room) {
   google::protobuf::RepeatedField<Room::Instance> sortedInstances(room->mutable_instances()->begin(),
                                                                   room->mutable_instances()->end());
 
@@ -143,16 +152,18 @@ void RoomRenderer::paintEvent(QPaintEvent* /* event */) {
     if (imgFile.isEmpty()) imgFile = "object";
 
     /*
-    auto item = scene->addPixmap();
-    item->setPos(inst.x(), inst.y());
-    item->setOffset(-xoff, -yoff);
-    item->setRotation(inst.rotation());
-    item->setTransform(item->transform().scale(inst.xscale(), inst.yscale()));*/
+                                         auto item = scene->addPixmap();
+                                         item->setPos(inst.x(), inst.y());
+                                         item->setOffset(-xoff, -yoff);
+                                         item->setRotation(inst.rotation());
+                                         item->setTransform(item->transform().scale(inst.xscale(), inst.yscale()));*/
     QPixmap pixmap = ArtManager::GetIcon(imgFile).pixmap(w, h);
     QRect dest(inst.x() - xoff, inst.y() - yoff, w * inst.xscale(), h * inst.yscale());
     painter.drawPixmap(dest, pixmap);
   }
+}
 
+void RoomRenderer::paintGrid(QPainter& painter, Room* room) {
   bool gridVisible = true;
   int gridHorSpacing = 0;
   int gridVertSpacing = 0;
@@ -160,6 +171,8 @@ void RoomRenderer::paintEvent(QPaintEvent* /* event */) {
   int gridVertOff = 0;
   int gridWidth = 16;
   int gridHeight = 16;
+
+  unsigned roomWidth = room->width(), roomHeight = room->height();
 
   if (gridVisible) {
     painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
