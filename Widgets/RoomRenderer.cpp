@@ -120,9 +120,9 @@ void RoomRenderer::paintInstances(QPainter& painter, Room* room) {
     return false;
   });
   for (auto inst : sortedInstances) {
-    QString imgFile;
-    int w = 18;
-    int h = 18;
+    QString imgFile = ":/actions/help.png";
+    int w = 16;
+    int h = 16;
     int xoff = 0;
     int yoff = 0;
 
@@ -132,14 +132,16 @@ void RoomRenderer::paintInstances(QPainter& painter, Room* room) {
     if (!obj) continue;
     ProtoModel* spr = MainWindow::resourceMap->GetResourceByName(TreeNode::kSprite,
                                                                  obj->data(Object::kSpriteNameFieldNumber).toString());
-    if (!spr) continue;
-    spr = spr->GetSubModel(TreeNode::kSpriteFieldNumber);
-    if (!spr) continue;
-    imgFile = spr->GetString(Sprite::kSubimagesFieldNumber, 0);
-    w = spr->data(Sprite::kWidthFieldNumber).toInt();
-    h = spr->data(Sprite::kHeightFieldNumber).toInt();
-    xoff = spr->data(Sprite::kOriginXFieldNumber).toInt();
-    yoff = spr->data(Sprite::kOriginYFieldNumber).toInt();
+    if (spr) {
+      spr = spr->GetSubModel(TreeNode::kSpriteFieldNumber);
+      if (spr) {
+        imgFile = spr->GetString(Sprite::kSubimagesFieldNumber, 0);
+        w = spr->data(Sprite::kWidthFieldNumber).toInt();
+        h = spr->data(Sprite::kHeightFieldNumber).toInt();
+        xoff = spr->data(Sprite::kOriginXFieldNumber).toInt();
+        yoff = spr->data(Sprite::kOriginYFieldNumber).toInt();
+      }
+    }
 
     if (imgFile.isEmpty()) imgFile = "object";
 

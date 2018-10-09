@@ -33,15 +33,20 @@ QVariant RepeatedProtoModel::data(const QModelIndex &index, int role) const {
       obj = obj->GetSubModel(TreeNode::kObjectFieldNumber);
       ProtoModel *spr = MainWindow::resourceMap->GetResourceByName(
           TreeNode::kSprite, obj->data(Object::kSpriteNameFieldNumber).toString());
+      static const QSize pixmapSize(18, 18);
       if (spr != nullptr) {
         spr = spr->GetSubModel(TreeNode::kSpriteFieldNumber);
-        return ArtManager::GetIcon(spr->GetString(Sprite::kSubimagesFieldNumber, 0));
+        return ArtManager::GetIcon(spr->GetString(Sprite::kSubimagesFieldNumber, 0)).pixmap(pixmapSize);
+      } else {
+        return QIcon(":/actions/help.png").pixmap(pixmapSize);
       }
     }
   } else if (role != Qt::DisplayRole && role != Qt::EditRole)
     return QVariant();
   else
     return data;
+
+  return QVariant();
 }
 
 QModelIndex RepeatedProtoModel::parent(const QModelIndex &index) const { return QModelIndex(); }
