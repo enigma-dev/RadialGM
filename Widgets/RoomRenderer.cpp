@@ -58,9 +58,11 @@ void RoomRenderer::paintTiles(QPainter& painter, Room* room) {
   std::sort(sortedTiles.begin(), sortedTiles.end(),
             [](const Room::Tile& a, const Room::Tile& b) { return a.depth() > b.depth(); });
   for (auto tile : sortedTiles) {
-    ProtoModel* bkg = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, tile.background_name())
-                          ->GetSubModel(TreeNode::kBackgroundFieldNumber);
+    ProtoModel* bkg = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, tile.background_name());
     if (!bkg) continue;
+    bkg = bkg->GetSubModel(TreeNode::kBackgroundFieldNumber);
+    if (!bkg) continue;
+
     QString imgFile = bkg->data(Background::kImageFieldNumber).toString();
     int w = static_cast<int>(tile.width());
     int h = static_cast<int>(tile.height());
@@ -78,9 +80,11 @@ void RoomRenderer::paintTiles(QPainter& painter, Room* room) {
 void RoomRenderer::paintBackgrounds(QPainter& painter, Room* room, bool foregrounds) {
   for (auto bkg : room->backgrounds()) {  //TODO: need to draw last if foreground
     if (!bkg.visible() || bkg.foreground() != foregrounds) continue;
-    ProtoModel* bkgRes = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, bkg.background_name())
-                             ->GetSubModel(TreeNode::kBackgroundFieldNumber);
+    ProtoModel* bkgRes = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, bkg.background_name());
     if (!bkgRes) continue;
+    bkgRes = bkgRes->GetSubModel(TreeNode::kBackgroundFieldNumber);
+    if (!bkgRes) continue;
+
     QString imgFile = bkgRes->data(Background::kImageFieldNumber).toString();
     int w = bkgRes->data(Background::kWidthFieldNumber).toInt();
     int h = bkgRes->data(Background::kHeightFieldNumber).toInt();
@@ -130,8 +134,8 @@ void RoomRenderer::paintInstances(QPainter& painter, Room* room) {
     if (!obj) continue;
     obj = obj->GetSubModel(TreeNode::kObjectFieldNumber);
     if (!obj) continue;
-    ProtoModel* spr = MainWindow::resourceMap->GetResourceByName(TreeNode::kSprite,
-                                                                 obj->data(Object::kSpriteNameFieldNumber).toString());
+    const QString spriteName = obj->data(Object::kSpriteNameFieldNumber).toString();
+    ProtoModel* spr = MainWindow::resourceMap->GetResourceByName(TreeNode::kSprite, spriteName);
     if (spr) {
       spr = spr->GetSubModel(TreeNode::kSpriteFieldNumber);
       if (spr) {
