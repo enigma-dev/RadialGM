@@ -32,10 +32,14 @@ RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, p
 
   RepeatedProtoModel* m = roomModel->GetRepeatedSubModel(Room::kInstancesFieldNumber);
   ui->layersAssetsView->setModel(m);
-  if (!m->empty()) {
-    auto currentInstanceModel = roomModel->data(Room::kInstancesFieldNumber, 0).value<void*>();
-    ui->layersPropertiesView->setModel(static_cast<ProtoModel*>(currentInstanceModel));
-  }
+  connect(ui->layersAssetsView->selectionModel(), &QItemSelectionModel::selectionChanged,
+          [=](const QItemSelection& selected, const QItemSelection& deselected) {
+            if (selected.empty()) return;
+            auto selectedIndex = selected.indexes().first();
+            auto currentInstanceModel =
+                roomModel->data(Room::kInstancesFieldNumber, selectedIndex.row()).value<void*>();
+            ui->layersPropertiesView->setModel(static_cast<ProtoModel*>(currentInstanceModel));
+          });
 
   for (int c = 0; c < m->columnCount(); ++c) {
     if (c != Room::Instance::kNameFieldNumber && c != Room::Instance::kObjectTypeFieldNumber &&
