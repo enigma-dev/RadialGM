@@ -12,6 +12,8 @@ int RepeatedProtoModel::rowCount(const QModelIndex & /*parent*/) const {
   return refl->FieldSize(*protobuf, field);
 }
 
+bool RepeatedProtoModel::empty() const { return this->rowCount() <= 0; }
+
 int RepeatedProtoModel::columnCount(const QModelIndex & /*parent*/) const {
   const Descriptor *desc = protobuf->GetDescriptor();
   return desc->field_count();
@@ -52,7 +54,7 @@ QVariant RepeatedProtoModel::data(const QModelIndex &index, int role) const {
 QModelIndex RepeatedProtoModel::parent(const QModelIndex &index) const { return QModelIndex(); }
 
 QVariant RepeatedProtoModel::headerData(int section, Qt::Orientation orientation, int role) const {
-  if (role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal) return QVariant();
+  if (this->empty() || role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal) return QVariant();
   ProtoModel *m = static_cast<ProtoModel *>(QObject::parent())->GetSubModel(field->number(), 0);
   return m->headerData(section, orientation, role);
 }

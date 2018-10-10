@@ -12,12 +12,13 @@ class ProtoModel;
 
 class RepeatedProtoModel : public QAbstractItemModel {
   Q_OBJECT
-public:
+ public:
   RepeatedProtoModel(Message *protobuf, const FieldDescriptor *field, ProtoModel *parent);
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  bool empty() const;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   //bool setData(const QModelIndex &index, const QVariant &value, int role) override;
-  QVariant data(int row, int column=0) const;
+  QVariant data(int row, int column = 0) const;
   QVariant data(const QModelIndex &index, int role) const override;
   QModelIndex parent(const QModelIndex &index) const override;
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -25,12 +26,12 @@ public:
   Qt::ItemFlags flags(const QModelIndex &index) const override;
 
  signals:
-  void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
-                           const QVariant &oldValue = QVariant(0), const QVector<int> &roles = QVector<int>());
+  void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVariant &oldValue = QVariant(0),
+                   const QVector<int> &roles = QVector<int>());
 
-protected:
+ protected:
   Message *protobuf;
   const FieldDescriptor *field;
 };
 
-#endif // REPEATEDPROTOMODEL_H
+#endif  // REPEATEDPROTOMODEL_H
