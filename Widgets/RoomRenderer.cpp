@@ -62,12 +62,13 @@ void RoomRenderer::paintTiles(QPainter& painter, Room* room) {
     if (!bkg) continue;
     bkg = bkg->GetSubModel(TreeNode::kBackgroundFieldNumber);
     if (!bkg) continue;
-
-    QString imgFile = bkg->data(Background::kImageFieldNumber).toString();
     int w = static_cast<int>(tile.width());
     int h = static_cast<int>(tile.height());
 
-    QPixmap pixmap(imgFile);
+    QString imgFile = bkg->data(Background::kImageFieldNumber).toString();
+    QPixmap pixmap = ArtManager::GetCachedPixmap(imgFile);
+    if (pixmap.isNull()) continue;
+
     QRect dest(tile.x(), tile.y(), w, h);
     QRect src(tile.xoffset(), tile.yoffset(), w, h);
     const QTransform transform = painter.transform();
@@ -84,11 +85,13 @@ void RoomRenderer::paintBackgrounds(QPainter& painter, Room* room, bool foregrou
     if (!bkgRes) continue;
     bkgRes = bkgRes->GetSubModel(TreeNode::kBackgroundFieldNumber);
     if (!bkgRes) continue;
-
-    QString imgFile = bkgRes->data(Background::kImageFieldNumber).toString();
     int w = bkgRes->data(Background::kWidthFieldNumber).toInt();
     int h = bkgRes->data(Background::kHeightFieldNumber).toInt();
-    QPixmap pixmap(imgFile);
+
+    QString imgFile = bkgRes->data(Background::kImageFieldNumber).toString();
+    QPixmap pixmap = ArtManager::GetCachedPixmap(imgFile);
+    if (pixmap.isNull()) continue;
+
     QRect dest(bkg.x(), bkg.y(), w, h);
     QRect src(0, 0, w, h);
     const QTransform transform = painter.transform();
@@ -148,8 +151,9 @@ void RoomRenderer::paintInstances(QPainter& painter, Room* room) {
     }
 
     if (imgFile.isEmpty()) imgFile = "object";
+    QPixmap pixmap = ArtManager::GetCachedPixmap(imgFile);
+    if (pixmap.isNull()) continue;
 
-    QPixmap pixmap(imgFile);
     QRect dest(inst.x(), inst.y(), w, h);
     const QTransform transform = painter.transform();
     painter.translate(-xoff, -yoff);

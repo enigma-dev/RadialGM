@@ -191,6 +191,7 @@ void MainWindow::openFile(QString fName) {
                          }
                        }
                      });
+  ArtManager::clearCache();
 }
 
 void MainWindow::on_actionOpen_triggered() {
