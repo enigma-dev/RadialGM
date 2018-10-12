@@ -69,8 +69,8 @@ void RoomRenderer::paintTiles(QPainter& painter, Room* room) {
     QPixmap pixmap = ArtManager::GetCachedPixmap(imgFile);
     if (pixmap.isNull()) continue;
 
-    QRect dest(tile.x(), tile.y(), w, h);
-    QRect src(tile.xoffset(), tile.yoffset(), w, h);
+    QRectF dest(tile.x(), tile.y(), w, h);
+    QRectF src(tile.xoffset(), tile.yoffset(), w, h);
     const QTransform transform = painter.transform();
     painter.scale(tile.has_xscale() ? tile.xscale() : 1, tile.has_yscale() ? tile.yscale() : 1);
     painter.drawPixmap(dest, pixmap, src);
@@ -92,20 +92,20 @@ void RoomRenderer::paintBackgrounds(QPainter& painter, Room* room, bool foregrou
     QPixmap pixmap = ArtManager::GetCachedPixmap(imgFile);
     if (pixmap.isNull()) continue;
 
-    QRect dest(bkg.x(), bkg.y(), w, h);
-    QRect src(0, 0, w, h);
+    QRectF dest(bkg.x(), bkg.y(), w, h);
+    QRectF src(0, 0, w, h);
     const QTransform transform = painter.transform();
     if (bkg.stretch()) {
       painter.scale(room->width() / qreal(w), room->height() / qreal(h));
     }
     if (bkg.htiled()) {
       dest.setX(0);
-      dest.setWidth(room->width());
+      dest.setWidth(static_cast<int>(room->width()));
       src.setX(bkg.x());
     }
     if (bkg.vtiled()) {
       dest.setY(0);
-      dest.setHeight(room->height());
+      dest.setHeight(static_cast<int>(room->height()));
       src.setY(bkg.y());
     }
     painter.fillRect(dest, QBrush(pixmap));
@@ -154,12 +154,13 @@ void RoomRenderer::paintInstances(QPainter& painter, Room* room) {
     QPixmap pixmap = ArtManager::GetCachedPixmap(imgFile);
     if (pixmap.isNull()) continue;
 
-    QRect dest(inst.x(), inst.y(), w, h);
+    QRectF dest(inst.x(), inst.y(), w, h);
+    QRectF src(0, 0, w, h);
     const QTransform transform = painter.transform();
     painter.translate(-xoff, -yoff);
     painter.rotate(inst.rotation());
     painter.scale(inst.xscale(), inst.yscale());
-    painter.drawPixmap(dest, pixmap);
+    painter.drawPixmap(dest, pixmap, src);
     painter.setTransform(transform);
   }
 }
@@ -173,7 +174,7 @@ void RoomRenderer::paintGrid(QPainter& painter, Room* room) {
   int gridWidth = 16;
   int gridHeight = 16;
 
-  unsigned roomWidth = room->width(), roomHeight = room->height();
+  int roomWidth = static_cast<int>(room->width()), roomHeight = static_cast<int>(room->height());
 
   if (gridVisible) {
     painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
@@ -192,7 +193,7 @@ void RoomRenderer::paintGrid(QPainter& painter, Room* room) {
     }
 
     if (gridVertSpacing == 0) {
-      for (int y = gridVertOff; y <= roomWidth; y += gridHeight) painter.drawLine(0, y, roomWidth, y);
+      for (int y = gridVertOff; y <= roomHeight; y += gridHeight) painter.drawLine(0, y, roomWidth, y);
     }
   }
 }
