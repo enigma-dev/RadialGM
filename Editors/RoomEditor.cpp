@@ -3,12 +3,15 @@
 #include "MainWindow.h"
 #include "ui_RoomEditor.h"
 
+#include "Models/ImmediateMapper.h"
 #include "codegen/Room.pb.h"
 
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
 
 #include <algorithm>
+
+using View = buffers::resources::Room::View;
 
 RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, parent), ui(new Ui::RoomEditor) {
   ui->setupUi(this);
@@ -29,6 +32,30 @@ RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, p
   resMapper->addMapping(ui->enableViewsCheckBox, Room::kEnableViewsFieldNumber);
   resMapper->addMapping(ui->clearViewportCheckBox, Room::kClearViewBackgroundFieldNumber);
   resMapper->toFirst();
+
+  RepeatedProtoModel* vm = roomModel->GetRepeatedSubModel(Room::kViewsFieldNumber);
+  ImmediateDataWidgetMapper* viewMapper = new ImmediateDataWidgetMapper(this);
+  viewMapper->setModel(vm);
+  viewMapper->addMapping(ui->viewVisibleCheckBox, View::kVisibleFieldNumber);
+
+  viewMapper->addMapping(ui->cameraXSpinBox, View::kXviewFieldNumber);
+  viewMapper->addMapping(ui->cameraYSpinBox, View::kYviewFieldNumber);
+  viewMapper->addMapping(ui->cameraWidthSpinBox, View::kWviewFieldNumber);
+  viewMapper->addMapping(ui->cameraHeightSpinBox, View::kHviewFieldNumber);
+
+  viewMapper->addMapping(ui->viewportXSpinBox, View::kXportFieldNumber);
+  viewMapper->addMapping(ui->viewportYSpinBox, View::kYportFieldNumber);
+  viewMapper->addMapping(ui->viewportWidthSpinBox, View::kWportFieldNumber);
+  viewMapper->addMapping(ui->viewportHeightSpinBox, View::kHportFieldNumber);
+
+  viewMapper->addMapping(ui->followingHBorderSpinBox, View::kHborderFieldNumber);
+  viewMapper->addMapping(ui->followingVBorderSpinBox, View::kVborderFieldNumber);
+  viewMapper->addMapping(ui->followingHSpeedSpinBox, View::kHspeedFieldNumber);
+  viewMapper->addMapping(ui->followingVSpeedSpinBox, View::kVspeedFieldNumber);
+  viewMapper->toFirst();
+
+  connect(ui->currentViewComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+          [=](int index) { viewMapper->setCurrentIndex(index); });
 
   RepeatedProtoModel* m = roomModel->GetRepeatedSubModel(Room::kInstancesFieldNumber);
   ui->layersAssetsView->setModel(m);

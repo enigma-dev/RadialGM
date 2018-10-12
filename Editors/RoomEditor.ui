@@ -827,11 +827,6 @@
               <string>View 7</string>
              </property>
             </item>
-            <item>
-             <property name="text">
-              <string>View 8</string>
-             </property>
-            </item>
            </widget>
           </item>
          </layout>
