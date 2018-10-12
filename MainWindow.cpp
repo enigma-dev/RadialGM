@@ -45,6 +45,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->mdiArea->setBackground(QImage(":/banner.png"));
   connect(ui->menuWindow, &QMenu::aboutToShow, this, &MainWindow::updateWindowMenu);
 
+  auto settingsButton = static_cast<QToolButton *>(ui->mainToolBar->widgetForAction(ui->actionSettings));
+  settingsButton->setPopupMode(QToolButton::ToolButtonPopupMode::MenuButtonPopup);
+  settingsButton->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextBesideIcon);
+  ui->actionSettings->setMenu(ui->menuChangeGameSettings);
+
   RGMPlugin *pluginServer = new ServerPlugin(*this);
   auto outputTextBrowser = this->ui->outputTextBrowser;
   connect(pluginServer, &RGMPlugin::OutputRead, outputTextBrowser, &QTextBrowser::append);
