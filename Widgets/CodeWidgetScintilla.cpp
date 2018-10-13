@@ -1,5 +1,7 @@
 #include "CodeWidget.h"
+#include "Components/ArtManager.h"
 
+#include <Qsci/qsciapis.h>
 #include <Qsci/qscilexercpp.h>
 #include <Qsci/qsciprinter.h>
 #include <Qsci/qsciscintilla.h>
@@ -7,21 +9,52 @@
 #include <QFontMetrics>
 #include <QLayout>
 #include <QPrintDialog>
+#include <QShortcut>
 
 namespace {
+
 QsciLexerCPP* cppLexer = nullptr;
-}
+QsciAPIs* sciApis = nullptr;
 
-CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), font(QFont("Courier", 10)) {
-  QFontMetrics fontMetrics(font);
-
+void prepare_scintilla_apis() {
   if (cppLexer == nullptr) {
     cppLexer = new QsciLexerCPP();
-    cppLexer->setFont(font);
+    cppLexer->setFont(QFont("Courier", 10));
   }
+
+  if (sciApis == nullptr) {
+    sciApis = new QsciAPIs(cppLexer);
+  }
+}
+
+}  // anonymous namespace
+
+void CodeWidget::prepareKeywordStore() { prepare_scintilla_apis(); }
+
+void CodeWidget::addKeyword(const QString& keyword) { sciApis->add(keyword); }
+
+void CodeWidget::finalizeKeywords() { sciApis->prepare(); }
+
+CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), font(QFont("Courier", 10)) {
+  prepare_scintilla_apis();
+
+  QFontMetrics fontMetrics(font);
 
   QsciScintilla* codeEdit = new QsciScintilla(this);
   this->textWidget = codeEdit;
+  codeEdit->registerImage(0, QPixmap(":/actions/right-arrow-red.png"));
+  codeEdit->registerImage(1, QPixmap(":/actions/right-arrow-blue.png"));
+  codeEdit->registerImage(2, QPixmap(":/actions/right-arrow-green.png"));
+  codeEdit->registerImage(3, QPixmap(":/actions/function.png"));
+  codeEdit->registerImage(4, ArtManager::GetIcon("object").pixmap(18, 18));
+  codeEdit->registerImage(5, ArtManager::GetIcon("sprite").pixmap(18, 18));
+
+  QShortcut* shortcut = new QShortcut(codeEdit);
+  shortcut->setKey(QKeySequence(Qt::CTRL + Qt::Key_Space));
+  connect(shortcut, &QShortcut::activated, codeEdit, &QsciScintilla::autoCompleteFromAll);
+  shortcut->setAutoRepeat(false);
+  codeEdit->setAutoCompletionThreshold(2);
+  codeEdit->setAutoCompletionSource(QsciScintilla::AutoCompletionSource::AcsAPIs);
 
   codeEdit->setCaretLineVisible(true);
   codeEdit->setCaretLineBackgroundColor(QColor("#ffe4e4"));

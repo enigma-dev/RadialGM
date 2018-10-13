@@ -20,6 +20,10 @@ class CodeWidget : public QWidget {
   int lineCount();
   QPair<int, int> cursorPosition();
 
+  static void prepareKeywordStore();
+  static void addKeyword(const QString& keyword);
+  static void finalizeKeywords();
+
  public slots:
   void newSource();
   void loadSource();

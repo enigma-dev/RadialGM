@@ -3,6 +3,7 @@
 #endif
 
 #include "ServerPlugin.h"
+#include "Widgets/CodeWidget.h"
 
 #include "codegen/server.grpc.pb.h"
 
@@ -51,9 +52,26 @@ class CompilerClient {
 
     std::unique_ptr<ClientReader<Resource> > reader(stub->GetResources(&context, emptyRequest));
     Resource resource;
+    CodeWidget::prepareKeywordStore();
     while (reader->Read(&resource)) {
-      qDebug() << resource.name().c_str();
+      const QString& name = QString::fromStdString(resource.name().c_str());
+      int type = 0;
+      if (resource.is_function()) {
+        type = 3;
+        for (int i = 0; i < resource.overload_count(); ++i) {
+          QString overload = QString::fromStdString(resource.parameters(i));
+          const QStringRef signature = QStringRef(&overload, overload.indexOf("(") + 1, overload.lastIndexOf(")"));
+          CodeWidget::addKeyword(QObject::tr("%0?3(%1)").arg(name).arg(signature));
+        }
+      } else {
+        if (resource.is_global()) type = 1;
+        if (resource.is_type_name()) type = 2;
+        CodeWidget::addKeyword(name + QObject::tr("?%0").arg(type));
+      }
+      qDebug() << name << type;
     }
+    CodeWidget::finalizeKeywords();
+    qDebug() << "done";
     Status status = reader->Finish();
   }
 
@@ -82,30 +100,36 @@ class CompilerClient {
   std::unique_ptr<Compiler::Stub> stub;
 };
 
+#include <chrono>
+#include <ctime>
+
 ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
-  process = new QProcess(this);
+  std::shared_ptr<Channel> channel = CreateChannel("localhost:37818", InsecureChannelCredentials());
+  ChannelInterface* clangIsAPieceOfShit = (ChannelInterface*)channel.get();
 
-  connect(process, &QProcess::readyReadStandardOutput, this, &ServerPlugin::HandleOutput);
-  connect(process, &QProcess::readyReadStandardError, this, &ServerPlugin::HandleError);
-  process->setWorkingDirectory("../RadialGM/Submodules/enigma-dev");
+  if (!clangIsAPieceOfShit->WaitForConnected(std::chrono::system_clock::now() + std::chrono::milliseconds(1000))) {
+    qDebug() << "heller1";
+    process = new QProcess(this);
+    qDebug() << "heller2";
+    connect(process, &QProcess::readyReadStandardOutput, this, &ServerPlugin::HandleOutput);
+    connect(process, &QProcess::readyReadStandardError, this, &ServerPlugin::HandleError);
 
-  QString program = "emake";
-  QStringList arguments;
-  arguments << "--server"
-            << "--quiet";
-  process->start(program, arguments);
-
-  ChannelArguments channelArguments;
-  channelArguments.SetMaxSendMessageSize(-1);
-  channelArguments.SetMaxReceiveMessageSize(-1);
-  auto channel = CreateCustomChannel("localhost:37818", InsecureChannelCredentials(), channelArguments);
+    qDebug() << "heller3";
+    QString program = "emake.exe";
+    QStringList arguments;
+    arguments << "--server"
+              << "--quiet";
+    qDebug() << "heller4";
+    process->startDetached(program, arguments, "../RadialGM/Submodules/enigma-dev");
+    qDebug() << "heller5";
+    process->waitForStarted();
+    qDebug() << "heller6";
+  }
   compilerClient = new CompilerClient(channel);
-  //compilerClient->GetResources();
+  compilerClient->GetResources();
 }
 
-ServerPlugin::~ServerPlugin() {
-  process->terminate();
-  process->waitForFinished();
+ServerPlugin::~ServerPlugin() {  //process->terminate();
 }
 
 void ServerPlugin::Run() { compilerClient->CompileBuffer(mainWindow.Game(), CompileMode::RUN); };
