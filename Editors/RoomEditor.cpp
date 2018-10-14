@@ -1,9 +1,11 @@
 #include "RoomEditor.h"
 #include "Components/ArtManager.h"
+#include "Components/QMenuView.h"
 #include "MainWindow.h"
 #include "ui_RoomEditor.h"
 
 #include "Models/ImmediateMapper.h"
+#include "Models/TreeSortFilterProxyModel.h"
 #include "codegen/Room.pb.h"
 
 #include <QGraphicsPixmapItem>
@@ -53,6 +55,15 @@ RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, p
   viewMapper->addMapping(ui->followingHSpeedSpinBox, View::kHspeedFieldNumber);
   viewMapper->addMapping(ui->followingVSpeedSpinBox, View::kVspeedFieldNumber);
   viewMapper->toFirst();
+
+  QMenuView* objMenu = new QMenuView(this);
+  TreeSortFilterProxyModel* treeProxy = new TreeSortFilterProxyModel(this);
+  treeProxy->SetFilterType(TreeNode::TypeCase::kObject);
+  treeProxy->setSourceModel(MainWindow::treeModel);
+  objMenu->setModel(treeProxy);
+  ui->objectSelectButton->setMenu(objMenu);
+
+  connect(objMenu, &QMenu::triggered, this, &RoomEditor::SelectedObjectChanged);
 
   connect(ui->currentViewComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
           [=](int index) { viewMapper->setCurrentIndex(index); });
@@ -114,6 +125,10 @@ bool RoomEditor::eventFilter(QObject* obj, QEvent* event) {
   }
 
   return QWidget::eventFilter(obj, event);
+}
+
+void RoomEditor::SelectedObjectChanged(QAction *action) {
+  ui->currentObject->setText(action->text());
 }
 
 void RoomEditor::updateCursorPositionLabel(const QPoint& pos) {

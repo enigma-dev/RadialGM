@@ -150,35 +150,30 @@
                <number>4</number>
               </property>
               <item>
-               <widget class="QToolButton" name="addAssetButton">
+               <widget class="QLineEdit" name="currentObject">
                 <property name="text">
-                 <string>Object</string>
-                </property>
-                <property name="icon">
-                 <iconset resource="../images.qrc">
-                  <normaloff>:/actions/add.png</normaloff>:/actions/add.png</iconset>
-                </property>
-                <property name="popupMode">
-                 <enum>QToolButton::MenuButtonPopup</enum>
-                </property>
-                <property name="toolButtonStyle">
-                 <enum>Qt::ToolButtonTextBesideIcon</enum>
+                 <string>&lt;no object&gt;</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QComboBox" name="addAssetCombo">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
+               <widget class="QToolButton" name="objectSelectButton">
+                <property name="minimumSize">
+                 <size>
+                  <width>32</width>
+                  <height>0</height>
+                 </size>
                 </property>
-                <item>
-                 <property name="text">
-                  <string>&lt;no object&gt;</string>
-                 </property>
-                </item>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset resource="../images.qrc">
+                  <normaloff>:/resources/object.png</normaloff>:/resources/object.png</iconset>
+                </property>
+                <property name="popupMode">
+                 <enum>QToolButton::MenuButtonPopup</enum>
+                </property>
                </widget>
               </item>
               <item>
@@ -1290,8 +1285,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>671</width>
-            <height>569</height>
+            <width>670</width>
+            <height>570</height>
            </rect>
           </property>
           <property name="autoFillBackground">

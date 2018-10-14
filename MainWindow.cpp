@@ -31,6 +31,7 @@
 #undef GetMessage
 
 ResourceModelMap *MainWindow::resourceMap = nullptr;
+TreeModel *MainWindow::treeModel = nullptr;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ArtManager::Init();

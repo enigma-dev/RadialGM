@@ -21,6 +21,9 @@ class RoomEditor : public BaseEditor {
 
   void setZoom(qreal zoom);
 
+ public slots:
+  void SelectedObjectChanged(QAction *action);
+
  private slots:
   void on_actionZoomIn_triggered();
   void on_actionZoomOut_triggered();

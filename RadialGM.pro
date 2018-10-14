@@ -83,7 +83,9 @@ SOURCES += \
     Models/ResourceModelMap.cpp \
     Models/ModelMapper.cpp \
     Models/RepeatedProtoModel.cpp \
-    Widgets/RoomRenderer.cpp
+    Widgets/RoomRenderer.cpp \
+    Components/QMenuView.cpp \
+    Models/TreeSortFilterProxyModel.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -115,7 +117,10 @@ HEADERS += \
     Models/ResourceModelMap.h \
     Models/ModelMapper.h \
     Models/RepeatedProtoModel.h \
-    Widgets/RoomRenderer.h
+    Widgets/RoomRenderer.h \
+    Components/QMenuView.h \
+    Components/QMenuView_p.h \
+    Models/TreeSortFilterProxyModel.h
 
 FORMS += \
     MainWindow.ui \

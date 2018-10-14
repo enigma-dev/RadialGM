@@ -27,6 +27,7 @@ class MainWindow : public QMainWindow {
   ~MainWindow();
   void closeEvent(QCloseEvent *event);
   static ResourceModelMap* resourceMap;
+  static TreeModel *treeModel;
   buffers::Game *Game() const { return this->project->mutable_game(); }
 
  public slots:
@@ -62,7 +63,6 @@ class MainWindow : public QMainWindow {
  private:
   QHash<buffers::TreeNode *, QMdiSubWindow *> subWindows;
 
-  TreeModel *treeModel;
   Ui::MainWindow *ui;
 
   buffers::Project *project;
