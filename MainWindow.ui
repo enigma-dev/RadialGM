@@ -185,22 +185,8 @@
       <property name="title">
        <string>Configurations</string>
       </property>
-      <widget class="QMenu" name="menuConfiguration0">
-       <property name="title">
-        <string>Configuration 0</string>
-       </property>
-       <addaction name="actionSelect"/>
-       <addaction name="actionDelete_2"/>
-      </widget>
-      <widget class="QMenu" name="menuConfiguration1">
-       <property name="title">
-        <string>Configuration 1</string>
-       </property>
-       <addaction name="actionSelect_2"/>
-       <addaction name="actionDelete"/>
-      </widget>
-      <addaction name="menuConfiguration0"/>
-      <addaction name="menuConfiguration1"/>
+      <addaction name="actionConfiguration0"/>
+      <addaction name="actionConfiguration1"/>
       <addaction name="separator"/>
       <addaction name="actionSettingsProperties"/>
       <addaction name="actionAddNewConfig"/>
@@ -860,6 +846,27 @@
     <string>Change Game Settings</string>
    </property>
   </action>
+  <actiongroup name="configActionGroup">
+   <action name="actionConfiguration0">
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+    <property name="text">
+     <string>Configuration 0</string>
+    </property>
+   </action>
+   <action name="actionConfiguration1">
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+    <property name="text">
+     <string>Configuration 1</string>
+    </property>
+   </action>
+  </actiongroup>
   <actiongroup name="platformActionGroup">
    <action name="actionWin32">
     <property name="checkable">
