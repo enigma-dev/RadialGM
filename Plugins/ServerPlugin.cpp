@@ -82,8 +82,8 @@ class CompilerClient {
     ClientContext context;
     Empty emptyRequest;
 
-    std::unique_ptr<ClientReader<System> > reader(stub->GetSystems(&context, emptyRequest));
-    System system;
+    std::unique_ptr<ClientReader<SystemType> > reader(stub->GetSystems(&context, emptyRequest));
+    SystemType system;
     while (reader->Read(&system)) {
       const QString systemName = QString::fromStdString(system.name());
       qDebug() << systemName;
