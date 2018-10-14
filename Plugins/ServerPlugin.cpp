@@ -9,6 +9,7 @@
 
 #include <QDebug>
 #include <QFileDialog>
+#include <QMenu>
 #include <QTemporaryFile>
 
 #include <grpc++/channel.h>
@@ -21,7 +22,8 @@ using namespace buffers;
 
 class CompilerClient {
  public:
-  explicit CompilerClient(std::shared_ptr<Channel> channel) : stub(Compiler::NewStub(channel)) {}
+  explicit CompilerClient(std::shared_ptr<Channel> channel, MainWindow& mainWindow)
+      : stub(Compiler::NewStub(channel)), mainWindow(mainWindow) {}
 
   void CompileBuffer(Game* game, CompileMode mode, std::string name) {
     ClientContext context;
@@ -75,6 +77,36 @@ class CompilerClient {
     Status status = reader->Finish();
   }
 
+  void GetSystems() {
+    qDebug() << "GetSystems()";
+    ClientContext context;
+    Empty emptyRequest;
+
+    std::unique_ptr<ClientReader<System> > reader(stub->GetSystems(&context, emptyRequest));
+    System system;
+    while (reader->Read(&system)) {
+      const QString systemName = QString::fromStdString(system.name());
+      qDebug() << systemName;
+      QMenu* menu = new QMenu(systemName);
+      QActionGroup* actionGroup = new QActionGroup(menu);
+      actionGroup->setExclusive(systemName.toLower() == "extensions" ? false : true);
+      for (auto subsystem : system.subsystems()) {
+        const QString subsystemName = QString::fromStdString(subsystem.name());
+        QAction* subsystemAction = menu->addAction(subsystemName);
+        subsystemAction->setCheckable(true);
+        actionGroup->addAction(subsystemAction);
+        //qDebug() << subsystem.name().c_str();
+        //qDebug() << subsystem.id().c_str();
+        //qDebug() << subsystem.description().c_str();
+        //qDebug() << subsystem.target().c_str();
+      }
+      mainWindow.addSystemMenu(menu);
+    }
+
+    qDebug() << "done";
+    Status status = reader->Finish();
+  }
+
   void SetDefinitions(std::string code, std::string yaml) {
     qDebug() << "SetDefinitions()";
     ClientContext context;
@@ -98,6 +130,7 @@ class CompilerClient {
 
  private:
   std::unique_ptr<Compiler::Stub> stub;
+  MainWindow& mainWindow;
 };
 
 #include <chrono>
@@ -125,8 +158,9 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
     process->waitForStarted();
     qDebug() << "heller6";
   }
-  compilerClient = new CompilerClient(channel);
+  compilerClient = new CompilerClient(channel, mainWindow);
   compilerClient->GetResources();
+  compilerClient->GetSystems();
 }
 
 ServerPlugin::~ServerPlugin() {  //process->terminate();

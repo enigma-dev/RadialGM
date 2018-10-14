@@ -181,17 +181,9 @@
       <iconset resource="images.qrc">
        <normaloff>:/resources/settings.png</normaloff>:/resources/settings.png</iconset>
      </property>
-     <widget class="QMenu" name="menuTarget">
+     <widget class="QMenu" name="menuConfigurations">
       <property name="title">
-       <string>Platform</string>
-      </property>
-      <addaction name="actionWin32"/>
-      <addaction name="actionXlib"/>
-      <addaction name="actionCocoa"/>
-     </widget>
-     <widget class="QMenu" name="menuConfiguration">
-      <property name="title">
-       <string>Configuration</string>
+       <string>Configurations</string>
       </property>
       <widget class="QMenu" name="menuConfiguration0">
        <property name="title">
@@ -210,32 +202,11 @@
       <addaction name="menuConfiguration0"/>
       <addaction name="menuConfiguration1"/>
       <addaction name="separator"/>
+      <addaction name="actionSettingsProperties"/>
       <addaction name="actionAddNewConfig"/>
      </widget>
-     <widget class="QMenu" name="menuTarget_2">
-      <property name="title">
-       <string>Target</string>
-      </property>
-      <addaction name="actionGCC32"/>
-      <addaction name="actionGCC64"/>
-      <addaction name="actionMSVC17"/>
-     </widget>
-     <widget class="QMenu" name="menuGraphicsSystem">
-      <property name="title">
-       <string>Graphics System</string>
-      </property>
-      <addaction name="actionOpenGL1"/>
-      <addaction name="actionOpenGL3"/>
-      <addaction name="actionDirect3D9"/>
-      <addaction name="actionDirect3D11"/>
-     </widget>
-     <addaction name="menuConfiguration"/>
+     <addaction name="menuConfigurations"/>
      <addaction name="separator"/>
-     <addaction name="menuTarget_2"/>
-     <addaction name="menuTarget"/>
-     <addaction name="menuGraphicsSystem"/>
-     <addaction name="separator"/>
-     <addaction name="actionSettingsProperties"/>
     </widget>
     <addaction name="actionCreate_Sprite"/>
     <addaction name="actionCreate_Sound"/>
