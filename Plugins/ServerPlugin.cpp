@@ -96,6 +96,7 @@ class CompilerClient {
     widgetAction->setDefaultWidget(widget);
 
     QMenu* extensionsMenu = new QMenu();
+    extensionsMenu->setToolTipsVisible(true);
 
     std::unique_ptr<ClientReader<SystemType> > reader(stub->GetSystems(&context, emptyRequest));
     SystemType system;
@@ -106,7 +107,10 @@ class CompilerClient {
       if (systemName.toLower() == "extensions") {
         for (auto extension : system.subsystems()) {
           const QString extensionName = QString::fromStdString(extension.name());
+          const QString extensionDesc = QString::fromStdString(extension.description());
           QAction* extensionAction = extensionsMenu->addAction(extensionName);
+          extensionAction->setToolTip(extensionDesc);
+
           extensionAction->setCheckable(true);
         }
         continue;
