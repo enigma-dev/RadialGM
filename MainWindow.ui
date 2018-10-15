@@ -788,11 +788,6 @@
     <string>Target</string>
    </property>
   </action>
-  <action name="actionSelect">
-   <property name="text">
-    <string>Select</string>
-   </property>
-  </action>
   <action name="actionAddNewConfig">
    <property name="icon">
     <iconset resource="images.qrc">
@@ -800,29 +795,6 @@
    </property>
    <property name="text">
     <string>Add New</string>
-   </property>
-  </action>
-  <action name="actionSelect_2">
-   <property name="text">
-    <string>Select</string>
-   </property>
-  </action>
-  <action name="actionDelete">
-   <property name="icon">
-    <iconset resource="images.qrc">
-     <normaloff>:/actions/delete.png</normaloff>:/actions/delete.png</iconset>
-   </property>
-   <property name="text">
-    <string>Delete</string>
-   </property>
-  </action>
-  <action name="actionDelete_2">
-   <property name="icon">
-    <iconset resource="images.qrc">
-     <normaloff>:/actions/delete.png</normaloff>:/actions/delete.png</iconset>
-   </property>
-   <property name="text">
-    <string>Delete</string>
    </property>
   </action>
   <action name="actionSettingsProperties">
@@ -864,101 +836,6 @@
     </property>
     <property name="text">
      <string>Configuration 1</string>
-    </property>
-   </action>
-  </actiongroup>
-  <actiongroup name="platformActionGroup">
-   <action name="actionWin32">
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-    <property name="checked">
-     <bool>true</bool>
-    </property>
-    <property name="text">
-     <string>Win32</string>
-    </property>
-   </action>
-   <action name="actionXlib">
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-    <property name="text">
-     <string>Xlib</string>
-    </property>
-   </action>
-   <action name="actionCocoa">
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-    <property name="text">
-     <string>Cocoa</string>
-    </property>
-   </action>
-  </actiongroup>
-  <actiongroup name="graphicsActionGroup">
-   <action name="actionOpenGL1">
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-    <property name="text">
-     <string>OpenGL1</string>
-    </property>
-   </action>
-   <action name="actionOpenGL3">
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-    <property name="text">
-     <string>OpenGL3</string>
-    </property>
-   </action>
-   <action name="actionDirect3D9">
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-    <property name="checked">
-     <bool>true</bool>
-    </property>
-    <property name="text">
-     <string>Direct3D9</string>
-    </property>
-   </action>
-   <action name="actionDirect3D11">
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-    <property name="text">
-     <string>Direct3D11</string>
-    </property>
-   </action>
-  </actiongroup>
-  <actiongroup name="targetActionGroup">
-   <action name="actionGCC32">
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-    <property name="checked">
-     <bool>true</bool>
-    </property>
-    <property name="text">
-     <string>GCC 32</string>
-    </property>
-   </action>
-   <action name="actionGCC64">
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-    <property name="text">
-     <string>GCC 64</string>
-    </property>
-   </action>
-   <action name="actionMSVC17">
-    <property name="checkable">
-     <bool>true</bool>
-    </property>
-    <property name="text">
-     <string>MSVC 17</string>
     </property>
    </action>
   </actiongroup>
