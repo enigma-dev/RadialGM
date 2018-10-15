@@ -26,7 +26,7 @@ class MainWindow : public QMainWindow {
   ~MainWindow();
   void closeEvent(QCloseEvent *event);
 
-  void addSystemMenu(QMenu *menu);
+  void addSystemMenu(QAction *menu);
 
   buffers::Game *Game() const { return this->project->mutable_game(); }
 
