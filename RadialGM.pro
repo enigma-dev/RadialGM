@@ -80,6 +80,7 @@ SOURCES += \
     Components/RecentFiles.cpp \
     Editors/CodeEditor.cpp \
     Editors/ScriptEditor.cpp \
+    Editors/SettingsEditor.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -107,7 +108,8 @@ HEADERS += \
     main.h \
     Dialogs/PreferencesKeys.h \
     Editors/CodeEditor.h \
-    Editors/ScriptEditor.h
+    Editors/ScriptEditor.h \
+    Editors/SettingsEditor.h
 
 FORMS += \
     MainWindow.ui \
@@ -121,7 +123,8 @@ FORMS += \
     Editors/RoomEditor.ui \
     Editors/SpriteEditor.ui \
     Editors/SoundEditor.ui \
-    Editors/CodeEditor.ui
+    Editors/CodeEditor.ui \
+    Editors/SettingsEditor.ui
 
 RESOURCES += \
     images.qrc
