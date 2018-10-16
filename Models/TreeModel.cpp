@@ -44,7 +44,8 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
                             {TypeCase::kFont, ArtManager::GetIcon("font")},
                             {TypeCase::kTimeline, ArtManager::GetIcon("timeline")},
                             {TypeCase::kObject, ArtManager::GetIcon("object")},
-                            {TypeCase::kRoom, ArtManager::GetIcon("room")}});
+                            {TypeCase::kRoom, ArtManager::GetIcon("room")},
+                            {TypeCase::kSettings, ArtManager::GetIcon("settings")}});
 
     auto it = iconMap.find(item->type_case());
     if (it == iconMap.end()) return ArtManager::GetIcon("info");

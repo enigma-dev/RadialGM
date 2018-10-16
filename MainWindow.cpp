@@ -10,6 +10,7 @@
 #include "Editors/PathEditor.h"
 #include "Editors/RoomEditor.h"
 #include "Editors/ScriptEditor.h"
+#include "Editors/SettingsEditor.h"
 #include "Editors/SoundEditor.h"
 #include "Editors/SpriteEditor.h"
 #include "Editors/TimelineEditor.h"
@@ -112,7 +113,8 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
                                 {TypeCase::kScript, EditorFactory<ScriptEditor>},
                                 {TypeCase::kTimeline, EditorFactory<TimelineEditor>},
                                 {TypeCase::kObject, EditorFactory<ObjectEditor>},
-                                {TypeCase::kRoom, EditorFactory<RoomEditor>}});
+                                {TypeCase::kRoom, EditorFactory<RoomEditor>},
+                                {TypeCase::kSettings, EditorFactory<SettingsEditor>}});
 
   const Descriptor *desc = item->GetDescriptor();
   const Reflection *refl = item->GetReflection();

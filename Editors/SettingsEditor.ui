@@ -87,6 +87,101 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <widget class="QWidget" name="API">
+       <layout class="QFormLayout" name="formLayout">
+        <property name="labelAlignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+        </property>
+        <property name="horizontalSpacing">
+         <number>4</number>
+        </property>
+        <property name="verticalSpacing">
+         <number>4</number>
+        </property>
+        <property name="leftMargin">
+         <number>4</number>
+        </property>
+        <property name="topMargin">
+         <number>4</number>
+        </property>
+        <property name="rightMargin">
+         <number>4</number>
+        </property>
+        <property name="bottomMargin">
+         <number>4</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLabel" name="audioLabel">
+          <property name="text">
+           <string>Audio</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="windowingLabel">
+          <property name="text">
+           <string>Windowing</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="compilerLabel">
+          <property name="text">
+           <string>Compiler</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="graphicsLabel">
+          <property name="text">
+           <string>Graphics</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="widgetsLabel">
+          <property name="text">
+           <string>Widgets</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="collisionsLabel">
+          <property name="text">
+           <string>Collisions</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <widget class="QLabel" name="networkingLabel">
+          <property name="text">
+           <string>Networking</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="comboBox"/>
+        </item>
+        <item row="1" column="1">
+         <widget class="QComboBox" name="comboBox_2"/>
+        </item>
+        <item row="2" column="1">
+         <widget class="QComboBox" name="comboBox_3"/>
+        </item>
+        <item row="3" column="1">
+         <widget class="QComboBox" name="comboBox_4"/>
+        </item>
+        <item row="4" column="1">
+         <widget class="QComboBox" name="comboBox_5"/>
+        </item>
+        <item row="5" column="1">
+         <widget class="QComboBox" name="comboBox_6"/>
+        </item>
+        <item row="6" column="1">
+         <widget class="QComboBox" name="comboBox_7"/>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </widget>
    </item>
