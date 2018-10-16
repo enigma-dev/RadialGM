@@ -86,58 +86,14 @@ class CompilerClient {
     ClientContext context;
     Empty emptyRequest;
 
-    QWidget* widget = new QWidget();
-    QWidgetAction* widgetAction = new QWidgetAction(&mainWindow);
-    QFormLayout* layout = new QFormLayout();
-    layout->setSpacing(4);
-    layout->setMargin(4);
-    layout->setLabelAlignment(Qt::AlignmentFlag::AlignRight);
-    widget->setLayout(layout);
-    widgetAction->setDefaultWidget(widget);
-
-    QMenu* extensionsMenu = new QMenu();
-    extensionsMenu->setToolTipsVisible(true);
-
     std::unique_ptr<ClientReader<SystemType> > reader(stub->GetSystems(&context, emptyRequest));
     SystemType system;
+    auto& systemCache = MainWindow::systemCache;
     while (reader->Read(&system)) {
       const QString systemName = QString::fromStdString(system.name());
       qDebug() << systemName;
-
-      if (systemName.toLower() == "extensions") {
-        for (auto extension : system.subsystems()) {
-          const QString extensionName = QString::fromStdString(extension.name());
-          const QString extensionDesc = QString::fromStdString(extension.description());
-          QAction* extensionAction = extensionsMenu->addAction(extensionName);
-          extensionAction->setToolTip(extensionDesc);
-
-          extensionAction->setCheckable(true);
-        }
-        continue;
-      }
-
-      QLabel* label = new QLabel(systemName);
-      QComboBox* combo = new QComboBox();
-      layout->addRow(label, combo);
-
-      for (auto subsystem : system.subsystems()) {
-        const QString subsystemName = QString::fromStdString(subsystem.name());
-        combo->addItem(subsystemName);
-        //qDebug() << subsystem.name().c_str();
-        //qDebug() << subsystem.id().c_str();
-        //qDebug() << subsystem.description().c_str();
-        //qDebug() << subsystem.target().c_str();
-      }
+      systemCache.append(system);
     }
-
-    QAction* extensionsSeperator = new QAction();
-    extensionsSeperator->setSeparator(true);
-    QAction* extensionsMenuAction = new QAction(QObject::tr("Extensions"));
-    extensionsMenuAction->setMenu(extensionsMenu);
-
-    //mainWindow.addSystemMenu(extensionsMenuAction);
-    //mainWindow.addSystemMenu(extensionsSeperator);
-    //mainWindow.addSystemMenu(widgetAction);
 
     qDebug() << "done";
     Status status = reader->Finish();

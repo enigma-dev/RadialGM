@@ -8,7 +8,9 @@ class MainWindow;
 #include "Components/RecentFiles.h"
 
 #include "codegen/project.pb.h"
+#include "codegen/server.pb.h"
 
+#include <QList>
 #include <QMainWindow>
 #include <QMdiSubWindow>
 #include <QPointer>
@@ -27,6 +29,8 @@ class MainWindow : public QMainWindow {
   void closeEvent(QCloseEvent *event);
 
   buffers::Game *Game() const { return this->project->mutable_game(); }
+
+  static QList<buffers::SystemType> systemCache;
 
  public slots:
   void openFile(QString fName);

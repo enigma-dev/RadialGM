@@ -118,9 +118,9 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="windowingLabel">
+         <widget class="QLabel" name="platformLabel">
           <property name="text">
-           <string>Windowing</string>
+           <string>Platform</string>
           </property>
          </widget>
         </item>
@@ -160,25 +160,25 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QComboBox" name="comboBox"/>
+         <widget class="QComboBox" name="audioCombo"/>
         </item>
         <item row="1" column="1">
-         <widget class="QComboBox" name="comboBox_2"/>
+         <widget class="QComboBox" name="platformCombo"/>
         </item>
         <item row="2" column="1">
-         <widget class="QComboBox" name="comboBox_3"/>
+         <widget class="QComboBox" name="compilerCombo"/>
         </item>
         <item row="3" column="1">
-         <widget class="QComboBox" name="comboBox_4"/>
+         <widget class="QComboBox" name="graphicsCombo"/>
         </item>
         <item row="4" column="1">
-         <widget class="QComboBox" name="comboBox_5"/>
+         <widget class="QComboBox" name="widgetsCombo"/>
         </item>
         <item row="5" column="1">
-         <widget class="QComboBox" name="comboBox_6"/>
+         <widget class="QComboBox" name="collisionsCombo"/>
         </item>
         <item row="6" column="1">
-         <widget class="QComboBox" name="comboBox_7"/>
+         <widget class="QComboBox" name="networkingCombo"/>
         </item>
        </layout>
       </widget>

@@ -31,6 +31,8 @@
 
 #undef GetMessage
 
+QList<buffers::SystemType> MainWindow::systemCache;
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ArtManager::Init();
 
