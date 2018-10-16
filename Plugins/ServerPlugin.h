@@ -16,6 +16,7 @@ class ServerPlugin : public RGMPlugin {
   void Run() override;
   void Debug() override;
   void CreateExecutable() override;
+  void SetCurrentConfig(const buffers::resources::Settings &settings) override;
 
  private slots:
   void HandleOutput();

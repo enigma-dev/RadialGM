@@ -32,6 +32,9 @@ class MainWindow : public QMainWindow {
 
   static QList<buffers::SystemType> systemCache;
 
+ signals:
+  void CurrentConfigChanged(const buffers::resources::Settings &settings);
+
  public slots:
   void openFile(QString fName);
 

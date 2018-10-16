@@ -111,6 +111,16 @@ class CompilerClient {
     Status status = stub->SetDefinitions(&context, definitionsRequest, &reply);
   }
 
+  void SetCurrentConfig(const resources::Settings& settings) {
+    qDebug() << "SetCurrentConfig()";
+    ClientContext context;
+    SetCurrentConfigRequest setConfigRequest;
+    setConfigRequest.mutable_settings()->CopyFrom(settings);
+
+    Empty reply;
+    Status status = stub->SetCurrentConfig(&context, setConfigRequest, &reply);
+  }
+
   void SyntaxCheck() {
     qDebug() << "SyntaxCheck()";
     ClientContext context;
@@ -167,6 +177,10 @@ void ServerPlugin::CreateExecutable() {
       QFileDialog::getSaveFileName(&mainWindow, tr("Create Executable"), "", tr("Executable (*.exe);;All Files (*)"));
   if (!fileName.isEmpty())
     compilerClient->CompileBuffer(mainWindow.Game(), CompileMode::COMPILE, fileName.toStdString());
+};
+
+void ServerPlugin::SetCurrentConfig(const resources::Settings& settings) {
+  compilerClient->SetCurrentConfig(settings);
 };
 
 void ServerPlugin::HandleOutput() { emit OutputRead(process->readAllStandardOutput()); }

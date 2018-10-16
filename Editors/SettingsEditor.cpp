@@ -2,7 +2,9 @@
 #include "MainWindow.h"
 #include "ui_SettingsEditor.h"
 
-#include <QDebug>
+#include "codegen/Settings.pb.h"
+
+using namespace buffers::resources;
 
 SettingsEditor::SettingsEditor(ProtoModel* model, QWidget* parent)
     : BaseEditor(model, parent), ui(new Ui::SettingsEditor) {

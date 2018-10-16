@@ -57,6 +57,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   auto outputTextBrowser = this->ui->outputTextBrowser;
   connect(pluginServer, &RGMPlugin::OutputRead, outputTextBrowser, &QTextBrowser::append);
   connect(pluginServer, &RGMPlugin::ErrorRead, outputTextBrowser, &QTextBrowser::append);
+  connect(this, &MainWindow::CurrentConfigChanged, pluginServer, &RGMPlugin::SetCurrentConfig);
   connect(ui->actionRun, &QAction::triggered, pluginServer, &RGMPlugin::Run);
   connect(ui->actionDebug, &QAction::triggered, pluginServer, &RGMPlugin::Debug);
   connect(ui->actionCreateExecutable, &QAction::triggered, pluginServer, &RGMPlugin::CreateExecutable);
