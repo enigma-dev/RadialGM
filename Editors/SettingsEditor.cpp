@@ -4,11 +4,18 @@
 
 #include "codegen/Settings.pb.h"
 
+#include <QPushButton>
+
 using namespace buffers::resources;
 
 SettingsEditor::SettingsEditor(ProtoModel* model, QWidget* parent)
     : BaseEditor(model, parent), ui(new Ui::SettingsEditor) {
   ui->setupUi(this);
+
+  QPushButton* saveButton = ui->buttonBox->button(QDialogButtonBox::Save);
+  saveButton->setIcon(QIcon(":/actions/accept.png"));
+  QPushButton* discardButton = ui->buttonBox->button(QDialogButtonBox::Discard);
+  discardButton->setIcon(QIcon(":/actions/cancel.png"));
 
   const QMap<QString, QComboBox*> systemUIMap = {
       {QString("Audio"), ui->audioCombo},          {QString("Platform"), ui->platformCombo},
