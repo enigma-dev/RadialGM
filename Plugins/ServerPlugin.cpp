@@ -135,9 +135,9 @@ class CompilerClient {
     QAction* extensionsMenuAction = new QAction(QObject::tr("Extensions"));
     extensionsMenuAction->setMenu(extensionsMenu);
 
-    mainWindow.addSystemMenu(extensionsMenuAction);
-    mainWindow.addSystemMenu(extensionsSeperator);
-    mainWindow.addSystemMenu(widgetAction);
+    //mainWindow.addSystemMenu(extensionsMenuAction);
+    //mainWindow.addSystemMenu(extensionsSeperator);
+    //mainWindow.addSystemMenu(widgetAction);
 
     qDebug() << "done";
     Status status = reader->Finish();

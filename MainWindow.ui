@@ -181,18 +181,11 @@
       <iconset resource="images.qrc">
        <normaloff>:/resources/settings.png</normaloff>:/resources/settings.png</iconset>
      </property>
-     <widget class="QMenu" name="menuConfigurations">
-      <property name="title">
-       <string>Configurations</string>
-      </property>
-      <addaction name="actionConfiguration0"/>
-      <addaction name="actionConfiguration1"/>
-      <addaction name="separator"/>
-      <addaction name="actionSettingsProperties"/>
-      <addaction name="actionAddNewConfig"/>
-     </widget>
-     <addaction name="menuConfigurations"/>
+     <addaction name="actionConfiguration0"/>
+     <addaction name="actionConfiguration1"/>
      <addaction name="separator"/>
+     <addaction name="actionSettingsProperties"/>
+     <addaction name="actionAddNewConfig"/>
     </widget>
     <addaction name="actionCreate_Sprite"/>
     <addaction name="actionCreate_Sound"/>
@@ -240,6 +233,7 @@
    <addaction name="actionSave"/>
    <addaction name="actionSaveAll"/>
    <addaction name="separator"/>
+   <addaction name="actionSettings"/>
    <addaction name="actionRun"/>
    <addaction name="actionDebug"/>
    <addaction name="actionCreateExecutable"/>
@@ -255,7 +249,6 @@
    <addaction name="actionCreate_Timeline"/>
    <addaction name="actionCreate_Room"/>
    <addaction name="separator"/>
-   <addaction name="actionSettings"/>
    <addaction name="actionPreferences"/>
    <addaction name="separator"/>
    <addaction name="actionDocumentation"/>

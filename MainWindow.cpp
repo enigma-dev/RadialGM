@@ -62,10 +62,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 MainWindow::~MainWindow() { delete ui; }
 
-void MainWindow::addSystemMenu(QAction *menu) {
-  ui->menuChangeGameSettings->insertAction(ui->actionSettingsProperties, menu);
-}
-
 void MainWindow::readSettings() {
   QSettings settings;
 

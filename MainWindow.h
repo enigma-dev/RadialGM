@@ -26,8 +26,6 @@ class MainWindow : public QMainWindow {
   ~MainWindow();
   void closeEvent(QCloseEvent *event);
 
-  void addSystemMenu(QAction *menu);
-
   buffers::Game *Game() const { return this->project->mutable_game(); }
 
  public slots:
