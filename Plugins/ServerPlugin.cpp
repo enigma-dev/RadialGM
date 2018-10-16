@@ -7,14 +7,9 @@
 
 #include "codegen/server.grpc.pb.h"
 
-#include <QComboBox>
 #include <QDebug>
 #include <QFileDialog>
-#include <QFormLayout>
-#include <QLabel>
-#include <QMenu>
 #include <QTemporaryFile>
-#include <QWidgetAction>
 
 #include <grpc++/channel.h>
 #include <grpc++/client_context.h>

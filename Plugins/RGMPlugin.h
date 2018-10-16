@@ -21,7 +21,7 @@ class RGMPlugin : public QObject {
   virtual void Run() {}
   virtual void Debug() {}
   virtual void CreateExecutable() {}
-  virtual void SetCurrentConfig(const buffers::resources::Settings &settings) {}
+  virtual void SetCurrentConfig(const buffers::resources::Settings & /*settings*/) {}
 
  protected:
   MainWindow &mainWindow;

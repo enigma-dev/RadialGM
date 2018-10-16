@@ -3,8 +3,6 @@
 
 #include "BaseEditor.h"
 
-#include "codegen/Settings.pb.h"
-
 namespace Ui {
 class SettingsEditor;
 }
