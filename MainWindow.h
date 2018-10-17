@@ -37,6 +37,7 @@ class MainWindow : public QMainWindow {
 
  public slots:
   void openFile(QString fName);
+  static void setCurrentConfig(const buffers::resources::Settings &settings);
 
  private slots:
   // file menu
@@ -66,6 +67,8 @@ class MainWindow : public QMainWindow {
   void on_treeView_doubleClicked(const QModelIndex &index);
 
  private:
+  static MainWindow *m_instance;
+
   QHash<buffers::TreeNode *, ProtoModel *> resourceModels;
   QHash<buffers::TreeNode *, QMdiSubWindow *> subWindows;
 

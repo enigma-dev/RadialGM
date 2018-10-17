@@ -4,6 +4,7 @@
 
 #include "codegen/Settings.pb.h"
 
+#include <QDebug>
 #include <QPushButton>
 
 using namespace buffers::resources;
@@ -14,16 +15,33 @@ SettingsEditor::SettingsEditor(ProtoModel* model, QWidget* parent)
 
   QPushButton* saveButton = ui->buttonBox->button(QDialogButtonBox::Save);
   saveButton->setIcon(QIcon(":/actions/accept.png"));
+  connect(saveButton, &QPushButton::clicked, [=]() {
+    qDebug() << "hey";
+    Settings settings;
+    auto* api = settings.mutable_api();
+    api->set_target_audio(ui->audioCombo->currentData().toString().toStdString());
+    api->set_target_collision(ui->collisionCombo->currentData().toString().toStdString());
+    api->set_target_compiler(ui->compilerCombo->currentData().toString().toStdString());
+    api->set_target_graphics(ui->graphicsCombo->currentData().toString().toStdString());
+    api->set_target_network(ui->networkCombo->currentData().toString().toStdString());
+    api->set_target_platform(ui->platformCombo->currentData().toString().toStdString());
+    api->set_target_widgets(ui->widgetsCombo->currentData().toString().toStdString());
+    api->add_extensions("Paths");
+
+    qDebug() << "hi" << ui->audioCombo->currentData().toString();
+
+    emit MainWindow::setCurrentConfig(settings);
+  });
   QPushButton* discardButton = ui->buttonBox->button(QDialogButtonBox::Discard);
   discardButton->setIcon(QIcon(":/actions/cancel.png"));
 
   treePageMap = {{QString("ENIGMA/API"), ui->apiPage}, {QString("ENIGMA/Extensions"), ui->extensionsPage}};
 
   const QMap<QString, QWidget*> systemUIMap = {
-      {QString("Audio"), ui->audioCombo},          {QString("Platform"), ui->platformCombo},
-      {QString("Graphics"), ui->graphicsCombo},    {QString("Widget"), ui->widgetsCombo},
-      {QString("Collision"), ui->collisionsCombo}, {QString("Compilers"), ui->compilerCombo},
-      {QString("Network"), ui->networkingCombo},   {QString("Extensions"), ui->extensionsList},
+      {QString("Audio"), ui->audioCombo},         {QString("Platform"), ui->platformCombo},
+      {QString("Graphics"), ui->graphicsCombo},   {QString("Widget"), ui->widgetsCombo},
+      {QString("Collision"), ui->collisionCombo}, {QString("Compilers"), ui->compilerCombo},
+      {QString("Network"), ui->networkCombo},     {QString("Extensions"), ui->extensionsList},
   };
   foreach (auto system, MainWindow::systemCache) {
     const QString systemName = QString::fromStdString(system.name());
@@ -40,14 +58,16 @@ SettingsEditor::SettingsEditor(ProtoModel* model, QWidget* parent)
     }
     foreach (auto subsystem, system.subsystems()) {
       const QString subsystemName = QString::fromStdString(subsystem.name());
+      const QString subsystemId = QString::fromStdString(subsystem.id());
       const QString subsystemDesc = QString::fromStdString(subsystem.description());
-      if (combo)
-        combo->addItem(subsystemName);
-      else if (listWidget) {
+      if (combo) {
+        combo->addItem(subsystemName, subsystemId);
+      } else if (listWidget) {
         auto item = new QListWidgetItem(subsystemName, listWidget);
         item->setFlags(item->flags() | Qt::ItemFlag::ItemIsUserCheckable);
         item->setCheckState(Qt::Unchecked);
         item->setToolTip(subsystemDesc);
+        item->setData(Qt::UserRole, subsystemId);
       }
     }
   }

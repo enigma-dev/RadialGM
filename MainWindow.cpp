@@ -33,8 +33,12 @@
 
 QList<buffers::SystemType> MainWindow::systemCache;
 
+MainWindow *MainWindow::m_instance = nullptr;
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ArtManager::Init();
+
+  m_instance = this;
 
   setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
   setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
@@ -57,6 +61,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   auto outputTextBrowser = this->ui->outputTextBrowser;
   connect(pluginServer, &RGMPlugin::OutputRead, outputTextBrowser, &QTextBrowser::append);
   connect(pluginServer, &RGMPlugin::ErrorRead, outputTextBrowser, &QTextBrowser::append);
+  connect(pluginServer, &RGMPlugin::CompileStatusChanged, [=](bool finished) {
+    ui->outputDockWidget->show();
+    ui->actionRun->setEnabled(finished);
+    ui->actionDebug->setEnabled(finished);
+    ui->actionCreateExecutable->setEnabled(finished);
+  });
   connect(this, &MainWindow::CurrentConfigChanged, pluginServer, &RGMPlugin::SetCurrentConfig);
   connect(ui->actionRun, &QAction::triggered, pluginServer, &RGMPlugin::Run);
   connect(ui->actionDebug, &QAction::triggered, pluginServer, &RGMPlugin::Debug);
@@ -64,6 +74,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 MainWindow::~MainWindow() { delete ui; }
+
+void MainWindow::setCurrentConfig(const buffers::resources::Settings &settings) {
+  emit m_instance->CurrentConfigChanged(settings);
+}
 
 void MainWindow::readSettings() {
   QSettings settings;

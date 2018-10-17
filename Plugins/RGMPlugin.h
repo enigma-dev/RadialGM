@@ -16,6 +16,7 @@ class RGMPlugin : public QObject {
  signals:
   void OutputRead(const QString &output);
   void ErrorRead(const QString &error);
+  void CompileStatusChanged(bool finished = false);
 
  public slots:
   virtual void Run() {}
