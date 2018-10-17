@@ -3,6 +3,7 @@
 
 #include <QDebug>
 #include <QFileDialog>
+#include <QList>
 #include <QTemporaryFile>
 #include <QTimer>
 
@@ -21,7 +22,7 @@ int detag(void* p) { return static_cast<int>(reinterpret_cast<intptr_t>(p)); }
 }  // anonymous namespace
 
 CompilerClient::CompilerClient(std::shared_ptr<Channel> channel, MainWindow& mainWindow)
-    : stub(Compiler::NewStub(channel)), mainWindow(mainWindow) {}
+    : QObject(&mainWindow), stub(Compiler::NewStub(channel)), mainWindow(mainWindow) {}
 
 void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string name) {
   qDebug() << "CompilerBuffer()";
@@ -150,32 +151,46 @@ void CompilerClient::UpdateLoop() {
 }
 
 ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
-  qDebug() << "heller1";
+  // create a new child process for us to launch an emake server
   process = new QProcess(this);
-  qDebug() << "heller2";
+
+  // hookup emake's output to our plugin's output signals so it redirects to the
+  // main output dock widget (thread safe and don't block the main event loop!)
   connect(process, &QProcess::readyReadStandardOutput, this, &ServerPlugin::HandleOutput);
   connect(process, &QProcess::readyReadStandardError, this, &ServerPlugin::HandleError);
-  process->setWorkingDirectory("../RadialGM/Submodules/enigma-dev");
 
-  qDebug() << "heller3";
-  QString program = "emake";
+  // look for an executable file that looks like emake in some common directories
+  QList<QString> searchPaths = {QDir::currentPath(), "../RadialGM/Submodules/enigma-dev"};
+  QFileInfo emakeFileInfo(QFile("emake"));
+  foreach (auto path, searchPaths) {
+    const QDir dir(path);
+    QDir::Filters filters = QDir::Filter::Executable | QDir::Filter::Files;
+    // we use a wildcard because we want it to find emake.exe on Windows
+    auto entryList = dir.entryInfoList(QStringList("emake*"), filters, QDir::SortFlag::NoSort);
+    if (!entryList.empty()) {
+      emakeFileInfo = entryList.first();
+      break;
+    }
+  }
+
+  // use the closest matching emake file we found and launch it in a child process
+  process->setWorkingDirectory(emakeFileInfo.absolutePath());
+  QString program = emakeFileInfo.fileName();
   QStringList arguments;
   arguments << "--server"
             << "-e"
             << "Paths"
             << "-r";
-  qDebug() << "heller4";
   process->start(program, arguments);
-  qDebug() << "heller5";
   process->waitForStarted();
-  qDebug() << "heller6";
 
-  // construct the channel and connect to the server
+  // construct the channel and connect to the server running in the process
   std::shared_ptr<Channel> channel = CreateChannel("localhost:37818", InsecureChannelCredentials());
   compilerClient = new CompilerClient(channel, mainWindow);
   connect(compilerClient, &CompilerClient::CompileStatusChanged, this, &RGMPlugin::CompileStatusChanged);
 
-  //TODO: timer
+  // use a timer to process async grpc events at regular intervals
+  // without us needing any threading or blocking the main thread
   QTimer* timer = new QTimer(this);
   connect(timer, &QTimer::timeout, compilerClient, &CompilerClient::UpdateLoop);
   timer->start();
