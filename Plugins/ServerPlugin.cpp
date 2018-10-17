@@ -26,7 +26,6 @@ CompilerClient::CompilerClient(std::shared_ptr<Channel> channel, MainWindow& mai
 void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string name) {
   qDebug() << "CompilerBuffer()";
   qDebug() << name.c_str();
-  name = "/tmp/holyshit.exe";
   static ClientContext context;
   CompileRequest request;
 
@@ -41,9 +40,10 @@ void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string nam
 }
 
 void CompilerClient::CompileBuffer(Game* game, CompileMode mode) {
-  QTemporaryFile t("enigma");
-  if (!t.open()) return;
-  CompileBuffer(game, mode, t.fileName().toStdString());
+  QTemporaryFile* t = new QTemporaryFile(QDir::temp().filePath("enigmaXXXXXX"), &mainWindow);
+  if (!t->open()) return;
+  t->close();
+  CompileBuffer(game, mode, (t->fileName()).toStdString());
 }
 
 void CompilerClient::GetResources() {
@@ -162,7 +162,8 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   QStringList arguments;
   arguments << "--server"
             << "-e"
-            << "Paths";
+            << "Paths"
+            << "-r";
   qDebug() << "heller4";
   process->start(program, arguments);
   qDebug() << "heller5";
