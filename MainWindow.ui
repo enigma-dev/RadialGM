@@ -175,7 +175,7 @@
     </property>
     <widget class="QMenu" name="menuChangeGameSettings">
      <property name="title">
-      <string>Change Game Settings</string>
+      <string>Change &amp;Game Settings</string>
      </property>
      <property name="icon">
       <iconset resource="images.qrc">
@@ -650,7 +650,7 @@
      <normaloff>:/resources/sprite.png</normaloff>:/resources/sprite.png</iconset>
    </property>
    <property name="text">
-    <string>Create Sprite</string>
+    <string>Create &amp;Sprite</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+S</string>
@@ -662,7 +662,7 @@
      <normaloff>:/resources/sound.png</normaloff>:/resources/sound.png</iconset>
    </property>
    <property name="text">
-    <string>Create Sound</string>
+    <string>Create &amp;Sound</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+U</string>
@@ -674,7 +674,7 @@
      <normaloff>:/resources/background.png</normaloff>:/resources/background.png</iconset>
    </property>
    <property name="text">
-    <string>Create Background</string>
+    <string>Create &amp;Background</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+B</string>
@@ -686,7 +686,7 @@
      <normaloff>:/resources/path.png</normaloff>:/resources/path.png</iconset>
    </property>
    <property name="text">
-    <string>Create Path</string>
+    <string>Create &amp;Path</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+P</string>
@@ -698,7 +698,7 @@
      <normaloff>:/resources/script.png</normaloff>:/resources/script.png</iconset>
    </property>
    <property name="text">
-    <string>Create Script</string>
+    <string>Create &amp;Script</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+C</string>
@@ -710,7 +710,7 @@
      <normaloff>:/resources/shader.png</normaloff>:/resources/shader.png</iconset>
    </property>
    <property name="text">
-    <string>Create Shader</string>
+    <string>Create &amp;Shader</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+A</string>
@@ -722,7 +722,7 @@
      <normaloff>:/resources/font.png</normaloff>:/resources/font.png</iconset>
    </property>
    <property name="text">
-    <string>Create Font</string>
+    <string>Create &amp;Font</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+F</string>
@@ -734,7 +734,7 @@
      <normaloff>:/resources/timeline.png</normaloff>:/resources/timeline.png</iconset>
    </property>
    <property name="text">
-    <string>Create Timeline</string>
+    <string>Create &amp;Timeline</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+T</string>
@@ -746,7 +746,7 @@
      <normaloff>:/resources/object-empty.png</normaloff>:/resources/object-empty.png</iconset>
    </property>
    <property name="text">
-    <string>Create Object</string>
+    <string>Create &amp;Object</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+O</string>
@@ -758,7 +758,7 @@
      <normaloff>:/resources/room.png</normaloff>:/resources/room.png</iconset>
    </property>
    <property name="text">
-    <string>Create Room</string>
+    <string>Create &amp;Room</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+R</string>
@@ -770,7 +770,7 @@
      <normaloff>:/resources/constants.png</normaloff>:/resources/constants.png</iconset>
    </property>
    <property name="text">
-    <string>Define Macros...</string>
+    <string>Define &amp;Macros...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+N</string>
@@ -787,7 +787,10 @@
      <normaloff>:/actions/add.png</normaloff>:/actions/add.png</iconset>
    </property>
    <property name="text">
-    <string>Add New</string>
+    <string>Create &amp;Config</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+G</string>
    </property>
   </action>
   <action name="actionSettingsProperties">
