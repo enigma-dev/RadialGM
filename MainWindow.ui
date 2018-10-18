@@ -776,11 +776,6 @@
     <string>Ctrl+Shift+N</string>
    </property>
   </action>
-  <action name="actionTarget">
-   <property name="text">
-    <string>Target</string>
-   </property>
-  </action>
   <action name="actionAddNewConfig">
    <property name="icon">
     <iconset resource="images.qrc">
