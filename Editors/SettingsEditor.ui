@@ -93,6 +93,169 @@
        </sizepolicy>
       </property>
       <widget class="QWidget" name="emptyPage"/>
+      <widget class="QWidget" name="projectInfoPage">
+       <layout class="QFormLayout" name="formLayout_2">
+        <property name="horizontalSpacing">
+         <number>4</number>
+        </property>
+        <property name="verticalSpacing">
+         <number>4</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Author</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Email</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="lineEdit">
+          <property name="inputMask">
+           <string/>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="frame">
+           <bool>true</bool>
+          </property>
+          <property name="placeholderText">
+           <string>John Doe</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="lineEdit_2">
+          <property name="placeholderText">
+           <string>johndoe@mail.com</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="0" colspan="2">
+         <widget class="Line" name="line">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>Version</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>Brief</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Website</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLineEdit" name="lineEdit_3">
+          <property name="placeholderText">
+           <string>http://www.johndoe.com</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QLineEdit" name="lineEdit_4">
+          <property name="text">
+           <string>100</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QLineEdit" name="lineEdit_5"/>
+        </item>
+        <item row="7" column="0" colspan="2">
+         <widget class="QGroupBox" name="groupBox_3">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="title">
+           <string>Information</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <property name="spacing">
+            <number>4</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QPlainTextEdit" name="plainTextEdit"/>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>Changed</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QDateTimeEdit" name="dateTimeEdit">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="graphicsPage">
        <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0">
         <property name="spacing">
@@ -111,81 +274,67 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QWidget" name="widget_2" native="true">
-          <layout class="QGridLayout" name="gridLayout_4">
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
-           <property name="spacing">
-            <number>4</number>
-           </property>
-           <item row="9" column="0">
-            <widget class="QCheckBox" name="checkBox_4">
-             <property name="text">
-              <string>Window stay on &amp;top</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <widget class="QCheckBox" name="checkBox_2">
-             <property name="text">
-              <string>&amp;Smooth colors</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="1">
-            <widget class="QCheckBox" name="checkBox">
-             <property name="text">
-              <string>Start &amp;fullscreen</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QCheckBox" name="checkBox_3">
-             <property name="text">
-              <string>Display the &amp;cursor</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QCheckBox" name="checkBox_6">
-             <property name="text">
-              <string>Show &amp;caption buttons</string>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="1">
-            <widget class="QCheckBox" name="checkBox_7">
-             <property name="text">
-              <string>Window &amp;resizeable</string>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="0">
-            <widget class="QCheckBox" name="checkBox_5">
-             <property name="text">
-              <string>Show window &amp;border</string>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="1">
-            <widget class="QCheckBox" name="checkBox_8">
-             <property name="text">
-              <string>&amp;Pause on focus lost</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
+         <layout class="QGridLayout" name="gridLayout_5">
+          <property name="spacing">
+           <number>4</number>
+          </property>
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="checkBox_4">
+            <property name="text">
+             <string>Window stay on &amp;top</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="checkBox_3">
+            <property name="text">
+             <string>Display the &amp;cursor</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="checkBox_5">
+            <property name="text">
+             <string>Show window &amp;border</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="checkBox_6">
+            <property name="text">
+             <string>Show &amp;caption buttons</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="checkBox_2">
+            <property name="text">
+             <string>&amp;Smooth colors</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QCheckBox" name="checkBox">
+            <property name="text">
+             <string>Start &amp;fullscreen</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QCheckBox" name="checkBox_7">
+            <property name="text">
+             <string>Window &amp;resizeable</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QCheckBox" name="checkBox_8">
+            <property name="text">
+             <string>&amp;Pause on focus lost</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <widget class="QGroupBox" name="groupBox_2">
@@ -526,104 +675,84 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QWidget" name="widget" native="true">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+         <layout class="QFormLayout" name="systemsLayout">
+          <property name="horizontalSpacing">
+           <number>4</number>
           </property>
-          <layout class="QFormLayout" name="formLayout">
-           <property name="horizontalSpacing">
-            <number>4</number>
-           </property>
-           <property name="verticalSpacing">
-            <number>4</number>
-           </property>
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
-           <item row="0" column="0">
-            <widget class="QLabel" name="audioLabel">
-             <property name="text">
-              <string>Audio</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QComboBox" name="audioCombo"/>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="platformLabel">
-             <property name="text">
-              <string>Platform</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QComboBox" name="platformCombo"/>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="compilerLabel">
-             <property name="text">
-              <string>Compiler</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QComboBox" name="compilerCombo"/>
-           </item>
-           <item row="3" column="1">
-            <widget class="QComboBox" name="graphicsCombo"/>
-           </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="graphicsLabel">
-             <property name="text">
-              <string>Graphics</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="1">
-            <widget class="QComboBox" name="widgetsCombo"/>
-           </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="widgetsLabel">
-             <property name="text">
-              <string>Widgets</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="1">
-            <widget class="QComboBox" name="collisionCombo"/>
-           </item>
-           <item row="5" column="0">
-            <widget class="QLabel" name="collisionLabel">
-             <property name="text">
-              <string>Collision</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="1">
-            <widget class="QComboBox" name="networkCombo"/>
-           </item>
-           <item row="6" column="0">
-            <widget class="QLabel" name="networkLabel">
-             <property name="text">
-              <string>Network</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
+          <property name="verticalSpacing">
+           <number>4</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="audioLabel">
+            <property name="text">
+             <string>Audio</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="audioCombo"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="platformLabel">
+            <property name="text">
+             <string>Platform</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="platformCombo"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="compilerLabel">
+            <property name="text">
+             <string>Compiler</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="graphicsLabel">
+            <property name="text">
+             <string>Graphics</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="widgetsLabel">
+            <property name="text">
+             <string>Widgets</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="collisionLabel">
+            <property name="text">
+             <string>Collision</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="networkLabel">
+            <property name="text">
+             <string>Network</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="compilerCombo"/>
+          </item>
+          <item row="3" column="1">
+           <widget class="QComboBox" name="graphicsCombo"/>
+          </item>
+          <item row="4" column="1">
+           <widget class="QComboBox" name="widgetsCombo"/>
+          </item>
+          <item row="5" column="1">
+           <widget class="QComboBox" name="collisionCombo"/>
+          </item>
+          <item row="6" column="1">
+           <widget class="QComboBox" name="networkCombo"/>
+          </item>
+         </layout>
         </item>
         <item>
          <widget class="QGroupBox" name="aboutSystemBox">
@@ -658,17 +787,17 @@
            <property name="spacing">
             <number>4</number>
            </property>
-           <item row="0" column="1">
-            <widget class="QLineEdit" name="authorName">
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
            <item row="0" column="0">
             <widget class="QLabel" name="authorLabel">
              <property name="text">
               <string>Author</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="authorName">
+             <property name="readOnly">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -723,11 +852,11 @@
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="inheritEquivalenceGroup"/>
-  <buttongroup name="treatLiteralsGroup"/>
-  <buttongroup name="inheritStringsGroup"/>
   <buttongroup name="inheritEscapesGroup"/>
+  <buttongroup name="treatLiteralsGroup"/>
+  <buttongroup name="inheritEquivalenceGroup"/>
   <buttongroup name="treatNegativesGroup"/>
+  <buttongroup name="inheritStringsGroup"/>
   <buttongroup name="inheritIncrementGroup"/>
  </buttongroups>
 </ui>

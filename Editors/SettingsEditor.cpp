@@ -46,7 +46,8 @@ SettingsEditor::SettingsEditor(ProtoModel* model, QWidget* parent)
   pageMap = {{"api", ui->apiPage},
              {"extensions", ui->extensionsPage},
              {"compiler", ui->compilerPage},
-             {"graphics", ui->graphicsPage}};
+             {"graphics", ui->graphicsPage},
+             {"project info", ui->projectInfoPage}};
 
   const QMap<QString, QWidget*> systemUIMap = {
       {QString("Audio"), ui->audioCombo},         {QString("Platform"), ui->platformCombo},
