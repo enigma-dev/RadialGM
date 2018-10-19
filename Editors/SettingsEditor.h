@@ -3,7 +3,7 @@
 
 #include "BaseEditor.h"
 
-#include <QTreeWidgetItem>
+#include <QListWidgetItem>
 
 namespace Ui {
 class SettingsEditor;
@@ -17,11 +17,11 @@ class SettingsEditor : public BaseEditor {
   ~SettingsEditor();
 
  private slots:
-  void on_treeWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
+  void on_listWidget_currentItemChanged(QListWidgetItem* current, QListWidgetItem* previous);
 
  private:
   Ui::SettingsEditor* ui;
-  QMap<QString, QWidget*> treePageMap;
+  QMap<QString, QWidget*> pageMap;
 };
 
 #endif  // SETTINGSEDITOR_H
