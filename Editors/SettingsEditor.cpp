@@ -11,6 +11,12 @@ using namespace buffers::resources;
 
 Q_DECLARE_METATYPE(buffers::SystemInfo);
 
+static std::string get_combo_system_id(const QComboBox* combo) {
+  auto data = combo->currentData();
+  auto subsystem = data.value<buffers::SystemInfo>();
+  return subsystem.id();
+}
+
 SettingsEditor::SettingsEditor(ProtoModel* model, QWidget* parent)
     : BaseEditor(model, parent), ui(new Ui::SettingsEditor) {
   ui->setupUi(this);
@@ -21,13 +27,13 @@ SettingsEditor::SettingsEditor(ProtoModel* model, QWidget* parent)
     qDebug() << "hey";
     Settings settings;
     auto* api = settings.mutable_api();
-    api->set_target_audio(ui->audioCombo->currentData().toString().toStdString());
-    api->set_target_collision(ui->collisionCombo->currentData().toString().toStdString());
-    api->set_target_compiler(ui->compilerCombo->currentData().toString().toStdString());
-    api->set_target_graphics(ui->graphicsCombo->currentData().toString().toStdString());
-    api->set_target_network(ui->networkCombo->currentData().toString().toStdString());
-    api->set_target_platform(ui->platformCombo->currentData().toString().toStdString());
-    api->set_target_widgets(ui->widgetsCombo->currentData().toString().toStdString());
+    api->set_target_audio(get_combo_system_id(ui->audioCombo));
+    api->set_target_collision(get_combo_system_id(ui->collisionCombo));
+    api->set_target_compiler(get_combo_system_id(ui->compilerCombo));
+    api->set_target_graphics(get_combo_system_id(ui->graphicsCombo));
+    api->set_target_network(get_combo_system_id(ui->networkCombo));
+    api->set_target_platform(get_combo_system_id(ui->platformCombo));
+    api->set_target_widgets(get_combo_system_id(ui->widgetsCombo));
     api->add_extensions("Paths");
 
     qDebug() << "hi" << ui->audioCombo->currentData().toString();
