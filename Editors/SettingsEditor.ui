@@ -114,21 +114,14 @@
          <number>0</number>
         </property>
         <item row="0" column="0">
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="authorLabel_2">
           <property name="text">
            <string>Author</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Email</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="1">
-         <widget class="QLineEdit" name="lineEdit">
+         <widget class="QLineEdit" name="authorEdit">
           <property name="inputMask">
            <string/>
           </property>
@@ -143,60 +136,80 @@
           </property>
          </widget>
         </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="emailLabel">
+          <property name="text">
+           <string>Email</string>
+          </property>
+         </widget>
+        </item>
         <item row="1" column="1">
-         <widget class="QLineEdit" name="lineEdit_2">
+         <widget class="QLineEdit" name="emailEdit">
           <property name="placeholderText">
            <string>johndoe@mail.com</string>
           </property>
          </widget>
         </item>
-        <item row="8" column="0" colspan="2">
-         <widget class="Line" name="line">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_4">
-          <property name="text">
-           <string>Version</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="label_5">
-          <property name="text">
-           <string>Brief</string>
-          </property>
-         </widget>
-        </item>
         <item row="2" column="0">
-         <widget class="QLabel" name="label_3">
+         <widget class="QLabel" name="websiteLabel">
           <property name="text">
            <string>Website</string>
           </property>
          </widget>
         </item>
         <item row="2" column="1">
-         <widget class="QLineEdit" name="lineEdit_3">
+         <widget class="QLineEdit" name="websiteEdit">
           <property name="placeholderText">
            <string>http://www.johndoe.com</string>
           </property>
          </widget>
         </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="versionLabel">
+          <property name="text">
+           <string>Version</string>
+          </property>
+         </widget>
+        </item>
         <item row="3" column="1">
-         <widget class="QLineEdit" name="lineEdit_4">
+         <widget class="QLineEdit" name="versionEdit">
           <property name="text">
            <string>100</string>
           </property>
          </widget>
         </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="lastChangedLabel">
+          <property name="text">
+           <string>Changed</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QDateTimeEdit" name="lastChangedEdit">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="briefLabel">
+          <property name="text">
+           <string>Brief</string>
+          </property>
+         </widget>
+        </item>
         <item row="5" column="1">
-         <widget class="QLineEdit" name="lineEdit_5"/>
+         <widget class="QLineEdit" name="briefEdit"/>
         </item>
         <item row="7" column="0" colspan="2">
-         <widget class="QGroupBox" name="groupBox_3">
+         <widget class="QGroupBox" name="informationBox">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -229,29 +242,9 @@
             <number>0</number>
            </property>
            <item>
-            <widget class="QPlainTextEdit" name="plainTextEdit"/>
+            <widget class="QPlainTextEdit" name="informationPlainEdit"/>
            </item>
           </layout>
-         </widget>
-        </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_6">
-          <property name="text">
-           <string>Changed</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="QDateTimeEdit" name="dateTimeEdit">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-          <property name="buttonSymbols">
-           <enum>QAbstractSpinBox::NoButtons</enum>
-          </property>
          </widget>
         </item>
        </layout>
@@ -279,56 +272,56 @@
            <number>4</number>
           </property>
           <item row="3" column="0">
-           <widget class="QCheckBox" name="checkBox_4">
+           <widget class="QCheckBox" name="stayontopCheckBox">
             <property name="text">
              <string>Window stay on &amp;top</string>
             </property>
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QCheckBox" name="checkBox_3">
+           <widget class="QCheckBox" name="showCursorCheckBox">
             <property name="text">
              <string>Display the &amp;cursor</string>
             </property>
            </widget>
           </item>
           <item row="2" column="0">
-           <widget class="QCheckBox" name="checkBox_5">
+           <widget class="QCheckBox" name="windowBorderCheckBox">
             <property name="text">
              <string>Show window &amp;border</string>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QCheckBox" name="checkBox_6">
+           <widget class="QCheckBox" name="showCaptionButtonsCheckBox">
             <property name="text">
              <string>Show &amp;caption buttons</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QCheckBox" name="checkBox_2">
+           <widget class="QCheckBox" name="smoothColorsCheckBox">
             <property name="text">
              <string>&amp;Smooth colors</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QCheckBox" name="checkBox">
+           <widget class="QCheckBox" name="startFullscreenCheckBox">
             <property name="text">
              <string>Start &amp;fullscreen</string>
             </property>
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QCheckBox" name="checkBox_7">
+           <widget class="QCheckBox" name="windowResizeableCheckBox">
             <property name="text">
              <string>Window &amp;resizeable</string>
             </property>
            </widget>
           </item>
           <item row="3" column="1">
-           <widget class="QCheckBox" name="checkBox_8">
+           <widget class="QCheckBox" name="pauseCheckBox">
             <property name="text">
              <string>&amp;Pause on focus lost</string>
             </property>
@@ -364,14 +357,14 @@
             <number>4</number>
            </property>
            <item row="2" column="0">
-            <widget class="QRadioButton" name="radioButton_2">
+            <widget class="QRadioButton" name="keepAspectButton">
              <property name="text">
               <string>Keep aspect ratio</string>
              </property>
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QSpinBox" name="spinBox">
+            <widget class="QSpinBox" name="fixedScaleSpinBox">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -390,14 +383,14 @@
             </widget>
            </item>
            <item row="3" column="0">
-            <widget class="QRadioButton" name="radioButton_3">
+            <widget class="QRadioButton" name="fullScaleButton">
              <property name="text">
               <string>Full scale</string>
              </property>
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QRadioButton" name="radioButton">
+            <widget class="QRadioButton" name="fixedScaleButton">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -413,7 +406,7 @@
          </widget>
         </item>
         <item>
-         <spacer name="verticalSpacer_2">
+         <spacer name="graphicsVerticalSpacer">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
@@ -445,7 +438,7 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QGroupBox" name="groupBox">
+         <widget class="QGroupBox" name="compatibilityBox">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -640,7 +633,7 @@
             </widget>
            </item>
            <item row="6" column="1">
-            <spacer name="verticalSpacer">
+            <spacer name="compilerPageVerticalSpacer">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
              </property>
@@ -852,11 +845,11 @@
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="inheritEscapesGroup"/>
+  <buttongroup name="treatNegativesGroup"/>
+  <buttongroup name="inheritIncrementGroup"/>
+  <buttongroup name="inheritStringsGroup"/>
   <buttongroup name="treatLiteralsGroup"/>
   <buttongroup name="inheritEquivalenceGroup"/>
-  <buttongroup name="treatNegativesGroup"/>
-  <buttongroup name="inheritStringsGroup"/>
-  <buttongroup name="inheritIncrementGroup"/>
+  <buttongroup name="inheritEscapesGroup"/>
  </buttongroups>
 </ui>
