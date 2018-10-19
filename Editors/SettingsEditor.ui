@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>665</width>
+    <width>765</width>
     <height>511</height>
    </rect>
   </property>
@@ -93,6 +93,236 @@
        </sizepolicy>
       </property>
       <widget class="QWidget" name="emptyPage"/>
+      <widget class="QWidget" name="compilerPage">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <property name="spacing">
+         <number>4</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QGroupBox" name="groupBox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="title">
+           <string>Compatibility</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_2">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <property name="spacing">
+            <number>4</number>
+           </property>
+           <item row="1" column="2">
+            <widget class="QRadioButton" name="radioButton_3">
+             <property name="text">
+              <string>C++ (\n)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">inheritEscapesGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="4" column="2">
+            <widget class="QRadioButton" name="radioButton_9">
+             <property name="text">
+              <string>C++ (scalar)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">treatLiteralsGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="5" column="2">
+            <widget class="QRadioButton" name="radioButton_11">
+             <property name="text">
+              <string>C++ (true != 0)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">treatNegativesGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="2" column="2">
+            <widget class="QRadioButton" name="radioButton_5">
+             <property name="text">
+              <string>C++ (+=1/-=1)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">inheritIncrementGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QRadioButton" name="radioButton_2">
+             <property name="text">
+              <string>C++ ('A'=65)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">inheritStringsGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="3" column="2">
+            <widget class="QRadioButton" name="radioButton_7">
+             <property name="text">
+              <string>C++ (b=c;a=c)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">inheritEqualityGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QRadioButton" name="radioButton_6">
+             <property name="text">
+              <string>GML (+)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">inheritIncrementGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QRadioButton" name="radioButton_4">
+             <property name="text">
+              <string>GML (#)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">inheritEscapesGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QRadioButton" name="radioButton_8">
+             <property name="text">
+              <string>GMl (a=b==c)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">inheritEqualityGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QRadioButton" name="radioButton">
+             <property name="text">
+              <string>GML ('A'=&quot;A&quot;)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">inheritStringsGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Inherit strings from:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>Inherit escapes from:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>Treat literals as:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>Inherit a=b=c from:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>Treat negatives as:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>Inherit ++/-- from:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QRadioButton" name="radioButton_10">
+             <property name="text">
+              <string>EDL (variant)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">treatLiteralsGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QRadioButton" name="radioButton_12">
+             <property name="text">
+              <string>GML (true &gt; 0)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">treatNegativesGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="6" column="1">
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="apiPage">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <property name="spacing">
@@ -307,4 +537,12 @@
   <include location="../images.qrc"/>
  </resources>
  <connections/>
+ <buttongroups>
+  <buttongroup name="inheritStringsGroup"/>
+  <buttongroup name="inheritEscapesGroup"/>
+  <buttongroup name="inheritIncrementGroup"/>
+  <buttongroup name="inheritEqualityGroup"/>
+  <buttongroup name="treatLiteralsGroup"/>
+  <buttongroup name="treatNegativesGroup"/>
+ </buttongroups>
 </ui>
