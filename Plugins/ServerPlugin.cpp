@@ -181,6 +181,14 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
             << "-e"
             << "Paths"
             << "-r";
+
+  // listen for the server process to stop and output the exit code
+  // this makes it easier to tell if an issue is just emake misbehaving
+  connect(process, &QProcess::stateChanged, [=](QProcess::ProcessState state) {
+    if (state != QProcess::NotRunning) return;
+    emit OutputRead(tr("Server process has stopped with exit code: %0").arg(process->exitCode()));
+  });
+
   process->start(program, arguments);
   process->waitForStarted();
 
