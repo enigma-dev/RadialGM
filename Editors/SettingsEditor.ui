@@ -144,7 +144,7 @@
             <number>4</number>
            </property>
            <item row="1" column="2">
-            <widget class="QRadioButton" name="radioButton_3">
+            <widget class="QRadioButton" name="inheritEscapesCPP">
              <property name="text">
               <string>C++ (\n)</string>
              </property>
@@ -154,7 +154,7 @@
             </widget>
            </item>
            <item row="4" column="2">
-            <widget class="QRadioButton" name="radioButton_9">
+            <widget class="QRadioButton" name="treatLiteralsCPP">
              <property name="text">
               <string>C++ (scalar)</string>
              </property>
@@ -164,7 +164,7 @@
             </widget>
            </item>
            <item row="5" column="2">
-            <widget class="QRadioButton" name="radioButton_11">
+            <widget class="QRadioButton" name="treatNegativesCPP">
              <property name="text">
               <string>C++ (true != 0)</string>
              </property>
@@ -174,7 +174,7 @@
             </widget>
            </item>
            <item row="2" column="2">
-            <widget class="QRadioButton" name="radioButton_5">
+            <widget class="QRadioButton" name="inheritIncrementCPP">
              <property name="text">
               <string>C++ (+=1/-=1)</string>
              </property>
@@ -184,7 +184,7 @@
             </widget>
            </item>
            <item row="0" column="2">
-            <widget class="QRadioButton" name="radioButton_2">
+            <widget class="QRadioButton" name="inheritStringsCPP">
              <property name="text">
               <string>C++ ('A'=65)</string>
              </property>
@@ -194,17 +194,17 @@
             </widget>
            </item>
            <item row="3" column="2">
-            <widget class="QRadioButton" name="radioButton_7">
+            <widget class="QRadioButton" name="inheritEquivalenceCPP">
              <property name="text">
               <string>C++ (b=c;a=c)</string>
              </property>
              <attribute name="buttonGroup">
-              <string notr="true">inheritEqualityGroup</string>
+              <string notr="true">inheritEquivalenceGroup</string>
              </attribute>
             </widget>
            </item>
            <item row="2" column="1">
-            <widget class="QRadioButton" name="radioButton_6">
+            <widget class="QRadioButton" name="inheritIncrementGML">
              <property name="text">
               <string>GML (+)</string>
              </property>
@@ -214,7 +214,7 @@
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QRadioButton" name="radioButton_4">
+            <widget class="QRadioButton" name="inheritEscapesGML">
              <property name="text">
               <string>GML (#)</string>
              </property>
@@ -224,17 +224,17 @@
             </widget>
            </item>
            <item row="3" column="1">
-            <widget class="QRadioButton" name="radioButton_8">
+            <widget class="QRadioButton" name="inheritEquivalenceGML">
              <property name="text">
               <string>GMl (a=b==c)</string>
              </property>
              <attribute name="buttonGroup">
-              <string notr="true">inheritEqualityGroup</string>
+              <string notr="true">inheritEquivalenceGroup</string>
              </attribute>
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QRadioButton" name="radioButton">
+            <widget class="QRadioButton" name="inheritStringsGML">
              <property name="text">
               <string>GML ('A'=&quot;A&quot;)</string>
              </property>
@@ -244,49 +244,49 @@
             </widget>
            </item>
            <item row="0" column="0">
-            <widget class="QLabel" name="label">
+            <widget class="QLabel" name="inheritStringsLabel">
              <property name="text">
               <string>Inherit strings from:</string>
              </property>
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="label_2">
+            <widget class="QLabel" name="inheritEscapesLabel">
              <property name="text">
               <string>Inherit escapes from:</string>
              </property>
             </widget>
            </item>
            <item row="4" column="0">
-            <widget class="QLabel" name="label_5">
+            <widget class="QLabel" name="treatLiteralsLabel">
              <property name="text">
               <string>Treat literals as:</string>
              </property>
             </widget>
            </item>
            <item row="3" column="0">
-            <widget class="QLabel" name="label_4">
+            <widget class="QLabel" name="inheritEquivalenceLabel">
              <property name="text">
               <string>Inherit a=b=c from:</string>
              </property>
             </widget>
            </item>
            <item row="5" column="0">
-            <widget class="QLabel" name="label_6">
+            <widget class="QLabel" name="treatNegativesLabel">
              <property name="text">
               <string>Treat negatives as:</string>
              </property>
             </widget>
            </item>
            <item row="2" column="0">
-            <widget class="QLabel" name="label_3">
+            <widget class="QLabel" name="inheritIncrementLabel">
              <property name="text">
               <string>Inherit ++/-- from:</string>
              </property>
             </widget>
            </item>
            <item row="4" column="1">
-            <widget class="QRadioButton" name="radioButton_10">
+            <widget class="QRadioButton" name="treatLiteralsEDL">
              <property name="text">
               <string>EDL (variant)</string>
              </property>
@@ -296,7 +296,7 @@
             </widget>
            </item>
            <item row="5" column="1">
-            <widget class="QRadioButton" name="radioButton_12">
+            <widget class="QRadioButton" name="treatNegativesGML">
              <property name="text">
               <string>GML (true &gt; 0)</string>
              </property>
@@ -538,11 +538,11 @@
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="inheritStringsGroup"/>
-  <buttongroup name="inheritEscapesGroup"/>
-  <buttongroup name="inheritIncrementGroup"/>
-  <buttongroup name="inheritEqualityGroup"/>
-  <buttongroup name="treatLiteralsGroup"/>
   <buttongroup name="treatNegativesGroup"/>
+  <buttongroup name="treatLiteralsGroup"/>
+  <buttongroup name="inheritEscapesGroup"/>
+  <buttongroup name="inheritEquivalenceGroup"/>
+  <buttongroup name="inheritIncrementGroup"/>
+  <buttongroup name="inheritStringsGroup"/>
  </buttongroups>
 </ui>
