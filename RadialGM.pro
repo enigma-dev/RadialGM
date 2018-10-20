@@ -80,6 +80,7 @@ SOURCES += \
     Components/RecentFiles.cpp \
     Editors/CodeEditor.cpp \
     Editors/ScriptEditor.cpp \
+    Widgets/ColorPicker.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -107,7 +108,8 @@ HEADERS += \
     main.h \
     Dialogs/PreferencesKeys.h \
     Editors/CodeEditor.h \
-    Editors/ScriptEditor.h
+    Editors/ScriptEditor.h \
+    Widgets/ColorPicker.h
 
 FORMS += \
     MainWindow.ui \
