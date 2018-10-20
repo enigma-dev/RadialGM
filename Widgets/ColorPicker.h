@@ -8,11 +8,15 @@ class ColorPicker : public QWidget {
   Q_OBJECT
 
   Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged USER true)
+  Q_PROPERTY(bool alphaEnabled READ alphaEnabled WRITE setAlphaEnabled)
+
  public:
   explicit ColorPicker(QWidget *parent = nullptr);
 
   QColor color() const;
-  void setColor(QColor);
+  void setColor(const QColor &);
+  bool alphaEnabled() const;
+  void setAlphaEnabled(bool enabled);
 
  signals:
   void colorChanged(QColor);
@@ -22,6 +26,7 @@ class ColorPicker : public QWidget {
 
  private:
   QColor color_;
+  bool alpha_enabled_;
 
   QToolButton *button;
 };
