@@ -69,6 +69,7 @@ SOURCES += \
     Editors/SpriteEditor.cpp \
     Widgets/BackgroundRenderer.cpp \
     Widgets/CodeWidget.cpp \
+    Widgets/ColorPicker.cpp \
     Models/TreeModel.cpp \
     Components/ArtManager.cpp \
     Models/ProtoModel.cpp \
@@ -96,6 +97,7 @@ HEADERS += \
     Editors/SpriteEditor.h \
     Widgets/BackgroundRenderer.h \
     Widgets/CodeWidget.h \
+    Widgets/ColorPicker.h \
     Models/TreeModel.h \
     Components/ArtManager.h \
     Models/ProtoModel.h \

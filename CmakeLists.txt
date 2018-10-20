@@ -47,6 +47,7 @@ set(RGM_SOURCES
     Components/RecentFiles.cpp
     Widgets/BackgroundRenderer.cpp
     Widgets/CodeWidget.cpp
+    Widgets/ColorPicker.cpp
     Plugins/RGMPlugin.cpp
     Plugins/ServerPlugin.cpp
     qtplugins.cpp
@@ -78,6 +79,7 @@ set(RGM_HEADERS
     Components/Utility.h
     Widgets/BackgroundRenderer.h
     Widgets/CodeWidget.h
+    Widgets/ColorPicker.h
     Plugins/RGMPlugin.h
     Plugins/ServerPlugin.h
 )
