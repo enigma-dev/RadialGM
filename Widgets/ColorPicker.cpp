@@ -12,19 +12,20 @@ ColorPicker::ColorPicker(QWidget *parent) : QWidget(parent) {
   this->setLayout(layout);
 
   connect(button, &QToolButton::clicked, [=]() {
-    QColor color = QColorDialog::getColor(this->color_, this, tr("Choose a color"), QColorDialog::ShowAlphaChannel);
+    QColor color = QColorDialog::getColor(color_, this, tr("Choose a color"), QColorDialog::ShowAlphaChannel);
+    // don't accept the color if the user cancelled the dialog
     if (!color.isValid()) return;
     this->setColor(color);
   });
   connect(this, &ColorPicker::colorChanged, this, &ColorPicker::updateButtonIcon);
-  this->updateButtonIcon();
+  updateButtonIcon();
 }
 
-QColor ColorPicker::color() const { return this->color_; }
+QColor ColorPicker::color() const { return color_; }
 
 void ColorPicker::setColor(QColor color) {
-  if (this->color_ == color) return;
-  this->color_ = color;
+  if (color_ == color) return;
+  color_ = color;
   emit colorChanged(color);
 }
 
@@ -32,6 +33,6 @@ void ColorPicker::updateButtonIcon() {
   QIcon transparencyIcon(":/transparent.png");
   QPixmap pixmap = transparencyIcon.pixmap(24, 24);
   QPainter painter(&pixmap);
-  painter.fillRect(pixmap.rect(), QBrush(this->color_));
+  painter.fillRect(pixmap.rect(), QBrush(color_));
   button->setIcon(pixmap);
 }
