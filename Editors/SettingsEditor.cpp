@@ -43,11 +43,9 @@ SettingsEditor::SettingsEditor(ProtoModel* model, QWidget* parent)
   QPushButton* discardButton = ui->buttonBox->button(QDialogButtonBox::Discard);
   discardButton->setIcon(QIcon(":/actions/cancel.png"));
 
-  pageMap = {{"api", ui->apiPage},
-             {"extensions", ui->extensionsPage},
-             {"compiler", ui->compilerPage},
-             {"graphics", ui->graphicsPage},
-             {"project info", ui->projectInfoPage}};
+  pageMap = {{"api", ui->apiPage},           {"extensions", ui->extensionsPage}, {"compiler", ui->compilerPage},
+             {"controls", ui->controlsPage}, {"graphics", ui->graphicsPage},     {"project info", ui->projectInfoPage},
+             {"version", ui->versionPage}};
 
   const QMap<QString, QWidget*> systemUIMap = {
       {QString("Audio"), ui->audioCombo},         {QString("Platform"), ui->platformCombo},
