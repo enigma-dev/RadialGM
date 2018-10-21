@@ -116,13 +116,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="transparentCheckBox">
-         <property name="text">
-          <string>&amp;Transparent</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QCheckBox" name="preloadCheckBox">
          <property name="text">
           <string>Pre&amp;load texture</string>
