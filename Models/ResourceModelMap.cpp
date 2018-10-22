@@ -1,4 +1,5 @@
 #include "Models/ResourceModelMap.h"
+#include "MainWindow.h"
 
 ResourceModelMap::ResourceModelMap(buffers::TreeNode *root, QObject* parent) : QObject(parent) {
   recursiveBindRes(root, this);
@@ -30,4 +31,19 @@ ProtoModel* ResourceModelMap::GetResourceByName(int type, const std::string& nam
 void ResourceModelMap::ResourceRenamed(TypeCase type, const QString& oldName, const QString& newName) {
   _resources[type][newName] = _resources[type][oldName];
   _resources[type][oldName] = nullptr;
+}
+
+const ProtoModel* GetObjectSprite(const std::string& objName) {
+  return GetObjectSprite(QString::fromStdString(objName));
+}
+
+const ProtoModel* GetObjectSprite(const QString& objName) {
+  ProtoModel* obj = MainWindow::resourceMap->GetResourceByName(TreeNode::kObject, objName);
+  if (!obj) return nullptr;
+  obj = obj->GetSubModel(TreeNode::kObjectFieldNumber);
+  if (!obj) return nullptr;
+  const QString spriteName = obj->data(Object::kSpriteNameFieldNumber).toString();
+  ProtoModel* spr = MainWindow::resourceMap->GetResourceByName(TreeNode::kSprite, spriteName);
+  if (spr) return spr->GetSubModel(TreeNode::kSpriteFieldNumber);
+  return nullptr;
 }

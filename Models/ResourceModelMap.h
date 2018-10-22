@@ -22,4 +22,7 @@ protected:
   QHash<int, QHash<QString, ProtoModel*>> _resources;
 };
 
+const ProtoModel* GetObjectSprite(const std::string& objName);
+const ProtoModel* GetObjectSprite(const QString& objName);
+
 #endif // MODELMAP_H

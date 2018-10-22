@@ -39,7 +39,7 @@ class ProtoModel : public QAbstractItemModel {
   RepeatedProtoModel* GetRepeatedSubModel(int fieldNum);
   ProtoModel *GetSubModel(int fieldNum);
   ProtoModel *GetSubModel(int fieldNum, int index);
-  QString GetString(int fieldNum, int index);
+  QString GetString(int fieldNum, int index) const;
   QModelIndex parent(const QModelIndex &index) const override;
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
   QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override;

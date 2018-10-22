@@ -169,7 +169,7 @@ ProtoModel *ProtoModel::GetSubModel(int fieldNum, int index) {
   return static_cast<ProtoModel *>(repeatedMessages[fieldNum][index].value<void *>());
 }
 
-QString ProtoModel::GetString(int fieldNum, int index) {
+QString ProtoModel::GetString(int fieldNum, int index) const {
   if (repeatedMessages.contains(fieldNum) && repeatedMessages[fieldNum].size() > index)
     return repeatedMessages[fieldNum][index].toString();
   else

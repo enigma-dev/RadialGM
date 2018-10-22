@@ -133,24 +133,16 @@ void RoomRenderer::paintInstances(QPainter& painter, Room* room) {
     int xoff = 0;
     int yoff = 0;
 
-    ProtoModel* obj = MainWindow::resourceMap->GetResourceByName(TreeNode::kObject, inst.object_type());
-    if (!obj) continue;
-    obj = obj->GetSubModel(TreeNode::kObjectFieldNumber);
-    if (!obj) continue;
-    const QString spriteName = obj->data(Object::kSpriteNameFieldNumber).toString();
-    ProtoModel* spr = MainWindow::resourceMap->GetResourceByName(TreeNode::kSprite, spriteName);
-    if (spr) {
-      spr = spr->GetSubModel(TreeNode::kSpriteFieldNumber);
-      if (spr) {
-        imgFile = spr->GetString(Sprite::kSubimagesFieldNumber, 0);
-        w = spr->data(Sprite::kWidthFieldNumber).toInt();
-        h = spr->data(Sprite::kHeightFieldNumber).toInt();
-        xoff = spr->data(Sprite::kOriginXFieldNumber).toInt();
-        yoff = spr->data(Sprite::kOriginYFieldNumber).toInt();
-      }
+    const ProtoModel* spr = GetObjectSprite(inst.object_type());
+    if (spr == nullptr) imgFile = "object";
+    else {
+      imgFile = spr->GetString(Sprite::kSubimagesFieldNumber, 0);
+      w = spr->data(Sprite::kWidthFieldNumber).toInt();
+      h = spr->data(Sprite::kHeightFieldNumber).toInt();
+      xoff = spr->data(Sprite::kOriginXFieldNumber).toInt();
+      yoff = spr->data(Sprite::kOriginYFieldNumber).toInt();
     }
 
-    if (imgFile.isEmpty()) imgFile = "object";
     QPixmap pixmap = ArtManager::GetCachedPixmap(imgFile);
     if (pixmap.isNull()) continue;
 
