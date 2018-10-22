@@ -44,7 +44,7 @@ void CompilerClient::CompileBuffer(Game* game, CompileMode mode) {
   QTemporaryFile* t = new QTemporaryFile(QDir::temp().filePath("enigmaXXXXXX"), &mainWindow);
   if (!t->open()) return;
   t->close();
-  CompileBuffer(game, mode, (t->fileName()).toStdString());
+  CompileBuffer(game, mode, (t->fileName() + ".exe").toStdString());
 }
 
 void CompilerClient::GetResources() {
@@ -136,12 +136,15 @@ void CompilerClient::UpdateLoop() {
 
   int msg_id = detag(got_tag);
 
-  static CompileReply reply;
+  static CompileReply compileReply;
 
   switch (msg_id) {
     case 1: {
       qDebug() << "ONE";
-      CompileBufferStream->Read(&reply, tag(2));
+      CompileBufferStream->Read(&compileReply, tag(1));
+      for (auto log : compileReply.message()) {
+        emit OutputRead(log.message().c_str());
+      }
       break;
     }
     default:
@@ -153,11 +156,6 @@ void CompilerClient::UpdateLoop() {
 ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   // create a new child process for us to launch an emake server
   process = new QProcess(this);
-
-  // hookup emake's output to our plugin's output signals so it redirects to the
-  // main output dock widget (thread safe and don't block the main event loop!)
-  connect(process, &QProcess::readyReadStandardOutput, this, &ServerPlugin::HandleOutput);
-  connect(process, &QProcess::readyReadStandardError, this, &ServerPlugin::HandleError);
 
   // look for an executable file that looks like emake in some common directories
   QList<QString> searchPaths = {QDir::currentPath(), "../RadialGM/Submodules/enigma-dev"};
@@ -182,13 +180,6 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
             << "Paths"
             << "-r";
 
-  // listen for the server process to stop and output the exit code
-  // this makes it easier to tell if an issue is just emake misbehaving
-  connect(process, &QProcess::stateChanged, [=](QProcess::ProcessState state) {
-    if (state != QProcess::NotRunning) return;
-    emit OutputRead(tr("Server process has stopped with exit code: %0").arg(process->exitCode()));
-  });
-
   process->start(program, arguments);
   process->waitForStarted();
 
@@ -196,6 +187,10 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   std::shared_ptr<Channel> channel = CreateChannel("localhost:37818", InsecureChannelCredentials());
   compilerClient = new CompilerClient(channel, mainWindow);
   connect(compilerClient, &CompilerClient::CompileStatusChanged, this, &RGMPlugin::CompileStatusChanged);
+  // hookup emake's output to our plugin's output signals so it redirects to the
+  // main output dock widget (thread safe and don't block the main event loop!)
+  connect(compilerClient, &CompilerClient::OutputRead, this, &RGMPlugin::OutputRead);
+  connect(compilerClient, &CompilerClient::ErrorRead, this, &RGMPlugin::ErrorRead);
 
   // use a timer to process async grpc events at regular intervals
   // without us needing any threading or blocking the main thread
@@ -224,7 +219,3 @@ void ServerPlugin::CreateExecutable() {
 void ServerPlugin::SetCurrentConfig(const resources::Settings& settings) {
   compilerClient->SetCurrentConfig(settings);
 };
-
-void ServerPlugin::HandleOutput() { emit OutputRead(process->readAllStandardOutput()); }
-
-void ServerPlugin::HandleError() { emit ErrorRead(process->readAllStandardError()); }

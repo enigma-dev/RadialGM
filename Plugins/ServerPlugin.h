@@ -26,12 +26,15 @@ class CompilerClient : public QObject {
   void CompileBuffer(Game* game, CompileMode mode);
   void GetResources();
   void GetSystems();
+  void GetOutput();
   void SetDefinitions(std::string code, std::string yaml);
   void SetCurrentConfig(const resources::Settings& settings);
   void SyntaxCheck();
 
  signals:
   void CompileStatusChanged(bool finished = false);
+  void OutputRead(const QString& output);
+  void ErrorRead(const QString& error);
 
  public slots:
   void UpdateLoop();
@@ -58,10 +61,6 @@ class ServerPlugin : public RGMPlugin {
   void Debug() override;
   void CreateExecutable() override;
   void SetCurrentConfig(const buffers::resources::Settings& settings) override;
-
- private slots:
-  void HandleOutput();
-  void HandleError();
 
  private:
   QProcess* process;
