@@ -38,6 +38,8 @@ void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string nam
   emit CompileStatusChanged();
   CompileBufferStream = stub->AsyncCompileBuffer(&context, request, &cq, tag(1));
   qDebug() << "wtf2";
+  static Status lol;
+  CompileBufferStream->Finish(&lol, tag(3));
 }
 
 void CompilerClient::CompileBuffer(Game* game, CompileMode mode) {
@@ -141,10 +143,22 @@ void CompilerClient::UpdateLoop() {
   switch (msg_id) {
     case 1: {
       qDebug() << "ONE";
-      CompileBufferStream->Read(&compileReply, tag(1));
+      CompileBufferStream->Read(&compileReply, tag(2));
+      qDebug() << compileReply.progress().progress() << compileReply.progress().message().c_str();
+      break;
+    }
+    case 2: {
+      qDebug() << "TWO";
+      qDebug() << compileReply.progress().progress() << compileReply.progress().message().c_str();
       for (auto log : compileReply.message()) {
         emit LogOutput(log.message().c_str());
       }
+      CompileBufferStream->Read(&compileReply, tag(2));
+      break;
+    }
+    case 3: {
+      qDebug() << "BING";
+      emit CompileStatusChanged(true);
       break;
     }
     default:
