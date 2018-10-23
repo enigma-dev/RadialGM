@@ -16,6 +16,7 @@
 
 using namespace grpc;
 using namespace buffers;
+using CompileMode = CompileRequest_CompileMode;
 
 class CompilerClient : public QObject {
   Q_OBJECT
