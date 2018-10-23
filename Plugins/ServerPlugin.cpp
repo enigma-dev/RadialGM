@@ -28,6 +28,7 @@ void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string nam
   qDebug() << "CompilerBuffer()";
   qDebug() << name.c_str();
   static ClientContext context;
+  qDebug() << "are we really against the bing";
   CompileRequest request;
 
   request.mutable_game()->CopyFrom(*game);
