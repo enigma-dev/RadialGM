@@ -34,8 +34,7 @@ class CompilerClient : public QObject {
 
  signals:
   void CompileStatusChanged(bool finished = false);
-  void OutputRead(const QString& output);
-  void ErrorRead(const QString& error);
+  void LogOutput(const QString& output);
 
  public slots:
   void UpdateLoop();

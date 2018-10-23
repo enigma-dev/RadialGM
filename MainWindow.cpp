@@ -59,8 +59,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   RGMPlugin *pluginServer = new ServerPlugin(*this);
   auto outputTextBrowser = this->ui->outputTextBrowser;
-  connect(pluginServer, &RGMPlugin::OutputRead, outputTextBrowser, &QTextBrowser::append);
-  connect(pluginServer, &RGMPlugin::ErrorRead, outputTextBrowser, &QTextBrowser::append);
+  connect(pluginServer, &RGMPlugin::LogOutput, outputTextBrowser, &QTextBrowser::append);
   connect(pluginServer, &RGMPlugin::CompileStatusChanged, [=](bool finished) {
     ui->outputDockWidget->show();
     ui->actionRun->setEnabled(finished);

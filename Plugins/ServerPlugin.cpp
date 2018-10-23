@@ -143,7 +143,7 @@ void CompilerClient::UpdateLoop() {
       qDebug() << "ONE";
       CompileBufferStream->Read(&compileReply, tag(1));
       for (auto log : compileReply.message()) {
-        emit OutputRead(log.message().c_str());
+        emit LogOutput(log.message().c_str());
       }
       break;
     }
@@ -189,8 +189,7 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   connect(compilerClient, &CompilerClient::CompileStatusChanged, this, &RGMPlugin::CompileStatusChanged);
   // hookup emake's output to our plugin's output signals so it redirects to the
   // main output dock widget (thread safe and don't block the main event loop!)
-  connect(compilerClient, &CompilerClient::OutputRead, this, &RGMPlugin::OutputRead);
-  connect(compilerClient, &CompilerClient::ErrorRead, this, &RGMPlugin::ErrorRead);
+  connect(compilerClient, &CompilerClient::LogOutput, this, &RGMPlugin::LogOutput);
 
   // use a timer to process async grpc events at regular intervals
   // without us needing any threading or blocking the main thread
