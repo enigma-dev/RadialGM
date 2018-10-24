@@ -193,7 +193,8 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   arguments << "--server"
             << "-e"
             << "Paths"
-            << "-r";
+            << "-r"
+            << "--quiet";
 
   process->start(program, arguments);
   process->waitForStarted();
