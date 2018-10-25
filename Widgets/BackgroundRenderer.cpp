@@ -99,7 +99,7 @@ void BackgroundRenderer::paintEvent(QPaintEvent * /* event */) {
     }
 
     if (gridVertSpacing == 0) {
-      for (int y = gridVertOff; y <= pixmap.width(); y += gridHeight) painter.drawLine(0, y, pixmap.width(), y);
+      for (int y = gridVertOff; y <= pixmap.height(); y += gridHeight) painter.drawLine(0, y, pixmap.width(), y);
     }
   }
 }
