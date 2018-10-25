@@ -27,8 +27,8 @@ CompilerClient::CompilerClient(std::shared_ptr<Channel> channel, MainWindow& mai
 void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string name) {
   qDebug() << "CompilerBuffer()";
   qDebug() << name.c_str();
-  static ClientContext context;
-  qDebug() << "are we really against the bing";
+  emit CompileStatusChanged();
+  auto callData = ScheduleTask();
   CompileRequest request;
 
   request.mutable_game()->CopyFrom(*game);
@@ -36,11 +36,40 @@ void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string nam
   request.set_mode(mode);
 
   qDebug() << "wtf1";
-  emit CompileStatusChanged();
-  CompileBufferStream = stub->AsyncCompileBuffer(&context, request, &cq, tag(1));
+  static std::unique_ptr<ClientAsyncReader<CompileReply>> stream;
+  stream = stub->AsyncCompileBuffer(&callData->context, request, &cq, tag(AsyncState::CONNECT));
   qDebug() << "wtf2";
-  static Status lol;
-  CompileBufferStream->Finish(&lol, tag(3));
+  stream->Finish(&status, tag(AsyncState::FINISH));
+
+  callData->process = [=](const AsyncState state, const Status & /*status*/) -> void {
+    static CompileReply compileReply;
+
+    switch (state) {
+      case AsyncState::CONNECT: {
+        qDebug() << "CONNECT";
+        stream->Read(&compileReply, tag(AsyncState::READ));
+        qDebug() << compileReply.progress().progress() << compileReply.progress().message().c_str();
+        break;
+      }
+      case AsyncState::READ: {
+        qDebug() << "READ";
+        qDebug() << compileReply.progress().progress() << compileReply.progress().message().c_str();
+        for (auto log : compileReply.message()) {
+          emit LogOutput(log.message().c_str());
+        }
+        stream->Read(&compileReply, tag(AsyncState::READ));
+        break;
+      }
+      case AsyncState::FINISH: {
+        qDebug() << "FINISH";
+        stream.release();
+        emit CompileStatusChanged(true);
+      }
+      default:
+        //error
+        break;
+    }
+  };
 }
 
 void CompilerClient::CompileBuffer(Game* game, CompileMode mode) {
@@ -129,42 +158,26 @@ void CompilerClient::SyntaxCheck() {
   Status status = stub->SyntaxCheck(&context, syntaxCheckRequest, &reply);
 }
 
+CallData* CompilerClient::ScheduleTask() {
+  std::unique_ptr<CallData> callData(new CallData());
+  tasks.push(std::move(callData));
+  return tasks.back().get();
+}
+
 void CompilerClient::UpdateLoop() {
   void* got_tag = nullptr;
   bool ok = false;
 
-  auto status = cq.AsyncNext(&got_tag, &ok, future_deadline(0));
+  auto asyncStatus = cq.AsyncNext(&got_tag, &ok, future_deadline(0));
   // yield to application main event loop
-  if (status != CompletionQueue::NextStatus::GOT_EVENT || !ok || !got_tag) return;
+  if (asyncStatus != CompletionQueue::NextStatus::GOT_EVENT || !ok || !got_tag) return;
 
-  int msg_id = detag(got_tag);
-
-  static CompileReply compileReply;
-
-  switch (msg_id) {
-    case 1: {
-      qDebug() << "ONE";
-      CompileBufferStream->Read(&compileReply, tag(2));
-      qDebug() << compileReply.progress().progress() << compileReply.progress().message().c_str();
-      break;
-    }
-    case 2: {
-      qDebug() << "TWO";
-      qDebug() << compileReply.progress().progress() << compileReply.progress().message().c_str();
-      for (auto log : compileReply.message()) {
-        emit LogOutput(log.message().c_str());
-      }
-      CompileBufferStream->Read(&compileReply, tag(2));
-      break;
-    }
-    case 3: {
-      qDebug() << "BING";
-      emit CompileStatusChanged(true);
-      break;
-    }
-    default:
-      //error
-      break;
+  AsyncState state = (AsyncState)(detag(got_tag));
+  if (this->tasks.empty()) return;  // received event but no tasks
+  auto task = this->tasks.front().get();
+  task->process(state, status);
+  if (state == AsyncState::FINISH) {
+    tasks.pop();
   }
 }
 

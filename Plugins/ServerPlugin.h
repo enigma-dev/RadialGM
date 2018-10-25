@@ -12,11 +12,23 @@
 #include <grpc++/create_channel.h>
 #include <grpc/grpc.h>
 
+#include <QList>
+#include <QPointer>
 #include <QProcess>
+
+#include <queue>
 
 using namespace grpc;
 using namespace buffers;
 using CompileMode = CompileRequest_CompileMode;
+
+enum AsyncState { READ = 1, WRITE = 2, CONNECT = 3, WRITES_DONE = 4, FINISH = 5 };
+
+class CallData {
+ public:
+  ClientContext context;
+  std::function<void(const AsyncState, const Status&)> process;
+};
 
 class CompilerClient : public QObject {
   Q_OBJECT
@@ -37,13 +49,14 @@ class CompilerClient : public QObject {
   void LogOutput(const QString& output);
 
  public slots:
+  CallData* ScheduleTask();
   void UpdateLoop();
 
  private:
   CompletionQueue cq;
   Status status;
 
-  std::unique_ptr<ClientAsyncReader<CompileReply>> CompileBufferStream;
+  std::queue<std::unique_ptr<CallData>> tasks;
 
   std::unique_ptr<Compiler::Stub> stub;
   MainWindow& mainWindow;
