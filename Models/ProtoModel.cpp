@@ -176,9 +176,9 @@ QString ProtoModel::GetString(int fieldNum, int index) const {
     return "";
 }
 
-QModelIndex ProtoModel::parent(const QModelIndex &index) const { return QModelIndex(); }
+QModelIndex ProtoModel::parent(const QModelIndex & /*index*/) const { return QModelIndex(); }
 
-QVariant ProtoModel::headerData(int section, Qt::Orientation orientation, int role) const {
+QVariant ProtoModel::headerData(int section, Qt::Orientation /*orientation*/, int role) const {
   if (role != Qt::DisplayRole) return QVariant();
   if (section == 0) return tr("Property");
 

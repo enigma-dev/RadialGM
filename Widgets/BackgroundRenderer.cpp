@@ -71,7 +71,7 @@ void BackgroundRenderer::paintEvent(QPaintEvent * /* event */) {
   painter.fillRect(QRectF(0, 0, pixmap.width() * zoom, pixmap.height() * zoom), ArtManager::GetTransparenyBrush());
 
   painter.scale(zoom, zoom);
-  bool transparent = model->data(Background::kTransparentFieldNumber).toBool();
+  bool transparent = false;
   painter.drawPixmap(0, 0, (transparent) ? transparentPixmap : pixmap);
 
   bool gridVisible = model->data(Background::kUseAsTilesetFieldNumber).toBool();

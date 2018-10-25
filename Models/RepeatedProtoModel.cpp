@@ -51,7 +51,7 @@ QVariant RepeatedProtoModel::data(const QModelIndex &index, int role) const {
   return QVariant();
 }
 
-QModelIndex RepeatedProtoModel::parent(const QModelIndex &index) const { return QModelIndex(); }
+QModelIndex RepeatedProtoModel::parent(const QModelIndex & /*index*/) const { return QModelIndex(); }
 
 QVariant RepeatedProtoModel::headerData(int section, Qt::Orientation orientation, int role) const {
   if (this->empty() || role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal) return QVariant();
@@ -59,7 +59,7 @@ QVariant RepeatedProtoModel::headerData(int section, Qt::Orientation orientation
   return m->headerData(section, orientation, role);
 }
 
-QModelIndex RepeatedProtoModel::index(int row, int column, const QModelIndex &parent) const {
+QModelIndex RepeatedProtoModel::index(int row, int column, const QModelIndex & /*parent*/) const {
   return createIndex(row, column);
 }
 

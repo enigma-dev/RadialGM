@@ -22,7 +22,6 @@ BackgroundEditor::BackgroundEditor(ProtoModel* model, QWidget* parent)
 
   resMapper->addMapping(ui->smoothCheckBox, Background::kSmoothEdgesFieldNumber);
   resMapper->addMapping(ui->preloadCheckBox, Background::kPreloadFieldNumber);
-  resMapper->addMapping(ui->transparentCheckBox, Background::kTransparentFieldNumber);
   resMapper->addMapping(ui->tilesetGroupBox, Background::kUseAsTilesetFieldNumber);
   resMapper->addMapping(ui->tileWidthSpinBox, Background::kTileWidthFieldNumber);
   resMapper->addMapping(ui->tileHeightSpinBox, Background::kTileHeightFieldNumber);

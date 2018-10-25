@@ -71,7 +71,7 @@ RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, p
   RepeatedProtoModel* m = roomModel->GetRepeatedSubModel(Room::kInstancesFieldNumber);
   ui->layersAssetsView->setModel(m);
   connect(ui->layersAssetsView->selectionModel(), &QItemSelectionModel::selectionChanged,
-          [=](const QItemSelection& selected, const QItemSelection& deselected) {
+          [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
             if (selected.empty()) return;
             auto selectedIndex = selected.indexes().first();
             auto currentInstanceModel =
@@ -127,9 +127,7 @@ bool RoomEditor::eventFilter(QObject* obj, QEvent* event) {
   return QWidget::eventFilter(obj, event);
 }
 
-void RoomEditor::SelectedObjectChanged(QAction *action) {
-  ui->currentObject->setText(action->text());
-}
+void RoomEditor::SelectedObjectChanged(QAction* action) { ui->currentObject->setText(action->text()); }
 
 void RoomEditor::updateCursorPositionLabel(const QPoint& pos) {
   this->cursorPositionLabel->setText(tr("X %0, Y %1").arg(pos.x()).arg(pos.y()));
