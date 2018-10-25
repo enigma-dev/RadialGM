@@ -41,12 +41,17 @@ set(RGM_SOURCES
     Models/SpriteModel.cpp
     Models/ProtoModel.cpp
     Models/ImmediateMapper.cpp
+    Models/ResourceModelMap.cpp
+    Models/RepeatedProtoModel.cpp
+    Models/TreeSortFilterProxyModel.cpp
     Components/ArtManager.cpp
     Components/Utility.cpp
     Components/RecentFiles.cpp
+    Components/QMenuView.cpp
     Widgets/BackgroundRenderer.cpp
     Widgets/CodeWidget.cpp
     Widgets/ColorPicker.cpp
+    Widgets/RoomRenderer.cpp
     Plugins/RGMPlugin.cpp
     Plugins/ServerPlugin.cpp
     qtplugins.cpp
@@ -72,12 +77,17 @@ set(RGM_HEADERS
     Models/ProtoModel.h
     Models/ImmediateMapper.h
     Models/SpriteModel.h
+    Models/ResourceModelMap.h
+    Models/RepeatedProtoModel.h
+    Models/TreeSortFilterProxyModel.h
     Components/ArtManager.h
     Components/RecentFiles.h
     Components/Utility.h
+    Components/QMenuView.h
     Widgets/BackgroundRenderer.h
     Widgets/CodeWidget.h
     Widgets/ColorPicker.h
+    Widgets/RoomRenderer.h
     Plugins/RGMPlugin.h
     Plugins/ServerPlugin.h
 )
