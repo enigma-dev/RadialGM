@@ -16,6 +16,8 @@
 #include <QPointer>
 #include <QProcess>
 
+#include <functional>
+#include <memory>
 #include <queue>
 
 using namespace grpc;
@@ -25,9 +27,22 @@ using CompileMode = CompileRequest_CompileMode;
 enum AsyncState { READ = 1, WRITE = 2, CONNECT = 3, WRITES_DONE = 4, FINISH = 5 };
 
 struct CallData {
+  Status status;
   ClientContext context;
   std::unique_ptr<ClientAsyncStreamingInterface> stream;
   std::function<void(const AsyncState, const Status&)> process;
+};
+
+struct CompileBufferCallData : public CallData {
+  CompileReply reply;
+};
+
+struct GetResourcesCallData : public CallData {
+  Resource resource;
+};
+
+struct GetSystemsCallData : public CallData {
+  SystemType system;
 };
 
 class CompilerClient : public QObject {
@@ -49,14 +64,14 @@ class CompilerClient : public QObject {
   void LogOutput(const QString& output);
 
  public slots:
-  CallData* ScheduleTask();
   void UpdateLoop();
 
  private:
   CompletionQueue cq;
-  Status status;
-
   std::queue<std::unique_ptr<CallData>> tasks;
+
+  template <typename T>
+  T* ScheduleTask();
 
   std::unique_ptr<Compiler::Stub> stub;
   MainWindow& mainWindow;
