@@ -10,6 +10,7 @@
 
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
+#include <QMouseEvent>
 
 #include <algorithm>
 
