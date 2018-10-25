@@ -26,8 +26,6 @@ enum AsyncState { READ = 1, WRITE = 2, CONNECT = 3, WRITES_DONE = 4, FINISH = 5 
 
 struct CallData {
   ClientContext context;
-  // stream uses context so keep its declaration after
-  // because destruction is in reverse order of declaration
   std::unique_ptr<ClientAsyncStreamingInterface> stream;
   std::function<void(const AsyncState, const Status&)> process;
 };

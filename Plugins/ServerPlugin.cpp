@@ -35,11 +35,7 @@ void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string nam
   request.set_name(name);
   request.set_mode(mode);
 
-  qDebug() << "wtf1";
-  callData->stream = stub->AsyncCompileBuffer(&callData->context, request, &cq, tag(AsyncState::CONNECT));
-  qDebug() << "wtf2";
-  callData->stream->Finish(&status, tag(AsyncState::FINISH));
-
+  callData->stream = stub->PrepareAsyncCompileBuffer(&callData->context, request, &cq);
   callData->process = [=](const AsyncState state, const Status & /*status*/) -> void {
     static CompileReply compileReply;
     auto stream = (ClientAsyncReader<CompileReply>*)callData->stream.get();
@@ -63,9 +59,9 @@ void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string nam
       case AsyncState::FINISH: {
         qDebug() << "FINISH";
         emit CompileStatusChanged(true);
+        break;
       }
       default:
-        //error
         break;
     }
   };
@@ -80,50 +76,74 @@ void CompilerClient::CompileBuffer(Game* game, CompileMode mode) {
 
 void CompilerClient::GetResources() {
   qDebug() << "GetResources()";
-  ClientContext context;
+  auto callData = ScheduleTask();
   Empty emptyRequest;
 
-  std::unique_ptr<ClientReader<Resource>> reader(stub->GetResources(&context, emptyRequest));
-  Resource resource;
-  CodeWidget::prepareKeywordStore();
-  while (reader->Read(&resource)) {
-    const QString& name = QString::fromStdString(resource.name().c_str());
-    int type = 0;
-    if (resource.is_function()) {
-      type = 3;
-      for (int i = 0; i < resource.overload_count(); ++i) {
-        QString overload = QString::fromStdString(resource.parameters(i));
-        const QStringRef signature = QStringRef(&overload, overload.indexOf("(") + 1, overload.lastIndexOf(")"));
-        CodeWidget::addKeyword(QObject::tr("%0?3(%1)").arg(name).arg(signature));
+  callData->stream = stub->PrepareAsyncGetResources(&callData->context, emptyRequest, &cq);
+  callData->process = [=](const AsyncState state, const Status & /*status*/) -> void {
+    static Resource resource;
+    auto stream = (ClientAsyncReader<Resource>*)callData->stream.get();
+
+    switch (state) {
+      case AsyncState::CONNECT: {
+        CodeWidget::prepareKeywordStore();
+        stream->Read(&resource, tag(AsyncState::READ));
+        break;
       }
-    } else {
-      if (resource.is_global()) type = 1;
-      if (resource.is_type_name()) type = 2;
-      CodeWidget::addKeyword(name + QObject::tr("?%0").arg(type));
+      case AsyncState::READ: {
+        const QString& name = QString::fromStdString(resource.name().c_str());
+        int type = 0;
+        if (resource.is_function()) {
+          type = 3;
+          for (int i = 0; i < resource.overload_count(); ++i) {
+            QString overload = QString::fromStdString(resource.parameters(i));
+            const QStringRef signature = QStringRef(&overload, overload.indexOf("(") + 1, overload.lastIndexOf(")"));
+            CodeWidget::addKeyword(QObject::tr("%0?3(%1)").arg(name).arg(signature));
+          }
+        } else {
+          if (resource.is_global()) type = 1;
+          if (resource.is_type_name()) type = 2;
+          CodeWidget::addKeyword(name + QObject::tr("?%0").arg(type));
+        }
+        qDebug() << name << type;
+        stream->Read(&resource, tag(AsyncState::READ));
+        break;
+      }
+      case AsyncState::FINISH: {
+        CodeWidget::finalizeKeywords();
+      }
+      default:
+        break;
     }
-    qDebug() << name << type;
-  }
-  CodeWidget::finalizeKeywords();
-  qDebug() << "done";
-  Status status = reader->Finish();
+  };
 }
 
 void CompilerClient::GetSystems() {
   qDebug() << "GetSystems()";
-  ClientContext context;
+  auto callData = ScheduleTask();
   Empty emptyRequest;
 
-  std::unique_ptr<ClientReader<SystemType>> reader(stub->GetSystems(&context, emptyRequest));
-  SystemType system;
-  auto& systemCache = MainWindow::systemCache;
-  while (reader->Read(&system)) {
-    const QString systemName = QString::fromStdString(system.name());
-    qDebug() << systemName;
-    systemCache.append(system);
-  }
-
-  qDebug() << "done";
-  Status status = reader->Finish();
+  callData->stream = stub->PrepareAsyncGetSystems(&callData->context, emptyRequest, &cq);
+  callData->process = [=](const AsyncState state, const Status & /*status*/) -> void {
+    static SystemType system;
+    static auto& systemCache = MainWindow::systemCache;
+    auto stream = (ClientAsyncReader<SystemType>*)callData->stream.get();
+    switch (state) {
+      case AsyncState::CONNECT: {
+        stream->Read(&system, tag(AsyncState::READ));
+        break;
+      }
+      case AsyncState::READ: {
+        const QString systemName = QString::fromStdString(system.name());
+        qDebug() << systemName;
+        systemCache.append(system);
+        stream->Read(&system, tag(AsyncState::READ));
+        break;
+      }
+      default:
+        break;
+    }
+  };
 }
 
 void CompilerClient::SetDefinitions(std::string code, std::string yaml) {
@@ -164,19 +184,28 @@ CallData* CompilerClient::ScheduleTask() {
 }
 
 void CompilerClient::UpdateLoop() {
+  static bool started = false;
   void* got_tag = nullptr;
   bool ok = false;
 
+  if (this->tasks.empty()) return;
+  auto task = this->tasks.front().get();
+  if (!started) {
+    task->stream->StartCall(tag(AsyncState::CONNECT));
+    task->stream->Finish(&status, tag(AsyncState::FINISH));
+    started = true;
+  }
   auto asyncStatus = cq.AsyncNext(&got_tag, &ok, future_deadline(0));
   // yield to application main event loop
   if (asyncStatus != CompletionQueue::NextStatus::GOT_EVENT || !ok || !got_tag) return;
 
   AsyncState state = (AsyncState)(detag(got_tag));
-  if (this->tasks.empty()) return;  // received event but no tasks
-  auto task = this->tasks.front().get();
   task->process(state, status);
   if (state == AsyncState::FINISH) {
+    // grpc streams use an arena allocator
+    task->stream.release();
     tasks.pop();
+    started = false;
   }
 }
 
