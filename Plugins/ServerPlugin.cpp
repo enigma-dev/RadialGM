@@ -36,13 +36,13 @@ void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string nam
   request.set_mode(mode);
 
   qDebug() << "wtf1";
-  static std::unique_ptr<ClientAsyncReader<CompileReply>> stream;
-  stream = stub->AsyncCompileBuffer(&callData->context, request, &cq, tag(AsyncState::CONNECT));
+  callData->stream = stub->AsyncCompileBuffer(&callData->context, request, &cq, tag(AsyncState::CONNECT));
   qDebug() << "wtf2";
-  stream->Finish(&status, tag(AsyncState::FINISH));
+  callData->stream->Finish(&status, tag(AsyncState::FINISH));
 
   callData->process = [=](const AsyncState state, const Status & /*status*/) -> void {
     static CompileReply compileReply;
+    auto stream = (ClientAsyncReader<CompileReply>*)callData->stream.get();
 
     switch (state) {
       case AsyncState::CONNECT: {
@@ -62,7 +62,6 @@ void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string nam
       }
       case AsyncState::FINISH: {
         qDebug() << "FINISH";
-        stream.release();
         emit CompileStatusChanged(true);
       }
       default:
