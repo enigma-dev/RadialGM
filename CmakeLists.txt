@@ -40,6 +40,7 @@ set(RGM_SOURCES
     Models/TreeModel.cpp
     Models/SpriteModel.cpp
     Models/ProtoModel.cpp
+    Models/ModelMapper.cpp
     Models/ImmediateMapper.cpp
     Models/ResourceModelMap.cpp
     Models/RepeatedProtoModel.cpp
@@ -75,6 +76,7 @@ set(RGM_HEADERS
     Editors/SpriteEditor.h
     Models/TreeModel.h
     Models/ProtoModel.h
+    Models/ModelMapper.h
     Models/ImmediateMapper.h
     Models/SpriteModel.h
     Models/ResourceModelMap.h
