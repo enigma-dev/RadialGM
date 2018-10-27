@@ -30,20 +30,34 @@ enum AsyncState { READ = 1, WRITE = 2, CONNECT = 3, WRITES_DONE = 4, FINISH = 5 
 struct CallData {
   Status status;
   ClientContext context;
-  std::unique_ptr<ClientAsyncStreamingInterface> stream;
   std::function<void(const AsyncState, const Status&)> process;
+  virtual ~CallData();
+  virtual void StartCall(void* tag) = 0;
+  virtual void Finish(Status* status, void* tag) = 0;
 };
 
 struct CompileBufferCallData : public CallData {
   CompileReply reply;
+  std::unique_ptr<ClientAsyncReader<CompileReply>> stream;
+  ~CompileBufferCallData() override;
+  void StartCall(void* tag) override;
+  void Finish(Status* status, void* tag) override;
 };
 
 struct GetResourcesCallData : public CallData {
   Resource resource;
+  std::unique_ptr<ClientAsyncReader<Resource>> stream;
+  ~GetResourcesCallData() override;
+  void StartCall(void* tag) override;
+  void Finish(Status* status, void* tag) override;
 };
 
 struct GetSystemsCallData : public CallData {
   SystemType system;
+  std::unique_ptr<ClientAsyncReader<SystemType>> stream;
+  ~GetSystemsCallData() override;
+  void StartCall(void* tag) override;
+  void Finish(Status* status, void* tag) override;
 };
 
 class CompilerClient : public QObject {

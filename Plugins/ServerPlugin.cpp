@@ -21,6 +21,17 @@ int detag(void* p) { return static_cast<int>(reinterpret_cast<intptr_t>(p)); }
 
 }  // anonymous namespace
 
+CallData::~CallData() { qDebug() << "~CallData"; }
+CompileBufferCallData::~CompileBufferCallData() { qDebug() << "~CompileBufferCallData"; }
+GetResourcesCallData::~GetResourcesCallData() { qDebug() << "~GetResourcesCallData"; }
+GetSystemsCallData::~GetSystemsCallData() { qDebug() << "~GetSystemsCallData"; }
+void CompileBufferCallData::StartCall(void* tag) { stream->StartCall(tag); }
+void GetResourcesCallData::StartCall(void* tag) { stream->StartCall(tag); }
+void GetSystemsCallData::StartCall(void* tag) { stream->StartCall(tag); }
+void CompileBufferCallData::Finish(Status* status, void* tag) { stream->Finish(status, tag); }
+void GetResourcesCallData::Finish(Status* status, void* tag) { stream->Finish(status, tag); }
+void GetSystemsCallData::Finish(Status* status, void* tag) { stream->Finish(status, tag); }
+
 CompilerClient::CompilerClient(std::shared_ptr<Channel> channel, MainWindow& mainWindow)
     : QObject(&mainWindow), stub(Compiler::NewStub(channel)), mainWindow(mainWindow) {}
 
@@ -37,7 +48,7 @@ void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string nam
 
   callData->stream = stub->PrepareAsyncCompileBuffer(&callData->context, request, &cq);
   callData->process = [=](const AsyncState state, const Status & /*status*/) -> void {
-    auto stream = (ClientAsyncReader<CompileReply>*)callData->stream.get();
+    auto& stream = callData->stream;
     const CompileReply& reply = callData->reply;
 
     switch (state) {
@@ -81,7 +92,7 @@ void CompilerClient::GetResources() {
 
   callData->stream = stub->PrepareAsyncGetResources(&callData->context, emptyRequest, &cq);
   callData->process = [=](const AsyncState state, const Status & /*status*/) -> void {
-    auto stream = (ClientAsyncReader<Resource>*)callData->stream.get();
+    auto& stream = callData->stream;
 
     switch (state) {
       case AsyncState::CONNECT: {
@@ -126,8 +137,9 @@ void CompilerClient::GetSystems() {
   callData->stream = stub->PrepareAsyncGetSystems(&callData->context, emptyRequest, &cq);
   callData->process = [=](const AsyncState state, const Status & /*status*/) -> void {
     static auto& systemCache = MainWindow::systemCache;
-    auto stream = (ClientAsyncReader<SystemType>*)callData->stream.get();
+    auto& stream = callData->stream;
     const SystemType& system = callData->system;
+
     switch (state) {
       case AsyncState::CONNECT: {
         stream->Read(&callData->system, tag(AsyncState::READ));
@@ -191,10 +203,9 @@ void CompilerClient::UpdateLoop() {
 
   if (this->tasks.empty()) return;
   auto& task = this->tasks.front();
-  auto& stream = task->stream;
   if (!started) {
-    stream->StartCall(tag(AsyncState::CONNECT));
-    stream->Finish(&task->status, tag(AsyncState::FINISH));
+    task->StartCall(tag(AsyncState::CONNECT));
+    task->Finish(&task->status, tag(AsyncState::FINISH));
     started = true;
   }
   auto asyncStatus = cq.AsyncNext(&got_tag, &ok, future_deadline(0));
@@ -204,8 +215,6 @@ void CompilerClient::UpdateLoop() {
   AsyncState state = (AsyncState)(detag(got_tag));
   task->process(state, task->status);
   if (state == AsyncState::FINISH) {
-    // grpc streams use an arena allocator
-    stream.release();
     // go to the next task
     tasks.pop();
     // next task needs to be started
