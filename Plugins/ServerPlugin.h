@@ -10,6 +10,7 @@
 #include <grpc++/channel.h>
 #include <grpc++/client_context.h>
 #include <grpc++/create_channel.h>
+#include <grpc++/support/async_stream.h>
 #include <grpc/grpc.h>
 
 #include <QList>
