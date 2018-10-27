@@ -48,13 +48,12 @@ void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string nam
 
   callData->stream = stub->PrepareAsyncCompileBuffer(&callData->context, request, &cq);
   callData->process = [=](const AsyncState state, const Status & /*status*/) -> void {
-    auto& stream = callData->stream;
     const CompileReply& reply = callData->reply;
 
     switch (state) {
       case AsyncState::CONNECT: {
         qDebug() << "CONNECT";
-        stream->Read(&callData->reply, tag(AsyncState::READ));
+        callData->stream->Read(&callData->reply, tag(AsyncState::READ));
         qDebug() << reply.progress().progress() << reply.progress().message().c_str();
         break;
       }
@@ -64,7 +63,7 @@ void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string nam
         for (auto log : reply.message()) {
           emit LogOutput(log.message().c_str());
         }
-        stream->Read(&callData->reply, tag(AsyncState::READ));
+        callData->stream->Read(&callData->reply, tag(AsyncState::READ));
         break;
       }
       case AsyncState::FINISH: {
@@ -92,12 +91,10 @@ void CompilerClient::GetResources() {
 
   callData->stream = stub->PrepareAsyncGetResources(&callData->context, emptyRequest, &cq);
   callData->process = [=](const AsyncState state, const Status & /*status*/) -> void {
-    auto& stream = callData->stream;
-
     switch (state) {
       case AsyncState::CONNECT: {
         CodeWidget::prepareKeywordStore();
-        stream->Read(&callData->resource, tag(AsyncState::READ));
+        callData->stream->Read(&callData->resource, tag(AsyncState::READ));
         break;
       }
       case AsyncState::READ: {
@@ -117,7 +114,7 @@ void CompilerClient::GetResources() {
           CodeWidget::addKeyword(name + QObject::tr("?%0").arg(type));
         }
         qDebug() << name << type;
-        stream->Read(&callData->resource, tag(AsyncState::READ));
+        callData->stream->Read(&callData->resource, tag(AsyncState::READ));
         break;
       }
       case AsyncState::FINISH: {
@@ -137,19 +134,18 @@ void CompilerClient::GetSystems() {
   callData->stream = stub->PrepareAsyncGetSystems(&callData->context, emptyRequest, &cq);
   callData->process = [=](const AsyncState state, const Status & /*status*/) -> void {
     static auto& systemCache = MainWindow::systemCache;
-    auto& stream = callData->stream;
     const SystemType& system = callData->system;
 
     switch (state) {
       case AsyncState::CONNECT: {
-        stream->Read(&callData->system, tag(AsyncState::READ));
+        callData->stream->Read(&callData->system, tag(AsyncState::READ));
         break;
       }
       case AsyncState::READ: {
         const QString systemName = QString::fromStdString(system.name());
         qDebug() << systemName;
         systemCache.append(system);
-        stream->Read(&callData->system, tag(AsyncState::READ));
+        callData->stream->Read(&callData->system, tag(AsyncState::READ));
         break;
       }
       default:
