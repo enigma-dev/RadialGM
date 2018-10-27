@@ -162,6 +162,8 @@ find_library(LIB_PROTO NAMES Protocols PATHS ${ENIGMA_DIR})
 target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_PROTO_D},${LIB_PROTO}>")
 
 # Find GRPC
+find_package(GRPC REQUIRED)
+include_directories(${GRPC_INCLUDE_DIRS})
 find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
 find_library(LIB_GRPC NAMES grpc)
 find_library(LIB_GPR NAMES gpr)
