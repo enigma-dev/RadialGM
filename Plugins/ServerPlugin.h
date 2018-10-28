@@ -25,7 +25,7 @@ using namespace grpc;
 using namespace buffers;
 using CompileMode = CompileRequest_CompileMode;
 
-enum AsyncState { READ = 1, WRITE = 2, CONNECT = 3, WRITES_DONE = 4, FINISH = 5 };
+enum AsyncState { DISCONNECTED = 0, READ = 1, WRITE = 2, CONNECT = 3, WRITES_DONE = 4, FINISH = 5 };
 
 struct CallData {
   Status status;

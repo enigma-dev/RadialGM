@@ -39,7 +39,7 @@ void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string nam
   qDebug() << "CompilerBuffer()";
   qDebug() << name.c_str();
   emit CompileStatusChanged();
-  auto callData = ScheduleTask<CompileBufferCallData>();
+  auto* callData = ScheduleTask<CompileBufferCallData>();
   CompileRequest request;
 
   request.mutable_game()->CopyFrom(*game);
@@ -86,7 +86,7 @@ void CompilerClient::CompileBuffer(Game* game, CompileMode mode) {
 
 void CompilerClient::GetResources() {
   qDebug() << "GetResources()";
-  auto callData = ScheduleTask<GetResourcesCallData>();
+  auto* callData = ScheduleTask<GetResourcesCallData>();
   Empty emptyRequest;
 
   callData->stream = stub->PrepareAsyncGetResources(&callData->context, emptyRequest, &cq);
@@ -128,7 +128,7 @@ void CompilerClient::GetResources() {
 
 void CompilerClient::GetSystems() {
   qDebug() << "GetSystems()";
-  auto callData = ScheduleTask<GetSystemsCallData>();
+  auto* callData = ScheduleTask<GetSystemsCallData>();
   Empty emptyRequest;
 
   callData->stream = stub->PrepareAsyncGetSystems(&callData->context, emptyRequest, &cq);
@@ -201,14 +201,17 @@ void CompilerClient::UpdateLoop() {
   auto& task = this->tasks.front();
   if (!started) {
     task->StartCall(tag(AsyncState::CONNECT));
-    task->Finish(&task->status, tag(AsyncState::FINISH));
     started = true;
   }
   auto asyncStatus = cq.AsyncNext(&got_tag, &ok, future_deadline(0));
-  // yield to application main event loop
-  if (asyncStatus != CompletionQueue::NextStatus::GOT_EVENT || !ok || !got_tag) return;
-
   AsyncState state = (AsyncState)(detag(got_tag));
+  if (state != AsyncState::DISCONNECTED && !ok) {
+    task->Finish(&task->status, tag(AsyncState::FINISH));
+    return;
+  }
+  // yield to application main event loop
+  if (asyncStatus != CompletionQueue::NextStatus::GOT_EVENT || !got_tag) return;
+
   task->process(state, task->status);
   if (state == AsyncState::FINISH) {
     // go to the next task
