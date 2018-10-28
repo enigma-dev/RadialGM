@@ -27,37 +27,20 @@ using CompileMode = CompileRequest_CompileMode;
 
 enum AsyncState { DISCONNECTED = 0, READ = 1, WRITE = 2, CONNECT = 3, WRITES_DONE = 4, FINISH = 5 };
 
-struct CallData {
+class CallData : public QObject {
+  Q_OBJECT
+
+ public:
   Status status;
   ClientContext context;
-  std::function<void(const AsyncState, const Status&)> process;
   virtual ~CallData();
-  virtual void StartCall(void* tag) = 0;
-  virtual void Finish(Status* status, void* tag) = 0;
-};
+  virtual void start() {}
+  virtual void operator()(const AsyncState state, const Status& status) = 0;
+  virtual void finish() {}
 
-struct CompileBufferCallData : public CallData {
-  CompileReply reply;
-  std::unique_ptr<ClientAsyncReader<CompileReply>> stream;
-  ~CompileBufferCallData() override;
-  void StartCall(void* tag) override;
-  void Finish(Status* status, void* tag) override;
-};
-
-struct GetResourcesCallData : public CallData {
-  Resource resource;
-  std::unique_ptr<ClientAsyncReader<Resource>> stream;
-  ~GetResourcesCallData() override;
-  void StartCall(void* tag) override;
-  void Finish(Status* status, void* tag) override;
-};
-
-struct GetSystemsCallData : public CallData {
-  SystemType system;
-  std::unique_ptr<ClientAsyncReader<SystemType>> stream;
-  ~GetSystemsCallData() override;
-  void StartCall(void* tag) override;
-  void Finish(Status* status, void* tag) override;
+ signals:
+  void CompileStatusChanged(bool finished = false);
+  void LogOutput(const QString& output);
 };
 
 class CompilerClient : public QObject {
@@ -65,6 +48,7 @@ class CompilerClient : public QObject {
 
  public:
   explicit CompilerClient(std::shared_ptr<Channel> channel, MainWindow& mainWindow);
+  ~CompilerClient() override;
   void CompileBuffer(Game* game, CompileMode mode, std::string name);
   void CompileBuffer(Game* game, CompileMode mode);
   void GetResources();

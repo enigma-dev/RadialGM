@@ -22,15 +22,87 @@ int detag(void* p) { return static_cast<int>(reinterpret_cast<intptr_t>(p)); }
 }  // anonymous namespace
 
 CallData::~CallData() { qDebug() << "~CallData"; }
-CompileBufferCallData::~CompileBufferCallData() { qDebug() << "~CompileBufferCallData"; }
-GetResourcesCallData::~GetResourcesCallData() { qDebug() << "~GetResourcesCallData"; }
-GetSystemsCallData::~GetSystemsCallData() { qDebug() << "~GetSystemsCallData"; }
-void CompileBufferCallData::StartCall(void* tag) { stream->StartCall(tag); }
-void GetResourcesCallData::StartCall(void* tag) { stream->StartCall(tag); }
-void GetSystemsCallData::StartCall(void* tag) { stream->StartCall(tag); }
-void CompileBufferCallData::Finish(Status* status, void* tag) { stream->Finish(status, tag); }
-void GetResourcesCallData::Finish(Status* status, void* tag) { stream->Finish(status, tag); }
-void GetSystemsCallData::Finish(Status* status, void* tag) { stream->Finish(status, tag); }
+
+template <class T>
+struct AsyncReadWorker : public CallData {
+  T element;
+  std::unique_ptr<ClientAsyncReader<T>> stream;
+
+  virtual ~AsyncReadWorker() override { qDebug() << "~AsyncReadWorker"; }
+  void operator()(const AsyncState state, const Status& /*status*/) override {
+    switch (state) {
+      case AsyncState::CONNECT: {
+        started();
+        stream->Read(&element, tag(AsyncState::READ));
+        break;
+      }
+      case AsyncState::READ: {
+        process(element);
+        stream->Read(&element, tag(AsyncState::READ));
+        break;
+      }
+      case AsyncState::FINISH: {
+        finished();
+        break;
+      }
+      default:
+        // TODO: Report error
+        break;
+    }
+  }
+  virtual void start() final { stream->StartCall(tag(AsyncState::CONNECT)); }
+  virtual void finish() final { stream->Finish(&status, tag(AsyncState::FINISH)); }
+
+  virtual void started() {}
+  virtual void finished() {}
+  virtual void process(const T& data) = 0;
+};
+
+struct ResourceReader : public AsyncReadWorker<Resource> {
+  virtual ~ResourceReader() { qDebug() << "~ResourceReader"; }
+  virtual void started() final { CodeWidget::prepareKeywordStore(); }
+  virtual void process(const Resource& resource) final {
+    const QString& name = QString::fromStdString(resource.name().c_str());
+    int type = 0;
+    if (resource.is_function()) {
+      type = 3;
+      for (int i = 0; i < resource.overload_count(); ++i) {
+        QString overload = QString::fromStdString(resource.parameters(i));
+        const QStringRef signature = QStringRef(&overload, overload.indexOf("(") + 1, overload.lastIndexOf(")"));
+        CodeWidget::addKeyword(QObject::tr("%0?3(%1)").arg(name).arg(signature));
+      }
+    } else {
+      if (resource.is_global()) type = 1;
+      if (resource.is_type_name()) type = 2;
+      CodeWidget::addKeyword(name + QObject::tr("?%0").arg(type));
+    }
+    qDebug() << name << type;
+  }
+  virtual void finished() final { CodeWidget::finalizeKeywords(); }
+};
+
+struct SystemReader : public AsyncReadWorker<SystemType> {
+  virtual ~SystemReader() { qDebug() << "~SystemReader"; }
+  virtual void process(const SystemType& system) final {
+    static auto& systemCache = MainWindow::systemCache;
+    const QString systemName = QString::fromStdString(system.name());
+    qDebug() << systemName;
+    systemCache.append(system);
+  }
+};
+
+struct CompileReader : public AsyncReadWorker<CompileReply> {
+  virtual ~CompileReader() { qDebug() << "~CompileReader"; }
+  virtual void process(const CompileReply& reply) final {
+    qDebug() << reply.progress().progress() << reply.progress().message().c_str();
+    for (auto log : reply.message()) {
+      emit LogOutput(log.message().c_str());
+    }
+  }
+  virtual void finished() final { emit CompileStatusChanged(true); }
+};
+
+CompilerClient::~CompilerClient() {}
 
 CompilerClient::CompilerClient(std::shared_ptr<Channel> channel, MainWindow& mainWindow)
     : QObject(&mainWindow), stub(Compiler::NewStub(channel)), mainWindow(mainWindow) {}
@@ -39,42 +111,16 @@ void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string nam
   qDebug() << "CompilerBuffer()";
   qDebug() << name.c_str();
   emit CompileStatusChanged();
-  auto* callData = ScheduleTask<CompileBufferCallData>();
+
+  auto* callData = ScheduleTask<CompileReader>();
   CompileRequest request;
 
   request.mutable_game()->CopyFrom(*game);
   request.set_name(name);
   request.set_mode(mode);
 
-  callData->stream = stub->PrepareAsyncCompileBuffer(&callData->context, request, &cq);
-  callData->process = [=](const AsyncState state, const Status & /*status*/) -> void {
-    const CompileReply& reply = callData->reply;
-
-    switch (state) {
-      case AsyncState::CONNECT: {
-        qDebug() << "CONNECT";
-        callData->stream->Read(&callData->reply, tag(AsyncState::READ));
-        qDebug() << reply.progress().progress() << reply.progress().message().c_str();
-        break;
-      }
-      case AsyncState::READ: {
-        qDebug() << "READ";
-        qDebug() << reply.progress().progress() << reply.progress().message().c_str();
-        for (auto log : reply.message()) {
-          emit LogOutput(log.message().c_str());
-        }
-        callData->stream->Read(&callData->reply, tag(AsyncState::READ));
-        break;
-      }
-      case AsyncState::FINISH: {
-        qDebug() << "FINISH";
-        emit CompileStatusChanged(true);
-        break;
-      }
-      default:
-        break;
-    }
-  };
+  auto worker = dynamic_cast<AsyncReadWorker<CompileReply>*>(callData);
+  worker->stream = stub->PrepareAsyncCompileBuffer(&worker->context, request, &cq);
 }
 
 void CompilerClient::CompileBuffer(Game* game, CompileMode mode) {
@@ -86,72 +132,20 @@ void CompilerClient::CompileBuffer(Game* game, CompileMode mode) {
 
 void CompilerClient::GetResources() {
   qDebug() << "GetResources()";
-  auto* callData = ScheduleTask<GetResourcesCallData>();
+  auto* callData = ScheduleTask<ResourceReader>();
   Empty emptyRequest;
 
-  callData->stream = stub->PrepareAsyncGetResources(&callData->context, emptyRequest, &cq);
-  callData->process = [=](const AsyncState state, const Status & /*status*/) -> void {
-    switch (state) {
-      case AsyncState::CONNECT: {
-        CodeWidget::prepareKeywordStore();
-        callData->stream->Read(&callData->resource, tag(AsyncState::READ));
-        break;
-      }
-      case AsyncState::READ: {
-        const Resource& resource = callData->resource;
-        const QString& name = QString::fromStdString(resource.name().c_str());
-        int type = 0;
-        if (resource.is_function()) {
-          type = 3;
-          for (int i = 0; i < resource.overload_count(); ++i) {
-            QString overload = QString::fromStdString(resource.parameters(i));
-            const QStringRef signature = QStringRef(&overload, overload.indexOf("(") + 1, overload.lastIndexOf(")"));
-            CodeWidget::addKeyword(QObject::tr("%0?3(%1)").arg(name).arg(signature));
-          }
-        } else {
-          if (resource.is_global()) type = 1;
-          if (resource.is_type_name()) type = 2;
-          CodeWidget::addKeyword(name + QObject::tr("?%0").arg(type));
-        }
-        qDebug() << name << type;
-        callData->stream->Read(&callData->resource, tag(AsyncState::READ));
-        break;
-      }
-      case AsyncState::FINISH: {
-        CodeWidget::finalizeKeywords();
-      }
-      default:
-        break;
-    }
-  };
+  auto worker = dynamic_cast<AsyncReadWorker<Resource>*>(callData);
+  worker->stream = stub->PrepareAsyncGetResources(&worker->context, emptyRequest, &cq);
 }
 
 void CompilerClient::GetSystems() {
   qDebug() << "GetSystems()";
-  auto* callData = ScheduleTask<GetSystemsCallData>();
+  auto* callData = ScheduleTask<SystemReader>();
   Empty emptyRequest;
 
-  callData->stream = stub->PrepareAsyncGetSystems(&callData->context, emptyRequest, &cq);
-  callData->process = [=](const AsyncState state, const Status & /*status*/) -> void {
-    static auto& systemCache = MainWindow::systemCache;
-    const SystemType& system = callData->system;
-
-    switch (state) {
-      case AsyncState::CONNECT: {
-        callData->stream->Read(&callData->system, tag(AsyncState::READ));
-        break;
-      }
-      case AsyncState::READ: {
-        const QString systemName = QString::fromStdString(system.name());
-        qDebug() << systemName;
-        systemCache.append(system);
-        callData->stream->Read(&callData->system, tag(AsyncState::READ));
-        break;
-      }
-      default:
-        break;
-    }
-  };
+  auto worker = dynamic_cast<AsyncReadWorker<SystemType>*>(callData);
+  worker->stream = stub->PrepareAsyncGetSystems(&worker->context, emptyRequest, &cq);
 }
 
 void CompilerClient::SetDefinitions(std::string code, std::string yaml) {
@@ -198,21 +192,23 @@ void CompilerClient::UpdateLoop() {
   bool ok = false;
 
   if (this->tasks.empty()) return;
-  auto& task = this->tasks.front();
+  auto* task = this->tasks.front().get();
   if (!started) {
-    task->StartCall(tag(AsyncState::CONNECT));
+    connect(task, &CallData::LogOutput, this, &CompilerClient::LogOutput);
+    connect(task, &CallData::CompileStatusChanged, this, &CompilerClient::CompileStatusChanged);
+    task->start();
     started = true;
   }
   auto asyncStatus = cq.AsyncNext(&got_tag, &ok, future_deadline(0));
-  AsyncState state = (AsyncState)(detag(got_tag));
+  auto state = static_cast<AsyncState>(detag(got_tag));
   if (state != AsyncState::DISCONNECTED && !ok) {
-    task->Finish(&task->status, tag(AsyncState::FINISH));
+    task->finish();
     return;
   }
   // yield to application main event loop
   if (asyncStatus != CompletionQueue::NextStatus::GOT_EVENT || !got_tag) return;
 
-  task->process(state, task->status);
+  (*task)(state, task->status);
   if (state == AsyncState::FINISH) {
     // go to the next task
     tasks.pop();
