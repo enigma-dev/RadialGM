@@ -3,6 +3,7 @@
 
 #include "Models/ProtoModel.h"
 #include "Models/TreeModel.h"
+#include "Models/ResourceModelMap.h"
 
 class MainWindow;
 #include "Components/RecentFiles.h"
@@ -25,7 +26,8 @@ class MainWindow : public QMainWindow {
   explicit MainWindow(QWidget *parent);
   ~MainWindow();
   void closeEvent(QCloseEvent *event);
-
+  static ResourceModelMap* resourceMap;
+  static TreeModel *treeModel;
   buffers::Game *Game() const { return this->project->mutable_game(); }
 
  public slots:
@@ -59,10 +61,8 @@ class MainWindow : public QMainWindow {
   void on_treeView_doubleClicked(const QModelIndex &index);
 
  private:
-  QHash<buffers::TreeNode *, ProtoModel *> resourceModels;
   QHash<buffers::TreeNode *, QMdiSubWindow *> subWindows;
 
-  TreeModel *treeModel;
   Ui::MainWindow *ui;
 
   buffers::Project *project;

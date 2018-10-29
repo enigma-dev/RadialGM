@@ -18,6 +18,8 @@
 using namespace grpc;
 using namespace buffers;
 
+using CompileMode = CompileRequest::CompileMode;
+
 class CompilerClient {
  public:
   explicit CompilerClient(std::shared_ptr<Channel> channel) : stub(Compiler::NewStub(channel)) {}
@@ -33,7 +35,7 @@ class CompilerClient {
     std::unique_ptr<ClientReader<CompileReply> > reader(stub->CompileBuffer(&context, request));
     CompileReply reply;
     while (reader->Read(&reply)) {
-      qDebug() << reply.message().c_str() << reply.progress();
+      //qDebug() << reply.message().c_str() << reply.progress();
     }
     Status status = reader->Finish();
   }
@@ -108,15 +110,15 @@ ServerPlugin::~ServerPlugin() {
   process->waitForFinished();
 }
 
-void ServerPlugin::Run() { compilerClient->CompileBuffer(mainWindow.Game(), CompileMode::RUN); };
+void ServerPlugin::Run() { compilerClient->CompileBuffer(mainWindow.Game(), CompileRequest::RUN); };
 
-void ServerPlugin::Debug() { compilerClient->CompileBuffer(mainWindow.Game(), CompileMode::DEBUG); };
+void ServerPlugin::Debug() { compilerClient->CompileBuffer(mainWindow.Game(), CompileRequest::DEBUG); };
 
 void ServerPlugin::CreateExecutable() {
   const QString& fileName =
       QFileDialog::getSaveFileName(&mainWindow, tr("Create Executable"), "", tr("Executable (*.exe);;All Files (*)"));
   if (!fileName.isEmpty())
-    compilerClient->CompileBuffer(mainWindow.Game(), CompileMode::COMPILE, fileName.toStdString());
+    compilerClient->CompileBuffer(mainWindow.Game(), CompileRequest::COMPILE, fileName.toStdString());
 };
 
 void ServerPlugin::HandleOutput() { emit OutputRead(process->readAllStandardOutput()); }

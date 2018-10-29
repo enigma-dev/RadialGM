@@ -1,6 +1,7 @@
 #include "TreeModel.h"
 
 #include "Components/ArtManager.h"
+#include "Models/ResourceModelMap.h"
 
 #include <unordered_map>
 
@@ -48,6 +49,25 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
 
     auto it = iconMap.find(item->type_case());
     if (it == iconMap.end()) return ArtManager::GetIcon("info");
+
+    if (item->type_case() == TypeCase::kSprite) {
+      QString spr = QString::fromStdString(item->sprite().subimages(0));
+      if (!spr.isEmpty()) return ArtManager::GetIcon(spr);
+    }
+
+    if (item->type_case() == TypeCase::kBackground) {
+      QString bkg = QString::fromStdString(item->background().image());
+      if (!bkg.isEmpty()) return ArtManager::GetIcon(bkg);
+    }
+
+    if (item->type_case() == TypeCase::kObject) {
+      const ProtoModel* sprModel = GetObjectSprite(item->name());
+      if (sprModel != nullptr) {
+        QString spr = sprModel->GetString(Sprite::kSubimagesFieldNumber, 0);
+        if (!spr.isEmpty()) return ArtManager::GetIcon(spr);
+      }
+    }
+
     const QIcon &icon = it->second;
     if (item->type_case() == TypeCase::kFolder && item->child_size() <= 0) {
       return icon.pixmap(icon.availableSizes().first(), QIcon::Disabled);
