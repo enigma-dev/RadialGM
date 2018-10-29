@@ -32,8 +32,9 @@
 #undef GetMessage
 
 QList<buffers::SystemType> MainWindow::systemCache;
-
 MainWindow *MainWindow::m_instance = nullptr;
+ResourceModelMap *MainWindow::resourceMap = nullptr;
+TreeModel *MainWindow::treeModel = nullptr;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ArtManager::Init();
@@ -101,6 +102,7 @@ void MainWindow::writeSettings() {
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
+  ui->mdiArea->closeAllSubWindows();
   this->writeSettings();
   event->accept();
 }
@@ -114,8 +116,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
   using namespace google::protobuf;
 
   using TypeCase = buffers::TreeNode::TypeCase;
-  using FactoryFunction = std::function<BaseEditor *(ProtoModel * model, QWidget * parent)>;
-  using FactoryMap = std::unordered_map<TypeCase, FactoryFunction>;
+  using FactoryMap = std::unordered_map<TypeCase, std::function<BaseEditor *(ProtoModel * m, QWidget * p)>>;
 
   static FactoryMap factoryMap({{TypeCase::kSprite, EditorFactory<SpriteEditor>},
                                 {TypeCase::kSound, EditorFactory<SoundEditor>},
@@ -128,34 +129,23 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
                                 {TypeCase::kRoom, EditorFactory<RoomEditor>},
                                 {TypeCase::kSettings, EditorFactory<SettingsEditor>}});
 
-  const Descriptor *desc = item->GetDescriptor();
-  const Reflection *refl = item->GetReflection();
-
-  const OneofDescriptor *typeOneof = desc->FindOneofByName("type");
-  const FieldDescriptor *typeField = refl->GetOneofFieldDescriptor(*item, typeOneof);
-  // might not be set or it's not a message
-  if (!typeField || typeField->cpp_type() != FieldDescriptor::CppType::CPPTYPE_MESSAGE) return;
-  Message *typeMessage = refl->MutableMessage(item, typeField);
-
   auto subWindow = subWindows[item];
   if (!subWindows.contains(item) || subWindow == nullptr) {
     auto factoryFunction = factoryMap.find(item->type_case());
     if (factoryFunction == factoryMap.end()) return;  // no registered editor
 
-    if (!resourceModels.contains(item)) resourceModels[item] = new ProtoModel(typeMessage, nullptr);
-    auto resourceModel = resourceModels[item];
+    ProtoModel *res = resourceMap->GetResourceByName(item->type_case(), item->name());
+    BaseEditor *editor = factoryFunction->second(res, this);
 
-    QWidget *editor = factoryFunction->second(resourceModel, nullptr);
-    resourceModel->setParent(editor);
+    connect(editor, &BaseEditor::ResourceRenamed, resourceMap, &ResourceModelMap::ResourceRenamed);
+    connect(editor, &BaseEditor::ResourceRenamed, [=]() { treeModel->dataChanged(QModelIndex(), QModelIndex()); });
 
     subWindow = subWindows[item] = ui->mdiArea->addSubWindow(editor);
     subWindow->resize(subWindow->frameSize().expandedTo(editor->size()));
     editor->setParent(subWindow);
 
-    subWindow->connect(subWindow, &QObject::destroyed, [=]() {
-      resourceModels.remove(item);
-      subWindows.remove(item);
-    });
+    subWindow->connect(subWindow, &QObject::destroyed, [=]() { subWindows.remove(item); });
+
     subWindow->setWindowIcon(subWindow->widget()->windowIcon());
     subWindow->setWindowTitle(QString::fromStdString(item->name()));
   }
@@ -208,7 +198,8 @@ void MainWindow::openFile(QString fName) {
   MainWindow::setWindowTitle(fileInfo.fileName() + " - ENIGMA");
   recentFiles->prependFile(fName);
 
-  treeModel = new TreeModel(project->mutable_game()->mutable_root(), this);
+  resourceMap = new ResourceModelMap(project->mutable_game()->mutable_root(), this);
+  treeModel = new TreeModel(project->mutable_game()->mutable_root(), resourceMap);
   ui->treeView->setModel(treeModel);
   treeModel->connect(treeModel, &QAbstractItemModel::dataChanged,
                      [=](const QModelIndex &topLeft, const QModelIndex &bottomRight) {
@@ -222,6 +213,7 @@ void MainWindow::openFile(QString fName) {
                          }
                        }
                      });
+  ArtManager::clearCache();
 }
 
 void MainWindow::on_actionOpen_triggered() {

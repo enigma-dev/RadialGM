@@ -3,15 +3,14 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 
-BaseEditor::BaseEditor(ProtoModel* model, QWidget* parent)
-    : QWidget(parent), model(model), mapper(new ImmediateDataWidgetMapper(this)) {
-  mapper->setOrientation(Qt::Vertical);
-  mapper->setModel(model);
-  connect(model, &ProtoModel::dataChanged, this, &BaseEditor::dataChanged);
+BaseEditor::BaseEditor(ProtoModel* treeNodeModel, QWidget* parent)
+    : QWidget(parent), nodeMapper(new ModelMapper(treeNodeModel, this)) {
+  buffers::TreeNode* n = static_cast<buffers::TreeNode*>(treeNodeModel->GetBuffer());
+  resMapper = new ModelMapper(treeNodeModel->GetSubModel(ResTypeFields[n->type_case()]), this);
 }
 
 void BaseEditor::closeEvent(QCloseEvent* event) {
-  if (model->IsDirty()) {
+  if (resMapper->IsDirty()) {
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(this, tr("Unsaved Changes"), tr("Would you like to save the changes?"),
                                   QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
@@ -20,22 +19,28 @@ void BaseEditor::closeEvent(QCloseEvent* event) {
       event->ignore();
       return;
     } else if (reply == QMessageBox::No) {
-      mapper->clearMapping();
-      model->RestoreBuffer();
+      nodeMapper->clearMapping();
+      nodeMapper->RestoreBuffer();
+      resMapper->clearMapping();
     }
   }
 
-  model->SetDirty(false);
+  resMapper->SetDirty(false);
   event->accept();
 }
 
-void BaseEditor::ReplaceBuffer(google::protobuf::Message* buffer) { model->ReplaceBuffer(buffer); }
+void BaseEditor::ReplaceBuffer(google::protobuf::Message* buffer) { resMapper->ReplaceBuffer(buffer); }
 
 void BaseEditor::SetModelData(int index, const QVariant& value) {
-  model->setData(model->index(index), value, Qt::DisplayRole);
+  resMapper->setData(resMapper->index(index), value, Qt::DisplayRole);
 }
 
-QVariant BaseEditor::GetModelData(int index) { return model->data(model->index(index), Qt::DisplayRole); }
+QVariant BaseEditor::GetModelData(int index) { return resMapper->data(resMapper->index(index), Qt::DisplayRole); }
 
-void BaseEditor::dataChanged(const QModelIndex& /*topLeft*/, const QModelIndex& /*bottomRight*/,
-                             const QVector<int>& /*roles*/) {}
+void BaseEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex& /*bottomRight*/, const QVariant& oldValue,
+                             const QVector<int>& /*roles*/) {
+  buffers::TreeNode* n = static_cast<buffers::TreeNode*>(nodeMapper->GetModel()->GetBuffer());
+  if (n == topLeft.internalPointer() && topLeft.row() == TreeNode::kNameFieldNumber) {
+    emit ResourceRenamed(n->type_case(), oldValue.toString(), QString::fromStdString(n->name()));
+  }
+}
