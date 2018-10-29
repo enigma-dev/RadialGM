@@ -1,6 +1,7 @@
 #include "BackgroundRenderer.h"
 
 #include "Components/ArtManager.h"
+#include "Components/Utility.h"
 
 #include "codegen/Background.pb.h"
 
@@ -83,23 +84,7 @@ void BackgroundRenderer::paintEvent(QPaintEvent * /* event */) {
   int gridHeight = model->data(Background::kTileHeightFieldNumber).toInt();
 
   if (gridVisible) {
-    painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
-    painter.setPen(QColor(0xff, 0xff, 0xff));
-
-    if (gridHorSpacing != 0 || gridVertSpacing != 0) {
-      for (int x = gridHorOff; x < pixmap.width(); x += gridWidth + gridHorSpacing) {
-        for (int y = gridVertOff; y < pixmap.height(); y += gridHeight + gridVertSpacing) {
-          painter.drawRect(x, y, gridWidth, gridHeight);
-        }
-      }
-    }
-
-    if (gridHorSpacing == 0) {
-      for (int x = gridHorOff; x <= pixmap.width(); x += gridWidth) painter.drawLine(x, 0, x, pixmap.height());
-    }
-
-    if (gridVertSpacing == 0) {
-      for (int y = gridVertOff; y <= pixmap.height(); y += gridHeight) painter.drawLine(0, y, pixmap.width(), y);
-    }
+    paint_grid(painter, pixmap.width(), pixmap.height(), gridHorSpacing, gridVertSpacing, gridHorOff, gridVertOff,
+               gridWidth, gridHeight);
   }
 }

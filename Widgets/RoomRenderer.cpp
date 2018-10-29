@@ -1,5 +1,6 @@
 #include "RoomRenderer.h"
 #include "Components/ArtManager.h"
+#include "Components/Utility.h"
 #include "MainWindow.h"
 
 #include <QPainter>
@@ -134,7 +135,8 @@ void RoomRenderer::paintInstances(QPainter& painter, Room* room) {
     int yoff = 0;
 
     const ProtoModel* spr = GetObjectSprite(inst.object_type());
-    if (spr == nullptr) imgFile = "object";
+    if (spr == nullptr)
+      imgFile = "object";
     else {
       imgFile = spr->GetString(Sprite::kSubimagesFieldNumber, 0);
       w = spr->data(Sprite::kWidthFieldNumber).toInt();
@@ -169,23 +171,7 @@ void RoomRenderer::paintGrid(QPainter& painter, Room* room) {
   int roomWidth = static_cast<int>(room->width()), roomHeight = static_cast<int>(room->height());
 
   if (gridVisible) {
-    painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
-    painter.setPen(QColor(0xff, 0xff, 0xff));
-
-    if (gridHorSpacing != 0 || gridVertSpacing != 0) {
-      for (int x = gridHorOff; x < roomWidth; x += gridWidth + gridHorSpacing) {
-        for (int y = gridVertOff; y < roomHeight; y += gridHeight + gridVertSpacing) {
-          painter.drawRect(x, y, gridWidth, gridHeight);
-        }
-      }
-    }
-
-    if (gridHorSpacing == 0) {
-      for (int x = gridHorOff; x <= roomWidth; x += gridWidth) painter.drawLine(x, 0, x, roomHeight);
-    }
-
-    if (gridVertSpacing == 0) {
-      for (int y = gridVertOff; y <= roomHeight; y += gridHeight) painter.drawLine(0, y, roomWidth, y);
-    }
+    paint_grid(painter, roomWidth, roomHeight, gridHorSpacing, gridVertSpacing, gridHorOff, gridVertOff, gridWidth,
+               gridHeight);
   }
 }
