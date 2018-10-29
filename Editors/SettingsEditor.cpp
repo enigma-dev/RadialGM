@@ -4,7 +4,6 @@
 
 #include "codegen/Settings.pb.h"
 
-#include <QDebug>
 #include <QPushButton>
 
 using namespace buffers::resources;
@@ -24,7 +23,6 @@ SettingsEditor::SettingsEditor(ProtoModel* model, QWidget* parent)
   QPushButton* saveButton = ui->buttonBox->button(QDialogButtonBox::Save);
   saveButton->setIcon(QIcon(":/actions/accept.png"));
   connect(saveButton, &QPushButton::clicked, [=]() {
-    qDebug() << "hey";
     Settings settings;
     auto* api = settings.mutable_api();
     api->set_target_audio(get_combo_system_id(ui->audioCombo));
@@ -35,8 +33,6 @@ SettingsEditor::SettingsEditor(ProtoModel* model, QWidget* parent)
     api->set_target_platform(get_combo_system_id(ui->platformCombo));
     api->set_target_widgets(get_combo_system_id(ui->widgetsCombo));
     api->add_extensions("Paths");
-
-    qDebug() << "hi" << ui->audioCombo->currentData().toString();
 
     emit MainWindow::setCurrentConfig(settings);
   });

@@ -1,7 +1,6 @@
 #include "ServerPlugin.h"
 #include "Widgets/CodeWidget.h"
 
-#include <QDebug>
 #include <QFileDialog>
 #include <QList>
 #include <QTemporaryFile>
@@ -21,14 +20,14 @@ int detag(void* p) { return static_cast<int>(reinterpret_cast<intptr_t>(p)); }
 
 }  // anonymous namespace
 
-CallData::~CallData() { qDebug() << "~CallData"; }
+CallData::~CallData() {}
 
 template <class T>
 struct AsyncReadWorker : public CallData {
   T element;
   std::unique_ptr<ClientAsyncReader<T>> stream;
 
-  virtual ~AsyncReadWorker() override { qDebug() << "~AsyncReadWorker"; }
+  virtual ~AsyncReadWorker() override {}
   void operator()(const AsyncState state, const Status& /*status*/) override {
     switch (state) {
       case AsyncState::CONNECT: {
@@ -63,7 +62,7 @@ struct AsyncResponseReadWorker : public CallData {
   T element;
   std::unique_ptr<ClientAsyncResponseReader<T>> stream;
 
-  virtual ~AsyncResponseReadWorker() override { qDebug() << "~AsyncResponseReadWorker"; }
+  virtual ~AsyncResponseReadWorker() override {}
   void operator()(const AsyncState state, const Status& /*status*/) override {
     switch (state) {
       case AsyncState::FINISH: {
@@ -87,7 +86,7 @@ struct AsyncResponseReadWorker : public CallData {
 };
 
 struct ResourceReader : public AsyncReadWorker<Resource> {
-  virtual ~ResourceReader() { qDebug() << "~ResourceReader"; }
+  virtual ~ResourceReader() {}
   virtual void started() final { CodeWidget::prepareKeywordStore(); }
   virtual void process(const Resource& resource) final {
     const QString& name = QString::fromStdString(resource.name().c_str());
@@ -104,25 +103,22 @@ struct ResourceReader : public AsyncReadWorker<Resource> {
       if (resource.is_type_name()) type = KeywordType::TYPE_NAME;
       CodeWidget::addKeyword(name, type);
     }
-    qDebug() << name << type;
   }
   virtual void finished() final { CodeWidget::finalizeKeywords(); }
 };
 
 struct SystemReader : public AsyncReadWorker<SystemType> {
-  virtual ~SystemReader() { qDebug() << "~SystemReader"; }
+  virtual ~SystemReader() {}
   virtual void process(const SystemType& system) final {
     static auto& systemCache = MainWindow::systemCache;
     const QString systemName = QString::fromStdString(system.name());
-    qDebug() << systemName;
     systemCache.append(system);
   }
 };
 
 struct CompileReader : public AsyncReadWorker<CompileReply> {
-  virtual ~CompileReader() { qDebug() << "~CompileReader"; }
+  virtual ~CompileReader() {}
   virtual void process(const CompileReply& reply) final {
-    qDebug() << reply.progress().progress() << reply.progress().message().c_str();
     for (auto log : reply.message()) {
       emit LogOutput(log.message().c_str());
     }
@@ -131,7 +127,7 @@ struct CompileReader : public AsyncReadWorker<CompileReply> {
 };
 
 struct SyntaxCheckReader : public AsyncResponseReadWorker<SyntaxError> {
-  virtual ~SyntaxCheckReader() { qDebug() << "~SyntaxCheckReader"; }
+  virtual ~SyntaxCheckReader() {}
   virtual void finished(const SyntaxError& /*err*/) final {}
 };
 
@@ -141,8 +137,6 @@ CompilerClient::CompilerClient(std::shared_ptr<Channel> channel, MainWindow& mai
     : QObject(&mainWindow), stub(Compiler::NewStub(channel)), mainWindow(mainWindow) {}
 
 void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string name) {
-  qDebug() << "CompilerBuffer()";
-  qDebug() << name.c_str();
   emit CompileStatusChanged();
 
   auto* callData = ScheduleTask<CompileReader>();
@@ -164,7 +158,6 @@ void CompilerClient::CompileBuffer(Game* game, CompileMode mode) {
 }
 
 void CompilerClient::GetResources() {
-  qDebug() << "GetResources()";
   auto* callData = ScheduleTask<ResourceReader>();
   Empty emptyRequest;
 
@@ -173,7 +166,6 @@ void CompilerClient::GetResources() {
 }
 
 void CompilerClient::GetSystems() {
-  qDebug() << "GetSystems()";
   auto* callData = ScheduleTask<SystemReader>();
   Empty emptyRequest;
 
@@ -182,7 +174,6 @@ void CompilerClient::GetSystems() {
 }
 
 void CompilerClient::SetDefinitions(std::string code, std::string yaml) {
-  qDebug() << "SetDefinitions()";
   auto* callData = ScheduleTask<SyntaxCheckReader>();
   SetDefinitionsRequest definitionsRequest;
 
@@ -194,7 +185,6 @@ void CompilerClient::SetDefinitions(std::string code, std::string yaml) {
 }
 
 void CompilerClient::SetCurrentConfig(const resources::Settings& settings) {
-  qDebug() << "SetCurrentConfig()";
   auto* callData = ScheduleTask<AsyncResponseReadWorker<Empty>>();
   SetCurrentConfigRequest setConfigRequest;
   setConfigRequest.mutable_settings()->CopyFrom(settings);
@@ -204,7 +194,6 @@ void CompilerClient::SetCurrentConfig(const resources::Settings& settings) {
 }
 
 void CompilerClient::SyntaxCheck() {
-  qDebug() << "SyntaxCheck()";
   auto* callData = ScheduleTask<SyntaxCheckReader>();
   SyntaxCheckRequest syntaxCheckRequest;
 
