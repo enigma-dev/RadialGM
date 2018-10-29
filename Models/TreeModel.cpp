@@ -3,9 +3,22 @@
 #include "Components/ArtManager.h"
 #include "Models/ResourceModelMap.h"
 
-#include <unordered_map>
+IconMap TreeModel::iconMap;
 
 TreeModel::TreeModel(buffers::TreeNode *root, QObject *parent) : QAbstractItemModel(parent), root(root) {
+  iconMap = {{TypeCase::kFolder, ArtManager::GetIcon("group")},
+             {TypeCase::kSprite, ArtManager::GetIcon("sprite")},
+             {TypeCase::kSound, ArtManager::GetIcon("sound")},
+             {TypeCase::kBackground, ArtManager::GetIcon("background")},
+             {TypeCase::kPath, ArtManager::GetIcon("path")},
+             {TypeCase::kScript, ArtManager::GetIcon("script")},
+             {TypeCase::kShader, ArtManager::GetIcon("shader")},
+             {TypeCase::kFont, ArtManager::GetIcon("font")},
+             {TypeCase::kTimeline, ArtManager::GetIcon("timeline")},
+             {TypeCase::kObject, ArtManager::GetIcon("object")},
+             {TypeCase::kRoom, ArtManager::GetIcon("room")},
+             {TypeCase::kSettings, ArtManager::GetIcon("settings")}};
+
   SetupParents(root);
 }
 
@@ -28,26 +41,10 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
 }
 
 QVariant TreeModel::data(const QModelIndex &index, int role) const {
-  using TypeCase = buffers::TreeNode::TypeCase;
-  using IconMap = std::unordered_map<TypeCase, QIcon>;
-
   if (!index.isValid()) return QVariant();
 
   buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
   if (role == Qt::DecorationRole) {
-    static IconMap iconMap({{TypeCase::kFolder, ArtManager::GetIcon("group")},
-                            {TypeCase::kSprite, ArtManager::GetIcon("sprite")},
-                            {TypeCase::kSound, ArtManager::GetIcon("sound")},
-                            {TypeCase::kBackground, ArtManager::GetIcon("background")},
-                            {TypeCase::kPath, ArtManager::GetIcon("path")},
-                            {TypeCase::kScript, ArtManager::GetIcon("script")},
-                            {TypeCase::kShader, ArtManager::GetIcon("shader")},
-                            {TypeCase::kFont, ArtManager::GetIcon("font")},
-                            {TypeCase::kTimeline, ArtManager::GetIcon("timeline")},
-                            {TypeCase::kObject, ArtManager::GetIcon("object")},
-                            {TypeCase::kRoom, ArtManager::GetIcon("room")},
-                            {TypeCase::kSettings, ArtManager::GetIcon("settings")}});
-
     auto it = iconMap.find(item->type_case());
     if (it == iconMap.end()) return ArtManager::GetIcon("info");
 
@@ -62,7 +59,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
     }
 
     if (item->type_case() == TypeCase::kObject) {
-      const ProtoModel* sprModel = GetObjectSprite(item->name());
+      const ProtoModel *sprModel = GetObjectSprite(item->name());
       if (sprModel != nullptr) {
         QString spr = sprModel->GetString(Sprite::kSubimagesFieldNumber, 0);
         if (!spr.isEmpty()) return ArtManager::GetIcon(spr);

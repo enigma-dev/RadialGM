@@ -63,18 +63,18 @@ struct ResourceReader : public AsyncReadWorker<Resource> {
   virtual void started() final { CodeWidget::prepareKeywordStore(); }
   virtual void process(const Resource& resource) final {
     const QString& name = QString::fromStdString(resource.name().c_str());
-    int type = 0;
+    KeywordType type = KeywordType::UNKNOWN;
     if (resource.is_function()) {
-      type = 3;
+      type = KeywordType::FUNCTION;
       for (int i = 0; i < resource.overload_count(); ++i) {
         QString overload = QString::fromStdString(resource.parameters(i));
         const QStringRef signature = QStringRef(&overload, overload.indexOf("(") + 1, overload.lastIndexOf(")"));
-        CodeWidget::addKeyword(QObject::tr("%0?3(%1)").arg(name).arg(signature));
+        CodeWidget::addCalltip(name, signature.toString(), type);
       }
     } else {
-      if (resource.is_global()) type = 1;
-      if (resource.is_type_name()) type = 2;
-      CodeWidget::addKeyword(name + QObject::tr("?%0").arg(type));
+      if (resource.is_global()) type = KeywordType::GLOBAL;
+      if (resource.is_type_name()) type = KeywordType::TYPE_NAME;
+      CodeWidget::addKeyword(name, type);
     }
     qDebug() << name << type;
   }

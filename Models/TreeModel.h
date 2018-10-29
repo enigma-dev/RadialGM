@@ -1,15 +1,23 @@
 #ifndef TREEMODEL_H
 #define TREEMODEL_H
 
+#include "Components/ArtManager.h"
 #include "codegen/treenode.pb.h"
 
 #include <QAbstractItemModel>
 #include <QHash>
 
+#include <unordered_map>
+
+using TypeCase = buffers::TreeNode::TypeCase;
+using IconMap = std::unordered_map<TypeCase, QIcon>;
+
 class TreeModel : public QAbstractItemModel {
   Q_OBJECT
 
  public:
+  static IconMap iconMap;
+
   explicit TreeModel(buffers::TreeNode *root, QObject *parent);
 
   bool setData(const QModelIndex &index, const QVariant &value, int role) override;
