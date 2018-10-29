@@ -58,6 +58,34 @@ struct AsyncReadWorker : public CallData {
   virtual void process(const T& data) = 0;
 };
 
+template <class T>
+struct AsyncResponseReadWorker : public CallData {
+  T element;
+  std::unique_ptr<ClientAsyncResponseReader<T>> stream;
+
+  virtual ~AsyncResponseReadWorker() override { qDebug() << "~AsyncResponseReadWorker"; }
+  void operator()(const AsyncState state, const Status& /*status*/) override {
+    switch (state) {
+      case AsyncState::FINISH: {
+        finished(element);
+        break;
+      }
+      default:
+        // TODO: Report error
+        break;
+    }
+  }
+  virtual void start() final {
+    stream->StartCall();
+    started();
+    stream->Finish(&element, &status, tag(AsyncState::FINISH));
+  }
+  virtual void finish() final {}
+
+  virtual void started() {}
+  virtual void finished(const T& data) {}
+};
+
 struct ResourceReader : public AsyncReadWorker<Resource> {
   virtual ~ResourceReader() { qDebug() << "~ResourceReader"; }
   virtual void started() final { CodeWidget::prepareKeywordStore(); }
@@ -100,6 +128,11 @@ struct CompileReader : public AsyncReadWorker<CompileReply> {
     }
   }
   virtual void finished() final { emit CompileStatusChanged(true); }
+};
+
+struct SyntaxCheckReader : public AsyncResponseReadWorker<SyntaxError> {
+  virtual ~SyntaxCheckReader() { qDebug() << "~SyntaxCheckReader"; }
+  virtual void finished(const SyntaxError& /*err*/) final {}
 };
 
 CompilerClient::~CompilerClient() {}
@@ -150,33 +183,33 @@ void CompilerClient::GetSystems() {
 
 void CompilerClient::SetDefinitions(std::string code, std::string yaml) {
   qDebug() << "SetDefinitions()";
-  ClientContext context;
+  auto* callData = ScheduleTask<SyntaxCheckReader>();
   SetDefinitionsRequest definitionsRequest;
 
   definitionsRequest.set_code(code);
   definitionsRequest.set_yaml(yaml);
 
-  SyntaxError reply;
-  Status status = stub->SetDefinitions(&context, definitionsRequest, &reply);
+  auto worker = dynamic_cast<AsyncResponseReadWorker<SyntaxError>*>(callData);
+  worker->stream = stub->PrepareAsyncSetDefinitions(&worker->context, definitionsRequest, &cq);
 }
 
 void CompilerClient::SetCurrentConfig(const resources::Settings& settings) {
   qDebug() << "SetCurrentConfig()";
-  ClientContext context;
+  auto* callData = ScheduleTask<AsyncResponseReadWorker<Empty>>();
   SetCurrentConfigRequest setConfigRequest;
   setConfigRequest.mutable_settings()->CopyFrom(settings);
 
-  Empty reply;
-  Status status = stub->SetCurrentConfig(&context, setConfigRequest, &reply);
+  auto worker = dynamic_cast<AsyncResponseReadWorker<Empty>*>(callData);
+  worker->stream = stub->PrepareAsyncSetCurrentConfig(&worker->context, setConfigRequest, &cq);
 }
 
 void CompilerClient::SyntaxCheck() {
   qDebug() << "SyntaxCheck()";
-  ClientContext context;
+  auto* callData = ScheduleTask<SyntaxCheckReader>();
   SyntaxCheckRequest syntaxCheckRequest;
 
-  SyntaxError reply;
-  Status status = stub->SyntaxCheck(&context, syntaxCheckRequest, &reply);
+  auto worker = dynamic_cast<AsyncResponseReadWorker<SyntaxError>*>(callData);
+  worker->stream = stub->PrepareAsyncSyntaxCheck(&worker->context, syntaxCheckRequest, &cq);
 }
 
 template <typename T>
