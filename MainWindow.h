@@ -30,11 +30,9 @@ class MainWindow : public QMainWindow {
   static TreeModel *treeModel;
   buffers::Game *Game() const { return this->project->mutable_game(); }
 
-  template <class T>
-  void CreateResource(TypeCase typeCase);
-
  public slots:
   void openFile(QString fName);
+  void CreateResource(TypeCase typeCase);
 
  private slots:
   // file menu
