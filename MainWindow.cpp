@@ -292,3 +292,48 @@ void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
 }
 
 void MainWindow::on_actionClearRecentMenu_triggered() { recentFiles->clear(); }
+
+#include <QDebug>
+
+template <class T>
+void MainWindow::CreateResource(TypeCase typeCase) {
+  auto *root = this->project->mutable_game()->mutable_root();
+  auto *child = root->add_child();
+  child->set_name("holyshit");
+  auto fieldNum = ResTypeFields[typeCase];
+  const Descriptor *desc = child->GetDescriptor();
+  const Reflection *refl = child->GetReflection();
+  const FieldDescriptor *field = desc->FindFieldByNumber(fieldNum);
+  refl->SetAllocatedMessage(child, new T(), field);
+  this->resourceMap->AddResource(child, resourceMap);
+  this->treeModel->addNode(child, root);
+  openSubWindow(child);
+}
+
+void MainWindow::on_actionCreate_Sprite_triggered() { CreateResource<buffers::resources::Sprite>(TypeCase::kSprite); }
+
+void MainWindow::on_actionCreate_Sound_triggered() { CreateResource<buffers::resources::Sound>(TypeCase::kSound); }
+
+void MainWindow::on_actionCreate_Background_triggered() {
+  CreateResource<buffers::resources::Background>(TypeCase::kBackground);
+}
+
+void MainWindow::on_actionCreate_Path_triggered() { CreateResource<buffers::resources::Path>(TypeCase::kPath); }
+
+void MainWindow::on_actionCreate_Script_triggered() { CreateResource<buffers::resources::Script>(TypeCase::kScript); }
+
+void MainWindow::on_actionCreate_Shader_triggered() { CreateResource<buffers::resources::Shader>(TypeCase::kShader); }
+
+void MainWindow::on_actionCreate_Font_triggered() { CreateResource<buffers::resources::Font>(TypeCase::kFont); }
+
+void MainWindow::on_actionCreate_Time_Line_triggered() {
+  CreateResource<buffers::resources::Timeline>(TypeCase::kTimeline);
+}
+
+void MainWindow::on_actionCreate_Object_triggered() { CreateResource<buffers::resources::Object>(TypeCase::kObject); }
+
+void MainWindow::on_actionCreate_Room_triggered() { CreateResource<buffers::resources::Room>(TypeCase::kRoom); }
+
+void MainWindow::on_actionChange_Global_Game_Settings_triggered() {
+  CreateResource<buffers::resources::Settings>(TypeCase::kSettings);
+}

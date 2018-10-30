@@ -2,8 +2,8 @@
 #define MAINWINDOW_H
 
 #include "Models/ProtoModel.h"
-#include "Models/TreeModel.h"
 #include "Models/ResourceModelMap.h"
+#include "Models/TreeModel.h"
 
 class MainWindow;
 #include "Components/RecentFiles.h"
@@ -26,9 +26,12 @@ class MainWindow : public QMainWindow {
   explicit MainWindow(QWidget *parent);
   ~MainWindow();
   void closeEvent(QCloseEvent *event);
-  static ResourceModelMap* resourceMap;
+  static ResourceModelMap *resourceMap;
   static TreeModel *treeModel;
   buffers::Game *Game() const { return this->project->mutable_game(); }
+
+  template <class T>
+  void CreateResource(TypeCase typeCase);
 
  public slots:
   void openFile(QString fName);
@@ -39,6 +42,19 @@ class MainWindow : public QMainWindow {
   void on_actionClearRecentMenu_triggered();
   void on_actionPreferences_triggered();
   void on_actionExit_triggered();
+
+  // resources menu
+  void on_actionCreate_Sprite_triggered();
+  void on_actionCreate_Sound_triggered();
+  void on_actionCreate_Background_triggered();
+  void on_actionCreate_Path_triggered();
+  void on_actionCreate_Script_triggered();
+  void on_actionCreate_Shader_triggered();
+  void on_actionCreate_Font_triggered();
+  void on_actionCreate_Time_Line_triggered();
+  void on_actionCreate_Object_triggered();
+  void on_actionCreate_Room_triggered();
+  void on_actionChange_Global_Game_Settings_triggered();
 
   // window menu
   void on_actionCascade_triggered();

@@ -61,7 +61,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
     }
 
     if (item->type_case() == TypeCase::kObject) {
-      const ProtoModel* sprModel = GetObjectSprite(item->name());
+      const ProtoModel *sprModel = GetObjectSprite(item->name());
       if (sprModel != nullptr) {
         QString spr = sprModel->GetString(Sprite::kSubimagesFieldNumber, 0);
         if (!spr.isEmpty()) return ArtManager::GetIcon(spr);
@@ -129,4 +129,11 @@ int TreeModel::rowCount(const QModelIndex &parent) const {
     parentItem = static_cast<buffers::TreeNode *>(parent.internalPointer());
 
   return parentItem->child_size();
+}
+
+void TreeModel::addNode(buffers::TreeNode *child, buffers::TreeNode *parent) {
+  auto rootIndex = QModelIndex();
+  emit beginInsertRows(rootIndex, parent->child_size(), parent->child_size());
+  parents[child] = parent;
+  emit endInsertRows();
 }
