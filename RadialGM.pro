@@ -67,7 +67,7 @@ SOURCES += \
     Editors/TimelineEditor.cpp \
     Editors/RoomEditor.cpp \
     Editors/SpriteEditor.cpp \
-    Widgets/BackgroundRenderer.cpp \
+    Widgets/BackgroundView.cpp \
     Widgets/CodeWidget.cpp \
     Widgets/ColorPicker.cpp \
     Models/TreeModel.cpp \
@@ -101,7 +101,7 @@ HEADERS += \
     Editors/TimelineEditor.h \
     Editors/RoomEditor.h \
     Editors/SpriteEditor.h \
-    Widgets/BackgroundRenderer.h \
+    Widgets/BackgroundView.h \
     Widgets/CodeWidget.h \
     Widgets/ColorPicker.h \
     Models/TreeModel.h \

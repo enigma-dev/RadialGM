@@ -3,7 +3,7 @@
 
 #include "BaseEditor.h"
 
-#include "Widgets/BackgroundRenderer.h"
+#include "Widgets/BackgroundView.h"
 
 namespace Ui {
 class BackgroundEditor;
@@ -30,7 +30,7 @@ class BackgroundEditor : public BaseEditor {
 
  private:
   Ui::BackgroundEditor *ui;
-  BackgroundRenderer *renderer;
+  BackgroundView *renderer;
 };
 
 #endif  // BACKGROUNDEDITOR_H

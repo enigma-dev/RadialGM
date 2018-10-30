@@ -391,7 +391,7 @@
           <number>2</number>
          </property>
          <item row="0" column="0">
-          <widget class="BackgroundRenderer" name="backgroundRenderer" native="true"/>
+          <widget class="BackgroundView" name="backgroundView" native="true"/>
          </item>
         </layout>
        </widget>
@@ -499,9 +499,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>BackgroundRenderer</class>
+   <class>BackgroundView</class>
    <extends>QWidget</extends>
-   <header>Widgets/BackgroundRenderer.h</header>
+   <header>Widgets/BackgroundView.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

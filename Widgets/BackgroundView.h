@@ -1,5 +1,5 @@
-#ifndef BACKGROUNDRENDERER_H
-#define BACKGROUNDRENDERER_H
+#ifndef BACKGROUNDVIEW_H
+#define BACKGROUNDVIEW_H
 
 #include "AssetView.h"
 #include "Models/ProtoModel.h"
@@ -7,10 +7,10 @@
 #include <QObject>
 #include <QWidget>
 
-class BackgroundRenderer : public AssetView {
+class BackgroundView : public AssetView {
   Q_OBJECT
  public:
-  explicit BackgroundRenderer(QWidget *parent);
+  explicit BackgroundView(QWidget *parent);
   QSize sizeHint() const override;
   void SetResourceModel(ProtoModel *model);
   bool SetImage(QString fName);
@@ -30,4 +30,4 @@ class BackgroundRenderer : public AssetView {
   qreal zoom;
 };
 
-#endif  // BACKGROUNDRENDERER_H
+#endif  // BACKGROUNDVIEW_H

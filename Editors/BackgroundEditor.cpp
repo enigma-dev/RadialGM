@@ -18,7 +18,7 @@ BackgroundEditor::BackgroundEditor(ProtoModel* model, QWidget* parent)
     : BaseEditor(model, parent), ui(new Ui::BackgroundEditor) {
   ui->setupUi(this);
 
-  ui->backgroundRenderer->SetResourceModel(resMapper->GetModel());
+  ui->backgroundView->SetResourceModel(resMapper->GetModel());
 
   resMapper->addMapping(ui->smoothCheckBox, Background::kSmoothEdgesFieldNumber);
   resMapper->addMapping(ui->preloadCheckBox, Background::kPreloadFieldNumber);
@@ -37,7 +37,7 @@ BackgroundEditor::~BackgroundEditor() { delete ui; }
 void BackgroundEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVariant& oldValue,
                                    const QVector<int>& roles) {
   BaseEditor::dataChanged(topLeft, bottomRight, oldValue, roles);
-  ui->backgroundRenderer->update();
+  ui->backgroundView->update();
 }
 
 void BackgroundEditor::on_actionSave_triggered() {
@@ -46,14 +46,14 @@ void BackgroundEditor::on_actionSave_triggered() {
 }
 
 void BackgroundEditor::on_actionZoomIn_triggered() {
-  ui->backgroundRenderer->SetZoom(ui->backgroundRenderer->GetZoom() * 2);
+  ui->backgroundView->SetZoom(ui->backgroundView->GetZoom() * 2);
 }
 
 void BackgroundEditor::on_actionZoomOut_triggered() {
-  ui->backgroundRenderer->SetZoom(ui->backgroundRenderer->GetZoom() / 2);
+  ui->backgroundView->SetZoom(ui->backgroundView->GetZoom() / 2);
 }
 
-void BackgroundEditor::on_actionZoom_triggered() { ui->backgroundRenderer->SetZoom(1); }
+void BackgroundEditor::on_actionZoom_triggered() { ui->backgroundView->SetZoom(1); }
 
 void BackgroundEditor::on_actionNewImage_triggered() {
   QDialog dialog(this);
@@ -66,7 +66,7 @@ void BackgroundEditor::on_actionNewImage_triggered() {
   if (result != QDialog::Accepted) return;
   QPixmap img(dialogUI.widthSpinBox->value(), dialogUI.heightSpinBox->value());
   img.fill(Qt::transparent);
-  ui->backgroundRenderer->SetImage(img);
+  ui->backgroundView->SetImage(img);
 }
 
 void BackgroundEditor::on_actionLoadImage_triggered() {
@@ -80,9 +80,9 @@ void BackgroundEditor::on_actionLoadImage_triggered() {
       QString lastImage = GetModelData(Background::kImageFieldNumber).toString();
       ReplaceBuffer(bkg);
       QString newImage = GetModelData(Background::kImageFieldNumber).toString();
-      if (!ui->backgroundRenderer->SetImage(newImage)) SetModelData(Background::kImageFieldNumber, lastImage);
+      if (!ui->backgroundView->SetImage(newImage)) SetModelData(Background::kImageFieldNumber, lastImage);
     } else {
-      if (ui->backgroundRenderer->SetImage(fName)) SetModelData(Background::kImageFieldNumber, fName);
+      if (ui->backgroundView->SetImage(fName)) SetModelData(Background::kImageFieldNumber, fName);
     }
   }
 }
@@ -93,7 +93,7 @@ void BackgroundEditor::on_actionSaveImage_triggered() {
 
   if (dialog->selectedFiles().size() > 0) {
     QString fName = dialog->selectedFiles()[0];
-    ui->backgroundRenderer->WriteImage(fName, dialog->selectedMimeTypeFilter());
+    ui->backgroundView->WriteImage(fName, dialog->selectedMimeTypeFilter());
   }
 }
 

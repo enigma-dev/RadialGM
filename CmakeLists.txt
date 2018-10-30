@@ -49,7 +49,7 @@ set(RGM_SOURCES
     Components/Utility.cpp
     Components/RecentFiles.cpp
     Components/QMenuView.cpp
-    Widgets/BackgroundRenderer.cpp
+    Widgets/BackgroundView.cpp
     Widgets/CodeWidget.cpp
     Widgets/ColorPicker.cpp
     Widgets/RoomRenderer.cpp
@@ -87,7 +87,7 @@ set(RGM_HEADERS
     Components/RecentFiles.h
     Components/Utility.h
     Components/QMenuView.h
-    Widgets/BackgroundRenderer.h
+    Widgets/BackgroundView.h
     Widgets/CodeWidget.h
     Widgets/ColorPicker.h
     Widgets/RoomRenderer.h
