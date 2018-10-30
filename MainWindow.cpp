@@ -296,14 +296,27 @@ void MainWindow::on_actionClearRecentMenu_triggered() { recentFiles->clear(); }
 void MainWindow::CreateResource(TypeCase typeCase) {
   auto *root = this->project->mutable_game()->mutable_root();
   auto *child = root->add_child();
-  child->set_name("holyshit");
   auto fieldNum = ResTypeFields[typeCase];
   const Descriptor *desc = child->GetDescriptor();
   const Reflection *refl = child->GetReflection();
   const FieldDescriptor *field = desc->FindFieldByNumber(fieldNum);
+
+  // find a unique name for the new resource
+  const std::string pre = field->name();
+  std::string name;
+  int i = 0;
+  do {
+    name = pre + std::to_string(i++);
+  } while (resourceMap->GetResourceByName(typeCase, name) != nullptr);
+  child->set_name(name);
+
+  // allocate and set the child's resource field
   refl->MutableMessage(child, field);
+
   this->resourceMap->AddResource(child, resourceMap);
   this->treeModel->addNode(child, root);
+
+  // open the new resource for editing
   openSubWindow(child);
 }
 
