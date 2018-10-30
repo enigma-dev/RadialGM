@@ -1305,7 +1305,7 @@
             <number>0</number>
            </property>
            <item row="0" column="0">
-            <widget class="RoomRenderer" name="roomRenderer" native="true"/>
+            <widget class="RoomView" name="roomView" native="true"/>
            </item>
           </layout>
          </widget>
@@ -1454,9 +1454,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>RoomRenderer</class>
+   <class>RoomView</class>
    <extends>QWidget</extends>
-   <header>Widgets/RoomRenderer.h</header>
+   <header>Widgets/RoomView.h</header>
   </customwidget>
  </customwidgets>
  <resources>
