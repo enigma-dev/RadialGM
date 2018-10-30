@@ -54,13 +54,6 @@ void BackgroundView::WriteImage(QString fName, QString type) {
 
 QSize BackgroundView::sizeHint() const { return QSize(pixmap.width(), pixmap.height()); }
 
-void BackgroundView::SetZoom(qreal zoom) {
-  if (zoom > 3200) zoom = 3200;
-  if (zoom < 0.0625) zoom = 0.0625;
-  this->zoom = zoom;
-  setFixedSize(static_cast<int>(pixmap.width() * zoom) + 1, static_cast<int>(pixmap.height() * zoom) + 1);
-}
-
 void BackgroundView::paintEvent(QPaintEvent * /* event */) {
   if (!model) return;
 

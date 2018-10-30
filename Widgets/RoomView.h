@@ -14,7 +14,6 @@ class RoomView : public AssetView {
   explicit RoomView(QWidget *parent);
   QSize sizeHint() const override;
   void SetResourceModel(ProtoModel *model);
-  void SetZoom(qreal zoom);
 
  protected:
   void paintEvent(QPaintEvent *event) override;

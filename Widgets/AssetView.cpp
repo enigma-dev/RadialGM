@@ -2,6 +2,13 @@
 
 AssetView::AssetView(QWidget* parent) : QWidget(parent), zoom(1) {}
 
+void AssetView::SetZoom(qreal zoom) {
+  if (zoom > 3200) zoom = 3200;
+  if (zoom < 0.0625) zoom = 0.0625;
+  this->zoom = zoom;
+  setFixedSize(sizeHint() * zoom);
+}
+
 const qreal& AssetView::GetZoom() const { return zoom; }
 
 void AssetView::paintGrid(QPainter& painter, int width, int height, int gridHorSpacing, int gridVertSpacing,

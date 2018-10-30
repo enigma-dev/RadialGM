@@ -13,6 +13,9 @@ class AssetView : public QWidget {
                  int gridVertOff, int gridWidth, int gridHeight);
   const qreal& GetZoom() const;
 
+ public slots:
+  void SetZoom(qreal zoom);
+
  protected:
   qreal zoom;
 };

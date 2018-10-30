@@ -18,20 +18,6 @@ QSize RoomView::sizeHint() const {
   return QSize(roomWidth, roomHeight);
 }
 
-void RoomView::SetZoom(qreal zoom) {
-  if (zoom > 3200) zoom = 3200;
-  if (zoom < 0.0625) zoom = 0.0625;
-  this->zoom = zoom;
-  QSize size(640, 480);
-  if (model) {
-    size.setWidth(model->data(Room::kWidthFieldNumber).toUInt());
-    size.setHeight(model->data(Room::kHeightFieldNumber).toUInt());
-  }
-  size *= zoom;
-
-  setFixedSize(size);
-}
-
 void RoomView::paintEvent(QPaintEvent* /* event */) {
   if (!model) return;
   QPainter painter(this);
