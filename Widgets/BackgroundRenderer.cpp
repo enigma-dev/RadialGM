@@ -1,7 +1,6 @@
 #include "BackgroundRenderer.h"
 
 #include "Components/ArtManager.h"
-#include "Components/Utility.h"
 
 #include "codegen/Background.pb.h"
 
@@ -10,7 +9,7 @@
 
 using buffers::resources::Background;
 
-BackgroundRenderer::BackgroundRenderer(QWidget *parent) : QWidget(parent), model(nullptr), zoom(1) {}
+BackgroundRenderer::BackgroundRenderer(QWidget *parent) : AssetView(parent), model(nullptr), zoom(1) {}
 
 void BackgroundRenderer::SetResourceModel(ProtoModel *model) {
   this->model = model;
@@ -84,7 +83,7 @@ void BackgroundRenderer::paintEvent(QPaintEvent * /* event */) {
   int gridHeight = model->data(Background::kTileHeightFieldNumber).toInt();
 
   if (gridVisible) {
-    paint_grid(painter, pixmap.width(), pixmap.height(), gridHorSpacing, gridVertSpacing, gridHorOff, gridVertOff,
-               gridWidth, gridHeight);
+    paintGrid(painter, pixmap.width(), pixmap.height(), gridHorSpacing, gridVertSpacing, gridHorOff, gridVertOff,
+              gridWidth, gridHeight);
   }
 }

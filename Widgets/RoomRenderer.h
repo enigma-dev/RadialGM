@@ -1,12 +1,13 @@
 #ifndef ROOMRENDERER_H
 #define ROOMRENDERER_H
 
+#include "AssetView.h"
 #include "Models/ProtoModel.h"
 
 #include <QObject>
 #include <QWidget>
 
-class RoomRenderer : public QWidget {
+class RoomRenderer : public AssetView {
   Q_OBJECT
 
  public:

@@ -1,11 +1,10 @@
 #include "RoomRenderer.h"
 #include "Components/ArtManager.h"
-#include "Components/Utility.h"
 #include "MainWindow.h"
 
 #include <QPainter>
 
-RoomRenderer::RoomRenderer(QWidget* parent) : QWidget(parent), model(nullptr) { this->SetZoom(1.0); }
+RoomRenderer::RoomRenderer(QWidget* parent) : AssetView(parent), model(nullptr) { this->SetZoom(1.0); }
 
 void RoomRenderer::SetResourceModel(ProtoModel* model) {
   this->model = model;
@@ -171,7 +170,7 @@ void RoomRenderer::paintGrid(QPainter& painter, Room* room) {
   int roomWidth = static_cast<int>(room->width()), roomHeight = static_cast<int>(room->height());
 
   if (gridVisible) {
-    paint_grid(painter, roomWidth, roomHeight, gridHorSpacing, gridVertSpacing, gridHorOff, gridVertOff, gridWidth,
-               gridHeight);
+    AssetView::paintGrid(painter, roomWidth, roomHeight, gridHorSpacing, gridVertSpacing, gridHorOff, gridVertOff,
+                         gridWidth, gridHeight);
   }
 }

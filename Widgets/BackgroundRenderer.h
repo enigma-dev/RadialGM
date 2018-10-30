@@ -1,12 +1,13 @@
 #ifndef BACKGROUNDRENDERER_H
 #define BACKGROUNDRENDERER_H
 
+#include "AssetView.h"
 #include "Models/ProtoModel.h"
 
 #include <QObject>
 #include <QWidget>
 
-class BackgroundRenderer : public QWidget {
+class BackgroundRenderer : public AssetView {
   Q_OBJECT
  public:
   explicit BackgroundRenderer(QWidget *parent);

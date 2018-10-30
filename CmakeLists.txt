@@ -53,6 +53,7 @@ set(RGM_SOURCES
     Widgets/CodeWidget.cpp
     Widgets/ColorPicker.cpp
     Widgets/RoomRenderer.cpp
+    Widgets/AssetView.cpp
     Plugins/RGMPlugin.cpp
     Plugins/ServerPlugin.cpp
     qtplugins.cpp
@@ -90,6 +91,7 @@ set(RGM_HEADERS
     Widgets/CodeWidget.h
     Widgets/ColorPicker.h
     Widgets/RoomRenderer.h
+    Widgets/AssetView.h
     Plugins/RGMPlugin.h
     Plugins/ServerPlugin.h
 )
