@@ -54,7 +54,7 @@ struct AsyncReadWorker : public CallData {
 
   virtual void started() {}
   virtual void finished() {}
-  virtual void process(const T& data) = 0;
+  virtual void process(const T&) = 0;
 };
 
 template <class T>
@@ -82,7 +82,7 @@ struct AsyncResponseReadWorker : public CallData {
   virtual void finish() final {}
 
   virtual void started() {}
-  virtual void finished(const T& data) {}
+  virtual void finished(const T&) {}
 };
 
 struct ResourceReader : public AsyncReadWorker<Resource> {
@@ -128,7 +128,7 @@ struct CompileReader : public AsyncReadWorker<CompileReply> {
 
 struct SyntaxCheckReader : public AsyncResponseReadWorker<SyntaxError> {
   virtual ~SyntaxCheckReader() {}
-  virtual void finished(const SyntaxError& /*err*/) final {}
+  virtual void finished(const SyntaxError&) final {}
 };
 
 CompilerClient::~CompilerClient() {}
