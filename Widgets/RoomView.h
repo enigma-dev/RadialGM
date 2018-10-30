@@ -15,7 +15,6 @@ class RoomView : public AssetView {
   QSize sizeHint() const override;
   void SetResourceModel(ProtoModel *model);
   void SetZoom(qreal zoom);
-  const qreal &GetZoom() const;
 
  protected:
   void paintEvent(QPaintEvent *event) override;
@@ -23,7 +22,6 @@ class RoomView : public AssetView {
  private:
   ProtoModel *model;
   QPixmap transparentPixmap;
-  qreal zoom;
 
   void paintTiles(QPainter &painter, Room *room);
   void paintBackgrounds(QPainter &painter, Room *room, bool foregrounds = false);

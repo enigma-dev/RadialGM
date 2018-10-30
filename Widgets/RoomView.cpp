@@ -32,8 +32,6 @@ void RoomView::SetZoom(qreal zoom) {
   setFixedSize(size);
 }
 
-const qreal& RoomView::GetZoom() const { return zoom; }
-
 void RoomView::paintEvent(QPaintEvent* /* event */) {
   if (!model) return;
   QPainter painter(this);

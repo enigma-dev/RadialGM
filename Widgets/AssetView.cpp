@@ -1,6 +1,8 @@
 #include "AssetView.h"
 
-AssetView::AssetView(QWidget* parent) : QWidget(parent) {}
+AssetView::AssetView(QWidget* parent) : QWidget(parent), zoom(1) {}
+
+const qreal& AssetView::GetZoom() const { return zoom; }
 
 void AssetView::paintGrid(QPainter& painter, int width, int height, int gridHorSpacing, int gridVertSpacing,
                           int gridHorOff, int gridVertOff, int gridWidth, int gridHeight) {

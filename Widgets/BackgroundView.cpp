@@ -9,7 +9,7 @@
 
 using buffers::resources::Background;
 
-BackgroundView::BackgroundView(QWidget *parent) : AssetView(parent), model(nullptr), zoom(1) {}
+BackgroundView::BackgroundView(QWidget *parent) : AssetView(parent), model(nullptr) {}
 
 void BackgroundView::SetResourceModel(ProtoModel *model) {
   this->model = model;
@@ -60,8 +60,6 @@ void BackgroundView::SetZoom(qreal zoom) {
   this->zoom = zoom;
   setFixedSize(static_cast<int>(pixmap.width() * zoom) + 1, static_cast<int>(pixmap.height() * zoom) + 1);
 }
-
-const qreal &BackgroundView::GetZoom() const { return zoom; }
 
 void BackgroundView::paintEvent(QPaintEvent * /* event */) {
   if (!model) return;

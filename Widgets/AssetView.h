@@ -11,10 +11,10 @@ class AssetView : public QWidget {
 
   void paintGrid(QPainter& painter, int width, int height, int gridHorSpacing, int gridVertSpacing, int gridHorOff,
                  int gridVertOff, int gridWidth, int gridHeight);
+  const qreal& GetZoom() const;
 
- signals:
-
- public slots:
+ protected:
+  qreal zoom;
 };
 
 #endif  // ASSETVIEW_H

@@ -17,7 +17,6 @@ class BackgroundView : public AssetView {
   bool SetImage(QPixmap image);
   void WriteImage(QString fName, QString type);
   void SetZoom(qreal zoom);
-  const qreal &GetZoom() const;
 
  protected:
   void paintEvent(QPaintEvent *event) override;
@@ -27,7 +26,6 @@ class BackgroundView : public AssetView {
   QPixmap pixmap;
   QPixmap transparentPixmap;
   QColor transparencyColor;
-  qreal zoom;
 };
 
 #endif  // BACKGROUNDVIEW_H
