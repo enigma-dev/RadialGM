@@ -33,7 +33,7 @@
 ResourceModelMap *MainWindow::resourceMap = nullptr;
 TreeModel *MainWindow::treeModel = nullptr;
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), project(new buffers::Project()) {
   ArtManager::Init();
 
   setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
@@ -161,11 +161,11 @@ void MainWindow::openFile(QString fName) {
   const QString suffix = fileInfo.suffix();
 
   if (suffix == "gm81" || suffix == "gmk" || suffix == "gm6" || suffix == "gmd") {
-    project = gmk::LoadGMK(fName.toStdString());
+    project.reset(gmk::LoadGMK(fName.toStdString()));
   } else if (suffix == "gmx") {
-    project = gmx::LoadGMX(fName.toStdString());
+    project.reset(gmx::LoadGMX(fName.toStdString()));
   } else if (suffix == "yyp") {
-    project = yyp::LoadYYP(fName.toStdString());
+    project.reset(yyp::LoadYYP(fName.toStdString()));
   }
 
   if (!project) {

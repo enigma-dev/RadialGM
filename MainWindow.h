@@ -79,7 +79,7 @@ class MainWindow : public QMainWindow {
 
   Ui::MainWindow *ui;
 
-  buffers::Project *project;
+  std::unique_ptr<buffers::Project> project;
   QPointer<RecentFiles> recentFiles;
 
   void openSubWindow(buffers::TreeNode *item);
