@@ -70,6 +70,7 @@ SOURCES += \
     Widgets/BackgroundView.cpp \
     Widgets/CodeWidget.cpp \
     Widgets/ColorPicker.cpp \
+    Widgets/AssetView.cpp \
     Models/TreeModel.cpp \
     Components/ArtManager.cpp \
     Models/ProtoModel.cpp \
@@ -86,8 +87,7 @@ SOURCES += \
     Models/RepeatedProtoModel.cpp \
     Widgets/RoomView.cpp \
     Components/QMenuView.cpp \
-    Models/TreeSortFilterProxyModel.cpp \
-    Widgets/AssetView.cpp
+    Models/TreeSortFilterProxyModel.cpp
 
 HEADERS += \
     MainWindow.h \
@@ -104,6 +104,7 @@ HEADERS += \
     Widgets/BackgroundView.h \
     Widgets/CodeWidget.h \
     Widgets/ColorPicker.h \
+    Widgets/AssetView.h \
     Models/TreeModel.h \
     Components/ArtManager.h \
     Models/ProtoModel.h \
@@ -123,8 +124,7 @@ HEADERS += \
     Widgets/RoomView.h \
     Components/QMenuView.h \
     Components/QMenuView_p.h \
-    Models/TreeSortFilterProxyModel.h \
-    Widgets/AssetView.h
+    Models/TreeSortFilterProxyModel.h
 
 FORMS += \
     MainWindow.ui \
