@@ -37,8 +37,8 @@ void AssetView::paintGrid(QPainter& painter, int width, int height, int gridHorS
       }
     }
   } else {
-    for (int x = gridHorOff; x <= width; x += gridWidth) painter.drawLine(x, 0, x, height);
-    for (int y = gridVertOff; y <= height; y += gridHeight) painter.drawLine(0, y, width, y);
+    for (int x = gridHorOff; x <= width; x += gridWidth) painter.drawLine(x, gridVertOff, x, gridVertOff + height);
+    for (int y = gridVertOff; y <= height; y += gridHeight) painter.drawLine(gridHorOff, y, gridHorOff + width, y);
   }
 
   painter.restore();
