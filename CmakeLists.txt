@@ -50,10 +50,11 @@ set(RGM_SOURCES
     Components/Utility.cpp
     Components/RecentFiles.cpp
     Components/QMenuView.cpp
-    Widgets/BackgroundRenderer.cpp
+    Widgets/BackgroundView.cpp
     Widgets/CodeWidget.cpp
     Widgets/ColorPicker.cpp
-    Widgets/RoomRenderer.cpp
+    Widgets/RoomView.cpp
+    Widgets/AssetView.cpp
     Plugins/RGMPlugin.cpp
     Plugins/ServerPlugin.cpp
     qtplugins.cpp
@@ -88,10 +89,11 @@ set(RGM_HEADERS
     Components/RecentFiles.h
     Components/Utility.h
     Components/QMenuView.h
-    Widgets/BackgroundRenderer.h
+    Widgets/BackgroundView.h
     Widgets/CodeWidget.h
     Widgets/ColorPicker.h
-    Widgets/RoomRenderer.h
+    Widgets/RoomView.h
+    Widgets/AssetView.h
     Plugins/RGMPlugin.h
     Plugins/ServerPlugin.h
 )
