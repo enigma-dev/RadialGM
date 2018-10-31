@@ -189,7 +189,7 @@
              </sizepolicy>
             </property>
             <property name="wrapping">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
             <property name="frame">
              <bool>true</bool>
@@ -201,10 +201,10 @@
              <bool>true</bool>
             </property>
             <property name="minimum">
-             <number>-2147483647</number>
+             <number>0</number>
             </property>
             <property name="maximum">
-             <number>2147483647</number>
+             <number>32000</number>
             </property>
             <property name="value">
              <number>16</number>
@@ -221,16 +221,16 @@
           <item row="1" column="1">
            <widget class="QSpinBox" name="tileHeightSpinBox">
             <property name="wrapping">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
             <property name="frame">
              <bool>true</bool>
             </property>
             <property name="minimum">
-             <number>-2147483647</number>
+             <number>0</number>
             </property>
             <property name="maximum">
-             <number>2147483647</number>
+             <number>32000</number>
             </property>
             <property name="value">
              <number>16</number>
@@ -247,13 +247,13 @@
           <item row="3" column="1">
            <widget class="QSpinBox" name="horizontalOffsetSpinBox">
             <property name="wrapping">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
             <property name="minimum">
-             <number>-2147483647</number>
+             <number>0</number>
             </property>
             <property name="maximum">
-             <number>2147483647</number>
+             <number>32000</number>
             </property>
            </widget>
           </item>
@@ -267,13 +267,13 @@
           <item row="4" column="1">
            <widget class="QSpinBox" name="verticalOffsetSpinBox">
             <property name="wrapping">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
             <property name="minimum">
-             <number>-2147483647</number>
+             <number>0</number>
             </property>
             <property name="maximum">
-             <number>2147483647</number>
+             <number>32000</number>
             </property>
            </widget>
           </item>
@@ -303,13 +303,13 @@
           <item row="6" column="1">
            <widget class="QSpinBox" name="horizontalSpacingSpinBox">
             <property name="wrapping">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
             <property name="minimum">
-             <number>-2147483647</number>
+             <number>0</number>
             </property>
             <property name="maximum">
-             <number>2147483647</number>
+             <number>32000</number>
             </property>
            </widget>
           </item>
@@ -323,13 +323,13 @@
           <item row="7" column="1">
            <widget class="QSpinBox" name="verticalSpacingSpinBox">
             <property name="wrapping">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
             <property name="minimum">
-             <number>-2147483647</number>
+             <number>0</number>
             </property>
             <property name="maximum">
-             <number>2147483647</number>
+             <number>32000</number>
             </property>
            </widget>
           </item>
@@ -367,7 +367,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>375</width>
+          <width>426</width>
           <height>311</height>
          </rect>
         </property>
@@ -391,7 +391,7 @@
           <number>2</number>
          </property>
          <item row="0" column="0">
-          <widget class="BackgroundRenderer" name="backgroundRenderer" native="true"/>
+          <widget class="BackgroundView" name="backgroundView" native="true"/>
          </item>
         </layout>
        </widget>
@@ -499,9 +499,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>BackgroundRenderer</class>
+   <class>BackgroundView</class>
    <extends>QWidget</extends>
-   <header>Widgets/BackgroundRenderer.h</header>
+   <header>Widgets/BackgroundView.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

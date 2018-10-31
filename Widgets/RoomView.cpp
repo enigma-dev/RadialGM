@@ -1,40 +1,24 @@
-#include "RoomRenderer.h"
+#include "RoomView.h"
 #include "Components/ArtManager.h"
 #include "MainWindow.h"
 
 #include <QPainter>
 
-RoomRenderer::RoomRenderer(QWidget* parent) : QWidget(parent), model(nullptr) { this->SetZoom(1.0); }
+RoomView::RoomView(QWidget* parent) : AssetView(parent), model(nullptr) { this->SetZoom(1.0); }
 
-void RoomRenderer::SetResourceModel(ProtoModel* model) {
+void RoomView::SetResourceModel(ProtoModel* model) {
   this->model = model;
   this->SetZoom(1.0);
 }
 
-QSize RoomRenderer::sizeHint() const {
+QSize RoomView::sizeHint() const {
   if (!model) return QSize(640, 480);
   unsigned roomWidth = model->data(Room::kWidthFieldNumber).toUInt(),
            roomHeight = model->data(Room::kHeightFieldNumber).toUInt();
   return QSize(roomWidth, roomHeight);
 }
 
-void RoomRenderer::SetZoom(qreal zoom) {
-  if (zoom > 3200) zoom = 3200;
-  if (zoom < 0.0625) zoom = 0.0625;
-  this->zoom = zoom;
-  QSize size(640, 480);
-  if (model) {
-    size.setWidth(model->data(Room::kWidthFieldNumber).toUInt());
-    size.setHeight(model->data(Room::kHeightFieldNumber).toUInt());
-  }
-  size *= zoom;
-
-  setFixedSize(size);
-}
-
-const qreal& RoomRenderer::GetZoom() const { return zoom; }
-
-void RoomRenderer::paintEvent(QPaintEvent* /* event */) {
+void RoomView::paintEvent(QPaintEvent* /* event */) {
   if (!model) return;
   QPainter painter(this);
 
@@ -52,7 +36,7 @@ void RoomRenderer::paintEvent(QPaintEvent* /* event */) {
   this->paintGrid(painter, room);
 }
 
-void RoomRenderer::paintTiles(QPainter& painter, Room* room) {
+void RoomView::paintTiles(QPainter& painter, Room* room) {
   google::protobuf::RepeatedField<Room::Tile> sortedTiles(room->mutable_tiles()->begin(), room->mutable_tiles()->end());
 
   std::sort(sortedTiles.begin(), sortedTiles.end(),
@@ -78,7 +62,7 @@ void RoomRenderer::paintTiles(QPainter& painter, Room* room) {
   }
 }
 
-void RoomRenderer::paintBackgrounds(QPainter& painter, Room* room, bool foregrounds) {
+void RoomView::paintBackgrounds(QPainter& painter, Room* room, bool foregrounds) {
   for (auto bkg : room->backgrounds()) {  //TODO: need to draw last if foreground
     if (!bkg.visible() || bkg.foreground() != foregrounds) continue;
     ProtoModel* bkgRes = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, bkg.background_name());
@@ -113,7 +97,7 @@ void RoomRenderer::paintBackgrounds(QPainter& painter, Room* room, bool foregrou
   }
 }
 
-void RoomRenderer::paintInstances(QPainter& painter, Room* room) {
+void RoomView::paintInstances(QPainter& painter, Room* room) {
   google::protobuf::RepeatedField<Room::Instance> sortedInstances(room->mutable_instances()->begin(),
                                                                   room->mutable_instances()->end());
 
@@ -134,7 +118,8 @@ void RoomRenderer::paintInstances(QPainter& painter, Room* room) {
     int yoff = 0;
 
     const ProtoModel* spr = GetObjectSprite(inst.object_type());
-    if (spr == nullptr) imgFile = "object";
+    if (spr == nullptr)
+      imgFile = "object";
     else {
       imgFile = spr->GetString(Sprite::kSubimagesFieldNumber, 0);
       w = spr->data(Sprite::kWidthFieldNumber).toInt();
@@ -157,7 +142,7 @@ void RoomRenderer::paintInstances(QPainter& painter, Room* room) {
   }
 }
 
-void RoomRenderer::paintGrid(QPainter& painter, Room* room) {
+void RoomView::paintGrid(QPainter& painter, Room* room) {
   bool gridVisible = true;
   int gridHorSpacing = 0;
   int gridVertSpacing = 0;
@@ -169,23 +154,7 @@ void RoomRenderer::paintGrid(QPainter& painter, Room* room) {
   int roomWidth = static_cast<int>(room->width()), roomHeight = static_cast<int>(room->height());
 
   if (gridVisible) {
-    painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
-    painter.setPen(QColor(0xff, 0xff, 0xff));
-
-    if (gridHorSpacing != 0 || gridVertSpacing != 0) {
-      for (int x = gridHorOff; x < roomWidth; x += gridWidth + gridHorSpacing) {
-        for (int y = gridVertOff; y < roomHeight; y += gridHeight + gridVertSpacing) {
-          painter.drawRect(x, y, gridWidth, gridHeight);
-        }
-      }
-    }
-
-    if (gridHorSpacing == 0) {
-      for (int x = gridHorOff; x <= roomWidth; x += gridWidth) painter.drawLine(x, 0, x, roomHeight);
-    }
-
-    if (gridVertSpacing == 0) {
-      for (int y = gridVertOff; y <= roomHeight; y += gridHeight) painter.drawLine(0, y, roomWidth, y);
-    }
+    AssetView::paintGrid(painter, roomWidth, roomHeight, gridHorSpacing, gridVertSpacing, gridHorOff, gridVertOff,
+                         gridWidth, gridHeight);
   }
 }

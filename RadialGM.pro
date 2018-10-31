@@ -67,9 +67,10 @@ SOURCES += \
     Editors/TimelineEditor.cpp \
     Editors/RoomEditor.cpp \
     Editors/SpriteEditor.cpp \
-    Widgets/BackgroundRenderer.cpp \
+    Widgets/BackgroundView.cpp \
     Widgets/CodeWidget.cpp \
     Widgets/ColorPicker.cpp \
+    Widgets/AssetView.cpp \
     Models/TreeModel.cpp \
     Components/ArtManager.cpp \
     Models/ProtoModel.cpp \
@@ -84,7 +85,7 @@ SOURCES += \
     Models/ResourceModelMap.cpp \
     Models/ModelMapper.cpp \
     Models/RepeatedProtoModel.cpp \
-    Widgets/RoomRenderer.cpp \
+    Widgets/RoomView.cpp \
     Components/QMenuView.cpp \
     Models/TreeSortFilterProxyModel.cpp
 
@@ -100,9 +101,10 @@ HEADERS += \
     Editors/TimelineEditor.h \
     Editors/RoomEditor.h \
     Editors/SpriteEditor.h \
-    Widgets/BackgroundRenderer.h \
+    Widgets/BackgroundView.h \
     Widgets/CodeWidget.h \
     Widgets/ColorPicker.h \
+    Widgets/AssetView.h \
     Models/TreeModel.h \
     Components/ArtManager.h \
     Models/ProtoModel.h \
@@ -119,7 +121,7 @@ HEADERS += \
     Models/ResourceModelMap.h \
     Models/ModelMapper.h \
     Models/RepeatedProtoModel.h \
-    Widgets/RoomRenderer.h \
+    Widgets/RoomView.h \
     Components/QMenuView.h \
     Components/QMenuView_p.h \
     Models/TreeSortFilterProxyModel.h
