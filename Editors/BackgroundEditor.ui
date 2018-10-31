@@ -189,7 +189,7 @@
              </sizepolicy>
             </property>
             <property name="wrapping">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
             <property name="frame">
              <bool>true</bool>
@@ -221,7 +221,7 @@
           <item row="1" column="1">
            <widget class="QSpinBox" name="tileHeightSpinBox">
             <property name="wrapping">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
             <property name="frame">
              <bool>true</bool>
@@ -247,7 +247,7 @@
           <item row="3" column="1">
            <widget class="QSpinBox" name="horizontalOffsetSpinBox">
             <property name="wrapping">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
             <property name="minimum">
              <number>0</number>
@@ -267,7 +267,7 @@
           <item row="4" column="1">
            <widget class="QSpinBox" name="verticalOffsetSpinBox">
             <property name="wrapping">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
             <property name="minimum">
              <number>0</number>
@@ -303,7 +303,7 @@
           <item row="6" column="1">
            <widget class="QSpinBox" name="horizontalSpacingSpinBox">
             <property name="wrapping">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
             <property name="minimum">
              <number>0</number>
@@ -323,7 +323,7 @@
           <item row="7" column="1">
            <widget class="QSpinBox" name="verticalSpacingSpinBox">
             <property name="wrapping">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
             <property name="minimum">
              <number>0</number>
