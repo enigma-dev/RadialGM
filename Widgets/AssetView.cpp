@@ -13,6 +13,9 @@ const qreal& AssetView::GetZoom() const { return zoom; }
 
 void AssetView::paintGrid(QPainter& painter, int width, int height, int gridHorSpacing, int gridVertSpacing,
                           int gridHorOff, int gridVertOff, int gridWidth, int gridHeight) {
+  if (width == 0 || height == 0) return;
+  if (gridWidth == 0 || gridHeight == 0) return;
+
   painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
   painter.setPen(QColor(Qt::white));
 
