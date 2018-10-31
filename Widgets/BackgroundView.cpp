@@ -1,4 +1,4 @@
-#include "BackgroundRenderer.h"
+#include "BackgroundView.h"
 
 #include "Components/ArtManager.h"
 
@@ -9,14 +9,14 @@
 
 using buffers::resources::Background;
 
-BackgroundRenderer::BackgroundRenderer(QWidget *parent) : QWidget(parent), model(nullptr), zoom(1) {}
+BackgroundView::BackgroundView(QWidget *parent) : AssetView(parent), model(nullptr) {}
 
-void BackgroundRenderer::SetResourceModel(ProtoModel *model) {
+void BackgroundView::SetResourceModel(ProtoModel *model) {
   this->model = model;
   SetImage(model->data(Background::kImageFieldNumber).toString());
 }
 
-bool BackgroundRenderer::SetImage(QPixmap image) {
+bool BackgroundView::SetImage(QPixmap image) {
   if (image.isNull()) return false;
 
   zoom = 1;
@@ -38,7 +38,7 @@ bool BackgroundRenderer::SetImage(QPixmap image) {
   return true;
 }
 
-bool BackgroundRenderer::SetImage(QString fName) {
+bool BackgroundView::SetImage(QString fName) {
   if (!SetImage(ArtManager::GetCachedPixmap(fName))) {
     QMessageBox::critical(this, tr("Failed to load image"), tr("Error opening: ") + fName, QMessageBox::Ok);
     return false;
@@ -47,23 +47,14 @@ bool BackgroundRenderer::SetImage(QString fName) {
   return true;
 }
 
-void BackgroundRenderer::WriteImage(QString fName, QString type) {
+void BackgroundView::WriteImage(QString fName, QString type) {
   if (!pixmap.save(fName, type.toStdString().c_str()))
     QMessageBox::critical(this, tr("Failed to save image"), tr("Error writing: ") + fName, QMessageBox::Ok);
 }
 
-QSize BackgroundRenderer::sizeHint() const { return QSize(pixmap.width(), pixmap.height()); }
+QSize BackgroundView::sizeHint() const { return QSize(pixmap.width(), pixmap.height()); }
 
-void BackgroundRenderer::SetZoom(qreal zoom) {
-  if (zoom > 3200) zoom = 3200;
-  if (zoom < 0.0625) zoom = 0.0625;
-  this->zoom = zoom;
-  setFixedSize(static_cast<int>(pixmap.width() * zoom) + 1, static_cast<int>(pixmap.height() * zoom) + 1);
-}
-
-const qreal &BackgroundRenderer::GetZoom() const { return zoom; }
-
-void BackgroundRenderer::paintEvent(QPaintEvent * /* event */) {
+void BackgroundView::paintEvent(QPaintEvent * /* event */) {
   if (!model) return;
 
   QPainter painter(this);
@@ -83,23 +74,7 @@ void BackgroundRenderer::paintEvent(QPaintEvent * /* event */) {
   int gridHeight = model->data(Background::kTileHeightFieldNumber).toInt();
 
   if (gridVisible) {
-    painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
-    painter.setPen(QColor(0xff, 0xff, 0xff));
-
-    if (gridHorSpacing != 0 || gridVertSpacing != 0) {
-      for (int x = gridHorOff; x < pixmap.width(); x += gridWidth + gridHorSpacing) {
-        for (int y = gridVertOff; y < pixmap.height(); y += gridHeight + gridVertSpacing) {
-          painter.drawRect(x, y, gridWidth, gridHeight);
-        }
-      }
-    }
-
-    if (gridHorSpacing == 0) {
-      for (int x = gridHorOff; x <= pixmap.width(); x += gridWidth) painter.drawLine(x, 0, x, pixmap.height());
-    }
-
-    if (gridVertSpacing == 0) {
-      for (int y = gridVertOff; y <= pixmap.height(); y += gridHeight) painter.drawLine(0, y, pixmap.width(), y);
-    }
+    paintGrid(painter, pixmap.width(), pixmap.height(), gridHorSpacing, gridVertSpacing, gridHorOff, gridVertOff,
+              gridWidth, gridHeight);
   }
 }

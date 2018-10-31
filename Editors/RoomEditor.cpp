@@ -20,7 +20,7 @@ RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, p
   ui->setupUi(this);
 
   ProtoModel* roomModel = model->GetSubModel(TreeNode::kRoomFieldNumber);
-  ui->roomRenderer->SetResourceModel(roomModel);
+  ui->roomView->SetResourceModel(roomModel);
 
   nodeMapper->addMapping(ui->roomName, TreeNode::kNameFieldNumber);
   nodeMapper->toFirst();
@@ -98,7 +98,7 @@ RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, p
   // track the cursor position on the transparency pattern for the status bar
   ui->roomPreview->widget()->setMouseTracking(true);
   // also need to track it on the room preview itself so the event is received
-  ui->roomRenderer->setMouseTracking(true);
+  ui->roomView->setMouseTracking(true);
 
   cursorPositionLabel = new QLabel();
   this->updateCursorPositionLabel(ui->roomPreview->widget()->cursor().pos());
@@ -119,8 +119,8 @@ bool RoomEditor::eventFilter(QObject* obj, QEvent* event) {
       return false;
     } else if (event->type() == QEvent::MouseMove) {
       QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
-      QPoint roomPos = mouseEvent->pos() - ui->roomRenderer->pos();
-      roomPos /= ui->roomRenderer->GetZoom();
+      QPoint roomPos = mouseEvent->pos() - ui->roomView->pos();
+      roomPos /= ui->roomView->GetZoom();
       this->updateCursorPositionLabel(roomPos);
     }
   }
@@ -134,8 +134,8 @@ void RoomEditor::updateCursorPositionLabel(const QPoint& pos) {
   this->cursorPositionLabel->setText(tr("X %0, Y %1").arg(pos.x()).arg(pos.y()));
 }
 
-void RoomEditor::on_actionZoomIn_triggered() { ui->roomRenderer->SetZoom(ui->roomRenderer->GetZoom() * 2); }
+void RoomEditor::on_actionZoomIn_triggered() { ui->roomView->SetZoom(ui->roomView->GetZoom() * 2); }
 
-void RoomEditor::on_actionZoomOut_triggered() { ui->roomRenderer->SetZoom(ui->roomRenderer->GetZoom() / 2); }
+void RoomEditor::on_actionZoomOut_triggered() { ui->roomView->SetZoom(ui->roomView->GetZoom() / 2); }
 
-void RoomEditor::on_actionZoom_triggered() { ui->roomRenderer->SetZoom(1.0); }
+void RoomEditor::on_actionZoom_triggered() { ui->roomView->SetZoom(1.0); }
