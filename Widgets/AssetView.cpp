@@ -13,20 +13,33 @@ const qreal& AssetView::GetZoom() const { return zoom; }
 
 void AssetView::paintGrid(QPainter& painter, int width, int height, int gridHorSpacing, int gridVertSpacing,
                           int gridHorOff, int gridVertOff, int gridWidth, int gridHeight) {
+  // do not draw zero-area grids
   if (width == 0 || height == 0) return;
   if (gridWidth == 0 || gridHeight == 0) return;
 
+  // save the painter state so we can restore it before returning
+  painter.save();
+
+  // xor the destination color
   painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
-  painter.setPen(QColor(Qt::white));
+  // this pen not only sets the color but also gives us perfectly square rectangles
+  QPen pen(Qt::white, 1, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin);
+  painter.setPen(pen);
 
   if (gridHorSpacing != 0 || gridVertSpacing != 0) {
-    for (int x = gridHorOff; x < width; x += gridWidth + gridHorSpacing + 1) {
-      for (int y = gridVertOff; y < height; y += gridHeight + gridVertSpacing + 1) {
-        painter.drawRect(x, y, gridWidth, gridHeight);
+    painter.translate(0.5, 0.5);
+    const int horStep = gridWidth + gridHorSpacing;
+    const int verStep = gridHeight + gridVertSpacing;
+
+    for (int x = gridHorOff; x < width; x += horStep) {
+      for (int y = gridVertOff; y < height; y += verStep) {
+        painter.drawRect(x, y, gridWidth - 1, gridHeight - 1);
       }
     }
   } else {
     for (int x = gridHorOff; x <= width; x += gridWidth) painter.drawLine(x, 0, x, height);
     for (int y = gridVertOff; y <= height; y += gridHeight) painter.drawLine(0, y, width, y);
   }
+
+  painter.restore();
 }
