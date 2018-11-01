@@ -6,6 +6,11 @@
 #include <QTextBlock>
 #include <QTextCursor>
 
+void CodeWidget::prepareKeywordStore() {}
+void CodeWidget::addKeyword(const QString& /*keyword*/, KeywordType /*type*/) {}
+void CodeWidget::addCalltip(const QString& /*keyword*/, const QString& /*calltip*/, KeywordType /*type*/) {}
+void CodeWidget::finalizeKeywords() {}
+
 CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), font(QFont("Courier", 10)) {
   QPlainTextEdit* plainTextEdit = new QPlainTextEdit(this);
   this->textWidget = plainTextEdit;

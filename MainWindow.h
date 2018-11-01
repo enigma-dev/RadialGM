@@ -9,7 +9,9 @@ class MainWindow;
 #include "Components/RecentFiles.h"
 
 #include "codegen/project.pb.h"
+#include "codegen/server.pb.h"
 
+#include <QList>
 #include <QMainWindow>
 #include <QMdiSubWindow>
 #include <QPointer>
@@ -30,11 +32,17 @@ class MainWindow : public QMainWindow {
   static TreeModel *treeModel;
   buffers::Game *Game() const { return this->project->mutable_game(); }
 
+  static QList<buffers::SystemType> systemCache;
+
+ signals:
+  void CurrentConfigChanged(const buffers::resources::Settings &settings);
+
  public slots:
   void openFile(QString fName);
   void openNewProject();
   void openProject(buffers::Project *openedProject);
   void CreateResource(TypeCase typeCase);
+  static void setCurrentConfig(const buffers::resources::Settings &settings);
 
  private slots:
   // file menu
@@ -78,6 +86,8 @@ class MainWindow : public QMainWindow {
   void on_treeView_doubleClicked(const QModelIndex &index);
 
  private:
+  static MainWindow *m_instance;
+
   QHash<buffers::TreeNode *, QMdiSubWindow *> subWindows;
 
   Ui::MainWindow *ui;

@@ -14,7 +14,8 @@ static const QHash<int, int> ResTypeFields = {{TypeCase::kSprite, TreeNode::kSpr
                                               {TypeCase::kScript, TreeNode::kScriptFieldNumber},
                                               {TypeCase::kTimeline, TreeNode::kTimelineFieldNumber},
                                               {TypeCase::kObject, TreeNode::kObjectFieldNumber},
-                                              {TypeCase::kRoom, TreeNode::kRoomFieldNumber}};
+                                              {TypeCase::kRoom, TreeNode::kRoomFieldNumber},
+                                              {TypeCase::kSettings, TreeNode::kSettingsFieldNumber}};
 
 class BaseEditor : public QWidget {
   Q_OBJECT

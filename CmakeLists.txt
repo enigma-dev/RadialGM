@@ -37,6 +37,7 @@ set(RGM_SOURCES
     Editors/TimelineEditor.cpp
     Editors/RoomEditor.cpp
     Editors/SpriteEditor.cpp
+    Editors/SettingsEditor.cpp
     Models/TreeModel.cpp
     Models/SpriteModel.cpp
     Models/ProtoModel.cpp
@@ -75,6 +76,7 @@ set(RGM_HEADERS
     Editors/TimelineEditor.h
     Editors/RoomEditor.h
     Editors/SpriteEditor.h
+    Editors/SettingsEditor.h
     Models/TreeModel.h
     Models/ProtoModel.h
     Models/ModelMapper.h
@@ -108,6 +110,7 @@ set(RGM_UI
     Editors/TimelineEditor.ui
     Editors/RoomEditor.ui
     Editors/SpriteEditor.ui
+    Editors/SettingsEditor.ui
 )
 
 set(RGM_RC
