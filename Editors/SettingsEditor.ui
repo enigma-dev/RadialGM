@@ -1,0 +1,1225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SettingsEditor</class>
+ <widget class="QWidget" name="SettingsEditor">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>765</width>
+    <height>511</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Settings</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../images.qrc">
+    <normaloff>:/resources/settings.png</normaloff>:/resources/settings.png</iconset>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
+   <property name="spacing">
+    <number>4</number>
+   </property>
+   <property name="leftMargin">
+    <number>4</number>
+   </property>
+   <property name="topMargin">
+    <number>4</number>
+   </property>
+   <property name="rightMargin">
+    <number>4</number>
+   </property>
+   <property name="bottomMargin">
+    <number>4</number>
+   </property>
+   <item>
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <widget class="QListWidget" name="listWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <item>
+       <property name="text">
+        <string>General</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Project Info</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Version</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Controls</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Graphics</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>API</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Compiler</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Extensions</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QStackedWidget" name="stackedWidget">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>1</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <widget class="QWidget" name="emptyPage"/>
+      <widget class="QWidget" name="projectInfoPage">
+       <layout class="QFormLayout" name="formLayout_2">
+        <property name="horizontalSpacing">
+         <number>4</number>
+        </property>
+        <property name="verticalSpacing">
+         <number>4</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLabel" name="authorLabel_2">
+          <property name="text">
+           <string>Author</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="authorEdit">
+          <property name="inputMask">
+           <string/>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="frame">
+           <bool>true</bool>
+          </property>
+          <property name="placeholderText">
+           <string>John Doe</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="emailLabel">
+          <property name="text">
+           <string>Email</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="emailEdit">
+          <property name="placeholderText">
+           <string>johndoe@mail.com</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="websiteLabel">
+          <property name="text">
+           <string>Website</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLineEdit" name="websiteEdit">
+          <property name="placeholderText">
+           <string>http://www.johndoe.com</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="versionLabel">
+          <property name="text">
+           <string>Version</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QLineEdit" name="versionEdit">
+          <property name="text">
+           <string>100</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="lastChangedLabel">
+          <property name="text">
+           <string>Changed</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QDateTimeEdit" name="lastChangedEdit">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0" colspan="2">
+         <widget class="QGroupBox" name="informationBox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="title">
+           <string>Information</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <property name="spacing">
+            <number>4</number>
+           </property>
+           <property name="leftMargin">
+            <number>4</number>
+           </property>
+           <property name="topMargin">
+            <number>4</number>
+           </property>
+           <property name="rightMargin">
+            <number>4</number>
+           </property>
+           <property name="bottomMargin">
+            <number>4</number>
+           </property>
+           <item>
+            <widget class="QPlainTextEdit" name="informationPlainEdit"/>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="graphicsPage">
+       <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0">
+        <property name="spacing">
+         <number>4</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <layout class="QGridLayout" name="gridLayout_5">
+          <property name="spacing">
+           <number>4</number>
+          </property>
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="stayontopCheckBox">
+            <property name="text">
+             <string>Window stay on &amp;top</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="showCursorCheckBox">
+            <property name="text">
+             <string>Display the &amp;cursor</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="windowBorderCheckBox">
+            <property name="text">
+             <string>Show window &amp;border</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="showCaptionButtonsCheckBox">
+            <property name="text">
+             <string>Show &amp;caption buttons</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="smoothColorsCheckBox">
+            <property name="text">
+             <string>&amp;Smooth colors</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QCheckBox" name="startFullscreenCheckBox">
+            <property name="text">
+             <string>Start &amp;fullscreen</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QCheckBox" name="windowResizeableCheckBox">
+            <property name="text">
+             <string>Window &amp;resizeable</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QCheckBox" name="pauseCheckBox">
+            <property name="text">
+             <string>&amp;Pause on focus lost</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_2">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="title">
+           <string>Scaling</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_3" columnstretch="0,1">
+           <property name="leftMargin">
+            <number>4</number>
+           </property>
+           <property name="topMargin">
+            <number>4</number>
+           </property>
+           <property name="rightMargin">
+            <number>4</number>
+           </property>
+           <property name="bottomMargin">
+            <number>4</number>
+           </property>
+           <property name="spacing">
+            <number>4</number>
+           </property>
+           <item row="2" column="0">
+            <widget class="QRadioButton" name="keepAspectButton">
+             <property name="text">
+              <string>Keep aspect ratio</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QSpinBox" name="fixedScaleSpinBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>1000</number>
+             </property>
+             <property name="value">
+              <number>100</number>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QRadioButton" name="fullScaleButton">
+             <property name="text">
+              <string>Full scale</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QRadioButton" name="fixedScaleButton">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Fixed scale (in %):</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <spacer name="graphicsVerticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="compilerPage">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <property name="spacing">
+         <number>4</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QGroupBox" name="compatibilityBox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="title">
+           <string>Compatibility</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_2">
+           <property name="leftMargin">
+            <number>4</number>
+           </property>
+           <property name="topMargin">
+            <number>4</number>
+           </property>
+           <property name="rightMargin">
+            <number>4</number>
+           </property>
+           <property name="bottomMargin">
+            <number>4</number>
+           </property>
+           <property name="spacing">
+            <number>4</number>
+           </property>
+           <item row="1" column="2">
+            <widget class="QRadioButton" name="inheritEscapesCPP">
+             <property name="text">
+              <string>C++ (\n)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">inheritEscapesGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="4" column="2">
+            <widget class="QRadioButton" name="treatLiteralsCPP">
+             <property name="text">
+              <string>C++ (scalar)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">treatLiteralsGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="5" column="2">
+            <widget class="QRadioButton" name="treatNegativesCPP">
+             <property name="text">
+              <string>C++ (true != 0)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">treatNegativesGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="2" column="2">
+            <widget class="QRadioButton" name="inheritIncrementCPP">
+             <property name="text">
+              <string>C++ (+=1/-=1)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">inheritIncrementGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QRadioButton" name="inheritStringsCPP">
+             <property name="text">
+              <string>C++ ('A'=65)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">inheritStringsGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="3" column="2">
+            <widget class="QRadioButton" name="inheritEquivalenceCPP">
+             <property name="text">
+              <string>C++ (b=c;a=c)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">inheritEquivalenceGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QRadioButton" name="inheritIncrementGML">
+             <property name="text">
+              <string>GML (+)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">inheritIncrementGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QRadioButton" name="inheritEscapesGML">
+             <property name="text">
+              <string>GML (#)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">inheritEscapesGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QRadioButton" name="inheritEquivalenceGML">
+             <property name="text">
+              <string>GMl (a=b==c)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">inheritEquivalenceGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QRadioButton" name="inheritStringsGML">
+             <property name="text">
+              <string>GML ('A'=&quot;A&quot;)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">inheritStringsGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="inheritStringsLabel">
+             <property name="text">
+              <string>Inherit strings from:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="inheritEscapesLabel">
+             <property name="text">
+              <string>Inherit escapes from:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="treatLiteralsLabel">
+             <property name="text">
+              <string>Treat literals as:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="inheritEquivalenceLabel">
+             <property name="text">
+              <string>Inherit a=b=c from:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QLabel" name="treatNegativesLabel">
+             <property name="text">
+              <string>Treat negatives as:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="inheritIncrementLabel">
+             <property name="text">
+              <string>Inherit ++/-- from:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QRadioButton" name="treatLiteralsEDL">
+             <property name="text">
+              <string>EDL (variant)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">treatLiteralsGroup</string>
+             </attribute>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QRadioButton" name="treatNegativesGML">
+             <property name="text">
+              <string>GML (true &gt; 0)</string>
+             </property>
+             <attribute name="buttonGroup">
+              <string notr="true">treatNegativesGroup</string>
+             </attribute>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <spacer name="compilerPageVerticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="apiPage">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="spacing">
+         <number>4</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <layout class="QFormLayout" name="systemsLayout">
+          <property name="horizontalSpacing">
+           <number>4</number>
+          </property>
+          <property name="verticalSpacing">
+           <number>4</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="audioLabel">
+            <property name="text">
+             <string>Audio</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="audioCombo"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="platformLabel">
+            <property name="text">
+             <string>Platform</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="platformCombo"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="compilerLabel">
+            <property name="text">
+             <string>Compiler</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="graphicsLabel">
+            <property name="text">
+             <string>Graphics</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="widgetsLabel">
+            <property name="text">
+             <string>Widgets</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="collisionLabel">
+            <property name="text">
+             <string>Collision</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="networkLabel">
+            <property name="text">
+             <string>Network</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="compilerCombo"/>
+          </item>
+          <item row="3" column="1">
+           <widget class="QComboBox" name="graphicsCombo"/>
+          </item>
+          <item row="4" column="1">
+           <widget class="QComboBox" name="widgetsCombo"/>
+          </item>
+          <item row="5" column="1">
+           <widget class="QComboBox" name="collisionCombo"/>
+          </item>
+          <item row="6" column="1">
+           <widget class="QComboBox" name="networkCombo"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="aboutSystemBox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="title">
+           <string>About</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+          <layout class="QGridLayout" name="gridLayout">
+           <property name="leftMargin">
+            <number>4</number>
+           </property>
+           <property name="topMargin">
+            <number>4</number>
+           </property>
+           <property name="rightMargin">
+            <number>4</number>
+           </property>
+           <property name="bottomMargin">
+            <number>4</number>
+           </property>
+           <property name="spacing">
+            <number>4</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QLabel" name="authorLabel">
+             <property name="text">
+              <string>Author</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="authorName">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" colspan="2">
+            <widget class="QPlainTextEdit" name="systemDesc">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="controlsPage">
+       <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,0,0">
+        <property name="spacing">
+         <number>4</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <layout class="QGridLayout" name="controlsGridLayout">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetDefaultConstraint</enum>
+          </property>
+          <property name="spacing">
+           <number>4</number>
+          </property>
+          <item row="1" column="0">
+           <widget class="QLabel" name="showGameInfoKeyLabel">
+            <property name="text">
+             <string>Show game &amp;information</string>
+            </property>
+            <property name="buddy">
+             <cstring>showGameInfoKeyEdit</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QKeySequenceEdit" name="screenshotKeyEdit">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="keySequence">
+             <string>F9</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QKeySequenceEdit" name="fullscreenKeyEdit">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="keySequence">
+             <string>F4</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QKeySequenceEdit" name="showGameInfoKeyEdit">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="keySequence">
+             <string>F1</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QKeySequenceEdit" name="saveGameKeyEdit">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="keySequence">
+             <string>F5</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QKeySequenceEdit" name="loadSavedGameKeyEdit">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="keySequence">
+             <string>F6</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="endGameKeyLabel">
+            <property name="text">
+             <string>&amp;End the game</string>
+            </property>
+            <property name="buddy">
+             <cstring>endGameKeyEdit</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="saveGameKeyLabel">
+            <property name="text">
+             <string>Save the &amp;game</string>
+            </property>
+            <property name="buddy">
+             <cstring>saveGameKeyEdit</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="fullscreenKeyLabel">
+            <property name="text">
+             <string>Toggle &amp;fullscreen</string>
+            </property>
+            <property name="buddy">
+             <cstring>fullscreenKeyEdit</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="screenshotKeyLabel">
+            <property name="text">
+             <string>Take a &amp;screenshot</string>
+            </property>
+            <property name="buddy">
+             <cstring>screenshotKeyEdit</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="loadSavedGameKeyLabel">
+            <property name="text">
+             <string>&amp;Load saved game</string>
+            </property>
+            <property name="buddy">
+             <cstring>loadSavedGameKeyEdit</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QKeySequenceEdit" name="endGameKeyEdit">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="keySequence">
+             <string>Esc</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <property name="spacing">
+           <number>4</number>
+          </property>
+          <item>
+           <widget class="QCheckBox" name="closeButtonEndsCheckBox">
+            <property name="text">
+             <string>&amp;Close button ends game</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="defaultKeysButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Defaults</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="clearAllkeysButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Clear All</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="controlsPageVerticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="versionPage">
+       <layout class="QVBoxLayout" name="verticalLayout_7">
+        <property name="spacing">
+         <number>4</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <layout class="QGridLayout" name="versionInfoGridLayout">
+          <property name="spacing">
+           <number>4</number>
+          </property>
+          <item row="1" column="0">
+           <widget class="QLabel" name="companyLabel">
+            <property name="text">
+             <string>&amp;Company</string>
+            </property>
+            <property name="buddy">
+             <cstring>companyLineEdit</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="6">
+           <widget class="QLabel" name="buildVersionLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>&amp;Build</string>
+            </property>
+            <property name="buddy">
+             <cstring>buildVersionSpinBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="majorVersionLabel">
+            <property name="text">
+             <string>&amp;Major</string>
+            </property>
+            <property name="buddy">
+             <cstring>majorVersionSpinBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="minorVersionLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>&amp;Minor</string>
+            </property>
+            <property name="buddy">
+             <cstring>minorVersionSpinBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="5">
+           <widget class="QSpinBox" name="releaseVersionSpinBox"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="productLabel">
+            <property name="text">
+             <string>&amp;Product</string>
+            </property>
+            <property name="buddy">
+             <cstring>productLineEdit</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="majorVersionSpinBox">
+            <property name="value">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QLabel" name="releaseVersionLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>&amp;Release</string>
+            </property>
+            <property name="buddy">
+             <cstring>releaseVersionSpinBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QSpinBox" name="minorVersionSpinBox"/>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="descriptionLabel">
+            <property name="text">
+             <string>&amp;Description</string>
+            </property>
+            <property name="buddy">
+             <cstring>descriptionLineEdit</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="copyrightLabel">
+            <property name="text">
+             <string>&amp;Copyright</string>
+            </property>
+            <property name="buddy">
+             <cstring>copyrightLineEdit</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="7">
+           <widget class="QSpinBox" name="buildVersionSpinBox"/>
+          </item>
+          <item row="1" column="1" colspan="7">
+           <widget class="QLineEdit" name="companyLineEdit"/>
+          </item>
+          <item row="2" column="1" colspan="7">
+           <widget class="QLineEdit" name="productLineEdit"/>
+          </item>
+          <item row="3" column="1" colspan="7">
+           <widget class="QLineEdit" name="copyrightLineEdit"/>
+          </item>
+          <item row="4" column="1" colspan="7">
+           <widget class="QLineEdit" name="descriptionLineEdit"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="versionPageVerticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="extensionsPage">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <property name="spacing">
+         <number>4</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QListWidget" name="extensionsList"/>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Discard|QDialogButtonBox::Save</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../images.qrc"/>
+ </resources>
+ <connections/>
+ <buttongroups>
+  <buttongroup name="inheritIncrementGroup"/>
+  <buttongroup name="treatLiteralsGroup"/>
+  <buttongroup name="treatNegativesGroup"/>
+  <buttongroup name="inheritStringsGroup"/>
+  <buttongroup name="inheritEscapesGroup"/>
+  <buttongroup name="inheritEquivalenceGroup"/>
+ </buttongroups>
+</ui>

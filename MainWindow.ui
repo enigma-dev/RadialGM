@@ -173,6 +173,20 @@
     <property name="title">
      <string>&amp;Resources</string>
     </property>
+    <widget class="QMenu" name="menuChangeGameSettings">
+     <property name="title">
+      <string>Change &amp;Game Settings</string>
+     </property>
+     <property name="icon">
+      <iconset resource="images.qrc">
+       <normaloff>:/resources/settings.png</normaloff>:/resources/settings.png</iconset>
+     </property>
+     <addaction name="actionConfiguration0"/>
+     <addaction name="actionConfiguration1"/>
+     <addaction name="separator"/>
+     <addaction name="actionSettingsProperties"/>
+     <addaction name="actionAddNewConfig"/>
+    </widget>
     <addaction name="actionCreate_Sprite"/>
     <addaction name="actionCreate_Sound"/>
     <addaction name="actionCreate_Background"/>
@@ -180,11 +194,11 @@
     <addaction name="actionCreate_Script"/>
     <addaction name="actionCreate_Shader"/>
     <addaction name="actionCreate_Font"/>
-    <addaction name="actionCreate_Time_Line"/>
+    <addaction name="actionCreate_Timeline"/>
     <addaction name="actionCreate_Object"/>
     <addaction name="actionCreate_Room"/>
     <addaction name="separator"/>
-    <addaction name="actionChange_Global_Game_Settings"/>
+    <addaction name="menuChangeGameSettings"/>
     <addaction name="separator"/>
     <addaction name="actionDefine_Macros"/>
    </widget>
@@ -219,6 +233,7 @@
    <addaction name="actionSave"/>
    <addaction name="actionSaveAll"/>
    <addaction name="separator"/>
+   <addaction name="actionSettings"/>
    <addaction name="actionRun"/>
    <addaction name="actionDebug"/>
    <addaction name="actionCreateExecutable"/>
@@ -231,7 +246,7 @@
    <addaction name="actionCreate_Shader"/>
    <addaction name="actionCreate_Font"/>
    <addaction name="actionCreate_Object"/>
-   <addaction name="actionCreate_Time_Line"/>
+   <addaction name="actionCreate_Timeline"/>
    <addaction name="actionCreate_Room"/>
    <addaction name="separator"/>
    <addaction name="actionPreferences"/>
@@ -635,7 +650,7 @@
      <normaloff>:/resources/sprite.png</normaloff>:/resources/sprite.png</iconset>
    </property>
    <property name="text">
-    <string>Create Sprite</string>
+    <string>Create &amp;Sprite</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+S</string>
@@ -647,7 +662,7 @@
      <normaloff>:/resources/sound.png</normaloff>:/resources/sound.png</iconset>
    </property>
    <property name="text">
-    <string>Create Sound</string>
+    <string>Create &amp;Sound</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+U</string>
@@ -659,7 +674,7 @@
      <normaloff>:/resources/background.png</normaloff>:/resources/background.png</iconset>
    </property>
    <property name="text">
-    <string>Create Background</string>
+    <string>Create &amp;Background</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+B</string>
@@ -671,7 +686,7 @@
      <normaloff>:/resources/path.png</normaloff>:/resources/path.png</iconset>
    </property>
    <property name="text">
-    <string>Create Path</string>
+    <string>Create &amp;Path</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+P</string>
@@ -683,7 +698,7 @@
      <normaloff>:/resources/script.png</normaloff>:/resources/script.png</iconset>
    </property>
    <property name="text">
-    <string>Create Script</string>
+    <string>Create &amp;Script</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+C</string>
@@ -695,7 +710,7 @@
      <normaloff>:/resources/shader.png</normaloff>:/resources/shader.png</iconset>
    </property>
    <property name="text">
-    <string>Create Shader</string>
+    <string>Create &amp;Shader</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+A</string>
@@ -707,19 +722,19 @@
      <normaloff>:/resources/font.png</normaloff>:/resources/font.png</iconset>
    </property>
    <property name="text">
-    <string>Create Font</string>
+    <string>Create &amp;Font</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+F</string>
    </property>
   </action>
-  <action name="actionCreate_Time_Line">
+  <action name="actionCreate_Timeline">
    <property name="icon">
     <iconset resource="images.qrc">
      <normaloff>:/resources/timeline.png</normaloff>:/resources/timeline.png</iconset>
    </property>
    <property name="text">
-    <string>Create Time Line</string>
+    <string>Create &amp;Timeline</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+T</string>
@@ -731,7 +746,7 @@
      <normaloff>:/resources/object-empty.png</normaloff>:/resources/object-empty.png</iconset>
    </property>
    <property name="text">
-    <string>Create Object</string>
+    <string>Create &amp;Object</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+O</string>
@@ -743,22 +758,10 @@
      <normaloff>:/resources/room.png</normaloff>:/resources/room.png</iconset>
    </property>
    <property name="text">
-    <string>Create Room</string>
+    <string>Create &amp;Room</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+R</string>
-   </property>
-  </action>
-  <action name="actionChange_Global_Game_Settings">
-   <property name="icon">
-    <iconset resource="images.qrc">
-     <normaloff>:/resources/settings.png</normaloff>:/resources/settings.png</iconset>
-   </property>
-   <property name="text">
-    <string>Change Global Game Settings</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+G</string>
    </property>
   </action>
   <action name="actionDefine_Macros">
@@ -767,12 +770,66 @@
      <normaloff>:/resources/constants.png</normaloff>:/resources/constants.png</iconset>
    </property>
    <property name="text">
-    <string>Define Macros...</string>
+    <string>Define &amp;Macros...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+N</string>
    </property>
   </action>
+  <action name="actionAddNewConfig">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/actions/add.png</normaloff>:/actions/add.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create &amp;Config</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+G</string>
+   </property>
+  </action>
+  <action name="actionSettingsProperties">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/actions/edit.png</normaloff>:/actions/edit.png</iconset>
+   </property>
+   <property name="text">
+    <string>Edit Configuration 0...</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/resources/settings.png</normaloff>:/resources/settings.png</iconset>
+   </property>
+   <property name="text">
+    <string>Configuration 0</string>
+   </property>
+   <property name="toolTip">
+    <string>Change Game Settings</string>
+   </property>
+  </action>
+  <actiongroup name="configActionGroup">
+   <action name="actionConfiguration0">
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+    <property name="text">
+     <string>Configuration 0</string>
+    </property>
+   </action>
+   <action name="actionConfiguration1">
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+    <property name="text">
+     <string>Configuration 1</string>
+    </property>
+   </action>
+  </actiongroup>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>

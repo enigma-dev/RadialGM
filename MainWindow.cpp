@@ -10,6 +10,7 @@
 #include "Editors/PathEditor.h"
 #include "Editors/RoomEditor.h"
 #include "Editors/ScriptEditor.h"
+#include "Editors/SettingsEditor.h"
 #include "Editors/SoundEditor.h"
 #include "Editors/SpriteEditor.h"
 #include "Editors/TimelineEditor.h"
@@ -30,11 +31,15 @@
 
 #undef GetMessage
 
+QList<buffers::SystemType> MainWindow::systemCache;
+MainWindow *MainWindow::m_instance = nullptr;
 ResourceModelMap *MainWindow::resourceMap = nullptr;
 TreeModel *MainWindow::treeModel = nullptr;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ArtManager::Init();
+
+  m_instance = this;
 
   setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
   setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
@@ -48,16 +53,31 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->mdiArea->setBackground(QImage(":/banner.png"));
   connect(ui->menuWindow, &QMenu::aboutToShow, this, &MainWindow::updateWindowMenu);
 
+  auto settingsButton = static_cast<QToolButton *>(ui->mainToolBar->widgetForAction(ui->actionSettings));
+  settingsButton->setPopupMode(QToolButton::ToolButtonPopupMode::MenuButtonPopup);
+  settingsButton->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextBesideIcon);
+  ui->actionSettings->setMenu(ui->menuChangeGameSettings);
+
   RGMPlugin *pluginServer = new ServerPlugin(*this);
   auto outputTextBrowser = this->ui->outputTextBrowser;
-  connect(pluginServer, &RGMPlugin::OutputRead, outputTextBrowser, &QTextBrowser::append);
-  connect(pluginServer, &RGMPlugin::ErrorRead, outputTextBrowser, &QTextBrowser::append);
+  connect(pluginServer, &RGMPlugin::LogOutput, outputTextBrowser, &QTextBrowser::append);
+  connect(pluginServer, &RGMPlugin::CompileStatusChanged, [=](bool finished) {
+    ui->outputDockWidget->show();
+    ui->actionRun->setEnabled(finished);
+    ui->actionDebug->setEnabled(finished);
+    ui->actionCreateExecutable->setEnabled(finished);
+  });
+  connect(this, &MainWindow::CurrentConfigChanged, pluginServer, &RGMPlugin::SetCurrentConfig);
   connect(ui->actionRun, &QAction::triggered, pluginServer, &RGMPlugin::Run);
   connect(ui->actionDebug, &QAction::triggered, pluginServer, &RGMPlugin::Debug);
   connect(ui->actionCreateExecutable, &QAction::triggered, pluginServer, &RGMPlugin::CreateExecutable);
 }
 
 MainWindow::~MainWindow() { delete ui; }
+
+void MainWindow::setCurrentConfig(const buffers::resources::Settings &settings) {
+  emit m_instance->CurrentConfigChanged(settings);
+}
 
 void MainWindow::readSettings() {
   QSettings settings;
@@ -106,7 +126,8 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
                                 {TypeCase::kScript, EditorFactory<ScriptEditor>},
                                 {TypeCase::kTimeline, EditorFactory<TimelineEditor>},
                                 {TypeCase::kObject, EditorFactory<ObjectEditor>},
-                                {TypeCase::kRoom, EditorFactory<RoomEditor>}});
+                                {TypeCase::kRoom, EditorFactory<RoomEditor>},
+                                {TypeCase::kSettings, EditorFactory<SettingsEditor>}});
 
   auto subWindow = subWindows[item];
   if (!subWindows.contains(item) || subWindow == nullptr) {

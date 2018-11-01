@@ -5,6 +5,8 @@
 #include <QPrinter>
 #include <QWidget>
 
+enum KeywordType { UNKNOWN = 0, FUNCTION = 1, GLOBAL = 2, TYPE_NAME = 3, MAX = 4 };
+
 class CodeWidget : public QWidget {
   Q_OBJECT
   // this is a shim property over the real property
@@ -19,6 +21,11 @@ class CodeWidget : public QWidget {
   void setCode(QString);
   int lineCount();
   QPair<int, int> cursorPosition();
+
+  static void prepareKeywordStore();
+  static void addKeyword(const QString& keyword, KeywordType type);
+  static void addCalltip(const QString& keyword, const QString& calltip, KeywordType type = KeywordType::FUNCTION);
+  static void finalizeKeywords();
 
  public slots:
   void newSource();

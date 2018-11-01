@@ -1,5 +1,8 @@
 #include "CodeWidget.h"
+#include "Components/ArtManager.h"
+#include "Models/TreeModel.h"
 
+#include <Qsci/qsciapis.h>
 #include <Qsci/qscilexercpp.h>
 #include <Qsci/qsciprinter.h>
 #include <Qsci/qsciscintilla.h>
@@ -7,21 +10,68 @@
 #include <QFontMetrics>
 #include <QLayout>
 #include <QPrintDialog>
+#include <QShortcut>
 
 namespace {
+
 QsciLexerCPP* cppLexer = nullptr;
-}
+QsciAPIs* sciApis = nullptr;
 
-CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), font(QFont("Courier", 10)) {
-  QFontMetrics fontMetrics(font);
-
+void prepare_scintilla_apis() {
   if (cppLexer == nullptr) {
     cppLexer = new QsciLexerCPP();
-    cppLexer->setFont(font);
+    cppLexer->setFont(QFont("Courier", 10));
   }
+
+  if (sciApis == nullptr) {
+    sciApis = new QsciAPIs(cppLexer);
+  }
+}
+
+}  // anonymous namespace
+
+void CodeWidget::prepareKeywordStore() {
+  if (sciApis != nullptr) {
+    delete sciApis;
+    sciApis = nullptr;
+  }
+  prepare_scintilla_apis();
+}
+
+void CodeWidget::addKeyword(const QString& keyword, KeywordType type) {
+  QString fmt = keyword + QObject::tr("?%0").arg(type);
+  sciApis->add(fmt);
+}
+
+void CodeWidget::addCalltip(const QString& keyword, const QString& calltip, KeywordType type) {
+  QString fmt = keyword + QObject::tr("?%0(%1)").arg(type).arg(calltip);
+  sciApis->add(fmt);
+}
+
+void CodeWidget::finalizeKeywords() { sciApis->prepare(); }
+
+CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), font(QFont("Courier", 10)) {
+  prepare_scintilla_apis();
+
+  QFontMetrics fontMetrics(font);
 
   QsciScintilla* codeEdit = new QsciScintilla(this);
   this->textWidget = codeEdit;
+  codeEdit->registerImage(KeywordType::UNKNOWN, QPixmap(":/actions/right-arrow-red.png"));
+  codeEdit->registerImage(KeywordType::TYPE_NAME, QPixmap(":/actions/right-arrow-blue.png"));
+  codeEdit->registerImage(KeywordType::GLOBAL, QPixmap(":/actions/right-arrow-green.png"));
+  codeEdit->registerImage(KeywordType::FUNCTION, QPixmap(":/actions/function.png"));
+
+  for (auto type : TreeModel::iconMap) {
+    codeEdit->registerImage(KeywordType::MAX + type.first, type.second.pixmap(18, 18));
+  }
+
+  QShortcut* shortcut = new QShortcut(codeEdit);
+  shortcut->setKey(QKeySequence(Qt::CTRL + Qt::Key_Space));
+  connect(shortcut, &QShortcut::activated, codeEdit, &QsciScintilla::autoCompleteFromAll);
+  shortcut->setAutoRepeat(false);
+  codeEdit->setAutoCompletionThreshold(2);
+  codeEdit->setAutoCompletionSource(QsciScintilla::AutoCompletionSource::AcsAll);
 
   codeEdit->setCaretLineVisible(true);
   codeEdit->setCaretLineBackgroundColor(QColor("#ffe4e4"));
