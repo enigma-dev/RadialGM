@@ -205,7 +205,17 @@ void MainWindow::openFile(QString fName) {
 
 void MainWindow::openNewProject() {
   MainWindow::setWindowTitle(tr("<new game> - ENIGMA"));
-  openProject(new buffers::Project());
+  auto newProject = new buffers::Project();
+  auto *root = newProject->mutable_game()->mutable_root();
+  QList<QString> defaultGroups = {tr("Sprites"),   tr("Sounds"),  tr("Backgrounds"), tr("Paths"),
+                                  tr("Scripts"),   tr("Shaders"), tr("Fonts"),       tr("Objects"),
+                                  tr("Timelines"), tr("Rooms"),   tr("Includes"),    tr("Configs")};
+  for (auto groupName : defaultGroups) {
+    auto *groupNode = root->add_child();
+    groupNode->set_folder(true);
+    groupNode->set_name(groupName.toStdString());
+  }
+  openProject(newProject);
 }
 
 void MainWindow::openProject(buffers::Project *openedProject) {
