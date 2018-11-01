@@ -209,6 +209,7 @@ void MainWindow::openNewProject() {
 }
 
 void MainWindow::openProject(buffers::Project *openedProject) {
+  this->ui->mdiArea->closeAllSubWindows();
   project.reset(openedProject);
   resourceMap = new ResourceModelMap(project->mutable_game()->mutable_root(), this);
   treeModel = new TreeModel(project->mutable_game()->mutable_root(), resourceMap);
