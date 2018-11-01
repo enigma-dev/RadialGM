@@ -210,9 +210,15 @@ void MainWindow::openNewProject() {
 
 void MainWindow::openProject(buffers::Project *openedProject) {
   this->ui->mdiArea->closeAllSubWindows();
+  ArtManager::clearCache();
+
   project.reset(openedProject);
+
+  delete resourceMap;
   resourceMap = new ResourceModelMap(project->mutable_game()->mutable_root(), this);
-  treeModel = new TreeModel(project->mutable_game()->mutable_root(), resourceMap);
+  delete treeModel;
+  treeModel = new TreeModel(project->mutable_game()->mutable_root(), this);
+
   ui->treeView->setModel(treeModel);
   treeModel->connect(treeModel, &QAbstractItemModel::dataChanged,
                      [=](const QModelIndex &topLeft, const QModelIndex &bottomRight) {
@@ -226,7 +232,6 @@ void MainWindow::openProject(buffers::Project *openedProject) {
                          }
                        }
                      });
-  ArtManager::clearCache();
 }
 
 void MainWindow::on_actionNew_triggered() { openNewProject(); }
