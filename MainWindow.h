@@ -28,8 +28,8 @@ class MainWindow : public QMainWindow {
   explicit MainWindow(QWidget *parent);
   ~MainWindow();
   void closeEvent(QCloseEvent *event);
-  static ResourceModelMap *resourceMap;
-  static TreeModel *treeModel;
+  static QScopedPointer<ResourceModelMap> resourceMap;
+  static QScopedPointer<TreeModel> treeModel;
   buffers::Game *Game() const { return this->project->mutable_game(); }
 
   static QList<buffers::SystemType> systemCache;

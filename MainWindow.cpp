@@ -33,8 +33,8 @@
 
 QList<buffers::SystemType> MainWindow::systemCache;
 MainWindow *MainWindow::m_instance = nullptr;
-ResourceModelMap *MainWindow::resourceMap = nullptr;
-TreeModel *MainWindow::treeModel = nullptr;
+QScopedPointer<ResourceModelMap> MainWindow::resourceMap;
+QScopedPointer<TreeModel> MainWindow::treeModel;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ArtManager::Init();
@@ -139,7 +139,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     ProtoModel *res = resourceMap->GetResourceByName(item->type_case(), item->name());
     BaseEditor *editor = factoryFunction->second(res, this);
 
-    connect(editor, &BaseEditor::ResourceRenamed, resourceMap, &ResourceModelMap::ResourceRenamed);
+    connect(editor, &BaseEditor::ResourceRenamed, resourceMap.get(), &ResourceModelMap::ResourceRenamed);
     connect(editor, &BaseEditor::ResourceRenamed, [=]() { treeModel->dataChanged(QModelIndex(), QModelIndex()); });
 
     subWindow = subWindows[item] = ui->mdiArea->addSubWindow(editor);
@@ -214,13 +214,11 @@ void MainWindow::openProject(buffers::Project *openedProject) {
 
   project.reset(openedProject);
 
-  delete resourceMap;
-  resourceMap = new ResourceModelMap(project->mutable_game()->mutable_root(), this);
-  delete treeModel;
-  treeModel = new TreeModel(project->mutable_game()->mutable_root(), this);
+  resourceMap.reset(new ResourceModelMap(project->mutable_game()->mutable_root(), nullptr));
+  treeModel.reset(new TreeModel(project->mutable_game()->mutable_root(), nullptr));
 
-  ui->treeView->setModel(treeModel);
-  treeModel->connect(treeModel, &QAbstractItemModel::dataChanged,
+  ui->treeView->setModel(treeModel.get());
+  treeModel->connect(treeModel.get(), &QAbstractItemModel::dataChanged,
                      [=](const QModelIndex &topLeft, const QModelIndex &bottomRight) {
                        for (int row = topLeft.row(); row <= bottomRight.row(); ++row) {
                          for (int column = topLeft.column(); column <= bottomRight.column(); ++column) {
@@ -354,7 +352,7 @@ void MainWindow::CreateResource(TypeCase typeCase) {
   // allocate and set the child's resource field
   refl->MutableMessage(child, field);
 
-  this->resourceMap->AddResource(child, resourceMap);
+  this->resourceMap->AddResource(child, resourceMap.get());
   this->treeModel->addNode(child, root);
 
   // open the new resource for editing
