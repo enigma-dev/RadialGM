@@ -33,7 +33,7 @@
 ResourceModelMap *MainWindow::resourceMap = nullptr;
 TreeModel *MainWindow::treeModel = nullptr;
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), project(new buffers::Project()) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ArtManager::Init();
 
   setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
@@ -55,6 +55,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->actionRun, &QAction::triggered, pluginServer, &RGMPlugin::Run);
   connect(ui->actionDebug, &QAction::triggered, pluginServer, &RGMPlugin::Debug);
   connect(ui->actionCreateExecutable, &QAction::triggered, pluginServer, &RGMPlugin::CreateExecutable);
+
+  openNewProject();
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -160,15 +162,16 @@ void MainWindow::openFile(QString fName) {
   QFileInfo fileInfo(fName);
   const QString suffix = fileInfo.suffix();
 
+  buffers::Project *loadedProject = nullptr;
   if (suffix == "gm81" || suffix == "gmk" || suffix == "gm6" || suffix == "gmd") {
-    project.reset(gmk::LoadGMK(fName.toStdString()));
+    loadedProject = gmk::LoadGMK(fName.toStdString());
   } else if (suffix == "gmx") {
-    project.reset(gmx::LoadGMX(fName.toStdString()));
+    loadedProject = gmx::LoadGMX(fName.toStdString());
   } else if (suffix == "yyp") {
-    project.reset(yyp::LoadYYP(fName.toStdString()));
+    loadedProject = yyp::LoadYYP(fName.toStdString());
   }
 
-  if (!project) {
+  if (!loadedProject) {
     QMessageBox::warning(this, tr("Failed To Open Project"), tr("There was a problem loading the project: ") + fName,
                          QMessageBox::Ok);
     return;
@@ -176,7 +179,16 @@ void MainWindow::openFile(QString fName) {
 
   MainWindow::setWindowTitle(fileInfo.fileName() + " - ENIGMA");
   recentFiles->prependFile(fName);
+  openProject(loadedProject);
+}
 
+void MainWindow::openNewProject() {
+  MainWindow::setWindowTitle(tr("<new game> - ENIGMA"));
+  openProject(new buffers::Project());
+}
+
+void MainWindow::openProject(buffers::Project *openedProject) {
+  project.reset(openedProject);
   resourceMap = new ResourceModelMap(project->mutable_game()->mutable_root(), this);
   treeModel = new TreeModel(project->mutable_game()->mutable_root(), resourceMap);
   ui->treeView->setModel(treeModel);
@@ -194,6 +206,8 @@ void MainWindow::openFile(QString fName) {
                      });
   ArtManager::clearCache();
 }
+
+void MainWindow::on_actionNew_triggered() { openNewProject(); }
 
 void MainWindow::on_actionOpen_triggered() {
   const QString &fileName = QFileDialog::getOpenFileName(

@@ -32,10 +32,13 @@ class MainWindow : public QMainWindow {
 
  public slots:
   void openFile(QString fName);
+  void openNewProject();
+  void openProject(buffers::Project *openedProject);
   void CreateResource(TypeCase typeCase);
 
  private slots:
   // file menu
+  void on_actionNew_triggered();
   void on_actionOpen_triggered();
   void on_actionClearRecentMenu_triggered();
   void on_actionPreferences_triggered();
