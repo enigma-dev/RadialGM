@@ -369,10 +369,10 @@ void MainWindow::on_actionCreate_Shader_triggered() { CreateResource(TypeCase::k
 
 void MainWindow::on_actionCreate_Font_triggered() { CreateResource(TypeCase::kFont); }
 
-void MainWindow::on_actionCreate_Time_Line_triggered() { CreateResource(TypeCase::kTimeline); }
+void MainWindow::on_actionCreate_Timeline_triggered() { CreateResource(TypeCase::kTimeline); }
 
 void MainWindow::on_actionCreate_Object_triggered() { CreateResource(TypeCase::kObject); }
 
 void MainWindow::on_actionCreate_Room_triggered() { CreateResource(TypeCase::kRoom); }
 
-void MainWindow::on_actionChange_Global_Game_Settings_triggered() { CreateResource(TypeCase::kSettings); }
+void MainWindow::on_actionAddNewConfig_triggered() { CreateResource(TypeCase::kSettings); }
