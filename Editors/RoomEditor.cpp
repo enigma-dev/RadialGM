@@ -60,7 +60,7 @@ RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, p
   QMenuView* objMenu = new QMenuView(this);
   TreeSortFilterProxyModel* treeProxy = new TreeSortFilterProxyModel(this);
   treeProxy->SetFilterType(TreeNode::TypeCase::kObject);
-  treeProxy->setSourceModel(MainWindow::treeModel);
+  treeProxy->setSourceModel(MainWindow::treeModel.get());
   objMenu->setModel(treeProxy);
   ui->objectSelectButton->setMenu(objMenu);
 

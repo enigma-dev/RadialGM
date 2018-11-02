@@ -128,3 +128,10 @@ int TreeModel::rowCount(const QModelIndex &parent) const {
 
   return parentItem->child_size();
 }
+
+void TreeModel::addNode(buffers::TreeNode *child, buffers::TreeNode *parent) {
+  auto rootIndex = QModelIndex();
+  emit beginInsertRows(rootIndex, parent->child_size(), parent->child_size());
+  parents[child] = parent;
+  emit endInsertRows();
+}

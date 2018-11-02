@@ -33,8 +33,8 @@
 
 QList<buffers::SystemType> MainWindow::systemCache;
 MainWindow *MainWindow::m_instance = nullptr;
-ResourceModelMap *MainWindow::resourceMap = nullptr;
-TreeModel *MainWindow::treeModel = nullptr;
+QScopedPointer<ResourceModelMap> MainWindow::resourceMap;
+QScopedPointer<TreeModel> MainWindow::treeModel;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ArtManager::Init();
@@ -71,6 +71,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->actionRun, &QAction::triggered, pluginServer, &RGMPlugin::Run);
   connect(ui->actionDebug, &QAction::triggered, pluginServer, &RGMPlugin::Debug);
   connect(ui->actionCreateExecutable, &QAction::triggered, pluginServer, &RGMPlugin::CreateExecutable);
+
+  openNewProject();
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -137,7 +139,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     ProtoModel *res = resourceMap->GetResourceByName(item->type_case(), item->name());
     BaseEditor *editor = factoryFunction->second(res, this);
 
-    connect(editor, &BaseEditor::ResourceRenamed, resourceMap, &ResourceModelMap::ResourceRenamed);
+    connect(editor, &BaseEditor::ResourceRenamed, resourceMap.get(), &ResourceModelMap::ResourceRenamed);
     connect(editor, &BaseEditor::ResourceRenamed, [=]() { treeModel->dataChanged(QModelIndex(), QModelIndex()); });
 
     subWindow = subWindows[item] = ui->mdiArea->addSubWindow(editor);
@@ -181,15 +183,16 @@ void MainWindow::openFile(QString fName) {
   QFileInfo fileInfo(fName);
   const QString suffix = fileInfo.suffix();
 
+  buffers::Project *loadedProject = nullptr;
   if (suffix == "gm81" || suffix == "gmk" || suffix == "gm6" || suffix == "gmd") {
-    project = gmk::LoadGMK(fName.toStdString());
+    loadedProject = gmk::LoadGMK(fName.toStdString());
   } else if (suffix == "gmx") {
-    project = gmx::LoadGMX(fName.toStdString());
+    loadedProject = gmx::LoadGMX(fName.toStdString());
   } else if (suffix == "yyp") {
-    project = yyp::LoadYYP(fName.toStdString());
+    loadedProject = yyp::LoadYYP(fName.toStdString());
   }
 
-  if (!project) {
+  if (!loadedProject) {
     QMessageBox::warning(this, tr("Failed To Open Project"), tr("There was a problem loading the project: ") + fName,
                          QMessageBox::Ok);
     return;
@@ -197,11 +200,35 @@ void MainWindow::openFile(QString fName) {
 
   MainWindow::setWindowTitle(fileInfo.fileName() + " - ENIGMA");
   recentFiles->prependFile(fName);
+  openProject(std::unique_ptr<buffers::Project>(loadedProject));
+}
 
-  resourceMap = new ResourceModelMap(project->mutable_game()->mutable_root(), this);
-  treeModel = new TreeModel(project->mutable_game()->mutable_root(), resourceMap);
-  ui->treeView->setModel(treeModel);
-  treeModel->connect(treeModel, &QAbstractItemModel::dataChanged,
+void MainWindow::openNewProject() {
+  MainWindow::setWindowTitle(tr("<new game> - ENIGMA"));
+  auto newProject = std::unique_ptr<buffers::Project>(new buffers::Project());
+  auto *root = newProject->mutable_game()->mutable_root();
+  QList<QString> defaultGroups = {tr("Sprites"),   tr("Sounds"),  tr("Backgrounds"), tr("Paths"),
+                                  tr("Scripts"),   tr("Shaders"), tr("Fonts"),       tr("Objects"),
+                                  tr("Timelines"), tr("Rooms"),   tr("Includes"),    tr("Configs")};
+  for (auto groupName : defaultGroups) {
+    auto *groupNode = root->add_child();
+    groupNode->set_folder(true);
+    groupNode->set_name(groupName.toStdString());
+  }
+  openProject(std::move(newProject));
+}
+
+void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
+  this->ui->mdiArea->closeAllSubWindows();
+  ArtManager::clearCache();
+
+  project = std::move(openedProject);
+
+  resourceMap.reset(new ResourceModelMap(project->mutable_game()->mutable_root(), nullptr));
+  treeModel.reset(new TreeModel(project->mutable_game()->mutable_root(), nullptr));
+
+  ui->treeView->setModel(treeModel.get());
+  treeModel->connect(treeModel.get(), &QAbstractItemModel::dataChanged,
                      [=](const QModelIndex &topLeft, const QModelIndex &bottomRight) {
                        for (int row = topLeft.row(); row <= bottomRight.row(); ++row) {
                          for (int column = topLeft.column(); column <= bottomRight.column(); ++column) {
@@ -213,8 +240,9 @@ void MainWindow::openFile(QString fName) {
                          }
                        }
                      });
-  ArtManager::clearCache();
 }
+
+void MainWindow::on_actionNew_triggered() { openNewProject(); }
 
 void MainWindow::on_actionOpen_triggered() {
   const QString &fileName = QFileDialog::getOpenFileName(
@@ -313,3 +341,52 @@ void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
 }
 
 void MainWindow::on_actionClearRecentMenu_triggered() { recentFiles->clear(); }
+
+void MainWindow::CreateResource(TypeCase typeCase) {
+  auto *root = this->project->mutable_game()->mutable_root();
+  auto *child = root->add_child();
+  auto fieldNum = ResTypeFields[typeCase];
+  const Descriptor *desc = child->GetDescriptor();
+  const Reflection *refl = child->GetReflection();
+  const FieldDescriptor *field = desc->FindFieldByNumber(fieldNum);
+
+  // find a unique name for the new resource
+  const std::string pre = field->name();
+  std::string name;
+  int i = 0;
+  do {
+    name = pre + std::to_string(i++);
+  } while (resourceMap->GetResourceByName(typeCase, name) != nullptr);
+  child->set_name(name);
+
+  // allocate and set the child's resource field
+  refl->MutableMessage(child, field);
+
+  this->resourceMap->AddResource(child, resourceMap.get());
+  this->treeModel->addNode(child, root);
+
+  // open the new resource for editing
+  openSubWindow(child);
+}
+
+void MainWindow::on_actionCreate_Sprite_triggered() { CreateResource(TypeCase::kSprite); }
+
+void MainWindow::on_actionCreate_Sound_triggered() { CreateResource(TypeCase::kSound); }
+
+void MainWindow::on_actionCreate_Background_triggered() { CreateResource(TypeCase::kBackground); }
+
+void MainWindow::on_actionCreate_Path_triggered() { CreateResource(TypeCase::kPath); }
+
+void MainWindow::on_actionCreate_Script_triggered() { CreateResource(TypeCase::kScript); }
+
+void MainWindow::on_actionCreate_Shader_triggered() { CreateResource(TypeCase::kShader); }
+
+void MainWindow::on_actionCreate_Font_triggered() { CreateResource(TypeCase::kFont); }
+
+void MainWindow::on_actionCreate_Timeline_triggered() { CreateResource(TypeCase::kTimeline); }
+
+void MainWindow::on_actionCreate_Object_triggered() { CreateResource(TypeCase::kObject); }
+
+void MainWindow::on_actionCreate_Room_triggered() { CreateResource(TypeCase::kRoom); }
+
+void MainWindow::on_actionAddNewConfig_triggered() { CreateResource(TypeCase::kSettings); }

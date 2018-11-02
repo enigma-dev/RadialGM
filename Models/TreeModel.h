@@ -29,6 +29,8 @@ class TreeModel : public QAbstractItemModel {
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
+  void addNode(buffers::TreeNode *child, buffers::TreeNode *parent);
+
  private:
   buffers::TreeNode *root;
   QHash<buffers::TreeNode *, buffers::TreeNode *> parents;
