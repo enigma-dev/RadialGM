@@ -25,14 +25,15 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
  public:
+  static QScopedPointer<ResourceModelMap> resourceMap;
+  static QScopedPointer<TreeModel> treeModel;
+  static QList<buffers::SystemType> systemCache;
+
   explicit MainWindow(QWidget *parent);
   ~MainWindow();
   void closeEvent(QCloseEvent *event);
-  static QScopedPointer<ResourceModelMap> resourceMap;
-  static QScopedPointer<TreeModel> treeModel;
+  void openProject(std::unique_ptr<buffers::Project> openedProject);
   buffers::Game *Game() const { return this->project->mutable_game(); }
-
-  static QList<buffers::SystemType> systemCache;
 
  signals:
   void CurrentConfigChanged(const buffers::resources::Settings &settings);
@@ -40,7 +41,6 @@ class MainWindow : public QMainWindow {
  public slots:
   void openFile(QString fName);
   void openNewProject();
-  void openProject(buffers::Project *openedProject);
   void CreateResource(TypeCase typeCase);
   static void setCurrentConfig(const buffers::resources::Settings &settings);
 

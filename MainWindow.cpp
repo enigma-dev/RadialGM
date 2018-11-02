@@ -200,12 +200,12 @@ void MainWindow::openFile(QString fName) {
 
   MainWindow::setWindowTitle(fileInfo.fileName() + " - ENIGMA");
   recentFiles->prependFile(fName);
-  openProject(loadedProject);
+  openProject(std::unique_ptr<buffers::Project>(loadedProject));
 }
 
 void MainWindow::openNewProject() {
   MainWindow::setWindowTitle(tr("<new game> - ENIGMA"));
-  auto newProject = new buffers::Project();
+  auto newProject = std::unique_ptr<buffers::Project>(new buffers::Project());
   auto *root = newProject->mutable_game()->mutable_root();
   QList<QString> defaultGroups = {tr("Sprites"),   tr("Sounds"),  tr("Backgrounds"), tr("Paths"),
                                   tr("Scripts"),   tr("Shaders"), tr("Fonts"),       tr("Objects"),
@@ -215,14 +215,14 @@ void MainWindow::openNewProject() {
     groupNode->set_folder(true);
     groupNode->set_name(groupName.toStdString());
   }
-  openProject(newProject);
+  openProject(std::move(newProject));
 }
 
-void MainWindow::openProject(buffers::Project *openedProject) {
+void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   this->ui->mdiArea->closeAllSubWindows();
   ArtManager::clearCache();
 
-  project.reset(openedProject);
+  project = std::move(openedProject);
 
   resourceMap.reset(new ResourceModelMap(project->mutable_game()->mutable_root(), nullptr));
   treeModel.reset(new TreeModel(project->mutable_game()->mutable_root(), nullptr));
