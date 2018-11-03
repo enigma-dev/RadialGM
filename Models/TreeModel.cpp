@@ -49,13 +49,16 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
     if (it == iconMap.end()) return ArtManager::GetIcon("info");
 
     if (item->type_case() == TypeCase::kSprite) {
+      if (item->sprite().subimages_size() <= 0) return QVariant();
       QString spr = QString::fromStdString(item->sprite().subimages(0));
       if (!spr.isEmpty()) return ArtManager::GetIcon(spr);
+      return QVariant();
     }
 
     if (item->type_case() == TypeCase::kBackground) {
       QString bkg = QString::fromStdString(item->background().image());
       if (!bkg.isEmpty()) return ArtManager::GetIcon(bkg);
+      return QVariant();
     }
 
     if (item->type_case() == TypeCase::kObject) {
@@ -64,6 +67,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
         QString spr = sprModel->GetString(Sprite::kSubimagesFieldNumber, 0);
         if (!spr.isEmpty()) return ArtManager::GetIcon(spr);
       }
+      return QVariant();
     }
 
     const QIcon &icon = it->second;
