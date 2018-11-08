@@ -131,8 +131,9 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
                                 {TypeCase::kRoom, EditorFactory<RoomEditor>},
                                 {TypeCase::kSettings, EditorFactory<SettingsEditor>}});
 
-  auto subWindow = subWindows[item];
-  if (!subWindows.contains(item) || subWindow == nullptr) {
+  auto swIt = subWindows.find(item);
+  QMdiSubWindow *subWindow;
+  if (swIt == subWindows.end() || !*swIt) {
     auto factoryFunction = factoryMap.find(item->type_case());
     if (factoryFunction == factoryMap.end()) return;  // no registered editor
 
@@ -150,6 +151,8 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
 
     subWindow->setWindowIcon(subWindow->widget()->windowIcon());
     subWindow->setWindowTitle(QString::fromStdString(item->name()));
+  } else {
+    subWindow = *swIt;
   }
 
   subWindow->show();
