@@ -132,8 +132,8 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
                                 {TypeCase::kSettings, EditorFactory<SettingsEditor>}});
 
   auto swIt = subWindows.find(item);
-  QMdiSubWindow *subWindow = (swIt == subWindows.end()) ? nullptr : *swIt;
-  if (subWindow == nullptr) {
+  QMdiSubWindow *subWindow = *swIt;
+  if (swIt == subWindows.end() || !subWindow) {
     auto factoryFunction = factoryMap.find(item->type_case());
     if (factoryFunction == factoryMap.end()) return;  // no registered editor
 
