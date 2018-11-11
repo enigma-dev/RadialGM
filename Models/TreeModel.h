@@ -31,6 +31,9 @@ class TreeModel : public QAbstractItemModel {
 
   void addNode(buffers::TreeNode *child, buffers::TreeNode *parent);
 
+ signals:
+  void ResourceRenamed(TypeCase type, const QString &oldName, const QString &newName);
+
  private:
   buffers::TreeNode *root;
   QHash<buffers::TreeNode *, buffers::TreeNode *> parents;

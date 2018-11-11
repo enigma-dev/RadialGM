@@ -41,6 +41,7 @@ void BaseEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex& /*bo
                              const QVector<int>& /*roles*/) {
   buffers::TreeNode* n = static_cast<buffers::TreeNode*>(nodeMapper->GetModel()->GetBuffer());
   if (n == topLeft.internalPointer() && topLeft.row() == TreeNode::kNameFieldNumber) {
+    this->setWindowTitle(QString::fromStdString(n->name()));
     emit ResourceRenamed(n->type_case(), oldValue.toString(), QString::fromStdString(n->name()));
   }
 }
