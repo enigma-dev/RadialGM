@@ -8,6 +8,12 @@ using CppType = FieldDescriptor::CppType;
 
 ProtoModel::ProtoModel(Message *protobuf, QObject *parent)
     : QAbstractItemModel(parent), dirty(false), protobuf(protobuf) {
+  connect(this, &ProtoModel::dataChanged, this,
+          [this](const QModelIndex &topLeft, const QModelIndex &bottomRight,
+                 const QVariant & /*oldValue*/ = QVariant(0), const QVector<int> &roles = QVector<int>()) {
+            emit QAbstractItemModel::dataChanged(topLeft, bottomRight, roles);
+          });
+
   protobufBackup = protobuf->New();
   protobufBackup->CopyFrom(*protobuf);
 

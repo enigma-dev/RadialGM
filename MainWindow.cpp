@@ -145,7 +145,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     connect(treeModel.get(), &TreeModel::ResourceRenamed, editor,
             [res](TypeCase /*type*/, const QString & /*oldName*/, const QString & /*newName*/) {
               const QModelIndex index = res->index(TreeNode::kNameFieldNumber);
-              emit static_cast<QAbstractItemModel *>(res)->dataChanged(index, index);
+              emit res->dataChanged(index, index);
             });
 
     subWindow = subWindows[item] = ui->mdiArea->addSubWindow(editor);
