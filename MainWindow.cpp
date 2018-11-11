@@ -141,8 +141,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     BaseEditor *editor = factoryFunction->second(res, this);
 
     connect(editor, &BaseEditor::ResourceRenamed, resourceMap.get(), &ResourceModelMap::ResourceRenamed);
-    connect(editor, &BaseEditor::ResourceRenamed, treeModel.get(),
-            []() { treeModel->dataChanged(QModelIndex(), QModelIndex()); });
+    connect(editor, &BaseEditor::ResourceRenamed, [=]() { treeModel->dataChanged(QModelIndex(), QModelIndex()); });
     connect(treeModel.get(), &TreeModel::ResourceRenamed, editor,
             [res](TypeCase /*type*/, const QString & /*oldName*/, const QString & /*newName*/) {
               const QModelIndex index = res->index(TreeNode::kNameFieldNumber);
