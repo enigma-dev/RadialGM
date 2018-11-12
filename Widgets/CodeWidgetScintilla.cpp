@@ -39,16 +39,21 @@ void CodeWidget::prepareKeywordStore() {
 }
 
 void CodeWidget::addKeyword(const QString& keyword, KeywordType type) {
+  if (!sciApis) return;
   QString fmt = keyword + QObject::tr("?%0").arg(type);
   sciApis->add(fmt);
 }
 
 void CodeWidget::addCalltip(const QString& keyword, const QString& calltip, KeywordType type) {
+  if (!sciApis) return;
   QString fmt = keyword + QObject::tr("?%0(%1)").arg(type).arg(calltip);
   sciApis->add(fmt);
 }
 
-void CodeWidget::finalizeKeywords() { sciApis->prepare(); }
+void CodeWidget::finalizeKeywords() {
+  if (!sciApis) return;
+  sciApis->prepare();
+}
 
 CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), font(QFont("Courier", 10)) {
   prepare_scintilla_apis();
