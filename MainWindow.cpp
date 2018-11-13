@@ -142,6 +142,11 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
 
     connect(editor, &BaseEditor::ResourceRenamed, resourceMap.get(), &ResourceModelMap::ResourceRenamed);
     connect(editor, &BaseEditor::ResourceRenamed, [=]() { treeModel->dataChanged(QModelIndex(), QModelIndex()); });
+    connect(treeModel.get(), &TreeModel::ResourceRenamed, editor,
+            [res](TypeCase /*type*/, const QString & /*oldName*/, const QString & /*newName*/) {
+              const QModelIndex index = res->index(TreeNode::kNameFieldNumber);
+              emit res->dataChanged(index, index);
+            });
 
     subWindow = subWindows[item] = ui->mdiArea->addSubWindow(editor);
     subWindow->resize(subWindow->frameSize().expandedTo(editor->size()));
@@ -150,7 +155,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     subWindow->connect(subWindow, &QObject::destroyed, [=]() { subWindows.remove(item); });
 
     subWindow->setWindowIcon(subWindow->widget()->windowIcon());
-    subWindow->setWindowTitle(QString::fromStdString(item->name()));
+    editor->setWindowTitle(QString::fromStdString(item->name()));
   } else {
     subWindow = *swIt;
   }
@@ -231,18 +236,8 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   treeModel.reset(new TreeModel(project->mutable_game()->mutable_root(), nullptr));
 
   ui->treeView->setModel(treeModel.get());
-  treeModel->connect(treeModel.get(), &QAbstractItemModel::dataChanged,
-                     [=](const QModelIndex &topLeft, const QModelIndex &bottomRight) {
-                       for (int row = topLeft.row(); row <= bottomRight.row(); ++row) {
-                         for (int column = topLeft.column(); column <= bottomRight.column(); ++column) {
-                           auto index = topLeft.sibling(row, column);
-                           buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
-                           if (!subWindows.contains(item)) return;
-                           auto subWindow = subWindows[item];
-                           subWindow->setWindowTitle(QString::fromStdString(item->name()));
-                         }
-                       }
-                     });
+  treeModel->connect(treeModel.get(), &TreeModel::ResourceRenamed, resourceMap.get(),
+                     &ResourceModelMap::ResourceRenamed);
 }
 
 void MainWindow::on_actionNew_triggered() { openNewProject(); }

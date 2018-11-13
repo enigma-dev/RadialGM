@@ -33,8 +33,9 @@ ProtoModel* ResourceModelMap::GetResourceByName(int type, const std::string& nam
 }
 
 void ResourceModelMap::ResourceRenamed(TypeCase type, const QString& oldName, const QString& newName) {
+  if (oldName == newName || !_resources[type].contains(oldName)) return;
   _resources[type][newName] = _resources[type][oldName];
-  _resources[type][oldName] = nullptr;
+  _resources[type].remove(oldName);
 }
 
 const ProtoModel* GetObjectSprite(const std::string& objName) {

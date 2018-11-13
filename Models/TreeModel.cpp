@@ -35,7 +35,11 @@ int TreeModel::columnCount(const QModelIndex & /*parent*/) const { return 1; }
 bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int role) {
   if (!index.isValid() || role != Qt::EditRole) return false;
   buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
-  item->set_name(value.toString().toStdString());
+  const QString oldName = QString::fromStdString(item->name());
+  const QString newName = value.toString();
+  if (oldName == newName) return true;
+  item->set_name(newName.toStdString());
+  emit ResourceRenamed(item->type_case(), oldName, value.toString());
   emit dataChanged(index, index);
   return true;
 }
