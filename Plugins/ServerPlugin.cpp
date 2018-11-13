@@ -244,7 +244,7 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   process = new QProcess(this);
 
   // look for an executable file that looks like emake in some common directories
-  QList<QString> searchPaths = {QDir::currentPath(), "../RadialGM/Submodules/enigma-dev"};
+  QList<QString> searchPaths = {QDir::currentPath(), "./enigma-dev", "../RadialGM/Submodules/enigma-dev"};
   QFileInfo emakeFileInfo(QFile("emake"));
   foreach (auto path, searchPaths) {
     const QDir dir(path);
