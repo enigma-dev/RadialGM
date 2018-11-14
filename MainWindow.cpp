@@ -36,6 +36,38 @@ MainWindow *MainWindow::m_instance = nullptr;
 QScopedPointer<ResourceModelMap> MainWindow::resourceMap;
 QScopedPointer<TreeModel> MainWindow::treeModel;
 
+class DoubleClickFilter : public QObject {
+ protected:
+  bool eventFilter(QObject *obj, QEvent *ev) override;
+};
+
+bool DoubleClickFilter::eventFilter(QObject * /*obj*/, QEvent *event) {
+  if (event->type() != QEvent::NonClientAreaMouseButtonDblClick) return false;
+  auto *mouseEvent = static_cast<QMouseEvent *>(event);
+  if (mouseEvent->button() != Qt::LeftButton) return false;
+  return true;
+}
+
+void UseNativeMaxButton(QDockWidget *dock) {
+  static QScopedPointer<DoubleClickFilter> doubleClickFilter(new DoubleClickFilter());
+  if (dock->isFloating()) dock->installEventFilter(doubleClickFilter.get());
+  dock->connect(dock, &QDockWidget::topLevelChanged, [=](bool floating) {
+    if (floating) {
+      bool wasVisible = dock->isVisible();
+      dock->setTitleBarWidget(nullptr);
+      Qt::WindowFlags windowFlags = dock->windowFlags();
+      windowFlags.setFlag(Qt::Tool, false);
+      windowFlags.setFlag(Qt::Dialog);
+      windowFlags.setFlag(Qt::WindowMaximizeButtonHint);
+      dock->setWindowFlags(windowFlags);
+      dock->setVisible(wasVisible);
+      dock->installEventFilter(doubleClickFilter.get());
+    } else {
+      dock->removeEventFilter(doubleClickFilter.get());
+    }
+  });
+}
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ArtManager::Init();
 
@@ -47,6 +79,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
   ui->setupUi(this);
+  UseNativeMaxButton(ui->outputDockWidget);
   this->readSettings();
   this->recentFiles = new RecentFiles(this, this->ui->menuRecent, this->ui->actionClearRecentMenu);
 
