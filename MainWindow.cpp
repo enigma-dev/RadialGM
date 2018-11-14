@@ -36,6 +36,82 @@ MainWindow *MainWindow::m_instance = nullptr;
 QScopedPointer<ResourceModelMap> MainWindow::resourceMap;
 QScopedPointer<TreeModel> MainWindow::treeModel;
 
+class DockWidgetTitleButton : public QToolButton {
+ public:
+  DockWidgetTitleButton();
+
+  QSize sizeHint() const;
+  inline QSize minimumSizeHint() const { return sizeHint(); }
+};
+
+DockWidgetTitleButton::DockWidgetTitleButton() : QToolButton() {
+  setFocusPolicy(Qt::NoFocus);
+  setAutoRaise(true);
+}
+
+QSize DockWidgetTitleButton::sizeHint() const {
+  ensurePolished();
+
+  int size = 2 * style()->pixelMetric(QStyle::PM_DockWidgetTitleBarButtonMargin, nullptr, this);
+  if (!icon().isNull()) {
+    int iconSize = style()->pixelMetric(QStyle::PM_SmallIconSize, nullptr, this);
+    QSize sz = icon().actualSize(QSize(iconSize, iconSize));
+    size += qMax(sz.width(), sz.height());
+  }
+
+  return QSize(size, size);
+}
+
+void UpdateStateButton(QAbstractButton *button, QDockWidget *dock) {
+  auto *style = dock->style();
+  if (dock->isFloating() && dock->windowState() != Qt::WindowState::WindowMaximized) {
+    button->setIcon(style->standardIcon(QStyle::SP_TitleBarMaxButton));
+  } else {
+    button->setIcon(style->standardIcon(QStyle::SP_TitleBarNormalButton));
+  }
+}
+
+void CreateDockTitleBar(QDockWidget *dock) {
+  QWidget *titleBar = new QWidget(dock);
+
+  QLabel *titleLabel = new QLabel(dock->windowTitle());
+  auto *stateButton = new DockWidgetTitleButton();
+  UpdateStateButton(stateButton, dock);
+  stateButton->connect(stateButton, &QToolButton::clicked, [=]() {
+    if (dock->isFloating()) {
+      if (dock->windowState() == Qt::WindowState::WindowMaximized) {
+        dock->setWindowState(Qt::WindowState::WindowNoState);
+      } else {
+        dock->setWindowState(Qt::WindowState::WindowMaximized);
+      }
+    } else {
+      dock->setFloating(true);
+    }
+    UpdateStateButton(stateButton, dock);
+  });
+  auto *closeButton = new DockWidgetTitleButton();
+  closeButton->setIcon(dock->style()->standardIcon(QStyle::SP_DockWidgetCloseButton));
+  closeButton->connect(closeButton, &QToolButton::clicked, dock, &QDockWidget::close);
+
+  dock->connect(dock, &QDockWidget::windowTitleChanged,
+                [titleLabel](const QString &title) { titleLabel->setText(title); });
+  dock->connect(dock, &QDockWidget::topLevelChanged, [=](bool /*floating*/) { UpdateStateButton(stateButton, dock); });
+
+  QBoxLayout *layout =
+      new QBoxLayout(dock->features().testFlag(QDockWidget::DockWidgetVerticalTitleBar) ? QBoxLayout::BottomToTop
+                                                                                        : QBoxLayout::LeftToRight,
+                     dock);
+  layout->setMargin(0);
+  layout->setSpacing(0);
+  layout->addWidget(titleLabel);
+  layout->addStretch(1);
+  layout->addWidget(stateButton);
+  layout->addWidget(closeButton);
+
+  titleBar->setLayout(layout);
+  dock->setTitleBarWidget(titleBar);
+}
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ArtManager::Init();
 
@@ -47,6 +123,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
   ui->setupUi(this);
+  CreateDockTitleBar(ui->outputDockWidget);
   this->readSettings();
   this->recentFiles = new RecentFiles(this, this->ui->menuRecent, this->ui->actionClearRecentMenu);
 
