@@ -75,28 +75,6 @@ void CreateDockTitleBar(QDockWidget *dock) {
   QWidget *titleBar = new QWidget(dock);
 
   QLabel *titleLabel = new QLabel(dock->windowTitle());
-  auto *stateButton = new DockWidgetTitleButton();
-  UpdateStateButton(stateButton, dock);
-  stateButton->connect(stateButton, &QToolButton::clicked, [=]() {
-    if (dock->isFloating()) {
-      if (dock->windowState() == Qt::WindowState::WindowMaximized) {
-        dock->setWindowState(Qt::WindowState::WindowNoState);
-      } else {
-        dock->setWindowState(Qt::WindowState::WindowMaximized);
-      }
-    } else {
-      dock->setFloating(true);
-    }
-    UpdateStateButton(stateButton, dock);
-  });
-  auto *closeButton = new DockWidgetTitleButton();
-  closeButton->setIcon(dock->style()->standardIcon(QStyle::SP_DockWidgetCloseButton));
-  closeButton->connect(closeButton, &QToolButton::clicked, dock, &QDockWidget::close);
-
-  dock->connect(dock, &QDockWidget::windowTitleChanged,
-                [titleLabel](const QString &title) { titleLabel->setText(title); });
-  dock->connect(dock, &QDockWidget::topLevelChanged, [=](bool /*floating*/) { UpdateStateButton(stateButton, dock); });
-
   QBoxLayout *layout =
       new QBoxLayout(dock->features().testFlag(QDockWidget::DockWidgetVerticalTitleBar) ? QBoxLayout::BottomToTop
                                                                                         : QBoxLayout::LeftToRight,
@@ -105,8 +83,36 @@ void CreateDockTitleBar(QDockWidget *dock) {
   layout->setSpacing(0);
   layout->addWidget(titleLabel);
   layout->addStretch(1);
-  layout->addWidget(stateButton);
-  layout->addWidget(closeButton);
+
+  if (dock->features().testFlag(QDockWidget::DockWidgetFloatable)) {
+    auto *stateButton = new DockWidgetTitleButton();
+    UpdateStateButton(stateButton, dock);
+    stateButton->connect(stateButton, &QToolButton::clicked, [=]() {
+      if (dock->isFloating()) {
+        if (dock->windowState() == Qt::WindowState::WindowMaximized) {
+          dock->setWindowState(Qt::WindowState::WindowNoState);
+        } else {
+          dock->setWindowState(Qt::WindowState::WindowMaximized);
+        }
+      } else {
+        dock->setFloating(true);
+      }
+      UpdateStateButton(stateButton, dock);
+    });
+    layout->addWidget(stateButton);
+    dock->connect(dock, &QDockWidget::topLevelChanged,
+                  [=](bool /*floating*/) { UpdateStateButton(stateButton, dock); });
+  }
+
+  if (dock->features().testFlag(QDockWidget::DockWidgetClosable)) {
+    auto *closeButton = new DockWidgetTitleButton();
+    closeButton->setIcon(dock->style()->standardIcon(QStyle::SP_DockWidgetCloseButton));
+    closeButton->connect(closeButton, &QToolButton::clicked, dock, &QDockWidget::close);
+    layout->addWidget(closeButton);
+  }
+
+  dock->connect(dock, &QDockWidget::windowTitleChanged,
+                [titleLabel](const QString &title) { titleLabel->setText(title); });
 
   titleBar->setLayout(layout);
   dock->setTitleBarWidget(titleBar);
