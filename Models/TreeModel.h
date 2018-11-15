@@ -2,6 +2,7 @@
 #define TREEMODEL_H
 
 #include "Components/ArtManager.h"
+#include "Models/ResourceModelMap.h"
 #include "codegen/treenode.pb.h"
 
 #include <QAbstractItemModel>
@@ -18,7 +19,7 @@ class TreeModel : public QAbstractItemModel {
  public:
   static IconMap iconMap;
 
-  explicit TreeModel(buffers::TreeNode *root, QObject *parent);
+  explicit TreeModel(buffers::TreeNode *root, ResourceModelMap *resourceMap, QObject *parent);
 
   bool setData(const QModelIndex &index, const QVariant &value, int role) override;
   QVariant data(const QModelIndex &index, int role) const override;
@@ -42,6 +43,7 @@ class TreeModel : public QAbstractItemModel {
 
  private:
   buffers::TreeNode *root;
+  ResourceModelMap *resourceMap;
   QHash<buffers::TreeNode *, buffers::TreeNode *> parents;
 
   void SetupParents(buffers::TreeNode *root);

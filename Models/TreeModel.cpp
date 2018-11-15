@@ -8,7 +8,8 @@
 
 IconMap TreeModel::iconMap;
 
-TreeModel::TreeModel(buffers::TreeNode *root, QObject *parent) : QAbstractItemModel(parent), root(root) {
+TreeModel::TreeModel(buffers::TreeNode *root, ResourceModelMap *resourceMap, QObject *parent)
+    : QAbstractItemModel(parent), root(root), resourceMap(resourceMap) {
   iconMap = {{TypeCase::kFolder, ArtManager::GetIcon("group")},
              {TypeCase::kSprite, ArtManager::GetIcon("sprite")},
              {TypeCase::kSound, ArtManager::GetIcon("sound")},
@@ -201,16 +202,29 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
     // if moving the node within the same parent we need to adjust the row
     // since its own removal will affect the row we reinsert it at
     if (itemRow < row && parentNode == parents[node]) --row;
-    // if we are moving multiple nodes within the same parent we need to
-    // offset the row we are removing by the number of rows we've already inserted
-    if (itemRow > row && parentNode == parents[node]) itemRow += i;
 
-    auto index = this->createIndex(itemRow, 0, node);
-    beginRemoveRows(index.parent(), itemRow, itemRow);
-    auto oldRepeated = parents[node]->mutable_child();
-    oldRepeated->ExtractSubrange(itemRow, 1, nullptr);
-    parents.remove(node);
-    endRemoveRows();
+    if (action != Qt::CopyAction) {
+      // if we are moving multiple nodes within the same parent we need to
+      // offset the row we are removing by the number of rows we've already inserted
+      if (itemRow > row && parentNode == parents[node]) itemRow += i;
+
+      auto index = this->createIndex(itemRow, 0, node);
+      beginRemoveRows(index.parent(), itemRow, itemRow);
+      auto oldRepeated = parents[node]->mutable_child();
+      oldRepeated->ExtractSubrange(itemRow, 1, nullptr);
+      parents.remove(node);
+      endRemoveRows();
+    } else {
+      // duplicate the node
+      auto *dup = node->New();
+      dup->CopyFrom(*node);
+      node = dup;
+      // give the duplicate node a new name
+      const QString name = resourceMap->CreateResourceName(node);
+      node->set_name(name.toStdString());
+      // add the new node to the resource map
+      resourceMap->AddResource(node, resourceMap);
+    }
 
     beginInsertRows(parent, row, row);
     parentNode->mutable_child()->AddAllocated(node);

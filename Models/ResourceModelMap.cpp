@@ -1,4 +1,5 @@
 #include "Models/ResourceModelMap.h"
+#include "Editors/BaseEditor.h"
 #include "MainWindow.h"
 
 ResourceModelMap::ResourceModelMap(buffers::TreeNode* root, QObject* parent) : QObject(parent) {
@@ -19,6 +20,23 @@ void ResourceModelMap::recursiveBindRes(buffers::TreeNode* node, QObject* parent
 
 void ResourceModelMap::AddResource(buffers::TreeNode* child, QObject* parent) {
   _resources[child->type_case()][QString::fromStdString(child->name())] = new ProtoModel(child, parent);
+}
+
+QString ResourceModelMap::CreateResourceName(TreeNode* node) {
+  auto fieldNum = ResTypeFields[node->type_case()];
+  const Descriptor* desc = node->GetDescriptor();
+  const FieldDescriptor* field = desc->FindFieldByNumber(fieldNum);
+  return CreateResourceName(node->type_case(), QString::fromStdString(field->name()));
+}
+
+QString ResourceModelMap::CreateResourceName(int type, const QString& typeName) {
+  const QString pre = typeName;
+  QString name;
+  int i = 0;
+  do {
+    name = pre + QString::number(i++);
+  } while (GetResourceByName(type, name) != nullptr);
+  return name;
 }
 
 ProtoModel* ResourceModelMap::GetResourceByName(int type, const QString& name) {

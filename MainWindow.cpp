@@ -233,7 +233,7 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   project = std::move(openedProject);
 
   resourceMap.reset(new ResourceModelMap(project->mutable_game()->mutable_root(), nullptr));
-  treeModel.reset(new TreeModel(project->mutable_game()->mutable_root(), nullptr));
+  treeModel.reset(new TreeModel(project->mutable_game()->mutable_root(), resourceMap.get(), nullptr));
 
   ui->treeView->setModel(treeModel.get());
   treeModel->connect(treeModel.get(), &TreeModel::ResourceRenamed, resourceMap.get(),
@@ -348,17 +348,12 @@ void MainWindow::CreateResource(TypeCase typeCase) {
   const Reflection *refl = child->GetReflection();
   const FieldDescriptor *field = desc->FindFieldByNumber(fieldNum);
 
-  // find a unique name for the new resource
-  const std::string pre = field->name();
-  std::string name;
-  int i = 0;
-  do {
-    name = pre + std::to_string(i++);
-  } while (resourceMap->GetResourceByName(typeCase, name) != nullptr);
-  child->set_name(name);
-
   // allocate and set the child's resource field
   refl->MutableMessage(child, field);
+
+  // find a unique name for the new resource
+  const QString name = resourceMap->CreateResourceName(child);
+  child->set_name(name.toStdString());
 
   this->resourceMap->AddResource(child, resourceMap.get());
   this->treeModel->addNode(child, root);
