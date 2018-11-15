@@ -124,7 +124,7 @@ QModelIndex TreeModel::parent(const QModelIndex &index) const {
   buffers::TreeNode *childItem = static_cast<buffers::TreeNode *>(index.internalPointer());
   buffers::TreeNode *parentItem = parents[childItem];
 
-  if (parentItem == root) return QModelIndex();
+  if (parentItem == root || !parentItem) return QModelIndex();
 
   return createIndex(parentItem->child_size(), 0, parentItem);
 }
@@ -156,6 +156,11 @@ QMimeData *TreeModel::mimeData(const QModelIndexList &indexes) const {
     if (!index.isValid() || nodes.contains(index)) continue;
     nodes << index;
   }
+
+  // when we have multiple nodes we need to sort them by row
+  // so that we can later remove the highest row first
+  std::sort(nodes.rbegin(), nodes.rend(), std::less<QModelIndex>());
+
   stream << QCoreApplication::applicationPid();
   stream << nodes.count();
   for (const QModelIndex &index : nodes) {
@@ -196,6 +201,9 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
     // if moving the node within the same parent we need to adjust the row
     // since its own removal will affect the row we reinsert it at
     if (itemRow < row && parentNode == parents[node]) --row;
+    // if we are moving multiple nodes within the same parent we need to
+    // offset the row we are removing by the number of rows we've already inserted
+    if (itemRow > row && parentNode == parents[node]) itemRow += i;
 
     auto index = this->createIndex(itemRow, 0, node);
     beginRemoveRows(index.parent(), itemRow, itemRow);
@@ -206,13 +214,11 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
 
     beginInsertRows(parent, row, row);
     parentNode->mutable_child()->AddAllocated(node);
-    for (int i = parentNode->child_size() - 1; i > row; --i) {
-      parentNode->mutable_child()->SwapElements(i, i - 1);
+    for (int j = parentNode->child_size() - 1; j > row; --j) {
+      parentNode->mutable_child()->SwapElements(j, j - 1);
     }
     parents[node] = parentNode;
     endInsertRows();
-
-    ++row;
   }
 
   return true;
