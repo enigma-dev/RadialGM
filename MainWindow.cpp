@@ -342,7 +342,7 @@ void MainWindow::on_actionClearRecentMenu_triggered() { recentFiles->clear(); }
 
 void MainWindow::CreateResource(TypeCase typeCase) {
   auto *root = this->project->mutable_game()->mutable_root();
-  auto *child = root->add_child();
+  auto *child = new TreeNode();
   auto fieldNum = ResTypeFields[typeCase];
   const Descriptor *desc = child->GetDescriptor();
   const Reflection *refl = child->GetReflection();

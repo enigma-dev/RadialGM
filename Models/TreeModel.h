@@ -29,6 +29,12 @@ class TreeModel : public QAbstractItemModel {
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
+  Qt::DropActions supportedDropActions() const override;
+  QStringList mimeTypes() const override;
+  QMimeData *mimeData(const QModelIndexList &indexes) const override;
+  bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
+                    const QModelIndex &parent) override;
+
   void addNode(buffers::TreeNode *child, buffers::TreeNode *parent);
 
  signals:
@@ -39,6 +45,7 @@ class TreeModel : public QAbstractItemModel {
   QHash<buffers::TreeNode *, buffers::TreeNode *> parents;
 
   void SetupParents(buffers::TreeNode *root);
+  inline QString treeNodeMime() const { return QStringLiteral("RadialGM/TreeNode"); }
 };
 
 #endif  // TREEMODEL_H
