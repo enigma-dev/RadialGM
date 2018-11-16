@@ -342,24 +342,26 @@ void MainWindow::on_actionClearRecentMenu_triggered() { recentFiles->clear(); }
 
 void MainWindow::CreateResource(TypeCase typeCase) {
   auto *root = this->project->mutable_game()->mutable_root();
-  auto *child = new TreeNode();
+  auto child = std::unique_ptr<TreeNode>(new TreeNode());
   auto fieldNum = ResTypeFields[typeCase];
   const Descriptor *desc = child->GetDescriptor();
   const Reflection *refl = child->GetReflection();
   const FieldDescriptor *field = desc->FindFieldByNumber(fieldNum);
 
   // allocate and set the child's resource field
-  refl->MutableMessage(child, field);
+  refl->MutableMessage(child.get(), field);
 
   // find a unique name for the new resource
-  const QString name = resourceMap->CreateResourceName(child);
+  const QString name = resourceMap->CreateResourceName(child.get());
   child->set_name(name.toStdString());
 
-  this->resourceMap->AddResource(child, resourceMap.get());
-  this->treeModel->addNode(child, root);
+  this->resourceMap->AddResource(child.get(), resourceMap.get());
 
   // open the new resource for editing
-  openSubWindow(child);
+  openSubWindow(child.get());
+
+  // release ownership of the new child to its parent and the tree
+  this->treeModel->addNode(child.release(), root);
 }
 
 void MainWindow::on_actionCreate_Sprite_triggered() { CreateResource(TypeCase::kSprite); }
