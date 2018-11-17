@@ -233,7 +233,7 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   project = std::move(openedProject);
 
   resourceMap.reset(new ResourceModelMap(project->mutable_game()->mutable_root(), nullptr));
-  treeModel.reset(new TreeModel(project->mutable_game()->mutable_root(), nullptr));
+  treeModel.reset(new TreeModel(project->mutable_game()->mutable_root(), resourceMap.get(), nullptr));
 
   ui->treeView->setModel(treeModel.get());
   treeModel->connect(treeModel.get(), &TreeModel::ResourceRenamed, resourceMap.get(),
@@ -342,29 +342,26 @@ void MainWindow::on_actionClearRecentMenu_triggered() { recentFiles->clear(); }
 
 void MainWindow::CreateResource(TypeCase typeCase) {
   auto *root = this->project->mutable_game()->mutable_root();
-  auto *child = root->add_child();
+  auto child = std::unique_ptr<TreeNode>(new TreeNode());
   auto fieldNum = ResTypeFields[typeCase];
   const Descriptor *desc = child->GetDescriptor();
   const Reflection *refl = child->GetReflection();
   const FieldDescriptor *field = desc->FindFieldByNumber(fieldNum);
 
-  // find a unique name for the new resource
-  const std::string pre = field->name();
-  std::string name;
-  int i = 0;
-  do {
-    name = pre + std::to_string(i++);
-  } while (resourceMap->GetResourceByName(typeCase, name) != nullptr);
-  child->set_name(name);
-
   // allocate and set the child's resource field
-  refl->MutableMessage(child, field);
+  refl->MutableMessage(child.get(), field);
 
-  this->resourceMap->AddResource(child, resourceMap.get());
-  this->treeModel->addNode(child, root);
+  // find a unique name for the new resource
+  const QString name = resourceMap->CreateResourceName(child.get());
+  child->set_name(name.toStdString());
+
+  this->resourceMap->AddResource(child.get(), resourceMap.get());
 
   // open the new resource for editing
-  openSubWindow(child);
+  openSubWindow(child.get());
+
+  // release ownership of the new child to its parent and the tree
+  this->treeModel->addNode(child.release(), root);
 }
 
 void MainWindow::on_actionCreate_Sprite_triggered() { CreateResource(TypeCase::kSprite); }

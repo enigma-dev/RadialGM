@@ -14,6 +14,8 @@ class ResourceModelMap : public QObject {
   ProtoModel* GetResourceByName(int type, const QString& name);
   ProtoModel* GetResourceByName(int type, const std::string& name);
   void AddResource(buffers::TreeNode* node, QObject* parent);
+  QString CreateResourceName(TreeNode* node);
+  QString CreateResourceName(int type, const QString& typeName);
 
  public slots:
   void ResourceRenamed(TypeCase type, const QString& oldName, const QString& newName);

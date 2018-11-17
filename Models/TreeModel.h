@@ -2,6 +2,7 @@
 #define TREEMODEL_H
 
 #include "Components/ArtManager.h"
+#include "Models/ResourceModelMap.h"
 #include "codegen/treenode.pb.h"
 
 #include <QAbstractItemModel>
@@ -18,7 +19,7 @@ class TreeModel : public QAbstractItemModel {
  public:
   static IconMap iconMap;
 
-  explicit TreeModel(buffers::TreeNode *root, QObject *parent);
+  explicit TreeModel(buffers::TreeNode *root, ResourceModelMap *resourceMap, QObject *parent);
 
   bool setData(const QModelIndex &index, const QVariant &value, int role) override;
   QVariant data(const QModelIndex &index, int role) const override;
@@ -29,6 +30,12 @@ class TreeModel : public QAbstractItemModel {
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
+  Qt::DropActions supportedDropActions() const override;
+  QStringList mimeTypes() const override;
+  QMimeData *mimeData(const QModelIndexList &indexes) const override;
+  bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
+                    const QModelIndex &parent) override;
+
   void addNode(buffers::TreeNode *child, buffers::TreeNode *parent);
 
  signals:
@@ -36,9 +43,11 @@ class TreeModel : public QAbstractItemModel {
 
  private:
   buffers::TreeNode *root;
+  ResourceModelMap *resourceMap;
   QHash<buffers::TreeNode *, buffers::TreeNode *> parents;
 
   void SetupParents(buffers::TreeNode *root);
+  inline QString treeNodeMime() const { return QStringLiteral("RadialGM/TreeNode"); }
 };
 
 #endif  // TREEMODEL_H
