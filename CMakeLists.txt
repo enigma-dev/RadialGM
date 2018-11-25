@@ -202,56 +202,56 @@ target_link_libraries(${EXE} PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 
 # Find Qt
 find_package(Qt5 COMPONENTS Core Widgets Gui PrintSupport REQUIRED)
-target_link_libraries(${EXE} PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui Qt5::QGifPlugin Qt5::QICOPlugin Qt5::PrintSupport)
+target_link_libraries(${EXE} PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport)
 
 
 if(MSVC)
-	target_link_libraries(${EXE} PRIVATE Qt5::WinMain)
+    target_link_libraries(${EXE} PRIVATE Qt5::WinMain)
 
-	# === Debug
-	find_library(LIB_QT_PLATFORM_D NAMES Qt5PlatformCompositorSupportd)
-	find_library(LIB_QT_FONT_D NAMES Qt5FontDatabaseSupportd)
-	find_library(LIB_QT_UI_D NAMES Qt5WindowsUIAutomationSupportd)
-	find_library(LIB_QT_EVENT_D NAMES Qt5EventDispatcherSupportd)
-	find_library(LIB_QT_THEME_D NAMES Qt5ThemeSupportd)
-	find_library(LIB_QT_PRINT_D NAMES Qt5PrintSupportd)
-	find_library(LIB_QT_ICO_D NAMES qicod PATHS "${QT_DIR}/plugins/imageformats")
-	find_library(LIB_QT_GIF_D NAMES qgifd PATHS "${QT_DIR}/plugins/imageformats")
-	find_library(LIB_QT_JPEG_D NAMES qjpegd PATHS "${QT_DIR}/plugins/imageformats")
-	# Windows 10 SDK doesn't include a debug version of Uxtheme
-	find_library(LIB_WIN_UXTHEME_D NAMES Uxtheme)
-	find_library(LIB_QT_WINVISTASTYLE_D NAMES qwindowsvistastyled PATHS "${QT_DIR}/plugins/styles")
-	find_library(LIB_QT_WIN_D NAMES qwindowsd PATHS "${QT_DIR}/plugins/platforms")
+    # === Debug
+    find_library(LIB_QT_PLATFORM_D NAMES Qt5PlatformCompositorSupportd)
+    find_library(LIB_QT_FONT_D NAMES Qt5FontDatabaseSupportd)
+    find_library(LIB_QT_UI_D NAMES Qt5WindowsUIAutomationSupportd)
+    find_library(LIB_QT_EVENT_D NAMES Qt5EventDispatcherSupportd)
+    find_library(LIB_QT_THEME_D NAMES Qt5ThemeSupportd)
+    find_library(LIB_QT_PRINT_D NAMES Qt5PrintSupportd)
+    find_library(LIB_QT_ICO_D NAMES qicod PATHS "${QT_DIR}/plugins/imageformats")
+    find_library(LIB_QT_GIF_D NAMES qgifd PATHS "${QT_DIR}/plugins/imageformats")
+    find_library(LIB_QT_JPEG_D NAMES qjpegd PATHS "${QT_DIR}/plugins/imageformats")
+    # Windows 10 SDK doesn't include a debug version of Uxtheme
+    find_library(LIB_WIN_UXTHEME_D NAMES Uxtheme)
+    find_library(LIB_QT_WINVISTASTYLE_D NAMES qwindowsvistastyled PATHS "${QT_DIR}/plugins/styles")
+    find_library(LIB_QT_WIN_D NAMES qwindowsd PATHS "${QT_DIR}/plugins/platforms")
 
-	# === Release
-	find_library(LIB_QT_PLATFORM NAMES Qt5PlatformCompositorSupport)
-	find_library(LIB_QT_FONT NAMES Qt5FontDatabaseSupport)
-	find_library(LIB_QT_UI NAMES Qt5WindowsUIAutomationSupport)
-	find_library(LIB_QT_EVENT NAMES Qt5EventDispatcherSupport)
-	find_library(LIB_QT_THEME NAMES Qt5ThemeSupport)
-	find_library(LIB_QT_PRINT NAMES Qt5PrintSupport)
-	# ICO is needed to set Win32 icon on the Window
-	# also all of these image plugins are very small about 100kb~ each
-	find_library(LIB_QT_ICO NAMES qico PATHS "${QT_DIR}/plugins/imageformats")
-	find_library(LIB_QT_GIF NAMES qgif PATHS "${QT_DIR}/plugins/imageformats")
-	find_library(LIB_QT_JPEG NAMES qjpeg PATHS "${QT_DIR}/plugins/imageformats")
-	find_library(LIB_WIN_UXTHEME NAMES Uxtheme)
-	find_library(LIB_QT_WINVISTASTYLE NAMES qwindowsvistastyle PATHS "${QT_DIR}/plugins/styles")
-	find_library(LIB_QT_WIN NAMES qwindows PATHS "${QT_DIR}/plugins/platforms")
+    # === Release
+    find_library(LIB_QT_PLATFORM NAMES Qt5PlatformCompositorSupport)
+    find_library(LIB_QT_FONT NAMES Qt5FontDatabaseSupport)
+    find_library(LIB_QT_UI NAMES Qt5WindowsUIAutomationSupport)
+    find_library(LIB_QT_EVENT NAMES Qt5EventDispatcherSupport)
+    find_library(LIB_QT_THEME NAMES Qt5ThemeSupport)
+    find_library(LIB_QT_PRINT NAMES Qt5PrintSupport)
+    # ICO is needed to set Win32 icon on the Window
+    # also all of these image plugins are very small about 100kb~ each
+    find_library(LIB_QT_ICO NAMES qico PATHS "${QT_DIR}/plugins/imageformats")
+    find_library(LIB_QT_GIF NAMES qgif PATHS "${QT_DIR}/plugins/imageformats")
+    find_library(LIB_QT_JPEG NAMES qjpeg PATHS "${QT_DIR}/plugins/imageformats")
+    find_library(LIB_WIN_UXTHEME NAMES Uxtheme)
+    find_library(LIB_QT_WINVISTASTYLE NAMES qwindowsvistastyle PATHS "${QT_DIR}/plugins/styles")
+    find_library(LIB_QT_WIN NAMES qwindows PATHS "${QT_DIR}/plugins/platforms")
 
-	target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_QT_PLATFORM_D},${LIB_QT_PLATFORM}>"
-						  "$<IF:$<CONFIG:Debug>,${LIB_QT_FONT_D},${LIB_QT_FONT}>"
-						  "$<IF:$<CONFIG:Debug>,${LIB_QT_UI_D},${LIB_QT_UI}>"
-						  "$<IF:$<CONFIG:Debug>,${LIB_QT_EVENT_D},${LIB_QT_EVENT}>"
-						  "$<IF:$<CONFIG:Debug>,${LIB_QT_THEME_D},${LIB_QT_THEME}>"
-						  "$<IF:$<CONFIG:Debug>,${LIB_QT_PRINT_D},${LIB_QT_PRINT}>"
-						  "$<IF:$<CONFIG:Debug>,${LIB_QT_ICO_D},${LIB_QT_ICO}>"
-						  "$<IF:$<CONFIG:Debug>,${LIB_QT_GIF_D},${LIB_QT_GIF}>"
-						  "$<IF:$<CONFIG:Debug>,${LIB_QT_JPEG_D},${LIB_QT_JPEG}>"
-						  "$<IF:$<CONFIG:Debug>,${LIB_WIN_UXTHEME_D},${LIB_WIN_UXTHEME}>"
-						  "$<IF:$<CONFIG:Debug>,${LIB_QT_WINVISTASTYLE_D},${LIB_QT_WINVISTASTYLE}>"
-						  "$<IF:$<CONFIG:Debug>,${LIB_QT_WIN_D},${LIB_QT_WIN}>"
-						  )
+    target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_QT_PLATFORM_D},${LIB_QT_PLATFORM}>"
+                          "$<IF:$<CONFIG:Debug>,${LIB_QT_FONT_D},${LIB_QT_FONT}>"
+                          "$<IF:$<CONFIG:Debug>,${LIB_QT_UI_D},${LIB_QT_UI}>"
+                          "$<IF:$<CONFIG:Debug>,${LIB_QT_EVENT_D},${LIB_QT_EVENT}>"
+                          "$<IF:$<CONFIG:Debug>,${LIB_QT_THEME_D},${LIB_QT_THEME}>"
+                          "$<IF:$<CONFIG:Debug>,${LIB_QT_PRINT_D},${LIB_QT_PRINT}>"
+                          "$<IF:$<CONFIG:Debug>,${LIB_QT_ICO_D},${LIB_QT_ICO}>"
+                          "$<IF:$<CONFIG:Debug>,${LIB_QT_GIF_D},${LIB_QT_GIF}>"
+                          "$<IF:$<CONFIG:Debug>,${LIB_QT_JPEG_D},${LIB_QT_JPEG}>"
+                          "$<IF:$<CONFIG:Debug>,${LIB_WIN_UXTHEME_D},${LIB_WIN_UXTHEME}>"
+                          "$<IF:$<CONFIG:Debug>,${LIB_QT_WINVISTASTYLE_D},${LIB_QT_WINVISTASTYLE}>"
+                          "$<IF:$<CONFIG:Debug>,${LIB_QT_WIN_D},${LIB_QT_WIN}>"
+                          )
 endif(MSVC)
 
 # Find FreeType
