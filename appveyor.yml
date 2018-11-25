@@ -1,0 +1,85 @@
+# don't build "feature" branches
+skip_branch_with_pr: true
+branches:
+  # whitelist
+  only:
+    - master
+# only merge should increment build number
+pull_requests:
+  do_not_increment_build_number: true
+
+
+# Build worker image (VM template)
+image: Visual Studio 2017
+
+# since we're pushing releases we don't want infinite recursion
+# because the release pushes a tag, hence we aren't building on tags
+skip_tags: true
+
+platform:
+  - x86
+  - x64
+
+configuration:
+  - Debug
+  - Release
+
+environment:
+  VCPKG_DIR: C:\tools\vcpkg
+  TRIPLET_NAME: $(PLATFORM)-windows-static
+  BUILD_TYPE: Debug
+  GENERATOR: "Visual Studio 15 2017"
+
+init:
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %PLATFORM%
+  - if %PLATFORM% == x64 set GENERATOR=Visual Studio 15 2017 Win64
+  - if %CONFIGURATION% == Release set BUILD_TYPE=MinSizeRel
+
+install:
+  - git submodule update --init --recursive
+  - ps: |
+      # this gets the latest release of RadialGM-deps using GitHub API
+      $apiURL = "https://api.github.com/repos/enigma-dev/radialgm-deps/releases/latest"
+      $latest = Invoke-RestMethod -Method Get -Uri $apiURL
+      # find the asset whose name matches the architecture of this build
+      $depsName = "rgmdeps-$env:platform.zip"
+      foreach ($asset in $latest.assets) {
+        Write-Host $asset.name
+        if ($asset.name -eq $depsName) {
+          $depsURL = $asset.browser_download_url
+          break
+        }
+      }
+      Write-Host $depsURL
+
+      # download and extract the deps matching this job's architecture
+      appveyor DownloadFile $depsURL -FileName $depsName
+      7z x -mmt $depsName -oC:\tools\vcpkg
+
+build_script:
+  - echo %BUILD_TYPE%
+  - echo %GENERATOR%
+  - cd %APPVEYOR_BUILD_FOLDER%\Submodules\enigma-dev\CommandLine\protos
+  - mkdir build && cd build
+  - cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" -DPROTOBUF_IMPORT_DIRS="%VCPKG_DIR%\installed\%TRIPLET_NAME%\include" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
+  - cmake --build . --target install --config "%BUILD_TYPE%"
+  - cd %APPVEYOR_BUILD_FOLDER%\Submodules\enigma-dev\CommandLine\libEGM
+  - mkdir build && cd build
+  - cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
+  - cmake --build . --target install --config "%BUILD_TYPE%"
+  - cd %APPVEYOR_BUILD_FOLDER%
+  - mkdir build && cd build
+  - cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
+  - cmake --build . --target ALL_BUILD --config "%BUILD_TYPE%"
+  - appveyor PushArtifact %BUILD_TYPE%\RadialGM.exe -FileName RadialGM-Win32-%CONFIGURATION%-%PLATFORM%.exe -DeploymentName RadialGM
+
+deploy:
+  release: RadialGM-v$(appveyor_build_version)
+  provider: GitHub
+  auth_token:
+    secure: 0dfPI8cYNeLks0iLSmTyzrI/H0K3CfMrBsvfslzZp66w5gqg8pqSf4Edhovsox9k
+  artifact: RadialGM
+  draft: false
+  prerelease: false
+  on:
+    branch: master

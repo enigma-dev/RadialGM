@@ -2,13 +2,16 @@
 #define MAINWINDOW_H
 
 #include "Models/ProtoModel.h"
+#include "Models/ResourceModelMap.h"
 #include "Models/TreeModel.h"
 
 class MainWindow;
 #include "Components/RecentFiles.h"
 
 #include "codegen/project.pb.h"
+#include "codegen/server.pb.h"
 
+#include <QList>
 #include <QMainWindow>
 #include <QMdiSubWindow>
 #include <QPointer>
@@ -22,28 +25,55 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
  public:
+  static QScopedPointer<ResourceModelMap> resourceMap;
+  static QScopedPointer<TreeModel> treeModel;
+  static QList<buffers::SystemType> systemCache;
+
   explicit MainWindow(QWidget *parent);
   ~MainWindow();
   void closeEvent(QCloseEvent *event);
-
+  void openProject(std::unique_ptr<buffers::Project> openedProject);
   buffers::Game *Game() const { return this->project->mutable_game(); }
+
+ signals:
+  void CurrentConfigChanged(const buffers::resources::Settings &settings);
 
  public slots:
   void openFile(QString fName);
+  void openNewProject();
+  void CreateResource(TypeCase typeCase);
+  static void setCurrentConfig(const buffers::resources::Settings &settings);
 
  private slots:
   // file menu
+  void on_actionNew_triggered();
   void on_actionOpen_triggered();
+  void on_actionClearRecentMenu_triggered();
   void on_actionPreferences_triggered();
   void on_actionExit_triggered();
+
+  // resources menu
+  void on_actionCreate_Sprite_triggered();
+  void on_actionCreate_Sound_triggered();
+  void on_actionCreate_Background_triggered();
+  void on_actionCreate_Path_triggered();
+  void on_actionCreate_Script_triggered();
+  void on_actionCreate_Shader_triggered();
+  void on_actionCreate_Font_triggered();
+  void on_actionCreate_Timeline_triggered();
+  void on_actionCreate_Object_triggered();
+  void on_actionCreate_Room_triggered();
+  void on_actionAddNewConfig_triggered();
 
   // window menu
   void on_actionCascade_triggered();
   void on_actionTile_triggered();
   void on_actionToggleTabbedView_triggered();
   void on_actionCloseAll_triggered();
+  void on_actionCloseOthers_triggered();
   void on_actionNext_triggered();
   void on_actionPrevious_triggered();
+  void updateWindowMenu();
 
   // help menu
   void on_actionDocumentation_triggered();
@@ -55,21 +85,20 @@ class MainWindow : public QMainWindow {
 
   void on_treeView_doubleClicked(const QModelIndex &index);
 
-  void on_actionClearRecentMenu_triggered();
-
  private:
-  QHash<buffers::TreeNode *, ProtoModel *> resourceModels;
+  static MainWindow *m_instance;
+
   QHash<buffers::TreeNode *, QMdiSubWindow *> subWindows;
 
-  TreeModel *treeModel;
   Ui::MainWindow *ui;
 
-  buffers::Project *project;
+  std::unique_ptr<buffers::Project> project;
   QPointer<RecentFiles> recentFiles;
 
   void openSubWindow(buffers::TreeNode *item);
   void readSettings();
   void writeSettings();
+  void setTabbedMode(bool enabled);
 };
 
 #endif  // MAINWINDOW_H

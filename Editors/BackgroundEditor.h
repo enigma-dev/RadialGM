@@ -3,7 +3,7 @@
 
 #include "BaseEditor.h"
 
-#include "Widgets/BackgroundRenderer.h"
+#include "Widgets/BackgroundView.h"
 
 namespace Ui {
 class BackgroundEditor;
@@ -17,7 +17,7 @@ class BackgroundEditor : public BaseEditor {
   ~BackgroundEditor();
 
  private slots:
-  void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
+  void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVariant &oldValue = QVariant(0),
                    const QVector<int> &roles = QVector<int>()) override;
   void on_actionSave_triggered();
   void on_actionZoomIn_triggered();
@@ -30,7 +30,7 @@ class BackgroundEditor : public BaseEditor {
 
  private:
   Ui::BackgroundEditor *ui;
-  BackgroundRenderer *renderer;
+  BackgroundView *renderer;
 };
 
 #endif  // BACKGROUNDEDITOR_H

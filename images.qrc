@@ -33,6 +33,17 @@
         <file alias="edit.png">Images/actions/edit.png</file>
         <file alias="undo.png">Images/actions/undo.png</file>
         <file alias="redo.png">Images/actions/redo.png</file>
+        <file alias="volume.png">Images/actions/volume.png</file>
+        <file alias="loop.png">Images/actions/loop.png</file>
+        <file alias="pause.png">Images/actions/pause.png</file>
+        <file alias="play.png">Images/actions/play.png</file>
+        <file alias="snap-to-grid.png">Images/actions/snap-to-grid.png</file>
+        <file alias="print.png">Images/actions/print.png</file>
+        <file alias="line-goto.png">Images/actions/line-goto.png</file>
+        <file alias="right-arrow-red.png">Images/actions/right-arrow-red.png</file>
+        <file alias="right-arrow-blue.png">Images/actions/right-arrow-blue.png</file>
+        <file alias="right-arrow-green.png">Images/actions/right-arrow-green.png</file>
+        <file alias="function.png">Images/actions/function.png</file>
     </qresource>
     <qresource prefix="/resources">
         <file alias="background.png">Images/resources/background.png</file>
