@@ -43,6 +43,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 INCLUDEPATH += /usr/include/qt/ \
                $$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
+               $$PWD/Submodules/enigma-dev/CommandLine/libAssets/ \
                $$PWD/Submodules/enigma-dev/CommandLine/protos \
                $$PWD/Submodules/enigma-dev/CommandLine/protos/codegen
 LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
@@ -51,6 +52,7 @@ LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
         -Wl,--rpath=$$PWD/Submodules/enigma-dev/ \
         -L$$PWD/Submodules/enigma-dev/ \
         -lProtocols \
+        -lAssets \
         -lpugixml \
         -lgrpc++
 

@@ -71,6 +71,8 @@ class CompilerClient : public QObject {
 
   template <typename T>
   T* ScheduleTask();
+  template <typename T>
+  T* ScheduleTask(T*);
 
   std::unique_ptr<Compiler::Stub> stub;
   MainWindow& mainWindow;

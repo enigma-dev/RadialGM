@@ -1,6 +1,8 @@
 #include "ServerPlugin.h"
 #include "Widgets/CodeWidget.h"
 
+#include "assets.h"
+
 #include <QFileDialog>
 #include <QList>
 #include <QTemporaryFile>
@@ -117,13 +119,20 @@ struct SystemReader : public AsyncReadWorker<SystemType> {
 };
 
 struct CompileReader : public AsyncReadWorker<CompileReply> {
+  const CompileRequest request;
+
+  CompileReader(const CompileRequest& request) : request(request) {}
   virtual ~CompileReader() {}
   virtual void process(const CompileReply& reply) final {
     for (auto log : reply.message()) {
       emit LogOutput(log.message().c_str());
     }
   }
-  virtual void finished() final { emit CompileStatusChanged(true); }
+  virtual void finished() final {
+    game_write_assets(request.game(), true, request.name());
+    game_launch(request.name().c_str(), request.name().c_str(), 1);
+    emit CompileStatusChanged(true);
+  }
 };
 
 struct SyntaxCheckReader : public AsyncResponseReadWorker<SyntaxError> {
@@ -139,13 +148,13 @@ CompilerClient::CompilerClient(std::shared_ptr<Channel> channel, MainWindow& mai
 void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string name) {
   emit CompileStatusChanged();
 
-  auto* callData = ScheduleTask<CompileReader>();
   CompileRequest request;
 
   request.mutable_game()->CopyFrom(*game);
   request.set_name(name);
   request.set_mode(mode);
 
+  auto* callData = ScheduleTask<CompileReader>(new CompileReader(request));
   auto worker = dynamic_cast<AsyncReadWorker<CompileReply>*>(callData);
   worker->stream = stub->PrepareAsyncCompileBuffer(&worker->context, request, &cq);
 }
@@ -204,6 +213,13 @@ void CompilerClient::SyntaxCheck() {
 template <typename T>
 T* CompilerClient::ScheduleTask() {
   std::unique_ptr<T> callData(new T());
+  tasks.push(std::move(callData));
+  return (T*)tasks.back().get();
+}
+
+template <typename T>
+T* CompilerClient::ScheduleTask(T* task) {
+  std::unique_ptr<T> callData(task);
   tasks.push(std::move(callData));
   return (T*)tasks.back().get();
 }
