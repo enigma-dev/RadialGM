@@ -19,7 +19,7 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/Dialogs")
 
 # Include ENIGMA things
 set(ENIGMA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/enigma-dev)
-include_directories("${ENIGMA_DIR}/CommandLine/protos" "${ENIGMA_DIR}/CommandLine/libEGM" "${ENIGMA_DIR}/shared/bettersystem")
+include_directories("${ENIGMA_DIR}/CommandLine/protos" "${ENIGMA_DIR}/CommandLine/libEGM" "${ENIGMA_DIR}/CommandLine/libAssets")
 
 # Populate a CMake variable with the sources
 set(RGM_SOURCES
