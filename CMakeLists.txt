@@ -19,7 +19,7 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/Dialogs")
 
 # Include ENIGMA things
 set(ENIGMA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/enigma-dev)
-include_directories("${ENIGMA_DIR}/CommandLine/protos" "${ENIGMA_DIR}/CommandLine/libEGM")
+include_directories("${ENIGMA_DIR}/CommandLine/protos" "${ENIGMA_DIR}/CommandLine/libEGM" "${ENIGMA_DIR}/shared/bettersystem")
 
 # Populate a CMake variable with the sources
 set(RGM_SOURCES
@@ -177,6 +177,13 @@ find_library(LIB_EGM_D NAMES EGMd PATHS ${ENIGMA_DIR})
 # Release
 find_library(LIB_EGM NAMES EGM PATHS ${ENIGMA_DIR})
 target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_EGM_D},${LIB_EGM}>")
+
+# Find libAssets
+# Debug
+find_library(LIB_ASSETS_D NAMES Assetsd PATHS ${ENIGMA_DIR})
+# Release
+find_library(LIB_ASSETS NAMES Assets PATHS ${ENIGMA_DIR})
+target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_ASSETS_D},${LIB_ASSETS}>")
 
 # Find libProtocols
 # Debug
