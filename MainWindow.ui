@@ -138,6 +138,20 @@
     <property name="title">
      <string>&amp;Edit</string>
     </property>
+    <addaction name="actionCreateResource"/>
+    <addaction name="separator"/>
+    <addaction name="actionCreateGroup"/>
+    <addaction name="separator"/>
+    <addaction name="actionSortByName"/>
+    <addaction name="separator"/>
+    <addaction name="actionExpand"/>
+    <addaction name="actionCollapse"/>
+    <addaction name="separator"/>
+    <addaction name="actionDelete"/>
+    <addaction name="separator"/>
+    <addaction name="actionRename"/>
+    <addaction name="separator"/>
+    <addaction name="actionProperties"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -807,6 +821,74 @@
    </property>
    <property name="toolTip">
     <string>Change Game Settings</string>
+   </property>
+  </action>
+  <action name="actionCreateResource">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/actions/new.png</normaloff>:/actions/new.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create Resource</string>
+   </property>
+  </action>
+  <action name="actionCreateGroup">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/actions/folder-new.png</normaloff>:/actions/folder-new.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create Group</string>
+   </property>
+  </action>
+  <action name="actionSortByName">
+   <property name="text">
+    <string>Sort by Name</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/actions/delete.png</normaloff>:/actions/delete.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete</string>
+   </property>
+  </action>
+  <action name="actionRename">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/actions/rename.png</normaloff>:/actions/rename.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rename</string>
+   </property>
+  </action>
+  <action name="actionProperties">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/actions/edit.png</normaloff>:/actions/edit.png</iconset>
+   </property>
+   <property name="text">
+    <string>Properties...</string>
+   </property>
+  </action>
+  <action name="actionExpand">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/resources/group-open.png</normaloff>:/resources/group-open.png</iconset>
+   </property>
+   <property name="text">
+    <string>Expand</string>
+   </property>
+  </action>
+  <action name="actionCollapse">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/resources/group.png</normaloff>:/resources/group.png</iconset>
+   </property>
+   <property name="text">
+    <string>Collapse</string>
    </property>
   </action>
   <actiongroup name="configActionGroup">
