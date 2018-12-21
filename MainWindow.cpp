@@ -385,3 +385,40 @@ void MainWindow::on_actionCreate_Object_triggered() { CreateResource(TypeCase::k
 void MainWindow::on_actionCreate_Room_triggered() { CreateResource(TypeCase::kRoom); }
 
 void MainWindow::on_actionAddNewConfig_triggered() { CreateResource(TypeCase::kSettings); }
+
+void MainWindow::on_actionRename_triggered() {
+  if (!ui->treeView->selectionModel()->hasSelection()) return;
+  ui->treeView->edit(ui->treeView->selectionModel()->currentIndex());
+}
+
+void MainWindow::on_actionProperties_triggered() {
+  if (!ui->treeView->selectionModel()->hasSelection()) return;
+  auto *treeNode = static_cast<buffers::TreeNode *>(ui->treeView->selectionModel()->currentIndex().internalPointer());
+  openSubWindow(treeNode);
+}
+
+void MainWindow::on_actionDelete_triggered() {
+  if (!ui->treeView->selectionModel()->hasSelection()) return;
+  auto currentIndex = ui->treeView->selectionModel()->currentIndex();
+  auto *treeNode = static_cast<buffers::TreeNode *>(currentIndex.internalPointer());
+  if (subWindows.contains(treeNode)) {
+    subWindows[treeNode]->close();
+  }
+  this->treeModel->removeNode(currentIndex);
+}
+
+void MainWindow::on_actionExpand_triggered() {
+  if (ui->treeView->selectionModel()->hasSelection()) {
+    ui->treeView->expand(ui->treeView->selectionModel()->currentIndex());
+  } else {
+    ui->treeView->expandAll();
+  }
+}
+
+void MainWindow::on_actionCollapse_triggered() {
+  if (ui->treeView->selectionModel()->hasSelection()) {
+    ui->treeView->collapse(ui->treeView->selectionModel()->currentIndex());
+  } else {
+    ui->treeView->collapseAll();
+  }
+}

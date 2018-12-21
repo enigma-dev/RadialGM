@@ -52,6 +52,13 @@ class MainWindow : public QMainWindow {
   void on_actionPreferences_triggered();
   void on_actionExit_triggered();
 
+  // edit menu
+  void on_actionExpand_triggered();
+  void on_actionCollapse_triggered();
+  void on_actionRename_triggered();
+  void on_actionProperties_triggered();
+  void on_actionDelete_triggered();
+
   // resources menu
   void on_actionCreate_Sprite_triggered();
   void on_actionCreate_Sound_triggered();

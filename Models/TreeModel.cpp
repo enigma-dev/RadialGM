@@ -252,3 +252,15 @@ void TreeModel::addNode(buffers::TreeNode *child, buffers::TreeNode *parent) {
   parents[child] = parent;
   emit endInsertRows();
 }
+
+void TreeModel::removeNode(const QModelIndex &childIndex) {
+  if (!childIndex.isValid()) return;
+  auto *child = static_cast<buffers::TreeNode *>(childIndex.internalPointer());
+  buffers::TreeNode *parent = parents[child];
+  int pos = 0;
+  for (; pos < parent->child_size(); ++pos)
+    if (parent->mutable_child(pos) == child) break;
+  emit beginRemoveRows(childIndex.parent(), pos, pos);
+  parent->mutable_child()->DeleteSubrange(pos, 1);
+  emit endRemoveRows();
+}

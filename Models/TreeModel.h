@@ -37,6 +37,7 @@ class TreeModel : public QAbstractItemModel {
                     const QModelIndex &parent) override;
 
   void addNode(buffers::TreeNode *child, buffers::TreeNode *parent);
+  void removeNode(const QModelIndex &childIndex);
 
  signals:
   void ResourceRenamed(TypeCase type, const QString &oldName, const QString &newName);
