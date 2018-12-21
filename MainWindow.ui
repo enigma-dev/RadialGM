@@ -139,7 +139,6 @@
      <string>&amp;Edit</string>
     </property>
     <addaction name="actionCreateResource"/>
-    <addaction name="separator"/>
     <addaction name="actionCreateGroup"/>
     <addaction name="separator"/>
     <addaction name="actionSortByName"/>
@@ -840,6 +839,9 @@
    <property name="text">
     <string>Create Group</string>
    </property>
+   <property name="shortcut">
+    <string>Shift+Ins</string>
+   </property>
   </action>
   <action name="actionSortByName">
    <property name="text">
@@ -854,6 +856,9 @@
    <property name="text">
     <string>Delete</string>
    </property>
+   <property name="shortcut">
+    <string>Shift+Del</string>
+   </property>
   </action>
   <action name="actionRename">
    <property name="icon">
@@ -863,6 +868,9 @@
    <property name="text">
     <string>Rename</string>
    </property>
+   <property name="shortcut">
+    <string>F2</string>
+   </property>
   </action>
   <action name="actionProperties">
    <property name="icon">
@@ -871,6 +879,9 @@
    </property>
    <property name="text">
     <string>Properties...</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Return</string>
    </property>
   </action>
   <action name="actionExpand">
