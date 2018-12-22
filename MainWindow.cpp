@@ -393,8 +393,11 @@ void MainWindow::on_actionRename_triggered() {
 
 void MainWindow::on_actionProperties_triggered() {
   if (!ui->treeView->selectionModel()->hasSelection()) return;
-  auto *treeNode = static_cast<buffers::TreeNode *>(ui->treeView->selectionModel()->currentIndex().internalPointer());
-  openSubWindow(treeNode);
+  auto selected = ui->treeView->selectionModel()->selectedIndexes();
+  for (auto index : selected) {
+    auto *treeNode = static_cast<buffers::TreeNode *>(index.internalPointer());
+    openSubWindow(treeNode);
+  }
 }
 
 static void CollectNodes(buffers::TreeNode *root, QSet<buffers::TreeNode *> &cache) {
