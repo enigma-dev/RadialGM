@@ -22,6 +22,13 @@ void ResourceModelMap::AddResource(buffers::TreeNode* child, QObject* parent) {
   _resources[child->type_case()][QString::fromStdString(child->name())] = new ProtoModel(child, parent);
 }
 
+void ResourceModelMap::RemoveResource(int type, const QString& name) {
+  if (!_resources.contains(type)) return;
+  if (!_resources[type].contains(name)) return;
+  delete _resources[type][name];
+  _resources[type].remove(name);
+}
+
 QString ResourceModelMap::CreateResourceName(TreeNode* node) {
   auto fieldNum = ResTypeFields[node->type_case()];
   const Descriptor* desc = node->GetDescriptor();

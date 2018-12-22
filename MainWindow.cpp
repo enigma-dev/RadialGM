@@ -397,14 +397,44 @@ void MainWindow::on_actionProperties_triggered() {
   openSubWindow(treeNode);
 }
 
+static void CollectNodes(buffers::TreeNode *root, QSet<buffers::TreeNode *> &cache) {
+  cache.insert(root);
+  for (int i = 0; i < root->child_size(); ++i) {
+    auto *child = root->mutable_child(i);
+    cache.insert(child);
+    if (child->has_folder()) CollectNodes(child, cache);
+  }
+}
+
 void MainWindow::on_actionDelete_triggered() {
   if (!ui->treeView->selectionModel()->hasSelection()) return;
-  auto currentIndex = ui->treeView->selectionModel()->currentIndex();
-  auto *treeNode = static_cast<buffers::TreeNode *>(currentIndex.internalPointer());
-  if (subWindows.contains(treeNode)) {
-    subWindows[treeNode]->close();
+  auto selected = ui->treeView->selectionModel()->selectedIndexes();
+  QSet<buffers::TreeNode *> selectedNodes;
+  for (auto index : selected) {
+    auto *treeNode = static_cast<buffers::TreeNode *>(index.internalPointer());
+    CollectNodes(treeNode, selectedNodes);
   }
-  this->treeModel->removeNode(currentIndex);
+  QString selectedNames = "";
+  for (auto node : selectedNodes) {
+    selectedNames += (node == *selectedNodes.begin() ? "" : ", ") + QString::fromStdString(node->name());
+  }
+
+  QMessageBox::StandardButton reply;
+  reply = QMessageBox::question(
+      this, tr("Delete Resources"),
+      tr("Do you want to delete the following resources from the project?\n%0").arg(selectedNames),
+      QMessageBox::Yes | QMessageBox::No);
+  if (reply != QMessageBox::Yes) return;
+
+  // close subwindows
+  for (auto node : selectedNodes) {
+    if (subWindows.contains(node)) subWindows[node]->close();
+  }
+
+  // remove tree nodes (recursively unmaps names)
+  for (auto index : selected) {
+    this->treeModel->removeNode(index);
+  }
 }
 
 void MainWindow::on_actionExpand_triggered() {

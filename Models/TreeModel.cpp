@@ -256,11 +256,19 @@ void TreeModel::addNode(buffers::TreeNode *child, buffers::TreeNode *parent) {
 void TreeModel::removeNode(const QModelIndex &childIndex) {
   if (!childIndex.isValid()) return;
   auto *child = static_cast<buffers::TreeNode *>(childIndex.internalPointer());
+  if (!child) return;
+  if (child->has_folder()) {
+    for (int i = child->child_size(); i > 0; --i) {
+      removeNode(this->index(i - 1, 0, childIndex));
+    }
+  }
   buffers::TreeNode *parent = parents[child];
   int pos = 0;
   for (; pos < parent->child_size(); ++pos)
     if (parent->mutable_child(pos) == child) break;
+  if (pos == parent->child_size()) return;  // already removed?
   emit beginRemoveRows(childIndex.parent(), pos, pos);
+  resourceMap->RemoveResource(child->type_case(), QString::fromStdString(child->name()));
   parent->mutable_child()->DeleteSubrange(pos, 1);
   emit endRemoveRows();
 }
