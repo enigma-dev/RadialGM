@@ -253,22 +253,32 @@ void TreeModel::addNode(buffers::TreeNode *child, buffers::TreeNode *parent) {
   emit endInsertRows();
 }
 
-void TreeModel::removeNode(const QModelIndex &childIndex) {
-  if (!childIndex.isValid()) return;
-  auto *child = static_cast<buffers::TreeNode *>(childIndex.internalPointer());
-  if (!child) return;
-  if (child->has_folder()) {
-    for (int i = child->child_size(); i > 0; --i) {
-      removeNode(this->index(i - 1, 0, childIndex));
+void TreeModel::removeNode(const QModelIndex &index) {
+  if (!index.isValid()) return;
+  auto *node = static_cast<buffers::TreeNode *>(index.internalPointer());
+  if (!node) return;
+  if (node->has_folder()) {
+    for (int i = node->child_size(); i > 0; --i) {
+      removeNode(this->index(i - 1, 0, index));
     }
   }
-  buffers::TreeNode *parent = parents[child];
+  buffers::TreeNode *parent = parents[node];
   int pos = 0;
   for (; pos < parent->child_size(); ++pos)
-    if (parent->mutable_child(pos) == child) break;
+    if (parent->mutable_child(pos) == node) break;
   if (pos == parent->child_size()) return;  // already removed?
-  emit beginRemoveRows(childIndex.parent(), pos, pos);
-  resourceMap->RemoveResource(child->type_case(), QString::fromStdString(child->name()));
+  emit beginRemoveRows(index.parent(), pos, pos);
+  resourceMap->RemoveResource(node->type_case(), QString::fromStdString(node->name()));
   parent->mutable_child()->DeleteSubrange(pos, 1);
   emit endRemoveRows();
+}
+
+void TreeModel::sortByName(const QModelIndex &index) {
+  if (!index.isValid()) return;
+  auto *node = static_cast<buffers::TreeNode *>(index.internalPointer());
+  if (!node) return;
+  auto *child_field = node->mutable_child();
+  std::sort(child_field->begin(), child_field->end(),
+            [](const buffers::TreeNode &a, const buffers::TreeNode &b) { return a.name() < b.name(); });
+  emit dataChanged(this->index(0, 0, index), this->index(node->child_size(), 0, index));
 }

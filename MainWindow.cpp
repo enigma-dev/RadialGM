@@ -455,3 +455,8 @@ void MainWindow::on_actionCollapse_triggered() {
     ui->treeView->collapseAll();
   }
 }
+
+void MainWindow::on_actionSortByName_triggered() {
+  if (!ui->treeView->selectionModel()->hasSelection()) return;
+  treeModel->sortByName(ui->treeView->currentIndex());
+}

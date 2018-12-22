@@ -58,6 +58,7 @@ class MainWindow : public QMainWindow {
   void on_actionRename_triggered();
   void on_actionProperties_triggered();
   void on_actionDelete_triggered();
+  void on_actionSortByName_triggered();
 
   // resources menu
   void on_actionCreate_Sprite_triggered();
