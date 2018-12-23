@@ -412,6 +412,9 @@
        <property name="itemsExpandable">
         <bool>true</bool>
        </property>
+       <property name="sortingEnabled">
+        <bool>true</bool>
+       </property>
        <property name="allColumnsShowFocus">
         <bool>false</bool>
        </property>

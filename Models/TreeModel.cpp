@@ -127,7 +127,15 @@ QModelIndex TreeModel::parent(const QModelIndex &index) const {
 
   if (parentItem == root || !parentItem) return QModelIndex();
 
-  return createIndex(parentItem->child_size(), 0, parentItem);
+  buffers::TreeNode *parentParentItem = parents[parentItem];
+  if (!parentParentItem) parentParentItem = root;
+
+  // get the row number for the parent from its own parent
+  int pos = 0;
+  for (; pos < parentParentItem->child_size(); ++pos)
+    if (parentParentItem->mutable_child(pos) == parentItem) break;
+  if (pos == parentParentItem->child_size()) return QModelIndex();
+  return createIndex(pos, 0, parentItem);
 }
 
 int TreeModel::rowCount(const QModelIndex &parent) const {
@@ -170,6 +178,16 @@ QMimeData *TreeModel::mimeData(const QModelIndexList &indexes) const {
   }
   mimeData->setData(treeNodeMime(), data);
   return mimeData;
+}
+
+void TreeModel::insert(const QModelIndex &parent, int row, buffers::TreeNode *node, buffers::TreeNode *parentNode) {
+  beginInsertRows(parent, row, row);
+  parentNode->mutable_child()->AddAllocated(node);
+  for (int j = parentNode->child_size() - 1; j > row; --j) {
+    parentNode->mutable_child()->SwapElements(j, j - 1);
+  }
+  parents[node] = parentNode;
+  endInsertRows();
 }
 
 bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, int row, int /*column*/,
@@ -231,13 +249,7 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
       resourceMap->AddResource(node, resourceMap);
     }
 
-    beginInsertRows(parent, row, row);
-    parentNode->mutable_child()->AddAllocated(node);
-    for (int j = parentNode->child_size() - 1; j > row; --j) {
-      parentNode->mutable_child()->SwapElements(j, j - 1);
-    }
-    parents[node] = parentNode;
-    endInsertRows();
+    insert(parent, row, node, parentNode);
 
     ++row;
   }
@@ -245,12 +257,30 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
   return true;
 }
 
-void TreeModel::addNode(buffers::TreeNode *child, buffers::TreeNode *parent) {
-  auto rootIndex = QModelIndex();
-  emit beginInsertRows(rootIndex, parent->child_size(), parent->child_size());
-  parent->mutable_child()->AddAllocated(child);
-  parents[child] = parent;
-  emit endInsertRows();
+QModelIndex TreeModel::addNode(buffers::TreeNode *child, const QModelIndex &parent) {
+  auto insertIndex = parent;
+  buffers::TreeNode *parentNode = nullptr;
+  int pos = 0;
+  if (parent.isValid()) {
+    parentNode = static_cast<buffers::TreeNode *>(parent.internalPointer());
+    if (parentNode->has_folder()) {
+      pos = parentNode->child_size();
+    } else {
+      insertIndex = parent.parent();
+      parentNode = static_cast<buffers::TreeNode *>(insertIndex.internalPointer());
+      if (!parentNode) {
+        parentNode = root;
+      }
+      pos = parent.row();
+    }
+  } else {
+    insertIndex = QModelIndex();
+    parentNode = this->root;
+    pos = parentNode->child_size();
+  }
+  insert(insertIndex, pos, child, parentNode);
+
+  return this->index(pos, 0, insertIndex);
 }
 
 void TreeModel::removeNode(const QModelIndex &index) {

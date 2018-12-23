@@ -36,7 +36,8 @@ class TreeModel : public QAbstractItemModel {
   bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
                     const QModelIndex &parent) override;
 
-  void addNode(buffers::TreeNode *child, buffers::TreeNode *parent);
+  void insert(const QModelIndex &parent, int row, buffers::TreeNode *node, buffers::TreeNode *parentNode);
+  QModelIndex addNode(buffers::TreeNode *child, const QModelIndex &parent);
   void removeNode(const QModelIndex &index);
   void sortByName(const QModelIndex &index);
 

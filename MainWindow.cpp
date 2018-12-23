@@ -341,7 +341,6 @@ void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
 void MainWindow::on_actionClearRecentMenu_triggered() { recentFiles->clear(); }
 
 void MainWindow::CreateResource(TypeCase typeCase) {
-  auto *root = this->project->mutable_game()->mutable_root();
   auto child = std::unique_ptr<TreeNode>(new TreeNode());
   auto fieldNum = ResTypeFields[typeCase];
   const Descriptor *desc = child->GetDescriptor();
@@ -361,7 +360,12 @@ void MainWindow::CreateResource(TypeCase typeCase) {
   openSubWindow(child.get());
 
   // release ownership of the new child to its parent and the tree
-  this->treeModel->addNode(child.release(), root);
+  auto index = this->treeModel->addNode(child.release(), ui->treeView->currentIndex());
+
+  // select the new node so that it gets "revealed" and its parent is expanded
+  ui->treeView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
+  // start editing the name of the resource in the tree for convenience
+  ui->treeView->edit(index);
 }
 
 void MainWindow::on_actionCreate_Sprite_triggered() { CreateResource(TypeCase::kSprite); }
