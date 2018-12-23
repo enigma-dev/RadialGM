@@ -460,3 +460,7 @@ void MainWindow::on_actionSortByName_triggered() {
   if (!ui->treeView->selectionModel()->hasSelection()) return;
   treeModel->sortByName(ui->treeView->currentIndex());
 }
+
+void MainWindow::on_treeView_customContextMenuRequested(const QPoint &pos) {
+  ui->menuEdit->exec(ui->treeView->mapToGlobal(pos));
+}

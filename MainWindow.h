@@ -92,6 +92,7 @@ class MainWindow : public QMainWindow {
   void on_actionAbout_triggered();
 
   void on_treeView_doubleClicked(const QModelIndex &index);
+  void on_treeView_customContextMenuRequested(const QPoint &pos);
 
  private:
   static MainWindow *m_instance;
