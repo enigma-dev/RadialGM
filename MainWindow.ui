@@ -139,6 +139,8 @@
      <string>&amp;Edit</string>
     </property>
     <addaction name="actionCreateResource"/>
+    <addaction name="actionDuplicate"/>
+    <addaction name="separator"/>
     <addaction name="actionCreateGroup"/>
     <addaction name="separator"/>
     <addaction name="actionSortByName"/>
@@ -831,7 +833,7 @@
      <normaloff>:/actions/new.png</normaloff>:/actions/new.png</iconset>
    </property>
    <property name="text">
-    <string>Create Resource</string>
+    <string>&amp;Create Resource</string>
    </property>
   </action>
   <action name="actionCreateGroup">
@@ -840,7 +842,7 @@
      <normaloff>:/actions/folder-new.png</normaloff>:/actions/folder-new.png</iconset>
    </property>
    <property name="text">
-    <string>Create Group</string>
+    <string>Create &amp;Group</string>
    </property>
    <property name="shortcut">
     <string>Shift+Ins</string>
@@ -848,7 +850,7 @@
   </action>
   <action name="actionSortByName">
    <property name="text">
-    <string>Sort by Name</string>
+    <string>&amp;Sort by Name</string>
    </property>
   </action>
   <action name="actionDelete">
@@ -857,7 +859,7 @@
      <normaloff>:/actions/delete.png</normaloff>:/actions/delete.png</iconset>
    </property>
    <property name="text">
-    <string>Delete</string>
+    <string>&amp;Delete</string>
    </property>
    <property name="shortcut">
     <string>Shift+Del</string>
@@ -869,7 +871,7 @@
      <normaloff>:/actions/rename.png</normaloff>:/actions/rename.png</iconset>
    </property>
    <property name="text">
-    <string>Rename</string>
+    <string>&amp;Rename</string>
    </property>
    <property name="shortcut">
     <string>F2</string>
@@ -881,7 +883,7 @@
      <normaloff>:/actions/edit.png</normaloff>:/actions/edit.png</iconset>
    </property>
    <property name="text">
-    <string>Properties...</string>
+    <string>&amp;Properties...</string>
    </property>
    <property name="shortcut">
     <string>Alt+Return</string>
@@ -893,7 +895,7 @@
      <normaloff>:/resources/group-open.png</normaloff>:/resources/group-open.png</iconset>
    </property>
    <property name="text">
-    <string>Expand</string>
+    <string>&amp;Expand All</string>
    </property>
   </action>
   <action name="actionCollapse">
@@ -902,7 +904,16 @@
      <normaloff>:/resources/group.png</normaloff>:/resources/group.png</iconset>
    </property>
    <property name="text">
-    <string>Collapse</string>
+    <string>C&amp;ollapse All</string>
+   </property>
+  </action>
+  <action name="actionDuplicate">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/actions/copy.png</normaloff>:/actions/copy.png</iconset>
+   </property>
+   <property name="text">
+    <string>D&amp;uplicate</string>
    </property>
   </action>
   <actiongroup name="configActionGroup">

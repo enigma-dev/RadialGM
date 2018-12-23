@@ -440,21 +440,9 @@ void MainWindow::on_actionDelete_triggered() {
   }
 }
 
-void MainWindow::on_actionExpand_triggered() {
-  if (ui->treeView->selectionModel()->hasSelection()) {
-    ui->treeView->expand(ui->treeView->selectionModel()->currentIndex());
-  } else {
-    ui->treeView->expandAll();
-  }
-}
+void MainWindow::on_actionExpand_triggered() { ui->treeView->expandAll(); }
 
-void MainWindow::on_actionCollapse_triggered() {
-  if (ui->treeView->selectionModel()->hasSelection()) {
-    ui->treeView->collapse(ui->treeView->selectionModel()->currentIndex());
-  } else {
-    ui->treeView->collapseAll();
-  }
-}
+void MainWindow::on_actionCollapse_triggered() { ui->treeView->collapseAll(); }
 
 void MainWindow::on_actionSortByName_triggered() {
   if (!ui->treeView->selectionModel()->hasSelection()) return;
