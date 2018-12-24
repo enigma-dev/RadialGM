@@ -61,17 +61,17 @@ class MainWindow : public QMainWindow {
   void on_actionSortByName_triggered();
 
   // resources menu
-  void on_actionCreate_Sprite_triggered();
-  void on_actionCreate_Sound_triggered();
-  void on_actionCreate_Background_triggered();
-  void on_actionCreate_Path_triggered();
-  void on_actionCreate_Script_triggered();
-  void on_actionCreate_Shader_triggered();
-  void on_actionCreate_Font_triggered();
-  void on_actionCreate_Timeline_triggered();
-  void on_actionCreate_Object_triggered();
-  void on_actionCreate_Room_triggered();
-  void on_actionAddNewConfig_triggered();
+  void on_actionCreateSprite_triggered();
+  void on_actionCreateSound_triggered();
+  void on_actionCreateBackground_triggered();
+  void on_actionCreatePath_triggered();
+  void on_actionCreateScript_triggered();
+  void on_actionCreateShader_triggered();
+  void on_actionCreateFont_triggered();
+  void on_actionCreateTimeline_triggered();
+  void on_actionCreateObject_triggered();
+  void on_actionCreateRoom_triggered();
+  void on_actionCreateSettings_triggered();
 
   // window menu
   void on_actionCascade_triggered();

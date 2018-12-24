@@ -215,9 +215,9 @@ void MainWindow::openNewProject() {
   MainWindow::setWindowTitle(tr("<new game> - ENIGMA"));
   auto newProject = std::unique_ptr<buffers::Project>(new buffers::Project());
   auto *root = newProject->mutable_game()->mutable_root();
-  QList<QString> defaultGroups = {tr("Sprites"),   tr("Sounds"),  tr("Backgrounds"), tr("Paths"),
-                                  tr("Scripts"),   tr("Shaders"), tr("Fonts"),       tr("Objects"),
-                                  tr("Timelines"), tr("Rooms"),   tr("Includes"),    tr("Configs")};
+  QList<QString> defaultGroups = {tr("Sprites"), tr("Sounds"),  tr("Backgrounds"), tr("Paths"),
+                                  tr("Scripts"), tr("Shaders"), tr("Fonts"),       tr("Timelines"),
+                                  tr("Objects"), tr("Rooms"),   tr("Includes"),    tr("Configs")};
   for (auto groupName : defaultGroups) {
     auto *groupNode = root->add_child();
     groupNode->set_folder(true);
@@ -368,27 +368,27 @@ void MainWindow::CreateResource(TypeCase typeCase) {
   ui->treeView->edit(index);
 }
 
-void MainWindow::on_actionCreate_Sprite_triggered() { CreateResource(TypeCase::kSprite); }
+void MainWindow::on_actionCreateSprite_triggered() { CreateResource(TypeCase::kSprite); }
 
-void MainWindow::on_actionCreate_Sound_triggered() { CreateResource(TypeCase::kSound); }
+void MainWindow::on_actionCreateSound_triggered() { CreateResource(TypeCase::kSound); }
 
-void MainWindow::on_actionCreate_Background_triggered() { CreateResource(TypeCase::kBackground); }
+void MainWindow::on_actionCreateBackground_triggered() { CreateResource(TypeCase::kBackground); }
 
-void MainWindow::on_actionCreate_Path_triggered() { CreateResource(TypeCase::kPath); }
+void MainWindow::on_actionCreatePath_triggered() { CreateResource(TypeCase::kPath); }
 
-void MainWindow::on_actionCreate_Script_triggered() { CreateResource(TypeCase::kScript); }
+void MainWindow::on_actionCreateScript_triggered() { CreateResource(TypeCase::kScript); }
 
-void MainWindow::on_actionCreate_Shader_triggered() { CreateResource(TypeCase::kShader); }
+void MainWindow::on_actionCreateShader_triggered() { CreateResource(TypeCase::kShader); }
 
-void MainWindow::on_actionCreate_Font_triggered() { CreateResource(TypeCase::kFont); }
+void MainWindow::on_actionCreateFont_triggered() { CreateResource(TypeCase::kFont); }
 
-void MainWindow::on_actionCreate_Timeline_triggered() { CreateResource(TypeCase::kTimeline); }
+void MainWindow::on_actionCreateTimeline_triggered() { CreateResource(TypeCase::kTimeline); }
 
-void MainWindow::on_actionCreate_Object_triggered() { CreateResource(TypeCase::kObject); }
+void MainWindow::on_actionCreateObject_triggered() { CreateResource(TypeCase::kObject); }
 
-void MainWindow::on_actionCreate_Room_triggered() { CreateResource(TypeCase::kRoom); }
+void MainWindow::on_actionCreateRoom_triggered() { CreateResource(TypeCase::kRoom); }
 
-void MainWindow::on_actionAddNewConfig_triggered() { CreateResource(TypeCase::kSettings); }
+void MainWindow::on_actionCreateSettings_triggered() { CreateResource(TypeCase::kSettings); }
 
 void MainWindow::on_actionRename_triggered() {
   if (!ui->treeView->selectionModel()->hasSelection()) return;
