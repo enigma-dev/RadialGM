@@ -390,6 +390,25 @@ void MainWindow::on_actionCreateRoom_triggered() { CreateResource(TypeCase::kRoo
 
 void MainWindow::on_actionCreateSettings_triggered() { CreateResource(TypeCase::kSettings); }
 
+void MainWindow::on_actionCreateGroup_triggered() {
+  auto child = std::unique_ptr<TreeNode>(new TreeNode());
+  child->set_folder(true);
+
+  // find a unique name for the new resource
+  const QString name = resourceMap->CreateResourceName(TypeCase::kFolder, "group");
+  child->set_name(name.toStdString());
+
+  this->resourceMap->AddResource(child.get(), resourceMap.get());
+
+  // release ownership of the new child to its parent and the tree
+  auto index = this->treeModel->addNode(child.release(), ui->treeView->currentIndex());
+
+  // select the new node so that it gets "revealed" and its parent is expanded
+  ui->treeView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
+  // start editing the name of the resource in the tree for convenience
+  ui->treeView->edit(index);
+}
+
 void MainWindow::on_actionRename_triggered() {
   if (!ui->treeView->selectionModel()->hasSelection()) return;
   ui->treeView->edit(ui->treeView->selectionModel()->currentIndex());
