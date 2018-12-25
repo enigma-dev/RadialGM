@@ -394,7 +394,7 @@ void MainWindow::on_actionCreateGroup_triggered() {
   auto child = std::unique_ptr<TreeNode>(new TreeNode());
   child->set_folder(true);
 
-  // find a unique name for the new resource
+  // find a unique name for the new group
   const QString name = resourceMap->CreateResourceName(TypeCase::kFolder, "group");
   child->set_name(name.toStdString());
 

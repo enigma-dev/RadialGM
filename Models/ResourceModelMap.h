@@ -23,7 +23,7 @@ class ResourceModelMap : public QObject {
 
  protected:
   void recursiveBindRes(buffers::TreeNode* node, QObject* parent);
-  QHash<int, QHash<QString, ProtoModel*>> _resources;
+  QHash<int, QHash<QString, QPair<buffers::TreeNode*, ProtoModel*>>> _resources;
 };
 
 const ProtoModel* GetObjectSprite(const std::string& objName);
