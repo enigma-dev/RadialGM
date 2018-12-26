@@ -391,6 +391,7 @@ void MainWindow::on_actionDuplicate_triggered() {
   if (!ui->treeView->selectionModel()->hasSelection()) return;
   const auto index = ui->treeView->selectionModel()->currentIndex();
   const auto *node = static_cast<const buffers::TreeNode *>(index.internalPointer());
+  if (node->has_folder()) return;
 
   // duplicate the node
   auto *dup = treeModel->duplicateNode(*node);
