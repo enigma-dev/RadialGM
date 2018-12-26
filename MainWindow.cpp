@@ -353,12 +353,9 @@ void MainWindow::CreateResource(TypeCase typeCase) {
   // find a unique name for the new resource
   const QString name = resourceMap->CreateResourceName(child.get());
   child->set_name(name.toStdString());
-
-  this->resourceMap->AddResource(child.get(), resourceMap.get());
-
   // open the new resource for editing
+  this->resourceMap->AddResource(child.get(), resourceMap.get());
   openSubWindow(child.get());
-
   // release ownership of the new child to its parent and the tree
   auto index = this->treeModel->addNode(child.release(), ui->treeView->currentIndex());
 
@@ -390,6 +387,25 @@ void MainWindow::on_actionCreateRoom_triggered() { CreateResource(TypeCase::kRoo
 
 void MainWindow::on_actionCreateSettings_triggered() { CreateResource(TypeCase::kSettings); }
 
+void MainWindow::on_actionDuplicate_triggered() {
+  if (!ui->treeView->selectionModel()->hasSelection()) return;
+  const auto index = ui->treeView->selectionModel()->currentIndex();
+  const auto *node = static_cast<const buffers::TreeNode *>(index.internalPointer());
+
+  // duplicate the node
+  auto *dup = treeModel->duplicateNode(*node);
+  // insert the duplicate into the tree
+  treeModel->insert(index.parent(), index.row() + 1, dup);
+  const auto dupIndex = index.siblingAtRow(index.row() + 1);
+  // open an editor for the duplicate node
+  openSubWindow(dup);
+
+  // select the new node so that it gets "revealed" and its parent is expanded
+  ui->treeView->selectionModel()->setCurrentIndex(dupIndex, QItemSelectionModel::ClearAndSelect);
+  // start editing the name of the resource in the tree for convenience
+  ui->treeView->edit(dupIndex);
+}
+
 void MainWindow::on_actionCreateGroup_triggered() {
   auto child = std::unique_ptr<TreeNode>(new TreeNode());
   child->set_folder(true);
@@ -397,10 +413,8 @@ void MainWindow::on_actionCreateGroup_triggered() {
   // find a unique name for the new group
   const QString name = resourceMap->CreateResourceName(TypeCase::kFolder, "group");
   child->set_name(name.toStdString());
-
-  this->resourceMap->AddResource(child.get(), resourceMap.get());
-
   // release ownership of the new child to its parent and the tree
+  this->resourceMap->AddResource(child.get(), resourceMap.get());
   auto index = this->treeModel->addNode(child.release(), ui->treeView->currentIndex());
 
   // select the new node so that it gets "revealed" and its parent is expanded

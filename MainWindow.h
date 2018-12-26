@@ -53,6 +53,7 @@ class MainWindow : public QMainWindow {
   void on_actionExit_triggered();
 
   // edit menu
+  void on_actionDuplicate_triggered();
   void on_actionCreateGroup_triggered();
   void on_actionExpand_triggered();
   void on_actionCollapse_triggered();

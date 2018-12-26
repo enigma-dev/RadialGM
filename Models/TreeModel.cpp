@@ -180,8 +180,15 @@ QMimeData *TreeModel::mimeData(const QModelIndexList &indexes) const {
   return mimeData;
 }
 
-void TreeModel::insert(const QModelIndex &parent, int row, buffers::TreeNode *node, buffers::TreeNode *parentNode) {
-  beginInsertRows(parent, row, row);
+void TreeModel::insert(const QModelIndex &parent, int row, buffers::TreeNode *node) {
+  auto insertIndex = parent;
+  if (!parent.isValid()) insertIndex = QModelIndex();
+  auto *parentNode = static_cast<buffers::TreeNode *>(insertIndex.internalPointer());
+  if (!parentNode) {
+    insertIndex = QModelIndex();
+    parentNode = root;
+  }
+  beginInsertRows(insertIndex, row, row);
   parentNode->mutable_child()->AddAllocated(node);
   for (int j = parentNode->child_size() - 1; j > row; --j) {
     parentNode->mutable_child()->SwapElements(j, j - 1);
@@ -238,20 +245,10 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
       parents.remove(node);
       endRemoveRows();
     } else {
-      // duplicate the node
-      auto *dup = node->New();
-      dup->CopyFrom(*node);
-      node = dup;
-      // give the duplicate node a new name
-      const QString name = resourceMap->CreateResourceName(node);
-      node->set_name(name.toStdString());
-      // add the new node to the resource map
-      resourceMap->AddResource(node, resourceMap);
+      node = duplicateNode(*node);
     }
 
-    insert(parent, row, node, parentNode);
-
-    ++row;
+    insert(parent, row++, node);
   }
 
   return true;
@@ -278,9 +275,22 @@ QModelIndex TreeModel::addNode(buffers::TreeNode *child, const QModelIndex &pare
     parentNode = this->root;
     pos = parentNode->child_size();
   }
-  insert(insertIndex, pos, child, parentNode);
+
+  insert(insertIndex, pos, child);
 
   return this->index(pos, 0, insertIndex);
+}
+
+buffers::TreeNode *TreeModel::duplicateNode(const buffers::TreeNode &node) {
+  // duplicate the node
+  auto *dup = node.New();
+  dup->CopyFrom(node);
+  // give the duplicate node a new name
+  const QString name = resourceMap->CreateResourceName(dup);
+  dup->set_name(name.toStdString());
+  // add the new node to the resource map
+  resourceMap->AddResource(dup, resourceMap);
+  return dup;
 }
 
 void TreeModel::removeNode(const QModelIndex &index) {
