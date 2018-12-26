@@ -257,28 +257,26 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
 }
 
 QModelIndex TreeModel::addNode(buffers::TreeNode *child, const QModelIndex &parent) {
-  auto insertIndex = parent;
-  buffers::TreeNode *parentNode = nullptr;
+  auto insertParent = parent;
   int pos = 0;
   if (parent.isValid()) {
-    parentNode = static_cast<buffers::TreeNode *>(parent.internalPointer());
+    buffers::TreeNode *parentNode = static_cast<buffers::TreeNode *>(parent.internalPointer());
     if (parentNode->has_folder()) {
       pos = parentNode->child_size();
     } else {
-      insertIndex = parent.parent();
-      parentNode = static_cast<buffers::TreeNode *>(insertIndex.internalPointer());
+      insertParent = parent.parent();
+      parentNode = static_cast<buffers::TreeNode *>(insertParent.internalPointer());
       if (!parentNode) {
         parentNode = root;
       }
       pos = parent.row();
     }
   } else {
-    insertIndex = QModelIndex();
-    parentNode = this->root;
-    pos = parentNode->child_size();
+    insertParent = QModelIndex();
+    pos = this->root->child_size();
   }
 
-  return insert(insertIndex, pos, child);
+  return insert(insertParent, pos, child);
 }
 
 buffers::TreeNode *TreeModel::duplicateNode(const buffers::TreeNode &node) {
