@@ -180,6 +180,14 @@ QMimeData *TreeModel::mimeData(const QModelIndexList &indexes) const {
   return mimeData;
 }
 
+template <typename T>
+static void RepeatedFieldInsert(RepeatedPtrField<T> *field, T *newItem, int index) {
+  field->AddAllocated(newItem);
+  for (int j = field->size() - 1; j > index; --j) {
+    field->SwapElements(j, j - 1);
+  }
+}
+
 QModelIndex TreeModel::insert(const QModelIndex &parent, int row, buffers::TreeNode *node) {
   auto insertIndex = parent;
   if (!parent.isValid()) insertIndex = QModelIndex();
@@ -189,10 +197,7 @@ QModelIndex TreeModel::insert(const QModelIndex &parent, int row, buffers::TreeN
     parentNode = root;
   }
   beginInsertRows(insertIndex, row, row);
-  parentNode->mutable_child()->AddAllocated(node);
-  for (int j = parentNode->child_size() - 1; j > row; --j) {
-    parentNode->mutable_child()->SwapElements(j, j - 1);
-  }
+  RepeatedFieldInsert<buffers::TreeNode>(parentNode->mutable_child(), node, row);
   parents[node] = parentNode;
   endInsertRows();
 
