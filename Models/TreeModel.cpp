@@ -127,7 +127,15 @@ QModelIndex TreeModel::parent(const QModelIndex &index) const {
 
   if (parentItem == root || !parentItem) return QModelIndex();
 
-  return createIndex(parentItem->child_size(), 0, parentItem);
+  buffers::TreeNode *parentParentItem = parents[parentItem];
+  if (!parentParentItem) parentParentItem = root;
+
+  // get the row number for the parent from its own parent
+  int pos = 0;
+  for (; pos < parentParentItem->child_size(); ++pos)
+    if (parentParentItem->mutable_child(pos) == parentItem) break;
+  if (pos == parentParentItem->child_size()) return QModelIndex();
+  return createIndex(pos, 0, parentItem);
 }
 
 int TreeModel::rowCount(const QModelIndex &parent) const {
@@ -170,6 +178,30 @@ QMimeData *TreeModel::mimeData(const QModelIndexList &indexes) const {
   }
   mimeData->setData(treeNodeMime(), data);
   return mimeData;
+}
+
+template <typename T>
+static void RepeatedFieldInsert(RepeatedPtrField<T> *field, T *newItem, int index) {
+  field->AddAllocated(newItem);
+  for (int j = field->size() - 1; j > index; --j) {
+    field->SwapElements(j, j - 1);
+  }
+}
+
+QModelIndex TreeModel::insert(const QModelIndex &parent, int row, buffers::TreeNode *node) {
+  auto insertIndex = parent;
+  if (!parent.isValid()) insertIndex = QModelIndex();
+  auto *parentNode = static_cast<buffers::TreeNode *>(insertIndex.internalPointer());
+  if (!parentNode) {
+    insertIndex = QModelIndex();
+    parentNode = root;
+  }
+  beginInsertRows(insertIndex, row, row);
+  RepeatedFieldInsert<buffers::TreeNode>(parentNode->mutable_child(), node, row);
+  parents[node] = parentNode;
+  endInsertRows();
+
+  return this->index(row, 0, insertIndex);
 }
 
 bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, int row, int /*column*/,
@@ -220,35 +252,76 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
       parents.remove(node);
       endRemoveRows();
     } else {
-      // duplicate the node
-      auto *dup = node->New();
-      dup->CopyFrom(*node);
-      node = dup;
-      // give the duplicate node a new name
-      const QString name = resourceMap->CreateResourceName(node);
-      node->set_name(name.toStdString());
-      // add the new node to the resource map
-      resourceMap->AddResource(node, resourceMap);
+      node = duplicateNode(*node);
     }
 
-    beginInsertRows(parent, row, row);
-    parentNode->mutable_child()->AddAllocated(node);
-    for (int j = parentNode->child_size() - 1; j > row; --j) {
-      parentNode->mutable_child()->SwapElements(j, j - 1);
-    }
-    parents[node] = parentNode;
-    endInsertRows();
-
-    ++row;
+    insert(parent, row++, node);
   }
 
   return true;
 }
 
-void TreeModel::addNode(buffers::TreeNode *child, buffers::TreeNode *parent) {
-  auto rootIndex = QModelIndex();
-  emit beginInsertRows(rootIndex, parent->child_size(), parent->child_size());
-  parent->mutable_child()->AddAllocated(child);
-  parents[child] = parent;
-  emit endInsertRows();
+QModelIndex TreeModel::addNode(buffers::TreeNode *child, const QModelIndex &parent) {
+  auto insertParent = parent;
+  int pos = 0;
+  if (parent.isValid()) {
+    buffers::TreeNode *parentNode = static_cast<buffers::TreeNode *>(parent.internalPointer());
+    if (parentNode->has_folder()) {
+      pos = parentNode->child_size();
+    } else {
+      insertParent = parent.parent();
+      parentNode = static_cast<buffers::TreeNode *>(insertParent.internalPointer());
+      if (!parentNode) {
+        parentNode = root;
+      }
+      pos = parent.row();
+    }
+  } else {
+    insertParent = QModelIndex();
+    pos = this->root->child_size();
+  }
+
+  return insert(insertParent, pos, child);
+}
+
+buffers::TreeNode *TreeModel::duplicateNode(const buffers::TreeNode &node) {
+  // duplicate the node
+  auto *dup = node.New();
+  dup->CopyFrom(node);
+  // give the duplicate node a new name
+  const QString name = resourceMap->CreateResourceName(dup);
+  dup->set_name(name.toStdString());
+  // add the new node to the resource map
+  resourceMap->AddResource(dup, resourceMap);
+  return dup;
+}
+
+void TreeModel::removeNode(const QModelIndex &index) {
+  if (!index.isValid()) return;
+  auto *node = static_cast<buffers::TreeNode *>(index.internalPointer());
+  if (!node) return;
+  if (node->has_folder()) {
+    for (int i = node->child_size(); i > 0; --i) {
+      removeNode(this->index(i - 1, 0, index));
+    }
+  }
+  buffers::TreeNode *parent = parents[node];
+  int pos = 0;
+  for (; pos < parent->child_size(); ++pos)
+    if (parent->mutable_child(pos) == node) break;
+  if (pos == parent->child_size()) return;  // already removed?
+  emit beginRemoveRows(index.parent(), pos, pos);
+  resourceMap->RemoveResource(node->type_case(), QString::fromStdString(node->name()));
+  parent->mutable_child()->DeleteSubrange(pos, 1);
+  emit endRemoveRows();
+}
+
+void TreeModel::sortByName(const QModelIndex &index) {
+  if (!index.isValid()) return;
+  auto *node = static_cast<buffers::TreeNode *>(index.internalPointer());
+  if (!node) return;
+  auto *child_field = node->mutable_child();
+  std::sort(child_field->begin(), child_field->end(),
+            [](const buffers::TreeNode &a, const buffers::TreeNode &b) { return a.name() < b.name(); });
+  emit dataChanged(this->index(0, 0, index), this->index(node->child_size(), 0, index));
 }

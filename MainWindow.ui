@@ -130,14 +130,64 @@
     <property name="title">
      <string>&amp;Build</string>
     </property>
+    <widget class="QMenu" name="menuChangeGameSettings">
+     <property name="title">
+      <string>Change &amp;Game Settings</string>
+     </property>
+     <property name="icon">
+      <iconset resource="images.qrc">
+       <normaloff>:/resources/settings.png</normaloff>:/resources/settings.png</iconset>
+     </property>
+     <addaction name="actionConfiguration0"/>
+     <addaction name="actionConfiguration1"/>
+     <addaction name="separator"/>
+     <addaction name="actionSettingsProperties"/>
+    </widget>
     <addaction name="actionRun"/>
     <addaction name="actionDebug"/>
     <addaction name="actionCreateExecutable"/>
+    <addaction name="separator"/>
+    <addaction name="menuChangeGameSettings"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
      <string>&amp;Edit</string>
     </property>
+    <widget class="QMenu" name="menuCreateResource">
+     <property name="title">
+      <string>&amp;Create Resource</string>
+     </property>
+     <property name="icon">
+      <iconset resource="images.qrc">
+       <normaloff>:/actions/new.png</normaloff>:/actions/new.png</iconset>
+     </property>
+     <addaction name="actionCreateSprite"/>
+     <addaction name="actionCreateSound"/>
+     <addaction name="actionCreateBackground"/>
+     <addaction name="actionCreatePath"/>
+     <addaction name="actionCreateScript"/>
+     <addaction name="actionCreateShader"/>
+     <addaction name="actionCreateFont"/>
+     <addaction name="actionCreateTimeline"/>
+     <addaction name="actionCreateObject"/>
+     <addaction name="actionCreateRoom"/>
+     <addaction name="actionCreateSettings"/>
+    </widget>
+    <addaction name="menuCreateResource"/>
+    <addaction name="actionDuplicate"/>
+    <addaction name="separator"/>
+    <addaction name="actionCreateGroup"/>
+    <addaction name="separator"/>
+    <addaction name="actionSortByName"/>
+    <addaction name="separator"/>
+    <addaction name="actionExpand"/>
+    <addaction name="actionCollapse"/>
+    <addaction name="separator"/>
+    <addaction name="actionDelete"/>
+    <addaction name="separator"/>
+    <addaction name="actionRename"/>
+    <addaction name="separator"/>
+    <addaction name="actionProperties"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -173,34 +223,17 @@
     <property name="title">
      <string>&amp;Resources</string>
     </property>
-    <widget class="QMenu" name="menuChangeGameSettings">
-     <property name="title">
-      <string>Change &amp;Game Settings</string>
-     </property>
-     <property name="icon">
-      <iconset resource="images.qrc">
-       <normaloff>:/resources/settings.png</normaloff>:/resources/settings.png</iconset>
-     </property>
-     <addaction name="actionConfiguration0"/>
-     <addaction name="actionConfiguration1"/>
-     <addaction name="separator"/>
-     <addaction name="actionSettingsProperties"/>
-     <addaction name="actionAddNewConfig"/>
-    </widget>
-    <addaction name="actionCreate_Sprite"/>
-    <addaction name="actionCreate_Sound"/>
-    <addaction name="actionCreate_Background"/>
-    <addaction name="actionCreate_Path"/>
-    <addaction name="actionCreate_Script"/>
-    <addaction name="actionCreate_Shader"/>
-    <addaction name="actionCreate_Font"/>
-    <addaction name="actionCreate_Timeline"/>
-    <addaction name="actionCreate_Object"/>
-    <addaction name="actionCreate_Room"/>
-    <addaction name="separator"/>
-    <addaction name="menuChangeGameSettings"/>
-    <addaction name="separator"/>
-    <addaction name="actionDefine_Macros"/>
+    <addaction name="actionCreateSprite"/>
+    <addaction name="actionCreateSound"/>
+    <addaction name="actionCreateBackground"/>
+    <addaction name="actionCreatePath"/>
+    <addaction name="actionCreateScript"/>
+    <addaction name="actionCreateShader"/>
+    <addaction name="actionCreateFont"/>
+    <addaction name="actionCreateTimeline"/>
+    <addaction name="actionCreateObject"/>
+    <addaction name="actionCreateRoom"/>
+    <addaction name="actionCreateSettings"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuBuild"/>
@@ -238,16 +271,17 @@
    <addaction name="actionDebug"/>
    <addaction name="actionCreateExecutable"/>
    <addaction name="separator"/>
-   <addaction name="actionCreate_Sprite"/>
-   <addaction name="actionCreate_Sound"/>
-   <addaction name="actionCreate_Background"/>
-   <addaction name="actionCreate_Path"/>
-   <addaction name="actionCreate_Script"/>
-   <addaction name="actionCreate_Shader"/>
-   <addaction name="actionCreate_Font"/>
-   <addaction name="actionCreate_Object"/>
-   <addaction name="actionCreate_Timeline"/>
-   <addaction name="actionCreate_Room"/>
+   <addaction name="actionCreateSprite"/>
+   <addaction name="actionCreateSound"/>
+   <addaction name="actionCreateBackground"/>
+   <addaction name="actionCreatePath"/>
+   <addaction name="actionCreateScript"/>
+   <addaction name="actionCreateShader"/>
+   <addaction name="actionCreateFont"/>
+   <addaction name="actionCreateTimeline"/>
+   <addaction name="actionCreateObject"/>
+   <addaction name="actionCreateRoom"/>
+   <addaction name="actionCreateSettings"/>
    <addaction name="separator"/>
    <addaction name="actionPreferences"/>
    <addaction name="separator"/>
@@ -367,6 +401,9 @@
      </item>
      <item>
       <widget class="QTreeView" name="treeView">
+       <property name="contextMenuPolicy">
+        <enum>Qt::CustomContextMenu</enum>
+       </property>
        <property name="editTriggers">
         <set>QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
        </property>
@@ -392,6 +429,9 @@
         <bool>false</bool>
        </property>
        <property name="itemsExpandable">
+        <bool>true</bool>
+       </property>
+       <property name="sortingEnabled">
         <bool>true</bool>
        </property>
        <property name="allColumnsShowFocus">
@@ -450,7 +490,7 @@
      <normaloff>:/actions/save-all.png</normaloff>:/actions/save-all.png</iconset>
    </property>
    <property name="text">
-    <string>Save &amp;All</string>
+    <string>Sa&amp;ve All</string>
    </property>
    <property name="toolTip">
     <string>Save All</string>
@@ -644,7 +684,7 @@
     <string>Clear Menu</string>
    </property>
   </action>
-  <action name="actionCreate_Sprite">
+  <action name="actionCreateSprite">
    <property name="icon">
     <iconset resource="images.qrc">
      <normaloff>:/resources/sprite.png</normaloff>:/resources/sprite.png</iconset>
@@ -656,19 +696,19 @@
     <string>Ctrl+Shift+S</string>
    </property>
   </action>
-  <action name="actionCreate_Sound">
+  <action name="actionCreateSound">
    <property name="icon">
     <iconset resource="images.qrc">
      <normaloff>:/resources/sound.png</normaloff>:/resources/sound.png</iconset>
    </property>
    <property name="text">
-    <string>Create &amp;Sound</string>
+    <string>Create So&amp;und</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+U</string>
    </property>
   </action>
-  <action name="actionCreate_Background">
+  <action name="actionCreateBackground">
    <property name="icon">
     <iconset resource="images.qrc">
      <normaloff>:/resources/background.png</normaloff>:/resources/background.png</iconset>
@@ -680,7 +720,7 @@
     <string>Ctrl+Shift+B</string>
    </property>
   </action>
-  <action name="actionCreate_Path">
+  <action name="actionCreatePath">
    <property name="icon">
     <iconset resource="images.qrc">
      <normaloff>:/resources/path.png</normaloff>:/resources/path.png</iconset>
@@ -692,31 +732,31 @@
     <string>Ctrl+Shift+P</string>
    </property>
   </action>
-  <action name="actionCreate_Script">
+  <action name="actionCreateScript">
    <property name="icon">
     <iconset resource="images.qrc">
      <normaloff>:/resources/script.png</normaloff>:/resources/script.png</iconset>
    </property>
    <property name="text">
-    <string>Create &amp;Script</string>
+    <string>Create S&amp;cript</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+C</string>
    </property>
   </action>
-  <action name="actionCreate_Shader">
+  <action name="actionCreateShader">
    <property name="icon">
     <iconset resource="images.qrc">
      <normaloff>:/resources/shader.png</normaloff>:/resources/shader.png</iconset>
    </property>
    <property name="text">
-    <string>Create &amp;Shader</string>
+    <string>Create Sh&amp;ader</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+A</string>
    </property>
   </action>
-  <action name="actionCreate_Font">
+  <action name="actionCreateFont">
    <property name="icon">
     <iconset resource="images.qrc">
      <normaloff>:/resources/font.png</normaloff>:/resources/font.png</iconset>
@@ -728,7 +768,7 @@
     <string>Ctrl+Shift+F</string>
    </property>
   </action>
-  <action name="actionCreate_Timeline">
+  <action name="actionCreateTimeline">
    <property name="icon">
     <iconset resource="images.qrc">
      <normaloff>:/resources/timeline.png</normaloff>:/resources/timeline.png</iconset>
@@ -740,7 +780,7 @@
     <string>Ctrl+Shift+T</string>
    </property>
   </action>
-  <action name="actionCreate_Object">
+  <action name="actionCreateObject">
    <property name="icon">
     <iconset resource="images.qrc">
      <normaloff>:/resources/object-empty.png</normaloff>:/resources/object-empty.png</iconset>
@@ -752,7 +792,7 @@
     <string>Ctrl+Shift+O</string>
    </property>
   </action>
-  <action name="actionCreate_Room">
+  <action name="actionCreateRoom">
    <property name="icon">
     <iconset resource="images.qrc">
      <normaloff>:/resources/room.png</normaloff>:/resources/room.png</iconset>
@@ -764,7 +804,7 @@
     <string>Ctrl+Shift+R</string>
    </property>
   </action>
-  <action name="actionDefine_Macros">
+  <action name="actionDefineMacros">
    <property name="icon">
     <iconset resource="images.qrc">
      <normaloff>:/resources/constants.png</normaloff>:/resources/constants.png</iconset>
@@ -776,25 +816,13 @@
     <string>Ctrl+Shift+N</string>
    </property>
   </action>
-  <action name="actionAddNewConfig">
-   <property name="icon">
-    <iconset resource="images.qrc">
-     <normaloff>:/actions/add.png</normaloff>:/actions/add.png</iconset>
-   </property>
-   <property name="text">
-    <string>Create &amp;Config</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Alt+G</string>
-   </property>
-  </action>
   <action name="actionSettingsProperties">
    <property name="icon">
     <iconset resource="images.qrc">
      <normaloff>:/actions/edit.png</normaloff>:/actions/edit.png</iconset>
    </property>
    <property name="text">
-    <string>Edit Configuration 0...</string>
+    <string>&amp;Edit Configuration 0...</string>
    </property>
   </action>
   <action name="actionSettings">
@@ -807,6 +835,101 @@
    </property>
    <property name="toolTip">
     <string>Change Game Settings</string>
+   </property>
+  </action>
+  <action name="actionCreateGroup">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/actions/folder-new.png</normaloff>:/actions/folder-new.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create &amp;Group</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+Ins</string>
+   </property>
+  </action>
+  <action name="actionSortByName">
+   <property name="text">
+    <string>&amp;Sort by Name</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/actions/delete.png</normaloff>:/actions/delete.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Delete</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+Del</string>
+   </property>
+  </action>
+  <action name="actionRename">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/actions/rename.png</normaloff>:/actions/rename.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Rename</string>
+   </property>
+   <property name="shortcut">
+    <string>F2</string>
+   </property>
+  </action>
+  <action name="actionProperties">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/actions/edit.png</normaloff>:/actions/edit.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Properties...</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Return</string>
+   </property>
+  </action>
+  <action name="actionExpand">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/resources/group-open.png</normaloff>:/resources/group-open.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Expand All</string>
+   </property>
+  </action>
+  <action name="actionCollapse">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/resources/group.png</normaloff>:/resources/group.png</iconset>
+   </property>
+   <property name="text">
+    <string>C&amp;ollapse All</string>
+   </property>
+  </action>
+  <action name="actionDuplicate">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/actions/copy.png</normaloff>:/actions/copy.png</iconset>
+   </property>
+   <property name="text">
+    <string>D&amp;uplicate</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Ins</string>
+   </property>
+  </action>
+  <action name="actionCreateSettings">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/resources/settings.png</normaloff>:/resources/settings.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create Settin&amp;gs</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+G</string>
    </property>
   </action>
   <actiongroup name="configActionGroup">

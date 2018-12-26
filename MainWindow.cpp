@@ -215,9 +215,9 @@ void MainWindow::openNewProject() {
   MainWindow::setWindowTitle(tr("<new game> - ENIGMA"));
   auto newProject = std::unique_ptr<buffers::Project>(new buffers::Project());
   auto *root = newProject->mutable_game()->mutable_root();
-  QList<QString> defaultGroups = {tr("Sprites"),   tr("Sounds"),  tr("Backgrounds"), tr("Paths"),
-                                  tr("Scripts"),   tr("Shaders"), tr("Fonts"),       tr("Objects"),
-                                  tr("Timelines"), tr("Rooms"),   tr("Includes"),    tr("Configs")};
+  QList<QString> defaultGroups = {tr("Sprites"), tr("Sounds"),  tr("Backgrounds"), tr("Paths"),
+                                  tr("Scripts"), tr("Shaders"), tr("Fonts"),       tr("Timelines"),
+                                  tr("Objects"), tr("Rooms"),   tr("Includes"),    tr("Configs")};
   for (auto groupName : defaultGroups) {
     auto *groupNode = root->add_child();
     groupNode->set_folder(true);
@@ -341,7 +341,6 @@ void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
 void MainWindow::on_actionClearRecentMenu_triggered() { recentFiles->clear(); }
 
 void MainWindow::CreateResource(TypeCase typeCase) {
-  auto *root = this->project->mutable_game()->mutable_root();
   auto child = std::unique_ptr<TreeNode>(new TreeNode());
   auto fieldNum = ResTypeFields[typeCase];
   const Descriptor *desc = child->GetDescriptor();
@@ -354,34 +353,139 @@ void MainWindow::CreateResource(TypeCase typeCase) {
   // find a unique name for the new resource
   const QString name = resourceMap->CreateResourceName(child.get());
   child->set_name(name.toStdString());
-
-  this->resourceMap->AddResource(child.get(), resourceMap.get());
-
   // open the new resource for editing
+  this->resourceMap->AddResource(child.get(), resourceMap.get());
   openSubWindow(child.get());
-
   // release ownership of the new child to its parent and the tree
-  this->treeModel->addNode(child.release(), root);
+  auto index = this->treeModel->addNode(child.release(), ui->treeView->currentIndex());
+
+  // select the new node so that it gets "revealed" and its parent is expanded
+  ui->treeView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
+  // start editing the name of the resource in the tree for convenience
+  ui->treeView->edit(index);
 }
 
-void MainWindow::on_actionCreate_Sprite_triggered() { CreateResource(TypeCase::kSprite); }
+void MainWindow::on_actionCreateSprite_triggered() { CreateResource(TypeCase::kSprite); }
 
-void MainWindow::on_actionCreate_Sound_triggered() { CreateResource(TypeCase::kSound); }
+void MainWindow::on_actionCreateSound_triggered() { CreateResource(TypeCase::kSound); }
 
-void MainWindow::on_actionCreate_Background_triggered() { CreateResource(TypeCase::kBackground); }
+void MainWindow::on_actionCreateBackground_triggered() { CreateResource(TypeCase::kBackground); }
 
-void MainWindow::on_actionCreate_Path_triggered() { CreateResource(TypeCase::kPath); }
+void MainWindow::on_actionCreatePath_triggered() { CreateResource(TypeCase::kPath); }
 
-void MainWindow::on_actionCreate_Script_triggered() { CreateResource(TypeCase::kScript); }
+void MainWindow::on_actionCreateScript_triggered() { CreateResource(TypeCase::kScript); }
 
-void MainWindow::on_actionCreate_Shader_triggered() { CreateResource(TypeCase::kShader); }
+void MainWindow::on_actionCreateShader_triggered() { CreateResource(TypeCase::kShader); }
 
-void MainWindow::on_actionCreate_Font_triggered() { CreateResource(TypeCase::kFont); }
+void MainWindow::on_actionCreateFont_triggered() { CreateResource(TypeCase::kFont); }
 
-void MainWindow::on_actionCreate_Timeline_triggered() { CreateResource(TypeCase::kTimeline); }
+void MainWindow::on_actionCreateTimeline_triggered() { CreateResource(TypeCase::kTimeline); }
 
-void MainWindow::on_actionCreate_Object_triggered() { CreateResource(TypeCase::kObject); }
+void MainWindow::on_actionCreateObject_triggered() { CreateResource(TypeCase::kObject); }
 
-void MainWindow::on_actionCreate_Room_triggered() { CreateResource(TypeCase::kRoom); }
+void MainWindow::on_actionCreateRoom_triggered() { CreateResource(TypeCase::kRoom); }
 
-void MainWindow::on_actionAddNewConfig_triggered() { CreateResource(TypeCase::kSettings); }
+void MainWindow::on_actionCreateSettings_triggered() { CreateResource(TypeCase::kSettings); }
+
+void MainWindow::on_actionDuplicate_triggered() {
+  if (!ui->treeView->selectionModel()->hasSelection()) return;
+  const auto index = ui->treeView->selectionModel()->currentIndex();
+  const auto *node = static_cast<const buffers::TreeNode *>(index.internalPointer());
+  if (node->has_folder()) return;
+
+  // duplicate the node
+  auto *dup = treeModel->duplicateNode(*node);
+  // insert the duplicate into the tree
+  const auto dupIndex = treeModel->insert(index.parent(), index.row() + 1, dup);
+  // open an editor for the duplicate node
+  openSubWindow(dup);
+
+  // select the new node so that it gets "revealed" and its parent is expanded
+  ui->treeView->selectionModel()->setCurrentIndex(dupIndex, QItemSelectionModel::ClearAndSelect);
+  // start editing the name of the resource in the tree for convenience
+  ui->treeView->edit(dupIndex);
+}
+
+void MainWindow::on_actionCreateGroup_triggered() {
+  auto child = std::unique_ptr<TreeNode>(new TreeNode());
+  child->set_folder(true);
+
+  // find a unique name for the new group
+  const QString name = resourceMap->CreateResourceName(TypeCase::kFolder, "group");
+  child->set_name(name.toStdString());
+  // release ownership of the new child to its parent and the tree
+  this->resourceMap->AddResource(child.get(), resourceMap.get());
+  auto index = this->treeModel->addNode(child.release(), ui->treeView->currentIndex());
+
+  // select the new node so that it gets "revealed" and its parent is expanded
+  ui->treeView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
+  // start editing the name of the resource in the tree for convenience
+  ui->treeView->edit(index);
+}
+
+void MainWindow::on_actionRename_triggered() {
+  if (!ui->treeView->selectionModel()->hasSelection()) return;
+  ui->treeView->edit(ui->treeView->selectionModel()->currentIndex());
+}
+
+void MainWindow::on_actionProperties_triggered() {
+  if (!ui->treeView->selectionModel()->hasSelection()) return;
+  auto selected = ui->treeView->selectionModel()->selectedIndexes();
+  for (auto index : selected) {
+    auto *treeNode = static_cast<buffers::TreeNode *>(index.internalPointer());
+    openSubWindow(treeNode);
+  }
+}
+
+static void CollectNodes(buffers::TreeNode *root, QSet<buffers::TreeNode *> &cache) {
+  cache.insert(root);
+  for (int i = 0; i < root->child_size(); ++i) {
+    auto *child = root->mutable_child(i);
+    cache.insert(child);
+    if (child->has_folder()) CollectNodes(child, cache);
+  }
+}
+
+void MainWindow::on_actionDelete_triggered() {
+  if (!ui->treeView->selectionModel()->hasSelection()) return;
+  auto selected = ui->treeView->selectionModel()->selectedIndexes();
+  QSet<buffers::TreeNode *> selectedNodes;
+  for (auto index : selected) {
+    auto *treeNode = static_cast<buffers::TreeNode *>(index.internalPointer());
+    CollectNodes(treeNode, selectedNodes);
+  }
+  QString selectedNames = "";
+  for (auto node : selectedNodes) {
+    selectedNames += (node == *selectedNodes.begin() ? "" : ", ") + QString::fromStdString(node->name());
+  }
+
+  QMessageBox::StandardButton reply;
+  reply = QMessageBox::question(
+      this, tr("Delete Resources"),
+      tr("Do you want to delete the following resources from the project?\n%0").arg(selectedNames),
+      QMessageBox::Yes | QMessageBox::No);
+  if (reply != QMessageBox::Yes) return;
+
+  // close subwindows
+  for (auto node : selectedNodes) {
+    if (subWindows.contains(node)) subWindows[node]->close();
+  }
+
+  // remove tree nodes (recursively unmaps names)
+  for (auto index : selected) {
+    this->treeModel->removeNode(index);
+  }
+}
+
+void MainWindow::on_actionExpand_triggered() { ui->treeView->expandAll(); }
+
+void MainWindow::on_actionCollapse_triggered() { ui->treeView->collapseAll(); }
+
+void MainWindow::on_actionSortByName_triggered() {
+  if (!ui->treeView->selectionModel()->hasSelection()) return;
+  treeModel->sortByName(ui->treeView->currentIndex());
+}
+
+void MainWindow::on_treeView_customContextMenuRequested(const QPoint &pos) {
+  ui->menuEdit->exec(ui->treeView->mapToGlobal(pos));
+}

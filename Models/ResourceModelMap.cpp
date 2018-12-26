@@ -11,7 +11,6 @@ void ResourceModelMap::recursiveBindRes(buffers::TreeNode* node, QObject* parent
     buffers::TreeNode* child = node->mutable_child(i);
     if (child->folder()) {
       recursiveBindRes(child, parent);
-      continue;
     }
 
     this->AddResource(child, parent);
@@ -19,7 +18,15 @@ void ResourceModelMap::recursiveBindRes(buffers::TreeNode* node, QObject* parent
 }
 
 void ResourceModelMap::AddResource(buffers::TreeNode* child, QObject* parent) {
-  _resources[child->type_case()][QString::fromStdString(child->name())] = new ProtoModel(child, parent);
+  _resources[child->type_case()][QString::fromStdString(child->name())] =
+      QPair<buffers::TreeNode*, ProtoModel*>(child, child->has_folder() ? nullptr : new ProtoModel(child, parent));
+}
+
+void ResourceModelMap::RemoveResource(int type, const QString& name) {
+  if (!_resources.contains(type)) return;
+  if (!_resources[type].contains(name)) return;
+  delete _resources[type][name].second;
+  _resources[type].remove(name);
 }
 
 QString ResourceModelMap::CreateResourceName(TreeNode* node) {
@@ -35,13 +42,13 @@ QString ResourceModelMap::CreateResourceName(int type, const QString& typeName) 
   int i = 0;
   do {
     name = pre + QString::number(i++);
-  } while (GetResourceByName(type, name) != nullptr);
+  } while (_resources[type].contains(name));
   return name;
 }
 
 ProtoModel* ResourceModelMap::GetResourceByName(int type, const QString& name) {
   if (_resources[type].contains(name))
-    return _resources[type][name];
+    return _resources[type][name].second;
   else
     return nullptr;
 }

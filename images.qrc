@@ -44,6 +44,8 @@
         <file alias="right-arrow-blue.png">Images/actions/right-arrow-blue.png</file>
         <file alias="right-arrow-green.png">Images/actions/right-arrow-green.png</file>
         <file alias="function.png">Images/actions/function.png</file>
+        <file alias="rename.png">Images/actions/rename.png</file>
+        <file alias="folder-new.png">Images/actions/folder-new.png</file>
     </qresource>
     <qresource prefix="/resources">
         <file alias="background.png">Images/resources/background.png</file>
