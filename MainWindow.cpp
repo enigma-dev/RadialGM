@@ -396,8 +396,7 @@ void MainWindow::on_actionDuplicate_triggered() {
   // duplicate the node
   auto *dup = treeModel->duplicateNode(*node);
   // insert the duplicate into the tree
-  treeModel->insert(index.parent(), index.row() + 1, dup);
-  const auto dupIndex = index.siblingAtRow(index.row() + 1);
+  const auto dupIndex = treeModel->insert(index.parent(), index.row() + 1, dup);
   // open an editor for the duplicate node
   openSubWindow(dup);
 

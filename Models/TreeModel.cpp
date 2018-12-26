@@ -180,7 +180,7 @@ QMimeData *TreeModel::mimeData(const QModelIndexList &indexes) const {
   return mimeData;
 }
 
-void TreeModel::insert(const QModelIndex &parent, int row, buffers::TreeNode *node) {
+QModelIndex TreeModel::insert(const QModelIndex &parent, int row, buffers::TreeNode *node) {
   auto insertIndex = parent;
   if (!parent.isValid()) insertIndex = QModelIndex();
   auto *parentNode = static_cast<buffers::TreeNode *>(insertIndex.internalPointer());
@@ -195,6 +195,8 @@ void TreeModel::insert(const QModelIndex &parent, int row, buffers::TreeNode *no
   }
   parents[node] = parentNode;
   endInsertRows();
+
+  return this->index(row, 0, insertIndex);
 }
 
 bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, int row, int /*column*/,
@@ -276,9 +278,7 @@ QModelIndex TreeModel::addNode(buffers::TreeNode *child, const QModelIndex &pare
     pos = parentNode->child_size();
   }
 
-  insert(insertIndex, pos, child);
-
-  return this->index(pos, 0, insertIndex);
+  return insert(insertIndex, pos, child);
 }
 
 buffers::TreeNode *TreeModel::duplicateNode(const buffers::TreeNode &node) {
