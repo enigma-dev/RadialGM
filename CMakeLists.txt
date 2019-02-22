@@ -187,9 +187,10 @@ target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_PROTO_D},${LIB_
 
 # Find GRPC
 find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
+find_library(LIB_GRPC_CRONET NAMES grpc_cronet)
 find_library(LIB_GRPC NAMES grpc)
 find_library(LIB_GPR NAMES gpr)
-target_link_libraries(${EXE} PRIVATE ${LIB_GRPC_UNSECURE} ${LIB_GRPC} ${LIB_GPR})
+target_link_libraries(${EXE} PRIVATE ${LIB_GPR} ${LIB_GRPC} ${LIB_GRPC_UNSECURE} ${LIB_GRPC_CRONET})
 
 # Find Protobuf
 include(FindProtobuf)
