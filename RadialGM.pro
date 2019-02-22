@@ -43,8 +43,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 INCLUDEPATH += /usr/include/qt/ \
                $$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
-               $$PWD/Submodules/enigma-dev/CommandLine/protos \
-               $$PWD/Submodules/enigma-dev/CommandLine/protos/codegen
+               $$PWD/Submodules/enigma-dev/shared/protos \
+               $$PWD/Submodules/enigma-dev/shared/protos/codegen
 LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
         -lEGM \
         -lprotobuf \

@@ -59,7 +59,7 @@ install:
 build_script:
   - echo %BUILD_TYPE%
   - echo %GENERATOR%
-  - cd %APPVEYOR_BUILD_FOLDER%\Submodules\enigma-dev\CommandLine\protos
+  - cd %APPVEYOR_BUILD_FOLDER%\Submodules\enigma-dev\shared\protos
   - mkdir build && cd build
   - cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" -DPROTOBUF_IMPORT_DIRS="%VCPKG_DIR%\installed\%TRIPLET_NAME%\include" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
   - cmake --build . --target install --config "%BUILD_TYPE%"

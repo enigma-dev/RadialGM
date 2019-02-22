@@ -19,7 +19,7 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/Dialogs")
 
 # Include ENIGMA things
 set(ENIGMA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/enigma-dev)
-include_directories("${ENIGMA_DIR}/CommandLine/protos" "${ENIGMA_DIR}/CommandLine/libEGM")
+include_directories("${ENIGMA_DIR}/shared/protos" "${ENIGMA_DIR}/CommandLine/libEGM")
 
 # Populate a CMake variable with the sources
 set(RGM_SOURCES
@@ -187,9 +187,10 @@ target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_PROTO_D},${LIB_
 
 # Find GRPC
 find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
+find_library(LIB_GRPC_CRONET NAMES grpc_cronet)
 find_library(LIB_GRPC NAMES grpc)
 find_library(LIB_GPR NAMES gpr)
-target_link_libraries(${EXE} PRIVATE ${LIB_GRPC_UNSECURE} ${LIB_GRPC} ${LIB_GPR})
+target_link_libraries(${EXE} PRIVATE ${LIB_GPR} ${LIB_GRPC} ${LIB_GRPC_UNSECURE} ${LIB_GRPC_CRONET})
 
 # Find Protobuf
 include(FindProtobuf)
@@ -277,5 +278,5 @@ target_link_libraries(${EXE} PRIVATE ${LIB_DOUBLE_CONVERSION})
 
 if(WIN32)
 	# Windows is a turd
-	target_link_libraries(${EXE} PRIVATE Ws2_32 Wldap32 Crypt32 Winmm Userenv Netapi32 version Dwmapi Imm32)
+	target_link_libraries(${EXE} PRIVATE Ws2_32 Wtsapi32 Wldap32 Crypt32 Winmm Userenv Netapi32 version Dwmapi Imm32)
 endif(WIN32)
