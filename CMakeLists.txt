@@ -190,7 +190,7 @@ find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
 find_library(LIB_GRPC_CRONET NAMES grpc_cronet)
 find_library(LIB_GRPC NAMES grpc)
 find_library(LIB_GPR NAMES gpr)
-target_link_libraries(${EXE} PRIVATE ${LIB_GPR} ${LIB_GRPC} ${LIB_GRPC_UNSECURE})
+target_link_libraries(${EXE} PRIVATE ${LIB_GPR} ${LIB_GRPC} ${LIB_GRPC_UNSECURE} ${LIB_GRPC_CRONET})
 
 # Find Protobuf
 include(FindProtobuf)
@@ -278,5 +278,5 @@ target_link_libraries(${EXE} PRIVATE ${LIB_DOUBLE_CONVERSION})
 
 if(WIN32)
 	# Windows is a turd
-	target_link_libraries(${EXE} PRIVATE Ws2_32 Wldap32 Crypt32 Winmm Userenv Netapi32 version Dwmapi Imm32)
+	target_link_libraries(${EXE} PRIVATE Ws2_32 Wtsapi32 Wldap32 Crypt32 Winmm Userenv Netapi32 version Dwmapi Imm32)
 endif(WIN32)
