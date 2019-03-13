@@ -3,7 +3,7 @@
 
 #include "Components/ArtManager.h"
 #include "Models/ResourceModelMap.h"
-#include "codegen/treenode.pb.h"
+#include "treenode.pb.h"
 
 #include <QAbstractItemModel>
 #include <QHash>

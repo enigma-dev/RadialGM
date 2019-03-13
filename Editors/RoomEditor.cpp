@@ -6,7 +6,7 @@
 
 #include "Models/ImmediateMapper.h"
 #include "Models/TreeSortFilterProxyModel.h"
-#include "codegen/Room.pb.h"
+#include "Room.pb.h"
 
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>

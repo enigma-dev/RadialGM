@@ -1,7 +1,7 @@
 #ifndef RESOURCEMODEL_H
 #define RESOURCEMODEL_H
 
-#include "codegen/treenode.pb.h"
+#include "treenode.pb.h"
 
 #include "RepeatedProtoModel.h"
 

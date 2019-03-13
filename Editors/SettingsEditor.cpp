@@ -2,7 +2,7 @@
 #include "MainWindow.h"
 #include "ui_SettingsEditor.h"
 
-#include "codegen/Settings.pb.h"
+#include "Settings.pb.h"
 
 #include <QPushButton>
 

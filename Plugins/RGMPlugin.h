@@ -3,8 +3,8 @@
 
 #include "MainWindow.h"
 
-#include "codegen/Settings.pb.h"
-#include "codegen/server.pb.h"
+#include "Settings.pb.h"
+#include "server.pb.h"
 
 #include <QApplication>
 

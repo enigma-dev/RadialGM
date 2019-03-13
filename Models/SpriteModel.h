@@ -1,7 +1,7 @@
 #ifndef SPRITEMODEL_H
 #define SPRITEMODEL_H
 
-#include "codegen/Sprite.pb.h"
+#include "Sprite.pb.h"
 
 #include <QAbstractListModel>
 #include <QSize>

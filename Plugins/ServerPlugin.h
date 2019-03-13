@@ -5,7 +5,7 @@
 
 #define _WIN32_WINNT 0x0600  // at least windows vista required for grpc
 
-#include "codegen/server.grpc.pb.h"
+#include "server.grpc.pb.h"
 
 #include <grpc++/channel.h>
 #include <grpc++/client_context.h>
