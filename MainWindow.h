@@ -8,8 +8,8 @@
 class MainWindow;
 #include "Components/RecentFiles.h"
 
-#include "codegen/project.pb.h"
-#include "codegen/server.pb.h"
+#include "project.pb.h"
+#include "server.pb.h"
 
 #include <QList>
 #include <QMainWindow>

@@ -1,7 +1,7 @@
 #include "ScriptEditor.h"
 #include "ui_CodeEditor.h"
 
-#include "codegen/Script.pb.h"
+#include "Script.pb.h"
 
 using namespace buffers::resources;
 
