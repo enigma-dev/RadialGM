@@ -57,7 +57,6 @@ set(RGM_SOURCES
     Widgets/AssetView.cpp
     Plugins/RGMPlugin.cpp
     Plugins/ServerPlugin.cpp
-    qtplugins.cpp
 )
 
 if (MSVC)
