@@ -27,6 +27,9 @@ QVariant SpriteModel::data(const QModelIndex& index, int role) const {
     return QVariant(QColor(Qt::yellow));
   } else if (role == Qt::SizeHintRole) {
     // Don't load image we just need size
+    if (index.row() < 0) {
+      return QSize(0, 0);
+    }
     QImageReader img(QString::fromStdString(protobuf->Get(index.row())));
     QSize actualSize = img.size();
     float aspectRatio = static_cast<float>(qMin(actualSize.width(), actualSize.height())) /
