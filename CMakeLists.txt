@@ -184,20 +184,20 @@ find_library(LIB_PROTO_D NAMES Protocolsd PATHS ${ENIGMA_DIR})
 find_library(LIB_PROTO NAMES Protocols PATHS ${ENIGMA_DIR})
 target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_PROTO_D},${LIB_PROTO}>")
 
-# Find OpenSSL
-find_package(OpenSSL REQUIRED)
-target_link_libraries(${EXE} PRIVATE OpenSSL::SSL OpenSSL::Crypto)
-
 # Find GRPC
 find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
 find_library(LIB_GRPC NAMES grpc)
 find_library(LIB_GPR NAMES gpr)
-target_link_libraries(${EXE} PRIVATE ${LIB_GPR} ${LIB_GRPC} ${LIB_GRPC_UNSECURE})
+target_link_libraries(${EXE} PRIVATE ${LIB_GRPC_UNSECURE} ${LIB_GRPC} ${LIB_GPR} )
 
 # Find Protobuf
 include(FindProtobuf)
 include_directories(${Protobuf_INCLUDE_DIRS})
 target_link_libraries(${EXE} PRIVATE ${Protobuf_LIBRARIES})
+
+# Find OpenSSL
+find_package(OpenSSL REQUIRED)
+target_link_libraries(${EXE} PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 
 # Find Qt
 find_package(Qt5 COMPONENTS Core Widgets Gui PrintSupport REQUIRED)
