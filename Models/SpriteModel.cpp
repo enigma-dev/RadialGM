@@ -21,6 +21,7 @@ QSize SpriteModel::GetIconSize() { return data(index(0), Qt::SizeHintRole).toSiz
 
 int SpriteModel::rowCount(const QModelIndex& /*parent*/) const { return protobuf->size(); }
 QVariant SpriteModel::data(const QModelIndex& index, int role) const {
+  if (!index.isValid()) return QVariant();
   if (role == Qt::DecorationRole)
     return QIcon(QString::fromStdString(protobuf->Get(index.row())));
   else if (role == Qt::BackgroundColorRole) {
