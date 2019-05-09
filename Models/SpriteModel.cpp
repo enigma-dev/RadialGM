@@ -21,15 +21,13 @@ QSize SpriteModel::GetIconSize() { return data(index(0), Qt::SizeHintRole).toSiz
 
 int SpriteModel::rowCount(const QModelIndex& /*parent*/) const { return protobuf->size(); }
 QVariant SpriteModel::data(const QModelIndex& index, int role) const {
+  if (!index.isValid()) return QVariant();
   if (role == Qt::DecorationRole)
     return QIcon(QString::fromStdString(protobuf->Get(index.row())));
   else if (role == Qt::BackgroundColorRole) {
     return QVariant(QColor(Qt::yellow));
   } else if (role == Qt::SizeHintRole) {
     // Don't load image we just need size
-    if (index.row() < 0) {
-      return QSize(0, 0);
-    }
     QImageReader img(QString::fromStdString(protobuf->Get(index.row())));
     QSize actualSize = img.size();
     float aspectRatio = static_cast<float>(qMin(actualSize.width(), actualSize.height())) /
