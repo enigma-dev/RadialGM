@@ -5,6 +5,7 @@
 #include <QMimeData>
 
 #include <QDebug>
+#include <QtGlobal>
 
 SpriteModel::SpriteModel(google::protobuf::RepeatedPtrField<std::string>* protobuf, QObject* parent)
     : QAbstractListModel(parent), protobuf(protobuf), maxIconSize(128, 128), minIconSize(16, 16) {}
@@ -21,7 +22,11 @@ QSize SpriteModel::GetIconSize() { return data(index(0), Qt::SizeHintRole).toSiz
 
 int SpriteModel::rowCount(const QModelIndex& /*parent*/) const { return protobuf->size(); }
 QVariant SpriteModel::data(const QModelIndex& index, int role) const {
-  if (!index.isValid()) return QVariant();
+  if (!index.isValid()) {
+    qWarning() << index << "provided to SpriteModel::data for role" << role << "is invalid.";
+    return QVariant();
+  }
+
   if (role == Qt::DecorationRole)
     return QIcon(QString::fromStdString(protobuf->Get(index.row())));
   else if (role == Qt::BackgroundColorRole) {
@@ -50,6 +55,12 @@ QVariant SpriteModel::data(const QModelIndex& index, int role) const {
 }
 
 bool SpriteModel::setData(const QModelIndex& index, const QVariant& value, int role) {
+  if (!index.isValid()) {
+    qWarning() << index << "provided to SpriteModel::setData for role" << role << "with value" << value
+               << "is invalid.";
+    return false;
+  }
+
   if (role == Qt::UserRole) {
     qDebug() << "setData()";
     qDebug() << value.toString();

@@ -4,6 +4,9 @@
 #include "ProtoModel.h"
 #include "ResourceModelMap.h"
 
+#include <QDebug>
+#include <QtGlobal>
+
 RepeatedProtoModel::RepeatedProtoModel(Message *protobuf, const FieldDescriptor *field, ProtoModel *parent)
     : QAbstractItemModel(parent), protobuf(protobuf), field(field) {}
 
@@ -26,6 +29,11 @@ QVariant RepeatedProtoModel::data(int row, int column) const {
 }
 
 QVariant RepeatedProtoModel::data(const QModelIndex &index, int role) const {
+  if (!index.isValid()) {
+    qWarning() << index << "provided to ProtoModel::data for role" << role << "is invalid.";
+    return QVariant();
+  }
+
   ProtoModel *m = static_cast<ProtoModel *>(QObject::parent())->GetSubModel(field->number(), index.row());
   QVariant data = m->data(index.column());
   if (role == Qt::DecorationRole && field->name() == "instances" &&

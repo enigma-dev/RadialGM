@@ -3,6 +3,9 @@
 
 #include <iostream>
 
+#include <QDebug>
+#include <QtGlobal>
+
 using namespace google::protobuf;
 using CppType = FieldDescriptor::CppType;
 
@@ -78,6 +81,10 @@ bool ProtoModel::IsDirty() { return dirty; }
 int ProtoModel::columnCount(const QModelIndex & /*parent*/) const { return 1; }
 
 bool ProtoModel::setData(const QModelIndex &index, const QVariant &value, int role) {
+  if (!index.isValid()) {
+    qWarning() << index << "provided to ProtoModel::setData for role" << role << "with value" << value << "is invalid.";
+    return false;
+  }
   const Descriptor *desc = protobuf->GetDescriptor();
   const Reflection *refl = protobuf->GetReflection();
   const FieldDescriptor *field = desc->FindFieldByNumber(index.row());
@@ -128,6 +135,10 @@ QVariant ProtoModel::data(int row, int column) const {
 }
 
 QVariant ProtoModel::data(const QModelIndex &index, int role) const {
+  if (!index.isValid()) {
+    qWarning() << index << "provided to ProtoModel::data for role" << role << "is invalid.";
+    return QVariant();
+  }
   if (role != Qt::DisplayRole && role != Qt::EditRole) return QVariant();
 
   const Descriptor *desc = protobuf->GetDescriptor();
