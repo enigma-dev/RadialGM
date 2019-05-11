@@ -92,6 +92,7 @@ set(RGM_HEADERS
     Components/RecentFiles.h
     Components/Utility.h
     Components/QMenuView.h
+    Components/Logger.h
     Widgets/BackgroundView.h
     Widgets/CodeWidget.h
     Widgets/ColorPicker.h

@@ -1,12 +1,11 @@
 #include "TreeModel.h"
 
 #include "Components/ArtManager.h"
+#include "Components/Logger.h"
 #include "Models/ResourceModelMap.h"
 
 #include <QCoreApplication>
-#include <QDebug>
 #include <QMimeData>
-#include <QtGlobal>
 
 IconMap TreeModel::iconMap;
 
@@ -39,10 +38,7 @@ void TreeModel::SetupParents(buffers::TreeNode *root) {
 int TreeModel::columnCount(const QModelIndex & /*parent*/) const { return 1; }
 
 bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int role) {
-  if (!index.isValid()) {
-    qWarning() << index << "provided to TreeModel::setData for role" << role << "with value" << value << "is invalid.";
-    return false;
-  }
+  R_EXPECT(index.isValid(), false) << "Supplied index was invalid:" << index;
   if (role != Qt::EditRole) return false;
 
   buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
@@ -56,10 +52,7 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
 }
 
 QVariant TreeModel::data(const QModelIndex &index, int role) const {
-  if (!index.isValid()) {
-    qWarning() << index << "provided to TreeModel::data for role" << role << "is invalid.";
-    return QVariant();
-  }
+  R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
 
   buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
   if (role == Qt::DecorationRole) {

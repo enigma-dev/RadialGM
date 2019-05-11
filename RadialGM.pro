@@ -108,6 +108,7 @@ HEADERS += \
     Widgets/AssetView.h \
     Widgets/RoomView.h \
     Models/TreeModel.h \
+    Components/Logger.h \
     Components/ArtManager.h \
     Models/ProtoModel.h \
     Models/ImmediateMapper.h \

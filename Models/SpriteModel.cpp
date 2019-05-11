@@ -1,11 +1,12 @@
 #include "SpriteModel.h"
 
+#include "Components/Logger.h"
+
 #include <QIcon>
 #include <QImageReader>
 #include <QMimeData>
 
 #include <QDebug>
-#include <QtGlobal>
 
 SpriteModel::SpriteModel(google::protobuf::RepeatedPtrField<std::string>* protobuf, QObject* parent)
     : QAbstractListModel(parent), protobuf(protobuf), maxIconSize(128, 128), minIconSize(16, 16) {}
@@ -21,11 +22,9 @@ void SpriteModel::SetMinIconSize(unsigned width, unsigned height) {
 QSize SpriteModel::GetIconSize() { return data(index(0), Qt::SizeHintRole).toSize(); }
 
 int SpriteModel::rowCount(const QModelIndex& /*parent*/) const { return protobuf->size(); }
+
 QVariant SpriteModel::data(const QModelIndex& index, int role) const {
-  if (!index.isValid()) {
-    qWarning() << index << "provided to SpriteModel::data for role" << role << "is invalid.";
-    return QVariant();
-  }
+  R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
 
   if (role == Qt::DecorationRole)
     return QIcon(QString::fromStdString(protobuf->Get(index.row())));
@@ -55,11 +54,7 @@ QVariant SpriteModel::data(const QModelIndex& index, int role) const {
 }
 
 bool SpriteModel::setData(const QModelIndex& index, const QVariant& value, int role) {
-  if (!index.isValid()) {
-    qWarning() << index << "provided to SpriteModel::setData for role" << role << "with value" << value
-               << "is invalid.";
-    return false;
-  }
+  R_EXPECT(index.isValid(), false) << "Supplied index was invalid:" << index;
 
   if (role == Qt::UserRole) {
     qDebug() << "setData()";
