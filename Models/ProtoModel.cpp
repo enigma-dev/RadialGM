@@ -1,6 +1,8 @@
 #include "ProtoModel.h"
 #include "RepeatedProtoModel.h"
 
+#include "Components/Logger.h"
+
 #include <iostream>
 
 using namespace google::protobuf;
@@ -78,6 +80,8 @@ bool ProtoModel::IsDirty() { return dirty; }
 int ProtoModel::columnCount(const QModelIndex & /*parent*/) const { return 1; }
 
 bool ProtoModel::setData(const QModelIndex &index, const QVariant &value, int role) {
+  R_EXPECT(index.isValid(), false) << "Supplied index was invalid:" << index;
+
   const Descriptor *desc = protobuf->GetDescriptor();
   const Reflection *refl = protobuf->GetReflection();
   const FieldDescriptor *field = desc->FindFieldByNumber(index.row());
@@ -128,6 +132,7 @@ QVariant ProtoModel::data(int row, int column) const {
 }
 
 QVariant ProtoModel::data(const QModelIndex &index, int role) const {
+  R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
   if (role != Qt::DisplayRole && role != Qt::EditRole) return QVariant();
 
   const Descriptor *desc = protobuf->GetDescriptor();

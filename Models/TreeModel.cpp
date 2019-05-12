@@ -1,6 +1,7 @@
 #include "TreeModel.h"
 
 #include "Components/ArtManager.h"
+#include "Components/Logger.h"
 #include "Models/ResourceModelMap.h"
 
 #include <QCoreApplication>
@@ -37,7 +38,9 @@ void TreeModel::SetupParents(buffers::TreeNode *root) {
 int TreeModel::columnCount(const QModelIndex & /*parent*/) const { return 1; }
 
 bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int role) {
-  if (!index.isValid() || role != Qt::EditRole) return false;
+  R_EXPECT(index.isValid(), false) << "Supplied index was invalid:" << index;
+  if (role != Qt::EditRole) return false;
+
   buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
   const QString oldName = QString::fromStdString(item->name());
   const QString newName = value.toString();
@@ -49,7 +52,7 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
 }
 
 QVariant TreeModel::data(const QModelIndex &index, int role) const {
-  if (!index.isValid()) return QVariant();
+  R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
 
   buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
   if (role == Qt::DecorationRole) {

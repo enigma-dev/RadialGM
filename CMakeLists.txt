@@ -92,6 +92,7 @@ set(RGM_HEADERS
     Components/RecentFiles.h
     Components/Utility.h
     Components/QMenuView.h
+    Components/Logger.h
     Widgets/BackgroundView.h
     Widgets/CodeWidget.h
     Widgets/ColorPicker.h
@@ -135,6 +136,9 @@ if(WIN32)
 else()
   add_executable(${EXE} ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${EDITOR_SOURCES} ${RGM_RC})
 endif(WIN32)
+
+# we do this even in release mode for "Editor Diagnostics"
+target_compile_definitions(${EXE} PUBLIC QT_MESSAGELOGCONTEXT)
 
 message(STATUS "Initial build flags:")
 set(CompilerFlags

@@ -16,6 +16,7 @@
 #include "Editors/TimelineEditor.h"
 
 #include "Components/ArtManager.h"
+#include "Components/Logger.h"
 
 #include "Plugins/RGMPlugin.h"
 #include "Plugins/ServerPlugin.h"
@@ -36,6 +37,54 @@ MainWindow *MainWindow::m_instance = nullptr;
 QScopedPointer<ResourceModelMap> MainWindow::resourceMap;
 QScopedPointer<TreeModel> MainWindow::treeModel;
 
+static QTextEdit *diagnosticTextEdit = nullptr;
+static QAction *toggleDiagnosticsAction = nullptr;
+
+void diagnosticHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
+  if (toggleDiagnosticsAction && !toggleDiagnosticsAction->isChecked()) {
+    toggleDiagnosticsAction->setIcon(QIcon(":/actions/log-debug.png"));
+    toggleDiagnosticsAction->setToolTip(
+        QT_TR_NOOP("The editor encountered issues which have been logged in the diagnostics output."));
+  } else {
+    // this should never happen!
+    // NOTE: if we used R_EXPECT_V here it would be recursive
+    std::cerr << "Critical: Diagnostics toggle button does not exist!" << std::endl;
+  }
+
+  QByteArray localMsg = msg.toLocal8Bit();
+  QString file = context.file ? context.file : "";
+  QString function = context.function ? context.function : "";
+  QString msgFormat("%1 in %3:%4 aka %5:\n\t%2");
+  QString typeName = "Unknown:";
+  switch (type) {
+    case QtDebugMsg:
+      typeName = "Debug";
+      break;
+    case QtInfoMsg:
+      typeName = "Info";
+      break;
+    case QtWarningMsg:
+      typeName = "Warning";
+      break;
+    case QtCriticalMsg:
+      typeName = "Critical";
+      break;
+    case QtFatalMsg:
+      typeName = "Fatal";
+      break;
+  }
+  QString msgFormatted = msgFormat.arg(typeName, localMsg.constData(), file, QString::number(context.line), function);
+
+  std::cerr << msgFormatted.toStdString() << std::endl;
+
+  if (diagnosticTextEdit) {
+    diagnosticTextEdit->append(msgFormatted);
+  } else {
+    // this should never happen!
+    std::cerr << "Critical: Diagnostics text control does not exist!" << std::endl;
+  }
+}
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ArtManager::Init();
 
@@ -47,7 +96,38 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
   ui->setupUi(this);
-  this->readSettings();
+
+  QToolBar *outputTB = new QToolBar(this);
+  outputTB->setIconSize(QSize(24, 24));
+  toggleDiagnosticsAction = new QAction();
+  toggleDiagnosticsAction->setCheckable(true);
+  toggleDiagnosticsAction->setIcon(QIcon(":/actions/log.png"));
+  toggleDiagnosticsAction->setToolTip(tr("Toggle Editor Diagnostics"));
+  outputTB->addAction(toggleDiagnosticsAction);
+  outputTB->addSeparator();
+  // use tool button for clear because QAction always has tooltip
+  QToolButton *clearButton = new QToolButton();
+  clearButton->setText(tr("Clear"));
+  outputTB->addWidget(clearButton);
+  QVBoxLayout *outputLayout = static_cast<QVBoxLayout *>(ui->outputDockWidgetContents->layout());
+  outputLayout->insertWidget(0, outputTB);
+
+  // install editor diagnostics handler
+  diagnosticTextEdit = ui->debugTextBrowser;
+  qInstallMessageHandler(diagnosticHandler);
+
+  connect(clearButton, &QToolButton::clicked,
+          [=]() { (toggleDiagnosticsAction->isChecked() ? ui->debugTextBrowser : ui->outputTextBrowser)->clear(); });
+  connect(toggleDiagnosticsAction, &QAction::toggled, [=](bool checked) {
+    ui->outputStackedWidget->setCurrentIndex(checked);
+
+    // reset the log icon as soon as diagnostics is viewed
+    if (checked) {
+      toggleDiagnosticsAction->setIcon(QIcon(":/actions/log.png"));
+      toggleDiagnosticsAction->setToolTip(tr("Toggle Editor Diagnostics"));
+    }
+  });
+
   this->recentFiles = new RecentFiles(this, this->ui->menuRecent, this->ui->actionClearRecentMenu);
 
   ui->mdiArea->setBackground(QImage(":/banner.png"));

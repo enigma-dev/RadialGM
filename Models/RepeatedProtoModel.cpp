@@ -1,5 +1,6 @@
 #include "RepeatedProtoModel.h"
 #include "Components/ArtManager.h"
+#include "Components/Logger.h"
 #include "MainWindow.h"
 #include "ProtoModel.h"
 #include "ResourceModelMap.h"
@@ -26,6 +27,8 @@ QVariant RepeatedProtoModel::data(int row, int column) const {
 }
 
 QVariant RepeatedProtoModel::data(const QModelIndex &index, int role) const {
+  R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
+
   ProtoModel *m = static_cast<ProtoModel *>(QObject::parent())->GetSubModel(field->number(), index.row());
   QVariant data = m->data(index.column());
   if (role == Qt::DecorationRole && field->name() == "instances" &&

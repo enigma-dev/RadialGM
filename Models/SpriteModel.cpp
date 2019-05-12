@@ -1,5 +1,7 @@
 #include "SpriteModel.h"
 
+#include "Components/Logger.h"
+
 #include <QIcon>
 #include <QImageReader>
 #include <QMimeData>
@@ -20,8 +22,10 @@ void SpriteModel::SetMinIconSize(unsigned width, unsigned height) {
 QSize SpriteModel::GetIconSize() { return data(index(0), Qt::SizeHintRole).toSize(); }
 
 int SpriteModel::rowCount(const QModelIndex& /*parent*/) const { return protobuf->size(); }
+
 QVariant SpriteModel::data(const QModelIndex& index, int role) const {
-  if (!index.isValid()) return QVariant();
+  R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
+
   if (role == Qt::DecorationRole)
     return QIcon(QString::fromStdString(protobuf->Get(index.row())));
   else if (role == Qt::BackgroundColorRole) {
@@ -50,6 +54,8 @@ QVariant SpriteModel::data(const QModelIndex& index, int role) const {
 }
 
 bool SpriteModel::setData(const QModelIndex& index, const QVariant& value, int role) {
+  R_EXPECT(index.isValid(), false) << "Supplied index was invalid:" << index;
+
   if (role == Qt::UserRole) {
     qDebug() << "setData()";
     qDebug() << value.toString();
