@@ -9,7 +9,7 @@ class LogAndReturn {
 
  public:
   LogAndReturn(QtMsgType msgType) : logger(msgType) {}
-  LogAndReturn(const QDebug& log) : logger(log) {}
+  LogAndReturn(const QDebug&& log) : logger(log) {}
 
   template <typename T>
   LogAndReturn& operator<<(T t) {
