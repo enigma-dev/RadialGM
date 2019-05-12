@@ -288,6 +288,10 @@
    <addaction name="actionDocumentation"/>
   </widget>
   <widget class="QDockWidget" name="outputDockWidget">
+   <property name="windowIcon">
+    <iconset resource="images.qrc">
+     <normaloff>:/actions/debug.png</normaloff>:/actions/debug.png</iconset>
+   </property>
    <property name="floating">
     <bool>false</bool>
    </property>
@@ -321,7 +325,52 @@
       <number>2</number>
      </property>
      <item>
-      <widget class="QTextBrowser" name="outputTextBrowser"/>
+      <widget class="QStackedWidget" name="outputStackedWidget">
+       <widget class="QWidget" name="outputTextPage">
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QTextBrowser" name="outputTextBrowser"/>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="debugTextPage">
+        <layout class="QVBoxLayout" name="verticalLayout_5">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QTextBrowser" name="debugTextBrowser"/>
+         </item>
+        </layout>
+       </widget>
+      </widget>
      </item>
     </layout>
    </widget>

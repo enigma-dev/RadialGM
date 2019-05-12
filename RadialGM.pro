@@ -30,6 +30,9 @@ rgm_disable_syntaxhighlight {
   CONFIG += qscintilla2
 }
 
+# we do this even in release mode for "Editor Diagnostics"
+DEFINES += QT_MESSAGELOGCONTEXT
+
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
