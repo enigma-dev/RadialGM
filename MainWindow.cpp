@@ -295,13 +295,11 @@ void MainWindow::openNewProject() {
   MainWindow::setWindowTitle(tr("<new game> - ENIGMA"));
   auto newProject = std::unique_ptr<buffers::Project>(new buffers::Project());
   auto *root = newProject->mutable_game()->mutable_root();
-  QList<QString> defaultGroups = {tr("Sprites"), tr("Sounds"),  tr("Backgrounds"), tr("Paths"),
-                                  tr("Scripts"), tr("Shaders"), tr("Fonts"),       tr("Timelines"),
-                                  tr("Objects"), tr("Rooms"),   tr("Includes"),    tr("Configs")};
-  for (auto groupName : defaultGroups) {
+
+  for (auto& groupName : defaultGroupNames) {
     auto *groupNode = root->add_child();
     groupNode->set_folder(true);
-    groupNode->set_name(groupName.toStdString());
+    groupNode->set_name(groupName.toString().toStdString());
   }
   openProject(std::move(newProject));
 }
@@ -316,8 +314,23 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   treeModel.reset(new TreeModel(project->mutable_game()->mutable_root(), resourceMap.get(), nullptr));
 
   ui->treeView->setModel(treeModel.get());
+
   treeModel->connect(treeModel.get(), &TreeModel::ResourceRenamed, resourceMap.get(),
                      &ResourceModelMap::ResourceRenamed);
+
+  nodeResource.clear();
+  const QTreeView *treeUi = ui->treeView;
+  QModelIndex node = treeUi->indexAt(QPoint());
+  QVariant nodeString;
+  int stringIndex;
+  while (node.isValid()) {
+        nodeString = node.data();
+        stringIndex = defaultGroupNames.indexOf(nodeString);
+        if (stringIndex != -1) {
+          nodeResource[node] = defaultGroupTypes.at(stringIndex);
+        }
+        node = treeUi->indexBelow(node);
+  }
 }
 
 void MainWindow::on_actionNew_triggered() { openNewProject(); }
@@ -433,11 +446,31 @@ void MainWindow::CreateResource(TypeCase typeCase) {
   // find a unique name for the new resource
   const QString name = resourceMap->CreateResourceName(child.get());
   child->set_name(name.toStdString());
+
   // open the new resource for editing
   this->resourceMap->AddResource(child.get(), resourceMap.get());
   openSubWindow(child.get());
+
+  // check if currently in resource folder, if not then set index to resource folder base node
+  QModelIndex currentIndex = ui->treeView->currentIndex();
+   if (!currentIndex.isValid()) {
+      QList<QModelIndex> keys = nodeResource.keys(typeCase);
+      if (keys.isEmpty()) {
+          currentIndex = ui->treeView->rootIndex();
+      }
+      else {
+          currentIndex = keys.constLast();
+      }
+  }
+  else if (nodeResource.value(currentIndex, TypeCase::TYPE_NOT_SET) != typeCase && nodeResource.value(currentIndex.parent(), TypeCase::TYPE_NOT_SET) != typeCase) {
+      QList<QModelIndex> keys = nodeResource.keys(typeCase);
+      if (!keys.isEmpty()) {
+          currentIndex = keys.constLast();
+      }
+  }
+
   // release ownership of the new child to its parent and the tree
-  auto index = this->treeModel->addNode(child.release(), ui->treeView->currentIndex());
+  auto index = this->treeModel->addNode(child.release(), currentIndex);
 
   // select the new node so that it gets "revealed" and its parent is expanded
   ui->treeView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
@@ -496,6 +529,8 @@ void MainWindow::on_actionCreateGroup_triggered() {
   // release ownership of the new child to its parent and the tree
   this->resourceMap->AddResource(child.get(), resourceMap.get());
   auto index = this->treeModel->addNode(child.release(), ui->treeView->currentIndex());
+
+  nodeResource[index] = nodeResource.value(index.parent(), TypeCase::TYPE_NOT_SET);
 
   // select the new node so that it gets "revealed" and its parent is expanded
   ui->treeView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);

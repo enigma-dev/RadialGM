@@ -139,3 +139,9 @@ void RoomEditor::on_actionZoomIn_triggered() { ui->roomView->SetZoom(ui->roomVie
 void RoomEditor::on_actionZoomOut_triggered() { ui->roomView->SetZoom(ui->roomView->GetZoom() / 2); }
 
 void RoomEditor::on_actionZoom_triggered() { ui->roomView->SetZoom(1.0); }
+
+void RoomEditor::on_actionSave_triggered()
+{
+    QWidget *parent = parentWidget();
+    parent->close();  //pass just save in future
+}

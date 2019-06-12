@@ -29,8 +29,9 @@ class RoomEditor : public BaseEditor {
   void on_actionZoomOut_triggered();
   void on_actionZoom_triggered();
   void updateCursorPositionLabel(const QPoint& pos);
+  void on_actionSave_triggered();
 
- private:
+private:
   Ui::RoomEditor* ui;
   QLabel *cursorPositionLabel, *assetNameLabel;
 

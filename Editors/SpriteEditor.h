@@ -17,7 +17,11 @@ class SpriteEditor : public BaseEditor {
   ~SpriteEditor();
   void LoadedMismatchedImage(QSize expectedSize, QSize actualSize);
 
- private:
+private slots:
+  void on_actionSave_triggered();
+
+
+private:
   Ui::SpriteEditor* ui;
   SpriteModel* spriteModel;
 };

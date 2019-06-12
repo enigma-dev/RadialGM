@@ -14,7 +14,11 @@ class ObjectEditor : public BaseEditor {
   explicit ObjectEditor(ProtoModel* model, QWidget* parent);
   ~ObjectEditor();
 
- private:
+private slots:
+    void on_saveButton_released();
+
+
+private:
   Ui::ObjectEditor* ui;
 };
 

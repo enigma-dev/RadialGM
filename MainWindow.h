@@ -11,7 +11,7 @@ class MainWindow;
 #include "project.pb.h"
 #include "server.pb.h"
 
-#include <QList>
+#include <QMap>
 #include <QMainWindow>
 #include <QMdiSubWindow>
 #include <QPointer>
@@ -99,7 +99,37 @@ class MainWindow : public QMainWindow {
  private:
   static MainWindow *m_instance;
 
+    // Coffee : set nodeResource as pointer. Clear when opening new file!
+  QMap<QModelIndex, TypeCase> nodeResource;
   QHash<buffers::TreeNode *, QMdiSubWindow *> subWindows;
+  const QList<QVariant> defaultGroupNames = {
+    tr("Sprites"),
+    tr("Sounds"),
+    tr("Backgrounds"),
+    tr("Paths"),
+    tr("Scripts"),
+    tr("Shaders"),
+    tr("Fonts"),
+    tr("Time Lines"),
+    tr("Objects"),
+    tr("Rooms"),
+    tr("Includes"),
+    tr("Configs")
+  };
+  const QList<TypeCase> defaultGroupTypes = {
+    TypeCase::kSprite,
+    TypeCase::kSound,
+    TypeCase::kBackground,
+    TypeCase::kPath,
+    TypeCase::kScript,
+    TypeCase::kShader,
+    TypeCase::kFont,
+    TypeCase::kTimeline,
+    TypeCase::kObject,
+    TypeCase::kRoom,
+    TypeCase::kInclude,
+    TypeCase::kSettings
+  };
 
   Ui::MainWindow *ui;
 

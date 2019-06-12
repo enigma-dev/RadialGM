@@ -20,3 +20,9 @@ SpriteEditor::~SpriteEditor() { delete ui; }
 void SpriteEditor::LoadedMismatchedImage(QSize /*expectedSize*/, QSize /*actualSize*/) {
   QMessageBox::critical(this, tr("Failed to load image"), tr("Error mismatched size"), QMessageBox::Ok);
 }
+
+void SpriteEditor::on_actionSave_triggered()
+{
+    QWidget *parent = parentWidget();
+    parent->close(); //pass just save in future
+}
