@@ -33,6 +33,7 @@
 #undef GetMessage
 
 QList<buffers::SystemType> MainWindow::systemCache;
+QMap<QModelIndex, TypeCase> MainWindow::nodeResource;
 MainWindow *MainWindow::m_instance = nullptr;
 QScopedPointer<ResourceModelMap> MainWindow::resourceMap;
 QScopedPointer<TreeModel> MainWindow::treeModel;

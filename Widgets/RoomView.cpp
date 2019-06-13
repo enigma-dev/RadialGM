@@ -50,7 +50,11 @@ void RoomView::paintTiles(QPainter& painter, Room* room) {
     int h = static_cast<int>(tile.height());
 
     QString imgFile = bkg->data(Background::kImageFieldNumber).toString();
-    QPixmap pixmap = ArtManager::GetCachedPixmap(imgFile);
+    if (bkg == nullptr) {
+      continue;
+    }
+    QPixmap pixmap;
+    ArtManager::GetCachedPixmap(imgFile, pixmap);
     if (pixmap.isNull()) continue;
 
     QRectF dest(tile.x(), tile.y(), w, h);
@@ -66,6 +70,9 @@ void RoomView::paintBackgrounds(QPainter& painter, Room* room, bool foregrounds)
   for (auto bkg : room->backgrounds()) {  //TODO: need to draw last if foreground
     if (!bkg.visible() || bkg.foreground() != foregrounds) continue;
     ProtoModel* bkgRes = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, bkg.background_name());
+    if (bkgRes == nullptr) {
+      continue;
+    }
     if (!bkgRes) continue;
     bkgRes = bkgRes->GetSubModel(TreeNode::kBackgroundFieldNumber);
     if (!bkgRes) continue;
@@ -73,7 +80,8 @@ void RoomView::paintBackgrounds(QPainter& painter, Room* room, bool foregrounds)
     int h = bkgRes->data(Background::kHeightFieldNumber).toInt();
 
     QString imgFile = bkgRes->data(Background::kImageFieldNumber).toString();
-    QPixmap pixmap = ArtManager::GetCachedPixmap(imgFile);
+    QPixmap pixmap;
+    ArtManager::GetCachedPixmap(imgFile, pixmap);
     if (pixmap.isNull()) continue;
 
     QRectF dest(bkg.x(), bkg.y(), w, h);
@@ -118,8 +126,9 @@ void RoomView::paintInstances(QPainter& painter, Room* room) {
     int yoff = 0;
 
     const ProtoModel* spr = GetObjectSprite(inst.object_type());
-    if (spr == nullptr)
+    if (spr == nullptr) {
       imgFile = "object";
+    }
     else {
       imgFile = spr->GetString(Sprite::kSubimagesFieldNumber, 0);
       w = spr->data(Sprite::kWidthFieldNumber).toInt();
@@ -128,7 +137,8 @@ void RoomView::paintInstances(QPainter& painter, Room* room) {
       yoff = spr->data(Sprite::kOriginYFieldNumber).toInt();
     }
 
-    QPixmap pixmap = ArtManager::GetCachedPixmap(imgFile);
+    QPixmap pixmap;
+    ArtManager::GetCachedPixmap(imgFile, pixmap);
     if (pixmap.isNull()) continue;
 
     QRectF dest(inst.x(), inst.y(), w, h);

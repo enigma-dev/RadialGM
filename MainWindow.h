@@ -25,6 +25,7 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
  public:
+  static QMap<QModelIndex, TypeCase> nodeResource;
   static QScopedPointer<ResourceModelMap> resourceMap;
   static QScopedPointer<TreeModel> treeModel;
   static QList<buffers::SystemType> systemCache;
@@ -100,7 +101,6 @@ class MainWindow : public QMainWindow {
   static MainWindow *m_instance;
 
     // Coffee : set nodeResource as pointer. Clear when opening new file!
-  QMap<QModelIndex, TypeCase> nodeResource;
   QHash<buffers::TreeNode *, QMdiSubWindow *> subWindows;
   const QList<QVariant> defaultGroupNames = {
     tr("Sprites"),
