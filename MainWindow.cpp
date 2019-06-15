@@ -29,11 +29,12 @@
 
 #include <functional>
 #include <unordered_map>
+#include <QtGlobal>
 
 #undef GetMessage
 
 QList<buffers::SystemType> MainWindow::systemCache;
-QMap<QModelIndex, TypeCase> MainWindow::nodeResource;
+QMap<QPersistentModelIndex, TypeCase> MainWindow::nodeResource;
 MainWindow *MainWindow::m_instance = nullptr;
 QScopedPointer<ResourceModelMap> MainWindow::resourceMap;
 QScopedPointer<TreeModel> MainWindow::treeModel;
@@ -84,6 +85,14 @@ void diagnosticHandler(QtMsgType type, const QMessageLogContext &context, const 
     // this should never happen!
     std::cerr << "Critical: Diagnostics text control does not exist!" << std::endl;
   }
+}
+
+void MainWindow::nameMap(const char *name, TypeCase type)
+{
+   QVariant nameVar = tr(name);
+//   defaultGroupNames.emplace_back(nameVar, type);
+   indexVector.push_back( {nameVar, type} );
+   nameIndexMap[nameVar] = indexVector.size() - 1;
 }
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -152,6 +161,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->actionRun, &QAction::triggered, pluginServer, &RGMPlugin::Run);
   connect(ui->actionDebug, &QAction::triggered, pluginServer, &RGMPlugin::Debug);
   connect(ui->actionCreateExecutable, &QAction::triggered, pluginServer, &RGMPlugin::CreateExecutable);
+
+  // set name maps
+  nameMap("Sprites", TypeCase::kSprite); nameMap("Sounds", TypeCase::kSound);    nameMap("Backgrounds", TypeCase::kBackground);
+  nameMap("Paths", TypeCase::kPath);     nameMap("Scripts", TypeCase::kScript);  nameMap("Shaders", TypeCase::kShader);
+  nameMap("Fonts", TypeCase::kFont); nameMap("Time Lines", TypeCase::kTimeline); nameMap("Objects", TypeCase::kObject);
+  nameMap("Rooms", TypeCase::kRoom);    nameMap("Includes", TypeCase::kInclude); nameMap("Configs", TypeCase::kSettings);
 
   openNewProject();
 }
@@ -297,10 +312,10 @@ void MainWindow::openNewProject() {
   auto newProject = std::unique_ptr<buffers::Project>(new buffers::Project());
   auto *root = newProject->mutable_game()->mutable_root();
 
-  for (auto& groupName : defaultGroupNames) {
+  for (auto& groupName : indexVector) {
     auto *groupNode = root->add_child();
     groupNode->set_folder(true);
-    groupNode->set_name(groupName.toString().toStdString());
+    groupNode->set_name(groupName.name.toString().toStdString());
   }
   openProject(std::move(newProject));
 }
@@ -321,14 +336,16 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
 
   nodeResource.clear();
   const QTreeView *treeUi = ui->treeView;
+  treeModel.get();
   QModelIndex node = treeUi->indexAt(QPoint());
   QVariant nodeString;
-  int stringIndex;
+  int index;
   while (node.isValid()) {
         nodeString = node.data();
-        stringIndex = defaultGroupNames.indexOf(nodeString);
-        if (stringIndex != -1) {
-          nodeResource[node] = defaultGroupTypes.at(stringIndex);
+        index = nameIndexMap.value(nodeString, -1);
+
+        if (index != -1) {
+            nodeResource[QPersistentModelIndex(node)] = indexVector[index].type;
         }
         node = treeUi->indexBelow(node);
   }
@@ -454,17 +471,17 @@ void MainWindow::CreateResource(TypeCase typeCase) {
 
   // check if currently in resource folder, if not then set index to resource folder base node
   QModelIndex currentIndex = ui->treeView->currentIndex();
-   if (!currentIndex.isValid()) {
-      QList<QModelIndex> keys = nodeResource.keys(typeCase);
+  if (!currentIndex.isValid()) {
+      QList<QPersistentModelIndex> keys = nodeResource.keys(typeCase);
       if (keys.isEmpty()) {
-          currentIndex = ui->treeView->rootIndex();
+          currentIndex = ui->treeView->rootIndex();  // oldest node mapped to that TypeCase
       }
       else {
           currentIndex = keys.constLast();
       }
   }
   else if (nodeResource.value(currentIndex, TypeCase::TYPE_NOT_SET) != typeCase && nodeResource.value(currentIndex.parent(), TypeCase::TYPE_NOT_SET) != typeCase) {
-      QList<QModelIndex> keys = nodeResource.keys(typeCase);
+      QList<QPersistentModelIndex> keys = nodeResource.keys(typeCase);
       if (!keys.isEmpty()) {
           currentIndex = keys.constLast();
       }
@@ -531,8 +548,10 @@ void MainWindow::on_actionCreateGroup_triggered() {
   this->resourceMap->AddResource(child.get(), resourceMap.get());
   auto index = this->treeModel->addNode(child.release(), ui->treeView->currentIndex());
 
-  nodeResource[index] = nodeResource.value(index.parent(), TypeCase::TYPE_NOT_SET);
-
+  TypeCase parentType = nodeResource.value(index.parent(), TypeCase::TYPE_NOT_SET);
+  if (parentType != TypeCase::TYPE_NOT_SET) {
+      nodeResource[QPersistentModelIndex(index)] = parentType;
+  }
   // select the new node so that it gets "revealed" and its parent is expanded
   ui->treeView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
   // start editing the name of the resource in the tree for convenience

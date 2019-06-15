@@ -25,7 +25,7 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
  public:
-  static QMap<QModelIndex, TypeCase> nodeResource;
+  static QMap<QPersistentModelIndex, TypeCase> nodeResource;
   static QScopedPointer<ResourceModelMap> resourceMap;
   static QScopedPointer<TreeModel> treeModel;
   static QList<buffers::SystemType> systemCache;
@@ -100,36 +100,7 @@ class MainWindow : public QMainWindow {
  private:
   static MainWindow *m_instance;
 
-    // Coffee : set nodeResource as pointer. Clear when opening new file!
   QHash<buffers::TreeNode *, QMdiSubWindow *> subWindows;
-  const QList<QVariant> defaultGroupNames = {
-    tr("Sprites"),
-    tr("Sounds"),
-    tr("Backgrounds"),
-    tr("Paths"),
-    tr("Scripts"),
-    tr("Shaders"),
-    tr("Fonts"),
-    tr("Time Lines"),
-    tr("Objects"),
-    tr("Rooms"),
-    tr("Includes"),
-    tr("Configs")
-  };
-  const QList<TypeCase> defaultGroupTypes = {
-    TypeCase::kSprite,
-    TypeCase::kSound,
-    TypeCase::kBackground,
-    TypeCase::kPath,
-    TypeCase::kScript,
-    TypeCase::kShader,
-    TypeCase::kFont,
-    TypeCase::kTimeline,
-    TypeCase::kObject,
-    TypeCase::kRoom,
-    TypeCase::kInclude,
-    TypeCase::kSettings
-  };
 
   Ui::MainWindow *ui;
 
@@ -140,6 +111,13 @@ class MainWindow : public QMainWindow {
   void readSettings();
   void writeSettings();
   void setTabbedMode(bool enabled);
+  void nameMap(const char *name, TypeCase type);
+  struct indexStruct {
+     QVariant name;
+     TypeCase type;
+  };
+  QVector<indexStruct> indexVector;
+  QMap<QVariant, int> nameIndexMap;
 };
 
 #endif  // MAINWINDOW_H
