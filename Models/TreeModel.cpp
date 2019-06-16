@@ -241,15 +241,20 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
       // offset the row we are removing by the number of
       // rows already removed from the same parent
       if (parentNode != oldParent || row > itemRow) {
-        itemRow -= removedCount[oldParent]++;
+        itemRow -= removedCount[oldParent];
       }
+
+      auto index = this->createIndex(itemRow, 0, node);
+      bool canDo = beginMoveRows(index.parent(), itemRow, itemRow, parent, row);
+      if (!canDo) continue;
+
+      // count this row as having been moved from this parent
+      if (parentNode != oldParent || row > itemRow) removedCount[oldParent]++;
 
       // if moving the node within the same parent we need to adjust the row
       // since its own removal will affect the row we reinsert it at
       if (parentNode == oldParent && row > itemRow) --row;
 
-      auto index = this->createIndex(itemRow, 0, node);
-      beginMoveRows(index.parent(), itemRow, itemRow, parent, row);
       auto oldRepeated = oldParent->mutable_child();
       oldRepeated->ExtractSubrange(itemRow, 1, nullptr);
       RepeatedFieldInsert<buffers::TreeNode>(parentNode->mutable_child(), node, row);
