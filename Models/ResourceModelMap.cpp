@@ -33,7 +33,8 @@ QString ResourceModelMap::CreateResourceName(TreeNode* node) {
   auto fieldNum = ResTypeFields[node->type_case()];
   const Descriptor* desc = node->GetDescriptor();
   const FieldDescriptor* field = desc->FindFieldByNumber(fieldNum);
-  return CreateResourceName(node->type_case(), QString::fromStdString(field->name()));
+  const QString fieldName = node->folder() ? "group" : QString::fromStdString(field->name());
+  return CreateResourceName(node->type_case(), fieldName);
 }
 
 QString ResourceModelMap::CreateResourceName(int type, const QString& typeName) {

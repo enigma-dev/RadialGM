@@ -249,16 +249,18 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
       if (parentNode == oldParent && row > itemRow) --row;
 
       auto index = this->createIndex(itemRow, 0, node);
-      beginRemoveRows(index.parent(), itemRow, itemRow);
+      beginMoveRows(index.parent(), itemRow, itemRow, parent, row);
       auto oldRepeated = oldParent->mutable_child();
       oldRepeated->ExtractSubrange(itemRow, 1, nullptr);
-      parents.remove(node);
-      endRemoveRows();
+      RepeatedFieldInsert<buffers::TreeNode>(parentNode->mutable_child(), node, row);
+      parents[node] = parentNode;
+      endMoveRows();
+      ++row;
     } else {
+      if (node->folder()) continue;
       node = duplicateNode(*node);
+      insert(parent, row++, node);
     }
-
-    insert(parent, row++, node);
   }
 
   return true;
