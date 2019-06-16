@@ -257,6 +257,7 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
       endMoveRows();
       ++row;
     } else {
+      if (node->folder()) continue;
       node = duplicateNode(*node);
       insert(parent, row++, node);
     }
