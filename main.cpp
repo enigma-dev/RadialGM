@@ -11,9 +11,7 @@
 QString defaultStyle = "";
 
 int main(int argc, char *argv[]) {
-  if (true) {
-    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);  //For correct high Dpi Scaling
-  }
+  QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);  //For correct high Dpi Scaling
   QApplication a(argc, argv);
   a.setOrganizationName("ENIGMA Dev Team");
   a.setOrganizationDomain("enigma-dev.org");

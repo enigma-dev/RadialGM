@@ -309,7 +309,6 @@ buffers::TreeNode *TreeModel::duplicateNode(const buffers::TreeNode &node) {
 
 void TreeModel::removeNode(const QModelIndex &index) {
   if (!index.isValid()) return;
-  MainWindow::nodeResource.remove(index);
   auto *node = static_cast<buffers::TreeNode *>(index.internalPointer());
   if (!node) return;
   if (node->has_folder()) {

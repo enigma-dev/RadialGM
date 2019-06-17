@@ -184,7 +184,7 @@
      <addaction name="actionChange_to_Script"/>
      <addaction name="actionChange_to_Shader"/>
      <addaction name="actionChange_to_Font"/>
-     <addaction name="actionChange_to_Time_Line"/>
+     <addaction name="actionChange_to_Timeline"/>
      <addaction name="actionChange_to_Object"/>
      <addaction name="actionChange_to_Room"/>
      <addaction name="actionChange_to_Include"/>
@@ -844,7 +844,10 @@
      <normaloff>:/resources/timeline.png</normaloff>:/resources/timeline.png</iconset>
    </property>
    <property name="text">
-    <string>Create Time Line</string>
+    <string>Create Timeline</string>
+   </property>
+   <property name="toolTip">
+    <string>Create Timeliine</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+T</string>
@@ -1037,9 +1040,12 @@
     <string>Change to Font</string>
    </property>
   </action>
-  <action name="actionChange_to_Time_Line">
+  <action name="actionChange_to_Timeline">
    <property name="text">
-    <string>Change to Time Line</string>
+    <string>Change to Timeline</string>
+   </property>
+   <property name="toolTip">
+    <string>Change to Timeline</string>
    </property>
   </action>
   <action name="actionChange_to_Object">

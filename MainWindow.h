@@ -85,7 +85,7 @@ class MainWindow : public QMainWindow {
   void on_actionChange_to_Script_triggered();
   void on_actionChange_to_Shader_triggered();
   void on_actionChange_to_Font_triggered();
-  void on_actionChange_to_Time_Line_triggered();
+  void on_actionChange_to_Timeline_triggered();
   void on_actionChange_to_Object_triggered();
   void on_actionChange_to_Room_triggered();
   void on_actionChange_to_Include_triggered();

@@ -50,9 +50,7 @@ void RoomView::paintTiles(QPainter& painter, Room* room) {
     int h = static_cast<int>(tile.height());
 
     QString imgFile = bkg->data(Background::kImageFieldNumber).toString();
-    if (bkg == nullptr) {
-      continue;
-    }
+    if (bkg == nullptr) continue;
     QPixmap pixmap;
     ArtManager::GetCachedPixmap(imgFile, pixmap);
     if (pixmap.isNull()) continue;
@@ -70,9 +68,7 @@ void RoomView::paintBackgrounds(QPainter& painter, Room* room, bool foregrounds)
   for (auto bkg : room->backgrounds()) {  //TODO: need to draw last if foreground
     if (!bkg.visible() || bkg.foreground() != foregrounds) continue;
     ProtoModel* bkgRes = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, bkg.background_name());
-    if (bkgRes == nullptr) {
-      continue;
-    }
+    if (bkgRes == nullptr)  continue;
     if (!bkgRes) continue;
     bkgRes = bkgRes->GetSubModel(TreeNode::kBackgroundFieldNumber);
     if (!bkgRes) continue;

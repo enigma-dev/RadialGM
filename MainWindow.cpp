@@ -90,7 +90,6 @@ void diagnosticHandler(QtMsgType type, const QMessageLogContext &context, const 
 void MainWindow::nameMap(const char *name, TypeCase type)
 {
    QVariant nameVar = tr(name);
-//   defaultGroupNames.emplace_back(nameVar, type);
    indexVector.push_back( {nameVar, type} );
    nameIndexMap[nameVar] = indexVector.size() - 1;
 }
@@ -165,7 +164,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   // set name maps
   nameMap("Sprites", TypeCase::kSprite); nameMap("Sounds", TypeCase::kSound);    nameMap("Backgrounds", TypeCase::kBackground);
   nameMap("Paths", TypeCase::kPath);     nameMap("Scripts", TypeCase::kScript);  nameMap("Shaders", TypeCase::kShader);
-  nameMap("Fonts", TypeCase::kFont); nameMap("Time Lines", TypeCase::kTimeline); nameMap("Objects", TypeCase::kObject);
+  nameMap("Fonts", TypeCase::kFont); nameMap("Timelines", TypeCase::kTimeline); nameMap("Objects", TypeCase::kObject);
   nameMap("Rooms", TypeCase::kRoom);    nameMap("Includes", TypeCase::kInclude); nameMap("Configs", TypeCase::kSettings);
 
   openNewProject();
@@ -338,16 +337,17 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   const QTreeView *treeUi = ui->treeView;
   treeModel.get();
   QModelIndex node = treeUi->indexAt(QPoint());
-  QVariant nodeString;
-  int index;
-  while (node.isValid()) {
-        nodeString = node.data();
-        index = nameIndexMap.value(nodeString, -1);
-
-        if (index != -1) {
-            nodeResource[QPersistentModelIndex(node)] = indexVector[index].type;
-        }
-        node = treeUi->indexBelow(node);
+  if (node.isValid()) {
+    QVariant nodeString;
+    int index;
+    while (node.isValid()) {
+       nodeString = node.data();
+       if (nodeString.isValid()) {
+          index = nameIndexMap.value(nodeString, -1);
+          if (index != -1) nodeResource[QPersistentModelIndex(node)] = indexVector[index].type;
+       }
+       node = treeUi->indexBelow(node);
+    }
   }
 }
 
@@ -474,22 +474,19 @@ void MainWindow::CreateResource(TypeCase typeCase) {
   if (!currentIndex.isValid()) {
       QList<QPersistentModelIndex> keys = nodeResource.keys(typeCase);
       if (keys.isEmpty()) {
-          currentIndex = ui->treeView->rootIndex();  // oldest node mapped to that TypeCase
+          currentIndex = ui->treeView->rootIndex();
       }
       else {
           QModelIndex oldNode = keys.constLast();  // use the oldest node mapped to that TypeCase
-          if (oldNode.isValid()) {
-              currentIndex = oldNode;
-          }
+          if (oldNode.isValid()) currentIndex = oldNode;
       }
   }
   else if (nodeResource.value(currentIndex, TypeCase::TYPE_NOT_SET) != typeCase && nodeResource.value(currentIndex.parent(), TypeCase::TYPE_NOT_SET) != typeCase) {
       QList<QPersistentModelIndex> keys = nodeResource.keys(typeCase);
       if (!keys.isEmpty()) {
           QModelIndex oldNode = keys.constLast();  // use the oldest node mapped to that TypeCase
-          if (oldNode.isValid()) {
-              currentIndex = oldNode;
-          }      }
+          if (oldNode.isValid()) currentIndex = oldNode;
+      }
   }
 
   // release ownership of the new child to its parent and the tree
@@ -635,7 +632,7 @@ void MainWindow::on_actionChange_to_Path_triggered() { ChangeNodeType(TypeCase::
 void MainWindow::on_actionChange_to_Script_triggered() { ChangeNodeType(TypeCase::kScript); }
 void MainWindow::on_actionChange_to_Shader_triggered() { ChangeNodeType(TypeCase::kShader); }
 void MainWindow::on_actionChange_to_Font_triggered() { ChangeNodeType(TypeCase::kFont); }
-void MainWindow::on_actionChange_to_Time_Line_triggered() { ChangeNodeType(TypeCase::kTimeline); }
+void MainWindow::on_actionChange_to_Timeline_triggered() { ChangeNodeType(TypeCase::kTimeline); }
 void MainWindow::on_actionChange_to_Object_triggered() { ChangeNodeType(TypeCase::kObject); }
 void MainWindow::on_actionChange_to_Room_triggered() { ChangeNodeType(TypeCase::kRoom); }
 void MainWindow::on_actionChange_to_Include_triggered() { ChangeNodeType(TypeCase::kInclude); }
