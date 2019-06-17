@@ -477,14 +477,19 @@ void MainWindow::CreateResource(TypeCase typeCase) {
           currentIndex = ui->treeView->rootIndex();  // oldest node mapped to that TypeCase
       }
       else {
-          currentIndex = keys.constLast();
+          QModelIndex oldNode = keys.constLast();  // use the oldest node mapped to that TypeCase
+          if (oldNode.isValid()) {
+              currentIndex = oldNode;
+          }
       }
   }
   else if (nodeResource.value(currentIndex, TypeCase::TYPE_NOT_SET) != typeCase && nodeResource.value(currentIndex.parent(), TypeCase::TYPE_NOT_SET) != typeCase) {
       QList<QPersistentModelIndex> keys = nodeResource.keys(typeCase);
       if (!keys.isEmpty()) {
-          currentIndex = keys.constLast();
-      }
+          QModelIndex oldNode = keys.constLast();  // use the oldest node mapped to that TypeCase
+          if (oldNode.isValid()) {
+              currentIndex = oldNode;
+          }      }
   }
 
   // release ownership of the new child to its parent and the tree
@@ -497,25 +502,15 @@ void MainWindow::CreateResource(TypeCase typeCase) {
 }
 
 void MainWindow::on_actionCreateSprite_triggered() { CreateResource(TypeCase::kSprite); }
-
 void MainWindow::on_actionCreateSound_triggered() { CreateResource(TypeCase::kSound); }
-
 void MainWindow::on_actionCreateBackground_triggered() { CreateResource(TypeCase::kBackground); }
-
 void MainWindow::on_actionCreatePath_triggered() { CreateResource(TypeCase::kPath); }
-
 void MainWindow::on_actionCreateScript_triggered() { CreateResource(TypeCase::kScript); }
-
 void MainWindow::on_actionCreateShader_triggered() { CreateResource(TypeCase::kShader); }
-
 void MainWindow::on_actionCreateFont_triggered() { CreateResource(TypeCase::kFont); }
-
 void MainWindow::on_actionCreateTimeline_triggered() { CreateResource(TypeCase::kTimeline); }
-
 void MainWindow::on_actionCreateObject_triggered() { CreateResource(TypeCase::kObject); }
-
 void MainWindow::on_actionCreateRoom_triggered() { CreateResource(TypeCase::kRoom); }
-
 void MainWindow::on_actionCreateSettings_triggered() { CreateResource(TypeCase::kSettings); }
 
 void MainWindow::on_actionDuplicate_triggered() {
@@ -623,4 +618,30 @@ void MainWindow::on_actionSortByName_triggered() {
 
 void MainWindow::on_treeView_customContextMenuRequested(const QPoint &pos) {
   ui->menuEdit->exec(ui->treeView->mapToGlobal(pos));
+}
+
+void MainWindow::ChangeNodeType(TypeCase type) {
+    if (!ui->treeView->selectionModel()->hasSelection()) return;
+    if (!nodeResource.contains(ui->treeView->currentIndex())) {
+      QPersistentModelIndex(ui->treeView->currentIndex());
+    }
+    nodeResource.insert(ui->treeView->currentIndex(), type);
+}
+
+void MainWindow::on_actionChange_to_Sprite_triggered() { ChangeNodeType(TypeCase::kSprite); }
+void MainWindow::on_actionChange_to_Sound_triggered() { ChangeNodeType(TypeCase::kSound); }
+void MainWindow::on_actionChange_to_Background_triggered() { ChangeNodeType(TypeCase::kBackground); }
+void MainWindow::on_actionChange_to_Path_triggered() { ChangeNodeType(TypeCase::kPath); }
+void MainWindow::on_actionChange_to_Script_triggered() { ChangeNodeType(TypeCase::kScript); }
+void MainWindow::on_actionChange_to_Shader_triggered() { ChangeNodeType(TypeCase::kShader); }
+void MainWindow::on_actionChange_to_Font_triggered() { ChangeNodeType(TypeCase::kFont); }
+void MainWindow::on_actionChange_to_Time_Line_triggered() { ChangeNodeType(TypeCase::kTimeline); }
+void MainWindow::on_actionChange_to_Object_triggered() { ChangeNodeType(TypeCase::kObject); }
+void MainWindow::on_actionChange_to_Room_triggered() { ChangeNodeType(TypeCase::kRoom); }
+void MainWindow::on_actionChange_to_Include_triggered() { ChangeNodeType(TypeCase::kInclude); }
+void MainWindow::on_actionChange_to_Setting_triggered() { ChangeNodeType(TypeCase::kSettings); }
+
+void MainWindow::on_actionClear_All_Group_Types_triggered() {
+   nodeResource.clear();
+   //todo: clear persistent index list
 }

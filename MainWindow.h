@@ -43,6 +43,7 @@ class MainWindow : public QMainWindow {
   void openFile(QString fName);
   void openNewProject();
   void CreateResource(TypeCase typeCase);
+  void ChangeNodeType(TypeCase typeCase);
   static void setCurrentConfig(const buffers::resources::Settings &settings);
 
  private slots:
@@ -76,6 +77,21 @@ class MainWindow : public QMainWindow {
   void on_actionCreateRoom_triggered();
   void on_actionCreateSettings_triggered();
 
+  // node type menu
+  void on_actionChange_to_Sprite_triggered();
+  void on_actionChange_to_Sound_triggered();
+  void on_actionChange_to_Background_triggered();
+  void on_actionChange_to_Path_triggered();
+  void on_actionChange_to_Script_triggered();
+  void on_actionChange_to_Shader_triggered();
+  void on_actionChange_to_Font_triggered();
+  void on_actionChange_to_Time_Line_triggered();
+  void on_actionChange_to_Object_triggered();
+  void on_actionChange_to_Room_triggered();
+  void on_actionChange_to_Include_triggered();
+  void on_actionChange_to_Setting_triggered();
+  void on_actionClear_All_Group_Types_triggered();
+
   // window menu
   void on_actionCascade_triggered();
   void on_actionTile_triggered();
@@ -97,7 +113,7 @@ class MainWindow : public QMainWindow {
   void on_treeView_doubleClicked(const QModelIndex &index);
   void on_treeView_customContextMenuRequested(const QPoint &pos);
 
- private:
+private:
   static MainWindow *m_instance;
 
   QHash<buffers::TreeNode *, QMdiSubWindow *> subWindows;

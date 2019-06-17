@@ -100,7 +100,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>31</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -173,6 +173,25 @@
      <addaction name="actionCreateRoom"/>
      <addaction name="actionCreateSettings"/>
     </widget>
+    <widget class="QMenu" name="menuChange_Group_Type">
+     <property name="title">
+      <string>Change Group Type</string>
+     </property>
+     <addaction name="actionChange_to_Sprite"/>
+     <addaction name="actionChange_to_Sound"/>
+     <addaction name="actionChange_to_Background"/>
+     <addaction name="actionChange_to_Path"/>
+     <addaction name="actionChange_to_Script"/>
+     <addaction name="actionChange_to_Shader"/>
+     <addaction name="actionChange_to_Font"/>
+     <addaction name="actionChange_to_Time_Line"/>
+     <addaction name="actionChange_to_Object"/>
+     <addaction name="actionChange_to_Room"/>
+     <addaction name="actionChange_to_Include"/>
+     <addaction name="actionChange_to_Setting"/>
+     <addaction name="separator"/>
+     <addaction name="actionClear_All_Group_Types"/>
+    </widget>
     <addaction name="menuCreateResource"/>
     <addaction name="actionDuplicate"/>
     <addaction name="separator"/>
@@ -186,6 +205,8 @@
     <addaction name="actionDelete"/>
     <addaction name="separator"/>
     <addaction name="actionRename"/>
+    <addaction name="separator"/>
+    <addaction name="menuChange_Group_Type"/>
     <addaction name="separator"/>
     <addaction name="actionProperties"/>
    </widget>
@@ -823,7 +844,7 @@
      <normaloff>:/resources/timeline.png</normaloff>:/resources/timeline.png</iconset>
    </property>
    <property name="text">
-    <string>Create &amp;Timeline</string>
+    <string>Create Time Line</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+T</string>
@@ -979,6 +1000,71 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+G</string>
+   </property>
+  </action>
+  <action name="actionChange_to_Sprite">
+   <property name="text">
+    <string>Change to Sprite</string>
+   </property>
+  </action>
+  <action name="actionChange_to_Sound">
+   <property name="text">
+    <string>Change to Sound</string>
+   </property>
+  </action>
+  <action name="actionChange_to_Background">
+   <property name="text">
+    <string>Change to Background</string>
+   </property>
+  </action>
+  <action name="actionChange_to_Path">
+   <property name="text">
+    <string>Change to Path</string>
+   </property>
+  </action>
+  <action name="actionChange_to_Script">
+   <property name="text">
+    <string>Change to Script</string>
+   </property>
+  </action>
+  <action name="actionChange_to_Shader">
+   <property name="text">
+    <string>Change to Shader</string>
+   </property>
+  </action>
+  <action name="actionChange_to_Font">
+   <property name="text">
+    <string>Change to Font</string>
+   </property>
+  </action>
+  <action name="actionChange_to_Time_Line">
+   <property name="text">
+    <string>Change to Time Line</string>
+   </property>
+  </action>
+  <action name="actionChange_to_Object">
+   <property name="text">
+    <string>Change to Object</string>
+   </property>
+  </action>
+  <action name="actionChange_to_Room">
+   <property name="text">
+    <string>Change to Room</string>
+   </property>
+  </action>
+  <action name="actionChange_to_Include">
+   <property name="text">
+    <string>Change to Include</string>
+   </property>
+  </action>
+  <action name="actionChange_to_Setting">
+   <property name="text">
+    <string>Change to Setting</string>
+   </property>
+  </action>
+  <action name="actionClear_All_Group_Types">
+   <property name="text">
+    <string>Clear All Group Types</string>
    </property>
   </action>
   <actiongroup name="configActionGroup">
