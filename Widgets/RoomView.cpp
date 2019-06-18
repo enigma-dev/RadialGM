@@ -124,8 +124,7 @@ void RoomView::paintInstances(QPainter& painter, Room* room) {
     const ProtoModel* spr = GetObjectSprite(inst.object_type());
     if (spr == nullptr) {
       imgFile = "object";
-    }
-    else {
+    } else {
       imgFile = spr->GetString(Sprite::kSubimagesFieldNumber, 0);
       w = spr->data(Sprite::kWidthFieldNumber).toInt();
       h = spr->data(Sprite::kHeightFieldNumber).toInt();
