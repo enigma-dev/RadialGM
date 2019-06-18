@@ -29,7 +29,6 @@
 
 #include <functional>
 #include <unordered_map>
-#include <QtGlobal>
 
 #undef GetMessage
 
