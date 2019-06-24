@@ -11,13 +11,15 @@
 QString defaultStyle = "";
 
 int main(int argc, char *argv[]) {
+  // must enable high DPI before QApplication constructor
+  QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
   QApplication a(argc, argv);
   a.setOrganizationName("ENIGMA Dev Team");
   a.setOrganizationDomain("enigma-dev.org");
   a.setApplicationName("RadialGM");
   a.setWindowIcon(QIcon(":/icon.ico"));
   a.setAttribute(Qt::AA_DisableWindowContextHelpButton);
-  a.setAttribute(Qt::AA_EnableHighDpiScaling);
 
   defaultStyle = a.style()->objectName();
 
