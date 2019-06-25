@@ -30,7 +30,7 @@ const QIcon& ArtManager::GetIcon(const QString& name) {
 const QBrush& ArtManager::GetTransparenyBrush() { return transparenyBrush; }
 
 const QPixmap& ArtManager::GetCachedPixmap(const QString& name) {
-  QPixmap pm;
+  static QPixmap pm;
   if (!QPixmapCache::find(name, &pm)) {
     pm.load(name);
     QPixmapCache::insert(name, pm);
