@@ -39,9 +39,7 @@ bool BackgroundView::SetImage(QPixmap image) {
 }
 
 bool BackgroundView::SetImage(QString fName) {
-  QPixmap pixmap;
-  ArtManager::GetCachedPixmap(fName, pixmap);
-  if (!SetImage(pixmap)) {
+  if (!SetImage(ArtManager::GetCachedPixmap(fName))) {
     QMessageBox::critical(this, tr("Failed to load image"), tr("Error opening: ") + fName, QMessageBox::Ok);
     return false;
   }

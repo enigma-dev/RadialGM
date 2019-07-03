@@ -29,14 +29,13 @@ const QIcon& ArtManager::GetIcon(const QString& name) {
 
 const QBrush& ArtManager::GetTransparenyBrush() { return transparenyBrush; }
 
-bool ArtManager::GetCachedPixmap(const QString& name, QPixmap &pm) {
-//  QPixmap pm;
+const QPixmap& ArtManager::GetCachedPixmap(const QString& name) {
+  static QPixmap pm;
   if (!QPixmapCache::find(name, &pm)) {
-    if (!pm.load(name)) return false;
-     QPixmapCache::insert(name, pm);
+    pm.load(name);
+    QPixmapCache::insert(name, pm);
   }
-  return true;
-  //  return std::move(pm);
+  return std::move(pm);
 }
 
 void ArtManager::clearCache() { QPixmapCache::clear(); }

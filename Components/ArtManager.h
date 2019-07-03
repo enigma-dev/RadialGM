@@ -10,7 +10,7 @@ class ArtManager {
   static void Init();
   static const QIcon& GetIcon(const QString& name);
   static const QBrush& GetTransparenyBrush();
-  static bool GetCachedPixmap(const QString& name, QPixmap &pm);
+  static const QPixmap& GetCachedPixmap(const QString& name);
   static void clearCache();
 
  private:
