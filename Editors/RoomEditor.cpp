@@ -13,7 +13,6 @@
 #include <QMouseEvent>
 
 #include <algorithm>
-#include <QDebug>
 
 using View = buffers::resources::Room::View;
 
