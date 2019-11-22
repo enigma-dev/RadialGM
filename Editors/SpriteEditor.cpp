@@ -7,6 +7,8 @@
 SpriteEditor::SpriteEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, parent), ui(new Ui::SpriteEditor) {
   ui->setupUi(this);
 
+  connect(ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
+
   spriteModel =
       new SpriteModel(static_cast<buffers::resources::Sprite*>(model->GetSubModel(TreeNode::kSpriteFieldNumber)->GetBuffer())->mutable_subimages(), this);
 

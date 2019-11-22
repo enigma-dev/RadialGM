@@ -34,6 +34,8 @@ void RoomView::paintEvent(QPaintEvent* /* event */) {
   this->paintInstances(painter, room);
   this->paintBackgrounds(painter, room, true);
   this->paintGrid(painter, room);
+
+  update(); // request repaint constantly
 }
 
 void RoomView::paintTiles(QPainter& painter, Room* room) {

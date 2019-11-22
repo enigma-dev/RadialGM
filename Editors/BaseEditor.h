@@ -31,6 +31,7 @@ class BaseEditor : public QWidget {
  public slots:
   virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
                            const QVariant &oldValue = QVariant(0), const QVector<int> &roles = QVector<int>());
+  void OnSave();
 
  protected:
   ModelMapper *nodeMapper;

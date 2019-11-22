@@ -4,6 +4,8 @@
 CodeEditor::CodeEditor(ProtoModel *model, QWidget *parent) : BaseEditor(model, parent), ui(new Ui::CodeEditor) {
   ui->setupUi(this);
 
+  connect(ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
+
   cursorPositionLabel = new QLabel(ui->statusBar);
   lineCountLabel = new QLabel(ui->statusBar);
 

@@ -13,11 +13,13 @@
 #include <QMouseEvent>
 
 #include <algorithm>
+#include <QDebug>
 
 using View = buffers::resources::Room::View;
 
 RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, parent), ui(new Ui::RoomEditor) {
   ui->setupUi(this);
+  connect(ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
 
   ProtoModel* roomModel = model->GetSubModel(TreeNode::kRoomFieldNumber);
   ui->roomView->SetResourceModel(roomModel);

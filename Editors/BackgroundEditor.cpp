@@ -18,6 +18,8 @@ BackgroundEditor::BackgroundEditor(ProtoModel* model, QWidget* parent)
     : BaseEditor(model, parent), ui(new Ui::BackgroundEditor) {
   ui->setupUi(this);
 
+  connect(ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
+
   ui->backgroundView->SetResourceModel(resMapper->GetModel());
 
   resMapper->addMapping(ui->smoothCheckBox, Background::kSmoothEdgesFieldNumber);
@@ -38,11 +40,6 @@ void BackgroundEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex
                                    const QVector<int>& roles) {
   BaseEditor::dataChanged(topLeft, bottomRight, oldValue, roles);
   ui->backgroundView->update();
-}
-
-void BackgroundEditor::on_actionSave_triggered() {
-  resMapper->SetDirty(false);
-  this->parentWidget()->close();
 }
 
 void BackgroundEditor::on_actionZoomIn_triggered() {

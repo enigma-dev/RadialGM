@@ -19,7 +19,6 @@ class BackgroundEditor : public BaseEditor {
  private slots:
   void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVariant &oldValue = QVariant(0),
                    const QVector<int> &roles = QVector<int>()) override;
-  void on_actionSave_triggered();
   void on_actionZoomIn_triggered();
   void on_actionZoomOut_triggered();
   void on_actionZoom_triggered();

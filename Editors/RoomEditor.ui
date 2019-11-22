@@ -142,6 +142,15 @@
               <property name="uniformRowHeights">
                <bool>true</bool>
               </property>
+              <property name="itemsExpandable">
+               <bool>false</bool>
+              </property>
+              <property name="sortingEnabled">
+               <bool>false</bool>
+              </property>
+              <property name="expandsOnDoubleClick">
+               <bool>false</bool>
+              </property>
              </widget>
             </item>
             <item>
@@ -207,10 +216,10 @@
            <attribute name="horizontalHeaderCascadingSectionResizes">
             <bool>true</bool>
            </attribute>
-           <attribute name="horizontalHeaderDefaultSectionSize">
+           <attribute name="horizontalHeaderMinimumSectionSize">
             <number>24</number>
            </attribute>
-           <attribute name="horizontalHeaderMinimumSectionSize">
+           <attribute name="horizontalHeaderDefaultSectionSize">
             <number>24</number>
            </attribute>
            <attribute name="horizontalHeaderStretchLastSection">
@@ -219,10 +228,10 @@
            <attribute name="verticalHeaderCascadingSectionResizes">
             <bool>true</bool>
            </attribute>
-           <attribute name="verticalHeaderDefaultSectionSize">
+           <attribute name="verticalHeaderMinimumSectionSize">
             <number>24</number>
            </attribute>
-           <attribute name="verticalHeaderMinimumSectionSize">
+           <attribute name="verticalHeaderDefaultSectionSize">
             <number>24</number>
            </attribute>
           </widget>
@@ -1278,8 +1287,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>694</width>
-            <height>569</height>
+            <width>712</width>
+            <height>572</height>
            </rect>
           </property>
           <property name="autoFillBackground">
