@@ -7,6 +7,11 @@ BaseEditor::BaseEditor(ProtoModel* treeNodeModel, QWidget* parent)
     : QWidget(parent), nodeMapper(new ModelMapper(treeNodeModel, this)) {
   buffers::TreeNode* n = static_cast<buffers::TreeNode*>(treeNodeModel->GetBuffer());
   resMapper = new ModelMapper(treeNodeModel->GetSubModel(ResTypeFields[n->type_case()]), this);
+  modelBackup = resMapper->GetModel()->Copy(nullptr);
+}
+
+BaseEditor::~BaseEditor() {
+  delete modelBackup;
 }
 
 void BaseEditor::closeEvent(QCloseEvent* event) {
@@ -20,7 +25,7 @@ void BaseEditor::closeEvent(QCloseEvent* event) {
       return;
     } else if (reply == QMessageBox::No) {
       nodeMapper->clearMapping();
-      resMapper->RestoreBuffer();
+      resMapper->ReplaceBuffer(modelBackup->GetBuffer());
       resMapper->clearMapping();
     }
   }

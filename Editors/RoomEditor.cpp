@@ -71,7 +71,9 @@ RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, p
           [=](int index) { viewMapper->setCurrentIndex(index); });
 
   RepeatedProtoModel* m = roomModel->GetRepeatedSubModel(Room::kInstancesFieldNumber);
-  ui->layersAssetsView->setModel(m);
+  QSortFilterProxyModel* mp =  new QSortFilterProxyModel(this);
+  mp->setSourceModel(m);
+  ui->layersAssetsView->setModel(mp);
   connect(ui->layersAssetsView->selectionModel(), &QItemSelectionModel::selectionChanged,
           [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
             if (selected.empty()) return;

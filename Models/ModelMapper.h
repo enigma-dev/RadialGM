@@ -13,13 +13,12 @@ public:
   ModelMapper(ProtoModel *model, BaseEditor* parent);
 
   // mapper
-  void addMapping(QWidget * widget, int section);
+  void addMapping(QWidget* widget, int section);
   void clearMapping();
   void toFirst();
 
   // model
   ProtoModel* GetModel();
-  void RestoreBuffer();
   void ReplaceBuffer(google::protobuf::Message *buffer);
   void SetDirty(bool dirty);
   bool IsDirty();
@@ -37,8 +36,9 @@ public:
   Qt::ItemFlags flags(const QModelIndex &index) const;
 
 protected:
-  ProtoModel *model;
-  ImmediateDataWidgetMapper *mapper;
+  BaseEditor* parentWidget;
+  ProtoModel* model;
+  ImmediateDataWidgetMapper* mapper;
 };
 
 #endif // MODELMAPPER_H

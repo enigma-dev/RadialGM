@@ -5,6 +5,9 @@
 #include "ProtoModel.h"
 #include "ResourceModelMap.h"
 
+#include <google/protobuf/repeated_field.h>
+#include <google/protobuf/reflection.h>
+
 RepeatedProtoModel::RepeatedProtoModel(Message *protobuf, const FieldDescriptor *field, ProtoModel *parent)
     : QAbstractItemModel(parent), protobuf(protobuf), field(field) {}
 
@@ -69,4 +72,12 @@ QModelIndex RepeatedProtoModel::index(int row, int column, const QModelIndex & /
 Qt::ItemFlags RepeatedProtoModel::flags(const QModelIndex &index) const {
   if (!index.isValid()) return nullptr;
   return QAbstractItemModel::flags(index);
+}
+
+bool RepeatedProtoModel::removeRows(int row, int count, const QModelIndex &parent) {
+  const Reflection *refl = protobuf->GetReflection();
+  auto f = refl->GetMutableRepeatedFieldRef<Message>(protobuf, field);
+  f->erase(f.begin()+row, f.begin()+row+count);
+  emit dataChanged(index(0), index(rowCount()));
+  return true;
 }

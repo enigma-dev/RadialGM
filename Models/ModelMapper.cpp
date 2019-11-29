@@ -2,7 +2,7 @@
 
 #include "Editors/BaseEditor.h"
 
-ModelMapper::ModelMapper(ProtoModel *model, BaseEditor *parent) : model(model) {
+ModelMapper::ModelMapper(ProtoModel *model, BaseEditor *parent) : parentWidget(parent),  model(model) {
   mapper = new ImmediateDataWidgetMapper(parent);
   mapper->setOrientation(Qt::Vertical);
   mapper->setModel(model);
@@ -20,8 +20,6 @@ void ModelMapper::clearMapping() { mapper->clearMapping(); }
 void ModelMapper::toFirst() { mapper->toFirst(); }
 
 // model
-
-void ModelMapper::RestoreBuffer() { model->RestoreBuffer(); }
 
 void ModelMapper::ReplaceBuffer(google::protobuf::Message *buffer) { model->ReplaceBuffer(buffer); }
 

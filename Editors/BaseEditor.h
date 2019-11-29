@@ -19,6 +19,7 @@ class BaseEditor : public QWidget {
 
  public:
   explicit BaseEditor(ProtoModel *treeNodeModel, QWidget *parent);
+  ~BaseEditor();
 
   virtual void closeEvent(QCloseEvent *event);
   void ReplaceBuffer(google::protobuf::Message *buffer);
@@ -34,8 +35,9 @@ class BaseEditor : public QWidget {
   void OnSave();
 
  protected:
-  ModelMapper *nodeMapper;
-  ModelMapper *resMapper;
+  ModelMapper* nodeMapper;
+  ModelMapper* resMapper;
+  ProtoModel* modelBackup;
 };
 
 #endif  // BASEEDTIOR_H

@@ -2,6 +2,8 @@
 #include "Editors/BaseEditor.h"
 #include "MainWindow.h"
 
+#include <QDebug>
+
 ResourceModelMap::ResourceModelMap(buffers::TreeNode* root, QObject* parent) : QObject(parent) {
   recursiveBindRes(root, this);
 }
@@ -22,7 +24,7 @@ void ResourceModelMap::AddResource(buffers::TreeNode* child, QObject* parent) {
       QPair<buffers::TreeNode*, ProtoModel*>(child, child->has_folder() ? nullptr : new ProtoModel(child, parent));
 }
 
-void ResourceModelMap::RemoveResource(int type, const QString& name) {
+void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
   if (!_resources.contains(type)) return;
   if (!_resources[type].contains(name)) return;
   delete _resources[type][name].second;
@@ -58,9 +60,17 @@ ProtoModel* ResourceModelMap::GetResourceByName(int type, const std::string& nam
   return GetResourceByName(type, QString::fromStdString(name));
 }
 
+
 void ResourceModelMap::ResourceRenamed(TypeCase type, const QString& oldName, const QString& newName) {
   if (oldName == newName || !_resources[type].contains(oldName)) return;
   _resources[type][newName] = _resources[type][oldName];
+  
+  for (auto res : _resources) {
+    for (auto model : res) {
+      UpdateReferences(model.second, ResTypeAsString(type), oldName, newName);
+    }
+  }
+  
   _resources[type].remove(oldName);
 }
 

@@ -26,8 +26,8 @@ class ProtoModel : public QAbstractItemModel {
   explicit ProtoModel(google::protobuf::Message *protobuf, QObject *parent);
   ~ProtoModel();
 
+  ProtoModel* Copy(QObject *parent);
   void ReplaceBuffer(google::protobuf::Message *buffer);
-  void RestoreBuffer();
   google::protobuf::Message *GetBuffer();
   void SetDirty(bool dirty);
   bool IsDirty();
@@ -55,7 +55,9 @@ class ProtoModel : public QAbstractItemModel {
   QHash<int, RepeatedProtoModel*> repeatedModels;
   bool dirty;
   google::protobuf::Message *protobuf;
-  google::protobuf::Message *protobufBackup;
 };
+
+void UpdateReferences(ProtoModel* model, const QString& type, const QString& oldName, const QString& newName);
+QString ResTypeAsString(TypeCase type);
 
 #endif  // RESOURCEMODEL_H

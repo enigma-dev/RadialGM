@@ -6,6 +6,14 @@
 
 #include <QObject>
 #include <QWidget>
+#include <QSortFilterProxyModel>
+
+class InstanceSortFilterProxyModel :  public QSortFilterProxyModel {
+ public:
+  InstanceSortFilterProxyModel(QWidget* parent) : QSortFilterProxyModel(parent) {}
+  bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
+};
+
 
 class RoomView : public AssetView {
   Q_OBJECT
@@ -19,13 +27,16 @@ class RoomView : public AssetView {
   void paintEvent(QPaintEvent *event) override;
 
  private:
-  ProtoModel *model;
+  ProtoModel* model;
+  InstanceSortFilterProxyModel* sortedInstances;
+  QSortFilterProxyModel* sortedTiles;
+
   QPixmap transparentPixmap;
 
-  void paintTiles(QPainter &painter, Room *room);
-  void paintBackgrounds(QPainter &painter, Room *room, bool foregrounds = false);
-  void paintInstances(QPainter &painter, Room *room);
-  void paintGrid(QPainter &painter, Room *room);
+  void paintTiles(QPainter &painter);
+  void paintBackgrounds(QPainter &painter, bool foregrounds = false);
+  void paintInstances(QPainter &painter);
+  void paintGrid(QPainter &painter);
 };
 
 #endif  // ROOMVIEW_H
