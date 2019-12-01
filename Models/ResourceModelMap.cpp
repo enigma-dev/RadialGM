@@ -27,6 +27,25 @@ void ResourceModelMap::AddResource(buffers::TreeNode* child, QObject* parent) {
 void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
   if (!_resources.contains(type)) return;
   if (!_resources[type].contains(name)) return;
+
+  if (type == TypeCase::kObject) {
+    for (auto room : _resources[TypeCase::kRoom]) {
+      ProtoModel* roomModel = room.second->GetSubModel(TreeNode::kRoomFieldNumber);
+      RepeatedProtoModel* instancesModel = roomModel->GetRepeatedSubModel(Room::kInstancesFieldNumber);
+      instancesModel->beginRemoveRows(QModelIndex(), 0, instancesModel->rowCount());
+      for (int row = 0; row < instancesModel->rowCount(); ++row) {
+        if (instancesModel->data(row, Room::Instance::kObjectTypeFieldNumber).toString() == name)
+          if (instancesModel->removeRows(row, 1)) {
+            qDebug() << "remove success";
+            row++;
+          } else {
+            qDebug() << "remove fail";
+          }
+      }
+      instancesModel->endRemoveRows();
+    }
+  }
+
   delete _resources[type][name].second;
   _resources[type].remove(name);
 }

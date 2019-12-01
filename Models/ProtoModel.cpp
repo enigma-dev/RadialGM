@@ -239,7 +239,6 @@ void UpdateReferences(ProtoModel* model, const QString& type, const QString& old
       } else if (field->cpp_type() == CppType::CPPTYPE_STRING && !field->is_repeated()) {
         const QString refType = QString::fromStdString(field->options().GetExtension(buffers::resource_ref));
         if (refType == type && model->data(row, 0).toString() == oldName) {
-          //qDebug() << "renamed " << oldName << " to " << newName;
           model->setData(model->index(row, 0, QModelIndex()), newName, Qt::DisplayRole);
         }
       }

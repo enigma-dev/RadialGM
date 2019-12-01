@@ -24,11 +24,14 @@ class RepeatedProtoModel : public QAbstractItemModel {
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
   QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override;
   Qt::ItemFlags flags(const QModelIndex &index) const override;
+  void beginRemoveRows(const QModelIndex &parent, int first, int last);
+  void endRemoveRows(); 
   bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
 
  signals:
   void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVariant &oldValue = QVariant(0),
                    const QVector<int> &roles = QVector<int>());
+  void rowsAboutToBeRemoved(const QModelIndex &parent, int first, int last);
 
  protected:
   Message *protobuf;

@@ -8,6 +8,15 @@
 #include <google/protobuf/repeated_field.h>
 #include <google/protobuf/reflection.h>
 
+#include <optional>
+
+struct RowRemovalOperation {
+  RowRemovalOperation(MutableRepeatedFieldRef<Message> field_): left(0), right(0), field(field_) {}
+  int left, right;
+  MutableRepeatedFieldRef<Message> field;
+};
+std::optional<RowRemovalOperation> rmRows_;
+
 RepeatedProtoModel::RepeatedProtoModel(Message *protobuf, const FieldDescriptor *field, ProtoModel *parent)
     : QAbstractItemModel(parent), protobuf(protobuf), field(field) {}
 
@@ -74,10 +83,29 @@ Qt::ItemFlags RepeatedProtoModel::flags(const QModelIndex &index) const {
   return QAbstractItemModel::flags(index);
 }
 
-bool RepeatedProtoModel::removeRows(int row, int count, const QModelIndex &parent) {
+void RepeatedProtoModel::beginRemoveRows(const QModelIndex &parent, int first, int last) {
   const Reflection *refl = protobuf->GetReflection();
-  auto f = refl->GetMutableRepeatedFieldRef<Message>(protobuf, field);
-  f->erase(f.begin()+row, f.begin()+row+count);
-  emit dataChanged(index(0), index(rowCount()));
+  rmRows = refl->GetMutableRepeatedFieldRef<Message>(protobuf, field);
+  emit rowsAboutToBeRemoved(parent, first, last);
+}
+
+bool RepeatedProtoModel::removeRows(int row, int count, const QModelIndex &parent) {
+  if (!rmRows_) return false;
+  if (rmRows_->left < rmRows_->right) while (rmRows_->right < row) {
+    rmRows_->field.SwapElements(rmRows_->left++, rmRows_->right++);
+  }
+  rmRows_->right = row + count;
   return true;
+}
+
+void RepeatedProtoModel::endRemoveRows() {
+  if (!rmRows_) return;
+  rmRows_.reset();
+  if (rmRows_->left < rmRows_->right) {
+    while (rmRows_->right < rmRows_->field.size()) {
+      rmRows_->field.SwapElements(rmRows_->left++, rmRows_->right++);
+    }
+    while (rmRows_->left < rmRows_->field.size()) rmRows_->field.RemoveLast();
+    emit dataChanged(index(0), index(rmRows_->left));
+  }
 }
