@@ -4,6 +4,11 @@
 #include <QAbstractItemModel>
 
 #include <google/protobuf/message.h>
+#include <google/protobuf/repeated_field.h>
+#include <google/protobuf/reflection.h>
+
+#include <optional>
+#include <QDebug>
 
 using namespace google::protobuf;
 using CppType = FieldDescriptor::CppType;
@@ -24,9 +29,39 @@ class RepeatedProtoModel : public QAbstractItemModel {
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
   QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override;
   Qt::ItemFlags flags(const QModelIndex &index) const override;
-  void beginRemoveRows(const QModelIndex &parent, int first, int last);
-  void endRemoveRows(); 
-  bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+
+  class RowRemovalOperation {
+      int left = 0, right = 0;
+      MutableRepeatedFieldRef<Message> field;
+      RepeatedProtoModel *model;
+   public:
+    RowRemovalOperation(RepeatedProtoModel *m):
+        field(m->protobuf->GetReflection()
+               ->GetMutableRepeatedFieldRef<Message>(m->protobuf, m->field)),
+        model(m) {}
+    void RemoveRow(int row) { return RemoveRows(row, 1); }
+    void RemoveRows(int row, int count) {
+      model->beginRemoveRows(QModelIndex(), row, row + count - 1);
+      if (left < right) {
+          while (right < row) {
+          field.SwapElements(left++, right++);
+        }
+      } else {
+        left = row;
+      }
+      right = row + count;
+      model->endRemoveRows();
+    }
+    ~RowRemovalOperation() {
+      qDebug() << left << "," << right << "," << field.size();
+      if (left < right) {
+        qDebug() << "swap final " << field.size() - right << " rows backward";
+        while (right < field.size()) field.SwapElements(left++, right++);
+        qDebug() << "remove final " << field.size() - left << " rows";
+        while (left < field.size()) field.RemoveLast();
+      }
+    }
+  };
 
  signals:
   void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVariant &oldValue = QVariant(0),
@@ -36,6 +71,7 @@ class RepeatedProtoModel : public QAbstractItemModel {
  protected:
   Message *protobuf;
   const FieldDescriptor *field;
+
 };
 
 #endif  // REPEATEDPROTOMODEL_H

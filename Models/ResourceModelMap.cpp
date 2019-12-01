@@ -32,21 +32,15 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
     for (auto room : _resources[TypeCase::kRoom]) {
       ProtoModel* roomModel = room.second->GetSubModel(TreeNode::kRoomFieldNumber);
       RepeatedProtoModel* instancesModel = roomModel->GetRepeatedSubModel(Room::kInstancesFieldNumber);
-      instancesModel->beginRemoveRows(QModelIndex(), 0, instancesModel->rowCount());
+      RepeatedProtoModel::RowRemovalOperation remover(instancesModel);
       for (int row = 0; row < instancesModel->rowCount(); ++row) {
         if (instancesModel->data(row, Room::Instance::kObjectTypeFieldNumber).toString() == name)
-          if (instancesModel->removeRows(row, 1)) {
-            qDebug() << "remove success";
-            row++;
-          } else {
-            qDebug() << "remove fail";
-          }
+          remover.RemoveRow(row);
       }
-      instancesModel->endRemoveRows();
     }
   }
 
-  delete _resources[type][name].second;
+  delete _resources[type][name].second;  // WTF is this?
   _resources[type].remove(name);
 }
 
