@@ -21,13 +21,13 @@ class RoomView : public AssetView {
  public:
   explicit RoomView(QWidget *parent);
   QSize sizeHint() const override;
-  void SetResourceModel(ProtoModel *model);
+  void SetResourceModel(ProtoModelPtr model);
 
  protected:
   void paintEvent(QPaintEvent *event) override;
 
  private:
-  ProtoModel* model;
+  ProtoModelPtr model;
   InstanceSortFilterProxyModel* sortedInstances;
   QSortFilterProxyModel* sortedTiles;
 

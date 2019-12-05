@@ -11,8 +11,8 @@ class ResourceModelMap : public QObject {
   Q_OBJECT
  public:
   ResourceModelMap(buffers::TreeNode* root, QObject* parent);
-  ProtoModel* GetResourceByName(int type, const QString& name);
-  ProtoModel* GetResourceByName(int type, const std::string& name);
+  ProtoModelPtr GetResourceByName(int type, const QString& name);
+  ProtoModelPtr GetResourceByName(int type, const std::string& name);
   void AddResource(buffers::TreeNode* node, QObject* parent);
   void RemoveResource(TypeCase type, const QString& name);
   QString CreateResourceName(TreeNode* node);
@@ -23,10 +23,10 @@ class ResourceModelMap : public QObject {
 
  protected:
   void recursiveBindRes(buffers::TreeNode* node, QObject* parent);
-  QHash<int, QHash<QString, QPair<buffers::TreeNode*, ProtoModel*>>> _resources;
+  QHash<int, QHash<QString, QPair<buffers::TreeNode*, ProtoModelPtr>>> _resources;
 };
 
-const ProtoModel* GetObjectSprite(const std::string& objName);
-const ProtoModel* GetObjectSprite(const QString& objName);
+const ProtoModelPtr GetObjectSprite(const std::string& objName);
+const ProtoModelPtr GetObjectSprite(const QString& objName);
 
 #endif  // MODELMAP_H

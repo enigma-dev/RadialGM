@@ -14,7 +14,7 @@
 
 using buffers::resources::Background;
 
-BackgroundEditor::BackgroundEditor(ProtoModel* model, QWidget* parent)
+BackgroundEditor::BackgroundEditor(ProtoModelPtr model, QWidget* parent)
     : BaseEditor(model, parent), ui(new Ui::BackgroundEditor) {
   ui->setupUi(this);
 

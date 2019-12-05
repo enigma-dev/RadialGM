@@ -23,10 +23,10 @@ class ProtoModel : public QAbstractItemModel {
   Q_OBJECT
 
  public:
-  explicit ProtoModel(google::protobuf::Message *protobuf, QObject *parent);
+  explicit ProtoModel(google::protobuf::Message *protobuf, ProtoModelBarePtr parent);
   ~ProtoModel();
-
-  ProtoModel* Copy(QObject *parent);
+  ProtoModelBarePtr GetParentModel() const;
+  ProtoModelPtr Copy();
   void ReplaceBuffer(google::protobuf::Message *buffer);
   google::protobuf::Message *GetBuffer();
   void SetDirty(bool dirty);
@@ -36,9 +36,9 @@ class ProtoModel : public QAbstractItemModel {
   bool setData(const QModelIndex &index, const QVariant &value, int role) override;
   QVariant data(int row, int column=0) const;
   QVariant data(const QModelIndex &index, int role) const override;
-  RepeatedProtoModel* GetRepeatedSubModel(int fieldNum);
-  ProtoModel *GetSubModel(int fieldNum);
-  ProtoModel *GetSubModel(int fieldNum, int index);
+  RepeatedProtoModelPtr GetRepeatedSubModel(int fieldNum);
+  ProtoModelPtr GetSubModel(int fieldNum);
+  ProtoModelPtr GetSubModel(int fieldNum, int index);
   QString GetString(int fieldNum, int index) const;
   QModelIndex parent(const QModelIndex &index) const override;
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -50,14 +50,15 @@ class ProtoModel : public QAbstractItemModel {
                            const QVariant &oldValue = QVariant(0), const QVector<int> &roles = QVector<int>());
 
  private:
-  QHash<int, QVariant> messages;  //where QVariant is ProtoModel*
-  QHash<int, QList<QVariant>> repeatedMessages;
-  QHash<int, RepeatedProtoModel*> repeatedModels;
+  ProtoModelBarePtr parentModel;
+  QHash<int, ProtoModelPtr> subModels;
+  QHash<int, QList<QString>> repeatedStrings;
+  QHash<int, RepeatedProtoModelPtr> repeatedModels;
   bool dirty;
   google::protobuf::Message *protobuf;
 };
 
-void UpdateReferences(ProtoModel* model, const QString& type, const QString& oldName, const QString& newName);
+void UpdateReferences(ProtoModelPtr model, const QString& type, const QString& oldName, const QString& newName);
 QString ResTypeAsString(TypeCase type);
 
 #endif  // RESOURCEMODEL_H

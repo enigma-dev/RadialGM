@@ -16,11 +16,11 @@
 
 using View = buffers::resources::Room::View;
 
-RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, parent), ui(new Ui::RoomEditor) {
+RoomEditor::RoomEditor(ProtoModelPtr model, QWidget* parent) : BaseEditor(model, parent), ui(new Ui::RoomEditor) {
   ui->setupUi(this);
   connect(ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
 
-  ProtoModel* roomModel = model->GetSubModel(TreeNode::kRoomFieldNumber);
+  ProtoModelPtr roomModel = model->GetSubModel(TreeNode::kRoomFieldNumber);
   ui->roomView->SetResourceModel(roomModel);
 
   nodeMapper->addMapping(ui->roomName, TreeNode::kNameFieldNumber);
@@ -37,9 +37,9 @@ RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, p
   resMapper->addMapping(ui->clearViewportCheckBox, Room::kClearViewBackgroundFieldNumber);
   resMapper->toFirst();
 
-  RepeatedProtoModel* vm = roomModel->GetRepeatedSubModel(Room::kViewsFieldNumber);
+  RepeatedProtoModelPtr vm = roomModel->GetRepeatedSubModel(Room::kViewsFieldNumber);
   ImmediateDataWidgetMapper* viewMapper = new ImmediateDataWidgetMapper(this);
-  viewMapper->setModel(vm);
+  viewMapper->setModel(vm.get());
   viewMapper->addMapping(ui->viewVisibleCheckBox, View::kVisibleFieldNumber);
 
   viewMapper->addMapping(ui->cameraXSpinBox, View::kXviewFieldNumber);
@@ -70,29 +70,29 @@ RoomEditor::RoomEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, p
   connect(ui->currentViewComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
           [=](int index) { viewMapper->setCurrentIndex(index); });
 
-  RepeatedProtoModel* m = roomModel->GetRepeatedSubModel(Room::kInstancesFieldNumber);
+  RepeatedProtoModelPtr m = roomModel->GetRepeatedSubModel(Room::kInstancesFieldNumber);
   QSortFilterProxyModel* mp =  new QSortFilterProxyModel(this);
-  mp->setSourceModel(m);
+  mp->setSourceModel(m.get());
   ui->layersAssetsView->setModel(mp);
   connect(ui->layersAssetsView->selectionModel(), &QItemSelectionModel::selectionChanged,
           [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
             if (selected.empty()) return;
             auto selectedIndex = selected.indexes().first();
             auto currentInstanceModel =
-                roomModel->data(Room::kInstancesFieldNumber, selectedIndex.row()).value<void*>();
-            ui->layersPropertiesView->setModel(static_cast<ProtoModel*>(currentInstanceModel));
+                roomModel->GetSubModel(Room::kInstancesFieldNumber, selectedIndex.row());
+            ui->layersPropertiesView->setModel(currentInstanceModel.get());
           });
 
-  for (int c = 0; c < m->columnCount(); ++c) {
+  /*for (int c = 0; c < m->columnCount(); ++c) {
     if (c != Room::Instance::kNameFieldNumber && c != Room::Instance::kObjectTypeFieldNumber &&
         c != Room::Instance::kIdFieldNumber)
       ui->layersAssetsView->hideColumn(c);
     else
       ui->layersAssetsView->resizeColumnToContents(c);
-  }
-
-  ui->layersAssetsView->header()->swapSections(Room::Instance::kNameFieldNumber,
-                                               Room::Instance::kObjectTypeFieldNumber);
+  }*/
+  
+  //ui->layersAssetsView->header()->swapSections(Room::Instance::kNameFieldNumber,
+    //                                           Room::Instance::kObjectTypeFieldNumber);
 
   // filter the room preview scroll area to paint
   // the checkerboard transparency pattern and to

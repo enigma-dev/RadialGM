@@ -10,7 +10,7 @@ class BaseEditor;
 
 class ModelMapper {
 public:
-  ModelMapper(ProtoModel *model, BaseEditor* parent);
+  ModelMapper(ProtoModelPtr model, BaseEditor* parent);
 
   // mapper
   void addMapping(QWidget* widget, int section);
@@ -18,7 +18,7 @@ public:
   void toFirst();
 
   // model
-  ProtoModel* GetModel();
+  ProtoModelPtr GetModel();
   void ReplaceBuffer(google::protobuf::Message *buffer);
   void SetDirty(bool dirty);
   bool IsDirty();
@@ -27,8 +27,8 @@ public:
   bool setData(const QModelIndex &index, const QVariant &value, int role);
   QVariant data(int row, int column=0) const;
   QVariant data(const QModelIndex &index, int role) const;
-  RepeatedProtoModel* GetRepeatedSubModel(int fieldNum);
-  ProtoModel* GetSubModel(int fieldNum);
+  RepeatedProtoModelPtr GetRepeatedSubModel(int fieldNum);
+  ProtoModelPtr GetSubModel(int fieldNum);
   QString GetString(int fieldNum, int index);
   QModelIndex parent(const QModelIndex &index) const;
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
@@ -37,7 +37,7 @@ public:
 
 protected:
   BaseEditor* parentWidget;
-  ProtoModel* model;
+  ProtoModelPtr model;
   ImmediateDataWidgetMapper* mapper;
 };
 

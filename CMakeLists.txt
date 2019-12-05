@@ -143,8 +143,8 @@ endif(WIN32)
 # we do this even in release mode for "Editor Diagnostics"
 target_compile_definitions(${EXE} PUBLIC QT_MESSAGELOGCONTEXT)
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_DEBUG_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
-set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_DEBUG_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+#set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_DEBUG_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+#set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_DEBUG_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
 
 message(STATUS "Initial build flags:")
 set(CompilerFlags

@@ -3,15 +3,11 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 
-BaseEditor::BaseEditor(ProtoModel* treeNodeModel, QWidget* parent)
+BaseEditor::BaseEditor(ProtoModelPtr treeNodeModel, QWidget* parent)
     : QWidget(parent), nodeMapper(new ModelMapper(treeNodeModel, this)) {
   buffers::TreeNode* n = static_cast<buffers::TreeNode*>(treeNodeModel->GetBuffer());
   resMapper = new ModelMapper(treeNodeModel->GetSubModel(ResTypeFields[n->type_case()]), this);
-  modelBackup = resMapper->GetModel()->Copy(nullptr);
-}
-
-BaseEditor::~BaseEditor() {
-  delete modelBackup;
+  modelBackup = resMapper->GetModel()->Copy();
 }
 
 void BaseEditor::closeEvent(QCloseEvent* event) {

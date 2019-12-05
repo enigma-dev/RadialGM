@@ -16,7 +16,7 @@ class RoomEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit RoomEditor(ProtoModel* model, QWidget* parent);
+  explicit RoomEditor(ProtoModelPtr model, QWidget* parent);
   ~RoomEditor();
 
   void setZoom(qreal zoom);

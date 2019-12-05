@@ -8,8 +8,8 @@
 using namespace google::protobuf;
 using CppType = FieldDescriptor::CppType;
 
-ProtoModel::ProtoModel(Message *protobuf, QObject *parent)
-    : QAbstractItemModel(parent), dirty(false), protobuf(protobuf) {
+ProtoModel::ProtoModel(Message *protobuf, ProtoModelBarePtr parent)
+    : QAbstractItemModel(parent), dirty(false), protobuf(protobuf), parentModel(parent) {
   connect(this, &ProtoModel::dataChanged, this,
           [this](const QModelIndex &topLeft, const QModelIndex &bottomRight,
                  const QVariant & /*oldValue*/ = QVariant(0), const QVector<int> &roles = QVector<int>()) {
@@ -23,11 +23,7 @@ ProtoModel::ProtoModel(Message *protobuf, QObject *parent)
 
     if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
       if (field->is_repeated()) {
-        repeatedModels[field->number()] = new RepeatedProtoModel(protobuf, field, this);
-        for (int j = 0; j < refl->FieldSize(*protobuf, field); j++) {
-          ProtoModel *subModel = new ProtoModel(refl->MutableRepeatedMessage(protobuf, field, j), this);
-          repeatedMessages[field->number()].append(QVariant::fromValue(static_cast<void *>(subModel)));
-        }
+        repeatedModels[field->number()] = RepeatedProtoModelPtr::create(protobuf, field, this);
       } else {
         const google::protobuf::OneofDescriptor *oneof = field->containing_oneof();
         if (oneof) {
@@ -38,12 +34,11 @@ ProtoModel::ProtoModel(Message *protobuf, QObject *parent)
             continue;  // don't allocate if not set
           }
         }
-        ProtoModel *subModel = new ProtoModel(refl->MutableMessage(protobuf, field), this);
-        messages[field->number()] = QVariant::fromValue(static_cast<void *>(subModel));
+        subModels[field->number()] = ProtoModelPtr::create(refl->MutableMessage(protobuf, field), this);
       }
     } else if (field->cpp_type() == CppType::CPPTYPE_STRING && field->is_repeated()) {
       for (int j = 0; j < refl->FieldSize(*protobuf, field); j++) {
-        repeatedMessages[field->number()].append(QString::fromStdString(refl->GetRepeatedString(*protobuf, field, j)));
+        repeatedStrings[field->number()].append(QString::fromStdString(refl->GetRepeatedString(*protobuf, field, j)));
       }
     }
   }
@@ -51,10 +46,14 @@ ProtoModel::ProtoModel(Message *protobuf, QObject *parent)
 
 ProtoModel::~ProtoModel() {}
 
-ProtoModel* ProtoModel::Copy(QObject *parent) {
+ProtoModelBarePtr ProtoModel::GetParentModel() const {
+  return parentModel;
+}
+
+ProtoModelPtr ProtoModel::Copy() {
   google::protobuf::Message *protobufCopy = protobuf->New();
   protobufCopy->CopyFrom(*protobuf);
-  return new ProtoModel(protobufCopy, parent);
+  return ProtoModelPtr(new ProtoModel(protobufCopy, parentModel));
 }
 
 void ProtoModel::ReplaceBuffer(Message *buffer) {
@@ -144,10 +143,7 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
 
   switch (field->cpp_type()) {
     case CppType::CPPTYPE_MESSAGE:
-      if (field->is_repeated())
-        return repeatedMessages[index.row()][index.column()];
-      else
-        return messages[index.row()];
+        R_EXPECT(false, QVariant()) << "The requested field " << index << " is a message";
     case CppType::CPPTYPE_INT32:
       return refl->GetInt32(*protobuf, field);
     case CppType::CPPTYPE_INT64:
@@ -171,22 +167,25 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
   return QVariant();
 }
 
-RepeatedProtoModel *ProtoModel::GetRepeatedSubModel(int fieldNum) { return repeatedModels[fieldNum]; }
+RepeatedProtoModelPtr ProtoModel::GetRepeatedSubModel(int fieldNum) { return repeatedModels[fieldNum]; }
 
-ProtoModel *ProtoModel::GetSubModel(int fieldNum) {
-  return static_cast<ProtoModel *>(this->data(fieldNum).value<void *>());
+ProtoModelPtr ProtoModel::GetSubModel(int fieldNum) {
+  if (subModels.contains(fieldNum))
+    return subModels[fieldNum];
+  else
+    return nullptr;
 }
 
-ProtoModel *ProtoModel::GetSubModel(int fieldNum, int index) {
-  if (repeatedMessages.contains(fieldNum) && repeatedMessages[fieldNum].count() > index)
-   return static_cast<ProtoModel *>(repeatedMessages[fieldNum][index].value<void *>());
+ProtoModelPtr ProtoModel::GetSubModel(int fieldNum, int index) {
+  if (repeatedModels.contains(fieldNum) && repeatedModels[fieldNum]->rowCount() > index)
+   return repeatedModels[fieldNum]->GetSubModel(index);
   else
     return nullptr;
 }
 
 QString ProtoModel::GetString(int fieldNum, int index) const {
-  if (repeatedMessages.contains(fieldNum) && repeatedMessages[fieldNum].count() > index)
-    return repeatedMessages[fieldNum][index].toString();
+  if (repeatedStrings.contains(fieldNum) && repeatedStrings[fieldNum].count() > index)
+    return repeatedStrings[fieldNum][index];
   else
     return "";
 }
@@ -216,7 +215,7 @@ Qt::ItemFlags ProtoModel::flags(const QModelIndex &index) const {
   return flags;
 }
 
-void UpdateReferences(ProtoModel* model, const QString& type, const QString& oldName, const QString& newName) {
+void UpdateReferences(ProtoModelPtr model, const QString& type, const QString& oldName, const QString& newName) {
 
   if (model == nullptr) return;
 

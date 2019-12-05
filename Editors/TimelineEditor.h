@@ -11,7 +11,7 @@ class TimelineEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit TimelineEditor(ProtoModel* model, QWidget* parent);
+  explicit TimelineEditor(ProtoModelPtr model, QWidget* parent);
   ~TimelineEditor();
 
  private:

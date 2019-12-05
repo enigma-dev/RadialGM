@@ -2,6 +2,7 @@
 #define REPEATEDPROTOMODEL_H
 
 #include <QAbstractItemModel>
+#include <QSharedPointer>
 
 #include <google/protobuf/message.h>
 #include <google/protobuf/repeated_field.h>
@@ -14,11 +15,20 @@ using namespace google::protobuf;
 using CppType = FieldDescriptor::CppType;
 
 class ProtoModel;
+using ProtoModelPtr = QSharedPointer<ProtoModel>;
+using ProtoModelBarePtr = ProtoModel*;
+
+class RepeatedProtoModel;
+using RepeatedProtoModelPtr = QSharedPointer<RepeatedProtoModel>;
 
 class RepeatedProtoModel : public QAbstractItemModel {
   Q_OBJECT
  public:
-  RepeatedProtoModel(Message *protobuf, const FieldDescriptor *field, ProtoModel *parent);
+  RepeatedProtoModel(Message *protobuf, const FieldDescriptor *field, ProtoModelBarePtr parent);
+  ProtoModelBarePtr GetParentModel() const;
+  void AddModel(ProtoModelPtr model);
+  ProtoModelPtr GetSubModel(int index);
+  QVector<ProtoModelPtr>& GetMutableModelList();
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   bool empty() const;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -33,34 +43,15 @@ class RepeatedProtoModel : public QAbstractItemModel {
   class RowRemovalOperation {
       int left = 0, right = 0;
       MutableRepeatedFieldRef<Message> field;
-      RepeatedProtoModel *model;
+      RepeatedProtoModelPtr model;
    public:
-    RowRemovalOperation(RepeatedProtoModel *m):
+    RowRemovalOperation(RepeatedProtoModelPtr m):
         field(m->protobuf->GetReflection()
                ->GetMutableRepeatedFieldRef<Message>(m->protobuf, m->field)),
         model(m) {}
-    void RemoveRow(int row) { return RemoveRows(row, 1); }
-    void RemoveRows(int row, int count) {
-      model->beginRemoveRows(QModelIndex(), row, row + count - 1);
-      if (left < right) {
-          while (right < row) {
-          field.SwapElements(left++, right++);
-        }
-      } else {
-        left = row;
-      }
-      right = row + count;
-      model->endRemoveRows();
-    }
-    ~RowRemovalOperation() {
-      qDebug() << left << "," << right << "," << field.size();
-      if (left < right) {
-        qDebug() << "swap final " << field.size() - right << " rows backward";
-        while (right < field.size()) field.SwapElements(left++, right++);
-        qDebug() << "remove final " << field.size() - left << " rows";
-        while (left < field.size()) field.RemoveLast();
-      }
-    }
+    void RemoveRow(int row);
+    void RemoveRows(int row, int count);
+    ~RowRemovalOperation();
   };
 
  signals:
@@ -69,9 +60,10 @@ class RepeatedProtoModel : public QAbstractItemModel {
   void rowsAboutToBeRemoved(const QModelIndex &parent, int first, int last);
 
  protected:
+  ProtoModelBarePtr parentModel;
   Message *protobuf;
   const FieldDescriptor *field;
-
+  QVector<ProtoModelPtr> models;
 };
 
 #endif  // REPEATEDPROTOMODEL_H

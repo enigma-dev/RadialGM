@@ -4,7 +4,7 @@
 
 #include <QMessageBox>
 
-SpriteEditor::SpriteEditor(ProtoModel* model, QWidget* parent) : BaseEditor(model, parent), ui(new Ui::SpriteEditor) {
+SpriteEditor::SpriteEditor(ProtoModelPtr model, QWidget* parent) : BaseEditor(model, parent), ui(new Ui::SpriteEditor) {
   ui->setupUi(this);
 
   connect(ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);

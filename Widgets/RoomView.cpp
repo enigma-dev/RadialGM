@@ -9,8 +9,8 @@ bool InstanceSortFilterProxyModel::lessThan(const QModelIndex &left, const QMode
   QVariant leftData = sourceModel()->data(left);
   QVariant rightData = sourceModel()->data(right);
 
-  ProtoModel* objA = MainWindow::resourceMap->GetResourceByName(TreeNode::kObject, leftData.toString());
-  ProtoModel* objB = MainWindow::resourceMap->GetResourceByName(TreeNode::kObject, rightData.toString());
+  ProtoModelPtr objA = MainWindow::resourceMap->GetResourceByName(TreeNode::kObject, leftData.toString());
+  ProtoModelPtr objB = MainWindow::resourceMap->GetResourceByName(TreeNode::kObject, rightData.toString());
 
   if (objA == nullptr || objB == nullptr) return false;
 
@@ -28,11 +28,11 @@ RoomView::RoomView(QWidget* parent) : AssetView(parent), model(nullptr) {
   this->sortedTiles = new QSortFilterProxyModel(this);
 }
 
-void RoomView::SetResourceModel(ProtoModel* model) {
+void RoomView::SetResourceModel(ProtoModelPtr model) {
   this->model = model;
-  this->sortedInstances->setSourceModel(model->GetRepeatedSubModel(Room::kInstancesFieldNumber));
+  this->sortedInstances->setSourceModel(model->GetRepeatedSubModel(Room::kInstancesFieldNumber).get());
   this->sortedInstances->sort(Room::Instance::kObjectTypeFieldNumber);
-  this->sortedTiles->setSourceModel(model->GetRepeatedSubModel(Room::kTilesFieldNumber));
+  this->sortedTiles->setSourceModel(model->GetRepeatedSubModel(Room::kTilesFieldNumber).get());
   this->sortedTiles->sort(Room::Tile::kDepthFieldNumber);
   this->SetZoom(1.0);
 }
@@ -70,7 +70,7 @@ void RoomView::paintEvent(QPaintEvent* /* event */) {
 void RoomView::paintTiles(QPainter& painter) {
   for (int row = 0; row < sortedTiles->rowCount(); row++) {
     QVariant bkgName = sortedTiles->data(sortedTiles->index(row, Room::Tile::kBackgroundNameFieldNumber));
-    ProtoModel* bkg = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, bkgName.toString());
+    ProtoModelPtr bkg = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, bkgName.toString());
     if (!bkg) continue;
     bkg = bkg->GetSubModel(TreeNode::kBackgroundFieldNumber);
     if (!bkg) continue;
@@ -102,7 +102,7 @@ void RoomView::paintTiles(QPainter& painter) {
 }
 
 void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
-  RepeatedProtoModel* backgrounds = model->GetRepeatedSubModel(Room::kBackgroundsFieldNumber);
+  RepeatedProtoModelPtr backgrounds = model->GetRepeatedSubModel(Room::kBackgroundsFieldNumber);
   for (int row = 0; row < backgrounds->rowCount(); row++) {
 
     bool visible = backgrounds->data(row, Room::Background::kVisibleFieldNumber).toBool();
@@ -110,7 +110,7 @@ void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
     QString bkgName = backgrounds->data(row, Room::Background::kBackgroundNameFieldNumber).toString();
     
     if (!visible || foreground != foregrounds) continue;
-    ProtoModel* bkgRes = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, bkgName);
+    ProtoModelPtr bkgRes = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, bkgName);
     if (!bkgRes) continue;
     bkgRes = bkgRes->GetSubModel(TreeNode::kBackgroundFieldNumber);
     if (!bkgRes) continue;
@@ -167,7 +167,7 @@ void RoomView::paintInstances(QPainter& painter) {
 
     QVariant sprName = sortedInstances->data(sortedInstances->index(row, Room::Instance::kObjectTypeFieldNumber));
 
-    const ProtoModel* spr = GetObjectSprite(sprName.toString());
+    const ProtoModelPtr spr = GetObjectSprite(sprName.toString());
     if (spr == nullptr)
       imgFile = "object";
     else {
