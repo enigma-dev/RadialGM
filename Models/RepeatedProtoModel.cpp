@@ -100,36 +100,63 @@ Qt::ItemFlags RepeatedProtoModel::flags(const QModelIndex &index) const {
   return QAbstractItemModel::flags(index);
 }
 
-void RepeatedProtoModel::RowRemovalOperation::RemoveRow(int row) { return RemoveRows(row, 1); }
+void RepeatedProtoModel::RowRemovalOperation::RemoveRow(int row) {
+  rows.insert(row);
+}
 void RepeatedProtoModel::RowRemovalOperation::RemoveRows(int row, int count) {
-  auto list = model->GetMutableModelList();
-  model->beginRemoveRows(QModelIndex(), row, row + count - 1);
-  if (left < right) {
-    while (right < row) {
-      field.SwapElements(left, right);
-      list[left].swap(list[right]);
-      left++; right++;
-    }
-  } else {
-    left = row;
-  }
-  right = row + count;
-  model->endRemoveRows();
+  for (int i = row; i < row + count; ++i) rows.insert(i);
 }
 
 RepeatedProtoModel::RowRemovalOperation::~RowRemovalOperation() {
   auto &list = model->GetMutableModelList();
-  qDebug() << left << "," << right << "," << field.size();
-  if (left < right) {
-    qDebug() << "swap final " << field.size() - right << " rows backward";
-    while (right < field.size()) {
+  std::cout << "Remove " << rows.size() << " rows" << std::endl;
+  if (rows.empty()) return;
+
+  // Compute ranges for our deleted rows.
+  struct Range {
+    int first, last;
+    Range(): first(), last() {}
+    Range(int f, int l): first(f), last(l) {}
+    int size() { return last - first + 1; }
+  };
+  std::vector<Range> ranges;
+  for (int row : rows) {
+    if (ranges.empty() || row != ranges.back().last + 1) {
+      ranges.emplace_back(row, row);
+    } else {
+      ranges.back().last = row;
+    }
+  }
+
+  // Broadcast range removal before the model can fuck anything up.
+  // Do this from back to front to minimize the amount of shit it fucks up.
+  for (auto range = ranges.rbegin(); range != ranges.rend(); ++range) {
+    std::cout << "Remove range " << range->first << " - " << range->last << std::endl;
+    model->beginRemoveRows(QModelIndex(), range->first, range->last);
+  }
+
+  // Basic dense range removal. Move "deleted" rows to the end of the array.
+  int left = 0, right = 0;
+  for (auto range : ranges) {
+    while (right < range.first) {
       field.SwapElements(left, right);
       list[left].swap(list[right]);
       left++; right++;
     }
-    
-    qDebug() << "remove final " << field.size() - left << " rows";
-    while (left < field.size()) field.RemoveLast();
-    list.resize(left);
+    right = range.last + 1;
+  }
+  while (right < field.size()) {
+    field.SwapElements(left, right);
+    list[left].swap(list[right]);
+    left++; right++;
+  }
+
+  // Send the endRemoveRows operations in the reverse order, removing the
+  // correct number of rows incrementally, or else various components in Qt
+  // will bitch, piss, moan, wail, whine, and cry. Actually, they will anyway.
+  for (Range range : ranges) {
+    list.resize(list.size() - range.size());
+    for (int j = range.first; j <= range.last; ++j) field.RemoveLast();
+    model->endRemoveRows();
   }
 }

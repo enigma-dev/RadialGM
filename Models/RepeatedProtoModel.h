@@ -2,6 +2,7 @@
 #define REPEATEDPROTOMODEL_H
 
 #include <QAbstractItemModel>
+#include <QDebug>
 #include <QSharedPointer>
 
 #include <google/protobuf/message.h>
@@ -9,7 +10,7 @@
 #include <google/protobuf/reflection.h>
 
 #include <optional>
-#include <QDebug>
+#include <set>
 
 using namespace google::protobuf;
 using CppType = FieldDescriptor::CppType;
@@ -41,14 +42,15 @@ class RepeatedProtoModel : public QAbstractItemModel {
   Qt::ItemFlags flags(const QModelIndex &index) const override;
 
   class RowRemovalOperation {
-      int left = 0, right = 0;
-      MutableRepeatedFieldRef<Message> field;
-      RepeatedProtoModelPtr model;
+    RepeatedProtoModelPtr model;
+    MutableRepeatedFieldRef<Message> field;
+    std::set<int> rows;
+
    public:
     RowRemovalOperation(RepeatedProtoModelPtr m):
+        model(m),
         field(m->protobuf->GetReflection()
-               ->GetMutableRepeatedFieldRef<Message>(m->protobuf, m->field)),
-        model(m) {}
+               ->GetMutableRepeatedFieldRef<Message>(m->protobuf, m->field)) {}
     void RemoveRow(int row);
     void RemoveRows(int row, int count);
     ~RowRemovalOperation();
