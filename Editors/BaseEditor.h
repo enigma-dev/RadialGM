@@ -36,7 +36,6 @@ class BaseEditor : public QWidget {
  protected:
   ModelMapper* nodeMapper;
   ModelMapper* resMapper;
-  ProtoModelPtr modelBackup;
 };
 
 #endif  // BASEEDTIOR_H

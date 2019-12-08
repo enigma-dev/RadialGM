@@ -2,8 +2,6 @@
 #include "Editors/BaseEditor.h"
 #include "MainWindow.h"
 
-#include <QDebug>
-
 ResourceModelMap::ResourceModelMap(buffers::TreeNode* root, QObject* parent) : QObject(parent) {
   recursiveBindRes(root, this);
 }
@@ -21,22 +19,69 @@ void ResourceModelMap::recursiveBindRes(buffers::TreeNode* node, QObject* parent
 
 void ResourceModelMap::AddResource(buffers::TreeNode* child, QObject* parent) {
   _resources[child->type_case()][QString::fromStdString(child->name())] =
-      QPair<buffers::TreeNode*, ProtoModelPtr>(child, child->has_folder() ? nullptr : ProtoModelPtr(new ProtoModel(child, nullptr)));
+      QPair<buffers::TreeNode*, ProtoModelPtr>(child, child->has_folder() ? nullptr : ProtoModelPtr(new ProtoModel(child, this)));
 }
 
 void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
   if (!_resources.contains(type)) return;
   if (!_resources[type].contains(name)) return;
 
+  // Delete all instances of this object type
   if (type == TypeCase::kObject) {
     for (auto room : _resources[TypeCase::kRoom]) {
       ProtoModelPtr roomModel = room.second->GetSubModel(TreeNode::kRoomFieldNumber);
       RepeatedProtoModelPtr instancesModel = roomModel->GetRepeatedSubModel(Room::kInstancesFieldNumber);
       RepeatedProtoModel::RowRemovalOperation remover(instancesModel);
+
       for (int row = 0; row < instancesModel->rowCount(); ++row) {
         if (instancesModel->data(row, Room::Instance::kObjectTypeFieldNumber).toString() == name)
           remover.RemoveRow(row);
       }
+
+      // Only models in use in open editors should have backup models
+      ProtoModelPtr backupModel = roomModel->GetBackupModel();
+      if (backupModel != nullptr) {
+        RepeatedProtoModelPtr instancesModelBak = backupModel->GetRepeatedSubModel(Room::kInstancesFieldNumber);
+        RepeatedProtoModel::RowRemovalOperation removerBak(instancesModelBak);
+
+        for (int row = 0; row < instancesModelBak->rowCount(); ++row) {
+          if (instancesModelBak->data(row, Room::Instance::kObjectTypeFieldNumber).toString() == name)
+            removerBak.RemoveRow(row);
+        }
+      }
+    }
+  }
+
+  // Delete all tiles using this background
+  if (type == TypeCase::kBackground) {
+    for (auto room : _resources[TypeCase::kRoom]) {
+      ProtoModelPtr roomModel = room.second->GetSubModel(TreeNode::kRoomFieldNumber);
+      RepeatedProtoModelPtr tilesModel = roomModel->GetRepeatedSubModel(Room::kTilesFieldNumber);
+      RepeatedProtoModel::RowRemovalOperation remover(tilesModel);
+
+      for (int row = 0; row < tilesModel->rowCount(); ++row) {
+        if (tilesModel->data(row, Room::Instance::kObjectTypeFieldNumber).toString() == name)
+          remover.RemoveRow(row);
+      }
+
+      // Only models in use in open editors should have backup models
+      ProtoModelPtr backupModel = roomModel->GetBackupModel();
+      if (backupModel != nullptr) {
+        RepeatedProtoModelPtr tilesModelBak = backupModel->GetRepeatedSubModel(Room::kTilesFieldNumber);
+        RepeatedProtoModel::RowRemovalOperation removerBak(tilesModelBak);
+
+        for (int row = 0; row < tilesModelBak->rowCount(); ++row) {
+          if (tilesModelBak->data(row, Room::Tile::kBackgroundNameFieldNumber).toString() == name)
+            removerBak.RemoveRow(row);
+        }
+      }
+    }
+  }
+
+  // Remove an references to this resource
+  for (auto res : _resources) {
+    for (auto model : res) {
+      UpdateReferences(model.second, ResTypeAsString(type), name, "");
     }
   }
 

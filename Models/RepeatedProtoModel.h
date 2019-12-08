@@ -2,31 +2,28 @@
 #define REPEATEDPROTOMODEL_H
 
 #include <QAbstractItemModel>
-#include <QDebug>
 #include <QSharedPointer>
 
 #include <google/protobuf/message.h>
 #include <google/protobuf/repeated_field.h>
 #include <google/protobuf/reflection.h>
 
-#include <optional>
 #include <set>
 
 using namespace google::protobuf;
 using CppType = FieldDescriptor::CppType;
 
 class ProtoModel;
-using ProtoModelPtr = QSharedPointer<ProtoModel>;
-using ProtoModelBarePtr = ProtoModel*;
+using ProtoModelPtr = ProtoModel*;
 
 class RepeatedProtoModel;
-using RepeatedProtoModelPtr = QSharedPointer<RepeatedProtoModel>;
+using RepeatedProtoModelPtr = RepeatedProtoModel*;
 
 class RepeatedProtoModel : public QAbstractItemModel {
   Q_OBJECT
  public:
-  RepeatedProtoModel(Message *protobuf, const FieldDescriptor *field, ProtoModelBarePtr parent);
-  ProtoModelBarePtr GetParentModel() const;
+  RepeatedProtoModel(Message *protobuf, const FieldDescriptor *field, ProtoModelPtr parent);
+  ProtoModelPtr GetParentModel() const;
   void AddModel(ProtoModelPtr model);
   ProtoModelPtr GetSubModel(int index);
   QVector<ProtoModelPtr>& GetMutableModelList();
@@ -62,7 +59,7 @@ class RepeatedProtoModel : public QAbstractItemModel {
   void rowsAboutToBeRemoved(const QModelIndex &parent, int first, int last);
 
  protected:
-  ProtoModelBarePtr parentModel;
+  ProtoModelPtr parentModel;
   Message *protobuf;
   const FieldDescriptor *field;
   QVector<ProtoModelPtr> models;

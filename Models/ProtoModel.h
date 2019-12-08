@@ -23,10 +23,13 @@ class ProtoModel : public QAbstractItemModel {
   Q_OBJECT
 
  public:
-  explicit ProtoModel(google::protobuf::Message *protobuf, ProtoModelBarePtr parent);
+  explicit ProtoModel(google::protobuf::Message *protobuf, QObject* parent);
+  explicit ProtoModel(google::protobuf::Message *protobuf, ProtoModelPtr parent);
   ~ProtoModel();
-  ProtoModelBarePtr GetParentModel() const;
-  ProtoModelPtr Copy();
+  ProtoModelPtr GetParentModel() const;
+  ProtoModelPtr BackupModel(QObject* parent);
+  ProtoModelPtr GetBackupModel();
+  bool RestoreBackup();
   void ReplaceBuffer(google::protobuf::Message *buffer);
   google::protobuf::Message *GetBuffer();
   void SetDirty(bool dirty);
@@ -50,12 +53,14 @@ class ProtoModel : public QAbstractItemModel {
                            const QVariant &oldValue = QVariant(0), const QVector<int> &roles = QVector<int>());
 
  private:
-  ProtoModelBarePtr parentModel;
+  ProtoModelPtr parentModel;
+  ProtoModelPtr modelBackup;
   QHash<int, ProtoModelPtr> subModels;
   QHash<int, QList<QString>> repeatedStrings;
   QHash<int, RepeatedProtoModelPtr> repeatedModels;
   bool dirty;
   google::protobuf::Message *protobuf;
+  QScopedPointer<Message> backupProtobuf;
 };
 
 void UpdateReferences(ProtoModelPtr model, const QString& type, const QString& oldName, const QString& newName);

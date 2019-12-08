@@ -22,7 +22,7 @@ bool InstanceSortFilterProxyModel::lessThan(const QModelIndex &left, const QMode
   return objA->data(Object::kDepthFieldNumber) < objB->data(Object::kDepthFieldNumber);
 }
 
-RoomView::RoomView(QWidget* parent) : AssetView(parent), model(nullptr) { 
+RoomView::RoomView(QWidget* parent) : AssetView(parent), model(nullptr) {
   this->SetZoom(1.0);
   this->sortedInstances = new InstanceSortFilterProxyModel(this);
   this->sortedTiles = new QSortFilterProxyModel(this);
@@ -30,9 +30,9 @@ RoomView::RoomView(QWidget* parent) : AssetView(parent), model(nullptr) {
 
 void RoomView::SetResourceModel(ProtoModelPtr model) {
   this->model = model;
-  this->sortedInstances->setSourceModel(model->GetRepeatedSubModel(Room::kInstancesFieldNumber).get());
+  this->sortedInstances->setSourceModel(model->GetRepeatedSubModel(Room::kInstancesFieldNumber));
   this->sortedInstances->sort(Room::Instance::kObjectTypeFieldNumber);
-  this->sortedTiles->setSourceModel(model->GetRepeatedSubModel(Room::kTilesFieldNumber).get());
+  this->sortedTiles->setSourceModel(model->GetRepeatedSubModel(Room::kTilesFieldNumber));
   this->sortedTiles->sort(Room::Tile::kDepthFieldNumber);
   this->SetZoom(1.0);
 }
@@ -52,10 +52,10 @@ void RoomView::paintEvent(QPaintEvent* /* event */) {
 
   QColor roomColor = Qt::transparent;
 
-  if (model->data(Room::kShowColorFieldNumber).toBool()) 
+  if (model->data(Room::kShowColorFieldNumber).toBool())
     roomColor = model->data(Room::kColorFieldNumber).toInt();
-  
-  painter.fillRect(QRectF(0, 0, model->data(Room::kWidthFieldNumber).toUInt(), 
+
+  painter.fillRect(QRectF(0, 0, model->data(Room::kWidthFieldNumber).toUInt(),
     model->data(Room::kWidthFieldNumber).toUInt()), QBrush(roomColor));
 
   this->paintBackgrounds(painter, false);
@@ -74,7 +74,7 @@ void RoomView::paintTiles(QPainter& painter) {
     if (!bkg) continue;
     bkg = bkg->GetSubModel(TreeNode::kBackgroundFieldNumber);
     if (!bkg) continue;
-    
+
     int x = sortedTiles->data(sortedTiles->index(row, Room::Tile::kXFieldNumber)).toInt();
     int y = sortedTiles->data(sortedTiles->index(row, Room::Tile::kYFieldNumber)).toInt();
     int xOff = sortedTiles->data(sortedTiles->index(row, Room::Tile::kXoffsetFieldNumber)).toInt();
@@ -108,7 +108,7 @@ void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
     bool visible = backgrounds->data(row, Room::Background::kVisibleFieldNumber).toBool();
     bool foreground = backgrounds->data(row, Room::Background::kForegroundFieldNumber).toBool();
     QString bkgName = backgrounds->data(row, Room::Background::kBackgroundNameFieldNumber).toString();
-    
+
     if (!visible || foreground != foregrounds) continue;
     ProtoModelPtr bkgRes = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, bkgName);
     if (!bkgRes) continue;
@@ -158,7 +158,7 @@ void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
 
 void RoomView::paintInstances(QPainter& painter) {
   for (int row = 0; row < sortedInstances->rowCount(); row++) {
-    
+
     QString imgFile = ":/actions/help.png";
     int w = 16;
     int h = 16;

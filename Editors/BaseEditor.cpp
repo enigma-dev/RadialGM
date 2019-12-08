@@ -2,12 +2,14 @@
 
 #include <QCloseEvent>
 #include <QMessageBox>
+#include <QDebug>
 
 BaseEditor::BaseEditor(ProtoModelPtr treeNodeModel, QWidget* parent)
     : QWidget(parent), nodeMapper(new ModelMapper(treeNodeModel, this)) {
   buffers::TreeNode* n = static_cast<buffers::TreeNode*>(treeNodeModel->GetBuffer());
   resMapper = new ModelMapper(treeNodeModel->GetSubModel(ResTypeFields[n->type_case()]), this);
-  modelBackup = resMapper->GetModel()->Copy();
+  // Backup should be deleted by Qt's garbage collector when this editor is closed
+  resMapper->GetModel()->BackupModel(this);
 }
 
 void BaseEditor::closeEvent(QCloseEvent* event) {
@@ -21,7 +23,10 @@ void BaseEditor::closeEvent(QCloseEvent* event) {
       return;
     } else if (reply == QMessageBox::No) {
       nodeMapper->clearMapping();
-      resMapper->ReplaceBuffer(modelBackup->GetBuffer());
+      if (!resMapper->RestoreBackup()) {
+        // This should never happen but here incase someone decides to incorrectly null the backup
+        qDebug() << "Failed to revert editor changes";
+      }
       resMapper->clearMapping();
     }
   }

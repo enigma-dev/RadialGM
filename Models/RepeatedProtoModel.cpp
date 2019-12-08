@@ -5,9 +5,7 @@
 #include "ProtoModel.h"
 #include "ResourceModelMap.h"
 
-#include <QDebug>
-
-RepeatedProtoModel::RepeatedProtoModel(Message *protobuf, const FieldDescriptor *field, ProtoModelBarePtr parent)
+RepeatedProtoModel::RepeatedProtoModel(Message *protobuf, const FieldDescriptor *field, ProtoModelPtr parent)
     : QAbstractItemModel(parent), parentModel(parent), protobuf(protobuf), field(field) {
   const Reflection *refl = protobuf->GetReflection();
   for (int j = 0; j < refl->FieldSize(*protobuf, field); j++) {
@@ -15,7 +13,7 @@ RepeatedProtoModel::RepeatedProtoModel(Message *protobuf, const FieldDescriptor 
   }
 }
 
-ProtoModelBarePtr RepeatedProtoModel::GetParentModel() const {
+ProtoModelPtr RepeatedProtoModel::GetParentModel() const {
   return parentModel;
 }
 
@@ -43,7 +41,7 @@ bool RepeatedProtoModel::empty() const { return this->rowCount() <= 0; }
 
 int RepeatedProtoModel::columnCount(const QModelIndex & /*parent*/) const {
   const Descriptor *desc = protobuf->GetDescriptor();
-  return desc->field_count()+1;
+  return desc->field_count();
 }
 
 //bool RepeatedProtoModel::setData(const QModelIndex &index, const QVariant &value, int role) {}
@@ -54,8 +52,6 @@ QVariant RepeatedProtoModel::data(int row, int column) const {
 
 QVariant RepeatedProtoModel::data(const QModelIndex &index, int role) const {
   R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
-
-  if (index.column() == columnCount()-1 && role == Qt::DisplayRole) return index.row();
 
   ProtoModelPtr m = GetParentModel()->GetSubModel(field->number(), index.row());
   if (m == nullptr) return QVariant();
@@ -74,6 +70,14 @@ QVariant RepeatedProtoModel::data(const QModelIndex &index, int role) const {
       } else {
         return QIcon(":/actions/help.png").pixmap(pixmapSize);
       }
+    }
+  } else if (role == Qt::DecorationRole && field->name() == "tiles" &&
+      index.column() == Room::Tile::kBackgroundNameFieldNumber) {
+    auto bkg = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, data.toString());
+    if (bkg != nullptr) {
+      bkg = bkg->GetSubModel(TreeNode::kBackgroundFieldNumber);
+      static const QSize pixmapSize(18, 18);
+      return ArtManager::GetIcon(bkg->data(Background::kImageFieldNumber).toString()).pixmap(pixmapSize);
     }
   } else if (role != Qt::DisplayRole && role != Qt::EditRole)
     return QVariant();
@@ -109,7 +113,6 @@ void RepeatedProtoModel::RowRemovalOperation::RemoveRows(int row, int count) {
 
 RepeatedProtoModel::RowRemovalOperation::~RowRemovalOperation() {
   auto &list = model->GetMutableModelList();
-  std::cout << "Remove " << rows.size() << " rows" << std::endl;
   if (rows.empty()) return;
 
   // Compute ranges for our deleted rows.
@@ -131,7 +134,6 @@ RepeatedProtoModel::RowRemovalOperation::~RowRemovalOperation() {
   // Broadcast range removal before the model can fuck anything up.
   // Do this from back to front to minimize the amount of shit it fucks up.
   for (auto range = ranges.rbegin(); range != ranges.rend(); ++range) {
-    std::cout << "Remove range " << range->first << " - " << range->last << std::endl;
     model->beginRemoveRows(QModelIndex(), range->first, range->last);
   }
 
@@ -140,14 +142,14 @@ RepeatedProtoModel::RowRemovalOperation::~RowRemovalOperation() {
   for (auto range : ranges) {
     while (right < range.first) {
       field.SwapElements(left, right);
-      list[left].swap(list[right]);
+      std::swap(list[left], list[right]);
       left++; right++;
     }
     right = range.last + 1;
   }
   while (right < field.size()) {
     field.SwapElements(left, right);
-    list[left].swap(list[right]);
+    std::swap(list[left], list[right]);
     left++; right++;
   }
 

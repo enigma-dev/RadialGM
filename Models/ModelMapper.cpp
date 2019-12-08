@@ -5,8 +5,8 @@
 ModelMapper::ModelMapper(ProtoModelPtr model, BaseEditor *parent) : parentWidget(parent),  model(model) {
   mapper = new ImmediateDataWidgetMapper(parent);
   mapper->setOrientation(Qt::Vertical);
-  mapper->setModel(model.get());
-  parent->connect(model.get(), &ProtoModel::dataChanged, parent, &BaseEditor::dataChanged);
+  mapper->setModel(model);
+  parent->connect(model, &ProtoModel::dataChanged, parent, &BaseEditor::dataChanged);
 }
 
 // mapper
@@ -22,6 +22,10 @@ void ModelMapper::toFirst() { mapper->toFirst(); }
 // model
 
 void ModelMapper::ReplaceBuffer(google::protobuf::Message *buffer) { model->ReplaceBuffer(buffer); }
+
+bool ModelMapper::RestoreBackup() {
+  return model->RestoreBackup();
+}
 
 void ModelMapper::SetDirty(bool dirty) { model->SetDirty(dirty); }
 

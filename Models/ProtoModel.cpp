@@ -3,13 +3,15 @@
 
 #include "Components/Logger.h"
 
-#include <iostream>
-
 using namespace google::protobuf;
 using CppType = FieldDescriptor::CppType;
 
-ProtoModel::ProtoModel(Message *protobuf, ProtoModelBarePtr parent)
-    : QAbstractItemModel(parent), dirty(false), protobuf(protobuf), parentModel(parent) {
+ProtoModel::ProtoModel(google::protobuf::Message *protobuf, QObject* parent) : ProtoModel(protobuf, (ProtoModelPtr)nullptr) {
+  QAbstractItemModel::setParent(parent);
+}
+
+ProtoModel::ProtoModel(Message *protobuf, ProtoModelPtr parent)
+    : QAbstractItemModel(parent), dirty(false), protobuf(protobuf), parentModel(parent), modelBackup(nullptr) {
   connect(this, &ProtoModel::dataChanged, this,
           [this](const QModelIndex &topLeft, const QModelIndex &bottomRight,
                  const QVariant & /*oldValue*/ = QVariant(0), const QVector<int> &roles = QVector<int>()) {
@@ -23,7 +25,7 @@ ProtoModel::ProtoModel(Message *protobuf, ProtoModelBarePtr parent)
 
     if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
       if (field->is_repeated()) {
-        repeatedModels[field->number()] = RepeatedProtoModelPtr::create(protobuf, field, this);
+        repeatedModels[field->number()] = new RepeatedProtoModel(protobuf, field, this);
       } else {
         const google::protobuf::OneofDescriptor *oneof = field->containing_oneof();
         if (oneof) {
@@ -34,7 +36,7 @@ ProtoModel::ProtoModel(Message *protobuf, ProtoModelBarePtr parent)
             continue;  // don't allocate if not set
           }
         }
-        subModels[field->number()] = ProtoModelPtr::create(refl->MutableMessage(protobuf, field), this);
+        subModels[field->number()] = new ProtoModel(refl->MutableMessage(protobuf, field), this);
       }
     } else if (field->cpp_type() == CppType::CPPTYPE_STRING && field->is_repeated()) {
       for (int j = 0; j < refl->FieldSize(*protobuf, field); j++) {
@@ -46,20 +48,30 @@ ProtoModel::ProtoModel(Message *protobuf, ProtoModelBarePtr parent)
 
 ProtoModel::~ProtoModel() {}
 
-ProtoModelBarePtr ProtoModel::GetParentModel() const {
+ProtoModelPtr ProtoModel::GetParentModel() const {
   return parentModel;
 }
 
-ProtoModelPtr ProtoModel::Copy() {
-  google::protobuf::Message *protobufCopy = protobuf->New();
-  protobufCopy->CopyFrom(*protobuf);
-  return ProtoModelPtr(new ProtoModel(protobufCopy, parentModel));
+ProtoModelPtr ProtoModel::BackupModel(QObject* parent) {
+  backupProtobuf.reset(protobuf->New());
+  backupProtobuf->CopyFrom(*protobuf);
+  modelBackup = new ProtoModel(backupProtobuf.get(), parent);
+  return modelBackup;
+}
+
+ProtoModelPtr ProtoModel::GetBackupModel() {
+  return modelBackup;
+}
+
+bool ProtoModel::RestoreBackup() {
+  if (modelBackup == nullptr) return false;
+  ReplaceBuffer(modelBackup->GetBuffer());
+  return true;
 }
 
 void ProtoModel::ReplaceBuffer(Message *buffer) {
   SetDirty(true);
   protobuf->CopyFrom(*buffer);
-  emit dataChanged(index(0), index(rowCount()));
 }
 
 google::protobuf::Message *ProtoModel::GetBuffer() { return protobuf; }

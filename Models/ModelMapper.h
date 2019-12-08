@@ -20,6 +20,7 @@ public:
   // model
   ProtoModelPtr GetModel();
   void ReplaceBuffer(google::protobuf::Message *buffer);
+  bool RestoreBackup();
   void SetDirty(bool dirty);
   bool IsDirty();
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
