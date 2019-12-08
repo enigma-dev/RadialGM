@@ -2,18 +2,31 @@
 #define REPEATEDPROTOMODEL_H
 
 #include <QAbstractItemModel>
+#include <QSharedPointer>
 
 #include <google/protobuf/message.h>
+#include <google/protobuf/repeated_field.h>
+#include <google/protobuf/reflection.h>
+
+#include <set>
 
 using namespace google::protobuf;
 using CppType = FieldDescriptor::CppType;
 
 class ProtoModel;
+using ProtoModelPtr = ProtoModel*;
+
+class RepeatedProtoModel;
+using RepeatedProtoModelPtr = RepeatedProtoModel*;
 
 class RepeatedProtoModel : public QAbstractItemModel {
   Q_OBJECT
  public:
-  RepeatedProtoModel(Message *protobuf, const FieldDescriptor *field, ProtoModel *parent);
+  RepeatedProtoModel(Message *protobuf, const FieldDescriptor *field, ProtoModelPtr parent);
+  ProtoModelPtr GetParentModel() const;
+  void AddModel(ProtoModelPtr model);
+  ProtoModelPtr GetSubModel(int index);
+  QVector<ProtoModelPtr>& GetMutableModelList();
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   bool empty() const;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -25,13 +38,31 @@ class RepeatedProtoModel : public QAbstractItemModel {
   QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override;
   Qt::ItemFlags flags(const QModelIndex &index) const override;
 
+  class RowRemovalOperation {
+    RepeatedProtoModelPtr model;
+    MutableRepeatedFieldRef<Message> field;
+    std::set<int> rows;
+
+   public:
+    RowRemovalOperation(RepeatedProtoModelPtr m):
+        model(m),
+        field(m->protobuf->GetReflection()
+               ->GetMutableRepeatedFieldRef<Message>(m->protobuf, m->field)) {}
+    void RemoveRow(int row);
+    void RemoveRows(int row, int count);
+    ~RowRemovalOperation();
+  };
+
  signals:
   void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVariant &oldValue = QVariant(0),
                    const QVector<int> &roles = QVector<int>());
+  void rowsAboutToBeRemoved(const QModelIndex &parent, int first, int last);
 
  protected:
+  ProtoModelPtr parentModel;
   Message *protobuf;
   const FieldDescriptor *field;
+  QVector<ProtoModelPtr> models;
 };
 
 #endif  // REPEATEDPROTOMODEL_H

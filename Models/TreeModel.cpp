@@ -71,7 +71,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
     }
 
     if (item->type_case() == TypeCase::kObject) {
-      const ProtoModel *sprModel = GetObjectSprite(item->name());
+      const ProtoModelPtr sprModel = GetObjectSprite(item->name());
       if (sprModel == nullptr) return QVariant();
       QString spr = sprModel->GetString(Sprite::kSubimagesFieldNumber, 0);
       return spr.isEmpty() ? QVariant() : ArtManager::GetIcon(spr);

@@ -10,17 +10,17 @@ class BaseEditor;
 
 class ModelMapper {
 public:
-  ModelMapper(ProtoModel *model, BaseEditor* parent);
+  ModelMapper(ProtoModelPtr model, BaseEditor* parent);
 
   // mapper
-  void addMapping(QWidget * widget, int section);
+  void addMapping(QWidget* widget, int section);
   void clearMapping();
   void toFirst();
 
   // model
-  ProtoModel* GetModel();
-  void RestoreBuffer();
+  ProtoModelPtr GetModel();
   void ReplaceBuffer(google::protobuf::Message *buffer);
+  bool RestoreBackup();
   void SetDirty(bool dirty);
   bool IsDirty();
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -28,8 +28,8 @@ public:
   bool setData(const QModelIndex &index, const QVariant &value, int role);
   QVariant data(int row, int column=0) const;
   QVariant data(const QModelIndex &index, int role) const;
-  RepeatedProtoModel* GetRepeatedSubModel(int fieldNum);
-  ProtoModel* GetSubModel(int fieldNum);
+  RepeatedProtoModelPtr GetRepeatedSubModel(int fieldNum);
+  ProtoModelPtr GetSubModel(int fieldNum);
   QString GetString(int fieldNum, int index);
   QModelIndex parent(const QModelIndex &index) const;
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
@@ -37,8 +37,9 @@ public:
   Qt::ItemFlags flags(const QModelIndex &index) const;
 
 protected:
-  ProtoModel *model;
-  ImmediateDataWidgetMapper *mapper;
+  BaseEditor* parentWidget;
+  ProtoModelPtr model;
+  ImmediateDataWidgetMapper* mapper;
 };
 
 #endif // MODELMAPPER_H

@@ -11,7 +11,7 @@ class ObjectEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit ObjectEditor(ProtoModel* model, QWidget* parent);
+  explicit ObjectEditor(ProtoModelPtr model, QWidget* parent);
   ~ObjectEditor();
 
  private:

@@ -16,7 +16,7 @@ static std::string get_combo_system_id(const QComboBox* combo) {
   return subsystem.id();
 }
 
-SettingsEditor::SettingsEditor(ProtoModel* model, QWidget* parent)
+SettingsEditor::SettingsEditor(ProtoModelPtr model, QWidget* parent)
     : BaseEditor(model, parent), ui(new Ui::SettingsEditor) {
   ui->setupUi(this);
 

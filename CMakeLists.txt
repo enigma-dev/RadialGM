@@ -15,6 +15,9 @@ set(CMAKE_AUTOUIC ON)
 # Create code from Qt rc files
 set(CMAKE_AUTORCC ON)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/Dialogs")
 
 # Include ENIGMA things
@@ -139,6 +142,11 @@ endif(WIN32)
 
 # we do this even in release mode for "Editor Diagnostics"
 target_compile_definitions(${EXE} PUBLIC QT_MESSAGELOGCONTEXT)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+endif()
 
 message(STATUS "Initial build flags:")
 set(CompilerFlags

@@ -11,7 +11,7 @@ class SoundEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit SoundEditor(ProtoModel* model, QWidget* parent);
+  explicit SoundEditor(ProtoModelPtr model, QWidget* parent);
   ~SoundEditor();
 
  private:

@@ -7,7 +7,7 @@ class ScriptEditor : public CodeEditor {
   Q_OBJECT
 
  public:
-  ScriptEditor(ProtoModel *model, QWidget *parent = nullptr);
+  ScriptEditor(ProtoModelPtr model, QWidget *parent = nullptr);
   ~ScriptEditor();
 };
 

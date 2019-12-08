@@ -2,11 +2,14 @@
 
 #include <QCloseEvent>
 #include <QMessageBox>
+#include <QDebug>
 
-BaseEditor::BaseEditor(ProtoModel* treeNodeModel, QWidget* parent)
+BaseEditor::BaseEditor(ProtoModelPtr treeNodeModel, QWidget* parent)
     : QWidget(parent), nodeMapper(new ModelMapper(treeNodeModel, this)) {
   buffers::TreeNode* n = static_cast<buffers::TreeNode*>(treeNodeModel->GetBuffer());
   resMapper = new ModelMapper(treeNodeModel->GetSubModel(ResTypeFields[n->type_case()]), this);
+  // Backup should be deleted by Qt's garbage collector when this editor is closed
+  resMapper->GetModel()->BackupModel(this);
 }
 
 void BaseEditor::closeEvent(QCloseEvent* event) {
@@ -20,7 +23,10 @@ void BaseEditor::closeEvent(QCloseEvent* event) {
       return;
     } else if (reply == QMessageBox::No) {
       nodeMapper->clearMapping();
-      nodeMapper->RestoreBuffer();
+      if (!resMapper->RestoreBackup()) {
+        // This should never happen but here incase someone decides to incorrectly null the backup
+        qDebug() << "Failed to revert editor changes";
+      }
       resMapper->clearMapping();
     }
   }
@@ -44,4 +50,9 @@ void BaseEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex& /*bo
     this->setWindowTitle(QString::fromStdString(n->name()));
     emit ResourceRenamed(n->type_case(), oldValue.toString(), QString::fromStdString(n->name()));
   }
+}
+
+void BaseEditor::OnSave() {
+  resMapper->SetDirty(false);
+  this->parentWidget()->close();
 }

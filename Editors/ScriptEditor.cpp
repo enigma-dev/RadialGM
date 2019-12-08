@@ -5,7 +5,7 @@
 
 using namespace buffers::resources;
 
-ScriptEditor::ScriptEditor(ProtoModel *model, QWidget *parent) : CodeEditor(model, parent) {
+ScriptEditor::ScriptEditor(ProtoModelPtr model, QWidget *parent) : CodeEditor(model, parent) {
   resMapper->addMapping(ui->codeWidget, Script::kCodeFieldNumber);
   resMapper->toFirst();
 

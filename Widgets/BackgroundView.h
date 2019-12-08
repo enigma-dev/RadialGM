@@ -12,7 +12,7 @@ class BackgroundView : public AssetView {
  public:
   explicit BackgroundView(QWidget *parent);
   QSize sizeHint() const override;
-  void SetResourceModel(ProtoModel *model);
+  void SetResourceModel(ProtoModelPtr model);
   bool SetImage(QString fName);
   bool SetImage(QPixmap image);
   void WriteImage(QString fName, QString type);
@@ -21,7 +21,7 @@ class BackgroundView : public AssetView {
   void paintEvent(QPaintEvent *event) override;
 
  private:
-  ProtoModel *model;
+  ProtoModelPtr model;
   QPixmap pixmap;
   QPixmap transparentPixmap;
   QColor transparencyColor;

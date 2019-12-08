@@ -2,7 +2,7 @@
 
 #include "Editors/BaseEditor.h"
 
-ModelMapper::ModelMapper(ProtoModel *model, BaseEditor *parent) : model(model) {
+ModelMapper::ModelMapper(ProtoModelPtr model, BaseEditor *parent) : parentWidget(parent),  model(model) {
   mapper = new ImmediateDataWidgetMapper(parent);
   mapper->setOrientation(Qt::Vertical);
   mapper->setModel(model);
@@ -11,7 +11,7 @@ ModelMapper::ModelMapper(ProtoModel *model, BaseEditor *parent) : model(model) {
 
 // mapper
 
-ProtoModel *ModelMapper::GetModel() { return model; }
+ProtoModelPtr ModelMapper::GetModel() { return model; }
 
 void ModelMapper::addMapping(QWidget *widget, int section) { mapper->addMapping(widget, section); }
 
@@ -21,9 +21,11 @@ void ModelMapper::toFirst() { mapper->toFirst(); }
 
 // model
 
-void ModelMapper::RestoreBuffer() { model->RestoreBuffer(); }
-
 void ModelMapper::ReplaceBuffer(google::protobuf::Message *buffer) { model->ReplaceBuffer(buffer); }
+
+bool ModelMapper::RestoreBackup() {
+  return model->RestoreBackup();
+}
 
 void ModelMapper::SetDirty(bool dirty) { model->SetDirty(dirty); }
 
@@ -41,9 +43,9 @@ QVariant ModelMapper::data(int row, int column) const { return model->data(row, 
 
 QVariant ModelMapper::data(const QModelIndex &index, int role) const { return model->data(index, role); }
 
-RepeatedProtoModel *ModelMapper::GetRepeatedSubModel(int fieldNum) { return model->GetRepeatedSubModel(fieldNum); }
+RepeatedProtoModelPtr ModelMapper::GetRepeatedSubModel(int fieldNum) { return model->GetRepeatedSubModel(fieldNum); }
 
-ProtoModel *ModelMapper::GetSubModel(int fieldNum) { return model->GetSubModel(fieldNum); }
+ProtoModelPtr ModelMapper::GetSubModel(int fieldNum) { return model->GetSubModel(fieldNum); }
 
 QString ModelMapper::GetString(int fieldNum, int index) { return model->GetString(fieldNum, index); }
 

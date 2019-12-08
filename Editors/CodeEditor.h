@@ -13,7 +13,7 @@ class CodeEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit CodeEditor(ProtoModel *model, QWidget *parent);
+  explicit CodeEditor(ProtoModelPtr model, QWidget *parent);
   ~CodeEditor();
 
  public slots:

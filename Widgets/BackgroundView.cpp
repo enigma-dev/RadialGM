@@ -11,7 +11,7 @@ using buffers::resources::Background;
 
 BackgroundView::BackgroundView(QWidget *parent) : AssetView(parent), model(nullptr) {}
 
-void BackgroundView::SetResourceModel(ProtoModel *model) {
+void BackgroundView::SetResourceModel(ProtoModelPtr model) {
   this->model = model;
   SetImage(model->data(Background::kImageFieldNumber).toString());
 }

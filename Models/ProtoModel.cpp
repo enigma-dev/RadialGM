@@ -3,21 +3,20 @@
 
 #include "Components/Logger.h"
 
-#include <iostream>
-
 using namespace google::protobuf;
 using CppType = FieldDescriptor::CppType;
 
-ProtoModel::ProtoModel(Message *protobuf, QObject *parent)
-    : QAbstractItemModel(parent), dirty(false), protobuf(protobuf) {
+ProtoModel::ProtoModel(google::protobuf::Message *protobuf, QObject* parent) : ProtoModel(protobuf, (ProtoModelPtr)nullptr) {
+  QAbstractItemModel::setParent(parent);
+}
+
+ProtoModel::ProtoModel(Message *protobuf, ProtoModelPtr parent)
+    : QAbstractItemModel(parent), dirty(false), protobuf(protobuf), parentModel(parent), modelBackup(nullptr) {
   connect(this, &ProtoModel::dataChanged, this,
           [this](const QModelIndex &topLeft, const QModelIndex &bottomRight,
                  const QVariant & /*oldValue*/ = QVariant(0), const QVector<int> &roles = QVector<int>()) {
             emit QAbstractItemModel::dataChanged(topLeft, bottomRight, roles);
           });
-
-  protobufBackup = protobuf->New();
-  protobufBackup->CopyFrom(*protobuf);
 
   const Descriptor *desc = protobuf->GetDescriptor();
   const Reflection *refl = protobuf->GetReflection();
@@ -27,10 +26,6 @@ ProtoModel::ProtoModel(Message *protobuf, QObject *parent)
     if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
       if (field->is_repeated()) {
         repeatedModels[field->number()] = new RepeatedProtoModel(protobuf, field, this);
-        for (int j = 0; j < refl->FieldSize(*protobuf, field); j++) {
-          ProtoModel *subModel = new ProtoModel(refl->MutableRepeatedMessage(protobuf, field, j), this);
-          repeatedMessages[field->number()].append(QVariant::fromValue(static_cast<void *>(subModel)));
-        }
       } else {
         const google::protobuf::OneofDescriptor *oneof = field->containing_oneof();
         if (oneof) {
@@ -41,29 +36,42 @@ ProtoModel::ProtoModel(Message *protobuf, QObject *parent)
             continue;  // don't allocate if not set
           }
         }
-        ProtoModel *subModel = new ProtoModel(refl->MutableMessage(protobuf, field), this);
-        messages[field->number()] = QVariant::fromValue(static_cast<void *>(subModel));
+        subModels[field->number()] = new ProtoModel(refl->MutableMessage(protobuf, field), this);
       }
     } else if (field->cpp_type() == CppType::CPPTYPE_STRING && field->is_repeated()) {
       for (int j = 0; j < refl->FieldSize(*protobuf, field); j++) {
-        repeatedMessages[field->number()].append(QString::fromStdString(refl->GetRepeatedString(*protobuf, field, j)));
+        repeatedStrings[field->number()].append(QString::fromStdString(refl->GetRepeatedString(*protobuf, field, j)));
       }
     }
   }
 }
 
-ProtoModel::~ProtoModel() { delete protobufBackup; }
+ProtoModel::~ProtoModel() {}
+
+ProtoModelPtr ProtoModel::GetParentModel() const {
+  return parentModel;
+}
+
+ProtoModelPtr ProtoModel::BackupModel(QObject* parent) {
+  backupProtobuf.reset(protobuf->New());
+  backupProtobuf->CopyFrom(*protobuf);
+  modelBackup = new ProtoModel(backupProtobuf.get(), parent);
+  return modelBackup;
+}
+
+ProtoModelPtr ProtoModel::GetBackupModel() {
+  return modelBackup;
+}
+
+bool ProtoModel::RestoreBackup() {
+  if (modelBackup == nullptr) return false;
+  ReplaceBuffer(modelBackup->GetBuffer());
+  return true;
+}
 
 void ProtoModel::ReplaceBuffer(Message *buffer) {
   SetDirty(true);
   protobuf->CopyFrom(*buffer);
-  emit dataChanged(index(0), index(rowCount()));
-}
-
-void ProtoModel::RestoreBuffer() {
-  SetDirty(false);
-  protobuf->CopyFrom(*protobufBackup);
-  emit dataChanged(index(0), index(rowCount()));
 }
 
 google::protobuf::Message *ProtoModel::GetBuffer() { return protobuf; }
@@ -147,10 +155,7 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
 
   switch (field->cpp_type()) {
     case CppType::CPPTYPE_MESSAGE:
-      if (field->is_repeated())
-        return repeatedMessages[index.row()][index.column()];
-      else
-        return messages[index.row()];
+        R_EXPECT(false, QVariant()) << "The requested field " << index << " is a message";
     case CppType::CPPTYPE_INT32:
       return refl->GetInt32(*protobuf, field);
     case CppType::CPPTYPE_INT64:
@@ -174,19 +179,25 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
   return QVariant();
 }
 
-RepeatedProtoModel *ProtoModel::GetRepeatedSubModel(int fieldNum) { return repeatedModels[fieldNum]; }
+RepeatedProtoModelPtr ProtoModel::GetRepeatedSubModel(int fieldNum) { return repeatedModels[fieldNum]; }
 
-ProtoModel *ProtoModel::GetSubModel(int fieldNum) {
-  return static_cast<ProtoModel *>(this->data(fieldNum).value<void *>());
+ProtoModelPtr ProtoModel::GetSubModel(int fieldNum) {
+  if (subModels.contains(fieldNum))
+    return subModels[fieldNum];
+  else
+    return nullptr;
 }
 
-ProtoModel *ProtoModel::GetSubModel(int fieldNum, int index) {
-  return static_cast<ProtoModel *>(repeatedMessages[fieldNum][index].value<void *>());
+ProtoModelPtr ProtoModel::GetSubModel(int fieldNum, int index) {
+  if (repeatedModels.contains(fieldNum) && repeatedModels[fieldNum]->rowCount() > index)
+   return repeatedModels[fieldNum]->GetSubModel(index);
+  else
+    return nullptr;
 }
 
 QString ProtoModel::GetString(int fieldNum, int index) const {
-  if (repeatedMessages.contains(fieldNum) && repeatedMessages[fieldNum].size() > index)
-    return repeatedMessages[fieldNum][index].toString();
+  if (repeatedStrings.contains(fieldNum) && repeatedStrings[fieldNum].count() > index)
+    return repeatedStrings[fieldNum][index];
   else
     return "";
 }
@@ -214,4 +225,49 @@ Qt::ItemFlags ProtoModel::flags(const QModelIndex &index) const {
   auto flags = QAbstractItemModel::flags(index);
   if (index.row() > 0) flags |= Qt::ItemIsEditable;
   return flags;
+}
+
+void UpdateReferences(ProtoModelPtr model, const QString& type, const QString& oldName, const QString& newName) {
+
+  if (model == nullptr) return;
+
+  int rows = model->rowCount();
+  for (int row = 0; row < rows; row++) {
+
+    google::protobuf::Message* protobuf = model->GetBuffer();
+
+    const Descriptor *desc = protobuf->GetDescriptor();
+    const Reflection *refl = protobuf->GetReflection();
+    const FieldDescriptor *field = desc->FindFieldByNumber(row);
+    if (field != nullptr) {
+      if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
+        if (field->is_repeated()) {
+          int cols = model->GetRepeatedSubModel(row)->columnCount();
+          for (int col = 0; col < cols; col++) {
+            UpdateReferences(model->GetSubModel(row, col), type, oldName, newName);
+          }
+        } else UpdateReferences(model->GetSubModel(row), type, oldName, newName);
+      } else if (field->cpp_type() == CppType::CPPTYPE_STRING && !field->is_repeated()) {
+        const QString refType = QString::fromStdString(field->options().GetExtension(buffers::resource_ref));
+        if (refType == type && model->data(row, 0).toString() == oldName) {
+          model->setData(model->index(row, 0, QModelIndex()), newName, Qt::DisplayRole);
+        }
+      }
+    }
+  }
+}
+
+QString ResTypeAsString(TypeCase type) {
+  switch (type) {
+    case TypeCase::kFolder:       return "treenode";
+    case TypeCase::kBackground:   return "background";
+    case TypeCase::kFont:         return "font";
+    case TypeCase::kObject:       return "object";
+    case TypeCase::kPath:         return "path";
+    case TypeCase::kRoom:         return "room";
+    case TypeCase::kSound:        return "sound";
+    case TypeCase::kSprite:       return "sprite";
+    case TypeCase::kTimeline:     return "timeline";
+  }
+  return "unknown";
 }

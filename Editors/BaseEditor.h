@@ -18,7 +18,7 @@ class BaseEditor : public QWidget {
   Q_OBJECT
 
  public:
-  explicit BaseEditor(ProtoModel *treeNodeModel, QWidget *parent);
+  explicit BaseEditor(ProtoModelPtr treeNodeModel, QWidget *parent);
 
   virtual void closeEvent(QCloseEvent *event);
   void ReplaceBuffer(google::protobuf::Message *buffer);
@@ -31,6 +31,7 @@ class BaseEditor : public QWidget {
  public slots:
   virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
                            const QVariant &oldValue = QVariant(0), const QVector<int> &roles = QVector<int>());
+  void OnSave();
 
  protected:
   ModelMapper *nodeMapper;
