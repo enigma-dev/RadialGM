@@ -11,6 +11,7 @@
 
 #include <QDesktopServices>
 #include <QPainter>
+#include <QDebug>
 
 using buffers::resources::Background;
 
@@ -67,28 +68,30 @@ void BackgroundEditor::on_actionNewImage_triggered() {
 }
 
 void BackgroundEditor::on_actionLoadImage_triggered() {
-  ImageDialog* dialog = new ImageDialog(this, "background");
-  dialog->exec();
+  FileDialog* dialog = new FileDialog(this, FileDialog_t::BackgroundLoad, false);
 
-  if (dialog->selectedFiles().size() > 0) {
+  if (dialog->exec() && dialog->selectedFiles().size() > 0) {
     QString fName = dialog->selectedFiles()[0];
-    Background* bkg = gmx::LoadBackground(fName.toStdString());
-    if (bkg != nullptr) {
-      QString lastImage = GetModelData(Background::kImageFieldNumber).toString();
-      ReplaceBuffer(bkg);
-      QString newImage = GetModelData(Background::kImageFieldNumber).toString();
-      if (!ui->backgroundView->SetImage(newImage)) SetModelData(Background::kImageFieldNumber, lastImage);
+    if (fName.endsWith("Background.gmx")) {
+      Background* bkg = gmx::LoadBackground(fName.toStdString());
+      if (bkg != nullptr) {
+        // QString lastData = GetModelData(Background::kImageFieldNumber).toString();
+        ReplaceBuffer(bkg);
+        // QString newData = GetModelData(Background::kImageFieldNumber).toString();
+        // TODO: Copy data into our egm and reset the path
+        // SetModelData(Background::kImageFieldNumber, lastData);
+      } else qDebug() << "Failed to load gmx Background";
     } else {
-      if (ui->backgroundView->SetImage(fName)) SetModelData(Background::kImageFieldNumber, fName);
+      // TODO: Copy data into our egm
+      SetModelData(Background::kImageFieldNumber, fName);
     }
   }
 }
 
 void BackgroundEditor::on_actionSaveImage_triggered() {
-  ImageDialog* dialog = new ImageDialog(this, "background", true);
-  dialog->exec();
+  FileDialog* dialog = new FileDialog(this, FileDialog_t::BackgroundSave, true);
 
-  if (dialog->selectedFiles().size() > 0) {
+  if (dialog->exec() && dialog->selectedFiles().size() > 0) {
     QString fName = dialog->selectedFiles()[0];
     ui->backgroundView->WriteImage(fName, dialog->selectedMimeTypeFilter());
   }
@@ -96,5 +99,7 @@ void BackgroundEditor::on_actionSaveImage_triggered() {
 
 void BackgroundEditor::on_actionEditImage_triggered() {
   QString fName = GetModelData(Background::kImageFieldNumber).toString();
-  QDesktopServices::openUrl(fName);  //TODO: file watcher reload
+  QDesktopServices::openUrl(QUrl::fromLocalFile(fName));
+  // TODO: file watcher reload
+  // TODO: editor settings
 }

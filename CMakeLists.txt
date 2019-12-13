@@ -214,8 +214,8 @@ find_package(OpenSSL REQUIRED)
 target_link_libraries(${EXE} PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 
 # Find Qt
-find_package(Qt5 COMPONENTS Core Widgets Gui PrintSupport REQUIRED)
-target_link_libraries(${EXE} PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport)
+find_package(Qt5 COMPONENTS Core Widgets Gui PrintSupport Multimedia REQUIRED)
+target_link_libraries(${EXE} PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Multimedia)
 
 
 if(MSVC)

@@ -5,7 +5,14 @@
 
 #include <QFileDialog>
 
-class ImageDialog : public QFileDialog {
+enum FileDialog_t {
+  BackgroundLoad,
+  BackgroundSave,
+  SoundSave,
+  SoundLoad
+};
+
+class FileDialog : public QFileDialog {
  public:
-  ImageDialog(QWidget* parent, QString xmlExtension, bool writer = false);
+   FileDialog(QWidget* parent, FileDialog_t type, bool writer);
 };
