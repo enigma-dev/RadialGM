@@ -143,7 +143,21 @@
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="toolButton">
+      <widget class="QToolButton" name="stopButton">
+       <property name="toolTip">
+        <string>Stop playing sound</string>
+       </property>
+       <property name="text">
+        <string>&amp;Stop</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../images.qrc">
+         <normaloff>:/actions/sound-stop.png</normaloff>:/actions/sound-stop.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="loopButton">
        <property name="toolTip">
         <string>Loop Playback</string>
        </property>
@@ -156,6 +170,9 @@
        </property>
        <property name="checkable">
         <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -200,6 +217,12 @@
        <property name="maximum">
         <number>100</number>
        </property>
+       <property name="singleStep">
+        <number>0</number>
+       </property>
+       <property name="pageStep">
+        <number>0</number>
+       </property>
        <property name="value">
         <number>100</number>
        </property>
@@ -230,6 +253,9 @@
        </property>
        <property name="maximum">
         <double>1.000000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>0.010000000000000</double>
        </property>
        <property name="value">
         <double>1.000000000000000</double>
@@ -267,11 +293,20 @@
        <property name="minimum">
         <number>0</number>
        </property>
+       <property name="singleStep">
+        <number>0</number>
+       </property>
+       <property name="pageStep">
+        <number>0</number>
+       </property>
        <property name="value">
         <number>20</number>
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="invertedAppearance">
+        <bool>false</bool>
        </property>
       </widget>
      </item>

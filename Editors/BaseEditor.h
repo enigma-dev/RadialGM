@@ -34,8 +34,8 @@ class BaseEditor : public QWidget {
   void OnSave();
 
  protected:
-  ModelMapper *nodeMapper;
-  ModelMapper *resMapper;
+  ModelMapper* nodeMapper;
+  ModelMapper* resMapper;
 };
 
 #endif  // BASEEDTIOR_H
