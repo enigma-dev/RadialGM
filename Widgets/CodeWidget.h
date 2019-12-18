@@ -14,7 +14,7 @@ class CodeWidget : public QWidget {
   Q_PROPERTY(QString code READ code WRITE setCode NOTIFY codeChanged USER true)
 
  public:
-  explicit CodeWidget(QWidget* parent);
+  explicit CodeWidget(QWidget* parent = nullptr);
   ~CodeWidget();
 
   QString code() const;

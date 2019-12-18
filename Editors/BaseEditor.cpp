@@ -50,6 +50,7 @@ void BaseEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex& /*bo
     this->setWindowTitle(QString::fromStdString(n->name()));
     emit ResourceRenamed(n->type_case(), oldValue.toString(), QString::fromStdString(n->name()));
   }
+  resMapper->SetDirty(true);
 }
 
 void BaseEditor::OnSave() {

@@ -10,6 +10,7 @@
 #include "Editors/PathEditor.h"
 #include "Editors/RoomEditor.h"
 #include "Editors/ScriptEditor.h"
+#include "Editors/ShaderEditor.h"
 #include "Editors/SettingsEditor.h"
 #include "Editors/SoundEditor.h"
 #include "Editors/SpriteEditor.h"
@@ -207,6 +208,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
                                 {TypeCase::kPath, EditorFactory<PathEditor>},
                                 {TypeCase::kFont, EditorFactory<FontEditor>},
                                 {TypeCase::kScript, EditorFactory<ScriptEditor>},
+                                {TypeCase::kShader, EditorFactory<ShaderEditor>},
                                 {TypeCase::kTimeline, EditorFactory<TimelineEditor>},
                                 {TypeCase::kObject, EditorFactory<ObjectEditor>},
                                 {TypeCase::kRoom, EditorFactory<RoomEditor>},

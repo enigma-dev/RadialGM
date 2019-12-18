@@ -57,6 +57,10 @@ LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
         -lgrpc++
 
 SOURCES += \
+    Dialogs/TimelineChangeMoment.cpp \
+    Editors/ShaderEditor.cpp \
+    Widgets/StackedCodeWidget.cpp \
+    Widgets/StackedCodewidget.cpp \
     main.cpp \
     MainWindow.cpp \
     Dialogs/PreferencesDialog.cpp \
@@ -93,6 +97,8 @@ SOURCES += \
     Models/TreeSortFilterProxyModel.cpp
 
 HEADERS += \
+    Dialogs/TimelineChangeMoment.h \
+    Editors/ShaderEditor.h \
     MainWindow.h \
     Dialogs/PreferencesDialog.h \
     Editors/BaseEditor.h \
@@ -120,6 +126,7 @@ HEADERS += \
     Plugins/RGMPlugin.h \
     Plugins/ServerPlugin.h \
     Components/RecentFiles.h \
+    Widgets/StackedCodeWidget.h \
     main.h \
     Dialogs/PreferencesKeys.h \
     Editors/CodeEditor.h \
@@ -132,6 +139,8 @@ HEADERS += \
     Models/TreeSortFilterProxyModel.h
 
 FORMS += \
+    Dialogs/TimelineChangeMoment.ui \
+    Editors/TimelineEditor.ui \
     MainWindow.ui \
     Dialogs/PreferencesDialog.ui \
     Dialogs/AddImageDialog.ui \
@@ -139,7 +148,6 @@ FORMS += \
     Editors/ObjectEditor.ui \
     Editors/FontEditor.ui \
     Editors/PathEditor.ui \
-    Editors/TimelineEditor.ui \
     Editors/RoomEditor.ui \
     Editors/SpriteEditor.ui \
     Editors/SoundEditor.ui \

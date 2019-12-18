@@ -44,8 +44,6 @@ int RepeatedProtoModel::columnCount(const QModelIndex & /*parent*/) const {
   return desc->field_count();
 }
 
-//bool RepeatedProtoModel::setData(const QModelIndex &index, const QVariant &value, int role) {}
-
 QVariant RepeatedProtoModel::data(int row, int column) const {
   return data(this->index(row, column, QModelIndex()), Qt::DisplayRole);
 }
@@ -87,6 +85,16 @@ QVariant RepeatedProtoModel::data(const QModelIndex &index, int role) const {
   return QVariant();
 }
 
+bool RepeatedProtoModel::setData(int subModelIndex, int dataField, const QVariant& value) {
+  return setData(index(subModelIndex, dataField), value);
+}
+
+bool RepeatedProtoModel::setData(const QModelIndex &index, const QVariant &value, int role) {
+  R_EXPECT(index.isValid(), false) << "Supplied index was invalid:" << index;
+  GetParentModel()->SetDirty(true);
+  return models[index.row()]->setData(models[index.row()]->index(index.column(), 0), value, role);
+}
+
 QModelIndex RepeatedProtoModel::parent(const QModelIndex & /*index*/) const { return QModelIndex(); }
 
 QVariant RepeatedProtoModel::headerData(int section, Qt::Orientation orientation, int role) const {
@@ -102,6 +110,65 @@ QModelIndex RepeatedProtoModel::index(int row, int column, const QModelIndex & /
 Qt::ItemFlags RepeatedProtoModel::flags(const QModelIndex &index) const {
   if (!index.isValid()) return nullptr;
   return QAbstractItemModel::flags(index);
+}
+
+bool RepeatedProtoModel::moveRows(int source, int count, int destination) {
+ if (source + count > rowCount() || destination > rowCount()) return false;
+
+ beginMoveRows(QModelIndex(), source, source + count, QModelIndex(), destination);
+
+ int left = source;
+ int right = source + count;
+ if (destination < left) {
+   SwapBack(destination, left, right);
+ } else if (destination > left) {
+   SwapBack(left, right, destination + right - left);
+ }  // else nothing to be done; moving range into itself
+
+ endMoveRows();
+
+ GetParentModel()->SetDirty(true);
+
+ return true;
+}
+
+bool RepeatedProtoModel::moveRows(const QModelIndex& /*sourceParent*/, int sourceRow, int count,
+                                 const QModelIndex& /*destinationParent*/, int destinationChild) {
+  return moveRows(sourceRow, count, destinationChild);
+}
+
+bool RepeatedProtoModel::insertRows(int row, int count, const QModelIndex &parent) {
+  if (row > rowCount()) return false;
+
+  beginInsertRows(parent, row, row+count);
+
+  int p = rowCount();
+
+  Message* parentBuffer = parentModel->GetBuffer();
+  for (int r = 0; r < count; ++r) {
+    Message* m = parentBuffer->GetReflection()->AddMessage(parentBuffer, field);
+    models.append(new ProtoModel(m, parentModel));
+  }
+
+  SwapBack(row, p, count);
+
+  endInsertRows();
+
+  GetParentModel()->SetDirty(true);
+
+  return true;
+}
+
+void RepeatedProtoModel::SwapBack(int left, int part, int right) {
+  MutableRepeatedFieldRef<Message> f = protobuf->GetReflection()->GetMutableRepeatedFieldRef<Message>(protobuf, field);
+  if (left >= part || part >= right) return;
+  int npart = (part - left) % (right - part);
+  while (part > left) {
+    std::swap(models[--part], models[--right]);
+    f.SwapElements(part, right);
+    //--part; --right;
+  }
+  SwapBack(left, left + npart, right);
 }
 
 void RepeatedProtoModel::RowRemovalOperation::RemoveRow(int row) {
@@ -161,4 +228,6 @@ RepeatedProtoModel::RowRemovalOperation::~RowRemovalOperation() {
     for (int j = range.first; j <= range.last; ++j) field.RemoveLast();
     model->endRemoveRows();
   }
+
+  model->GetParentModel()->SetDirty(true);
 }

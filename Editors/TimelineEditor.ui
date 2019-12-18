@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>314</width>
-    <height>395</height>
+    <width>256</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+   <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -23,21 +23,24 @@
    <iconset resource="../images.qrc">
     <normaloff>:/resources/timeline.png</normaloff>:/resources/timeline.png</iconset>
   </property>
+  <property name="layoutDirection">
+   <enum>Qt::LeftToRight</enum>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
-    <number>4</number>
+    <number>2</number>
    </property>
    <property name="leftMargin">
-    <number>6</number>
+    <number>0</number>
    </property>
    <property name="topMargin">
-    <number>6</number>
+    <number>0</number>
    </property>
    <property name="rightMargin">
-    <number>6</number>
+    <number>0</number>
    </property>
    <property name="bottomMargin">
-    <number>6</number>
+    <number>0</number>
    </property>
    <item>
     <layout class="QGridLayout" name="propertiesLayout" columnstretch="0,0">
@@ -67,10 +70,48 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="momentsActionsLayout">
-     <property name="spacing">
-      <number>4</number>
-     </property>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>20</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>30</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Step</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="stepBox">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
      <item>
       <widget class="QToolButton" name="addMomentButton">
        <property name="toolTip">
@@ -122,70 +163,31 @@
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QToolButton" name="undoButton">
-       <property name="toolTip">
-        <string>Undo</string>
-       </property>
-       <property name="text">
-        <string>Undo</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../images.qrc">
-         <normaloff>:/actions/undo.png</normaloff>:/actions/undo.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="undoEditSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QToolButton" name="editMomentButton">
-       <property name="toolTip">
-        <string>Edit Moment</string>
-       </property>
-       <property name="text">
-        <string>Edit Moment</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../images.qrc">
-         <normaloff>:/actions/edit.png</normaloff>:/actions/edit.png</iconset>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
    <item>
-    <widget class="QListWidget" name="momentsList">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+    <widget class="QListView" name="momentsList">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
      </property>
-     <property name="alternatingRowColors">
-      <bool>false</bool>
+     <property name="acceptDrops">
+      <bool>true</bool>
      </property>
-     <item>
-      <property name="text">
-       <string>Step 0</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Step 1</string>
-      </property>
-     </item>
+     <property name="sizeAdjustPolicy">
+      <enum>QAbstractScrollArea::AdjustIgnored</enum>
+     </property>
+     <property name="dragEnabled">
+      <bool>true</bool>
+     </property>
+     <property name="dragDropMode">
+      <enum>QAbstractItemView::InternalMove</enum>
+     </property>
+     <property name="defaultDropAction">
+      <enum>Qt::MoveAction</enum>
+     </property>
     </widget>
    </item>
    <item>

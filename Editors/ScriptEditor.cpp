@@ -5,12 +5,21 @@
 
 using namespace buffers::resources;
 
-ScriptEditor::ScriptEditor(ProtoModelPtr model, QWidget *parent) : CodeEditor(model, parent) {
-  resMapper->addMapping(ui->codeWidget, Script::kCodeFieldNumber);
+ScriptEditor::ScriptEditor(ProtoModelPtr model, QWidget *parent) :
+    BaseEditor(model, parent), codeEditor(new CodeEditor(this)) {
+
+  QLayout* layout = new QVBoxLayout(this);
+  layout->addWidget(codeEditor);
+  layout->setMargin(0);
+  setLayout(layout);
+  resize(codeEditor->geometry().width(), codeEditor->geometry().height());
+
+  CodeWidget* codeWidget = codeEditor->AddCodeWidget();
+  resMapper->addMapping(codeWidget, Script::kCodeFieldNumber);
   resMapper->toFirst();
 
-  this->updateCursorPositionLabel();
-  this->updateLineCountLabel();
+  codeEditor->updateCursorPositionLabel();
+  codeEditor->updateLineCountLabel();
 }
 
 ScriptEditor::~ScriptEditor() {}

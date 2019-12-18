@@ -23,9 +23,9 @@
    <iconset resource="../images.qrc">
     <normaloff>:/resources/script.png</normaloff>:/resources/script.png</iconset>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
-    <number>0</number>
+    <number>2</number>
    </property>
    <property name="leftMargin">
     <number>0</number>
@@ -41,11 +41,17 @@
    </property>
    <item>
     <widget class="QToolBar" name="mainToolBar">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
      <property name="iconSize">
       <size>
@@ -75,10 +81,31 @@
     </widget>
    </item>
    <item>
-    <widget class="CodeWidget" name="codeWidget" native="true"/>
+    <widget class="StackedCodeWidget" name="stackedWidget" native="true">
+     <property name="cursor">
+      <cursorShape>ArrowCursor</cursorShape>
+     </property>
+     <widget class="CodeWidget" name="code" native="true">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>711</width>
+        <height>341</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
    </item>
    <item>
-    <widget class="QStatusBar" name="statusBar"/>
+    <widget class="QStatusBar" name="statusBar">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
    </item>
   </layout>
   <action name="actionSave">
@@ -228,6 +255,11 @@
    <class>CodeWidget</class>
    <extends>QWidget</extends>
    <header>Widgets/CodeWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>StackedCodeWidget</class>
+   <extends>QWidget</extends>
+   <header>Widgets/StackedCodeWidget.h</header>
    <container>1</container>
    <slots>
     <slot>cut()</slot>
@@ -246,166 +278,5 @@
  <resources>
   <include location="../images.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>actionCut</sender>
-   <signal>triggered()</signal>
-   <receiver>codeWidget</receiver>
-   <slot>cut()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>367</x>
-     <y>214</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionCopy</sender>
-   <signal>triggered()</signal>
-   <receiver>codeWidget</receiver>
-   <slot>copy()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>367</x>
-     <y>214</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionPaste</sender>
-   <signal>triggered()</signal>
-   <receiver>codeWidget</receiver>
-   <slot>paste()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>367</x>
-     <y>214</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionUndo</sender>
-   <signal>triggered()</signal>
-   <receiver>codeWidget</receiver>
-   <slot>undo()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>367</x>
-     <y>214</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionRedo</sender>
-   <signal>triggered()</signal>
-   <receiver>codeWidget</receiver>
-   <slot>redo()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>367</x>
-     <y>214</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionNewSource</sender>
-   <signal>triggered()</signal>
-   <receiver>codeWidget</receiver>
-   <slot>newSource()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>367</x>
-     <y>214</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionLoadSource</sender>
-   <signal>triggered()</signal>
-   <receiver>codeWidget</receiver>
-   <slot>loadSource()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>367</x>
-     <y>214</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionSaveSource</sender>
-   <signal>triggered()</signal>
-   <receiver>codeWidget</receiver>
-   <slot>saveSource()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>367</x>
-     <y>214</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionPrint</sender>
-   <signal>triggered()</signal>
-   <receiver>codeWidget</receiver>
-   <slot>printSource()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>367</x>
-     <y>214</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionGoToLine</sender>
-   <signal>triggered()</signal>
-   <receiver>codeWidget</receiver>
-   <slot>gotoLineDialog()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>367</x>
-     <y>214</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

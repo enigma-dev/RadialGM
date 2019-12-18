@@ -29,12 +29,14 @@ set(RGM_SOURCES
     main.cpp
     MainWindow.cpp
     Dialogs/PreferencesDialog.cpp
+    Dialogs/TimelineChangeMoment.cpp
     Editors/BaseEditor.cpp
     Editors/CodeEditor.cpp
     Editors/BackgroundEditor.cpp
     Editors/ObjectEditor.cpp
     Editors/SoundEditor.cpp
     Editors/ScriptEditor.cpp
+    Editors/ShaderEditor.cpp
     Editors/FontEditor.cpp
     Editors/PathEditor.cpp
     Editors/TimelineEditor.cpp
@@ -55,6 +57,7 @@ set(RGM_SOURCES
     Components/QMenuView.cpp
     Widgets/BackgroundView.cpp
     Widgets/CodeWidget.cpp
+    Widgets/StackedCodeWidget.cpp
     Widgets/ColorPicker.cpp
     Widgets/RoomView.cpp
     Widgets/AssetView.cpp
@@ -71,12 +74,14 @@ set(RGM_HEADERS
     MainWindow.h
     Dialogs/PreferencesDialog.h
     Dialogs/PreferencesKeys.h
+    Dialogs/TimelineChangeMoment.h
     Editors/CodeEditor.h
     Editors/BaseEditor.h
     Editors/BackgroundEditor.h
     Editors/ObjectEditor.h
     Editors/SoundEditor.h
     Editors/ScriptEditor.h
+    Editors/ShaderEditor.h
     Editors/FontEditor.h
     Editors/PathEditor.h
     Editors/TimelineEditor.h
@@ -98,6 +103,7 @@ set(RGM_HEADERS
     Components/Logger.h
     Widgets/BackgroundView.h
     Widgets/CodeWidget.h
+    Widgets/StackedCodeWidget.h
     Widgets/ColorPicker.h
     Widgets/RoomView.h
     Widgets/AssetView.h
@@ -109,6 +115,7 @@ set(RGM_UI
     MainWindow.ui
     Dialogs/PreferencesDialog.ui
     Dialogs/AddImageDialog.ui
+    Dialogs/TimelineChangeMoment.ui
     Editors/CodeEditor.ui
     Editors/BackgroundEditor.ui
     Editors/ObjectEditor.ui
@@ -184,14 +191,14 @@ target_link_libraries(${EXE} PRIVATE yaml-cpp)
 
 # Find libEGM
 # Debug
-find_library(LIB_EGM_D NAMES EGMd PATHS ${ENIGMA_DIR})
+find_library(LIB_EGM_D NAMES EGMd EGM PATHS ${ENIGMA_DIR})
 # Release
 find_library(LIB_EGM NAMES EGM PATHS ${ENIGMA_DIR})
 target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_EGM_D},${LIB_EGM}>")
 
 # Find libProtocols
 # Debug
-find_library(LIB_PROTO_D NAMES Protocolsd PATHS ${ENIGMA_DIR})
+find_library(LIB_PROTO_D NAMES Protocolsd Protocols PATHS ${ENIGMA_DIR})
 # Release
 find_library(LIB_PROTO NAMES Protocols PATHS ${ENIGMA_DIR})
 target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_PROTO_D},${LIB_PROTO}>")
