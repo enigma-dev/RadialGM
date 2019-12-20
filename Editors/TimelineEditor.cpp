@@ -72,6 +72,8 @@ TimelineEditor::TimelineEditor(ProtoModelPtr model, QWidget* parent)
     if (dialog.exec())
       ChangeMoment(IndexOf(ui->stepBox->value()), dialog.GetSpinBoxValue());
 
+    ui->momentsList->reset();
+
     ui->changeMomentButton->setDown(false); // Qt buggy af
   });
 

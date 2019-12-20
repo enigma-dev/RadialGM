@@ -17,7 +17,16 @@ ProtoModelPtr RepeatedProtoModel::GetParentModel() const {
   return parentModel;
 }
 
-int RepeatedProtoModel::rowCount(const QModelIndex & /*parent*/) const {
+void RepeatedProtoModel::SetParentModel(ProtoModelPtr parent) {
+  parentModel = parent;
+  setParent(parent);
+  for (ProtoModelPtr m : models) {
+    if (m->GetParentModel() != parent) m->SetParentModel(parent);
+  }
+}
+
+int RepeatedProtoModel::rowCount(const QModelIndex & parent) const {
+  if (parent.isValid()) return 0;
   const Reflection *refl = protobuf->GetReflection();
   return refl->FieldSize(*protobuf, field);
 }
@@ -39,7 +48,8 @@ QVector<ProtoModelPtr>& RepeatedProtoModel::GetMutableModelList() {
 
 bool RepeatedProtoModel::empty() const { return this->rowCount() <= 0; }
 
-int RepeatedProtoModel::columnCount(const QModelIndex & /*parent*/) const {
+int RepeatedProtoModel::columnCount(const QModelIndex & parent) const {
+  if (parent.isValid()) return 0;
   const Descriptor *desc = protobuf->GetDescriptor();
   return desc->field_count();
 }
@@ -95,7 +105,7 @@ bool RepeatedProtoModel::setData(const QModelIndex &index, const QVariant &value
   return models[index.row()]->setData(models[index.row()]->index(index.column(), 0), value, role);
 }
 
-QModelIndex RepeatedProtoModel::parent(const QModelIndex & /*index*/) const { return QModelIndex(); }
+QModelIndex RepeatedProtoModel::parent(const QModelIndex &/*index*/) const { return QModelIndex(); }
 
 QVariant RepeatedProtoModel::headerData(int section, Qt::Orientation orientation, int role) const {
   if (this->empty() || role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal) return QVariant();
@@ -115,7 +125,7 @@ Qt::ItemFlags RepeatedProtoModel::flags(const QModelIndex &index) const {
 bool RepeatedProtoModel::moveRows(int source, int count, int destination) {
  if (source + count > rowCount() || destination > rowCount()) return false;
 
- beginMoveRows(QModelIndex(), source, source + count, QModelIndex(), destination);
+ beginMoveRows(QModelIndex(), source, source + count - 1, QModelIndex(), destination);
 
  int left = source;
  int right = source + count;
@@ -150,7 +160,7 @@ bool RepeatedProtoModel::insertRows(int row, int count, const QModelIndex &paren
     models.append(new ProtoModel(m, parentModel));
   }
 
-  SwapBack(row, p, count);
+  SwapBack(row, p, rowCount());
 
   endInsertRows();
 
@@ -166,7 +176,6 @@ void RepeatedProtoModel::SwapBack(int left, int part, int right) {
   while (part > left) {
     std::swap(models[--part], models[--right]);
     f.SwapElements(part, right);
-    //--part; --right;
   }
   SwapBack(left, left + npart, right);
 }

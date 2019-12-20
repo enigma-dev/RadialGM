@@ -22,13 +22,30 @@ using Timeline = buffers::resources::Timeline;
 class ProtoModel : public QAbstractItemModel {
   Q_OBJECT
 
+private:
+  struct SubModels {
+    void Swap(SubModels& other);
+    QHash<int, ProtoModelPtr> protoModels;
+    QHash<int, QList<QString>> strings;
+    QHash<int, RepeatedProtoModelPtr> repeatedModels;
+  };
+
+  SubModels subModels;
+  ProtoModelPtr parentModel;
+  ProtoModelPtr modelBackup;
+  bool dirty;
+  google::protobuf::Message *protobuf;
+  QScopedPointer<Message> backupProtobuf;
+
  public:
   explicit ProtoModel(google::protobuf::Message *protobuf, QObject* parent);
   explicit ProtoModel(google::protobuf::Message *protobuf, ProtoModelPtr parent);
   ~ProtoModel();
   ProtoModelPtr GetParentModel() const;
+  void SetParentModel(ProtoModelPtr parent);
   ProtoModelPtr BackupModel(QObject* parent);
   ProtoModelPtr GetBackupModel();
+  SubModels& GetSubModels();
   bool RestoreBackup();
   void ReplaceBuffer(google::protobuf::Message *buffer);
   google::protobuf::Message *GetBuffer();
@@ -51,16 +68,6 @@ class ProtoModel : public QAbstractItemModel {
  signals:
   void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
                            const QVariant &oldValue = QVariant(0), const QVector<int> &roles = QVector<int>());
-
- private:
-  ProtoModelPtr parentModel;
-  ProtoModelPtr modelBackup;
-  QHash<int, ProtoModelPtr> subModels;
-  QHash<int, QList<QString>> repeatedStrings;
-  QHash<int, RepeatedProtoModelPtr> repeatedModels;
-  bool dirty;
-  google::protobuf::Message *protobuf;
-  QScopedPointer<Message> backupProtobuf;
 };
 
 void UpdateReferences(ProtoModelPtr model, const QString& type, const QString& oldName, const QString& newName);

@@ -24,6 +24,7 @@ class RepeatedProtoModel : public QAbstractItemModel {
  public:
   RepeatedProtoModel(Message *protobuf, const FieldDescriptor *field, ProtoModelPtr parent);
   ProtoModelPtr GetParentModel() const;
+  void SetParentModel(ProtoModelPtr parent);
   void AddModel(ProtoModelPtr model);
   ProtoModelPtr GetSubModel(int index);
   QVector<ProtoModelPtr>& GetMutableModelList();
