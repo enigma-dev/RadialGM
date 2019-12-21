@@ -16,10 +16,11 @@ class CodeEditor : public QWidget {
   explicit CodeEditor(QWidget *parent, bool removeSaveBtn = false);
   ~CodeEditor();
   void SetDisabled(bool disabled);
-  CodeWidget* AddCodeWidget();
+  CodeWidget *AddCodeWidget();
   int GetCurrentIndex();
   void SetCurrentIndex(int index);
   void RemoveCodeWidget(int index);
+  void ClearCodeWidgets();
   Ui::CodeEditor *ui;
 
  public slots:

@@ -12,7 +12,7 @@ class FontEditor : public BaseEditor {
 
  public:
   explicit FontEditor(ProtoModelPtr model, QWidget* parent);
-  ~FontEditor();
+  ~FontEditor() override;
 
  private:
   Ui::FontEditor* ui;

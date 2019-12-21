@@ -7,11 +7,10 @@
 class ScriptEditor : public BaseEditor {
   Q_OBJECT
 
-public:
-  ScriptEditor(ProtoModelPtr model, QWidget *parent = nullptr);
-  ~ScriptEditor();
+ public:
+  ScriptEditor(ProtoModelPtr model, QWidget* parent = nullptr);
 
-private:
+ private:
   CodeEditor* codeEditor;
 };
 

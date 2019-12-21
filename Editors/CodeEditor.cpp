@@ -2,21 +2,21 @@
 #include "Widgets/StackedCodeWidget.h"
 #include "ui_CodeEditor.h"
 
-CodeEditor::CodeEditor(QWidget *parent, bool removeSaveBtn) : ui(new Ui::CodeEditor) {
+CodeEditor::CodeEditor(QWidget* parent, bool removeSaveBtn) : ui(new Ui::CodeEditor) {
   ui->setupUi(this);
 
   if (removeSaveBtn) ui->mainToolBar->removeAction(ui->actionSave);
 
   layout()->setAlignment(Qt::AlignTop);
 
-  connect(ui->actionCut,        &QAction::triggered, ui->stackedWidget, &StackedCodeWidget::cut);
-  connect(ui->actionCopy,       &QAction::triggered, ui->stackedWidget, &StackedCodeWidget::copy);
-  connect(ui->actionRedo,       &QAction::triggered, ui->stackedWidget, &StackedCodeWidget::redo);
-  connect(ui->actionUndo,       &QAction::triggered, ui->stackedWidget, &StackedCodeWidget::undo);
-  connect(ui->actionPaste,      &QAction::triggered, ui->stackedWidget, &StackedCodeWidget::paste);
-  connect(ui->actionPrint,      &QAction::triggered, ui->stackedWidget, &StackedCodeWidget::printSource);
-  connect(ui->actionGoToLine,   &QAction::triggered, ui->stackedWidget, &StackedCodeWidget::gotoLineDialog);
-  connect(ui->actionNewSource,  &QAction::triggered, ui->stackedWidget, &StackedCodeWidget::newSource);
+  connect(ui->actionCut, &QAction::triggered, ui->stackedWidget, &StackedCodeWidget::cut);
+  connect(ui->actionCopy, &QAction::triggered, ui->stackedWidget, &StackedCodeWidget::copy);
+  connect(ui->actionRedo, &QAction::triggered, ui->stackedWidget, &StackedCodeWidget::redo);
+  connect(ui->actionUndo, &QAction::triggered, ui->stackedWidget, &StackedCodeWidget::undo);
+  connect(ui->actionPaste, &QAction::triggered, ui->stackedWidget, &StackedCodeWidget::paste);
+  connect(ui->actionPrint, &QAction::triggered, ui->stackedWidget, &StackedCodeWidget::printSource);
+  connect(ui->actionGoToLine, &QAction::triggered, ui->stackedWidget, &StackedCodeWidget::gotoLineDialog);
+  connect(ui->actionNewSource, &QAction::triggered, ui->stackedWidget, &StackedCodeWidget::newSource);
   connect(ui->actionLoadSource, &QAction::triggered, ui->stackedWidget, &StackedCodeWidget::loadSource);
   connect(ui->actionSaveSource, &QAction::triggered, ui->stackedWidget, &StackedCodeWidget::saveSource);
   //connect(ui->actionFindAndReplace, &QAction::triggered, ui->stackedWidget, &StackedCodeWidget::findAndReplace);
@@ -41,20 +41,20 @@ void CodeEditor::SetDisabled(bool disabled) {
   (disabled) ? ui->stackedWidget->hide() : ui->stackedWidget->show();
   (disabled) ? ui->statusBar->hide() : ui->statusBar->show();
   for (QAction* action : ui->mainToolBar->actions()) {
-     action->setDisabled(disabled);
+    action->setDisabled(disabled);
   }
 }
 
-int CodeEditor::GetCurrentIndex() {
-  return ui->stackedWidget->currentIndex();
-}
+int CodeEditor::GetCurrentIndex() { return ui->stackedWidget->currentIndex(); }
 
-void CodeEditor::SetCurrentIndex(int index) {
- ui->stackedWidget->setCurrentIndex(index);
-}
+void CodeEditor::SetCurrentIndex(int index) { ui->stackedWidget->setCurrentIndex(index); }
 
-void CodeEditor::RemoveCodeWidget(int index) {
-  ui->stackedWidget->removeWidget(ui->stackedWidget->widget(index));
+void CodeEditor::RemoveCodeWidget(int index) { ui->stackedWidget->removeWidget(ui->stackedWidget->widget(index)); }
+
+void CodeEditor::ClearCodeWidgets() {
+  for (int i = 0; i < ui->stackedWidget->count(); ++i) {
+    ui->stackedWidget->removeWidget(ui->stackedWidget->widget(i));
+  }
 }
 
 CodeWidget* CodeEditor::AddCodeWidget() {

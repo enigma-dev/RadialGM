@@ -13,27 +13,15 @@ RepeatedProtoModel::RepeatedProtoModel(Message *protobuf, const FieldDescriptor 
   }
 }
 
-ProtoModelPtr RepeatedProtoModel::GetParentModel() const {
-  return parentModel;
-}
+ProtoModelPtr RepeatedProtoModel::GetParentModel() const { return parentModel; }
 
-void RepeatedProtoModel::SetParentModel(ProtoModelPtr parent) {
-  parentModel = parent;
-  setParent(parent);
-  for (ProtoModelPtr m : models) {
-    if (m->GetParentModel() != parent) m->SetParentModel(parent);
-  }
-}
-
-int RepeatedProtoModel::rowCount(const QModelIndex & parent) const {
+int RepeatedProtoModel::rowCount(const QModelIndex &parent) const {
   if (parent.isValid()) return 0;
   const Reflection *refl = protobuf->GetReflection();
   return refl->FieldSize(*protobuf, field);
 }
 
-void RepeatedProtoModel::AddModel(ProtoModelPtr model) {
-  models.append(model);
-}
+void RepeatedProtoModel::AddModel(ProtoModelPtr model) { models.append(model); }
 
 ProtoModelPtr RepeatedProtoModel::GetSubModel(int index) {
   if (index < models.count())
@@ -42,13 +30,11 @@ ProtoModelPtr RepeatedProtoModel::GetSubModel(int index) {
     return nullptr;
 }
 
-QVector<ProtoModelPtr>& RepeatedProtoModel::GetMutableModelList() {
-  return models;
-}
+QVector<ProtoModelPtr> &RepeatedProtoModel::GetMutableModelList() { return models; }
 
 bool RepeatedProtoModel::empty() const { return this->rowCount() <= 0; }
 
-int RepeatedProtoModel::columnCount(const QModelIndex & parent) const {
+int RepeatedProtoModel::columnCount(const QModelIndex &parent) const {
   if (parent.isValid()) return 0;
   const Descriptor *desc = protobuf->GetDescriptor();
   return desc->field_count();
@@ -80,7 +66,7 @@ QVariant RepeatedProtoModel::data(const QModelIndex &index, int role) const {
       }
     }
   } else if (role == Qt::DecorationRole && field->name() == "tiles" &&
-      index.column() == Room::Tile::kBackgroundNameFieldNumber) {
+             index.column() == Room::Tile::kBackgroundNameFieldNumber) {
     auto bkg = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, data.toString());
     if (bkg != nullptr) {
       bkg = bkg->GetSubModel(TreeNode::kBackgroundFieldNumber);
@@ -95,7 +81,7 @@ QVariant RepeatedProtoModel::data(const QModelIndex &index, int role) const {
   return QVariant();
 }
 
-bool RepeatedProtoModel::setData(int subModelIndex, int dataField, const QVariant& value) {
+bool RepeatedProtoModel::setData(int subModelIndex, int dataField, const QVariant &value) {
   return setData(index(subModelIndex, dataField), value);
 }
 
@@ -105,7 +91,7 @@ bool RepeatedProtoModel::setData(const QModelIndex &index, const QVariant &value
   return models[index.row()]->setData(models[index.row()]->index(index.column(), 0), value, role);
 }
 
-QModelIndex RepeatedProtoModel::parent(const QModelIndex &/*index*/) const { return QModelIndex(); }
+QModelIndex RepeatedProtoModel::parent(const QModelIndex & /*index*/) const { return QModelIndex(); }
 
 QVariant RepeatedProtoModel::headerData(int section, Qt::Orientation orientation, int role) const {
   if (this->empty() || role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal) return QVariant();
@@ -123,40 +109,40 @@ Qt::ItemFlags RepeatedProtoModel::flags(const QModelIndex &index) const {
 }
 
 bool RepeatedProtoModel::moveRows(int source, int count, int destination) {
- if (source + count > rowCount() || destination > rowCount()) return false;
+  int left = source;
+  int right = source + count;
+  if (left < 0 || destination < 0) return false;
+  if (right > rowCount() || destination > rowCount()) return false;
+  if (destination >= left && destination < right) return false;
 
- beginMoveRows(QModelIndex(), source, source + count - 1, QModelIndex(), destination);
+  beginMoveRows(QModelIndex(), source, source + count - 1, QModelIndex(), destination);
 
- int left = source;
- int right = source + count;
- if (destination < left) {
-   SwapBack(destination, left, right);
- } else if (destination > left) {
-   SwapBack(left, right, destination + right - left);
- }  // else nothing to be done; moving range into itself
+  if (destination < left) {
+    SwapBack(destination, left, right);
+  } else {  // Verified above that we're dest < left or dest >= right
+    SwapBack(left, right, destination);
+  }
 
- endMoveRows();
-
- GetParentModel()->SetDirty(true);
-
- return true;
+  endMoveRows();
+  GetParentModel()->SetDirty(true);
+  return true;
 }
 
-bool RepeatedProtoModel::moveRows(const QModelIndex& /*sourceParent*/, int sourceRow, int count,
-                                 const QModelIndex& /*destinationParent*/, int destinationChild) {
+bool RepeatedProtoModel::moveRows(const QModelIndex & /*sourceParent*/, int sourceRow, int count,
+                                  const QModelIndex & /*destinationParent*/, int destinationChild) {
   return moveRows(sourceRow, count, destinationChild);
 }
 
 bool RepeatedProtoModel::insertRows(int row, int count, const QModelIndex &parent) {
   if (row > rowCount()) return false;
 
-  beginInsertRows(parent, row, row+count);
+  beginInsertRows(parent, row, row + count);
 
   int p = rowCount();
 
-  Message* parentBuffer = parentModel->GetBuffer();
+  Message *parentBuffer = parentModel->GetBuffer();
   for (int r = 0; r < count; ++r) {
-    Message* m = parentBuffer->GetReflection()->AddMessage(parentBuffer, field);
+    Message *m = parentBuffer->GetReflection()->AddMessage(parentBuffer, field);
     models.append(new ProtoModel(m, parentModel));
   }
 
@@ -180,9 +166,7 @@ void RepeatedProtoModel::SwapBack(int left, int part, int right) {
   SwapBack(left, left + npart, right);
 }
 
-void RepeatedProtoModel::RowRemovalOperation::RemoveRow(int row) {
-  rows.insert(row);
-}
+void RepeatedProtoModel::RowRemovalOperation::RemoveRow(int row) { rows.insert(row); }
 void RepeatedProtoModel::RowRemovalOperation::RemoveRows(int row, int count) {
   for (int i = row; i < row + count; ++i) rows.insert(i);
 }
@@ -194,8 +178,8 @@ RepeatedProtoModel::RowRemovalOperation::~RowRemovalOperation() {
   // Compute ranges for our deleted rows.
   struct Range {
     int first, last;
-    Range(): first(), last() {}
-    Range(int f, int l): first(f), last(l) {}
+    Range() : first(), last() {}
+    Range(int f, int l) : first(f), last(l) {}
     int size() { return last - first + 1; }
   };
   std::vector<Range> ranges;
@@ -219,14 +203,16 @@ RepeatedProtoModel::RowRemovalOperation::~RowRemovalOperation() {
     while (right < range.first) {
       field.SwapElements(left, right);
       std::swap(list[left], list[right]);
-      left++; right++;
+      left++;
+      right++;
     }
     right = range.last + 1;
   }
   while (right < field.size()) {
     field.SwapElements(left, right);
     std::swap(list[left], list[right]);
-    left++; right++;
+    left++;
+    right++;
   }
 
   // Send the endRemoveRows operations in the reverse order, removing the

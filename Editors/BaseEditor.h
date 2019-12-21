@@ -31,11 +31,13 @@ class BaseEditor : public QWidget {
  public slots:
   virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
                            const QVariant &oldValue = QVariant(0), const QVector<int> &roles = QVector<int>());
+  virtual void RebindSubModels();
   void OnSave();
 
  protected:
-  ModelMapper* nodeMapper;
-  ModelMapper* resMapper;
+  ModelMapper *nodeMapper;
+  ModelMapper *resMapper;
+  ProtoModelPtr _model;
 };
 
 #endif  // BASEEDTIOR_H

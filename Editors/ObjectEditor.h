@@ -12,7 +12,7 @@ class ObjectEditor : public BaseEditor {
 
  public:
   explicit ObjectEditor(ProtoModelPtr model, QWidget* parent);
-  ~ObjectEditor();
+  ~ObjectEditor() override;
 
  private:
   Ui::ObjectEditor* ui;

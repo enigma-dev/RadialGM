@@ -4,14 +4,13 @@
 #include "Shader.pb.h"
 
 #include <QComboBox>
-#include <QStackedWidget>
 #include <QLayout>
+#include <QStackedWidget>
 
 using namespace buffers::resources;
 
-ShaderEditor::ShaderEditor(ProtoModelPtr model, QWidget *parent) :
-    BaseEditor(model, parent), codeEditor(new CodeEditor(this)) {
-
+ShaderEditor::ShaderEditor(ProtoModelPtr model, QWidget* parent)
+    : BaseEditor(model, parent), codeEditor(new CodeEditor(this)) {
   QLayout* layout = new QVBoxLayout(this);
   layout->addWidget(codeEditor);
   layout->setMargin(0);
@@ -19,6 +18,7 @@ ShaderEditor::ShaderEditor(ProtoModelPtr model, QWidget *parent) :
   resize(codeEditor->geometry().width(), codeEditor->geometry().height());
 
   Ui::CodeEditor* ui = codeEditor->ui;
+  connect(ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
 
   QLabel* shaderLabel = new QLabel(tr("Shader Type: "), ui->mainToolBar);
   QComboBox* shaderType = new QComboBox(ui->mainToolBar);
@@ -35,13 +35,10 @@ ShaderEditor::ShaderEditor(ProtoModelPtr model, QWidget *parent) :
   resMapper->addMapping(vertexWidget, Shader::kVertexCodeFieldNumber);
   resMapper->toFirst();
 
-  connect(shaderType, QOverload<int>::of(&QComboBox::currentIndexChanged), [=](int index) {
-    ui->stackedWidget->setCurrentIndex(index);
-  });
+  connect(shaderType, QOverload<int>::of(&QComboBox::currentIndexChanged),
+          [=](int index) { ui->stackedWidget->setCurrentIndex(index); });
 
   ui->stackedWidget->setCurrentIndex(0);
   codeEditor->updateCursorPositionLabel();
   codeEditor->updateLineCountLabel();
 }
-
-ShaderEditor::~ShaderEditor() {}

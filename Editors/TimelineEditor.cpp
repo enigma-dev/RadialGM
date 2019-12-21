@@ -1,27 +1,26 @@
 #include "TimelineEditor.h"
 
-#include "ui_TimelineEditor.h"
 #include "ui_CodeEditor.h"
+#include "ui_TimelineEditor.h"
 
-#include "Dialogs/TimelineChangeMoment.h"
 #include "CodeEditor.h"
+#include "Dialogs/TimelineChangeMoment.h"
 
-#include <QSplitter>
+#include <QDebug>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QSizePolicy>
-#include <QDebug>
+#include <QSplitter>
 
 TimelineEditor::TimelineEditor(ProtoModelPtr model, QWidget* parent)
-    : BaseEditor(model, parent), codeEditor(new CodeEditor(this, true)),  ui(new Ui::TimelineEditor) {
-
-  ProtoModelPtr timelineModel = model->GetSubModel(TreeNode::kTimelineFieldNumber);
-  momentsModel = timelineModel->GetRepeatedSubModel(Timeline::kMomentsFieldNumber);
-
+    : BaseEditor(model, parent), codeEditor(new CodeEditor(this, true)), ui(new Ui::TimelineEditor) {
   QLayout* layout = new QVBoxLayout(this);
   QSplitter* splitter = new QSplitter(this);
 
   QWidget* momentWidget = new QWidget(this);
   ui->setupUi(momentWidget);
+
+  nodeMapper->addMapping(ui->nameEdit, TreeNode::kNameFieldNumber);
 
   connect(ui->saveButton, &QAbstractButton::pressed, this, &BaseEditor::OnSave);
 
@@ -40,16 +39,7 @@ TimelineEditor::TimelineEditor(ProtoModelPtr model, QWidget* parent)
   // Tell frankensteined widget to resize to proper size
   resize(codeEditor->geometry().width() + momentWidget->geometry().width(), codeEditor->geometry().height());
 
-  for (int moment = 0; moment < momentsModel->rowCount(); ++moment) {
-    BindMomentEditor(moment);
-  }
-
-  ui->momentsList->setModel(momentsModel);
-  ui->momentsList->setModelColumn(Timeline::Moment::kStepFieldNumber);
-
-  if (momentsModel->rowCount() == 0) codeEditor->setDisabled(true);
-
-  connect(ui->momentsList, &QAbstractItemView::clicked, [=](const QModelIndex &index) {
+  connect(ui->momentsList, &QAbstractItemView::clicked, [=](const QModelIndex& index) {
     SetCurrentEditor(index.row());
     ui->stepBox->setValue(momentsModel->data(index.row(), Timeline::Moment::kStepFieldNumber).toInt());
   });
@@ -57,24 +47,21 @@ TimelineEditor::TimelineEditor(ProtoModelPtr model, QWidget* parent)
   connect(ui->addMomentButton, &QPushButton::pressed, [=]() {
     AddMoment(ui->stepBox->value());
     codeEditor->setDisabled(false);
-    SetCurrentEditor(momentsModel->rowCount()-1);
+    SetCurrentEditor(momentsModel->rowCount() - 1);
     ui->stepBox->setValue(ui->stepBox->value() + 1);
   });
 
-  connect(ui->stepBox, QOverload<int>::of(&QSpinBox::valueChanged), [=](int value) {
-    CheckDisableButtons(value);
-  });
+  connect(ui->stepBox, QOverload<int>::of(&QSpinBox::valueChanged), [=](int value) { CheckDisableButtons(value); });
 
   connect(ui->changeMomentButton, &QPushButton::pressed, [=]() {
     TimelineChangeMoment dialog(this);
     dialog.setWindowTitle((QString)("Change moment " + QString::number(ui->stepBox->value()) + " to     "));
     dialog.SetSpinBoxValue(ui->stepBox->value());
-    if (dialog.exec())
-      ChangeMoment(IndexOf(ui->stepBox->value()), dialog.GetSpinBoxValue());
+    if (dialog.exec()) ChangeMoment(IndexOf(ui->stepBox->value()), dialog.GetSpinBoxValue());
 
     ui->momentsList->reset();
 
-    ui->changeMomentButton->setDown(false); // Qt buggy af
+    ui->changeMomentButton->setDown(false);  // Qt buggy af
   });
 
   connect(ui->deleteMomentButton, &QPushButton::pressed, [=]() {
@@ -85,36 +72,65 @@ TimelineEditor::TimelineEditor(ProtoModelPtr model, QWidget* parent)
     if (momentsModel->rowCount() == 0) {
       CheckDisableButtons(-1);
       codeEditor->setDisabled(true);
-    } else SetCurrentEditor(momentsModel->rowCount()-1);
+    } else
+      SetCurrentEditor(momentsModel->rowCount() - 1);
+
+    CheckDisableButtons(ui->stepBox->value());
   });
 
-  CheckDisableButtons(ui->stepBox->value());
+  RebindSubModels();
 }
 
 TimelineEditor::~TimelineEditor() { delete ui; }
 
+void TimelineEditor::RebindSubModels() {
+  codeEditor->ClearCodeWidgets();
+
+  ProtoModelPtr timelineModel = _model->GetSubModel(TreeNode::kTimelineFieldNumber);
+  momentsModel = timelineModel->GetRepeatedSubModel(Timeline::kMomentsFieldNumber);
+
+  for (int moment = 0; moment < momentsModel->rowCount(); ++moment) {
+    BindMomentEditor(moment);
+  }
+
+  ui->momentsList->setModel(momentsModel);
+  ui->momentsList->setModelColumn(Timeline::Moment::kStepFieldNumber);
+
+  if (momentsModel->rowCount() == 0) codeEditor->setDisabled(true);
+
+  CheckDisableButtons(ui->stepBox->value());
+
+  BaseEditor::RebindSubModels();
+}
+
 void TimelineEditor::AddMoment(int step) {
   int insertIndex = FindInsertIndex(step);
-
   momentsModel->insertRow(insertIndex);
   momentsModel->setData(insertIndex, Timeline::Moment::kStepFieldNumber, step);
+  BindMomentEditor(insertIndex);
 }
 
 void TimelineEditor::ChangeMoment(int oldIndex, int step) {
-  momentsModel->setData(oldIndex, Timeline::Moment::kStepFieldNumber, step);
-  momentsModel->moveRows(oldIndex, 1, FindInsertIndex(step));
+  if (IndexOf(step) != -1) {
+    QMessageBox error;
+    error.critical(this, "Error Changing Moment", "Moment already exists");
+  } else {
+    int newIndex = FindInsertIndex(step);
+    momentsModel->moveRows(oldIndex, 1, newIndex);
+    momentsModel->setData((newIndex < oldIndex) ? newIndex : newIndex - 1, Timeline::Moment::kStepFieldNumber, step);
+  }
 }
 
 void TimelineEditor::RemoveMoment(int modelIndex) {
- RepeatedProtoModel::RowRemovalOperation remover(momentsModel);
- remover.RemoveRow(modelIndex);
- codeEditor->RemoveCodeWidget(modelIndex);
+  RepeatedProtoModel::RowRemovalOperation remover(momentsModel);
+  remover.RemoveRow(modelIndex);
+  codeEditor->RemoveCodeWidget(modelIndex);
 }
 
 int TimelineEditor::FindInsertIndex(int step) {
   int index = 0;
-  while (index < momentsModel->rowCount() && step > momentsModel->
-        data(index, Timeline::Moment::kStepFieldNumber).toInt()) {
+  while (index < momentsModel->rowCount() &&
+         step > momentsModel->data(index, Timeline::Moment::kStepFieldNumber).toInt()) {
     ++index;
   }
 
@@ -122,14 +138,13 @@ int TimelineEditor::FindInsertIndex(int step) {
 }
 
 int TimelineEditor::IndexOf(int step) {
-  int index = -1;
   for (int r = 0; r < momentsModel->rowCount(); ++r) {
     if (momentsModel->data(r, Timeline::Moment::kStepFieldNumber).toInt() == step) {
-      index = r;
-      break;
+      return r;
     }
   }
-  return index;
+
+  return -1;
 }
 
 void TimelineEditor::BindMomentEditor(int modelIndex) {
@@ -141,9 +156,8 @@ void TimelineEditor::BindMomentEditor(int modelIndex) {
 
 void TimelineEditor::SetCurrentEditor(int modelIndex) {
   codeEditor->SetCurrentIndex(modelIndex);
-  ui->momentsList->selectionModel()->select(
-              momentsModel->index(modelIndex, Timeline::Moment::kStepFieldNumber),
-              QItemSelectionModel::QItemSelectionModel::ClearAndSelect);
+  ui->momentsList->selectionModel()->select(momentsModel->index(modelIndex, Timeline::Moment::kStepFieldNumber),
+                                            QItemSelectionModel::QItemSelectionModel::ClearAndSelect);
 }
 
 void TimelineEditor::CheckDisableButtons(int value) {

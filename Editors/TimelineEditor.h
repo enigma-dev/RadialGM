@@ -7,16 +7,19 @@
 namespace Ui {
 class TimelineEditor;
 class CodeEditor;
-}
+}  // namespace Ui
 
 class TimelineEditor : public BaseEditor {
   Q_OBJECT
 
  public:
   explicit TimelineEditor(ProtoModelPtr model, QWidget* parent);
-  ~TimelineEditor();
+  ~TimelineEditor() override;
 
-private:
+ public slots:
+  void RebindSubModels() override;
+
+ private:
   void CheckDisableButtons(int value);
   void AddMoment(int step);
   void ChangeMoment(int oldIndex, int step);
@@ -28,6 +31,7 @@ private:
 
   CodeEditor* codeEditor;
   Ui::TimelineEditor* ui;
+  ProtoModelPtr timelineModel;
   RepeatedProtoModelPtr momentsModel;
 };
 

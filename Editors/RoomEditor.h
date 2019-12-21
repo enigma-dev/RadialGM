@@ -17,12 +17,13 @@ class RoomEditor : public BaseEditor {
 
  public:
   explicit RoomEditor(ProtoModelPtr model, QWidget* parent);
-  ~RoomEditor();
+  ~RoomEditor() override;
 
   void setZoom(qreal zoom);
 
  public slots:
-  void SelectedObjectChanged(QAction *action);
+  void RebindSubModels() override;
+  void SelectedObjectChanged(QAction* action);
 
  private slots:
   void on_actionZoomIn_triggered();
@@ -33,6 +34,8 @@ class RoomEditor : public BaseEditor {
  private:
   Ui::RoomEditor* ui;
   QLabel *cursorPositionLabel, *assetNameLabel;
+  ProtoModelPtr roomModel;
+  ImmediateDataWidgetMapper* viewMapper;
 
   bool eventFilter(QObject* obj, QEvent* event) override;
 };

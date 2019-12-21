@@ -14,7 +14,7 @@ class BackgroundEditor : public BaseEditor {
 
  public:
   explicit BackgroundEditor(ProtoModelPtr model, QWidget *parent);
-  ~BackgroundEditor();
+  ~BackgroundEditor() override;
 
  private slots:
   void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVariant &oldValue = QVariant(0),
