@@ -20,9 +20,6 @@ RoomEditor::RoomEditor(ProtoModelPtr model, QWidget* parent) : BaseEditor(model,
   ui->setupUi(this);
   connect(ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
 
-  ProtoModelPtr roomModel = model->GetSubModel(TreeNode::kRoomFieldNumber);
-  ui->roomView->SetResourceModel(roomModel);
-
   nodeMapper->addMapping(ui->roomName, TreeNode::kNameFieldNumber);
   nodeMapper->toFirst();
 
@@ -37,9 +34,7 @@ RoomEditor::RoomEditor(ProtoModelPtr model, QWidget* parent) : BaseEditor(model,
   resMapper->addMapping(ui->clearViewportCheckBox, Room::kClearViewBackgroundFieldNumber);
   resMapper->toFirst();
 
-  RepeatedProtoModelPtr vm = roomModel->GetRepeatedSubModel(Room::kViewsFieldNumber);
-  ImmediateDataWidgetMapper* viewMapper = new ImmediateDataWidgetMapper(this);
-  viewMapper->setModel(vm);
+  viewMapper = new ImmediateDataWidgetMapper(this);
   viewMapper->addMapping(ui->viewVisibleCheckBox, View::kVisibleFieldNumber);
 
   viewMapper->addMapping(ui->cameraXSpinBox, View::kXviewFieldNumber);
@@ -70,56 +65,6 @@ RoomEditor::RoomEditor(ProtoModelPtr model, QWidget* parent) : BaseEditor(model,
   connect(ui->currentViewComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
           [=](int index) { viewMapper->setCurrentIndex(index); });
 
-  RepeatedProtoModelPtr im = roomModel->GetRepeatedSubModel(Room::kInstancesFieldNumber);
-  QSortFilterProxyModel* imp = new QSortFilterProxyModel(this);
-  imp->setSourceModel(im);
-  ui->instancesListView->setModel(imp);
-  connect(ui->instancesListView->selectionModel(), &QItemSelectionModel::selectionChanged,
-          [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
-            if (selected.empty()) return;
-            ui->tilesListView->clearSelection();
-            auto selectedIndex = selected.indexes().first();
-            auto currentInstanceModel =
-                roomModel->GetSubModel(Room::kInstancesFieldNumber, selectedIndex.row());
-            ui->layersPropertiesView->setModel(currentInstanceModel);
-          });
-
-  for (int c = 0; c < im->columnCount(); ++c) {
-    if (c != Room::Instance::kNameFieldNumber && c != Room::Instance::kObjectTypeFieldNumber &&
-        c != Room::Instance::kIdFieldNumber)
-      ui->instancesListView->hideColumn(c);
-    else
-      ui->instancesListView->resizeColumnToContents(c);
-  }
-  
-  ui->instancesListView->header()->swapSections(Room::Instance::kNameFieldNumber,
-                                               Room::Instance::kObjectTypeFieldNumber);
-
-  RepeatedProtoModelPtr tm = roomModel->GetRepeatedSubModel(Room::kTilesFieldNumber);
-  QSortFilterProxyModel* tmp = new QSortFilterProxyModel(this);
-  tmp->setSourceModel(tm);
-  ui->tilesListView->setModel(tmp);
-  connect(ui->tilesListView->selectionModel(), &QItemSelectionModel::selectionChanged,
-          [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
-            if (selected.empty()) return;
-            ui->instancesListView->clearSelection();
-            auto selectedIndex = selected.indexes().first();
-            auto currentInstanceModel =
-                roomModel->GetSubModel(Room::kTilesFieldNumber, selectedIndex.row());
-            ui->layersPropertiesView->setModel(currentInstanceModel);
-          });
-
-  for (int c = 0; c < tm->columnCount(); ++c) {
-    if (c != Room::Tile::kBackgroundNameFieldNumber && c != Room::Tile::kIdFieldNumber &&
-        c != Room::Tile::kDepthFieldNumber && c != Room::Tile::kNameFieldNumber)
-      ui->tilesListView->hideColumn(c);
-    else
-      ui->tilesListView->resizeColumnToContents(c);
-  }
-
-  ui->tilesListView->header()->swapSections(Room::Tile::kNameFieldNumber,
-                                               Room::Tile::kBackgroundNameFieldNumber);
-
   // filter the room preview scroll area to paint
   // the checkerboard transparency pattern and to
   // track the cursor position for the status bar
@@ -135,9 +80,70 @@ RoomEditor::RoomEditor(ProtoModelPtr model, QWidget* parent) : BaseEditor(model,
 
   ui->statusBar->addWidget(cursorPositionLabel);
   ui->statusBar->addWidget(assetNameLabel);
+
+  RebindSubModels();
 }
 
 RoomEditor::~RoomEditor() { delete ui; }
+
+void RoomEditor::RebindSubModels() {
+  roomModel = _model->GetSubModel(TreeNode::kRoomFieldNumber);
+  ui->roomView->SetResourceModel(roomModel);
+
+  RepeatedProtoModelPtr im = roomModel->GetRepeatedSubModel(Room::kInstancesFieldNumber);
+  QSortFilterProxyModel* imp = new QSortFilterProxyModel(this);
+  imp->setSourceModel(im);
+  ui->instancesListView->setModel(imp);
+
+  for (int c = 0; c < im->columnCount(); ++c) {
+    if (c != Room::Instance::kNameFieldNumber && c != Room::Instance::kObjectTypeFieldNumber &&
+        c != Room::Instance::kIdFieldNumber)
+      ui->instancesListView->hideColumn(c);
+    else
+      ui->instancesListView->resizeColumnToContents(c);
+  }
+
+  ui->instancesListView->header()->swapSections(Room::Instance::kNameFieldNumber,
+                                                Room::Instance::kObjectTypeFieldNumber);
+
+  RepeatedProtoModelPtr tm = roomModel->GetRepeatedSubModel(Room::kTilesFieldNumber);
+  QSortFilterProxyModel* tmp = new QSortFilterProxyModel(this);
+  tmp->setSourceModel(tm);
+  ui->tilesListView->setModel(tmp);
+
+  for (int c = 0; c < tm->columnCount(); ++c) {
+    if (c != Room::Tile::kBackgroundNameFieldNumber && c != Room::Tile::kIdFieldNumber &&
+        c != Room::Tile::kDepthFieldNumber && c != Room::Tile::kNameFieldNumber)
+      ui->tilesListView->hideColumn(c);
+    else
+      ui->tilesListView->resizeColumnToContents(c);
+  }
+
+  ui->tilesListView->header()->swapSections(Room::Tile::kNameFieldNumber, Room::Tile::kBackgroundNameFieldNumber);
+
+  RepeatedProtoModelPtr vm = roomModel->GetRepeatedSubModel(Room::kViewsFieldNumber);
+  viewMapper->setModel(vm);
+
+  connect(ui->instancesListView->selectionModel(), &QItemSelectionModel::selectionChanged,
+          [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
+            if (selected.empty()) return;
+            ui->tilesListView->clearSelection();
+            auto selectedIndex = selected.indexes().first();
+            auto currentInstanceModel = roomModel->GetSubModel(Room::kInstancesFieldNumber, selectedIndex.row());
+            ui->layersPropertiesView->setModel(currentInstanceModel);
+          });
+
+  connect(ui->tilesListView->selectionModel(), &QItemSelectionModel::selectionChanged,
+          [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
+            if (selected.empty()) return;
+            ui->instancesListView->clearSelection();
+            auto selectedIndex = selected.indexes().first();
+            auto currentInstanceModel = roomModel->GetSubModel(Room::kTilesFieldNumber, selectedIndex.row());
+            ui->layersPropertiesView->setModel(currentInstanceModel);
+          });
+
+  BaseEditor::RebindSubModels();
+}
 
 bool RoomEditor::eventFilter(QObject* obj, QEvent* event) {
   if (obj == ui->roomPreview->widget()) {

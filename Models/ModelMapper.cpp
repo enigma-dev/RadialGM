@@ -2,8 +2,8 @@
 
 #include "Editors/BaseEditor.h"
 
-ModelMapper::ModelMapper(ProtoModelPtr model, BaseEditor *parent) : parentWidget(parent),  model(model) {
-  mapper = new ImmediateDataWidgetMapper(parent);
+ModelMapper::ModelMapper(ProtoModelPtr model, BaseEditor *parent) : QObject(parent), model(model) {
+  mapper = new ImmediateDataWidgetMapper(this);
   mapper->setOrientation(Qt::Vertical);
   mapper->setModel(model);
   parent->connect(model, &ProtoModel::dataChanged, parent, &BaseEditor::dataChanged);
@@ -23,9 +23,7 @@ void ModelMapper::toFirst() { mapper->toFirst(); }
 
 void ModelMapper::ReplaceBuffer(google::protobuf::Message *buffer) { model->ReplaceBuffer(buffer); }
 
-bool ModelMapper::RestoreBackup() {
-  return model->RestoreBackup();
-}
+bool ModelMapper::RestoreBackup() { return model->RestoreBackup(); }
 
 void ModelMapper::SetDirty(bool dirty) { model->SetDirty(dirty); }
 

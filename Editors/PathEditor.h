@@ -12,7 +12,7 @@ class PathEditor : public BaseEditor {
 
  public:
   explicit PathEditor(ProtoModelPtr model, QWidget* parent);
-  ~PathEditor();
+  ~PathEditor() override;
 
  private:
   Ui::PathEditor* ui;

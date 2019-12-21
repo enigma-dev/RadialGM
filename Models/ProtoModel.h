@@ -5,6 +5,7 @@
 
 #include "RepeatedProtoModel.h"
 
+#include <QDebug>
 #include <QHash>
 #include <QList>
 
@@ -22,22 +23,38 @@ using Timeline = buffers::resources::Timeline;
 class ProtoModel : public QAbstractItemModel {
   Q_OBJECT
 
+ private:
+  struct SubModels {
+    void Clear();
+    QHash<int, ProtoModelPtr> protoModels;
+    QHash<int, QList<QString>> strings;
+    QHash<int, RepeatedProtoModelPtr> repeatedModels;
+  };
+
+  bool dirty;
+  Message *protobuf;
+  SubModels subModels;
+  ProtoModelPtr parentModel;
+  ProtoModelPtr modelBackup;
+  QScopedPointer<Message> backupProtobuf;
+
  public:
-  explicit ProtoModel(google::protobuf::Message *protobuf, QObject* parent);
-  explicit ProtoModel(google::protobuf::Message *protobuf, ProtoModelPtr parent);
-  ~ProtoModel();
+  explicit ProtoModel(Message *protobuf, QObject *parent);
+  explicit ProtoModel(Message *protobuf, ProtoModelPtr parent);
+  void RebuildSubModels();
   ProtoModelPtr GetParentModel() const;
-  ProtoModelPtr BackupModel(QObject* parent);
+  ProtoModelPtr BackupModel(QObject *parent);
   ProtoModelPtr GetBackupModel();
+  SubModels &GetSubModels();
   bool RestoreBackup();
-  void ReplaceBuffer(google::protobuf::Message *buffer);
-  google::protobuf::Message *GetBuffer();
+  void ReplaceBuffer(Message *buffer);
+  Message *GetBuffer();
   void SetDirty(bool dirty);
   bool IsDirty();
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   bool setData(const QModelIndex &index, const QVariant &value, int role) override;
-  QVariant data(int row, int column=0) const;
+  QVariant data(int row, int column = 0) const;
   QVariant data(const QModelIndex &index, int role) const override;
   RepeatedProtoModelPtr GetRepeatedSubModel(int fieldNum);
   ProtoModelPtr GetSubModel(int fieldNum);
@@ -49,21 +66,11 @@ class ProtoModel : public QAbstractItemModel {
   Qt::ItemFlags flags(const QModelIndex &index) const override;
 
  signals:
-  void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
-                           const QVariant &oldValue = QVariant(0), const QVector<int> &roles = QVector<int>());
-
- private:
-  ProtoModelPtr parentModel;
-  ProtoModelPtr modelBackup;
-  QHash<int, ProtoModelPtr> subModels;
-  QHash<int, QList<QString>> repeatedStrings;
-  QHash<int, RepeatedProtoModelPtr> repeatedModels;
-  bool dirty;
-  google::protobuf::Message *protobuf;
-  QScopedPointer<Message> backupProtobuf;
+  void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVariant &oldValue = QVariant(0),
+                   const QVector<int> &roles = QVector<int>());
 };
 
-void UpdateReferences(ProtoModelPtr model, const QString& type, const QString& oldName, const QString& newName);
+void UpdateReferences(ProtoModelPtr model, const QString &type, const QString &oldName, const QString &newName);
 QString ResTypeAsString(TypeCase type);
 
 #endif  // RESOURCEMODEL_H

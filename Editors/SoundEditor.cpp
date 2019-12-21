@@ -7,40 +7,39 @@
 #include "Components/Utility.h"
 
 #include <QDebug>
-#include <QTime>
-#include <QSlider>
 #include <QDesktopServices>
+#include <QSlider>
+#include <QTime>
 
-SoundEditor::SoundEditor(ProtoModelPtr model, QWidget* parent) :
-    BaseEditor(model, parent), ui(new Ui::SoundEditor), mediaPlayer(new QMediaPlayer(this)),
-    playlist(new QMediaPlaylist(mediaPlayer)), userPaused(false) {
+SoundEditor::SoundEditor(ProtoModelPtr model, QWidget* parent)
+    : BaseEditor(model, parent),
+      ui(new Ui::SoundEditor),
+      mediaPlayer(new QMediaPlayer(this)),
+      playlist(new QMediaPlaylist(mediaPlayer)),
+      userPaused(false) {
   ui->setupUi(this);
 
   nodeMapper->addMapping(ui->nameEdit, TreeNode::kNameFieldNumber);
-  nodeMapper->toFirst();
-
   resMapper->addMapping(ui->volumeSpinBox, Sound::kVolumeFieldNumber);
-  resMapper->toFirst();
 
   ui->volumeSlider->setValue(static_cast<int>(ui->volumeSpinBox->value() * 100));
 
   connect(ui->saveButton, &QAbstractButton::pressed, this, &BaseEditor::OnSave);
 
-  ProtoModelPtr soundModel = model->GetSubModel(TreeNode::kSoundFieldNumber);
   playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
-  playlist->addMedia(QUrl::fromLocalFile(soundModel->data(Sound::kDataFieldNumber).toString()));
   mediaPlayer->setPlaylist(playlist);
   // Update the signals every 50ms instead of Qt's default 1000ms to keep slider up to date
   mediaPlayer->setNotifyInterval(50);
 
   connect(mediaPlayer, &QMediaPlayer::positionChanged, [=]() {
-   if (mediaPlayer->duration() > 0) {
-     int percent = static_cast<int>(100*(static_cast<float>(mediaPlayer->position()) / mediaPlayer->duration()));
-     ui->playbackSlider->setSliderPosition(percent);
-   } else ui->playbackSlider->setSliderPosition(0);
+    if (mediaPlayer->duration() > 0) {
+      int percent = static_cast<int>(100 * (static_cast<float>(mediaPlayer->position()) / mediaPlayer->duration()));
+      ui->playbackSlider->setSliderPosition(percent);
+    } else
+      ui->playbackSlider->setSliderPosition(0);
 
-   QTime timestamp(0,0);
-   ui->playbackPositionLabel->setText(timestamp.addMSecs(static_cast<int>(mediaPlayer->position())).toString());
+    QTime timestamp(0, 0);
+    ui->playbackPositionLabel->setText(timestamp.addMSecs(static_cast<int>(mediaPlayer->position())).toString());
   });
 
   connect(mediaPlayer, &QMediaPlayer::mediaChanged, [=]() {
@@ -55,11 +54,19 @@ SoundEditor::SoundEditor(ProtoModelPtr model, QWidget* parent) :
       ui->playButton->setIcon(ArtManager::GetIcon(":/actions/pause.png"));
   });
 
-  playlist->addMedia(QUrl::fromLocalFile(soundModel->data(Sound::kDataFieldNumber).toString()));
   mediaPlayer->setPlaylist(playlist);
+
+  RebindSubModels();
 }
 
 SoundEditor::~SoundEditor() { delete ui; }
+
+void SoundEditor::RebindSubModels() {
+  playlist->clear();
+  soundModel = _model->GetSubModel(TreeNode::kSoundFieldNumber);
+  playlist->addMedia(QUrl::fromLocalFile(soundModel->data(Sound::kDataFieldNumber).toString()));
+  BaseEditor::RebindSubModels();
+}
 
 void SoundEditor::on_playButton_clicked() {
   if (mediaPlayer->state() == QMediaPlayer::PausedState || mediaPlayer->state() == QMediaPlayer::StoppedState) {
@@ -83,7 +90,7 @@ void SoundEditor::on_playbackSlider_sliderPressed() {
 }
 
 void SoundEditor::on_playbackSlider_sliderReleased() {
-  mediaPlayer->setPosition(static_cast<int>((ui->playbackSlider->value()/100.f)*mediaPlayer->duration()));
+  mediaPlayer->setPosition(static_cast<int>((ui->playbackSlider->value() / 100.f) * mediaPlayer->duration()));
   if (mediaPlayer->state() == QMediaPlayer::PausedState && !userPaused) mediaPlayer->play();
 }
 
@@ -98,7 +105,7 @@ void SoundEditor::on_volumeSpinBox_valueChanged(double arg1) {
 }
 
 void SoundEditor::on_saveAsButton_clicked() {
- //  TODO: implement this when egm is done
+  //  TODO: implement this when egm is done
 }
 
 void SoundEditor::on_loadButton_clicked() {
@@ -114,7 +121,8 @@ void SoundEditor::on_loadButton_clicked() {
         // QString newData = GetModelData(Sound::kDataFieldNumber).toString();
         // TODO: Copy data into our egm and reset the path
         // SetModelData(Sound::kDataFieldNumber, lastData);
-      } else qDebug() << "Failed to load gmx sound";
+      } else
+        qDebug() << "Failed to load gmx sound";
     } else {
       // TODO: Copy data into our egm
       SetModelData(Sound::kDataFieldNumber, fName);
@@ -130,6 +138,4 @@ void SoundEditor::on_editButton_clicked() {
   // TODO: editor settings
 }
 
-void SoundEditor::on_stopButton_clicked() {
-  mediaPlayer->stop();
-}
+void SoundEditor::on_stopButton_clicked() { mediaPlayer->stop(); }

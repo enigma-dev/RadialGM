@@ -14,8 +14,11 @@ class SpriteEditor : public BaseEditor {
 
  public:
   explicit SpriteEditor(ProtoModelPtr model, QWidget* parent);
-  ~SpriteEditor();
+  ~SpriteEditor() override;
   void LoadedMismatchedImage(QSize expectedSize, QSize actualSize);
+
+ public slots:
+  void RebindSubModels() override;
 
  private:
   Ui::SpriteEditor* ui;

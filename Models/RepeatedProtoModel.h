@@ -24,19 +24,31 @@ class RepeatedProtoModel : public QAbstractItemModel {
  public:
   RepeatedProtoModel(Message *protobuf, const FieldDescriptor *field, ProtoModelPtr parent);
   ProtoModelPtr GetParentModel() const;
+  void SetParentModel(ProtoModelPtr parent);
+  void SetBuffer(Message *buffer, const FieldDescriptor *field);
   void AddModel(ProtoModelPtr model);
   ProtoModelPtr GetSubModel(int index);
   QVector<ProtoModelPtr>& GetMutableModelList();
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   bool empty() const;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  //bool setData(const QModelIndex &index, const QVariant &value, int role) override;
+  bool setData(int subModelIndex, int dataField, const QVariant& value);
+  bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override;
   QVariant data(int row, int column = 0) const;
   QVariant data(const QModelIndex &index, int role) const override;
   QModelIndex parent(const QModelIndex &index) const override;
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
   QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override;
   Qt::ItemFlags flags(const QModelIndex &index) const override;
+  bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+  bool moveRows(int source, int count, int destination);
+  bool moveRows(const QModelIndex &sourceParent, int sourceRow, int count, const QModelIndex &destinationParent,
+                int destinationChild) override;
+
+  // Takes the elements in range [part, right) and move them to `left` by swapping.
+  // Rearranges elements so that all those at or after the partition point are
+  // moved to the beginning of the range (`left`).
+  void SwapBack(int left, int part, int right);
 
   class RowRemovalOperation {
     RepeatedProtoModelPtr model;
