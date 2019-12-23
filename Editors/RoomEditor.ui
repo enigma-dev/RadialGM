@@ -20,7 +20,7 @@
    <string>Room</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../RGM_/images.qrc">
+   <iconset resource="../images.qrc">
     <normaloff>:/resources/room.png</normaloff>:/resources/room.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -107,6 +107,9 @@
            <enum>Qt::Vertical</enum>
           </property>
           <widget class="QTreeView" name="tilesListView">
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
            <property name="selectionMode">
             <enum>QAbstractItemView::ExtendedSelection</enum>
            </property>
@@ -138,6 +141,9 @@
                 <width>259</width>
                 <height>0</height>
                </size>
+              </property>
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
               </property>
               <property name="selectionMode">
                <enum>QAbstractItemView::ExtendedSelection</enum>
@@ -186,7 +192,7 @@
                  <string/>
                 </property>
                 <property name="icon">
-                 <iconset resource="../../RGM_/images.qrc">
+                 <iconset resource="../images.qrc">
                   <normaloff>:/resources/object.png</normaloff>:/resources/object.png</iconset>
                 </property>
                 <property name="popupMode">
@@ -203,7 +209,7 @@
                  <string>Delete Assets</string>
                 </property>
                 <property name="icon">
-                 <iconset resource="../../RGM_/images.qrc">
+                 <iconset resource="../images.qrc">
                   <normaloff>:/actions/delete.png</normaloff>:/actions/delete.png</iconset>
                 </property>
                </widget>
@@ -301,7 +307,7 @@
              <string>Creation</string>
             </property>
             <property name="icon">
-             <iconset resource="../../RGM_/images.qrc">
+             <iconset resource="../images.qrc">
               <normaloff>:/resources/script.png</normaloff>:/resources/script.png</iconset>
             </property>
             <property name="toolButtonStyle">
@@ -1089,7 +1095,7 @@
                 <string>Object</string>
                </property>
                <property name="icon">
-                <iconset resource="../../RGM_/images.qrc">
+                <iconset resource="../images.qrc">
                  <normaloff>:/actions/add.png</normaloff>:/actions/add.png</iconset>
                </property>
                <property name="toolButtonStyle">
@@ -1339,7 +1345,7 @@
   </layout>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="../../RGM_/images.qrc">
+    <iconset resource="../images.qrc">
      <normaloff>:/actions/accept.png</normaloff>:/actions/accept.png</iconset>
    </property>
    <property name="text">
@@ -1351,7 +1357,7 @@
   </action>
   <action name="actionSelectionMode">
    <property name="icon">
-    <iconset resource="../../RGM_/images.qrc">
+    <iconset resource="../images.qrc">
      <normaloff>:/events/mouse.png</normaloff>:/events/mouse.png</iconset>
    </property>
    <property name="text">
@@ -1363,7 +1369,7 @@
   </action>
   <action name="actionZoomIn">
    <property name="icon">
-    <iconset resource="../../RGM_/images.qrc">
+    <iconset resource="../images.qrc">
      <normaloff>:/actions/zoom-in.png</normaloff>:/actions/zoom-in.png</iconset>
    </property>
    <property name="text">
@@ -1375,7 +1381,7 @@
   </action>
   <action name="actionZoomOut">
    <property name="icon">
-    <iconset resource="../../RGM_/images.qrc">
+    <iconset resource="../images.qrc">
      <normaloff>:/actions/zoom-out.png</normaloff>:/actions/zoom-out.png</iconset>
    </property>
    <property name="text">
@@ -1387,7 +1393,7 @@
   </action>
   <action name="actionZoom">
    <property name="icon">
-    <iconset resource="../../RGM_/images.qrc">
+    <iconset resource="../images.qrc">
      <normaloff>:/actions/zoom.png</normaloff>:/actions/zoom.png</iconset>
    </property>
    <property name="text">
@@ -1402,7 +1408,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../RGM_/images.qrc">
+    <iconset resource="../images.qrc">
      <normaloff>:/actions/snap-to-grid.png</normaloff>:/actions/snap-to-grid.png</iconset>
    </property>
    <property name="text">
@@ -1414,7 +1420,7 @@
   </action>
   <action name="actionUndo">
    <property name="icon">
-    <iconset resource="../../RGM_/images.qrc">
+    <iconset resource="../images.qrc">
      <normaloff>:/actions/undo.png</normaloff>:/actions/undo.png</iconset>
    </property>
    <property name="text">
@@ -1423,7 +1429,7 @@
   </action>
   <action name="actionRedo">
    <property name="icon">
-    <iconset resource="../../RGM_/images.qrc">
+    <iconset resource="../images.qrc">
      <normaloff>:/actions/redo.png</normaloff>:/actions/redo.png</iconset>
    </property>
    <property name="text">
@@ -1432,7 +1438,7 @@
   </action>
   <action name="actionCut">
    <property name="icon">
-    <iconset resource="../../RGM_/images.qrc">
+    <iconset resource="../images.qrc">
      <normaloff>:/actions/cut.png</normaloff>:/actions/cut.png</iconset>
    </property>
    <property name="text">
@@ -1444,7 +1450,7 @@
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset resource="../../RGM_/images.qrc">
+    <iconset resource="../images.qrc">
      <normaloff>:/actions/copy.png</normaloff>:/actions/copy.png</iconset>
    </property>
    <property name="text">
@@ -1453,7 +1459,7 @@
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset resource="../../RGM_/images.qrc">
+    <iconset resource="../images.qrc">
      <normaloff>:/actions/paste.png</normaloff>:/actions/paste.png</iconset>
    </property>
    <property name="text">
@@ -1478,7 +1484,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../RGM_/images.qrc"/>
+  <include location="../images.qrc"/>
  </resources>
  <connections/>
 </ui>

@@ -53,7 +53,8 @@ class ProtoModel : public QAbstractItemModel {
   bool IsDirty();
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  bool setData(const QModelIndex &index, const QVariant &value, int role) override;
+  bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override;
+  bool setData(int row, int column, const QVariant &value);
   QVariant data(int row, int column = 0) const;
   QVariant data(const QModelIndex &index, int role) const override;
   RepeatedProtoModelPtr GetRepeatedSubModel(int fieldNum);

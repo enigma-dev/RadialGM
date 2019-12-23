@@ -36,8 +36,7 @@ bool RepeatedProtoModel::empty() const { return this->rowCount() <= 0; }
 
 int RepeatedProtoModel::columnCount(const QModelIndex &parent) const {
   if (parent.isValid()) return 0;
-  const Descriptor *desc = protobuf->GetDescriptor();
-  return desc->field_count();
+  return field->message_type()->field_count() + 1;
 }
 
 QVariant RepeatedProtoModel::data(int row, int column) const {
@@ -87,16 +86,21 @@ bool RepeatedProtoModel::setData(int subModelIndex, int dataField, const QVarian
 
 bool RepeatedProtoModel::setData(const QModelIndex &index, const QVariant &value, int role) {
   R_EXPECT(index.isValid(), false) << "Supplied index was invalid:" << index;
-  GetParentModel()->SetDirty(true);
-  return models[index.row()]->setData(models[index.row()]->index(index.column(), 0), value, role);
+  const QVariant oldValue = this->data(index, role);
+  if (models[index.row()]->setData(models[index.row()]->index(index.column(), 0), value, role)) {
+    GetParentModel()->SetDirty(true);
+    emit dataChanged(index, index, oldValue);
+    return true;
+  }
+
+  return false;
 }
 
 QModelIndex RepeatedProtoModel::parent(const QModelIndex & /*index*/) const { return QModelIndex(); }
 
 QVariant RepeatedProtoModel::headerData(int section, Qt::Orientation orientation, int role) const {
-  if (this->empty() || role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal) return QVariant();
-  ProtoModelPtr m = GetParentModel()->GetSubModel(field->number(), 0);
-  return m->headerData(section, orientation, role);
+  if (section == 0 || role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal) return QVariant();
+  return QString::fromStdString(field->message_type()->field(section - 1)->name());
 }
 
 QModelIndex RepeatedProtoModel::index(int row, int column, const QModelIndex & /*parent*/) const {
@@ -105,7 +109,7 @@ QModelIndex RepeatedProtoModel::index(int row, int column, const QModelIndex & /
 
 Qt::ItemFlags RepeatedProtoModel::flags(const QModelIndex &index) const {
   if (!index.isValid()) return nullptr;
-  return QAbstractItemModel::flags(index);
+  return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
 }
 
 bool RepeatedProtoModel::moveRows(int source, int count, int destination) {
@@ -136,7 +140,7 @@ bool RepeatedProtoModel::moveRows(const QModelIndex & /*sourceParent*/, int sour
 bool RepeatedProtoModel::insertRows(int row, int count, const QModelIndex &parent) {
   if (row > rowCount()) return false;
 
-  beginInsertRows(parent, row, row + count);
+  beginInsertRows(parent, row, row + count - 1);
 
   int p = rowCount();
 
