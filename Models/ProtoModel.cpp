@@ -93,6 +93,10 @@ bool ProtoModel::IsDirty() { return dirty; }
 
 int ProtoModel::columnCount(const QModelIndex & /*parent*/) const { return 1; }
 
+bool ProtoModel::setData(int row, int column, const QVariant &value) {
+  return setData(this->index(row, column, QModelIndex()), value);
+}
+
 bool ProtoModel::setData(const QModelIndex &index, const QVariant &value, int role) {
   R_EXPECT(index.isValid(), false) << "Supplied index was invalid:" << index;
 
@@ -143,6 +147,8 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
     }
     return QVariant();
   }
+
+  if (!refl->HasField(*protobuf, field)) return QVariant();
 
   switch (field->cpp_type()) {
     case CppType::CPPTYPE_MESSAGE: R_EXPECT(false, QVariant()) << "The requested field " << index << " is a message";
