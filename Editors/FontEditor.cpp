@@ -21,7 +21,7 @@ The quick brown fox jumps over the lazy dog.");
   resMapper->addMapping(ui->fontComboBox, Font::kFontNameFieldNumber);
   resMapper->addMapping(ui->sizeSpinBox, Font::kSizeFieldNumber);
   resMapper->addMapping(ui->boldCheckBox, Font::kBoldFieldNumber);
-  resMapper->addMapping(ui->boldCheckBox, Font::kItalicFieldNumber);
+  resMapper->addMapping(ui->italicCheckBox, Font::kItalicFieldNumber);
 
   RebindSubModels();
 }
