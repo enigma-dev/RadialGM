@@ -64,7 +64,7 @@ void RoomView::paintEvent(QPaintEvent* /* event */) {
   this->paintBackgrounds(painter, true);
   this->paintGrid(painter);
 
-  update();
+  //update();
 }
 
 void RoomView::paintTiles(QPainter& painter) {
