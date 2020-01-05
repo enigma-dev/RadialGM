@@ -127,6 +127,8 @@ bool ProtoModel::setData(const QModelIndex &index, const QVariant &value, int ro
   SetDirty(true);
   emit dataChanged(index, index, oldValue);
 
+  if (GetParentModel() != nullptr) emit GetParentModel()->dataChanged(QModelIndex(), QModelIndex());
+
   return true;
 }
 

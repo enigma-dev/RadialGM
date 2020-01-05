@@ -89,6 +89,7 @@ bool RepeatedProtoModel::setData(const QModelIndex &index, const QVariant &value
   const QVariant oldValue = this->data(index, role);
   if (models[index.row()]->setData(models[index.row()]->index(index.column(), 0), value, role)) {
     GetParentModel()->SetDirty(true);
+    emit GetParentModel()->dataChanged(QModelIndex(), QModelIndex());
     emit dataChanged(index, index, oldValue);
     return true;
   }

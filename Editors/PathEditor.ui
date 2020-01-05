@@ -182,6 +182,9 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="value">
+                <number>4</number>
+               </property>
               </widget>
              </item>
             </layout>
@@ -318,6 +321,12 @@
                     <height>0</height>
                    </size>
                   </property>
+                  <property name="minimum">
+                   <number>-999999999</number>
+                  </property>
+                  <property name="maximum">
+                   <number>999999999</number>
+                  </property>
                  </widget>
                 </item>
                </layout>
@@ -364,6 +373,12 @@
                     <width>60</width>
                     <height>0</height>
                    </size>
+                  </property>
+                  <property name="minimum">
+                   <number>-999999999</number>
+                  </property>
+                  <property name="maximum">
+                   <number>999999999</number>
                   </property>
                  </widget>
                 </item>
@@ -417,6 +432,15 @@
                     <width>60</width>
                     <height>0</height>
                    </size>
+                  </property>
+                  <property name="minimum">
+                   <number>-999999999</number>
+                  </property>
+                  <property name="maximum">
+                   <number>999999999</number>
+                  </property>
+                  <property name="value">
+                   <number>100</number>
                   </property>
                  </widget>
                 </item>
@@ -629,6 +653,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../images.qrc">
      <normaloff>:/actions/snap-to-grid.png</normaloff>:/actions/snap-to-grid.png</iconset>
@@ -648,6 +675,9 @@
   </action>
   <action name="actionShowGrid">
    <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
     <bool>true</bool>
    </property>
    <property name="icon">

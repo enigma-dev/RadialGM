@@ -10,11 +10,11 @@ enum GridType {
   Standard,   // Simple x by x Grid
   Complex,    // Grid with offset and spacing between squares
   Isometric,  // TODO: Implement this
-  None,       // Don't draw the grid
 };
 
 struct GridDimensions {
   GridType type = GridType::Standard;
+  bool show = true;
   int horSpacing = 16;
   int vertSpacing = 16;
   int horOff = 0;

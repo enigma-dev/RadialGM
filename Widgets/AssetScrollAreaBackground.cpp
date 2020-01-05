@@ -1,5 +1,6 @@
 #include "AssetScrollAreaBackground.h"
 #include "Components/ArtManager.h"
+#include "MainWindow.h"
 #include "Widgets/RoomView.h"
 
 #include <QEvent>
@@ -10,6 +11,8 @@
 AssetScrollAreaBackground::AssetScrollAreaBackground(AssetScrollArea* parent) : QWidget(parent) {
   installEventFilter(this);
   setMouseTracking(true);
+  // Redraw on an model changes
+  connect(MainWindow::resourceMap.get(), &ResourceModelMap::dataChanged, [this]() { this->update(); });
 }
 
 void AssetScrollAreaBackground::SetAssetView(AssetView* asset) {
@@ -126,12 +129,14 @@ void AssetScrollAreaBackground::paintEvent(QPaintEvent* /* event */) {
     painter.restore();
 
     GridDimensions g = assetView->GetGrid();
-    if (g.type == GridType::Complex)
-      paintGrid(painter, g.width * zoom, g.height * zoom, g.horSpacing * zoom, g.vertSpacing * zoom,
-                (g.horOff * zoom) + offset.x(), (g.vertOff * zoom) + offset.y(), g.cellWidth * zoom,
-                g.cellHeight * zoom);
-    else if (g.type == GridType::Standard)
-      paintGrid(painter, g.horSpacing * zoom, g.vertSpacing * zoom, offset.x(), offset.y());
+    if (g.show) {
+      if (g.type == GridType::Complex)
+        paintGrid(painter, g.width * zoom, g.height * zoom, g.horSpacing * zoom, g.vertSpacing * zoom,
+                  (g.horOff * zoom) + offset.x(), (g.vertOff * zoom) + offset.y(), g.cellWidth * zoom,
+                  g.cellHeight * zoom);
+      else if (g.type == GridType::Standard)
+        paintGrid(painter, g.horSpacing * zoom, g.vertSpacing * zoom, offset.x(), offset.y());
+    }
   }
 }
 

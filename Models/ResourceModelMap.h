@@ -21,6 +21,9 @@ class ResourceModelMap : public QObject {
  public slots:
   void ResourceRenamed(TypeCase type, const QString& oldName, const QString& newName);
 
+ signals:
+  void dataChanged();
+
  protected:
   void recursiveBindRes(buffers::TreeNode* node, QObject* parent);
   QHash<int, QHash<QString, QPair<buffers::TreeNode*, ProtoModelPtr>>> _resources;

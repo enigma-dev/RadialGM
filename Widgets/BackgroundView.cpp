@@ -55,7 +55,7 @@ QSize BackgroundView::sizeHint() const { return QSize(pixmap.width(), pixmap.hei
 
 void BackgroundView::Paint(QPainter &painter) {
   if (!model) {
-    grid.type = GridType::None;
+    grid.show = false;
     return;
   }
 
@@ -65,7 +65,7 @@ void BackgroundView::Paint(QPainter &painter) {
   painter.drawPixmap(0, 0, (transparent) ? transparentPixmap : pixmap);
 
   if (model->data(Background::kUseAsTilesetFieldNumber).toBool()) {
-    grid.type = GridType::Complex;
+    grid.show = true;
     grid.horSpacing = model->data(Background::kHorizontalSpacingFieldNumber).toInt();
     grid.vertSpacing = model->data(Background::kVerticalSpacingFieldNumber).toInt();
     grid.horOff = model->data(Background::kHorizontalOffsetFieldNumber).toInt();
@@ -75,6 +75,6 @@ void BackgroundView::Paint(QPainter &painter) {
     grid.width = pixmap.width();
     grid.height = pixmap.height();
   } else {
-    grid.type = GridType::None;
+    grid.show = false;
   }
 }
