@@ -20,6 +20,8 @@ RoomEditor::RoomEditor(ProtoModelPtr model, QWidget* parent) : BaseEditor(model,
   ui->setupUi(this);
   connect(ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
 
+  ui->roomPreviewBackground->SetAssetView(ui->roomView);
+
   nodeMapper->addMapping(ui->roomName, TreeNode::kNameFieldNumber);
   nodeMapper->toFirst();
 
@@ -65,20 +67,14 @@ RoomEditor::RoomEditor(ProtoModelPtr model, QWidget* parent) : BaseEditor(model,
   connect(ui->currentViewComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
           [=](int index) { viewMapper->setCurrentIndex(index); });
 
-  // filter the room preview scroll area to paint
-  // the checkerboard transparency pattern and to
-  // track the cursor position for the status bar
-  ui->roomPreview->widget()->installEventFilter(this);
-  // track the cursor position on the transparency pattern for the status bar
-  ui->roomPreview->widget()->setMouseTracking(true);
-  // also need to track it on the room preview itself so the event is received
-  ui->roomView->setMouseTracking(true);
-
   cursorPositionLabel = new QLabel();
-  this->updateCursorPositionLabel(ui->roomPreview->widget()->cursor().pos());
-  assetNameLabel = new QLabel("obj_xxx");
-
+  connect(ui->roomPreviewBackground, &AssetScrollAreaBackground::MouseMoved, [=](int x, int y) {
+    const GridDimensions g = ui->roomView->GetGrid();
+    cursorPositionLabel->setText(tr("X %0, Y %1").arg(RoundNum(x, g.horSpacing)).arg(RoundNum(y, g.vertSpacing)));
+  });
   ui->statusBar->addWidget(cursorPositionLabel);
+
+  assetNameLabel = new QLabel("obj_xxx");
   ui->statusBar->addWidget(assetNameLabel);
 
   RebindSubModels();
@@ -145,32 +141,18 @@ void RoomEditor::RebindSubModels() {
   BaseEditor::RebindSubModels();
 }
 
-bool RoomEditor::eventFilter(QObject* obj, QEvent* event) {
-  if (obj == ui->roomPreview->widget()) {
-    if (event->type() == QEvent::Paint) {
-      QPainter painter(ui->roomPreview->widget());
-      painter.scale(4, 4);
-      painter.fillRect(painter.viewport(), ArtManager::GetTransparenyBrush());
-      return false;
-    } else if (event->type() == QEvent::MouseMove) {
-      QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
-      QPoint roomPos = mouseEvent->pos() - ui->roomView->pos();
-      roomPos /= ui->roomView->GetZoom();
-      this->updateCursorPositionLabel(roomPos);
-    }
-  }
-
-  return QWidget::eventFilter(obj, event);
-}
-
 void RoomEditor::SelectedObjectChanged(QAction* action) { ui->currentObject->setText(action->text()); }
 
 void RoomEditor::updateCursorPositionLabel(const QPoint& pos) {
   this->cursorPositionLabel->setText(tr("X %0, Y %1").arg(pos.x()).arg(pos.y()));
 }
 
-void RoomEditor::on_actionZoomIn_triggered() { ui->roomView->SetZoom(ui->roomView->GetZoom() * 2); }
+void RoomEditor::on_actionZoomIn_triggered() {
+  ui->roomPreviewBackground->SetZoom(ui->roomPreviewBackground->GetZoom() * 2);
+}
 
-void RoomEditor::on_actionZoomOut_triggered() { ui->roomView->SetZoom(ui->roomView->GetZoom() / 2); }
+void RoomEditor::on_actionZoomOut_triggered() {
+  ui->roomPreviewBackground->SetZoom(ui->roomPreviewBackground->GetZoom() / 2);
+}
 
-void RoomEditor::on_actionZoom_triggered() { ui->roomView->SetZoom(1.0); }
+void RoomEditor::on_actionZoom_triggered() { ui->roomPreviewBackground->SetZoom(1.0); }

@@ -9,9 +9,9 @@
 
 #include "gmx.h"
 
+#include <QDebug>
 #include <QDesktopServices>
 #include <QPainter>
-#include <QDebug>
 
 using buffers::resources::Background;
 
@@ -20,6 +20,8 @@ BackgroundEditor::BackgroundEditor(ProtoModelPtr model, QWidget* parent)
   ui->setupUi(this);
 
   connect(ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
+
+  ui->imagePreviewBackground->SetAssetView(ui->backgroundView);
 
   ui->backgroundView->SetResourceModel(resMapper->GetModel());
 
@@ -44,14 +46,14 @@ void BackgroundEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex
 }
 
 void BackgroundEditor::on_actionZoomIn_triggered() {
-  ui->backgroundView->SetZoom(ui->backgroundView->GetZoom() * 2);
+  ui->imagePreviewBackground->SetZoom(ui->imagePreviewBackground->GetZoom() * 2);
 }
 
 void BackgroundEditor::on_actionZoomOut_triggered() {
-  ui->backgroundView->SetZoom(ui->backgroundView->GetZoom() / 2);
+  ui->imagePreviewBackground->SetZoom(ui->imagePreviewBackground->GetZoom() / 2);
 }
 
-void BackgroundEditor::on_actionZoom_triggered() { ui->backgroundView->SetZoom(1); }
+void BackgroundEditor::on_actionZoom_triggered() { ui->imagePreviewBackground->SetZoom(1); }
 
 void BackgroundEditor::on_actionNewImage_triggered() {
   QDialog dialog(this);
@@ -80,7 +82,8 @@ void BackgroundEditor::on_actionLoadImage_triggered() {
         // QString newData = GetModelData(Background::kImageFieldNumber).toString();
         // TODO: Copy data into our egm and reset the path
         // SetModelData(Background::kImageFieldNumber, lastData);
-      } else qDebug() << "Failed to load gmx Background";
+      } else
+        qDebug() << "Failed to load gmx Background";
     } else {
       // TODO: Copy data into our egm
       SetModelData(Background::kImageFieldNumber, fName);

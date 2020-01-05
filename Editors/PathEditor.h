@@ -2,6 +2,9 @@
 #define PATHEDITOR_H
 
 #include "BaseEditor.h"
+#include "Components/ArtManager.h"
+
+#include <QLabel>
 
 namespace Ui {
 class PathEditor;
@@ -16,6 +19,7 @@ class PathEditor : public BaseEditor {
 
  private:
   Ui::PathEditor* ui;
+  QLabel* cursorPositionLabel;
 };
 
 #endif  // PATHEDITOR_H

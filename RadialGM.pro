@@ -59,6 +59,9 @@ LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
 SOURCES += \
     Dialogs/TimelineChangeMoment.cpp \
     Editors/ShaderEditor.cpp \
+    Widgets/AssetScrollArea.cpp \
+    Widgets/AssetScrollAreaBackground.cpp \
+    Widgets/PathView.cpp \
     Widgets/StackedCodeWidget.cpp \
     Widgets/StackedCodewidget.cpp \
     main.cpp \
@@ -111,10 +114,14 @@ HEADERS += \
     Editors/RoomEditor.h \
     Editors/SpriteEditor.h \
     Editors/SettingsEditor.h \
+    Widgets/AssetScrollArea.h \
+    Widgets/AssetScrollAreaBackground.h \
     Widgets/BackgroundView.h \
     Widgets/CodeWidget.h \
     Widgets/ColorPicker.h \
     Widgets/AssetView.h \
+    Widgets/PathView.h \
+    Widgets/ResourceSelector.h \
     Widgets/RoomView.h \
     Models/TreeModel.h \
     Components/Logger.h \

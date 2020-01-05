@@ -355,20 +355,20 @@
       </layout>
      </item>
      <item>
-      <widget class="QScrollArea" name="imagePreview">
+      <widget class="AssetScrollArea" name="imagePreview">
        <property name="widgetResizable">
         <bool>true</bool>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
        </property>
-       <widget class="QWidget" name="scrollAreaWidget">
+       <widget class="AssetScrollAreaBackground" name="imagePreviewBackground">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>426</width>
-          <height>311</height>
+          <width>446</width>
+          <height>314</height>
          </rect>
         </property>
         <property name="autoFillBackground">
@@ -499,9 +499,21 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>AssetScrollArea</class>
+   <extends>QScrollArea</extends>
+   <header>Widgets/AssetScrollArea.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>BackgroundView</class>
    <extends>QWidget</extends>
    <header>Widgets/BackgroundView.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>AssetScrollAreaBackground</class>
+   <extends>QWidget</extends>
+   <header>Widgets/AssetScrollAreaBackground.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

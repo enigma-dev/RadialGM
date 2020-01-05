@@ -1,23 +1,41 @@
 #ifndef ASSETVIEW_H
 #define ASSETVIEW_H
 
+#include "AssetScrollAreaBackground.h"
+
 #include <QPainter>
 #include <QWidget>
+
+enum GridType {
+  Standard,   // Simple x by x Grid
+  Complex,    // Grid with offset and spacing between squares
+  Isometric,  // TODO: Implement this
+  None,       // Don't draw the grid
+};
+
+struct GridDimensions {
+  GridType type = GridType::Standard;
+  int horSpacing = 16;
+  int vertSpacing = 16;
+  int horOff = 0;
+  int vertOff = 0;
+  int cellWidth = 0;
+  int cellHeight = 0;
+  int width = 0;
+  int height = 0;
+};
 
 class AssetView : public QWidget {
   Q_OBJECT
  public:
-  explicit AssetView(QWidget* parent = nullptr);
-
-  void paintGrid(QPainter& painter, int width, int height, int gridHorSpacing, int gridVertSpacing, int gridHorOff,
-                 int gridVertOff, int gridWidth, int gridHeight);
-  const qreal& GetZoom() const;
-
- public slots:
-  void SetZoom(qreal zoom);
+  explicit AssetView(AssetScrollAreaBackground* parent);
+  virtual void Paint(QPainter& painter) = 0;
+  GridDimensions& GetGrid();
 
  protected:
-  qreal zoom;
+  void paintEvent(QPaintEvent* event);
+
+  GridDimensions grid;
 };
 
 #endif  // ASSETVIEW_H

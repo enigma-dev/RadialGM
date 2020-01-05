@@ -10,15 +10,13 @@
 class BackgroundView : public AssetView {
   Q_OBJECT
  public:
-  explicit BackgroundView(QWidget *parent);
+  explicit BackgroundView(AssetScrollAreaBackground *parent);
   QSize sizeHint() const override;
   void SetResourceModel(ProtoModelPtr model);
   bool SetImage(QString fName);
   bool SetImage(QPixmap image);
   void WriteImage(QString fName, QString type);
-
- protected:
-  void paintEvent(QPaintEvent *event) override;
+  void Paint(QPainter &painter) override;
 
  private:
   ProtoModelPtr model;

@@ -2,10 +2,10 @@
 #include "Components/ArtManager.h"
 #include "MainWindow.h"
 
-#include <QPainter>
 #include <QDebug>
+#include <QPainter>
 
-bool InstanceSortFilterProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const {
+bool InstanceSortFilterProxyModel::lessThan(const QModelIndex& left, const QModelIndex& right) const {
   QVariant leftData = sourceModel()->data(left);
   QVariant rightData = sourceModel()->data(right);
 
@@ -22,8 +22,8 @@ bool InstanceSortFilterProxyModel::lessThan(const QModelIndex &left, const QMode
   return objA->data(Object::kDepthFieldNumber) < objB->data(Object::kDepthFieldNumber);
 }
 
-RoomView::RoomView(QWidget* parent) : AssetView(parent), model(nullptr) {
-  this->SetZoom(1.0);
+RoomView::RoomView(AssetScrollAreaBackground* parent) : AssetView(parent), model(nullptr) {
+  setFixedSize(sizeHint());
   this->sortedInstances = new InstanceSortFilterProxyModel(this);
   this->sortedTiles = new QSortFilterProxyModel(this);
 }
@@ -34,37 +34,42 @@ void RoomView::SetResourceModel(ProtoModelPtr model) {
   this->sortedInstances->sort(Room::Instance::kObjectTypeFieldNumber);
   this->sortedTiles->setSourceModel(model->GetRepeatedSubModel(Room::kTilesFieldNumber));
   this->sortedTiles->sort(Room::Tile::kDepthFieldNumber);
-  this->SetZoom(1.0);
+  setFixedSize(sizeHint());
+  repaint();
 }
 
 QSize RoomView::sizeHint() const {
   if (!model) return QSize(640, 480);
-  unsigned roomWidth = model->data(Room::kWidthFieldNumber).toUInt(),
-           roomHeight = model->data(Room::kHeightFieldNumber).toUInt();
-  return QSize(roomWidth, roomHeight);
+  QVariant roomWidth = model->data(Room::kWidthFieldNumber), roomHeight = model->data(Room::kHeightFieldNumber);
+  if (!roomWidth.isValid() || !roomHeight.isValid()) return QSize(640, 480);
+  return QSize(roomWidth.toUInt(), roomHeight.toUInt());
 }
 
-void RoomView::paintEvent(QPaintEvent* /* event */) {
+void RoomView::Paint(QPainter& painter) {
+  grid.type = GridType::Standard;
+
   if (!model) return;
-  QPainter painter(this);
 
-  painter.scale(zoom, zoom);
+  QVariant hsnap = model->data(Room::kHsnapFieldNumber);
+  QVariant vsnap = model->data(Room::kVsnapFieldNumber);
+  grid.horSpacing = hsnap.isValid() ? hsnap.toInt() : 16;
+  grid.vertSpacing = vsnap.isValid() ? vsnap.toInt() : 16;
 
-  QColor roomColor = Qt::transparent;
+  QColor roomColor = QColor(255, 255, 255, 100);
 
-  if (model->data(Room::kShowColorFieldNumber).toBool())
-    roomColor = model->data(Room::kColorFieldNumber).toInt();
+  if (model->data(Room::kShowColorFieldNumber).toBool()) roomColor = model->data(Room::kColorFieldNumber).toInt();
 
-  painter.fillRect(QRectF(0, 0, model->data(Room::kWidthFieldNumber).toUInt(),
-    model->data(Room::kWidthFieldNumber).toUInt()), QBrush(roomColor));
+  QVariant roomWidth = model->data(Room::kWidthFieldNumber), roomHeight = model->data(Room::kHeightFieldNumber);
+  painter.fillRect(
+      QRectF(0, 0, roomWidth.isValid() ? roomWidth.toUInt() : 640, roomWidth.isValid() ? roomHeight.toUInt() : 480),
+      QBrush(roomColor));
 
   this->paintBackgrounds(painter, false);
   this->paintTiles(painter);
   this->paintInstances(painter);
   this->paintBackgrounds(painter, true);
-  this->paintGrid(painter);
 
-  update();
+  //update();
 }
 
 void RoomView::paintTiles(QPainter& painter) {
@@ -104,7 +109,6 @@ void RoomView::paintTiles(QPainter& painter) {
 void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
   RepeatedProtoModelPtr backgrounds = model->GetRepeatedSubModel(Room::kBackgroundsFieldNumber);
   for (int row = 0; row < backgrounds->rowCount(); row++) {
-
     bool visible = backgrounds->data(row, Room::Background::kVisibleFieldNumber).toBool();
     bool foreground = backgrounds->data(row, Room::Background::kForegroundFieldNumber).toBool();
     QString bkgName = backgrounds->data(row, Room::Background::kBackgroundNameFieldNumber).toString();
@@ -158,7 +162,6 @@ void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
 
 void RoomView::paintInstances(QPainter& painter) {
   for (int row = 0; row < sortedInstances->rowCount(); row++) {
-
     QString imgFile = ":/actions/help.png";
     int w = 16;
     int h = 16;
@@ -191,28 +194,10 @@ void RoomView::paintInstances(QPainter& painter) {
     QRectF src(0, 0, w, h);
     const QTransform transform = painter.transform();
     painter.translate(x.toInt(), y.toInt());
-    painter.scale(xScale.toFloat(), yScale.toFloat());
+    painter.scale(xScale.isValid() ? xScale.toFloat() : 1, yScale.isValid() ? yScale.toFloat() : 1);
     painter.rotate(rot.toFloat());
     painter.translate(-xoff, -yoff);
     painter.drawPixmap(dest, pixmap, src);
     painter.setTransform(transform);
-  }
-}
-
-void RoomView::paintGrid(QPainter& painter) {
-  bool gridVisible = true;
-  int gridHorSpacing = 0;
-  int gridVertSpacing = 0;
-  int gridHorOff = 0;
-  int gridVertOff = 0;
-  int gridWidth = 16;
-  int gridHeight = 16;
-
-  int roomWidth = model->data(Room::kWidthFieldNumber).toInt();
-  int roomHeight = model->data(Room::kHeightFieldNumber).toInt();
-
-  if (gridVisible) {
-    AssetView::paintGrid(painter, roomWidth, roomHeight, gridHorSpacing, gridVertSpacing, gridHorOff, gridVertOff,
-                         gridWidth, gridHeight);
   }
 }
