@@ -18,8 +18,13 @@ void ResourceModelMap::recursiveBindRes(buffers::TreeNode* node, QObject* parent
 }
 
 void ResourceModelMap::AddResource(buffers::TreeNode* child, QObject* parent) {
+  ProtoModelPtr model = child->has_folder() ? nullptr : ProtoModelPtr(new ProtoModel(child, this));
   _resources[child->type_case()][QString::fromStdString(child->name())] =
-      QPair<buffers::TreeNode*, ProtoModelPtr>(child, child->has_folder() ? nullptr : ProtoModelPtr(new ProtoModel(child, this)));
+      QPair<buffers::TreeNode*, ProtoModelPtr>(child, model);
+
+  if (model != nullptr) {
+    connect(model, &ProtoModel::dataChanged, [this]() { emit dataChanged(); });
+  }
 }
 
 void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
@@ -60,8 +65,7 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
       RepeatedProtoModel::RowRemovalOperation remover(tilesModel);
 
       for (int row = 0; row < tilesModel->rowCount(); ++row) {
-        if (tilesModel->data(row, Room::Instance::kObjectTypeFieldNumber).toString() == name)
-          remover.RemoveRow(row);
+        if (tilesModel->data(row, Room::Instance::kObjectTypeFieldNumber).toString() == name) remover.RemoveRow(row);
       }
 
       // Only models in use in open editors should have backup models
@@ -86,6 +90,7 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
   }
 
   _resources[type].remove(name);
+  emit dataChanged();
 }
 
 QString ResourceModelMap::CreateResourceName(TreeNode* node) {
@@ -117,18 +122,19 @@ ProtoModelPtr ResourceModelMap::GetResourceByName(int type, const std::string& n
   return GetResourceByName(type, QString::fromStdString(name));
 }
 
-
 void ResourceModelMap::ResourceRenamed(TypeCase type, const QString& oldName, const QString& newName) {
   if (oldName == newName || !_resources[type].contains(oldName)) return;
   _resources[type][newName] = _resources[type][oldName];
-  
+
   for (auto res : _resources) {
     for (auto model : res) {
       UpdateReferences(model.second, ResTypeAsString(type), oldName, newName);
     }
   }
-  
+
   _resources[type].remove(oldName);
+
+  emit dataChanged();
 }
 
 const ProtoModelPtr GetObjectSprite(const std::string& objName) {

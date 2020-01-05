@@ -30,10 +30,13 @@ RoomView::RoomView(AssetScrollAreaBackground* parent) : AssetView(parent), model
 
 void RoomView::SetResourceModel(ProtoModelPtr model) {
   this->model = model;
-  this->sortedInstances->setSourceModel(model->GetRepeatedSubModel(Room::kInstancesFieldNumber));
-  this->sortedInstances->sort(Room::Instance::kObjectTypeFieldNumber);
-  this->sortedTiles->setSourceModel(model->GetRepeatedSubModel(Room::kTilesFieldNumber));
-  this->sortedTiles->sort(Room::Tile::kDepthFieldNumber);
+
+  if (model != nullptr) {
+    this->sortedInstances->setSourceModel(model->GetRepeatedSubModel(Room::kInstancesFieldNumber));
+    this->sortedInstances->sort(Room::Instance::kObjectTypeFieldNumber);
+    this->sortedTiles->setSourceModel(model->GetRepeatedSubModel(Room::kTilesFieldNumber));
+    this->sortedTiles->sort(Room::Tile::kDepthFieldNumber);
+  }
   setFixedSize(sizeHint());
   repaint();
 }
@@ -68,8 +71,6 @@ void RoomView::Paint(QPainter& painter) {
   this->paintTiles(painter);
   this->paintInstances(painter);
   this->paintBackgrounds(painter, true);
-
-  //update();
 }
 
 void RoomView::paintTiles(QPainter& painter) {
