@@ -5,23 +5,39 @@ PathView::PathView(AssetScrollAreaBackground *parent) : RoomView(parent) {}
 // Perform cubic bezier interpolation
 QPoint cubic(QPoint start, QPoint handle1, QPoint handle2, QPoint end, double position) {
   double inv_position = 1 - position;
-  QPoint a = start * inv_position + handle1 * position;
-  QPoint b = handle2 * inv_position + end * position;
+  QPoint a3 = start * inv_position + handle1 * position;
+  QPoint b3 = handle1 * inv_position + handle2 * position;
+  QPoint c3 = handle2 * inv_position + end * position;
+  QPoint a2 = a3 * inv_position + b3 * position;
+  QPoint b2 = b3 * inv_position + c3 * position;
+  return a2 * inv_position + b2 * position;
+}
+// Perform quadratic bezier interpolation
+QPoint quadratic(QPoint start, QPoint handle, QPoint end, double position) {
+  double inv_position = 1 - position;
+  QPoint a = start * inv_position + handle * position;
+  QPoint b = handle * inv_position + end * position;
   return a * inv_position + b * position;
 }
 
-void shittyCurve(QPoint start, QPoint handle1, QPoint handle2, QPoint end, QPainterPath &path) {
+void shittyCurve(QPoint start, QPoint handle, QPoint end, QPainterPath &path) {
   int precision = 4;
-  for (int i = 0; i <= precision; ++i) {
+    path.moveTo(start);
+  for (int i = 1; i <= precision; ++i) {
     double at = i / (double)precision;
-    path.lineTo(cubic(start, handle1, handle2, end, at));
+    path.lineTo(quadratic(start, handle, end, at));
   }
 }
 
-void whatever(QPoint previous, QPoint current, QPoint next, QPoint after, int precision, QPainterPath &path) {
-  QPoint a = cubic(previous, current, current, next, .5);
-  QPoint b = cubic(current, next, next, after, .5);
-  shittyCurve(a, next, next, b, path);
+void whatever(QPoint previous, QPoint current, QPoint next, int precision, QPainterPath &path) {
+  QPoint a = (previous + current) / 2;
+  QPoint b = current;
+  QPoint c = (current + next) / 2;
+  
+  shittyCurve(a, b, c, path);
+  path.addEllipse(a, 9, 5);
+  path.addEllipse(b, 9, 9);
+  path.addEllipse(c, 5, 9);
 }
 
 void PathView::Paint(QPainter &painter) {
@@ -46,24 +62,22 @@ void PathView::Paint(QPainter &painter) {
 
   bool closed = pathModel->data(Path::kClosedFieldNumber).toBool();
 
-  QPoint prev = closed ? start : end;
-  QPoint cap = closed ? end : start;
-  for (int p = 1; p < pointsModel->rowCount() - 1; ++p) {
+  QPoint prev = closed ? end : start;
+  QPoint cap = closed ? start : end;
+  for (int p = 0; p < pointsModel->rowCount(); ++p) {
     QPoint cur(pointsModel->data(p, Path::Point::kXFieldNumber).toInt(),
                pointsModel->data(p, Path::Point::kYFieldNumber).toInt());
-    QPoint next(pointsModel->data(p + 1, Path::Point::kXFieldNumber).toInt(),
-                pointsModel->data(p + 1, Path::Point::kYFieldNumber).toInt());
-    QPoint after = p + 2 < pointsModel->rowCount()
-                       ? QPoint(pointsModel->data(p + 2, Path::Point::kXFieldNumber).toInt(),
-                                pointsModel->data(p + 2, Path::Point::kYFieldNumber).toInt())
-                       : cap;
+    QPoint next = p + 1 < pointsModel->rowCount()
+         ? QPoint(pointsModel->data(p + 1, Path::Point::kXFieldNumber).toInt(),
+                  pointsModel->data(p + 1, Path::Point::kYFieldNumber).toInt())
+         : cap;
 
     QVariant prec = pathModel->data(Path::kPrecisionFieldNumber);
     int precision = prec.isValid() ? prec.toInt() : 4;
 
-    whatever(prev, cur, next, after, precision, path);
-    path.addEllipse(next, 4, 4);
-    prev = next;
+    whatever(prev, cur, next, precision, path);
+    path.addEllipse(cur, 4, 4);
+    prev = cur;
   }
 
   painter.drawPath(path);
