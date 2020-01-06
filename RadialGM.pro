@@ -60,7 +60,6 @@ SOURCES += \
     Dialogs/TimelineChangeMoment.cpp \
     Editors/ShaderEditor.cpp \
     Widgets/StackedCodeWidget.cpp \
-    Widgets/StackedCodewidget.cpp \
     main.cpp \
     MainWindow.cpp \
     Dialogs/PreferencesDialog.cpp \
