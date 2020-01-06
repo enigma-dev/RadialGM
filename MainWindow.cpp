@@ -10,8 +10,8 @@
 #include "Editors/PathEditor.h"
 #include "Editors/RoomEditor.h"
 #include "Editors/ScriptEditor.h"
-#include "Editors/ShaderEditor.h"
 #include "Editors/SettingsEditor.h"
+#include "Editors/ShaderEditor.h"
 #include "Editors/SoundEditor.h"
 #include "Editors/SpriteEditor.h"
 #include "Editors/TimelineEditor.h"
@@ -58,21 +58,11 @@ void diagnosticHandler(QtMsgType type, const QMessageLogContext &context, const 
   QString msgFormat("%1 in %3:%4 aka %5:\n\t%2");
   QString typeName = "Unknown:";
   switch (type) {
-    case QtDebugMsg:
-      typeName = "Debug";
-      break;
-    case QtInfoMsg:
-      typeName = "Info";
-      break;
-    case QtWarningMsg:
-      typeName = "Warning";
-      break;
-    case QtCriticalMsg:
-      typeName = "Critical";
-      break;
-    case QtFatalMsg:
-      typeName = "Fatal";
-      break;
+    case QtDebugMsg: typeName = "Debug"; break;
+    case QtInfoMsg: typeName = "Info"; break;
+    case QtWarningMsg: typeName = "Warning"; break;
+    case QtCriticalMsg: typeName = "Critical"; break;
+    case QtFatalMsg: typeName = "Fatal"; break;
   }
   QString msgFormatted = msgFormat.arg(typeName, localMsg.constData(), file, QString::number(context.line), function);
 
@@ -153,6 +143,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->actionRun, &QAction::triggered, pluginServer, &RGMPlugin::Run);
   connect(ui->actionDebug, &QAction::triggered, pluginServer, &RGMPlugin::Debug);
   connect(ui->actionCreateExecutable, &QAction::triggered, pluginServer, &RGMPlugin::CreateExecutable);
+
+  connect(ui->mdiArea, &QMdiArea::subWindowActivated, [=](QMdiSubWindow *w) {
+    for (QMdiSubWindow *subWindow : subWindows) {
+      if (w == nullptr) continue;
+      BaseEditor *editor = static_cast<BaseEditor *>(subWindow->widget());
+      if (w == subWindow) {
+        emit editor->FocusGained();
+      } else if (editor->HasFocus()) {
+        emit editor->FocusLost();
+      }
+    }
+  });
 
   openNewProject();
 }

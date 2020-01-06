@@ -12,7 +12,11 @@ AssetScrollAreaBackground::AssetScrollAreaBackground(AssetScrollArea* parent) : 
   installEventFilter(this);
   setMouseTracking(true);
   // Redraw on an model changes
-  connect(MainWindow::resourceMap.get(), &ResourceModelMap::dataChanged, [this]() { this->update(); });
+  connect(MainWindow::resourceMap.get(), &ResourceModelMap::dataChanged, this, [this]() { this->update(); });
+}
+
+AssetScrollAreaBackground::~AssetScrollAreaBackground() {
+  disconnect(MainWindow::resourceMap.get(), &ResourceModelMap::dataChanged, this, nullptr);
 }
 
 void AssetScrollAreaBackground::SetAssetView(AssetView* asset) {
@@ -20,8 +24,9 @@ void AssetScrollAreaBackground::SetAssetView(AssetView* asset) {
   SetZoom(1);
 }
 
-void AssetScrollAreaBackground::SetDrawSolidBackground(bool b) {
+void AssetScrollAreaBackground::SetDrawSolidBackground(bool b, QColor color) {
   drawSolidBackground = b;
+  backgroundColor = color;
   update();
 }
 
@@ -48,20 +53,24 @@ void AssetScrollAreaBackground::paintGrid(QPainter& painter, int gridHorSpacing,
   QPen pen(Qt::white, 1, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin);
   painter.setPen(pen);
 
-  for (int x = gridHorOff + gridHorSpacing; x < width(); x += gridHorSpacing) {
-    painter.drawLine(x, 0, x, this->height());
+  if (gridHorSpacing != 0) {
+    for (int x = gridHorOff + gridHorSpacing; x < width(); x += gridHorSpacing) {
+      painter.drawLine(x, 0, x, this->height());
+    }
+
+    for (int x = gridHorOff; x > 0; x -= gridHorSpacing) {
+      painter.drawLine(x, 0, x, this->height());
+    }
   }
 
-  for (int x = gridHorOff; x > 0; x -= gridHorSpacing) {
-    painter.drawLine(x, 0, x, this->height());
-  }
+  if (gridVertSpacing != 0) {
+    for (int y = gridVertOff + gridVertSpacing; y < height(); y += gridVertSpacing) {
+      painter.drawLine(0, y, this->width(), y);
+    }
 
-  for (int y = gridVertOff + gridVertSpacing; y < height(); y += gridVertSpacing) {
-    painter.drawLine(0, y, this->width(), y);
-  }
-
-  for (int y = gridVertOff; y > 0; y -= gridVertSpacing) {
-    painter.drawLine(0, y, this->width(), y);
+    for (int y = gridVertOff; y > 0; y -= gridVertSpacing) {
+      painter.drawLine(0, y, this->width(), y);
+    }
   }
 
   painter.restore();
@@ -107,7 +116,7 @@ void AssetScrollAreaBackground::paintEvent(QPaintEvent* /* event */) {
   QPainter painter(this);
 
   if (drawSolidBackground) {
-    painter.fillRect(painter.viewport(), Qt::GlobalColor::gray);
+    painter.fillRect(painter.viewport(), backgroundColor);
   } else {
     painter.save();
     painter.scale(4, 4);
@@ -141,24 +150,50 @@ void AssetScrollAreaBackground::paintEvent(QPaintEvent* /* event */) {
 }
 
 bool AssetScrollAreaBackground::eventFilter(QObject* obj, QEvent* event) {
-  if (event->type() == QEvent::MouseMove) {
-    QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
-    QPoint roomPos = mouseEvent->pos() - offset;
-    roomPos /= zoom;
-    emit MouseMoved(roomPos.x(), roomPos.y());
-  } else if (event->type() == QEvent::Enter) {
-    setFocus();
-  } else if (event->type() == QEvent::Leave) {
-    clearFocus();
-  } else if (event->type() == QEvent::KeyPress) {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-    pressedKeys += keyEvent->key();
-    userOffset.setX(userOffset.x() + (pressedKeys.contains(Qt::Key::Key_D) - pressedKeys.contains(Qt::Key::Key_A)) * 4);
-    userOffset.setY(userOffset.y() + (pressedKeys.contains(Qt::Key::Key_W) - pressedKeys.contains(Qt::Key::Key_S)) * 4);
-    update();
-  } else if (event->type() == QEvent::KeyRelease) {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-    pressedKeys -= keyEvent->key();
+  if (parentHasFocus) {
+    switch (event->type()) {
+      case QEvent::MouseMove: {
+        QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+        QPoint roomPos = mouseEvent->pos() - offset;
+        roomPos /= zoom;
+        emit MouseMoved(roomPos.x(), roomPos.y());
+        break;
+      }
+      case QEvent::MouseButtonPress: {
+        QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+        emit MousePressed(mouseEvent->button());
+        break;
+      }
+      case QEvent::MouseButtonRelease: {
+        QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+        emit MouseReleased(mouseEvent->button());
+        break;
+      }
+      case QEvent::Enter: {
+        setFocus();
+        break;
+      }
+      case QEvent::Leave: {
+        clearFocus();
+        break;
+      }
+      case QEvent::KeyPress: {
+        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+        pressedKeys += keyEvent->key();
+        userOffset.setX(userOffset.x() +
+                        (pressedKeys.contains(Qt::Key::Key_D) - pressedKeys.contains(Qt::Key::Key_A)) * 4);
+        userOffset.setY(userOffset.y() +
+                        (pressedKeys.contains(Qt::Key::Key_W) - pressedKeys.contains(Qt::Key::Key_S)) * 4);
+        update();
+        break;
+      }
+      case QEvent::KeyRelease: {
+        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+        pressedKeys -= keyEvent->key();
+        break;
+      }
+      default: break;
+    }
   }
   return QWidget::eventFilter(obj, event);
 }

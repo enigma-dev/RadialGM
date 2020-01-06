@@ -59,7 +59,6 @@ LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
 SOURCES += \
     Dialogs/TimelineChangeMoment.cpp \
     Editors/ShaderEditor.cpp \
-    Widgets/AssetScrollArea.cpp \
     Widgets/AssetScrollAreaBackground.cpp \
     Widgets/PathView.cpp \
     Widgets/StackedCodeWidget.cpp \

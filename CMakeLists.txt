@@ -55,7 +55,6 @@ set(RGM_SOURCES
     Components/Utility.cpp
     Components/RecentFiles.cpp
     Components/QMenuView.cpp
-    Widgets/AssetScrollArea.cpp
     Widgets/AssetScrollAreaBackground.cpp
     Widgets/BackgroundView.cpp
     Widgets/CodeWidget.cpp

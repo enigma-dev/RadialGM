@@ -9,7 +9,10 @@
 
 using buffers::resources::Background;
 
-BackgroundView::BackgroundView(AssetScrollAreaBackground *parent) : AssetView(parent), model(nullptr) {}
+BackgroundView::BackgroundView(AssetScrollAreaBackground *parent) : AssetView(parent), model(nullptr) {
+  grid.type = GridType::Complex;
+  parent->SetDrawSolidBackground(true, Qt::GlobalColor::transparent);
+}
 
 void BackgroundView::SetResourceModel(ProtoModelPtr model) {
   this->model = model;

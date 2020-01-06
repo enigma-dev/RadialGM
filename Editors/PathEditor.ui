@@ -182,6 +182,12 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>8</number>
+               </property>
                <property name="value">
                 <number>4</number>
                </property>
@@ -506,6 +512,12 @@
           </item>
           <item>
            <widget class="QTableView" name="pointsTableView">
+            <property name="selectionMode">
+             <enum>QAbstractItemView::SingleSelection</enum>
+            </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectItems</enum>
+            </property>
             <attribute name="horizontalHeaderStretchLastSection">
              <bool>true</bool>
             </attribute>
@@ -594,7 +606,7 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>267</width>
+               <width>171</width>
                <height>508</height>
               </rect>
              </property>

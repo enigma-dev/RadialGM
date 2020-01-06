@@ -24,9 +24,20 @@ class AssetScrollAreaBackground : public QWidget {
   Q_OBJECT
  public:
   explicit AssetScrollAreaBackground(AssetScrollArea* parent = nullptr);
+  ~AssetScrollAreaBackground();
   void SetAssetView(AssetView* asset);
-  void SetDrawSolidBackground(bool b);
+  void SetDrawSolidBackground(bool b, QColor color);
   const qreal& GetZoom() const;
+
+  bool parentHasFocus = false;
+
+ public slots:
+  void SetZoom(qreal zoom);
+
+ signals:
+  void MouseMoved(int x, int y);
+  void MousePressed(Qt::MouseButton button);
+  void MouseReleased(Qt::MouseButton button);
 
  protected:
   // Standard Grid
@@ -37,19 +48,13 @@ class AssetScrollAreaBackground : public QWidget {
   void paintEvent(QPaintEvent* event) override;
   bool eventFilter(QObject* obj, QEvent* event) override;
 
- public slots:
-  void SetZoom(qreal zoom);
-
- signals:
-  void MouseMoved(int x, int y);
-
- protected:
   AssetView* assetView = nullptr;
   bool drawSolidBackground = true;
   qreal zoom = 1;
   QPoint offset;
   QPoint userOffset;
   QSet<int> pressedKeys;
+  QColor backgroundColor = Qt::GlobalColor::gray;
 };
 
 #endif  // ASSETSCROLLAREABACKGROUND_H

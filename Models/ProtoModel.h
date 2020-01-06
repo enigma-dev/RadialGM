@@ -23,7 +23,8 @@ using Timeline = buffers::resources::Timeline;
 class ProtoModel : public QAbstractItemModel {
   Q_OBJECT
 
- private:
+ protected:
+  void RecursiveDataChanged();
   struct SubModels {
     void Clear();
     QHash<int, ProtoModelPtr> protoModels;

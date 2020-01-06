@@ -89,7 +89,7 @@ bool RepeatedProtoModel::setData(const QModelIndex &index, const QVariant &value
   const QVariant oldValue = this->data(index, role);
   if (models[index.row()]->setData(models[index.row()]->index(index.column(), 0), value, role)) {
     GetParentModel()->SetDirty(true);
-    emit GetParentModel()->dataChanged(QModelIndex(), QModelIndex());
+    RecursiveDataChanged();
     emit dataChanged(index, index, oldValue);
     return true;
   }
@@ -158,6 +158,14 @@ bool RepeatedProtoModel::insertRows(int row, int count, const QModelIndex &paren
   GetParentModel()->SetDirty(true);
 
   return true;
+}
+
+void RepeatedProtoModel::RecursiveDataChanged() {
+  ProtoModelPtr m = GetParentModel();
+  while (m != nullptr) {
+    emit m->dataChanged(QModelIndex(), QModelIndex());
+    m = m->GetParentModel();
+  }
 }
 
 void RepeatedProtoModel::SwapBack(int left, int part, int right) {
