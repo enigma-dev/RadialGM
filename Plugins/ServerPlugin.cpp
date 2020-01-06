@@ -240,6 +240,7 @@ void CompilerClient::UpdateLoop() {
 }
 
 ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
+  return;
   // create a new child process for us to launch an emake server
   process = new QProcess(this);
 
