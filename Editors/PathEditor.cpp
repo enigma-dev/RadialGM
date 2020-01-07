@@ -51,6 +51,7 @@ PathEditor::PathEditor(ProtoModelPtr model, QWidget* parent) : BaseEditor(model,
   connect(roomButton, &QToolButton::pressed, [=]() {
     roomLineEdit->setText("");
     ui->roomView->SetResourceModel(nullptr);
+    pathModel->setData(Path::kBackgroundRoomNameFieldNumber, 0, "");
   });
 
   connect(roomButton->menu, &QMenu::triggered, this, [=](QAction* action) {
@@ -58,6 +59,7 @@ PathEditor::PathEditor(ProtoModelPtr model, QWidget* parent) : BaseEditor(model,
     ui->roomView->SetResourceModel(MainWindow::resourceMap->GetResourceByName(TypeCase::kRoom, action->text())
                                        ->GetSubModel(TreeNode::kRoomFieldNumber));
     ui->pathPreviewBackground->SetZoom(1);
+    pathModel->setData(Path::kBackgroundRoomNameFieldNumber, 0, action->text());
   });
 
   ui->mainToolBar->addSeparator();
