@@ -12,7 +12,7 @@
 
 PathEditor::PathEditor(ProtoModelPtr model, QWidget* parent) : BaseEditor(model, parent), ui(new Ui::PathEditor) {
   ui->setupUi(this);
-  connect(ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
+  connect(ui->saveButton, &QAbstractButton::pressed, this, &BaseEditor::OnSave);
 
   ui->pathPreviewBackground->SetAssetView(ui->roomView);
 
