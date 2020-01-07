@@ -31,8 +31,8 @@ class PathEditor : public BaseEditor {
   QLabel* cursorPositionLabel;
   QLineEdit* roomLineEdit;
   bool snapToGrid = true;
-  ProtoModelPtr pathModel;
-  RepeatedProtoModelPtr pointsModel;
+  ProtoModelPtr pathModel = nullptr;
+  RepeatedProtoModelPtr pointsModel = nullptr;
   bool draggingPoint = false;
 };
 

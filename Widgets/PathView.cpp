@@ -165,7 +165,7 @@ void PathView::Paint(QPainter &painter) {
       painter.restore();
     }
 
-    if (selectedPointIndex != -1) {
+    if (selectedPointIndex != -1 && selectedPointIndex < user_points.size()) {
       painter.setBrush(QBrush(Qt::red));
       painter.drawEllipse(user_points[selectedPointIndex], 4, 4);
     }

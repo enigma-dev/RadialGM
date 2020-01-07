@@ -146,12 +146,13 @@ void PathEditor::RebindSubModels() {
     if (button == Qt::MouseButton::LeftButton) {
       draggingPoint = true;
       // Check for point at location (reverse loop to get last added one if dups)
-      for (int i = pointsModel->rowCount(); i >= 0; i--) {
+      for (int i = pointsModel->rowCount() - 1; i >= 0; i--) {
         QPoint pt(pointsModel->data(i, Path::Point::kXFieldNumber).toInt(),
                   pointsModel->data(i, Path::Point::kYFieldNumber).toInt());
         if (pt == ui->roomView->mousePos) {
-          ui->roomView->selectedPointIndex = i;
-          ui->pointsTableView->selectionModel()->select(pointsModel->index(i, Path::Point::kXFieldNumber),
+          QModelIndex newSelectIndex = pointsModel->index(i, Path::Point::kXFieldNumber);
+          ui->pointsTableView->setCurrentIndex(newSelectIndex);
+          ui->pointsTableView->selectionModel()->select(newSelectIndex,
                                                         QItemSelectionModel::QItemSelectionModel::ClearAndSelect);
           return;
         }
@@ -183,12 +184,14 @@ void PathEditor::RebindSubModels() {
 }
 
 bool PathEditor::eventFilter(QObject* obj, QEvent* event) {
-  // Resize columns to view size
-  if (obj == ui->pointsTableView && event->type() == QEvent::Resize) {
-    QResizeEvent* resizeEvent = static_cast<QResizeEvent*>(event);
-    for (int c = 0; c < 3; ++c) {
-      // Note: I ha nfi what 40 is here. Something todo with margins prolly
-      ui->pointsTableView->setColumnWidth(c, (resizeEvent->size().width() - 40) / 3);
+  if (pointsModel != nullptr) {
+    // Resize columns to view size
+    if (obj == ui->pointsTableView && event->type() == QEvent::Resize) {
+      QResizeEvent* resizeEvent = static_cast<QResizeEvent*>(event);
+      int cc = pointsModel->columnCount() - 1;
+      for (int c = 1; c < cc; ++c) {  // column 1 is hidden
+        ui->pointsTableView->setColumnWidth(c, (resizeEvent->size().width()) / cc);
+      }
     }
   }
   return QWidget::eventFilter(obj, event);
@@ -219,12 +222,15 @@ void PathEditor::on_deletePointButton_pressed() {
     remover.RemoveRow(deleteIndex);
   }
 
-  qDebug() << deleteIndex;
-
-  if (pointsModel->rowCount() > 0)
-    ui->pointsTableView->selectionModel()->select(
-        pointsModel->index((deleteIndex == 0) ? 0 : deleteIndex - 1, Path::Point::kXFieldNumber),
-        QItemSelectionModel::QItemSelectionModel::ClearAndSelect);
-  else
+  if (pointsModel->rowCount() > 0) {
+    QModelIndex newSelectIndex =
+        pointsModel->index((deleteIndex == 0) ? 0 : deleteIndex - 1, Path::Point::kXFieldNumber);
+    ui->pointsTableView->setCurrentIndex(newSelectIndex);
+    ui->pointsTableView->selectionModel()->select(newSelectIndex,
+                                                  QItemSelectionModel::QItemSelectionModel::ClearAndSelect);
+  } else {
     ui->deletePointButton->setDisabled(true);
+    ui->pointsTableView->selectionModel()->clearSelection();
+    ui->pathPreviewBackground->update();
+  }
 }
