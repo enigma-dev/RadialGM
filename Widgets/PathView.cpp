@@ -36,10 +36,9 @@ int PathView::Precision() const {
   if (res > 8) return 8;
   return res;
 }
-// int PathView::EffectiveIndex(int n) const;
+
 int PathView::EffectiveIndex(int n, int size, bool closed) const {
   if (closed) {
-    const int size = Size();
     if (n < 0) {
       if (n < -size) n %= size;
       n += size;

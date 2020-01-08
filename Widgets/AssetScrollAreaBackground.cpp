@@ -8,7 +8,17 @@
 #include <QMouseEvent>
 #include <QPainter>
 
-AssetScrollAreaBackground::AssetScrollAreaBackground(AssetScrollArea* parent) : QWidget(parent) {
+AssetScrollAreaBackground::AssetScrollAreaBackground(AssetScrollArea* parent)
+    : QWidget(parent),
+      _assetView(nullptr),
+      _drawSolidBackground(true),
+      _currentZoom(1),
+      _zoomFactor(2),
+      _maxZoom(3200),
+      _minZoom(0.0625),
+      _backgroundColor(Qt::GlobalColor::gray),
+      _parentHasFocus(false),
+      _viewMoveSpeed(4) {
   installEventFilter(this);
   setMouseTracking(true);
   // Redraw on an model changes
@@ -20,29 +30,69 @@ AssetScrollAreaBackground::~AssetScrollAreaBackground() {
 }
 
 void AssetScrollAreaBackground::SetAssetView(AssetView* asset) {
-  assetView = asset;
+  _assetView = asset;
   SetZoom(1);
 }
 
 void AssetScrollAreaBackground::SetDrawSolidBackground(bool b, QColor color) {
-  drawSolidBackground = b;
-  backgroundColor = color;
+  _drawSolidBackground = b;
+  _backgroundColor = color;
   update();
 }
 
 void AssetScrollAreaBackground::SetZoom(qreal zoom) {
-  if (zoom > 3200) zoom = 3200;
-  if (zoom < 0.0625) zoom = 0.0625;
-  this->zoom = zoom;
+  if (zoom > 3200) zoom = _maxZoom;
+  if (zoom < 0.0625) zoom = _minZoom;
+  this->_currentZoom = zoom;
 
-  if (assetView != nullptr) assetView->setFixedSize(assetView->sizeHint() * zoom);
+  if (_assetView != nullptr) _assetView->setFixedSize(_assetView->sizeHint() * zoom);
 
   update();
 }
 
-const qreal& AssetScrollAreaBackground::GetZoom() const { return zoom; }
+void AssetScrollAreaBackground::SetZoomRange(qreal scalingFactor, qreal min, qreal max) {
+  _zoomFactor = scalingFactor;
+  _minZoom = min;
+  _maxZoom = max;
+}
 
-void AssetScrollAreaBackground::paintGrid(QPainter& painter, int gridHorSpacing, int gridVertSpacing, int gridHorOff,
+bool AssetScrollAreaBackground::GetGridVisible() {
+  if (_assetView != nullptr) {
+    return _assetView->GetGrid().show;
+  }
+  return false;
+}
+
+void AssetScrollAreaBackground::ResetZoom() { SetZoom(1); }
+
+void AssetScrollAreaBackground::ZoomIn() { SetZoom(GetZoom() * _zoomFactor); }
+
+void AssetScrollAreaBackground::ZoomOut() { SetZoom(GetZoom() / _zoomFactor); }
+
+const qreal& AssetScrollAreaBackground::GetZoom() const { return _currentZoom; }
+
+void AssetScrollAreaBackground::SetGridVisible(bool visible) {
+  if (_assetView != nullptr) {
+    _assetView->GetGrid().show = visible;
+    update();
+  }
+}
+
+void AssetScrollAreaBackground::SetGridHSnap(int hSnap) {
+  if (_assetView != nullptr) {
+    _assetView->GetGrid().horSpacing = hSnap;
+  }
+}
+
+void AssetScrollAreaBackground::SetGridVSnap(int vSnap) {
+  if (_assetView != nullptr) {
+    _assetView->GetGrid().vertSpacing = vSnap;
+  }
+}
+
+void AssetScrollAreaBackground::SetParentHasFocus(bool focus) { _parentHasFocus = focus; }
+
+void AssetScrollAreaBackground::PaintGrid(QPainter& painter, int gridHorSpacing, int gridVertSpacing, int gridHorOff,
                                           int gridVertOff) {
   // save the painter state so we can restore it before returning
   painter.save();
@@ -76,7 +126,7 @@ void AssetScrollAreaBackground::paintGrid(QPainter& painter, int gridHorSpacing,
   painter.restore();
 }
 
-void AssetScrollAreaBackground::paintGrid(QPainter& painter, int width, int height, int gridHorSpacing,
+void AssetScrollAreaBackground::PaintGrid(QPainter& painter, int width, int height, int gridHorSpacing,
                                           int gridVertSpacing, int gridHorOff, int gridVertOff, int gridWidth,
                                           int gridHeight) {
   // do not draw zero-area grids
@@ -112,11 +162,17 @@ void AssetScrollAreaBackground::paintGrid(QPainter& painter, int width, int heig
   painter.restore();
 }
 
+QPoint AssetScrollAreaBackground::GetCenterOffset() {
+  return QPoint(
+      (rect().width() < _assetView->rect().width()) ? 0 : rect().center().x() - _assetView->rect().center().x(),
+      (rect().height() < _assetView->rect().height()) ? 0 : rect().center().y() - _assetView->rect().center().y());
+}
+
 void AssetScrollAreaBackground::paintEvent(QPaintEvent* /* event */) {
   QPainter painter(this);
 
-  if (drawSolidBackground) {
-    painter.fillRect(painter.viewport(), backgroundColor);
+  if (_drawSolidBackground) {
+    painter.fillRect(painter.viewport(), _backgroundColor);
   } else {
     painter.save();
     painter.scale(4, 4);
@@ -124,38 +180,36 @@ void AssetScrollAreaBackground::paintEvent(QPaintEvent* /* event */) {
     painter.restore();
   }
 
-  if (assetView != nullptr) {
-    offset =
-        QPoint(
-            (rect().width() < assetView->rect().width()) ? 0 : rect().center().x() - assetView->rect().center().x(),
-            (rect().height() < assetView->rect().height()) ? 0 : rect().center().y() - assetView->rect().center().y()) +
-        userOffset;
+  if (_assetView != nullptr) {
+    _totalDrawOffset = GetCenterOffset() + _userDrawOffset;
 
     painter.save();
-    painter.translate(offset);
-    painter.scale(zoom, zoom);
-    assetView->Paint(painter);
+    painter.translate(_totalDrawOffset);
+    painter.scale(_currentZoom, _currentZoom);
+    _assetView->Paint(painter);
     painter.restore();
 
-    GridDimensions g = assetView->GetGrid();
+    GridDimensions g = _assetView->GetGrid();
     if (g.show) {
       if (g.type == GridType::Complex)
-        paintGrid(painter, g.width * zoom, g.height * zoom, g.horSpacing * zoom, g.vertSpacing * zoom,
-                  (g.horOff * zoom) + offset.x(), (g.vertOff * zoom) + offset.y(), g.cellWidth * zoom,
-                  g.cellHeight * zoom);
+        PaintGrid(painter, g.width * _currentZoom, g.height * _currentZoom, g.horSpacing * _currentZoom,
+                  g.vertSpacing * _currentZoom, (g.horOff * _currentZoom) + _totalDrawOffset.x(),
+                  (g.vertOff * _currentZoom) + _totalDrawOffset.y(), g.cellWidth * _currentZoom,
+                  g.cellHeight * _currentZoom);
       else if (g.type == GridType::Standard)
-        paintGrid(painter, g.horSpacing * zoom, g.vertSpacing * zoom, offset.x(), offset.y());
+        PaintGrid(painter, g.horSpacing * _currentZoom, g.vertSpacing * _currentZoom, _totalDrawOffset.x(),
+                  _totalDrawOffset.y());
     }
   }
 }
 
 bool AssetScrollAreaBackground::eventFilter(QObject* obj, QEvent* event) {
-  if (parentHasFocus) {
+  if (_parentHasFocus) {
     switch (event->type()) {
       case QEvent::MouseMove: {
         QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
-        QPoint roomPos = mouseEvent->pos() - offset;
-        roomPos /= zoom;
+        QPoint roomPos = mouseEvent->pos() - _totalDrawOffset;
+        roomPos /= _currentZoom;
         emit MouseMoved(roomPos.x(), roomPos.y());
         break;
       }
@@ -179,17 +233,19 @@ bool AssetScrollAreaBackground::eventFilter(QObject* obj, QEvent* event) {
       }
       case QEvent::KeyPress: {
         QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-        pressedKeys += keyEvent->key();
-        userOffset.setX(userOffset.x() +
-                        (pressedKeys.contains(Qt::Key::Key_D) - pressedKeys.contains(Qt::Key::Key_A)) * 4);
-        userOffset.setY(userOffset.y() +
-                        (pressedKeys.contains(Qt::Key::Key_W) - pressedKeys.contains(Qt::Key::Key_S)) * 4);
+        _pressedKeys += keyEvent->key();
+        _userDrawOffset.setX(_userDrawOffset.x() +
+                             (_pressedKeys.contains(Qt::Key::Key_D) - _pressedKeys.contains(Qt::Key::Key_A)) *
+                                 _viewMoveSpeed);
+        _userDrawOffset.setY(_userDrawOffset.y() +
+                             (_pressedKeys.contains(Qt::Key::Key_W) - _pressedKeys.contains(Qt::Key::Key_S)) *
+                                 _viewMoveSpeed);
         update();
         break;
       }
       case QEvent::KeyRelease: {
         QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-        pressedKeys -= keyEvent->key();
+        _pressedKeys -= keyEvent->key();
         break;
       }
       default: break;

@@ -147,12 +147,8 @@ void RoomEditor::updateCursorPositionLabel(const QPoint& pos) {
   this->cursorPositionLabel->setText(tr("X %0, Y %1").arg(pos.x()).arg(pos.y()));
 }
 
-void RoomEditor::on_actionZoomIn_triggered() {
-  ui->roomPreviewBackground->SetZoom(ui->roomPreviewBackground->GetZoom() * 2);
-}
+void RoomEditor::on_actionZoomIn_triggered() { ui->roomPreviewBackground->ZoomIn(); }
 
-void RoomEditor::on_actionZoomOut_triggered() {
-  ui->roomPreviewBackground->SetZoom(ui->roomPreviewBackground->GetZoom() / 2);
-}
+void RoomEditor::on_actionZoomOut_triggered() { ui->roomPreviewBackground->ZoomOut(); }
 
-void RoomEditor::on_actionZoom_triggered() { ui->roomPreviewBackground->SetZoom(1.0); }
+void RoomEditor::on_actionZoom_triggered() { ui->roomPreviewBackground->ResetZoom(); }

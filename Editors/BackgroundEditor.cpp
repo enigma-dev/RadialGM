@@ -45,15 +45,11 @@ void BackgroundEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex
   ui->backgroundView->update();
 }
 
-void BackgroundEditor::on_actionZoomIn_triggered() {
-  ui->imagePreviewBackground->SetZoom(ui->imagePreviewBackground->GetZoom() * 2);
-}
+void BackgroundEditor::on_actionZoomIn_triggered() { ui->imagePreviewBackground->ZoomIn(); }
 
-void BackgroundEditor::on_actionZoomOut_triggered() {
-  ui->imagePreviewBackground->SetZoom(ui->imagePreviewBackground->GetZoom() / 2);
-}
+void BackgroundEditor::on_actionZoomOut_triggered() { ui->imagePreviewBackground->ZoomOut(); }
 
-void BackgroundEditor::on_actionZoom_triggered() { ui->imagePreviewBackground->SetZoom(1); }
+void BackgroundEditor::on_actionZoom_triggered() { ui->imagePreviewBackground->ResetZoom(); }
 
 void BackgroundEditor::on_actionNewImage_triggered() {
   QDialog dialog(this);
@@ -82,8 +78,9 @@ void BackgroundEditor::on_actionLoadImage_triggered() {
         // QString newData = GetModelData(Background::kImageFieldNumber).toString();
         // TODO: Copy data into our egm and reset the path
         // SetModelData(Background::kImageFieldNumber, lastData);
-      } else
+      } else {
         qDebug() << "Failed to load gmx Background";
+      }
     } else {
       // TODO: Copy data into our egm
       SetModelData(Background::kImageFieldNumber, fName);

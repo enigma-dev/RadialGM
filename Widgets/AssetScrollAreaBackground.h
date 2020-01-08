@@ -28,11 +28,18 @@ class AssetScrollAreaBackground : public QWidget {
   void SetAssetView(AssetView* asset);
   void SetDrawSolidBackground(bool b, QColor color);
   const qreal& GetZoom() const;
-
-  bool parentHasFocus = false;
+  void SetZoomRange(qreal scalingFactor, qreal min, qreal max);
+  bool GetGridVisible();
 
  public slots:
-  void SetZoom(qreal zoom);
+  void SetZoom(qreal _currentZoom);
+  void ZoomIn();
+  void ZoomOut();
+  void ResetZoom();
+  void SetGridVisible(bool visible);
+  void SetGridHSnap(int hSnap);
+  void SetGridVSnap(int vSnap);
+  void SetParentHasFocus(bool focus);
 
  signals:
   void MouseMoved(int x, int y);
@@ -40,21 +47,27 @@ class AssetScrollAreaBackground : public QWidget {
   void MouseReleased(Qt::MouseButton button);
 
  protected:
+  QPoint GetCenterOffset();
   // Standard Grid
-  void paintGrid(QPainter& painter, int gridHorSpacing, int gridVertSpacing, int gridHorOff, int gridVertOff);
+  void PaintGrid(QPainter& painter, int gridHorSpacing, int gridVertSpacing, int gridHorOff, int gridVertOff);
   // Grid used in tilesets
-  void paintGrid(QPainter& painter, int width, int height, int gridHorSpacing, int gridVertSpacing, int gridHorOff,
+  void PaintGrid(QPainter& painter, int width, int height, int gridHorSpacing, int gridVertSpacing, int gridHorOff,
                  int gridVertOff, int gridWidth, int gridHeight);
   void paintEvent(QPaintEvent* event) override;
   bool eventFilter(QObject* obj, QEvent* event) override;
 
-  AssetView* assetView = nullptr;
-  bool drawSolidBackground = true;
-  qreal zoom = 1;
-  QPoint offset;
-  QPoint userOffset;
-  QSet<int> pressedKeys;
-  QColor backgroundColor = Qt::GlobalColor::gray;
+  AssetView* _assetView = nullptr;
+  bool _drawSolidBackground = true;
+  qreal _currentZoom = 1;
+  qreal _zoomFactor = 2;
+  qreal _maxZoom = 3200;
+  qreal _minZoom = 0.0625;
+  QPoint _totalDrawOffset;
+  QPoint _userDrawOffset;
+  QSet<int> _pressedKeys;
+  QColor _backgroundColor = Qt::GlobalColor::gray;
+  bool _parentHasFocus = false;
+  int _viewMoveSpeed = 4;
 };
 
 #endif  // ASSETSCROLLAREABACKGROUND_H

@@ -144,17 +144,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(ui->actionDebug, &QAction::triggered, pluginServer, &RGMPlugin::Debug);
   connect(ui->actionCreateExecutable, &QAction::triggered, pluginServer, &RGMPlugin::CreateExecutable);
 
-  connect(ui->mdiArea, &QMdiArea::subWindowActivated, [=](QMdiSubWindow *w) {
-    for (QMdiSubWindow *subWindow : subWindows) {
-      if (w == nullptr) continue;
-      BaseEditor *editor = static_cast<BaseEditor *>(subWindow->widget());
-      if (w == subWindow) {
-        emit editor->FocusGained();
-      } else if (editor->HasFocus()) {
-        emit editor->FocusLost();
-      }
-    }
-  });
+  connect(ui->mdiArea, &QMdiArea::subWindowActivated, this, &MainWindow::MDIWindowChanged);
 
   openNewProject();
 }
@@ -247,6 +237,18 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
 
   subWindow->show();
   ui->mdiArea->setActiveSubWindow(subWindow);
+}
+
+void MainWindow::MDIWindowChanged(QMdiSubWindow *window) {
+  for (QMdiSubWindow *subWindow : subWindows) {
+    if (subWindow == nullptr) continue;
+    BaseEditor *editor = static_cast<BaseEditor *>(subWindow->widget());
+    if (window == subWindow) {
+      emit editor->FocusGained();
+    } else if (editor->HasFocus()) {
+      emit editor->FocusLost();
+    }
+  }
 }
 
 void MainWindow::updateWindowMenu() {

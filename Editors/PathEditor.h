@@ -4,6 +4,7 @@
 #include "BaseEditor.h"
 #include "Components/ArtManager.h"
 
+#include <QItemSelection>
 #include <QLabel>
 #include <QLineEdit>
 
@@ -22,6 +23,13 @@ class PathEditor : public BaseEditor {
   void InsertPoint(int index, int x, int y, int speed);
 
  private slots:
+  void SetSnapToGrid(bool snap);
+  void RoomMenuItemSelected(QAction* action);
+  void RoomMenuButtonPressed();
+  void MouseMoved(int x, int y);
+  void MousePressed(Qt::MouseButton button);
+  void MouseReleased(Qt::MouseButton button);
+  void UpdateSelection(const QItemSelection& selected, const QItemSelection& deselected);
   void on_addPointButton_pressed();
   void on_insertPointButton_pressed();
   void on_deletePointButton_pressed();

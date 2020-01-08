@@ -44,6 +44,7 @@ void RoomView::SetResourceModel(ProtoModelPtr model) {
 QSize RoomView::sizeHint() const {
   if (!model) return QSize(640, 480);
   QVariant roomWidth = model->data(Room::kWidthFieldNumber), roomHeight = model->data(Room::kHeightFieldNumber);
+  // TODO: add model defaults (enigma-dev/enigma-dev#1872)
   if (!roomWidth.isValid() || !roomHeight.isValid()) return QSize(640, 480);
   return QSize(roomWidth.toUInt(), roomHeight.toUInt());
 }
