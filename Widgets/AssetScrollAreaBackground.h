@@ -56,18 +56,18 @@ class AssetScrollAreaBackground : public QWidget {
   void paintEvent(QPaintEvent* event) override;
   bool eventFilter(QObject* obj, QEvent* event) override;
 
-  AssetView* _assetView = nullptr;
-  bool _drawSolidBackground = true;
-  qreal _currentZoom = 1;
-  qreal _zoomFactor = 2;
-  qreal _maxZoom = 3200;
-  qreal _minZoom = 0.0625;
+  AssetView* _assetView;
+  bool _drawSolidBackground;
+  qreal _currentZoom;
+  qreal _zoomFactor;
+  qreal _maxZoom;
+  qreal _minZoom;
   QPoint _totalDrawOffset;
   QPoint _userDrawOffset;
   QSet<int> _pressedKeys;
-  QColor _backgroundColor = Qt::GlobalColor::gray;
-  bool _parentHasFocus = false;
-  int _viewMoveSpeed = 4;
+  QColor _backgroundColor;
+  bool _parentHasFocus;
+  int _viewMoveSpeed;
 };
 
 #endif  // ASSETSCROLLAREABACKGROUND_H
