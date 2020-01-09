@@ -62,7 +62,7 @@ namespace {
 
 // Draws a curve of adjustable shittiness. Use increment to control the
 // shittiness. For added shittiness, the start and end points will not be drawn.
-void shittyCurve(QPoint start, QPoint handle, QPoint end, double increment, QVector<QPoint> *points) {
+void ApproximateCurve(QPoint start, QPoint handle, QPoint end, double increment, QVector<QPoint> *points) {
   for (double i = increment; i < 1; i += increment) {
     points->push_back(quadratic(start, handle, end, i));
   }
@@ -71,12 +71,12 @@ void shittyCurve(QPoint start, QPoint handle, QPoint end, double increment, QVec
 // A curve function that doesn't do what it's fucking told, and instead goes
 // off and does its own thing, because apparently Mark doesn't know what a
 // damned spline is
-void reallyStupidCurve(QPoint previous, QPoint current, QPoint next, double increment, QVector<QPoint> *points) {
+void OvermarsCurve(QPoint previous, QPoint current, QPoint next, double increment, QVector<QPoint> *points) {
   QPoint a = (previous + current) / 2;
   QPoint b = current;
   QPoint c = (current + next) / 2;
 
-  shittyCurve(a, b, c, increment, points);
+  ApproximateCurve(a, b, c, increment, points);
 }
 
 }  // namespace
@@ -103,15 +103,15 @@ QVector<QPoint> PathView::RenderPoints(const QVector<QPoint> &user_points) const
       p1 = p2;
       p2 = p3;
       p3 = user_points[i + 2];
-      reallyStupidCurve(p1, p2, p3, increment, &points);
+      OvermarsCurve(p1, p2, p3, increment, &points);
     }
     if (closed) {
       p1 = p2;
       p2 = p3;
       p3 = user_points[0];
       QPoint p4 = user_points[1];
-      reallyStupidCurve(p1, p2, p3, increment, &points);
-      reallyStupidCurve(p2, p3, p4, increment, &points);
+      OvermarsCurve(p1, p2, p3, increment, &points);
+      OvermarsCurve(p2, p3, p4, increment, &points);
       points.push_back(points[0]);
     } else {
       points.push_back(user_points.back());
