@@ -69,7 +69,7 @@ class RepeatedProtoModel : public QAbstractItemModel {
   void rowsAboutToBeRemoved(const QModelIndex &parent, int first, int last);
 
  protected:
-  void RecursiveDataChanged();
+  void ParentDataChanged();
   ProtoModelPtr parentModel;
   Message *protobuf;
   const FieldDescriptor *field;

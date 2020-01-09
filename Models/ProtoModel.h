@@ -24,7 +24,7 @@ class ProtoModel : public QAbstractItemModel {
   Q_OBJECT
 
  protected:
-  void RecursiveDataChanged();
+  void ParentDataChanged();
   struct SubModels {
     void Clear();
     QHash<int, ProtoModelPtr> protoModels;

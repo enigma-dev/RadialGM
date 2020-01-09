@@ -126,7 +126,7 @@ bool ProtoModel::setData(const QModelIndex &index, const QVariant &value, int ro
 
   SetDirty(true);
   emit dataChanged(index, index, oldValue);
-  RecursiveDataChanged();
+  ParentDataChanged();
 
   return true;
 }
@@ -215,7 +215,7 @@ Qt::ItemFlags ProtoModel::flags(const QModelIndex &index) const {
   return flags;
 }
 
-void ProtoModel::RecursiveDataChanged() {
+void ProtoModel::ParentDataChanged() {
   ProtoModelPtr m = GetParentModel();
   while (m != nullptr) {
     emit m->dataChanged(QModelIndex(), QModelIndex());
