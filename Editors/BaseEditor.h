@@ -20,13 +20,15 @@ class BaseEditor : public QWidget {
  public:
   explicit BaseEditor(ProtoModelPtr treeNodeModel, QWidget *parent);
 
-  virtual void closeEvent(QCloseEvent *event);
   void ReplaceBuffer(google::protobuf::Message *buffer);
   void SetModelData(int index, const QVariant &value);
   QVariant GetModelData(int index);
+  bool HasFocus();
 
  signals:
   void ResourceRenamed(TypeCase type, const QString &oldName, const QString &newName);
+  void FocusGained();
+  void FocusLost();
 
  public slots:
   virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
@@ -35,9 +37,12 @@ class BaseEditor : public QWidget {
   void OnSave();
 
  protected:
+  virtual void closeEvent(QCloseEvent *event) override;
+
   ModelMapper *nodeMapper;
   ModelMapper *resMapper;
   ProtoModelPtr _model;
+  bool hasFocus = false;
 };
 
 #endif  // BASEEDTIOR_H

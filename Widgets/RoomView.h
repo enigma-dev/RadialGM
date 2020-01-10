@@ -5,38 +5,34 @@
 #include "Models/ProtoModel.h"
 
 #include <QObject>
-#include <QWidget>
 #include <QSortFilterProxyModel>
+#include <QWidget>
 
-class InstanceSortFilterProxyModel :  public QSortFilterProxyModel {
+class InstanceSortFilterProxyModel : public QSortFilterProxyModel {
  public:
-  InstanceSortFilterProxyModel(QWidget* parent) : QSortFilterProxyModel(parent) {}
+  InstanceSortFilterProxyModel(QWidget *parent) : QSortFilterProxyModel(parent) {}
   bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
 };
-
 
 class RoomView : public AssetView {
   Q_OBJECT
 
  public:
-  explicit RoomView(QWidget *parent);
+  explicit RoomView(AssetScrollAreaBackground *parent = nullptr);
   QSize sizeHint() const override;
   void SetResourceModel(ProtoModelPtr model);
+  void Paint(QPainter &painter) override;
 
  protected:
-  void paintEvent(QPaintEvent *event) override;
-
- private:
   ProtoModelPtr model;
-  InstanceSortFilterProxyModel* sortedInstances;
-  QSortFilterProxyModel* sortedTiles;
+  InstanceSortFilterProxyModel *sortedInstances;
+  QSortFilterProxyModel *sortedTiles;
 
   QPixmap transparentPixmap;
 
   void paintTiles(QPainter &painter);
   void paintBackgrounds(QPainter &painter, bool foregrounds = false);
   void paintInstances(QPainter &painter);
-  void paintGrid(QPainter &painter);
 };
 
 #endif  // ROOMVIEW_H

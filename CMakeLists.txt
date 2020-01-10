@@ -55,10 +55,12 @@ set(RGM_SOURCES
     Components/Utility.cpp
     Components/RecentFiles.cpp
     Components/QMenuView.cpp
+    Widgets/AssetScrollAreaBackground.cpp
     Widgets/BackgroundView.cpp
     Widgets/CodeWidget.cpp
     Widgets/StackedCodeWidget.cpp
     Widgets/ColorPicker.cpp
+    Widgets/PathView.cpp
     Widgets/RoomView.cpp
     Widgets/AssetView.cpp
     Plugins/RGMPlugin.cpp
@@ -101,10 +103,13 @@ set(RGM_HEADERS
     Components/Utility.h
     Components/QMenuView.h
     Components/Logger.h
+    Widgets/AssetScrollArea.h
+    Widgets/AssetScrollAreaBackground.h
     Widgets/BackgroundView.h
     Widgets/CodeWidget.h
     Widgets/StackedCodeWidget.h
     Widgets/ColorPicker.h
+    Widgets/PathView.h
     Widgets/RoomView.h
     Widgets/AssetView.h
     Plugins/RGMPlugin.h

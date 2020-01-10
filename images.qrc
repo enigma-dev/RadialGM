@@ -18,6 +18,7 @@
         <file alias="tag.png">Images/actions/tag.png</file>
         <file alias="help.png">Images/actions/help.png</file>
         <file alias="find.png">Images/actions/find.png</file>
+        <file alias="grid.png">Images/actions/grid.png</file>
         <file alias="cascade.png">Images/actions/cascade.png</file>
         <file alias="accept.png">Images/actions/accept.png</file>
         <file alias="open-image.png">Images/actions/open-image.png</file>

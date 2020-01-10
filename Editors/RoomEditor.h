@@ -36,8 +36,6 @@ class RoomEditor : public BaseEditor {
   QLabel *cursorPositionLabel, *assetNameLabel;
   ProtoModelPtr roomModel;
   ImmediateDataWidgetMapper* viewMapper;
-
-  bool eventFilter(QObject* obj, QEvent* event) override;
 };
 
 #endif  // ROOMEDITOR_H

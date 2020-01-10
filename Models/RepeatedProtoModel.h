@@ -5,8 +5,8 @@
 #include <QSharedPointer>
 
 #include <google/protobuf/message.h>
-#include <google/protobuf/repeated_field.h>
 #include <google/protobuf/reflection.h>
+#include <google/protobuf/repeated_field.h>
 
 #include <set>
 
@@ -14,10 +14,10 @@ using namespace google::protobuf;
 using CppType = FieldDescriptor::CppType;
 
 class ProtoModel;
-using ProtoModelPtr = ProtoModel*;
+using ProtoModelPtr = ProtoModel *;
 
 class RepeatedProtoModel;
-using RepeatedProtoModelPtr = RepeatedProtoModel*;
+using RepeatedProtoModelPtr = RepeatedProtoModel *;
 
 class RepeatedProtoModel : public QAbstractItemModel {
   Q_OBJECT
@@ -28,11 +28,11 @@ class RepeatedProtoModel : public QAbstractItemModel {
   void SetBuffer(Message *buffer, const FieldDescriptor *field);
   void AddModel(ProtoModelPtr model);
   ProtoModelPtr GetSubModel(int index);
-  QVector<ProtoModelPtr>& GetMutableModelList();
+  QVector<ProtoModelPtr> &GetMutableModelList();
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   bool empty() const;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  bool setData(int subModelIndex, int dataField, const QVariant& value);
+  bool setData(int subModelIndex, int dataField, const QVariant &value);
   bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override;
   QVariant data(int row, int column = 0) const;
   QVariant data(const QModelIndex &index, int role) const override;
@@ -56,10 +56,8 @@ class RepeatedProtoModel : public QAbstractItemModel {
     std::set<int> rows;
 
    public:
-    RowRemovalOperation(RepeatedProtoModelPtr m):
-        model(m),
-        field(m->protobuf->GetReflection()
-               ->GetMutableRepeatedFieldRef<Message>(m->protobuf, m->field)) {}
+    RowRemovalOperation(RepeatedProtoModelPtr m)
+        : model(m), field(m->protobuf->GetReflection()->GetMutableRepeatedFieldRef<Message>(m->protobuf, m->field)) {}
     void RemoveRow(int row);
     void RemoveRows(int row, int count);
     ~RowRemovalOperation();
@@ -71,6 +69,7 @@ class RepeatedProtoModel : public QAbstractItemModel {
   void rowsAboutToBeRemoved(const QModelIndex &parent, int first, int last);
 
  protected:
+  void ParentDataChanged();
   ProtoModelPtr parentModel;
   Message *protobuf;
   const FieldDescriptor *field;

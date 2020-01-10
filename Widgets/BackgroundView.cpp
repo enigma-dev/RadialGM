@@ -9,7 +9,10 @@
 
 using buffers::resources::Background;
 
-BackgroundView::BackgroundView(QWidget *parent) : AssetView(parent), model(nullptr) {}
+BackgroundView::BackgroundView(AssetScrollAreaBackground *parent) : AssetView(parent), model(nullptr) {
+  grid.type = GridType::Complex;
+  parent->SetDrawSolidBackground(true, Qt::GlobalColor::transparent);
+}
 
 void BackgroundView::SetResourceModel(ProtoModelPtr model) {
   this->model = model;
@@ -19,7 +22,6 @@ void BackgroundView::SetResourceModel(ProtoModelPtr model) {
 bool BackgroundView::SetImage(QPixmap image) {
   if (image.isNull()) return false;
 
-  zoom = 1;
   pixmap = image;
 
   QImage img = pixmap.toImage();
@@ -54,27 +56,28 @@ void BackgroundView::WriteImage(QString fName, QString type) {
 
 QSize BackgroundView::sizeHint() const { return QSize(pixmap.width(), pixmap.height()); }
 
-void BackgroundView::paintEvent(QPaintEvent * /* event */) {
-  if (!model) return;
+void BackgroundView::Paint(QPainter &painter) {
+  if (!model) {
+    grid.show = false;
+    return;
+  }
 
-  QPainter painter(this);
+  painter.fillRect(QRectF(0, 0, pixmap.width(), pixmap.height()), ArtManager::GetTransparenyBrush());
 
-  painter.fillRect(QRectF(0, 0, pixmap.width() * zoom, pixmap.height() * zoom), ArtManager::GetTransparenyBrush());
-
-  painter.scale(zoom, zoom);
   bool transparent = false;
   painter.drawPixmap(0, 0, (transparent) ? transparentPixmap : pixmap);
 
-  bool gridVisible = model->data(Background::kUseAsTilesetFieldNumber).toBool();
-  int gridHorSpacing = model->data(Background::kHorizontalSpacingFieldNumber).toInt();
-  int gridVertSpacing = model->data(Background::kVerticalSpacingFieldNumber).toInt();
-  int gridHorOff = model->data(Background::kHorizontalOffsetFieldNumber).toInt();
-  int gridVertOff = model->data(Background::kVerticalOffsetFieldNumber).toInt();
-  int gridWidth = model->data(Background::kTileWidthFieldNumber).toInt();
-  int gridHeight = model->data(Background::kTileHeightFieldNumber).toInt();
-
-  if (gridVisible) {
-    paintGrid(painter, pixmap.width(), pixmap.height(), gridHorSpacing, gridVertSpacing, gridHorOff, gridVertOff,
-              gridWidth, gridHeight);
+  if (model->data(Background::kUseAsTilesetFieldNumber).toBool()) {
+    grid.show = true;
+    grid.horSpacing = model->data(Background::kHorizontalSpacingFieldNumber).toInt();
+    grid.vertSpacing = model->data(Background::kVerticalSpacingFieldNumber).toInt();
+    grid.horOff = model->data(Background::kHorizontalOffsetFieldNumber).toInt();
+    grid.vertOff = model->data(Background::kVerticalOffsetFieldNumber).toInt();
+    grid.cellWidth = model->data(Background::kTileWidthFieldNumber).toInt();
+    grid.cellHeight = model->data(Background::kTileHeightFieldNumber).toInt();
+    grid.width = pixmap.width();
+    grid.height = pixmap.height();
+  } else {
+    grid.show = false;
   }
 }

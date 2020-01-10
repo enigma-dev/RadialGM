@@ -126,6 +126,7 @@ bool ProtoModel::setData(const QModelIndex &index, const QVariant &value, int ro
 
   SetDirty(true);
   emit dataChanged(index, index, oldValue);
+  ParentDataChanged();
 
   return true;
 }
@@ -212,6 +213,14 @@ Qt::ItemFlags ProtoModel::flags(const QModelIndex &index) const {
   auto flags = QAbstractItemModel::flags(index);
   if (index.row() > 0) flags |= Qt::ItemIsEditable;
   return flags;
+}
+
+void ProtoModel::ParentDataChanged() {
+  ProtoModelPtr m = GetParentModel();
+  while (m != nullptr) {
+    emit m->dataChanged(QModelIndex(), QModelIndex());
+    m = m->GetParentModel();
+  }
 }
 
 void ProtoModel::SubModels::Clear() {

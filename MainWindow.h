@@ -31,7 +31,6 @@ class MainWindow : public QMainWindow {
 
   explicit MainWindow(QWidget *parent);
   ~MainWindow();
-  void closeEvent(QCloseEvent *event);
   void openProject(std::unique_ptr<buffers::Project> openedProject);
   buffers::Game *Game() const { return this->project->mutable_game(); }
 
@@ -45,6 +44,8 @@ class MainWindow : public QMainWindow {
   static void setCurrentConfig(const buffers::resources::Settings &settings);
 
  private slots:
+  void MDIWindowChanged(QMdiSubWindow *window);
+
   // file menu
   void on_actionNew_triggered();
   void on_actionOpen_triggered();
@@ -97,6 +98,8 @@ class MainWindow : public QMainWindow {
   void on_treeView_customContextMenuRequested(const QPoint &pos);
 
  private:
+  void closeEvent(QCloseEvent *event) override;
+
   static MainWindow *m_instance;
 
   QHash<buffers::TreeNode *, QMdiSubWindow *> subWindows;

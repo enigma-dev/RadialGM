@@ -1284,7 +1284,10 @@
         </widget>
        </item>
        <item>
-        <widget class="QScrollArea" name="roomPreview">
+        <widget class="AssetScrollArea" name="roomPreview">
+         <property name="layoutDirection">
+          <enum>Qt::RightToLeft</enum>
+         </property>
          <property name="autoFillBackground">
           <bool>false</bool>
          </property>
@@ -1297,7 +1300,7 @@
          <property name="alignment">
           <set>Qt::AlignCenter</set>
          </property>
-         <widget class="QWidget" name="scrollAreaWidgetContents">
+         <widget class="AssetScrollAreaBackground" name="roomPreviewBackground">
           <property name="geometry">
            <rect>
             <x>0</x>
@@ -1323,9 +1326,6 @@
             <number>0</number>
            </property>
            <property name="bottomMargin">
-            <number>0</number>
-           </property>
-           <property name="spacing">
             <number>0</number>
            </property>
            <item row="0" column="0">
@@ -1481,6 +1481,18 @@
    <class>RoomView</class>
    <extends>QWidget</extends>
    <header>Widgets/RoomView.h</header>
+  </customwidget>
+  <customwidget>
+   <class>AssetScrollArea</class>
+   <extends>QScrollArea</extends>
+   <header>Widgets/AssetScrollArea.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>AssetScrollAreaBackground</class>
+   <extends>QWidget</extends>
+   <header>Widgets/AssetScrollAreaBackground.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>
