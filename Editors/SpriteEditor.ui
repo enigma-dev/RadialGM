@@ -644,6 +644,12 @@
    <header>Widgets/SpriteView.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>AssetScrollAreaBackground</class>
+   <extends>QWidget</extends>
+   <header>Widgets/AssetScrollAreaBackground.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <resources>
   <include location="../images.qrc"/>
