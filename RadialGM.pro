@@ -21,7 +21,7 @@ QMAKE_TARGET_DESCRIPTION = ENIGMA Development Environment
 QMAKE_TARGET_COPYRIGHT = "Copyright \\251 2007-2018 ENIGMA Dev Team"
 
 # Uncomment if you want QPlainTextEdit used in place of QScintilla
-#CONFIG += rgm_disable_syntaxhighlight
+CONFIG += rgm_disable_syntaxhighlight
 
 rgm_disable_syntaxhighlight {
   SOURCES += Widgets/CodeWidgetPlain.cpp
@@ -59,10 +59,14 @@ LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
 SOURCES += \
     Dialogs/TimelineChangeMoment.cpp \
     Editors/ShaderEditor.cpp \
+    Editors/SpriteEditor.cpp \
+    Models/RepeatedStringModel.cpp \
+    Models/SpriteSubimageModel.cpp \
     Widgets/AssetScrollAreaBackground.cpp \
     Widgets/PathView.cpp \
+    Widgets/SpriteSubimageListView.cpp \
+    Widgets/SpriteView.cpp \
     Widgets/StackedCodeWidget.cpp \
-    Widgets/StackedCodewidget.cpp \
     main.cpp \
     MainWindow.cpp \
     Dialogs/PreferencesDialog.cpp \
@@ -74,7 +78,6 @@ SOURCES += \
     Editors/PathEditor.cpp \
     Editors/TimelineEditor.cpp \
     Editors/RoomEditor.cpp \
-    Editors/SpriteEditor.cpp \
     Editors/SettingsEditor.cpp \
     Widgets/BackgroundView.cpp \
     Widgets/CodeWidget.cpp \
@@ -85,7 +88,6 @@ SOURCES += \
     Components/ArtManager.cpp \
     Models/ProtoModel.cpp \
     Models/ImmediateMapper.cpp \
-    Models/SpriteModel.cpp \
     Components/Utility.cpp \
     Plugins/RGMPlugin.cpp \
     Plugins/ServerPlugin.cpp \
@@ -101,6 +103,7 @@ SOURCES += \
 HEADERS += \
     Dialogs/TimelineChangeMoment.h \
     Editors/ShaderEditor.h \
+    Editors/SpriteEditor.h \
     MainWindow.h \
     Dialogs/PreferencesDialog.h \
     Editors/BaseEditor.h \
@@ -111,8 +114,9 @@ HEADERS += \
     Editors/SoundEditor.h \
     Editors/TimelineEditor.h \
     Editors/RoomEditor.h \
-    Editors/SpriteEditor.h \
     Editors/SettingsEditor.h \
+    Models/RepeatedStringModel.h \
+    Models/SpriteSubimageModel.h \
     Widgets/AssetScrollArea.h \
     Widgets/AssetScrollAreaBackground.h \
     Widgets/BackgroundView.h \
@@ -127,11 +131,12 @@ HEADERS += \
     Components/ArtManager.h \
     Models/ProtoModel.h \
     Models/ImmediateMapper.h \
-    Models/SpriteModel.h \
     Components/Utility.h \
     Plugins/RGMPlugin.h \
     Plugins/ServerPlugin.h \
     Components/RecentFiles.h \
+    Widgets/SpriteSubimageListView.h \
+    Widgets/SpriteView.h \
     Widgets/StackedCodeWidget.h \
     main.h \
     Dialogs/PreferencesKeys.h \

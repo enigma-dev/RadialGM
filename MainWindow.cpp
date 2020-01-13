@@ -441,7 +441,7 @@ void MainWindow::CreateResource(TypeCase typeCase) {
   const QString name = resourceMap->CreateResourceName(child.get());
   child->set_name(name.toStdString());
   // open the new resource for editing
-  this->resourceMap->AddResource(child.get(), resourceMap.get());
+  this->resourceMap->AddResource(child.get());
   openSubWindow(child.get());
   // release ownership of the new child to its parent and the tree
   auto index = this->treeModel->addNode(child.release(), ui->treeView->currentIndex());
@@ -501,7 +501,7 @@ void MainWindow::on_actionCreateGroup_triggered() {
   const QString name = resourceMap->CreateResourceName(TypeCase::kFolder, "group");
   child->set_name(name.toStdString());
   // release ownership of the new child to its parent and the tree
-  this->resourceMap->AddResource(child.get(), resourceMap.get());
+  this->resourceMap->AddResource(child.get());
   auto index = this->treeModel->addNode(child.release(), ui->treeView->currentIndex());
 
   // select the new node so that it gets "revealed" and its parent is expanded

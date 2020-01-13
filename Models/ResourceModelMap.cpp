@@ -3,21 +3,21 @@
 #include "MainWindow.h"
 
 ResourceModelMap::ResourceModelMap(buffers::TreeNode* root, QObject* parent) : QObject(parent) {
-  recursiveBindRes(root, this);
+  recursiveBindRes(root);
 }
 
-void ResourceModelMap::recursiveBindRes(buffers::TreeNode* node, QObject* parent) {
+void ResourceModelMap::recursiveBindRes(buffers::TreeNode* node) {
   for (int i = 0; i < node->child_size(); ++i) {
     buffers::TreeNode* child = node->mutable_child(i);
     if (child->folder()) {
-      recursiveBindRes(child, parent);
+      recursiveBindRes(child);
     }
 
-    this->AddResource(child, parent);
+    this->AddResource(child);
   }
 }
 
-void ResourceModelMap::AddResource(buffers::TreeNode* child, QObject* parent) {
+void ResourceModelMap::AddResource(buffers::TreeNode* child) {
   ProtoModelPtr model = child->has_folder() ? nullptr : ProtoModelPtr(new ProtoModel(child, this));
   _resources[child->type_case()][QString::fromStdString(child->name())] =
       QPair<buffers::TreeNode*, ProtoModelPtr>(child, model);
@@ -137,11 +137,9 @@ void ResourceModelMap::ResourceRenamed(TypeCase type, const QString& oldName, co
   emit dataChanged();
 }
 
-const ProtoModelPtr GetObjectSprite(const std::string& objName) {
-  return GetObjectSprite(QString::fromStdString(objName));
-}
+ProtoModelPtr GetObjectSprite(const std::string& objName) { return GetObjectSprite(QString::fromStdString(objName)); }
 
-const ProtoModelPtr GetObjectSprite(const QString& objName) {
+ProtoModelPtr GetObjectSprite(const QString& objName) {
   ProtoModelPtr obj = MainWindow::resourceMap->GetResourceByName(TreeNode::kObject, objName);
   if (!obj) return nullptr;
   obj = obj->GetSubModel(TreeNode::kObjectFieldNumber);

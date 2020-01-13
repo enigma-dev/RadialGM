@@ -3,8 +3,8 @@
 #include <QImage>
 #include <QImageReader>
 #include <QImageWriter>
-#include <QMimeDatabase>
 #include <QMap>
+#include <QMimeDatabase>
 
 struct MimeType {
   MimeType() {}
@@ -14,11 +14,12 @@ struct MimeType {
 };
 
 class MimeTypeList {
-public:
+ public:
   MimeTypeList() {}
   MimeTypeList(const QList<QByteArray>& mimeTypes, const QList<MimeType> additionalMimeTypes) {
     QStringList temp;
-    foreach(const QByteArray& mime, mimeTypes) temp.append(mime);
+    foreach (const QByteArray& mime, mimeTypes)
+      temp.append(mime);
 
     QMimeDatabase mimeDB;
     for (const QString& mimeTypeFilter : temp) {
@@ -33,13 +34,13 @@ public:
       filters.append(mime.fileFilter);
     }
 
-     for (const MimeType& mime : additionalMimeTypes) {
-       nameFilters.append(mime.description);
-     }
+    for (const MimeType& mime : additionalMimeTypes) {
+      nameFilters.append(mime.description);
+    }
 
-     filters.prepend(QString("(%1)").arg(filters.join(' ')));
-     nameFilters.prepend("All Supported " + filters[0]);
-     nameFilters.append("All Files (*)");
+    filters.prepend(QString("(%1)").arg(filters.join(' ')));
+    nameFilters.prepend("All Supported " + filters[0]);
+    nameFilters.append("All Files (*)");
   }
 
   QStringList nameFilters;
@@ -48,41 +49,35 @@ public:
 };
 
 static const QMap<FileDialog_t, MimeTypeList> derp = {
-    {FileDialog_t::BackgroundLoad, MimeTypeList(QImageReader::supportedMimeTypes(),
-      {
-         MimeType("*.Background.gmx", "GMX Background (*.Background.gmx)"),
-         MimeType("*.bkg", "EGM Background (*.bkg)")
-      })
-    },
 
-    {FileDialog_t::BackgroundSave, MimeTypeList(QImageWriter::supportedMimeTypes(),
-      {
-         MimeType("*.bkg", "EGM Background (*.bkg)")
-      })
-    },
+    {FileDialog_t::SpriteLoad,
+     MimeTypeList(QImageReader::supportedMimeTypes(), {MimeType("*.Sprite.gmx", "GMX Background (*.Background.gmx)"),
+                                                       MimeType("*.spr", "EGM Background (*.bkg)")})},
+
+    {FileDialog_t::SpriteSave,
+     MimeTypeList(QImageWriter::supportedMimeTypes(), {MimeType("*.spr", "EGM Background (*.bkg)")})},
+
+    {FileDialog_t::BackgroundLoad, MimeTypeList(QImageReader::supportedMimeTypes(),
+                                                {MimeType("*.Background.gmx", "GMX Background (*.Background.gmx)"),
+                                                 MimeType("*.bkg", "EGM Background (*.bkg)")})},
+
+    {FileDialog_t::BackgroundSave,
+     MimeTypeList(QImageWriter::supportedMimeTypes(), {MimeType("*.bkg", "EGM Background (*.bkg)")})},
 
     {FileDialog_t::SoundLoad, MimeTypeList({},
-      {
-         MimeType("*.Sound.gmx", "GMX Sound (*.Sound.gmx)"),
-         MimeType("*.snd", "EGM Sound (*.snd)"),
-         MimeType("*.ogg", "OGG (*.ogg)"),
-         MimeType("*.flac", "FLAC (*.flac)"),
-         MimeType("*.mp3", "MP3 (*.mp3)"),
-         MimeType("*.mod", "MOD (*.mod)"),
-         MimeType("*.wav", "Wav (*.wav)"),
-      })
-    },
+                                           {
+                                               MimeType("*.Sound.gmx", "GMX Sound (*.Sound.gmx)"),
+                                               MimeType("*.snd", "EGM Sound (*.snd)"),
+                                               MimeType("*.ogg", "OGG (*.ogg)"),
+                                               MimeType("*.flac", "FLAC (*.flac)"),
+                                               MimeType("*.mp3", "MP3 (*.mp3)"),
+                                               MimeType("*.mod", "MOD (*.mod)"),
+                                               MimeType("*.wav", "Wav (*.wav)"),
+                                           })},
 
-    {FileDialog_t::SoundSave, MimeTypeList({},
-      {
-         MimeType("*.snd", "EGM Sound (*.snd)")
-      })
-    }
-};
+    {FileDialog_t::SoundSave, MimeTypeList({}, {MimeType("*.snd", "EGM Sound (*.snd)")})}};
 
-FileDialog::FileDialog(QWidget* parent, FileDialog_t type, bool writer) :
-    QFileDialog(parent, "Select ") {
-
+FileDialog::FileDialog(QWidget* parent, FileDialog_t type, bool writer) : QFileDialog(parent, "Select ") {
   if (writer)
     setAcceptMode(QFileDialog::AcceptSave);
   else {

@@ -1,5 +1,6 @@
 #include "ProtoModel.h"
 #include "RepeatedProtoModel.h"
+#include "SpriteSubimageModel.h"
 
 #include "Components/Logger.h"
 
@@ -45,9 +46,12 @@ void ProtoModel::RebuildSubModels() {
         subModels.protoModels[field->number()] = new ProtoModel(refl->MutableMessage(protobuf, field), this);
       }
     } else if (field->cpp_type() == CppType::CPPTYPE_STRING && field->is_repeated()) {
-      for (int j = 0; j < refl->FieldSize(*protobuf, field); j++) {
-        subModels.strings[field->number()].append(QString::fromStdString(refl->GetRepeatedString(*protobuf, field, j)));
-      }
+      if (field->name() == "subimages")
+        subModels.repeatedStringModels[field->number()] =
+            new SpriteSubimageModel(refl->GetMutableRepeatedFieldRef<std::string>(protobuf, field), field, this);
+      else
+        subModels.repeatedStringModels[field->number()] =
+            new RepeatedStringModel(refl->GetMutableRepeatedFieldRef<std::string>(protobuf, field), field, this);
     }
   }
 }
@@ -160,7 +164,7 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
     case CppType::CPPTYPE_DOUBLE: return refl->GetDouble(*protobuf, field);
     case CppType::CPPTYPE_FLOAT: return refl->GetFloat(*protobuf, field);
     case CppType::CPPTYPE_BOOL: return refl->GetBool(*protobuf, field);
-    case CppType::CPPTYPE_ENUM: return refl->GetInt32(*protobuf, field);
+    case CppType::CPPTYPE_ENUM: return refl->GetEnumValue(*protobuf, field);
     case CppType::CPPTYPE_STRING: return QString::fromStdString(refl->GetString(*protobuf, field));
   }
 
@@ -168,6 +172,10 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
 }
 
 RepeatedProtoModelPtr ProtoModel::GetRepeatedSubModel(int fieldNum) { return subModels.repeatedModels[fieldNum]; }
+
+RepeatedStringModelPtr ProtoModel::GetRepeatedStringSubModel(int fieldNum) {
+  return subModels.repeatedStringModels[fieldNum];
+}
 
 ProtoModelPtr ProtoModel::GetSubModel(int fieldNum) {
   if (subModels.protoModels.contains(fieldNum))
@@ -181,13 +189,6 @@ ProtoModelPtr ProtoModel::GetSubModel(int fieldNum, int index) {
     return subModels.repeatedModels[fieldNum]->GetSubModel(index);
   else
     return nullptr;
-}
-
-QString ProtoModel::GetString(int fieldNum, int index) const {
-  if (subModels.strings.contains(fieldNum) && subModels.strings[fieldNum].count() > index)
-    return subModels.strings[fieldNum][index];
-  else
-    return "";
 }
 
 QModelIndex ProtoModel::parent(const QModelIndex & /*index*/) const { return QModelIndex(); }
@@ -224,9 +225,9 @@ void ProtoModel::ParentDataChanged() {
 }
 
 void ProtoModel::SubModels::Clear() {
-  this->protoModels.clear();
-  this->repeatedModels.clear();
-  this->strings.clear();
+  protoModels.clear();
+  repeatedModels.clear();
+  repeatedStringModels.clear();
 }
 
 void UpdateReferences(ProtoModelPtr model, const QString &type, const QString &oldName, const QString &newName) {

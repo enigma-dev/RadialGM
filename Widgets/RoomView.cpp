@@ -176,7 +176,7 @@ void RoomView::paintInstances(QPainter& painter) {
     if (spr == nullptr)
       imgFile = "object";
     else {
-      imgFile = spr->GetString(Sprite::kSubimagesFieldNumber, 0);
+      imgFile = spr->GetRepeatedStringSubModel(Sprite::kSubimagesFieldNumber)->data(0).toString();
       w = spr->data(Sprite::kWidthFieldNumber).toInt();
       h = spr->data(Sprite::kHeightFieldNumber).toInt();
       xoff = spr->data(Sprite::kOriginXFieldNumber).toInt();

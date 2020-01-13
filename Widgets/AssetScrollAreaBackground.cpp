@@ -201,6 +201,8 @@ void AssetScrollAreaBackground::paintEvent(QPaintEvent* /* event */) {
                   _totalDrawOffset.y());
     }
   }
+
+  _assetView->PaintTop(painter);
 }
 
 bool AssetScrollAreaBackground::eventFilter(QObject* obj, QEvent* event) {

@@ -13,7 +13,7 @@ class ModelMapper : public QObject {
   ModelMapper(ProtoModelPtr model, BaseEditor *parent);
 
   // mapper
-  void addMapping(QWidget *widget, int section);
+  void addMapping(QWidget *widget, int section, QByteArray propName = "");
   void clearMapping();
   void toFirst();
 
@@ -29,8 +29,8 @@ class ModelMapper : public QObject {
   QVariant data(int row, int column = 0) const;
   QVariant data(const QModelIndex &index, int role) const;
   RepeatedProtoModelPtr GetRepeatedSubModel(int fieldNum);
+  RepeatedStringModelPtr GetRepeatedStringSubModel(int fieldNum);
   ProtoModelPtr GetSubModel(int fieldNum);
-  QString GetString(int fieldNum, int index);
   QModelIndex parent(const QModelIndex &index) const;
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
   QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const;

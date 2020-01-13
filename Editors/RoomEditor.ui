@@ -1472,17 +1472,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ColorPicker</class>
-   <extends>QWidget</extends>
-   <header>Widgets/ColorPicker.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>RoomView</class>
-   <extends>QWidget</extends>
-   <header>Widgets/RoomView.h</header>
-  </customwidget>
-  <customwidget>
    <class>AssetScrollArea</class>
    <extends>QScrollArea</extends>
    <header>Widgets/AssetScrollArea.h</header>
@@ -1493,6 +1482,17 @@
    <extends>QWidget</extends>
    <header>Widgets/AssetScrollAreaBackground.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ColorPicker</class>
+   <extends>QWidget</extends>
+   <header>Widgets/ColorPicker.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>RoomView</class>
+   <extends>QWidget</extends>
+   <header>Widgets/RoomView.h</header>
   </customwidget>
  </customwidgets>
  <resources>

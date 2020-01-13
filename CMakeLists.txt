@@ -44,7 +44,8 @@ set(RGM_SOURCES
     Editors/SpriteEditor.cpp
     Editors/SettingsEditor.cpp
     Models/TreeModel.cpp
-    Models/SpriteModel.cpp
+    Models/RepeatedStringModel.cpp
+    Models/SpriteSubimageModel.cpp
     Models/ProtoModel.cpp
     Models/ModelMapper.cpp
     Models/ImmediateMapper.cpp
@@ -63,6 +64,8 @@ set(RGM_SOURCES
     Widgets/PathView.cpp
     Widgets/RoomView.cpp
     Widgets/AssetView.cpp
+    Widgets/SpriteView.cpp
+    Widgets/SpriteSubimageListView.cpp
     Plugins/RGMPlugin.cpp
     Plugins/ServerPlugin.cpp
 )
@@ -94,7 +97,8 @@ set(RGM_HEADERS
     Models/ProtoModel.h
     Models/ModelMapper.h
     Models/ImmediateMapper.h
-    Models/SpriteModel.h
+    Models/RepeatedStringModel.h
+    Models/SpriteSubimageModel.h
     Models/ResourceModelMap.h
     Models/RepeatedProtoModel.h
     Models/TreeSortFilterProxyModel.h
@@ -112,6 +116,8 @@ set(RGM_HEADERS
     Widgets/PathView.h
     Widgets/RoomView.h
     Widgets/AssetView.h
+    Widgets/SpriteView.h
+    Widgets/SpriteSubimageListView.h
     Plugins/RGMPlugin.h
     Plugins/ServerPlugin.h
 )

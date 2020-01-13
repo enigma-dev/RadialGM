@@ -1,6 +1,6 @@
 #include "AssetView.h"
 
-AssetView::AssetView(AssetScrollAreaBackground* parent) : QWidget(parent) { setMouseTracking(true); }
+AssetView::AssetView(AssetScrollAreaBackground* parent) : QWidget(parent), _parent(parent) { setMouseTracking(true); }
 
 GridDimensions& AssetView::GetGrid() { return grid; }
 

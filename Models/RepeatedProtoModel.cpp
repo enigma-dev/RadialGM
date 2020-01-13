@@ -59,7 +59,8 @@ QVariant RepeatedProtoModel::data(const QModelIndex &index, int role) const {
       static const QSize pixmapSize(18, 18);
       if (spr != nullptr) {
         spr = spr->GetSubModel(TreeNode::kSpriteFieldNumber);
-        return ArtManager::GetIcon(spr->GetString(Sprite::kSubimagesFieldNumber, 0)).pixmap(pixmapSize);
+        return ArtManager::GetIcon(spr->GetRepeatedStringSubModel(Sprite::kSubimagesFieldNumber)->data(0).toString())
+            .pixmap(pixmapSize);
       } else {
         return QIcon(":/actions/help.png").pixmap(pixmapSize);
       }
@@ -204,11 +205,7 @@ RepeatedProtoModel::RowRemovalOperation::~RowRemovalOperation() {
     }
   }
 
-  // Broadcast range removal before the model can fuck anything up.
-  // Do this from back to front to minimize the amount of shit it fucks up.
-  for (auto range = ranges.rbegin(); range != ranges.rend(); ++range) {
-    model->beginRemoveRows(QModelIndex(), range->first, range->last);
-  }
+  emit model->beginResetModel();
 
   // Basic dense range removal. Move "deleted" rows to the end of the array.
   int left = 0, right = 0;
@@ -234,8 +231,9 @@ RepeatedProtoModel::RowRemovalOperation::~RowRemovalOperation() {
   for (Range range : ranges) {
     list.resize(list.size() - range.size());
     for (int j = range.first; j <= range.last; ++j) field.RemoveLast();
-    model->endRemoveRows();
   }
+
+  emit model->endResetModel();
 
   model->GetParentModel()->SetDirty(true);
 }

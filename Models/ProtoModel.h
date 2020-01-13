@@ -4,6 +4,7 @@
 #include "treenode.pb.h"
 
 #include "RepeatedProtoModel.h"
+#include "RepeatedStringModel.h"
 
 #include <QDebug>
 #include <QHash>
@@ -28,7 +29,7 @@ class ProtoModel : public QAbstractItemModel {
   struct SubModels {
     void Clear();
     QHash<int, ProtoModelPtr> protoModels;
-    QHash<int, QList<QString>> strings;
+    QHash<int, RepeatedStringModelPtr> repeatedStringModels;
     QHash<int, RepeatedProtoModelPtr> repeatedModels;
   };
 
@@ -59,9 +60,9 @@ class ProtoModel : public QAbstractItemModel {
   QVariant data(int row, int column = 0) const;
   QVariant data(const QModelIndex &index, int role) const override;
   RepeatedProtoModelPtr GetRepeatedSubModel(int fieldNum);
+  RepeatedStringModelPtr GetRepeatedStringSubModel(int fieldNum);
   ProtoModelPtr GetSubModel(int fieldNum);
   ProtoModelPtr GetSubModel(int fieldNum, int index);
-  QString GetString(int fieldNum, int index) const;
   QModelIndex parent(const QModelIndex &index) const override;
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
   QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override;

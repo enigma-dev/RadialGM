@@ -73,7 +73,8 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
     if (item->type_case() == TypeCase::kObject) {
       const ProtoModelPtr sprModel = GetObjectSprite(item->name());
       if (sprModel == nullptr) return QVariant();
-      QString spr = sprModel->GetString(Sprite::kSubimagesFieldNumber, 0);
+      QString spr = sprModel->GetRepeatedStringSubModel(Sprite::kSubimagesFieldNumber)->data(0).toString();
+      //GetString(Sprite::kSubimagesFieldNumber, 0);
       return spr.isEmpty() ? QVariant() : ArtManager::GetIcon(spr);
     }
 
@@ -302,7 +303,7 @@ buffers::TreeNode *TreeModel::duplicateNode(const buffers::TreeNode &node) {
   const QString name = resourceMap->CreateResourceName(dup);
   dup->set_name(name.toStdString());
   // add the new node to the resource map
-  resourceMap->AddResource(dup, resourceMap);
+  resourceMap->AddResource(dup);
   return dup;
 }
 

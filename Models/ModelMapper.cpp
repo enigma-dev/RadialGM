@@ -13,7 +13,9 @@ ModelMapper::ModelMapper(ProtoModelPtr model, BaseEditor *parent) : QObject(pare
 
 ProtoModelPtr ModelMapper::GetModel() { return model; }
 
-void ModelMapper::addMapping(QWidget *widget, int section) { mapper->addMapping(widget, section); }
+void ModelMapper::addMapping(QWidget *widget, int section, QByteArray propName) {
+  mapper->addMapping(widget, section, propName);
+}
 
 void ModelMapper::clearMapping() { mapper->clearMapping(); }
 
@@ -43,9 +45,11 @@ QVariant ModelMapper::data(const QModelIndex &index, int role) const { return mo
 
 RepeatedProtoModelPtr ModelMapper::GetRepeatedSubModel(int fieldNum) { return model->GetRepeatedSubModel(fieldNum); }
 
-ProtoModelPtr ModelMapper::GetSubModel(int fieldNum) { return model->GetSubModel(fieldNum); }
+RepeatedStringModelPtr ModelMapper::GetRepeatedStringSubModel(int fieldNum) {
+  return model->GetRepeatedStringSubModel(fieldNum);
+}
 
-QString ModelMapper::GetString(int fieldNum, int index) { return model->GetString(fieldNum, index); }
+ProtoModelPtr ModelMapper::GetSubModel(int fieldNum) { return model->GetSubModel(fieldNum); }
 
 QModelIndex ModelMapper::parent(const QModelIndex &index) const { return model->parent(index); }
 
