@@ -39,17 +39,7 @@ bool ModelMapper::setData(const QModelIndex &index, const QVariant &value, int r
   return model->setData(index, value, role);
 }
 
-QVariant ModelMapper::data(int row, int column) const { return model->data(row, column); }
-
 QVariant ModelMapper::data(const QModelIndex &index, int role) const { return model->data(index, role); }
-
-RepeatedProtoModelPtr ModelMapper::GetRepeatedSubModel(int fieldNum) { return model->GetRepeatedSubModel(fieldNum); }
-
-RepeatedStringModelPtr ModelMapper::GetRepeatedStringSubModel(int fieldNum) {
-  return model->GetRepeatedStringSubModel(fieldNum);
-}
-
-ProtoModelPtr ModelMapper::GetSubModel(int fieldNum) { return model->GetSubModel(fieldNum); }
 
 QModelIndex ModelMapper::parent(const QModelIndex &index) const { return model->parent(index); }
 

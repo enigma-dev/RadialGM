@@ -26,11 +26,11 @@ class ModelMapper : public QObject {
   int rowCount(const QModelIndex &parent = QModelIndex()) const;
   int columnCount(const QModelIndex &parent = QModelIndex()) const;
   bool setData(const QModelIndex &index, const QVariant &value, int role);
-  QVariant data(int row, int column = 0) const;
+  //QVariant data(int row, int column = 0) const;
   QVariant data(const QModelIndex &index, int role) const;
-  RepeatedProtoModelPtr GetRepeatedSubModel(int fieldNum);
-  RepeatedStringModelPtr GetRepeatedStringSubModel(int fieldNum);
-  ProtoModelPtr GetSubModel(int fieldNum);
+  //RepeatedProtoModelPtr GetRepeatedSubModel(int fieldNum);
+  //RepeatedStringModelPtr GetRepeatedStringSubModel(int fieldNum);
+  //ProtoModelPtr GetSubModel(int fieldNum);
   QModelIndex parent(const QModelIndex &index) const;
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
   QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const;

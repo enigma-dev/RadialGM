@@ -1,4 +1,5 @@
 #include "BaseEditor.h"
+#include "Models/MessageModel.h"
 
 #include <QCloseEvent>
 #include <QDebug>
@@ -7,7 +8,7 @@
 BaseEditor::BaseEditor(ProtoModelPtr treeNodeModel, QWidget* parent)
     : QWidget(parent), nodeMapper(new ModelMapper(treeNodeModel, this)), _model(treeNodeModel) {
   buffers::TreeNode* n = static_cast<buffers::TreeNode*>(treeNodeModel->GetBuffer());
-  resMapper = new ModelMapper(treeNodeModel->GetSubModel(ResTypeFields[n->type_case()]), this);
+  resMapper = new ModelMapper(treeNodeModel->GetSubModel<MessageModel*>(ResTypeFields[n->type_case()]), this);
 
   // Backup should be deleted by Qt's garbage collector when this editor is closed
   resMapper->GetModel()->BackupModel(this);

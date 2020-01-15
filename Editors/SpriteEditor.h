@@ -2,7 +2,7 @@
 #define SPRITEEDITOR_H
 
 #include "BaseEditor.h"
-#include "Models/SpriteSubimageModel.h"
+#include "Models/RepeatedImageModel.h"
 
 #include <QItemSelection>
 
@@ -41,7 +41,7 @@ class SpriteEditor : public BaseEditor {
  private:
   Ui::SpriteEditor* ui;
   ProtoModel* _spriteModel;
-  SpriteSubimageModelPtr _subimagesModel;
+  RepeatedImageModel* _subimagesModel;
 };
 
 #endif  // SPRITEEDITOR_H

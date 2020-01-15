@@ -1,4 +1,7 @@
 #include "PathView.h"
+#include "Models/MessageModel.h"
+#include "Models/RepeatedMessageModel.h"
+#include "Models/RepeatedModel.h"
 
 PathView::PathView(AssetScrollAreaBackground *parent) : RoomView(parent) {}
 
@@ -22,7 +25,7 @@ QPoint quadratic(QPoint start, QPoint handle, QPoint end, double position) {
 }
 
 int PathView::Size() const {
-  RepeatedProtoModelPtr pointsModel = pathModel->GetRepeatedSubModel(Path::kPointsFieldNumber);
+  RepeatedMessageModel *pointsModel = pathModel->GetSubModel<RepeatedMessageModel *>(Path::kPointsFieldNumber);
   return pointsModel->rowCount();
 }
 

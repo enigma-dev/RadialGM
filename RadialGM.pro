@@ -60,8 +60,9 @@ SOURCES += \
     Dialogs/TimelineChangeMoment.cpp \
     Editors/ShaderEditor.cpp \
     Editors/SpriteEditor.cpp \
+    Models/MessageModel.cpp \
+    Models/RepeatedImageModel.cpp \
     Models/RepeatedStringModel.cpp \
-    Models/SpriteSubimageModel.cpp \
     Widgets/AssetScrollAreaBackground.cpp \
     Widgets/PathView.cpp \
     Widgets/SpriteSubimageListView.cpp \
@@ -96,7 +97,6 @@ SOURCES += \
     Editors/ScriptEditor.cpp \
     Models/ResourceModelMap.cpp \
     Models/ModelMapper.cpp \
-    Models/RepeatedProtoModel.cpp \
     Components/QMenuView.cpp \
     Models/TreeSortFilterProxyModel.cpp
 
@@ -115,8 +115,11 @@ HEADERS += \
     Editors/TimelineEditor.h \
     Editors/RoomEditor.h \
     Editors/SettingsEditor.h \
+    Models/MessageModel.h \
+    Models/RepeatedImageModel.h \
+    Models/RepeatedMessageModel.h \
+    Models/RepeatedModel.h \
     Models/RepeatedStringModel.h \
-    Models/SpriteSubimageModel.h \
     Widgets/AssetScrollArea.h \
     Widgets/AssetScrollAreaBackground.h \
     Widgets/BackgroundView.h \
@@ -144,7 +147,6 @@ HEADERS += \
     Editors/ScriptEditor.h \
     Models/ResourceModelMap.h \
     Models/ModelMapper.h \
-    Models/RepeatedProtoModel.h \
     Components/QMenuView.h \
     Components/QMenuView_p.h \
     Models/TreeSortFilterProxyModel.h

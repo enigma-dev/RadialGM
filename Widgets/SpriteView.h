@@ -3,7 +3,7 @@
 
 #include "AssetView.h"
 #include "Models/ProtoModel.h"
-#include "Models/SpriteSubimageModel.h"
+#include "Models/RepeatedImageModel.h"
 
 #include <QObject>
 #include <QWidget>
@@ -28,7 +28,7 @@ class SpriteView : public AssetView {
  private:
   ProtoModelPtr _model;
   QPixmap _pixmap;
-  RepeatedStringModelPtr _subimgs;
+  RepeatedModel<RepeatedImageModel *> *_subimgs;
   bool _showBBox;
   bool _showOrigin;
 };

@@ -56,7 +56,7 @@ void SpriteEditor::RebindSubModels() {
   ui->subImageList->setGridSize(_subimagesModel->GetIconSize());
 
   ui->subimagePreview->SetResourceModel(_spriteModel);
-  connect(_subimagesModel, &SpriteSubimageModel::MismatchedImageSize, this, &SpriteEditor::LoadedMismatchedImage);
+  connect(_subimagesModel, &RepeatedImageModel::MismatchedImageSize, this, &SpriteEditor::LoadedMismatchedImage);
 
   connect(ui->subImageList->selectionModel(), &QItemSelectionModel::selectionChanged, this,
           &SpriteEditor::SelectionChanged);
