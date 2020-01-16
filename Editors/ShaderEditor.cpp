@@ -9,7 +9,7 @@
 
 using namespace buffers::resources;
 
-ShaderEditor::ShaderEditor(ProtoModelPtr model, QWidget* parent)
+ShaderEditor::ShaderEditor(MessageModel* model, QWidget* parent)
     : BaseEditor(model, parent), codeEditor(new CodeEditor(this)) {
   QLayout* layout = new QVBoxLayout(this);
   layout->addWidget(codeEditor);

@@ -2,53 +2,31 @@
 
 #include "Editors/BaseEditor.h"
 
-ModelMapper::ModelMapper(ProtoModelPtr model, BaseEditor *parent) : QObject(parent), model(model) {
-  mapper = new ImmediateDataWidgetMapper(this);
-  mapper->setOrientation(Qt::Vertical);
-  mapper->setModel(model);
+ModelMapper::ModelMapper(MessageModel *model, BaseEditor *parent) : QObject(parent), _model(model) {
+  _mapper = new ImmediateDataWidgetMapper(this);
+  _mapper->setOrientation(Qt::Vertical);
+  _mapper->setModel(model);
   parent->connect(model, &ProtoModel::dataChanged, parent, &BaseEditor::dataChanged);
 }
 
 // mapper
 
-ProtoModelPtr ModelMapper::GetModel() { return model; }
+MessageModel *ModelMapper::GetModel() { return _model; }
 
 void ModelMapper::addMapping(QWidget *widget, int section, QByteArray propName) {
-  mapper->addMapping(widget, section, propName);
+  _mapper->addMapping(widget, section, propName);
 }
 
-void ModelMapper::clearMapping() { mapper->clearMapping(); }
+void ModelMapper::clearMapping() { _mapper->clearMapping(); }
 
-void ModelMapper::toFirst() { mapper->toFirst(); }
+void ModelMapper::toFirst() { _mapper->toFirst(); }
 
 // model
 
-void ModelMapper::ReplaceBuffer(google::protobuf::Message *buffer) { model->ReplaceBuffer(buffer); }
+void ModelMapper::ReplaceBuffer(google::protobuf::Message *buffer) { _model->ReplaceBuffer(buffer); }
 
-bool ModelMapper::RestoreBackup() { return model->RestoreBackup(); }
+bool ModelMapper::RestoreBackup() { return _model->RestoreBackup(); }
 
-void ModelMapper::SetDirty(bool dirty) { model->SetDirty(dirty); }
+void ModelMapper::SetDirty(bool dirty) { _model->SetDirty(dirty); }
 
-bool ModelMapper::IsDirty() { return model->IsDirty(); }
-
-int ModelMapper::rowCount(const QModelIndex &parent) const { return model->rowCount(parent); }
-
-int ModelMapper::columnCount(const QModelIndex &parent) const { return model->columnCount(parent); }
-
-bool ModelMapper::setData(const QModelIndex &index, const QVariant &value, int role) {
-  return model->setData(index, value, role);
-}
-
-QVariant ModelMapper::data(const QModelIndex &index, int role) const { return model->data(index, role); }
-
-QModelIndex ModelMapper::parent(const QModelIndex &index) const { return model->parent(index); }
-
-QVariant ModelMapper::headerData(int section, Qt::Orientation orientation, int role) const {
-  return model->headerData(section, orientation, role);
-}
-
-QModelIndex ModelMapper::index(int row, int column, const QModelIndex &parent) const {
-  return model->index(row, column, parent);
-}
-
-Qt::ItemFlags ModelMapper::flags(const QModelIndex &index) const { return model->flags(index); }
+bool ModelMapper::IsDirty() { return _model->IsDirty(); }

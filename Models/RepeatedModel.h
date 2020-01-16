@@ -1,5 +1,5 @@
-#ifndef MESSAGEMODEL_H
-#define MESSAGEMODEL_H
+#ifndef REPEATEDMODEL_H
+#define REPEATEDMODEL_H
 
 #include "ProtoModel.h"
 
@@ -11,11 +11,17 @@
 template <class T>
 class RepeatedModel : public ProtoModel {
  public:
-  RepeatedModel(ProtoModelPtr parent, MutableRepeatedFieldRef<T> field) : ProtoModel(parent), _field(field) {}
+  RepeatedModel(ProtoModel *parent, Message *message, const FieldDescriptor *field, MutableRepeatedFieldRef<T> fieldRef)
+      : ProtoModel(parent, message), _field(field), _fieldRef(fieldRef) {}
 
-  virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override { return 0; }
+  // Used to apply changes to any underlying data structure if needed
+  virtual void Swap(int /*left*/, int /*right*/) {}
+  virtual void Append() {}
+  virtual void Resize(int /*newSize*/) {}
+  virtual int Size() { return 0; }
+  virtual void Clear() { _fieldRef.Clear(); }
 
-  virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override { return 0; }
+  bool Empty() { return rowCount() == 0; }
 
   // Moves / deletion / addition only make sense in repeated fields
 
@@ -41,6 +47,25 @@ class RepeatedModel : public ProtoModel {
     return true;
   }
 
+  virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override {
+    if (!parent.isValid()) return 0;
+    return _fieldRef.size();
+  }
+
+  virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override {
+    if (!parent.isValid()) return 0;
+    return 1;
+  }
+
+  virtual QModelIndex index(int row, int column, const QModelIndex & /*parent*/) const {
+    return this->createIndex(row, column);
+  }
+
+  virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override {
+    if (section == 0 || role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal) return QVariant();
+    return QString::fromStdString(_field->name());
+  }
+
   // Convience function for internal moves
   bool moveRows(int source, int count, int destination) {
     return moveRows(QModelIndex(), source, count, QModelIndex(), destination);
@@ -53,12 +78,7 @@ class RepeatedModel : public ProtoModel {
 
     int p = rowCount();
 
-    for (int r = 0; r < count; ++r) {
-      _field.Add(T());
-      if (std::is_same<T, Message>::value) {
-        _subModels.append(_field.Get(rowCount() - 1));
-      }
-    }
+    Append();
 
     SwapBack(row, p, rowCount());
     ParentDataChanged();
@@ -67,17 +87,19 @@ class RepeatedModel : public ProtoModel {
   };
 
   virtual bool removeRows(int position, int count, const QModelIndex & /*parent*/) override {
-    RowRemovalOperation remover(this, _field, _subModels);
-    remover.RemoveRows(position, count);
+    //RowRemovalOperation remover(this, _fieldRef);
+    //remover.RemoveRows(position, count);
     return true;
   }
 
   // Mimedata stuff required for Drag & Drop and clipboard functions
   virtual Qt::DropActions supportedDropActions() { return Qt::MoveAction | Qt::CopyAction; }
 
-  virtual QMimeData *mimeData(const QModelIndexList & /*indexes*/) const override {}
+  virtual QMimeData *mimeData(const QModelIndexList & /*indexes*/) const override { return nullptr; }
   virtual bool dropMimeData(const QMimeData * /*data*/, Qt::DropAction /*action*/, int /*row*/, int /*column*/,
-                            const QModelIndex & /*parent*/) override {}
+                            const QModelIndex & /*parent*/) override {
+    return false;
+  }
 
   virtual QStringList mimeTypes() const override {
     return QStringList("RadialGM/"); /*QString::fromStdString(_field.name());*/
@@ -90,8 +112,8 @@ class RepeatedModel : public ProtoModel {
     if (left >= part || part >= right) return;
     int npart = (part - left) % (right - part);
     while (part > left) {
-      if (_subModels.empty()) std::swap(_subModels[left], _subModels[right]);
-      _field.SwapElements(part, right);
+      Swap(left, right);
+      _fieldRef.SwapElements(part, right);
     }
     SwapBack(left, left + npart, right);
   }
@@ -100,11 +122,9 @@ class RepeatedModel : public ProtoModel {
     std::set<int> _rows;
     RepeatedModel<T> _model;
     MutableRepeatedFieldRef<T> _field;
-    QVector<ProtoModelPtr> *_subModels;
 
    public:
-    RowRemovalOperation(RepeatedModel<T> model, MutableRepeatedFieldRef<T> field, QVector<ProtoModelPtr> *subModels)
-        : _model(model), _field(field), _subModels(subModels) {}
+    RowRemovalOperation(RepeatedModel<T> model, MutableRepeatedFieldRef<T> field) : _model(model), _field(field) {}
     void RemoveRow(int row) { _rows.insert(row); }
     void RemoveRows(int row, int count) {
       for (int i = row; i < row + count; ++i) _rows.insert(i);
@@ -136,7 +156,7 @@ class RepeatedModel : public ProtoModel {
       for (auto range : ranges) {
         while (right < range.first) {
           _field.SwapElements(left, right);
-          if (_subModels->empty()) std::swap(_subModels[left], _subModels[right]);
+          _model->Swap(left, right);
           left++;
           right++;
         }
@@ -144,7 +164,7 @@ class RepeatedModel : public ProtoModel {
       }
       while (right < _field.size()) {
         _field.SwapElements(left, right);
-        if (_subModels->empty()) std::swap(_subModels[left], _subModels[right]);
+        _model->Swap(left, right);
         left++;
         right++;
       }
@@ -153,7 +173,7 @@ class RepeatedModel : public ProtoModel {
       // correct number of rows incrementally, or else various components in Qt
       // will bitch, piss, moan, wail, whine, and cry. Actually, they will anyway.
       for (Range range : ranges) {
-        if (_subModels->empty()) _subModels->resize(_subModels->size() - range.size());
+        _model->resize(_model.Size() - range.size());
         for (int j = range.first; j <= range.last; ++j) _field.RemoveLast();
       }
 
@@ -164,7 +184,8 @@ class RepeatedModel : public ProtoModel {
   };
 
  protected:
-  MutableRepeatedFieldRef<T> _field;
+  const FieldDescriptor *_field;
+  MutableRepeatedFieldRef<T> _fieldRef;
 };
 
 #endif

@@ -26,48 +26,50 @@ include_directories("${ENIGMA_DIR}/shared/protos/codegen" "${ENIGMA_DIR}/Command
 
 # Populate a CMake variable with the sources
 set(RGM_SOURCES
+    Plugins/RGMPlugin.cpp
+    Plugins/ServerPlugin.cpp
     main.cpp
     MainWindow.cpp
     Dialogs/PreferencesDialog.cpp
     Dialogs/TimelineChangeMoment.cpp
-    Editors/BaseEditor.cpp
-    Editors/CodeEditor.cpp
-    Editors/BackgroundEditor.cpp
-    Editors/ObjectEditor.cpp
-    Editors/SoundEditor.cpp
-    Editors/ScriptEditor.cpp
-    Editors/ShaderEditor.cpp
-    Editors/FontEditor.cpp
-    Editors/PathEditor.cpp
-    Editors/TimelineEditor.cpp
-    Editors/RoomEditor.cpp
-    Editors/SpriteEditor.cpp
-    Editors/SettingsEditor.cpp
-    Models/TreeModel.cpp
-    Models/RepeatedStringModel.cpp
-    Models/SpriteSubimageModel.cpp
-    Models/ProtoModel.cpp
-    Models/ModelMapper.cpp
-    Models/ImmediateMapper.cpp
-    Models/ResourceModelMap.cpp
-    Models/RepeatedProtoModel.cpp
-    Models/TreeSortFilterProxyModel.cpp
     Components/ArtManager.cpp
     Components/Utility.cpp
-    Components/RecentFiles.cpp
     Components/QMenuView.cpp
-    Widgets/AssetScrollAreaBackground.cpp
-    Widgets/BackgroundView.cpp
-    Widgets/CodeWidget.cpp
-    Widgets/StackedCodeWidget.cpp
-    Widgets/ColorPicker.cpp
-    Widgets/PathView.cpp
-    Widgets/RoomView.cpp
+    Components/RecentFiles.cpp
+    Models/TreeSortFilterProxyModel.cpp
+    Models/MessageModel.cpp
+    Models/RepeatedImageModel.cpp
+    Models/RepeatedStringModel.cpp
+    Models/ModelMapper.cpp
+    Models/ProtoModel.cpp
+    Models/RepeatedMessageModel.cpp
+    Models/ImmediateMapper.cpp
+    Models/ResourceModelMap.cpp
+    Models/TreeModel.cpp
+    Editors/ObjectEditor.cpp
+    Editors/PathEditor.cpp
+    Editors/CodeEditor.cpp
+    Editors/SoundEditor.cpp
+    Editors/FontEditor.cpp
+    Editors/BackgroundEditor.cpp
+    Editors/TimelineEditor.cpp
+    Editors/ShaderEditor.cpp
+    Editors/ScriptEditor.cpp
+    Editors/SettingsEditor.cpp
+    Editors/SpriteEditor.cpp
+    Editors/BaseEditor.cpp
+    Editors/RoomEditor.cpp
+    Widgets/CodeWidgetPlain.cpp
     Widgets/AssetView.cpp
-    Widgets/SpriteView.cpp
+    Widgets/CodeWidget.cpp
+    Widgets/BackgroundView.cpp
+    Widgets/StackedCodeWidget.cpp
+    Widgets/RoomView.cpp
+    Widgets/PathView.cpp
+    Widgets/AssetScrollAreaBackground.cpp
     Widgets/SpriteSubimageListView.cpp
-    Plugins/RGMPlugin.cpp
-    Plugins/ServerPlugin.cpp
+    Widgets/ColorPicker.cpp
+    Widgets/SpriteView.cpp
 )
 
 if (MSVC)
@@ -75,67 +77,73 @@ if (MSVC)
 endif()
 
 set(RGM_HEADERS
-    main.h
+    Plugins/ServerPlugin.h
+    Plugins/RGMPlugin.h
     MainWindow.h
+    main.h
     Dialogs/PreferencesDialog.h
     Dialogs/PreferencesKeys.h
     Dialogs/TimelineChangeMoment.h
-    Editors/CodeEditor.h
-    Editors/BaseEditor.h
-    Editors/BackgroundEditor.h
-    Editors/ObjectEditor.h
-    Editors/SoundEditor.h
-    Editors/ScriptEditor.h
-    Editors/ShaderEditor.h
+    Components/Logger.h
+    Components/RecentFiles.h
+    Components/QMenuView.h
+    Components/ArtManager.h
+    Components/QMenuView_p.h
+    Components/Utility.h
+    Models/TreeModel.h
+    Models/RepeatedStringModel.h
+    Models/ResourceModelMap.h
+    Models/ModelMapper.h
+    Models/TreeSortFilterProxyModel.h
+    Models/RepeatedImageModel.h
+    Models/MessageModel.h
+    Models/ImmediateMapper.h
+    Models/RepeatedMessageModel.h
+    Models/ProtoModel.h
+    Models/RepeatedModel.h
     Editors/FontEditor.h
     Editors/PathEditor.h
-    Editors/TimelineEditor.h
-    Editors/RoomEditor.h
     Editors/SpriteEditor.h
     Editors/SettingsEditor.h
-    Models/TreeModel.h
-    Models/ProtoModel.h
-    Models/ModelMapper.h
-    Models/ImmediateMapper.h
-    Models/RepeatedStringModel.h
-    Models/SpriteSubimageModel.h
-    Models/ResourceModelMap.h
-    Models/RepeatedProtoModel.h
-    Models/TreeSortFilterProxyModel.h
-    Components/ArtManager.h
-    Components/RecentFiles.h
-    Components/Utility.h
-    Components/QMenuView.h
-    Components/Logger.h
+    Editors/SoundEditor.h
+    Editors/TimelineEditor.h
+    Editors/BackgroundEditor.h
+    Editors/ObjectEditor.h
+    Editors/RoomEditor.h
+    Editors/BaseEditor.h
+    Editors/ScriptEditor.h
+    Editors/CodeEditor.h
+    Editors/ShaderEditor.h
     Widgets/AssetScrollArea.h
-    Widgets/AssetScrollAreaBackground.h
-    Widgets/BackgroundView.h
-    Widgets/CodeWidget.h
     Widgets/StackedCodeWidget.h
-    Widgets/ColorPicker.h
+    Widgets/AssetScrollAreaBackground.h
     Widgets/PathView.h
+    Widgets/ResourceSelector.h
     Widgets/RoomView.h
     Widgets/AssetView.h
-    Widgets/SpriteView.h
+    Widgets/ColorPicker.h
     Widgets/SpriteSubimageListView.h
-    Plugins/RGMPlugin.h
-    Plugins/ServerPlugin.h
+    Widgets/CodeWidget.h
+    Widgets/SpriteView.h
+    Widgets/BackgroundView.h
+
 )
 
 set(RGM_UI
     MainWindow.ui
+    Dialogs/TimelineChangeMoment.ui
     Dialogs/PreferencesDialog.ui
     Dialogs/AddImageDialog.ui
-    Dialogs/TimelineChangeMoment.ui
     Editors/CodeEditor.ui
+    Editors/SoundEditor.ui
     Editors/BackgroundEditor.ui
-    Editors/ObjectEditor.ui
-    Editors/FontEditor.ui
-    Editors/PathEditor.ui
-    Editors/TimelineEditor.ui
-    Editors/RoomEditor.ui
     Editors/SpriteEditor.ui
+    Editors/PathEditor.ui
     Editors/SettingsEditor.ui
+    Editors/RoomEditor.ui
+    Editors/FontEditor.ui
+    Editors/TimelineEditor.ui
+    Editors/ObjectEditor.ui
 )
 
 set(RGM_RC

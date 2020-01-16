@@ -14,7 +14,7 @@ class SpriteEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit SpriteEditor(ProtoModelPtr model, QWidget* parent);
+  explicit SpriteEditor(MessageModel* model, QWidget* parent);
   ~SpriteEditor() override;
   void LoadedMismatchedImage(QSize expectedSize, QSize actualSize);
   void RemoveSelectedIndexes();
@@ -39,7 +39,7 @@ class SpriteEditor : public BaseEditor {
   void on_centerOriginButton_clicked();
 
  private:
-  Ui::SpriteEditor* ui;
+  Ui::SpriteEditor* _ui;
   ProtoModel* _spriteModel;
   RepeatedImageModel* _subimagesModel;
 };

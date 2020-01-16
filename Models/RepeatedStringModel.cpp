@@ -6,6 +6,44 @@
 
 #include <algorithm>
 
+QVariant RepeatedStringModel::Data(int row, int column) const {
+  return data(this->index(row, column, QModelIndex()), Qt::DisplayRole);
+}
+
+bool RepeatedStringModel::SetData(const QVariant& value, int row, int column) {
+  return setData(index(row, column, QModelIndex()), value);
+}
+
+bool RepeatedStringModel::setData(const QModelIndex& index, const QVariant& value, int /*role*/) {
+  if (index.column() != 0) {
+    qDebug() << "Invalid column index";
+    return false;
+  }
+
+  if (index.row() < 0 || index.row() >= rowCount()) {
+    qDebug() << "Invalid row index";
+    return false;
+  }
+
+  _fieldRef.Set(index.row(), value.toString().toStdString());
+
+  return true;
+}
+
+QVariant RepeatedStringModel::data(const QModelIndex& index, int /*role*/) const {
+  if (index.column() != 0) {
+    qDebug() << "Invalid column index";
+    return QVariant();
+  }
+
+  if (index.row() < 0 || index.row() >= rowCount()) {
+    qDebug() << "Invalid row index";
+    return QVariant();
+  }
+
+  return QString::fromStdString(_fieldRef.Get(index.row()));
+}
+
 QMimeData* RepeatedStringModel::mimeData(const QModelIndexList& indexes) const {
   QModelIndexList sortedIndexes = indexes;
   std::sort(sortedIndexes.begin(), sortedIndexes.end(),

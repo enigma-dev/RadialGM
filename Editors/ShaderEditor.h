@@ -8,7 +8,7 @@ class ShaderEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  ShaderEditor(ProtoModelPtr model, QWidget* parent = nullptr);
+  ShaderEditor(MessageModel* model, QWidget* parent = nullptr);
 
  private:
   CodeEditor* codeEditor;

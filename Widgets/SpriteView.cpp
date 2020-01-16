@@ -10,9 +10,9 @@ SpriteView::SpriteView(AssetScrollAreaBackground *parent) : AssetView(parent), _
 
 QSize SpriteView::sizeHint() const { return _pixmap.size(); }
 
-void SpriteView::SetResourceModel(ProtoModelPtr model) {
+void SpriteView::SetResourceModel(MessageModel *model) {
   _model = model;
-  _subimgs = _model->GetRepeatedStringSubModel(Sprite::kSubimagesFieldNumber);
+  _subimgs = _model->GetSubModel<RepeatedImageModel *>(Sprite::kSubimagesFieldNumber);
   if (_subimgs->rowCount() > 0) SetSubimage(0);
 }
 
@@ -23,7 +23,7 @@ void SpriteView::SetSubimage(int index) {
     qDebug() << "Invalid subimage index specified";
     return;
   } else {
-    _pixmap = ArtManager::GetCachedPixmap(_subimgs->data(index).toString());
+    _pixmap = ArtManager::GetCachedPixmap(_subimgs->Data(index).toString());
   }
 
   _parent->update();
@@ -47,10 +47,10 @@ QRectF SpriteView::AutomaticBBoxRect() {
 }
 
 QRectF SpriteView::BBoxRect() {
-  int x = _model->data(Sprite::kBboxLeftFieldNumber).toInt();
-  int y = _model->data(Sprite::kBboxTopFieldNumber).toInt();
-  int right = _model->data(Sprite::kBboxRightFieldNumber).toInt();
-  int bottom = _model->data(Sprite::kBboxBottomFieldNumber).toInt();
+  int x = _model->Data(Sprite::kBboxLeftFieldNumber).toInt();
+  int y = _model->Data(Sprite::kBboxTopFieldNumber).toInt();
+  int right = _model->Data(Sprite::kBboxRightFieldNumber).toInt();
+  int bottom = _model->Data(Sprite::kBboxBottomFieldNumber).toInt();
   return QRectF(x, y, right - x, bottom - y);
 }
 
@@ -75,8 +75,8 @@ void SpriteView::PaintTop(QPainter &painter) {
 
   if (_showOrigin) {
     painter.setBrush(QBrush(Qt::yellow));
-    painter.drawEllipse(QPoint(_model->data(Sprite::kOriginXFieldNumber).toInt() * zoom,
-                               _model->data(Sprite::kOriginYFieldNumber).toInt() * zoom),
+    painter.drawEllipse(QPoint(_model->Data(Sprite::kOriginXFieldNumber).toInt() * zoom,
+                               _model->Data(Sprite::kOriginYFieldNumber).toInt() * zoom),
                         2, 2);
   }
 

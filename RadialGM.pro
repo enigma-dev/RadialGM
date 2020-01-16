@@ -62,6 +62,7 @@ SOURCES += \
     Editors/SpriteEditor.cpp \
     Models/MessageModel.cpp \
     Models/RepeatedImageModel.cpp \
+    Models/RepeatedMessageModel.cpp \
     Models/RepeatedStringModel.cpp \
     Widgets/AssetScrollAreaBackground.cpp \
     Widgets/PathView.cpp \

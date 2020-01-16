@@ -9,8 +9,8 @@ class RepeatedImageModel : public RepeatedStringModel {
   Q_OBJECT
 
  public:
-  RepeatedImageModel(ProtoModelPtr parent, MutableRepeatedFieldRef<std::string> field)
-      : RepeatedStringModel(parent, field), _maxIconSize(128, 128), _minIconSize(16, 16) {}
+  RepeatedImageModel(ProtoModel* parent, Message* message, const FieldDescriptor* field)
+      : RepeatedStringModel(parent, message, field), _maxIconSize(128, 128), _minIconSize(16, 16) {}
   void SetMaxIconSize(unsigned width, unsigned height);
   void SetMinIconSize(unsigned width, unsigned height);
   QSize GetIconSize();

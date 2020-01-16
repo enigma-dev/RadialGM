@@ -9,32 +9,32 @@
 
 using buffers::resources::Background;
 
-BackgroundView::BackgroundView(AssetScrollAreaBackground *parent) : AssetView(parent), model(nullptr) {
+BackgroundView::BackgroundView(AssetScrollAreaBackground *parent) : AssetView(parent), _model(nullptr) {
   grid.type = GridType::Complex;
   parent->SetDrawSolidBackground(true, Qt::GlobalColor::transparent);
 }
 
-void BackgroundView::SetResourceModel(ProtoModelPtr model) {
-  this->model = model;
-  SetImage(model->data(Background::kImageFieldNumber).toString());
+void BackgroundView::SetResourceModel(MessageModel *model) {
+  this->_model = model;
+  SetImage(model->Data(Background::kImageFieldNumber).toString());
 }
 
 bool BackgroundView::SetImage(QPixmap image) {
   if (image.isNull()) return false;
 
-  pixmap = image;
+  _pixmap = image;
 
-  QImage img = pixmap.toImage();
+  QImage img = _pixmap.toImage();
   img = img.convertToFormat(QImage::Format_ARGB32);
-  transparencyColor = img.pixelColor(0, img.height() - 1);
+  _transparencyColor = img.pixelColor(0, img.height() - 1);
   for (int x = 0; x < img.width(); ++x) {
     for (int y = 0; y < img.height(); ++y) {
-      if (img.pixelColor(x, y) == transparencyColor) img.setPixelColor(x, y, Qt::transparent);
+      if (img.pixelColor(x, y) == _transparencyColor) img.setPixelColor(x, y, Qt::transparent);
     }
   }
 
-  transparentPixmap = QPixmap::fromImage(img);
-  setFixedSize(pixmap.width() + 1, pixmap.height() + 1);
+  _transparentPixmap = QPixmap::fromImage(img);
+  setFixedSize(_pixmap.width() + 1, _pixmap.height() + 1);
   update();
 
   return true;
@@ -50,33 +50,33 @@ bool BackgroundView::SetImage(QString fName) {
 }
 
 void BackgroundView::WriteImage(QString fName, QString type) {
-  if (!pixmap.save(fName, type.toStdString().c_str()))
+  if (!_pixmap.save(fName, type.toStdString().c_str()))
     QMessageBox::critical(this, tr("Failed to save image"), tr("Error writing: ") + fName, QMessageBox::Ok);
 }
 
-QSize BackgroundView::sizeHint() const { return QSize(pixmap.width(), pixmap.height()); }
+QSize BackgroundView::sizeHint() const { return QSize(_pixmap.width(), _pixmap.height()); }
 
 void BackgroundView::Paint(QPainter &painter) {
-  if (!model) {
+  if (!_model) {
     grid.show = false;
     return;
   }
 
-  painter.fillRect(QRectF(0, 0, pixmap.width(), pixmap.height()), ArtManager::GetTransparenyBrush());
+  painter.fillRect(QRectF(0, 0, _pixmap.width(), _pixmap.height()), ArtManager::GetTransparenyBrush());
 
   bool transparent = false;
-  painter.drawPixmap(0, 0, (transparent) ? transparentPixmap : pixmap);
+  painter.drawPixmap(0, 0, (transparent) ? _transparentPixmap : _pixmap);
 
-  if (model->data(Background::kUseAsTilesetFieldNumber).toBool()) {
+  if (_model->Data(Background::kUseAsTilesetFieldNumber).toBool()) {
     grid.show = true;
-    grid.horSpacing = model->data(Background::kHorizontalSpacingFieldNumber).toInt();
-    grid.vertSpacing = model->data(Background::kVerticalSpacingFieldNumber).toInt();
-    grid.horOff = model->data(Background::kHorizontalOffsetFieldNumber).toInt();
-    grid.vertOff = model->data(Background::kVerticalOffsetFieldNumber).toInt();
-    grid.cellWidth = model->data(Background::kTileWidthFieldNumber).toInt();
-    grid.cellHeight = model->data(Background::kTileHeightFieldNumber).toInt();
-    grid.width = pixmap.width();
-    grid.height = pixmap.height();
+    grid.horSpacing = _model->Data(Background::kHorizontalSpacingFieldNumber).toInt();
+    grid.vertSpacing = _model->Data(Background::kVerticalSpacingFieldNumber).toInt();
+    grid.horOff = _model->Data(Background::kHorizontalOffsetFieldNumber).toInt();
+    grid.vertOff = _model->Data(Background::kVerticalOffsetFieldNumber).toInt();
+    grid.cellWidth = _model->Data(Background::kTileWidthFieldNumber).toInt();
+    grid.cellHeight = _model->Data(Background::kTileHeightFieldNumber).toInt();
+    grid.width = _pixmap.width();
+    grid.height = _pixmap.height();
   } else {
     grid.show = false;
   }

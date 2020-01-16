@@ -2,6 +2,7 @@
 
 #include "Components/ArtManager.h"
 #include "Components/Logger.h"
+#include "Models/RepeatedImageModel.h"
 #include "Models/ResourceModelMap.h"
 
 #include <QCoreApplication>
@@ -71,9 +72,9 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
     }
 
     if (item->type_case() == TypeCase::kObject) {
-      const ProtoModelPtr sprModel = GetObjectSprite(item->name());
+      MessageModel *sprModel = GetObjectSprite(item->name());
       if (sprModel == nullptr) return QVariant();
-      QString spr = sprModel->GetRepeatedStringSubModel(Sprite::kSubimagesFieldNumber)->data(0).toString();
+      QString spr = sprModel->GetSubModel<RepeatedImageModel *>(Sprite::kSubimagesFieldNumber)->Data(0).toString();
       //GetString(Sprite::kSubimagesFieldNumber, 0);
       return spr.isEmpty() ? QVariant() : ArtManager::GetIcon(spr);
     }

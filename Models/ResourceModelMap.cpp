@@ -1,6 +1,7 @@
 #include "Models/ResourceModelMap.h"
 #include "Editors/BaseEditor.h"
 #include "MainWindow.h"
+#include "Models/RepeatedMessageModel.h"
 
 ResourceModelMap::ResourceModelMap(buffers::TreeNode* root, QObject* parent) : QObject(parent) {
   recursiveBindRes(root);
@@ -18,9 +19,9 @@ void ResourceModelMap::recursiveBindRes(buffers::TreeNode* node) {
 }
 
 void ResourceModelMap::AddResource(buffers::TreeNode* child) {
-  ProtoModelPtr model = child->has_folder() ? nullptr : ProtoModelPtr(new ProtoModel(child, this));
+  MessageModel* model = child->has_folder() ? nullptr : new MessageModel(this, child);
   _resources[child->type_case()][QString::fromStdString(child->name())] =
-      QPair<buffers::TreeNode*, ProtoModelPtr>(child, model);
+      QPair<buffers::TreeNode*, MessageModel*>(child, model);
 
   if (model != nullptr) {
     connect(model, &ProtoModel::dataChanged, [this]() { emit dataChanged(); });
@@ -34,24 +35,27 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
   // Delete all instances of this object type
   if (type == TypeCase::kObject) {
     for (auto room : _resources[TypeCase::kRoom]) {
-      ProtoModelPtr roomModel = room.second->GetSubModel(TreeNode::kRoomFieldNumber);
-      RepeatedProtoModelPtr instancesModel = roomModel->GetRepeatedSubModel(Room::kInstancesFieldNumber);
-      RepeatedProtoModel::RowRemovalOperation remover(instancesModel);
+      MessageModel* roomModel = room.second->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
+      RepeatedMessageModel* instancesModel = roomModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
+      //RepeatedProtoModel::RowRemovalOperation remover(instancesModel);
 
       for (int row = 0; row < instancesModel->rowCount(); ++row) {
-        if (instancesModel->data(row, Room::Instance::kObjectTypeFieldNumber).toString() == name)
-          remover.RemoveRow(row);
+        if (instancesModel->Data(row, Room::Instance::kObjectTypeFieldNumber).toString() == name)
+          ;
+        //remover.RemoveRow(row);
       }
 
       // Only models in use in open editors should have backup models
-      ProtoModelPtr backupModel = roomModel->GetBackupModel();
+      MessageModel* backupModel = roomModel->GetBackupModel();
       if (backupModel != nullptr) {
-        RepeatedProtoModelPtr instancesModelBak = backupModel->GetRepeatedSubModel(Room::kInstancesFieldNumber);
-        RepeatedProtoModel::RowRemovalOperation removerBak(instancesModelBak);
+        RepeatedMessageModel* instancesModelBak =
+            backupModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
+        //RepeatedProtoModel::RowRemovalOperation removerBak(instancesModelBak);
 
         for (int row = 0; row < instancesModelBak->rowCount(); ++row) {
-          if (instancesModelBak->data(row, Room::Instance::kObjectTypeFieldNumber).toString() == name)
-            removerBak.RemoveRow(row);
+          if (instancesModelBak->Data(row, Room::Instance::kObjectTypeFieldNumber).toString() == name)
+            ;
+          //removerBak.RemoveRow(row);
         }
       }
     }
@@ -60,23 +64,25 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
   // Delete all tiles using this background
   if (type == TypeCase::kBackground) {
     for (auto room : _resources[TypeCase::kRoom]) {
-      ProtoModelPtr roomModel = room.second->GetSubModel(TreeNode::kRoomFieldNumber);
-      RepeatedProtoModelPtr tilesModel = roomModel->GetRepeatedSubModel(Room::kTilesFieldNumber);
-      RepeatedProtoModel::RowRemovalOperation remover(tilesModel);
+      MessageModel* roomModel = room.second->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
+      RepeatedMessageModel* tilesModel = roomModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
+      //RepeatedProtoModel::RowRemovalOperation remover(tilesModel);
 
       for (int row = 0; row < tilesModel->rowCount(); ++row) {
-        if (tilesModel->data(row, Room::Instance::kObjectTypeFieldNumber).toString() == name) remover.RemoveRow(row);
+        if (tilesModel->Data(row, Room::Instance::kObjectTypeFieldNumber).toString() == name)
+          ;  // remover.RemoveRow(row);
       }
 
       // Only models in use in open editors should have backup models
-      ProtoModelPtr backupModel = roomModel->GetBackupModel();
+      MessageModel* backupModel = roomModel->GetBackupModel();
       if (backupModel != nullptr) {
-        RepeatedProtoModelPtr tilesModelBak = backupModel->GetRepeatedSubModel(Room::kTilesFieldNumber);
-        RepeatedProtoModel::RowRemovalOperation removerBak(tilesModelBak);
+        RepeatedMessageModel* tilesModelBak = backupModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
+        //RepeatedProtoModel::RowRemovalOperation removerBak(tilesModelBak);
 
         for (int row = 0; row < tilesModelBak->rowCount(); ++row) {
-          if (tilesModelBak->data(row, Room::Tile::kBackgroundNameFieldNumber).toString() == name)
-            removerBak.RemoveRow(row);
+          if (tilesModelBak->Data(row, Room::Tile::kBackgroundNameFieldNumber).toString() == name)
+            ;
+          //removerBak.RemoveRow(row);
         }
       }
     }
@@ -111,14 +117,14 @@ QString ResourceModelMap::CreateResourceName(int type, const QString& typeName) 
   return name;
 }
 
-ProtoModelPtr ResourceModelMap::GetResourceByName(int type, const QString& name) {
+MessageModel* ResourceModelMap::GetResourceByName(int type, const QString& name) {
   if (_resources[type].contains(name))
     return _resources[type][name].second;
   else
     return nullptr;
 }
 
-ProtoModelPtr ResourceModelMap::GetResourceByName(int type, const std::string& name) {
+MessageModel* ResourceModelMap::GetResourceByName(int type, const std::string& name) {
   return GetResourceByName(type, QString::fromStdString(name));
 }
 
@@ -137,15 +143,15 @@ void ResourceModelMap::ResourceRenamed(TypeCase type, const QString& oldName, co
   emit dataChanged();
 }
 
-ProtoModelPtr GetObjectSprite(const std::string& objName) { return GetObjectSprite(QString::fromStdString(objName)); }
+MessageModel* GetObjectSprite(const std::string& objName) { return GetObjectSprite(QString::fromStdString(objName)); }
 
-ProtoModelPtr GetObjectSprite(const QString& objName) {
-  ProtoModelPtr obj = MainWindow::resourceMap->GetResourceByName(TreeNode::kObject, objName);
+MessageModel* GetObjectSprite(const QString& objName) {
+  MessageModel* obj = MainWindow::resourceMap->GetResourceByName(TreeNode::kObject, objName);
   if (!obj) return nullptr;
-  obj = obj->GetSubModel(TreeNode::kObjectFieldNumber);
+  obj = obj->GetSubModel<MessageModel*>(TreeNode::kObjectFieldNumber);
   if (!obj) return nullptr;
-  const QString spriteName = obj->data(Object::kSpriteNameFieldNumber).toString();
-  ProtoModelPtr spr = MainWindow::resourceMap->GetResourceByName(TreeNode::kSprite, spriteName);
-  if (spr) return spr->GetSubModel(TreeNode::kSpriteFieldNumber);
+  const QString spriteName = obj->Data(Object::kSpriteNameFieldNumber).toString();
+  MessageModel* spr = MainWindow::resourceMap->GetResourceByName(TreeNode::kSprite, spriteName);
+  if (spr) return spr->GetSubModel<MessageModel*>(TreeNode::kSpriteFieldNumber);
   return nullptr;
 }

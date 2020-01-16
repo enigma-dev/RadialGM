@@ -1,6 +1,9 @@
 #include "RoomView.h"
 #include "Components/ArtManager.h"
 #include "MainWindow.h"
+#include "Models/MessageModel.h"
+#include "Models/RepeatedMessageModel.h"
+#include "Models/RepeatedStringModel.h"
 
 #include <QDebug>
 #include <QPainter>
@@ -9,41 +12,41 @@ bool InstanceSortFilterProxyModel::lessThan(const QModelIndex& left, const QMode
   QVariant leftData = sourceModel()->data(left);
   QVariant rightData = sourceModel()->data(right);
 
-  ProtoModelPtr objA = MainWindow::resourceMap->GetResourceByName(TreeNode::kObject, leftData.toString());
-  ProtoModelPtr objB = MainWindow::resourceMap->GetResourceByName(TreeNode::kObject, rightData.toString());
+  MessageModel* objA = MainWindow::resourceMap->GetResourceByName(TreeNode::kObject, leftData.toString());
+  MessageModel* objB = MainWindow::resourceMap->GetResourceByName(TreeNode::kObject, rightData.toString());
 
   if (objA == nullptr || objB == nullptr) return false;
 
-  objA = objA->GetSubModel(TreeNode::kObjectFieldNumber);
-  objB = objB->GetSubModel(TreeNode::kObjectFieldNumber);
+  objA = objA->GetSubModel<MessageModel*>(TreeNode::kObjectFieldNumber);
+  objB = objB->GetSubModel<MessageModel*>(TreeNode::kObjectFieldNumber);
 
   if (objA == nullptr || objB == nullptr) return false;
 
-  return objA->data(Object::kDepthFieldNumber) < objB->data(Object::kDepthFieldNumber);
+  return objA->Data(Object::kDepthFieldNumber) < objB->Data(Object::kDepthFieldNumber);
 }
 
-RoomView::RoomView(AssetScrollAreaBackground* parent) : AssetView(parent), model(nullptr) {
+RoomView::RoomView(AssetScrollAreaBackground* parent) : AssetView(parent), _model(nullptr) {
   setFixedSize(sizeHint());
-  this->sortedInstances = new InstanceSortFilterProxyModel(this);
-  this->sortedTiles = new QSortFilterProxyModel(this);
+  this->_sortedInstances = new InstanceSortFilterProxyModel(this);
+  this->_sortedTiles = new QSortFilterProxyModel(this);
 }
 
-void RoomView::SetResourceModel(ProtoModelPtr model) {
-  this->model = model;
+void RoomView::SetResourceModel(MessageModel* model) {
+  this->_model = model;
 
   if (model != nullptr) {
-    this->sortedInstances->setSourceModel(model->GetRepeatedSubModel(Room::kInstancesFieldNumber));
-    this->sortedInstances->sort(Room::Instance::kObjectTypeFieldNumber);
-    this->sortedTiles->setSourceModel(model->GetRepeatedSubModel(Room::kTilesFieldNumber));
-    this->sortedTiles->sort(Room::Tile::kDepthFieldNumber);
+    this->_sortedInstances->setSourceModel(model->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber));
+    this->_sortedInstances->sort(Room::Instance::kObjectTypeFieldNumber);
+    this->_sortedTiles->setSourceModel(model->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber));
+    this->_sortedTiles->sort(Room::Tile::kDepthFieldNumber);
   }
   setFixedSize(sizeHint());
   repaint();
 }
 
 QSize RoomView::sizeHint() const {
-  if (!model) return QSize(640, 480);
-  QVariant roomWidth = model->data(Room::kWidthFieldNumber), roomHeight = model->data(Room::kHeightFieldNumber);
+  if (!_model) return QSize(640, 480);
+  QVariant roomWidth = _model->Data(Room::kWidthFieldNumber), roomHeight = _model->Data(Room::kHeightFieldNumber);
   // TODO: add model defaults (enigma-dev/enigma-dev#1872)
   if (!roomWidth.isValid() || !roomHeight.isValid()) return QSize(640, 480);
   return QSize(roomWidth.toUInt(), roomHeight.toUInt());
@@ -52,18 +55,18 @@ QSize RoomView::sizeHint() const {
 void RoomView::Paint(QPainter& painter) {
   grid.type = GridType::Standard;
 
-  if (!model) return;
+  if (!_model) return;
 
-  QVariant hsnap = model->data(Room::kHsnapFieldNumber);
-  QVariant vsnap = model->data(Room::kVsnapFieldNumber);
+  QVariant hsnap = _model->Data(Room::kHsnapFieldNumber);
+  QVariant vsnap = _model->Data(Room::kVsnapFieldNumber);
   grid.horSpacing = hsnap.isValid() ? hsnap.toInt() : 16;
   grid.vertSpacing = vsnap.isValid() ? vsnap.toInt() : 16;
 
   QColor roomColor = QColor(255, 255, 255, 100);
 
-  if (model->data(Room::kShowColorFieldNumber).toBool()) roomColor = model->data(Room::kColorFieldNumber).toInt();
+  if (_model->Data(Room::kShowColorFieldNumber).toBool()) roomColor = _model->Data(Room::kColorFieldNumber).toInt();
 
-  QVariant roomWidth = model->data(Room::kWidthFieldNumber), roomHeight = model->data(Room::kHeightFieldNumber);
+  QVariant roomWidth = _model->Data(Room::kWidthFieldNumber), roomHeight = _model->Data(Room::kHeightFieldNumber);
   painter.fillRect(
       QRectF(0, 0, roomWidth.isValid() ? roomWidth.toUInt() : 640, roomWidth.isValid() ? roomHeight.toUInt() : 480),
       QBrush(roomColor));
@@ -75,27 +78,27 @@ void RoomView::Paint(QPainter& painter) {
 }
 
 void RoomView::paintTiles(QPainter& painter) {
-  for (int row = 0; row < sortedTiles->rowCount(); row++) {
-    QVariant bkgName = sortedTiles->data(sortedTiles->index(row, Room::Tile::kBackgroundNameFieldNumber));
-    ProtoModelPtr bkg = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, bkgName.toString());
+  for (int row = 0; row < _sortedTiles->rowCount(); row++) {
+    QVariant bkgName = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kBackgroundNameFieldNumber));
+    MessageModel* bkg = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, bkgName.toString());
     if (!bkg) continue;
-    bkg = bkg->GetSubModel(TreeNode::kBackgroundFieldNumber);
+    bkg = bkg->GetSubModel<MessageModel*>(TreeNode::kBackgroundFieldNumber);
     if (!bkg) continue;
 
-    int x = sortedTiles->data(sortedTiles->index(row, Room::Tile::kXFieldNumber)).toInt();
-    int y = sortedTiles->data(sortedTiles->index(row, Room::Tile::kYFieldNumber)).toInt();
-    int xOff = sortedTiles->data(sortedTiles->index(row, Room::Tile::kXoffsetFieldNumber)).toInt();
-    int yOff = sortedTiles->data(sortedTiles->index(row, Room::Tile::kYoffsetFieldNumber)).toInt();
-    int w = sortedTiles->data(sortedTiles->index(row, Room::Tile::kWidthFieldNumber)).toInt();
-    int h = sortedTiles->data(sortedTiles->index(row, Room::Tile::kHeightFieldNumber)).toInt();
+    int x = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kXFieldNumber)).toInt();
+    int y = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kYFieldNumber)).toInt();
+    int xOff = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kXoffsetFieldNumber)).toInt();
+    int yOff = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kYoffsetFieldNumber)).toInt();
+    int w = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kWidthFieldNumber)).toInt();
+    int h = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kHeightFieldNumber)).toInt();
 
-    QVariant xScale = sortedTiles->data(sortedTiles->index(row, Room::Tile::kXscaleFieldNumber));
-    QVariant yScale = sortedTiles->data(sortedTiles->index(row, Room::Tile::kYscaleFieldNumber));
+    QVariant xScale = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kXscaleFieldNumber));
+    QVariant yScale = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kYscaleFieldNumber));
 
     if (xScale.isNull()) xScale.setValue(1);
     if (yScale.isNull()) yScale.setValue(1);
 
-    QString imgFile = bkg->data(Background::kImageFieldNumber).toString();
+    QString imgFile = bkg->Data(Background::kImageFieldNumber).toString();
     QPixmap pixmap = ArtManager::GetCachedPixmap(imgFile);
     if (pixmap.isNull()) continue;
 
@@ -109,41 +112,41 @@ void RoomView::paintTiles(QPainter& painter) {
 }
 
 void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
-  RepeatedProtoModelPtr backgrounds = model->GetRepeatedSubModel(Room::kBackgroundsFieldNumber);
+  RepeatedMessageModel* backgrounds = _model->GetSubModel<RepeatedMessageModel*>(Room::kBackgroundsFieldNumber);
   for (int row = 0; row < backgrounds->rowCount(); row++) {
-    bool visible = backgrounds->data(row, Room::Background::kVisibleFieldNumber).toBool();
-    bool foreground = backgrounds->data(row, Room::Background::kForegroundFieldNumber).toBool();
-    QString bkgName = backgrounds->data(row, Room::Background::kBackgroundNameFieldNumber).toString();
+    bool visible = backgrounds->Data(row, Room::Background::kVisibleFieldNumber).toBool();
+    bool foreground = backgrounds->Data(row, Room::Background::kForegroundFieldNumber).toBool();
+    QString bkgName = backgrounds->Data(row, Room::Background::kBackgroundNameFieldNumber).toString();
 
     if (!visible || foreground != foregrounds) continue;
-    ProtoModelPtr bkgRes = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, bkgName);
+    MessageModel* bkgRes = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, bkgName);
     if (!bkgRes) continue;
-    bkgRes = bkgRes->GetSubModel(TreeNode::kBackgroundFieldNumber);
+    bkgRes = bkgRes->GetSubModel<MessageModel*>(TreeNode::kBackgroundFieldNumber);
     if (!bkgRes) continue;
 
-    int x = backgrounds->data(row, Room::Background::kXFieldNumber).toInt();
-    int y = backgrounds->data(row, Room::Background::kYFieldNumber).toInt();
-    int w = bkgRes->data(Background::kWidthFieldNumber).toInt();
-    int h = bkgRes->data(Background::kHeightFieldNumber).toInt();
+    int x = backgrounds->Data(row, Room::Background::kXFieldNumber).toInt();
+    int y = backgrounds->Data(row, Room::Background::kYFieldNumber).toInt();
+    int w = bkgRes->Data(Background::kWidthFieldNumber).toInt();
+    int h = bkgRes->Data(Background::kHeightFieldNumber).toInt();
 
-    QString imgFile = bkgRes->data(Background::kImageFieldNumber).toString();
+    QString imgFile = bkgRes->Data(Background::kImageFieldNumber).toString();
     QPixmap pixmap = ArtManager::GetCachedPixmap(imgFile);
     if (pixmap.isNull()) continue;
 
     QRectF dest(x, y, w, h);
     QRectF src(0, 0, w, h);
 
-    bool stretch = backgrounds->data(row, Room::Background::kStretchFieldNumber).toBool();
-    int room_w = model->data(Room::kWidthFieldNumber).toInt();
-    int room_h = model->data(Room::kHeightFieldNumber).toInt();
+    bool stretch = backgrounds->Data(row, Room::Background::kStretchFieldNumber).toBool();
+    int room_w = _model->Data(Room::kWidthFieldNumber).toInt();
+    int room_h = _model->Data(Room::kHeightFieldNumber).toInt();
 
     const QTransform transform = painter.transform();
     if (stretch) {
       painter.scale(room_w / qreal(w), room_h / qreal(h));
     }
 
-    bool hTiled = backgrounds->data(row, Room::Background::kHtiledFieldNumber).toBool();
-    bool vTiled = backgrounds->data(row, Room::Background::kVtiledFieldNumber).toBool();
+    bool hTiled = backgrounds->Data(row, Room::Background::kHtiledFieldNumber).toBool();
+    bool vTiled = backgrounds->Data(row, Room::Background::kVtiledFieldNumber).toBool();
 
     if (hTiled) {
       dest.setX(0);
@@ -163,34 +166,34 @@ void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
 }
 
 void RoomView::paintInstances(QPainter& painter) {
-  for (int row = 0; row < sortedInstances->rowCount(); row++) {
+  for (int row = 0; row < _sortedInstances->rowCount(); row++) {
     QString imgFile = ":/actions/help.png";
     int w = 16;
     int h = 16;
     int xoff = 0;
     int yoff = 0;
 
-    QVariant sprName = sortedInstances->data(sortedInstances->index(row, Room::Instance::kObjectTypeFieldNumber));
+    QVariant sprName = _sortedInstances->data(_sortedInstances->index(row, Room::Instance::kObjectTypeFieldNumber));
 
-    const ProtoModelPtr spr = GetObjectSprite(sprName.toString());
+    MessageModel* spr = GetObjectSprite(sprName.toString());
     if (spr == nullptr)
       imgFile = "object";
     else {
-      imgFile = spr->GetRepeatedStringSubModel(Sprite::kSubimagesFieldNumber)->data(0).toString();
-      w = spr->data(Sprite::kWidthFieldNumber).toInt();
-      h = spr->data(Sprite::kHeightFieldNumber).toInt();
-      xoff = spr->data(Sprite::kOriginXFieldNumber).toInt();
-      yoff = spr->data(Sprite::kOriginYFieldNumber).toInt();
+      imgFile = spr->GetSubModel<RepeatedStringModel*>(Sprite::kSubimagesFieldNumber)->Data(0).toString();
+      w = spr->Data(Sprite::kWidthFieldNumber).toInt();
+      h = spr->Data(Sprite::kHeightFieldNumber).toInt();
+      xoff = spr->Data(Sprite::kOriginXFieldNumber).toInt();
+      yoff = spr->Data(Sprite::kOriginYFieldNumber).toInt();
     }
 
     QPixmap pixmap = ArtManager::GetCachedPixmap(imgFile);
     if (pixmap.isNull()) continue;
 
-    QVariant x = sortedInstances->data(sortedInstances->index(row, Room::Instance::kXFieldNumber));
-    QVariant y = sortedInstances->data(sortedInstances->index(row, Room::Instance::kYFieldNumber));
-    QVariant xScale = sortedInstances->data(sortedInstances->index(row, Room::Instance::kXscaleFieldNumber));
-    QVariant yScale = sortedInstances->data(sortedInstances->index(row, Room::Instance::kYscaleFieldNumber));
-    QVariant rot = sortedInstances->data(sortedInstances->index(row, Room::Instance::kRotationFieldNumber));
+    QVariant x = _sortedInstances->data(_sortedInstances->index(row, Room::Instance::kXFieldNumber));
+    QVariant y = _sortedInstances->data(_sortedInstances->index(row, Room::Instance::kYFieldNumber));
+    QVariant xScale = _sortedInstances->data(_sortedInstances->index(row, Room::Instance::kXscaleFieldNumber));
+    QVariant yScale = _sortedInstances->data(_sortedInstances->index(row, Room::Instance::kYscaleFieldNumber));
+    QVariant rot = _sortedInstances->data(_sortedInstances->index(row, Room::Instance::kRotationFieldNumber));
 
     QRectF dest(0, 0, w, h);
     QRectF src(0, 0, w, h);

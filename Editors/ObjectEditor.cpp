@@ -2,7 +2,7 @@
 
 #include "ui_ObjectEditor.h"
 
-ObjectEditor::ObjectEditor(ProtoModelPtr model, QWidget* parent) : BaseEditor(model, parent), ui(new Ui::ObjectEditor) {
+ObjectEditor::ObjectEditor(MessageModel* model, QWidget* parent) : BaseEditor(model, parent), ui(new Ui::ObjectEditor) {
   ui->setupUi(this);
   connect(ui->saveButton, &QAbstractButton::pressed, this, &BaseEditor::OnSave);
 }

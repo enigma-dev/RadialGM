@@ -1,5 +1,6 @@
 #include "SpriteEditor.h"
 #include "Components/Utility.h"
+#include "Models/MessageModel.h"
 
 #include "ui_SpriteEditor.h"
 
@@ -13,57 +14,57 @@
 #include <QMessageBox>
 #include <QUuid>
 
-SpriteEditor::SpriteEditor(ProtoModelPtr model, QWidget* parent) : BaseEditor(model, parent), ui(new Ui::SpriteEditor) {
-  ui->setupUi(this);
-  connect(ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
-  ui->scrollAreaWidget->SetAssetView(ui->subimagePreview);
+SpriteEditor::SpriteEditor(MessageModel* model, QWidget* parent)
+    : BaseEditor(model, parent), _ui(new Ui::SpriteEditor) {
+  _ui->setupUi(this);
+  connect(_ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
+  _ui->scrollAreaWidget->SetAssetView(_ui->subimagePreview);
 
   QLabel* bboxLabel = new QLabel(tr("Show BBox "));
   QCheckBox* showBBox = new QCheckBox(this);
   showBBox->setChecked(true);
-  ui->mainToolBar->addWidget(bboxLabel);
-  ui->mainToolBar->addWidget(showBBox);
-  connect(showBBox, &QCheckBox::stateChanged, ui->subimagePreview, &SpriteView::SetShowBBox);
+  _ui->mainToolBar->addWidget(bboxLabel);
+  _ui->mainToolBar->addWidget(showBBox);
+  connect(showBBox, &QCheckBox::stateChanged, _ui->subimagePreview, &SpriteView::SetShowBBox);
 
   QLabel* originLabel = new QLabel(tr("Show Origin "));
   QCheckBox* showOrigin = new QCheckBox(this);
   showOrigin->setChecked(true);
-  ui->mainToolBar->addWidget(originLabel);
-  ui->mainToolBar->addWidget(showOrigin);
-  connect(showOrigin, &QCheckBox::stateChanged, ui->subimagePreview, &SpriteView::SetShowOrigin);
+  _ui->mainToolBar->addWidget(originLabel);
+  _ui->mainToolBar->addWidget(showOrigin);
+  connect(showOrigin, &QCheckBox::stateChanged, _ui->subimagePreview, &SpriteView::SetShowOrigin);
 
-  resMapper->addMapping(ui->originXSpinBox, Sprite::kOriginXFieldNumber);
-  resMapper->addMapping(ui->originYSpinBox, Sprite::kOriginYFieldNumber);
-  resMapper->addMapping(ui->collisionShapeGroupBox, Sprite::kShapeFieldNumber, "currentIndex");
-  resMapper->addMapping(ui->bboxComboBox, Sprite::kBboxModeFieldNumber, "currentIndex");
-  resMapper->addMapping(ui->leftSpinBox, Sprite::kBboxLeftFieldNumber);
-  resMapper->addMapping(ui->rightSpinBox, Sprite::kBboxRightFieldNumber);
-  resMapper->addMapping(ui->topSpinBox, Sprite::kBboxTopFieldNumber);
-  resMapper->addMapping(ui->bottomSpinBox, Sprite::kBboxBottomFieldNumber);
+  resMapper->addMapping(_ui->originXSpinBox, Sprite::kOriginXFieldNumber);
+  resMapper->addMapping(_ui->originYSpinBox, Sprite::kOriginYFieldNumber);
+  resMapper->addMapping(_ui->collisionShapeGroupBox, Sprite::kShapeFieldNumber, "currentIndex");
+  resMapper->addMapping(_ui->bboxComboBox, Sprite::kBboxModeFieldNumber, "currentIndex");
+  resMapper->addMapping(_ui->leftSpinBox, Sprite::kBboxLeftFieldNumber);
+  resMapper->addMapping(_ui->rightSpinBox, Sprite::kBboxRightFieldNumber);
+  resMapper->addMapping(_ui->topSpinBox, Sprite::kBboxTopFieldNumber);
+  resMapper->addMapping(_ui->bottomSpinBox, Sprite::kBboxBottomFieldNumber);
 
   RebindSubModels();
 }
 
-SpriteEditor::~SpriteEditor() { delete ui; }
+SpriteEditor::~SpriteEditor() { delete _ui; }
 
 void SpriteEditor::RebindSubModels() {
-  _spriteModel = _model->GetSubModel(TreeNode::kSpriteFieldNumber);
-  _subimagesModel =
-      static_cast<SpriteSubimageModelPtr>(_spriteModel->GetRepeatedStringSubModel(Sprite::kSubimagesFieldNumber));
+  MessageModel* _spriteModel = _model->GetSubModel<MessageModel*>(TreeNode::kSpriteFieldNumber);
+  _subimagesModel = _spriteModel->GetSubModel<RepeatedImageModel*>(Sprite::kSubimagesFieldNumber);
 
-  ui->subImageList->setModel(_subimagesModel);
-  ui->subImageList->setIconSize(_subimagesModel->GetIconSize());
-  ui->subImageList->setGridSize(_subimagesModel->GetIconSize());
+  _ui->subImageList->setModel(_subimagesModel);
+  _ui->subImageList->setIconSize(_subimagesModel->GetIconSize());
+  _ui->subImageList->setGridSize(_subimagesModel->GetIconSize());
 
-  ui->subimagePreview->SetResourceModel(_spriteModel);
+  _ui->subimagePreview->SetResourceModel(_spriteModel);
   connect(_subimagesModel, &RepeatedImageModel::MismatchedImageSize, this, &SpriteEditor::LoadedMismatchedImage);
 
-  connect(ui->subImageList->selectionModel(), &QItemSelectionModel::selectionChanged, this,
+  connect(_ui->subImageList->selectionModel(), &QItemSelectionModel::selectionChanged, this,
           &SpriteEditor::SelectionChanged);
 
   BaseEditor::RebindSubModels();
 
-  on_bboxComboBox_currentIndexChanged(_spriteModel->data(Sprite::kBboxModeFieldNumber).toInt());
+  on_bboxComboBox_currentIndexChanged(_spriteModel->Data(Sprite::kBboxModeFieldNumber).toInt());
 }
 
 void SpriteEditor::LoadedMismatchedImage(QSize expectedSize, QSize actualSize) {
@@ -78,41 +79,41 @@ void SpriteEditor::LoadedMismatchedImage(QSize expectedSize, QSize actualSize) {
 }
 
 void SpriteEditor::RemoveSelectedIndexes() {
-  {
+  /*{
     RepeatedStringModel::RowRemovalOperation remover(_subimagesModel);
     for (QModelIndex idx : ui->subImageList->selectionModel()->selectedIndexes()) {
       remover.RemoveRow(idx.row());
     }
-  }
+  }*/
 
-  ui->subimagePreview->SetSubimage((_subimagesModel->rowCount() == 0) ? -1 : 0);
+  _ui->subimagePreview->SetSubimage((_subimagesModel->rowCount() == 0) ? -1 : 0);
 }
 
 void SpriteEditor::SelectionChanged(const QItemSelection& selected, const QItemSelection& /*deselected*/) {
   if (!selected.empty()) {
-    ui->subimagePreview->SetSubimage(selected.indexes().back().row());
+    _ui->subimagePreview->SetSubimage(selected.indexes().back().row());
   }
 }
 
 void SpriteEditor::on_bboxComboBox_currentIndexChanged(int index) {
   bool manual = (index != Sprite::BoundingBox::Sprite_BoundingBox_MANUAL);
-  ui->leftSpinBox->setDisabled(manual);
-  ui->rightSpinBox->setDisabled(manual);
-  ui->topSpinBox->setDisabled(manual);
-  ui->bottomSpinBox->setDisabled(manual);
+  _ui->leftSpinBox->setDisabled(manual);
+  _ui->rightSpinBox->setDisabled(manual);
+  _ui->topSpinBox->setDisabled(manual);
+  _ui->bottomSpinBox->setDisabled(manual);
 
   if (index == Sprite::BoundingBox::Sprite_BoundingBox_AUTOMATIC) {
-    QRectF rect = ui->subimagePreview->AutomaticBBoxRect();
-    ui->leftSpinBox->setValue(rect.x());
-    ui->topSpinBox->setValue(rect.y());
-    ui->rightSpinBox->setValue(rect.x() + rect.width());
-    ui->bottomSpinBox->setValue(rect.y() + rect.height());
+    QRectF rect = _ui->subimagePreview->AutomaticBBoxRect();
+    _ui->leftSpinBox->setValue(rect.x());
+    _ui->topSpinBox->setValue(rect.y());
+    _ui->rightSpinBox->setValue(rect.x() + rect.width());
+    _ui->bottomSpinBox->setValue(rect.y() + rect.height());
   } else if (index == Sprite::BoundingBox::Sprite_BoundingBox_FULL_IMAGE) {
-    QPixmap p = ui->subimagePreview->GetPixmap();
-    ui->leftSpinBox->setValue(0);
-    ui->topSpinBox->setValue(0);
-    ui->rightSpinBox->setValue(p.width());
-    ui->bottomSpinBox->setValue(p.height());
+    QPixmap p = _ui->subimagePreview->GetPixmap();
+    _ui->leftSpinBox->setValue(0);
+    _ui->topSpinBox->setValue(0);
+    _ui->rightSpinBox->setValue(p.width());
+    _ui->bottomSpinBox->setValue(p.height());
   }
 }
 
@@ -122,7 +123,7 @@ void SpriteEditor::on_actionNewSubimage_triggered() {
     // TODO: Dialog to ask size
     imgSize = QSize(64, 64);
   } else {
-    imgSize = ui->subimagePreview->GetPixmap().size();
+    imgSize = _ui->subimagePreview->GetPixmap().size();
   }
 
   QImage img(imgSize, QImage::Format_RGBA8888);
@@ -132,14 +133,14 @@ void SpriteEditor::on_actionNewSubimage_triggered() {
   QString fName(QDir::tempPath() + "/" + uid.mid(1, uid.length() - 2) + ".png");
   img.save(fName);
   _subimagesModel->insertRow(_subimagesModel->rowCount());
-  _subimagesModel->setData(_subimagesModel->rowCount() - 1, fName);
+  _subimagesModel->SetData(fName, _subimagesModel->rowCount() - 1);
 }
 
 void SpriteEditor::on_actionDeleteSubimages_triggered() { RemoveSelectedIndexes(); }
 
 void SpriteEditor::on_actionCut_triggered() {
   QGuiApplication::clipboard()->setMimeData(
-      _subimagesModel->mimeData(ui->subImageList->selectionModel()->selectedIndexes()));
+      _subimagesModel->mimeData(_ui->subImageList->selectionModel()->selectedIndexes()));
   RemoveSelectedIndexes();
 }
 
@@ -150,7 +151,7 @@ void SpriteEditor::on_actionPaste_triggered() {
 
 void SpriteEditor::on_actionCopy_triggered() {
   QGuiApplication::clipboard()->setMimeData(
-      _subimagesModel->mimeData(ui->subImageList->selectionModel()->selectedIndexes()));
+      _subimagesModel->mimeData(_ui->subImageList->selectionModel()->selectedIndexes()));
 }
 
 void SpriteEditor::on_actionLoadSubimages_triggered() {
@@ -160,13 +161,13 @@ void SpriteEditor::on_actionLoadSubimages_triggered() {
   if (dialog->exec() && dialog->selectedFiles().size() > 0) {
     QImageReader img(dialog->selectedFiles()[0]);
     if (img.size().width() > 0 && img.size().height() > 0) {
-      _subimagesModel->clear();
+      _subimagesModel->Clear();
       for (QString fName : dialog->selectedFiles()) {
         QImageReader newImg(fName);
         if (img.size() == newImg.size()) {
           _subimagesModel->insertRow(_subimagesModel->rowCount());
           // TODO: Internalize file
-          _subimagesModel->setData(_subimagesModel->rowCount() - 1, fName);
+          _subimagesModel->SetData(fName, _subimagesModel->rowCount() - 1);
         } else {
           LoadedMismatchedImage(img.size(), newImg.size());
         }
@@ -182,13 +183,13 @@ void SpriteEditor::on_actionAddSubimages_triggered() {
   dialog->setFileMode(QFileDialog::ExistingFiles);
 
   if (dialog->exec() && dialog->selectedFiles().size() > 0) {
-    QSize imgSize = ui->subimagePreview->GetPixmap().size();
+    QSize imgSize = _ui->subimagePreview->GetPixmap().size();
     for (QString fName : dialog->selectedFiles()) {
       QImageReader newImg(fName);
       if (imgSize == newImg.size()) {
         _subimagesModel->insertRow(_subimagesModel->rowCount());
         // TODO: Internalize file
-        _subimagesModel->setData(_subimagesModel->rowCount() - 1, fName);
+        _subimagesModel->SetData(fName, _subimagesModel->rowCount() - 1);
       } else {
         LoadedMismatchedImage(imgSize, newImg.size());
       }
@@ -198,22 +199,22 @@ void SpriteEditor::on_actionAddSubimages_triggered() {
   }
 }
 
-void SpriteEditor::on_actionZoom_triggered() { ui->scrollAreaWidget->ResetZoom(); }
+void SpriteEditor::on_actionZoom_triggered() { _ui->scrollAreaWidget->ResetZoom(); }
 
-void SpriteEditor::on_actionZoomIn_triggered() { ui->scrollAreaWidget->ZoomIn(); }
+void SpriteEditor::on_actionZoomIn_triggered() { _ui->scrollAreaWidget->ZoomIn(); }
 
-void SpriteEditor::on_actionZoomOut_triggered() { ui->scrollAreaWidget->ZoomOut(); }
+void SpriteEditor::on_actionZoomOut_triggered() { _ui->scrollAreaWidget->ZoomOut(); }
 
 void SpriteEditor::on_actionEditSubimages_triggered() {
-  for (QModelIndex idx : ui->subImageList->selectionModel()->selectedIndexes()) {
-    QDesktopServices::openUrl(QUrl::fromLocalFile(_subimagesModel->data(idx.row()).toString()));
+  for (QModelIndex idx : _ui->subImageList->selectionModel()->selectedIndexes()) {
+    QDesktopServices::openUrl(QUrl::fromLocalFile(_subimagesModel->Data(idx.row()).toString()));
     // TODO: file watcher reload
     // TODO: editor settings
   }
 }
 
 void SpriteEditor::on_centerOriginButton_clicked() {
-  QSize sz = ui->subimagePreview->GetPixmap().size();
-  ui->originXSpinBox->setValue(sz.width() / 2);
-  ui->originYSpinBox->setValue(sz.height() / 2);
+  QSize sz = _ui->subimagePreview->GetPixmap().size();
+  _ui->originXSpinBox->setValue(sz.width() / 2);
+  _ui->originYSpinBox->setValue(sz.height() / 2);
 }

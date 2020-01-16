@@ -5,7 +5,7 @@
 
 using namespace buffers::resources;
 
-ScriptEditor::ScriptEditor(ProtoModelPtr model, QWidget* parent)
+ScriptEditor::ScriptEditor(MessageModel* model, QWidget* parent)
     : BaseEditor(model, parent), codeEditor(new CodeEditor(this)) {
   QLayout* layout = new QVBoxLayout(this);
   layout->addWidget(codeEditor);

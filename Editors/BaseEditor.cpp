@@ -5,7 +5,7 @@
 #include <QDebug>
 #include <QMessageBox>
 
-BaseEditor::BaseEditor(ProtoModelPtr treeNodeModel, QWidget* parent)
+BaseEditor::BaseEditor(MessageModel* treeNodeModel, QWidget* parent)
     : QWidget(parent), nodeMapper(new ModelMapper(treeNodeModel, this)), _model(treeNodeModel) {
   buffers::TreeNode* n = static_cast<buffers::TreeNode*>(treeNodeModel->GetBuffer());
   resMapper = new ModelMapper(treeNodeModel->GetSubModel<MessageModel*>(ResTypeFields[n->type_case()]), this);
@@ -45,12 +45,6 @@ void BaseEditor::closeEvent(QCloseEvent* event) {
 bool BaseEditor::HasFocus() { return hasFocus; }
 
 void BaseEditor::ReplaceBuffer(google::protobuf::Message* buffer) { resMapper->ReplaceBuffer(buffer); }
-
-void BaseEditor::SetModelData(int index, const QVariant& value) {
-  resMapper->setData(resMapper->index(index), value, Qt::DisplayRole);
-}
-
-QVariant BaseEditor::GetModelData(int index) { return resMapper->data(resMapper->index(index), Qt::DisplayRole); }
 
 void BaseEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex& /*bottomRight*/, const QVariant& oldValue,
                              const QVector<int>& /*roles*/) {

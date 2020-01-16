@@ -184,7 +184,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 }
 
 template <typename T>
-T *EditorFactory(ProtoModelPtr model, QWidget *parent) {
+T *EditorFactory(MessageModel *model, QWidget *parent) {
   return new T(model, parent);
 }
 
@@ -192,7 +192,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
   using namespace google::protobuf;
 
   using TypeCase = buffers::TreeNode::TypeCase;
-  using FactoryMap = std::unordered_map<TypeCase, std::function<BaseEditor *(ProtoModelPtr m, QWidget * p)>>;
+  using FactoryMap = std::unordered_map<TypeCase, std::function<BaseEditor *(MessageModel * m, QWidget * p)>>;
 
   static FactoryMap factoryMap({{TypeCase::kSprite, EditorFactory<SpriteEditor>},
                                 {TypeCase::kSound, EditorFactory<SoundEditor>},
@@ -212,7 +212,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     auto factoryFunction = factoryMap.find(item->type_case());
     if (factoryFunction == factoryMap.end()) return;  // no registered editor
 
-    ProtoModelPtr res = resourceMap->GetResourceByName(item->type_case(), item->name());
+    MessageModel *res = resourceMap->GetResourceByName(item->type_case(), item->name());
     BaseEditor *editor = factoryFunction->second(res, this);
 
     connect(editor, &BaseEditor::ResourceRenamed, resourceMap.get(), &ResourceModelMap::ResourceRenamed);

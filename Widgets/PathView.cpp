@@ -1,7 +1,5 @@
 #include "PathView.h"
-#include "Models/MessageModel.h"
 #include "Models/RepeatedMessageModel.h"
-#include "Models/RepeatedModel.h"
 
 PathView::PathView(AssetScrollAreaBackground *parent) : RoomView(parent) {}
 
@@ -25,14 +23,14 @@ QPoint quadratic(QPoint start, QPoint handle, QPoint end, double position) {
 }
 
 int PathView::Size() const {
-  RepeatedMessageModel *pointsModel = pathModel->GetSubModel<RepeatedMessageModel *>(Path::kPointsFieldNumber);
+  RepeatedMessageModel *pointsModel = _pathModel->GetSubModel<RepeatedMessageModel *>(Path::kPointsFieldNumber);
   return pointsModel->rowCount();
 }
 
-bool PathView::Closed() const { return pathModel->data(Path::kClosedFieldNumber).toBool(); }
-bool PathView::Smooth() const { return pathModel->data(Path::kSmoothFieldNumber).toBool(); }
+bool PathView::Closed() const { return _pathModel->Data(Path::kClosedFieldNumber).toBool(); }
+bool PathView::Smooth() const { return _pathModel->Data(Path::kSmoothFieldNumber).toBool(); }
 int PathView::Precision() const {
-  QVariant prec = pathModel->data(Path::kPrecisionFieldNumber);
+  QVariant prec = _pathModel->Data(Path::kPrecisionFieldNumber);
   if (!prec.isValid()) return 4;
   int res = prec.toInt();
   if (res < 1) return 1;
@@ -56,9 +54,9 @@ int PathView::EffectiveIndex(int n, int size, bool closed) const {
 }
 QPoint PathView::EffectivePoint(int n, int size, bool closed) const { return Point(EffectiveIndex(n, size, closed)); }
 QPoint PathView::Point(int n) const {
-  RepeatedProtoModelPtr pointsModel = pathModel->GetRepeatedSubModel(Path::kPointsFieldNumber);
-  return QPoint(pointsModel->data(n, Path::Point::kXFieldNumber).toInt(),
-                pointsModel->data(n, Path::Point::kYFieldNumber).toInt());
+  RepeatedMessageModel *pointsModel = _pathModel->GetSubModel<RepeatedMessageModel *>(Path::kPointsFieldNumber);
+  return QPoint(pointsModel->Data(n, Path::Point::kXFieldNumber).toInt(),
+                pointsModel->Data(n, Path::Point::kYFieldNumber).toInt());
 }
 
 namespace {
@@ -129,8 +127,8 @@ QVector<QPoint> PathView::RenderPoints(const QVector<QPoint> &user_points) const
 void PathView::Paint(QPainter &painter) {
   RoomView::Paint(painter);
 
-  RepeatedProtoModelPtr pointsModel = pathModel->GetRepeatedSubModel(Path::kPointsFieldNumber);
-  if (!pointsModel->empty()) {
+  RepeatedMessageModel *pointsModel = _pathModel->GetSubModel<RepeatedMessageModel *>(Path::kPointsFieldNumber);
+  if (!pointsModel->Empty()) {
     int size = pointsModel->rowCount();
 
     QPainterPath path;
@@ -177,4 +175,4 @@ void PathView::Paint(QPainter &painter) {
   painter.drawEllipse(mousePos, 4, 4);
 }
 
-void PathView::SetPathModel(ProtoModelPtr model) { pathModel = model; }
+void PathView::SetPathModel(MessageModel *model) { _pathModel = model; }
