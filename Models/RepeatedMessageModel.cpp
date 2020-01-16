@@ -1,6 +1,15 @@
 #include "RepeatedMessageModel.h"
 #include "MessageModel.h"
 
+RepeatedMessageModel::RepeatedMessageModel(ProtoModel *parent, Message *message, const FieldDescriptor *field)
+    : RepeatedModel<Message>(parent, message, field,
+                             message->GetReflection()->GetMutableRepeatedFieldRef<Message>(message, field)) {
+  const Reflection *refl = _protobuf->GetReflection();
+  for (int j = 0; j < refl->FieldSize(*_protobuf, field); j++) {
+    _subModels.append(new MessageModel(parent, refl->MutableRepeatedMessage(_protobuf, field, j)));
+  }
+}
+
 QVariant RepeatedMessageModel::Data(int row, int column) const { return _subModels[row]->Data(column); }
 
 bool RepeatedMessageModel::SetData(const QVariant &value, int row, int column) {
@@ -12,6 +21,7 @@ bool RepeatedMessageModel::setData(const QModelIndex &index, const QVariant &val
 }
 
 QVariant RepeatedMessageModel::data(const QModelIndex &index, int role) const {
+  //if (!index.isValid()) return QVariant();
   return _subModels[index.row()]->data(_subModels[index.row()]->index(index.column()), role);
 }
 
@@ -21,6 +31,7 @@ QVariant RepeatedMessageModel::headerData(int section, Qt::Orientation orientati
 }
 
 QModelIndex RepeatedMessageModel::index(int row, int column, const QModelIndex & /*parent*/) const {
+  qDebug() << "indezx: " << row;
   return createIndex(row, column);
 }
 

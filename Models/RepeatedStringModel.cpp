@@ -7,7 +7,8 @@
 #include <algorithm>
 
 QVariant RepeatedStringModel::Data(int row, int column) const {
-  return data(this->index(row, column, QModelIndex()), Qt::DisplayRole);
+  qDebug() << "RepeatedStringModel::Data";
+  return data(index(row, column, QModelIndex()), Qt::DisplayRole);
 }
 
 bool RepeatedStringModel::SetData(const QVariant& value, int row, int column) {
@@ -31,6 +32,7 @@ bool RepeatedStringModel::setData(const QModelIndex& index, const QVariant& valu
 }
 
 QVariant RepeatedStringModel::data(const QModelIndex& index, int /*role*/) const {
+  qDebug() << "RepeatedStringModel::data";
   if (index.column() != 0) {
     qDebug() << "Invalid column index";
     return QVariant();

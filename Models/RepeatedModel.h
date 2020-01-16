@@ -23,6 +23,11 @@ class RepeatedModel : public ProtoModel {
 
   bool Empty() { return rowCount() == 0; }
 
+  virtual QVariant Data(int row, int column = 0) const = 0;
+  virtual bool SetData(const QVariant &value, int row, int column = 0) = 0;
+  virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override = 0;
+  virtual QVariant data(const QModelIndex &index, int role) const override = 0;
+
   // Moves / deletion / addition only make sense in repeated fields
 
   virtual bool moveRows(const QModelIndex &sourceParent, int source, int count, const QModelIndex &destinationParent,
@@ -48,7 +53,7 @@ class RepeatedModel : public ProtoModel {
   }
 
   virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override {
-    if (!parent.isValid()) return 0;
+    //if (!parent.isValid()) return 0;
     return _fieldRef.size();
   }
 
@@ -57,7 +62,7 @@ class RepeatedModel : public ProtoModel {
     return 1;
   }
 
-  virtual QModelIndex index(int row, int column, const QModelIndex & /*parent*/) const {
+  virtual QModelIndex index(int row, int column, const QModelIndex & /*parent*/) const override {
     return this->createIndex(row, column);
   }
 
@@ -118,7 +123,7 @@ class RepeatedModel : public ProtoModel {
     SwapBack(left, left + npart, right);
   }
 
-  class RowRemovalOperation {
+  /*class RowRemovalOperation {
     std::set<int> _rows;
     RepeatedModel<T> _model;
     MutableRepeatedFieldRef<T> _field;
@@ -181,7 +186,7 @@ class RepeatedModel : public ProtoModel {
 
       _model->GetParentModel()->SetDirty(true);
     }
-  };
+  };*/
 
  protected:
   const FieldDescriptor *_field;

@@ -4,9 +4,9 @@
 #include "RepeatedMessageModel.h"
 #include "ResourceModelMap.h"
 
-MessageModel::MessageModel(ProtoModel *parent, Message *protobuf) : ProtoModel(parent, protobuf) {}
+MessageModel::MessageModel(ProtoModel *parent, Message *protobuf) : ProtoModel(parent, protobuf) { RebuildSubModels(); }
 
-MessageModel::MessageModel(QObject *parent, Message *protobuf) : ProtoModel(parent, protobuf) {}
+MessageModel::MessageModel(QObject *parent, Message *protobuf) : ProtoModel(parent, protobuf) { RebuildSubModels(); }
 
 void MessageModel::RebuildSubModels() {
   const Descriptor *desc = _protobuf->GetDescriptor();
@@ -30,9 +30,10 @@ void MessageModel::RebuildSubModels() {
         _subModels[field->number()] = new MessageModel(this, refl->MutableMessage(_protobuf, field));
       }
     } else if (field->cpp_type() == CppType::CPPTYPE_STRING && field->is_repeated()) {
-      if (field->name() == "subimages")
+      if (field->name() == "subimages") {
         _subModels[field->number()] = new RepeatedImageModel(this, _protobuf, field);
-      else
+        GetSubModel<RepeatedImageModel *>(field->number());
+      } else
         _subModels[field->number()] = new RepeatedStringModel(this, _protobuf, field);
     }
   }

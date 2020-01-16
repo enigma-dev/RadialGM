@@ -8,9 +8,7 @@ class MessageModel;
 class RepeatedMessageModel : public RepeatedModel<Message> {
   Q_OBJECT
  public:
-  RepeatedMessageModel(ProtoModel *parent, Message *message, const FieldDescriptor *field)
-      : RepeatedModel<Message>(parent, message, field,
-                               message->GetReflection()->GetMutableRepeatedFieldRef<Message>(message, field)) {}
+  RepeatedMessageModel(ProtoModel *parent, Message *message, const FieldDescriptor *field);
 
   // RepeatedMessage models hold multiple MessageModels
   // You can access a submodel by it's position within the data structure.
@@ -36,7 +34,7 @@ class RepeatedMessageModel : public RepeatedModel<Message> {
   //const QModelIndex &parent) override;
 
  protected:
-  QVector<ProtoModel *> _subModels;
+  QVector<MessageModel *> _subModels;
 };
 
 #endif

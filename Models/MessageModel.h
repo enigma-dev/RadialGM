@@ -28,7 +28,12 @@ class MessageModel : public ProtoModel {
   // These messages can be accessed by the protobuf field number (ie Room::kInstancesFieldNumber)
   template <class T>
   T GetSubModel(int fieldNum) {
-    return static_cast<T>(_subModels[fieldNum]);
+    if (T t = dynamic_cast<T>(_subModels[fieldNum])) {
+      return t;
+    } else {
+      qDebug() << "Invalid model cast";
+      return nullptr;
+    }
   }
 
   // These are the same as the above but operate on the raw protobuf
@@ -47,7 +52,6 @@ class MessageModel : public ProtoModel {
   virtual QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override;
 
  protected:
-  Message *_protobuf;
   MessageModel *_modelBackup;
   QScopedPointer<Message> _backupProtobuf;
   QHash<int, ProtoModel *> _subModels;
