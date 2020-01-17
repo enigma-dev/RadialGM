@@ -44,8 +44,8 @@ bool RepeatedMessageModel::insertRows(int row, int count, const QModelIndex &par
 
   Message *parentBuffer = GetParentModel<MessageModel *>()->GetBuffer();
   for (int r = 0; r < count; ++r) {
-    //Message *m = parentBuffer->GetReflection()->AddMessage(parentBuffer, _field);
-    //_subModels.append(new MessageModel(m, _parentModel));
+    Message *m = parentBuffer->GetReflection()->AddMessage(parentBuffer, _field);
+    _subModels.append(new MessageModel(_parentModel, m));
   }
 
   SwapBack(row, p, rowCount());

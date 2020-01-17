@@ -7,8 +7,7 @@
 #include <algorithm>
 
 QVariant RepeatedStringModel::Data(int row, int column) const {
-  qDebug() << "RepeatedStringModel::Data";
-  return data(index(row, column, QModelIndex()), Qt::DisplayRole);
+  return data(index(row, column, QModelIndex()), Qt::UserRole);
 }
 
 bool RepeatedStringModel::SetData(const QVariant& value, int row, int column) {
