@@ -227,8 +227,8 @@ void PathEditor::on_insertPointButton_pressed() {
 void PathEditor::on_deletePointButton_pressed() {
   int deleteIndex = _ui->pointsTableView->selectionModel()->currentIndex().row();
   {
-    //RepeatedProtoModel::RowRemovalOperation remover(_pointsModel);
-    //remover.RemoveRow(deleteIndex);
+    RepeatedMessageModel::RowRemovalOperation remover(_pointsModel);
+    remover.RemoveRow(deleteIndex);
   }
 
   if (_pointsModel->rowCount() > 0) {

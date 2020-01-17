@@ -129,8 +129,8 @@ void FontEditor::UpdateRangeText(int min, int max) {
 
 void FontEditor::on_deleteRangeButton_pressed() {
   {  // so our remover gets deleted
-    //RepeatedMessageModel::RowRemovalOperation remover(_rangesModel);
-    //remover.RemoveRow(_ui->rangeTableView->selectionModel()->selectedRows().first().row());
+    RepeatedMessageModel::RowRemovalOperation remover(_rangesModel);
+    remover.RemoveRow(_ui->rangeTableView->selectionModel()->selectedRows().first().row());
   }
 
   if (_rangesModel->rowCount() == 0) {

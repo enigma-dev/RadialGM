@@ -18,6 +18,11 @@ class RepeatedMessageModel : public RepeatedModel<Message> {
     return static_cast<T>(_subModels[index]);
   }
 
+  virtual void Swap(int /*left*/, int /*right*/) override;
+  virtual void AppendNew() override;
+  virtual void Resize(int /*newSize*/) override;
+  virtual void Clear() override;
+
   virtual QVariant Data(int row, int column) const override;
   virtual bool SetData(const QVariant &value, int row, int column) override;
 
@@ -25,7 +30,7 @@ class RepeatedMessageModel : public RepeatedModel<Message> {
   virtual QVariant data(const QModelIndex &index, int role) const override;
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
   virtual QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override;
-
+  virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   virtual bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
 
   // TODO: implement dropping a message

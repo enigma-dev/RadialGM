@@ -16,9 +16,8 @@ class RepeatedModel : public ProtoModel {
 
   // Used to apply changes to any underlying data structure if needed
   virtual void Swap(int /*left*/, int /*right*/) {}
-  virtual void Append() {}
+  virtual void AppendNew() {}
   virtual void Resize(int /*newSize*/) {}
-  virtual int Size() { return 0; }
   virtual void Clear() { _fieldRef.Clear(); }
 
   bool Empty() { return rowCount() == 0; }
@@ -53,12 +52,12 @@ class RepeatedModel : public ProtoModel {
   }
 
   virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override {
-    //if (!parent.isValid()) return 0;
+    Q_UNUSED(parent);
     return _fieldRef.size();
   }
 
   virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override {
-    if (!parent.isValid()) return 0;
+    Q_UNUSED(parent);
     return 1;
   }
 
@@ -83,7 +82,7 @@ class RepeatedModel : public ProtoModel {
 
     int p = rowCount();
 
-    Append();
+    AppendNew();
 
     SwapBack(row, p, rowCount());
     ParentDataChanged();
@@ -92,13 +91,13 @@ class RepeatedModel : public ProtoModel {
   };
 
   virtual bool removeRows(int position, int count, const QModelIndex & /*parent*/) override {
-    //RowRemovalOperation remover(this, _fieldRef);
-    //remover.RemoveRows(position, count);
+    RowRemovalOperation remover(this);
+    remover.RemoveRows(position, count);
     return true;
   }
 
   // Mimedata stuff required for Drag & Drop and clipboard functions
-  virtual Qt::DropActions supportedDropActions() { return Qt::MoveAction | Qt::CopyAction; }
+  virtual Qt::DropActions supportedDropActions() const override { return Qt::MoveAction | Qt::CopyAction; }
 
   virtual QMimeData *mimeData(const QModelIndexList & /*indexes*/) const override { return nullptr; }
   virtual bool dropMimeData(const QMimeData * /*data*/, Qt::DropAction /*action*/, int /*row*/, int /*column*/,
@@ -107,7 +106,7 @@ class RepeatedModel : public ProtoModel {
   }
 
   virtual QStringList mimeTypes() const override {
-    return QStringList("RadialGM/"); /*QString::fromStdString(_field.name());*/
+    return QStringList("RadialGM/" + QString::fromStdString(_field->name()));
   }
 
   // Takes the elements in range [part, right) and move them to `left` by swapping.
@@ -123,13 +122,13 @@ class RepeatedModel : public ProtoModel {
     SwapBack(left, left + npart, right);
   }
 
-  /*class RowRemovalOperation {
+  class RowRemovalOperation {
     std::set<int> _rows;
-    RepeatedModel<T> _model;
+    RepeatedModel<T> &_model;
     MutableRepeatedFieldRef<T> _field;
 
    public:
-    RowRemovalOperation(RepeatedModel<T> model, MutableRepeatedFieldRef<T> field) : _model(model), _field(field) {}
+    RowRemovalOperation(RepeatedModel<T> *model) : _model(*model), _field(model->GetfieldRef()) {}
     void RemoveRow(int row) { _rows.insert(row); }
     void RemoveRows(int row, int count) {
       for (int i = row; i < row + count; ++i) _rows.insert(i);
@@ -154,14 +153,14 @@ class RepeatedModel : public ProtoModel {
         }
       }
 
-      emit _model->beginResetModel();
+      emit _model.beginResetModel();
 
       // Basic dense range removal. Move "deleted" rows to the end of the array.
       int left = 0, right = 0;
       for (auto range : ranges) {
         while (right < range.first) {
           _field.SwapElements(left, right);
-          _model->Swap(left, right);
+          _model.Swap(left, right);
           left++;
           right++;
         }
@@ -169,7 +168,7 @@ class RepeatedModel : public ProtoModel {
       }
       while (right < _field.size()) {
         _field.SwapElements(left, right);
-        _model->Swap(left, right);
+        _model.Swap(left, right);
         left++;
         right++;
       }
@@ -178,17 +177,18 @@ class RepeatedModel : public ProtoModel {
       // correct number of rows incrementally, or else various components in Qt
       // will bitch, piss, moan, wail, whine, and cry. Actually, they will anyway.
       for (Range range : ranges) {
-        _model->resize(_model.Size() - range.size());
+        _model.Resize(_field.size() - range.size());
         for (int j = range.first; j <= range.last; ++j) _field.RemoveLast();
       }
 
-      emit _model->endResetModel();
+      emit _model.endResetModel();
 
-      _model->GetParentModel()->SetDirty(true);
+      _model.GetParentModel<ProtoModel *>()->SetDirty(true);
     }
-  };*/
+  };
 
  protected:
+  MutableRepeatedFieldRef<T> GetfieldRef() const { return _fieldRef; }
   const FieldDescriptor *_field;
   MutableRepeatedFieldRef<T> _fieldRef;
 };

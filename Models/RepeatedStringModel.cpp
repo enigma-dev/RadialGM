@@ -6,6 +6,8 @@
 
 #include <algorithm>
 
+void RepeatedStringModel::AppendNew() { _fieldRef.Add(""); }
+
 QVariant RepeatedStringModel::Data(int row, int column) const {
   return data(index(row, column, QModelIndex()), Qt::UserRole);
 }
@@ -31,7 +33,6 @@ bool RepeatedStringModel::setData(const QModelIndex& index, const QVariant& valu
 }
 
 QVariant RepeatedStringModel::data(const QModelIndex& index, int /*role*/) const {
-  qDebug() << "RepeatedStringModel::data";
   if (index.column() != 0) {
     qDebug() << "Invalid column index";
     return QVariant();

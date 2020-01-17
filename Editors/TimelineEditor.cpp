@@ -122,8 +122,8 @@ void TimelineEditor::ChangeMoment(int oldIndex, int step) {
 }
 
 void TimelineEditor::RemoveMoment(int modelIndex) {
-  //RepeatedProtoModel::RowRemovalOperation remover(_momentsModel);
-  //remover.RemoveRow(modelIndex);
+  RepeatedMessageModel::RowRemovalOperation remover(_momentsModel);
+  remover.RemoveRow(modelIndex);
   _codeEditor->RemoveCodeWidget(modelIndex);
 }
 

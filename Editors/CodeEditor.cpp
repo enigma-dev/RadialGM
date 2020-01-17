@@ -2,7 +2,7 @@
 #include "Widgets/StackedCodeWidget.h"
 #include "ui_CodeEditor.h"
 
-CodeEditor::CodeEditor(QWidget* parent, bool removeSaveBtn) : ui(new Ui::CodeEditor) {
+CodeEditor::CodeEditor(QWidget* /*parent*/, bool removeSaveBtn) : ui(new Ui::CodeEditor) {
   ui->setupUi(this);
 
   if (removeSaveBtn) ui->mainToolBar->removeAction(ui->actionSave);

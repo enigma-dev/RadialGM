@@ -10,10 +10,30 @@ RepeatedMessageModel::RepeatedMessageModel(ProtoModel *parent, Message *message,
   }
 }
 
+void RepeatedMessageModel::Swap(int left, int right) { std::swap(_subModels[left], _subModels[right]); }
+
+void RepeatedMessageModel::AppendNew() {
+  MessageModel *parent = GetParentModel<MessageModel *>();
+  Message *parentBuffer = parent->GetBuffer();
+  Message *m = parentBuffer->GetReflection()->AddMessage(parentBuffer, _field);
+  _subModels.append(new MessageModel(parent, m));
+}
+
+void RepeatedMessageModel::Resize(int newSize) { _subModels.resize(newSize); }
+
+void RepeatedMessageModel::Clear() {
+  _fieldRef.Clear();
+  _subModels.clear();
+}
+
 QVariant RepeatedMessageModel::Data(int row, int column) const { return _subModels[row]->Data(column); }
 
 bool RepeatedMessageModel::SetData(const QVariant &value, int row, int column) {
   return _subModels[row]->SetData(value, column);
+}
+
+int RepeatedMessageModel::columnCount(const QModelIndex & /*parent*/) const {
+  return _field->message_type()->field_count();
 }
 
 bool RepeatedMessageModel::setData(const QModelIndex &index, const QVariant &value, int role) {
@@ -21,7 +41,6 @@ bool RepeatedMessageModel::setData(const QModelIndex &index, const QVariant &val
 }
 
 QVariant RepeatedMessageModel::data(const QModelIndex &index, int role) const {
-  //if (!index.isValid()) return QVariant();
   return _subModels[index.row()]->data(_subModels[index.row()]->index(index.column()), role);
 }
 
@@ -31,7 +50,6 @@ QVariant RepeatedMessageModel::headerData(int section, Qt::Orientation orientati
 }
 
 QModelIndex RepeatedMessageModel::index(int row, int column, const QModelIndex & /*parent*/) const {
-  qDebug() << "indezx: " << row;
   return createIndex(row, column);
 }
 

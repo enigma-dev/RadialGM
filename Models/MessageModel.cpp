@@ -1,5 +1,7 @@
 #include "MessageModel.h"
+#include "Components/ArtManager.h"
 #include "Components/Logger.h"
+#include "MainWindow.h"
 #include "RepeatedImageModel.h"
 #include "RepeatedMessageModel.h"
 #include "ResourceModelMap.h"
@@ -91,7 +93,7 @@ QVariant MessageModel::Data(int row, int column) const {
 
 QVariant MessageModel::data(const QModelIndex &index, int role) const {
   R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
-  if (role != Qt::DisplayRole && role != Qt::EditRole) return QVariant();
+  if (role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::DecorationRole) return QVariant();
 
   const Descriptor *desc = _protobuf->GetDescriptor();
   const Reflection *refl = _protobuf->GetReflection();
@@ -102,6 +104,29 @@ QVariant MessageModel::data(const QModelIndex &index, int role) const {
     if (index.row() == 0 && role == Qt::DisplayRole) {
       return tr("Value");
     }
+    return QVariant();
+  }
+
+  // These are for icons in things like the room's instance list
+  if (role == Qt::DecorationRole) {
+    const QString refType = QString::fromStdString(field->options().GetExtension(buffers::resource_ref));
+    if (refType == "object") {
+      MessageModel *sprModel = GetObjectSprite(data(index, Qt::DisplayRole).toString());
+      if (sprModel != nullptr) {
+        RepeatedImageModel *subImgs = sprModel->GetSubModel<RepeatedImageModel *>(Sprite::kSubimagesFieldNumber);
+        if (subImgs != nullptr && subImgs->rowCount() > 0) {
+          return ArtManager::GetIcon(subImgs->Data(0).toString());
+        }
+      }
+    } else if (refType == "background") {
+      MessageModel *bkgModel =
+          MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, data(index, Qt::DisplayRole).toString());
+      if (bkgModel != nullptr) {
+        bkgModel = bkgModel->GetSubModel<MessageModel *>(TreeNode::kBackgroundFieldNumber);
+        if (bkgModel != nullptr) return ArtManager::GetIcon(bkgModel->Data(Background::kImageFieldNumber).toString());
+      }
+    }
+
     return QVariant();
   }
 

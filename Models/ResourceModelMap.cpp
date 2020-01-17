@@ -37,12 +37,11 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
     for (auto room : _resources[TypeCase::kRoom]) {
       MessageModel* roomModel = room.second->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
       RepeatedMessageModel* instancesModel = roomModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
-      //RepeatedProtoModel::RowRemovalOperation remover(instancesModel);
+      RepeatedMessageModel::RowRemovalOperation remover(instancesModel);
 
       for (int row = 0; row < instancesModel->rowCount(); ++row) {
         if (instancesModel->Data(row, Room::Instance::kObjectTypeFieldNumber).toString() == name)
-          ;
-        //remover.RemoveRow(row);
+          remover.RemoveRow(row);
       }
 
       // Only models in use in open editors should have backup models
@@ -50,12 +49,11 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
       if (backupModel != nullptr) {
         RepeatedMessageModel* instancesModelBak =
             backupModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
-        //RepeatedProtoModel::RowRemovalOperation removerBak(instancesModelBak);
+        RepeatedMessageModel::RowRemovalOperation removerBak(instancesModelBak);
 
         for (int row = 0; row < instancesModelBak->rowCount(); ++row) {
           if (instancesModelBak->Data(row, Room::Instance::kObjectTypeFieldNumber).toString() == name)
-            ;
-          //removerBak.RemoveRow(row);
+            removerBak.RemoveRow(row);
         }
       }
     }
@@ -66,23 +64,21 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
     for (auto room : _resources[TypeCase::kRoom]) {
       MessageModel* roomModel = room.second->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
       RepeatedMessageModel* tilesModel = roomModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
-      //RepeatedProtoModel::RowRemovalOperation remover(tilesModel);
+      RepeatedMessageModel::RowRemovalOperation remover(tilesModel);
 
       for (int row = 0; row < tilesModel->rowCount(); ++row) {
-        if (tilesModel->Data(row, Room::Instance::kObjectTypeFieldNumber).toString() == name)
-          ;  // remover.RemoveRow(row);
+        if (tilesModel->Data(row, Room::Instance::kObjectTypeFieldNumber).toString() == name) remover.RemoveRow(row);
       }
 
       // Only models in use in open editors should have backup models
       MessageModel* backupModel = roomModel->GetBackupModel();
       if (backupModel != nullptr) {
         RepeatedMessageModel* tilesModelBak = backupModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
-        //RepeatedProtoModel::RowRemovalOperation removerBak(tilesModelBak);
+        RepeatedMessageModel::RowRemovalOperation removerBak(tilesModelBak);
 
         for (int row = 0; row < tilesModelBak->rowCount(); ++row) {
           if (tilesModelBak->Data(row, Room::Tile::kBackgroundNameFieldNumber).toString() == name)
-            ;
-          //removerBak.RemoveRow(row);
+            removerBak.RemoveRow(row);
         }
       }
     }
