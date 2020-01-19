@@ -34,7 +34,7 @@
 #undef GetMessage
 
 QList<buffers::SystemType> MainWindow::systemCache;
-MainWindow *MainWindow::m_instance = nullptr;
+MainWindow *MainWindow::_instance = nullptr;
 QScopedPointer<ResourceModelMap> MainWindow::resourceMap;
 QScopedPointer<TreeModel> MainWindow::treeModel;
 
@@ -76,17 +76,17 @@ void diagnosticHandler(QtMsgType type, const QMessageLogContext &context, const 
   }
 }
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainWindow) {
   ArtManager::Init();
 
-  m_instance = this;
+  _instance = this;
 
   setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
   setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
   setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
   setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
-  ui->setupUi(this);
+  _ui->setupUi(this);
 
   QToolBar *outputTB = new QToolBar(this);
   outputTB->setIconSize(QSize(24, 24));
@@ -100,17 +100,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   QToolButton *clearButton = new QToolButton();
   clearButton->setText(tr("Clear"));
   outputTB->addWidget(clearButton);
-  QVBoxLayout *outputLayout = static_cast<QVBoxLayout *>(ui->outputDockWidgetContents->layout());
+  QVBoxLayout *outputLayout = static_cast<QVBoxLayout *>(_ui->outputDockWidgetContents->layout());
   outputLayout->insertWidget(0, outputTB);
 
   // install editor diagnostics handler
-  diagnosticTextEdit = ui->debugTextBrowser;
+  diagnosticTextEdit = _ui->debugTextBrowser;
   qInstallMessageHandler(diagnosticHandler);
 
   connect(clearButton, &QToolButton::clicked,
-          [=]() { (toggleDiagnosticsAction->isChecked() ? ui->debugTextBrowser : ui->outputTextBrowser)->clear(); });
+          [=]() { (toggleDiagnosticsAction->isChecked() ? _ui->debugTextBrowser : _ui->outputTextBrowser)->clear(); });
   connect(toggleDiagnosticsAction, &QAction::toggled, [=](bool checked) {
-    ui->outputStackedWidget->setCurrentIndex(checked);
+    _ui->outputStackedWidget->setCurrentIndex(checked);
 
     // reset the log icon as soon as diagnostics is viewed
     if (checked) {
@@ -120,39 +120,39 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   });
 
   this->readSettings();
-  this->recentFiles = new RecentFiles(this, this->ui->menuRecent, this->ui->actionClearRecentMenu);
+  this->_recentFiles = new RecentFiles(this, this->_ui->menuRecent, this->_ui->actionClearRecentMenu);
 
-  ui->mdiArea->setBackground(QImage(":/banner.png"));
-  connect(ui->menuWindow, &QMenu::aboutToShow, this, &MainWindow::updateWindowMenu);
+  _ui->mdiArea->setBackground(QImage(":/banner.png"));
+  connect(_ui->menuWindow, &QMenu::aboutToShow, this, &MainWindow::updateWindowMenu);
 
-  auto settingsButton = static_cast<QToolButton *>(ui->mainToolBar->widgetForAction(ui->actionSettings));
+  auto settingsButton = static_cast<QToolButton *>(_ui->mainToolBar->widgetForAction(_ui->actionSettings));
   settingsButton->setPopupMode(QToolButton::ToolButtonPopupMode::MenuButtonPopup);
   settingsButton->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextBesideIcon);
-  ui->actionSettings->setMenu(ui->menuChangeGameSettings);
+  _ui->actionSettings->setMenu(_ui->menuChangeGameSettings);
 
   RGMPlugin *pluginServer = new ServerPlugin(*this);
-  auto outputTextBrowser = this->ui->outputTextBrowser;
+  auto outputTextBrowser = this->_ui->outputTextBrowser;
   connect(pluginServer, &RGMPlugin::LogOutput, outputTextBrowser, &QTextBrowser::append);
   connect(pluginServer, &RGMPlugin::CompileStatusChanged, [=](bool finished) {
-    ui->outputDockWidget->show();
-    ui->actionRun->setEnabled(finished);
-    ui->actionDebug->setEnabled(finished);
-    ui->actionCreateExecutable->setEnabled(finished);
+    _ui->outputDockWidget->show();
+    _ui->actionRun->setEnabled(finished);
+    _ui->actionDebug->setEnabled(finished);
+    _ui->actionCreateExecutable->setEnabled(finished);
   });
   connect(this, &MainWindow::CurrentConfigChanged, pluginServer, &RGMPlugin::SetCurrentConfig);
-  connect(ui->actionRun, &QAction::triggered, pluginServer, &RGMPlugin::Run);
-  connect(ui->actionDebug, &QAction::triggered, pluginServer, &RGMPlugin::Debug);
-  connect(ui->actionCreateExecutable, &QAction::triggered, pluginServer, &RGMPlugin::CreateExecutable);
+  connect(_ui->actionRun, &QAction::triggered, pluginServer, &RGMPlugin::Run);
+  connect(_ui->actionDebug, &QAction::triggered, pluginServer, &RGMPlugin::Debug);
+  connect(_ui->actionCreateExecutable, &QAction::triggered, pluginServer, &RGMPlugin::CreateExecutable);
 
-  connect(ui->mdiArea, &QMdiArea::subWindowActivated, this, &MainWindow::MDIWindowChanged);
+  connect(_ui->mdiArea, &QMdiArea::subWindowActivated, this, &MainWindow::MDIWindowChanged);
 
   openNewProject();
 }
 
-MainWindow::~MainWindow() { delete ui; }
+MainWindow::~MainWindow() { delete _ui; }
 
 void MainWindow::setCurrentConfig(const buffers::resources::Settings &settings) {
-  emit m_instance->CurrentConfigChanged(settings);
+  emit _instance->CurrentConfigChanged(settings);
 }
 
 void MainWindow::readSettings() {
@@ -173,12 +173,12 @@ void MainWindow::writeSettings() {
   settings.beginGroup("MainWindow");
   settings.setValue("geometry", saveGeometry());
   settings.setValue("state", saveState());
-  settings.setValue("tabbedView", ui->actionToggleTabbedView->isChecked());
+  settings.setValue("tabbedView", _ui->actionToggleTabbedView->isChecked());
   settings.endGroup();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
-  ui->mdiArea->closeAllSubWindows();
+  _ui->mdiArea->closeAllSubWindows();
   this->writeSettings();
   event->accept();
 }
@@ -206,9 +206,9 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
                                 {TypeCase::kRoom, EditorFactory<RoomEditor>},
                                 {TypeCase::kSettings, EditorFactory<SettingsEditor>}});
 
-  auto swIt = subWindows.find(item);
+  auto swIt = _subWindows.find(item);
   QMdiSubWindow *subWindow;
-  if (swIt == subWindows.end() || !*swIt) {
+  if (swIt == _subWindows.end() || !*swIt) {
     auto factoryFunction = factoryMap.find(item->type_case());
     if (factoryFunction == factoryMap.end()) return;  // no registered editor
 
@@ -220,14 +220,14 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     connect(treeModel.get(), &TreeModel::ResourceRenamed, editor,
             [res](TypeCase /*type*/, const QString & /*oldName*/, const QString & /*newName*/) {
               const QModelIndex index = res->index(TreeNode::kNameFieldNumber);
-              emit res->dataChanged(index, index);
+              emit res->DataChanged(index, index);
             });
 
-    subWindow = subWindows[item] = ui->mdiArea->addSubWindow(editor);
+    subWindow = _subWindows[item] = _ui->mdiArea->addSubWindow(editor);
     subWindow->resize(subWindow->frameSize().expandedTo(editor->size()));
     editor->setParent(subWindow);
 
-    subWindow->connect(subWindow, &QObject::destroyed, [=]() { subWindows.remove(item); });
+    subWindow->connect(subWindow, &QObject::destroyed, [=]() { _subWindows.remove(item); });
 
     subWindow->setWindowIcon(subWindow->widget()->windowIcon());
     editor->setWindowTitle(QString::fromStdString(item->name()));
@@ -236,11 +236,11 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
   }
 
   subWindow->show();
-  ui->mdiArea->setActiveSubWindow(subWindow);
+  _ui->mdiArea->setActiveSubWindow(subWindow);
 }
 
 void MainWindow::MDIWindowChanged(QMdiSubWindow *window) {
-  for (QMdiSubWindow *subWindow : subWindows) {
+  for (QMdiSubWindow *subWindow : _subWindows) {
     if (subWindow == nullptr) continue;
     BaseEditor *editor = static_cast<BaseEditor *>(subWindow->widget());
     if (window == subWindow) {
@@ -254,10 +254,10 @@ void MainWindow::MDIWindowChanged(QMdiSubWindow *window) {
 void MainWindow::updateWindowMenu() {
   static QList<QAction *> windowActions;
   foreach (auto action, windowActions) {
-    ui->menuWindow->removeAction(action);
+    _ui->menuWindow->removeAction(action);
     windowActions.removeOne(action);
   }
-  auto windows = ui->mdiArea->subWindowList();
+  auto windows = _ui->mdiArea->subWindowList();
   for (int i = 0; i < windows.size(); ++i) {
     QMdiSubWindow *mdiSubWindow = windows.at(i);
 
@@ -266,11 +266,11 @@ void MainWindow::updateWindowMenu() {
     numberString = numberString.insert(numberString.length() - 1, '&');
     QString text = tr("%1 %2").arg(numberString).arg(windowTitle);
 
-    QAction *action = ui->menuWindow->addAction(
-        text, mdiSubWindow, [this, mdiSubWindow]() { ui->mdiArea->setActiveSubWindow(mdiSubWindow); });
+    QAction *action = _ui->menuWindow->addAction(
+        text, mdiSubWindow, [this, mdiSubWindow]() { _ui->mdiArea->setActiveSubWindow(mdiSubWindow); });
     windowActions.append(action);
     action->setCheckable(true);
-    action->setChecked(mdiSubWindow == ui->mdiArea->activeSubWindow());
+    action->setChecked(mdiSubWindow == _ui->mdiArea->activeSubWindow());
   }
 }
 
@@ -294,7 +294,7 @@ void MainWindow::openFile(QString fName) {
   }
 
   MainWindow::setWindowTitle(fileInfo.fileName() + " - ENIGMA");
-  recentFiles->prependFile(fName);
+  _recentFiles->prependFile(fName);
   openProject(std::unique_ptr<buffers::Project>(loadedProject));
 }
 
@@ -314,15 +314,15 @@ void MainWindow::openNewProject() {
 }
 
 void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
-  this->ui->mdiArea->closeAllSubWindows();
+  this->_ui->mdiArea->closeAllSubWindows();
   ArtManager::clearCache();
 
-  project = std::move(openedProject);
+  _project = std::move(openedProject);
 
-  resourceMap.reset(new ResourceModelMap(project->mutable_game()->mutable_root(), nullptr));
-  treeModel.reset(new TreeModel(project->mutable_game()->mutable_root(), resourceMap.get(), nullptr));
+  resourceMap.reset(new ResourceModelMap(_project->mutable_game()->mutable_root(), nullptr));
+  treeModel.reset(new TreeModel(_project->mutable_game()->mutable_root(), resourceMap.get(), nullptr));
 
-  ui->treeView->setModel(treeModel.get());
+  _ui->treeView->setModel(treeModel.get());
   treeModel->connect(treeModel.get(), &TreeModel::ResourceRenamed, resourceMap.get(),
                      &ResourceModelMap::ResourceRenamed);
 }
@@ -346,10 +346,10 @@ void MainWindow::on_actionPreferences_triggered() {
 void MainWindow::on_actionExit_triggered() { QApplication::exit(); }
 
 void MainWindow::setTabbedMode(bool enabled) {
-  ui->actionToggleTabbedView->setChecked(enabled);
-  ui->mdiArea->setViewMode(enabled ? QMdiArea::TabbedView : QMdiArea::SubWindowView);
+  _ui->actionToggleTabbedView->setChecked(enabled);
+  _ui->mdiArea->setViewMode(enabled ? QMdiArea::TabbedView : QMdiArea::SubWindowView);
   if (enabled) {
-    QTabBar *tabBar = ui->mdiArea->findChild<QTabBar *>();
+    QTabBar *tabBar = _ui->mdiArea->findChild<QTabBar *>();
     if (tabBar) {
       tabBar->setExpanding(false);
     }
@@ -358,27 +358,27 @@ void MainWindow::setTabbedMode(bool enabled) {
 
 void MainWindow::on_actionCascade_triggered() {
   this->setTabbedMode(false);
-  ui->mdiArea->cascadeSubWindows();
+  _ui->mdiArea->cascadeSubWindows();
 }
 
 void MainWindow::on_actionTile_triggered() {
   this->setTabbedMode(false);
-  ui->mdiArea->tileSubWindows();
+  _ui->mdiArea->tileSubWindows();
 }
 
-void MainWindow::on_actionCloseAll_triggered() { ui->mdiArea->closeAllSubWindows(); }
+void MainWindow::on_actionCloseAll_triggered() { _ui->mdiArea->closeAllSubWindows(); }
 
 void MainWindow::on_actionCloseOthers_triggered() {
-  foreach (QMdiSubWindow *subWindow, ui->mdiArea->subWindowList()) {
-    if (subWindow != ui->mdiArea->activeSubWindow()) subWindow->close();
+  foreach (QMdiSubWindow *subWindow, _ui->mdiArea->subWindowList()) {
+    if (subWindow != _ui->mdiArea->activeSubWindow()) subWindow->close();
   }
 }
 
-void MainWindow::on_actionToggleTabbedView_triggered() { this->setTabbedMode(ui->actionToggleTabbedView->isChecked()); }
+void MainWindow::on_actionToggleTabbedView_triggered() { this->setTabbedMode(_ui->actionToggleTabbedView->isChecked()); }
 
-void MainWindow::on_actionNext_triggered() { ui->mdiArea->activateNextSubWindow(); }
+void MainWindow::on_actionNext_triggered() { _ui->mdiArea->activateNextSubWindow(); }
 
-void MainWindow::on_actionPrevious_triggered() { ui->mdiArea->activatePreviousSubWindow(); }
+void MainWindow::on_actionPrevious_triggered() { _ui->mdiArea->activatePreviousSubWindow(); }
 
 void MainWindow::on_actionDocumentation_triggered() {
   QUrl url(documentationURL(), QUrl::TolerantMode);
@@ -425,7 +425,7 @@ void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
   openSubWindow(item);
 }
 
-void MainWindow::on_actionClearRecentMenu_triggered() { recentFiles->clear(); }
+void MainWindow::on_actionClearRecentMenu_triggered() { _recentFiles->clear(); }
 
 void MainWindow::CreateResource(TypeCase typeCase) {
   auto child = std::unique_ptr<TreeNode>(new TreeNode());
@@ -444,12 +444,12 @@ void MainWindow::CreateResource(TypeCase typeCase) {
   this->resourceMap->AddResource(child.get());
   openSubWindow(child.get());
   // release ownership of the new child to its parent and the tree
-  auto index = this->treeModel->addNode(child.release(), ui->treeView->currentIndex());
+  auto index = this->treeModel->addNode(child.release(), _ui->treeView->currentIndex());
 
   // select the new node so that it gets "revealed" and its parent is expanded
-  ui->treeView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
+  _ui->treeView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
   // start editing the name of the resource in the tree for convenience
-  ui->treeView->edit(index);
+  _ui->treeView->edit(index);
 }
 
 void MainWindow::on_actionCreateSprite_triggered() { CreateResource(TypeCase::kSprite); }
@@ -475,8 +475,8 @@ void MainWindow::on_actionCreateRoom_triggered() { CreateResource(TypeCase::kRoo
 void MainWindow::on_actionCreateSettings_triggered() { CreateResource(TypeCase::kSettings); }
 
 void MainWindow::on_actionDuplicate_triggered() {
-  if (!ui->treeView->selectionModel()->hasSelection()) return;
-  const auto index = ui->treeView->selectionModel()->currentIndex();
+  if (!_ui->treeView->selectionModel()->hasSelection()) return;
+  const auto index = _ui->treeView->selectionModel()->currentIndex();
   const auto *node = static_cast<const buffers::TreeNode *>(index.internalPointer());
   if (node->has_folder()) return;
 
@@ -488,9 +488,9 @@ void MainWindow::on_actionDuplicate_triggered() {
   openSubWindow(dup);
 
   // select the new node so that it gets "revealed" and its parent is expanded
-  ui->treeView->selectionModel()->setCurrentIndex(dupIndex, QItemSelectionModel::ClearAndSelect);
+  _ui->treeView->selectionModel()->setCurrentIndex(dupIndex, QItemSelectionModel::ClearAndSelect);
   // start editing the name of the resource in the tree for convenience
-  ui->treeView->edit(dupIndex);
+  _ui->treeView->edit(dupIndex);
 }
 
 void MainWindow::on_actionCreateGroup_triggered() {
@@ -502,22 +502,22 @@ void MainWindow::on_actionCreateGroup_triggered() {
   child->set_name(name.toStdString());
   // release ownership of the new child to its parent and the tree
   this->resourceMap->AddResource(child.get());
-  auto index = this->treeModel->addNode(child.release(), ui->treeView->currentIndex());
+  auto index = this->treeModel->addNode(child.release(), _ui->treeView->currentIndex());
 
   // select the new node so that it gets "revealed" and its parent is expanded
-  ui->treeView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
+  _ui->treeView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
   // start editing the name of the resource in the tree for convenience
-  ui->treeView->edit(index);
+  _ui->treeView->edit(index);
 }
 
 void MainWindow::on_actionRename_triggered() {
-  if (!ui->treeView->selectionModel()->hasSelection()) return;
-  ui->treeView->edit(ui->treeView->selectionModel()->currentIndex());
+  if (!_ui->treeView->selectionModel()->hasSelection()) return;
+  _ui->treeView->edit(_ui->treeView->selectionModel()->currentIndex());
 }
 
 void MainWindow::on_actionProperties_triggered() {
-  if (!ui->treeView->selectionModel()->hasSelection()) return;
-  auto selected = ui->treeView->selectionModel()->selectedIndexes();
+  if (!_ui->treeView->selectionModel()->hasSelection()) return;
+  auto selected = _ui->treeView->selectionModel()->selectedIndexes();
   for (auto index : selected) {
     auto *treeNode = static_cast<buffers::TreeNode *>(index.internalPointer());
     openSubWindow(treeNode);
@@ -534,8 +534,8 @@ static void CollectNodes(buffers::TreeNode *root, QSet<buffers::TreeNode *> &cac
 }
 
 void MainWindow::on_actionDelete_triggered() {
-  if (!ui->treeView->selectionModel()->hasSelection()) return;
-  auto selected = ui->treeView->selectionModel()->selectedIndexes();
+  if (!_ui->treeView->selectionModel()->hasSelection()) return;
+  auto selected = _ui->treeView->selectionModel()->selectedIndexes();
   QSet<buffers::TreeNode *> selectedNodes;
   for (auto index : selected) {
     auto *treeNode = static_cast<buffers::TreeNode *>(index.internalPointer());
@@ -555,7 +555,7 @@ void MainWindow::on_actionDelete_triggered() {
 
   // close subwindows
   for (auto node : selectedNodes) {
-    if (subWindows.contains(node)) subWindows[node]->close();
+    if (_subWindows.contains(node)) _subWindows[node]->close();
   }
 
   // remove tree nodes (recursively unmaps names)
@@ -564,15 +564,15 @@ void MainWindow::on_actionDelete_triggered() {
   }
 }
 
-void MainWindow::on_actionExpand_triggered() { ui->treeView->expandAll(); }
+void MainWindow::on_actionExpand_triggered() { _ui->treeView->expandAll(); }
 
-void MainWindow::on_actionCollapse_triggered() { ui->treeView->collapseAll(); }
+void MainWindow::on_actionCollapse_triggered() { _ui->treeView->collapseAll(); }
 
 void MainWindow::on_actionSortByName_triggered() {
-  if (!ui->treeView->selectionModel()->hasSelection()) return;
-  treeModel->sortByName(ui->treeView->currentIndex());
+  if (!_ui->treeView->selectionModel()->hasSelection()) return;
+  treeModel->sortByName(_ui->treeView->currentIndex());
 }
 
 void MainWindow::on_treeView_customContextMenuRequested(const QPoint &pos) {
-  ui->menuEdit->exec(ui->treeView->mapToGlobal(pos));
+  _ui->menuEdit->exec(_ui->treeView->mapToGlobal(pos));
 }

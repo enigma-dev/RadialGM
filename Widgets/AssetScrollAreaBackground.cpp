@@ -22,11 +22,11 @@ AssetScrollAreaBackground::AssetScrollAreaBackground(AssetScrollArea* parent)
   installEventFilter(this);
   setMouseTracking(true);
   // Redraw on an model changes
-  connect(MainWindow::resourceMap.get(), &ResourceModelMap::dataChanged, this, [this]() { this->update(); });
+  connect(MainWindow::resourceMap.get(), &ResourceModelMap::DataChanged, this, [this]() { this->update(); });
 }
 
 AssetScrollAreaBackground::~AssetScrollAreaBackground() {
-  disconnect(MainWindow::resourceMap.get(), &ResourceModelMap::dataChanged, this, nullptr);
+  disconnect(MainWindow::resourceMap.get(), &ResourceModelMap::DataChanged, this, nullptr);
 }
 
 void AssetScrollAreaBackground::SetAssetView(AssetView* asset) {

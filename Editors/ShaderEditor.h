@@ -11,7 +11,7 @@ class ShaderEditor : public BaseEditor {
   ShaderEditor(MessageModel* model, QWidget* parent = nullptr);
 
  private:
-  CodeEditor* codeEditor;
+  CodeEditor* _codeEditor;
 };
 
 #endif  // SHADEREDITOR_H

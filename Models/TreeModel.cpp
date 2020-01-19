@@ -74,9 +74,10 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
     if (item->type_case() == TypeCase::kObject) {
       MessageModel *sprModel = GetObjectSprite(item->name());
       if (sprModel == nullptr) return QVariant();
-      QString spr = sprModel->GetSubModel<RepeatedImageModel *>(Sprite::kSubimagesFieldNumber)->Data(0).toString();
-      //GetString(Sprite::kSubimagesFieldNumber, 0);
-      return spr.isEmpty() ? QVariant() : ArtManager::GetIcon(spr);
+      if (!sprModel->GetSubModel<RepeatedImageModel *>(Sprite::kSubimagesFieldNumber)->Empty()) {
+        QString spr = sprModel->GetSubModel<RepeatedImageModel *>(Sprite::kSubimagesFieldNumber)->Data(0).toString();
+        return spr.isEmpty() ? QVariant() : ArtManager::GetIcon(spr);
+      }
     }
 
     const QIcon &icon = it->second;

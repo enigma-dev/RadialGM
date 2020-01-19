@@ -20,7 +20,7 @@ TimelineEditor::TimelineEditor(MessageModel* model, QWidget* parent)
   QWidget* momentWidget = new QWidget(this);
   _ui->setupUi(momentWidget);
 
-  nodeMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
+  _nodeMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
 
   connect(_ui->saveButton, &QAbstractButton::pressed, this, &BaseEditor::OnSave);
 

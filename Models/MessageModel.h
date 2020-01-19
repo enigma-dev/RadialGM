@@ -26,14 +26,10 @@ class MessageModel : public ProtoModel {
   // Protobuf's can contain nested messages.
   // In message models these messages are held as submodels.
   // These messages can be accessed by the protobuf field number (ie Room::kInstancesFieldNumber)
+  // FIXME: Sanity check this cast
   template <class T>
   T GetSubModel(int fieldNum) {
-    if (T t = dynamic_cast<T>(_subModels[fieldNum])) {
-      return t;
-    } else {
-      qDebug() << "Invalid model cast";
-      return nullptr;
-    }
+    return static_cast<T>(_subModels[fieldNum]);
   }
 
   // These are the same as the above but operate on the raw protobuf
@@ -50,6 +46,7 @@ class MessageModel : public ProtoModel {
   virtual QModelIndex parent(const QModelIndex &index) const override;
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
   virtual QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override;
+  virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
 
  protected:
   MessageModel *_modelBackup;

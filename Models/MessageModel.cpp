@@ -32,7 +32,7 @@ void MessageModel::RebuildSubModels() {
         _subModels[field->number()] = new MessageModel(this, refl->MutableMessage(_protobuf, field));
       }
     } else if (field->cpp_type() == CppType::CPPTYPE_STRING && field->is_repeated()) {
-      if (field->name() == "subimages") {
+      if (field->options().GetExtension(buffers::file_kind) == buffers::FileKind::IMAGE) {
         _subModels[field->number()] = new RepeatedImageModel(this, _protobuf, field);
         GetSubModel<RepeatedImageModel *>(field->number());
       } else
@@ -81,7 +81,7 @@ bool MessageModel::setData(const QModelIndex &index, const QVariant &value, int 
   }
 
   SetDirty(true);
-  emit dataChanged(index, index, oldValue);
+  emit DataChanged(index, index, oldValue);
   ParentDataChanged();
 
   return true;
@@ -167,6 +167,14 @@ QVariant MessageModel::headerData(int section, Qt::Orientation /*orientation*/, 
 
 QModelIndex MessageModel::index(int row, int column, const QModelIndex & /*parent*/) const {
   return this->createIndex(row, column, static_cast<void *>(_protobuf));
+}
+
+Qt::ItemFlags MessageModel::flags(const QModelIndex &index) const {
+  if (!index.isValid()) return nullptr;
+  auto flags = QAbstractItemModel::flags(index);
+  // Row 0 isn't a valid field in messages. We use it as header data
+  if (index.row() > 0) flags |= Qt::ItemIsEditable;
+  return flags;
 }
 
 MessageModel *MessageModel::BackupModel(QObject *parent) {

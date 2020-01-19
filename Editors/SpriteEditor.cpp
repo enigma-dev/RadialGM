@@ -34,14 +34,14 @@ SpriteEditor::SpriteEditor(MessageModel* model, QWidget* parent)
   _ui->mainToolBar->addWidget(showOrigin);
   connect(showOrigin, &QCheckBox::stateChanged, _ui->subimagePreview, &SpriteView::SetShowOrigin);
 
-  resMapper->addMapping(_ui->originXSpinBox, Sprite::kOriginXFieldNumber);
-  resMapper->addMapping(_ui->originYSpinBox, Sprite::kOriginYFieldNumber);
-  resMapper->addMapping(_ui->collisionShapeGroupBox, Sprite::kShapeFieldNumber, "currentIndex");
-  resMapper->addMapping(_ui->bboxComboBox, Sprite::kBboxModeFieldNumber, "currentIndex");
-  resMapper->addMapping(_ui->leftSpinBox, Sprite::kBboxLeftFieldNumber);
-  resMapper->addMapping(_ui->rightSpinBox, Sprite::kBboxRightFieldNumber);
-  resMapper->addMapping(_ui->topSpinBox, Sprite::kBboxTopFieldNumber);
-  resMapper->addMapping(_ui->bottomSpinBox, Sprite::kBboxBottomFieldNumber);
+  _resMapper->addMapping(_ui->originXSpinBox, Sprite::kOriginXFieldNumber);
+  _resMapper->addMapping(_ui->originYSpinBox, Sprite::kOriginYFieldNumber);
+  _resMapper->addMapping(_ui->collisionShapeGroupBox, Sprite::kShapeFieldNumber, "currentIndex");
+  _resMapper->addMapping(_ui->bboxComboBox, Sprite::kBboxModeFieldNumber, "currentIndex");
+  _resMapper->addMapping(_ui->leftSpinBox, Sprite::kBboxLeftFieldNumber);
+  _resMapper->addMapping(_ui->rightSpinBox, Sprite::kBboxRightFieldNumber);
+  _resMapper->addMapping(_ui->topSpinBox, Sprite::kBboxTopFieldNumber);
+  _resMapper->addMapping(_ui->bottomSpinBox, Sprite::kBboxBottomFieldNumber);
 
   RebindSubModels();
 }
@@ -62,6 +62,8 @@ void SpriteEditor::RebindSubModels() {
   connect(_ui->subImageList->selectionModel(), &QItemSelectionModel::selectionChanged, this,
           &SpriteEditor::SelectionChanged);
 
+  connect(_subimagesModel, &QAbstractItemModel::modelReset, this, &SpriteEditor::SubImagesRemoved);
+
   BaseEditor::RebindSubModels();
 
   on_bboxComboBox_currentIndexChanged(_spriteModel->Data(Sprite::kBboxModeFieldNumber).toInt());
@@ -78,15 +80,15 @@ void SpriteEditor::LoadedMismatchedImage(QSize expectedSize, QSize actualSize) {
   // TODO: Add some remedies to this such as streching, croping or scaling the background
 }
 
-void SpriteEditor::RemoveSelectedIndexes() {
-  /*{
-    RepeatedStringModel::RowRemovalOperation remover(_subimagesModel);
-    for (QModelIndex idx : ui->subImageList->selectionModel()->selectedIndexes()) {
-      remover.RemoveRow(idx.row());
-    }
-  }*/
-
+void SpriteEditor::SubImagesRemoved() {
   _ui->subimagePreview->SetSubimage((_subimagesModel->rowCount() == 0) ? -1 : 0);
+}
+
+void SpriteEditor::RemoveSelectedIndexes() {
+  RepeatedStringModel::RowRemovalOperation remover(_subimagesModel);
+  for (QModelIndex idx : _ui->subImageList->selectionModel()->selectedIndexes()) {
+    remover.RemoveRow(idx.row());
+  }
 }
 
 void SpriteEditor::SelectionChanged(const QItemSelection& selected, const QItemSelection& /*deselected*/) {

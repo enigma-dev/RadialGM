@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui printsupport multimedia
+QT       += core gui printsupport multimedia testlib
 CONFIG   += c++11
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -46,7 +46,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 INCLUDEPATH += /usr/include/qt/ \
                $$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
-               $$PWD/Submodules/enigma-dev/shared/protos/codegen
+               $$PWD/Submodules/enigma-dev/shared/protos/.eobjs/
 LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
         -lEGM \
         -lprotobuf \

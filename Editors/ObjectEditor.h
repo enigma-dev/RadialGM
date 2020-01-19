@@ -15,7 +15,7 @@ class ObjectEditor : public BaseEditor {
   ~ObjectEditor() override;
 
  private:
-  Ui::ObjectEditor* ui;
+  Ui::ObjectEditor* _ui;
 };
 
 #endif  // OBJECTEDITOR_H

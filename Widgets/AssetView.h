@@ -36,7 +36,7 @@ class AssetView : public QWidget {
  protected:
   void paintEvent(QPaintEvent* event);
   AssetScrollAreaBackground* _parent;
-  GridDimensions grid;
+  GridDimensions _grid;
 };
 
 #endif  // ASSETVIEW_H

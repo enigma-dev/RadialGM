@@ -38,10 +38,10 @@ class BaseEditor : public QWidget {
  protected:
   virtual void closeEvent(QCloseEvent *event) override;
 
-  ModelMapper *nodeMapper;
-  ModelMapper *resMapper;
+  ModelMapper *_nodeMapper;
+  ModelMapper *_resMapper;
   MessageModel *_model;
-  bool hasFocus = false;
+  bool _hasFocus = false;
 };
 
 #endif  // BASEEDTIOR_H

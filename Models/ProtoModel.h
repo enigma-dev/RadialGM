@@ -34,21 +34,23 @@ class ProtoModel : public QAbstractItemModel {
   // For resource models like a Room this will be a nullptr
   // For instances it would be a pointer to the room
   // For *a* instance it would be a pointer to a room's instances field's model
+  // FIXME: Sanity check this cast
   template <class T>
   T GetParentModel() const {
     return static_cast<T>(_parentModel);
   };
 
-  // If a submodel changed technically any model that owns it has also changed
-  // so we need to notify all parents when anything changes in their descendants
+  // If a submodel changed technically any model that owns it has also changed.
+  // so we need to notify all parents when anything changes in their descendants.
   void ParentDataChanged();
 
   // A model is "dirty" if the user has made any changes to it since opening the editor.
+  // This is mostly used in "Would you like to save?" dialogs when closing editors.
   void SetDirty(bool dirty);
   bool IsDirty();
 
-  // The layout of the data varies between the model types
-  // For a MessageModel a row is the name of the data field and the column should always be 0
+  // The layout of the data varies between the model types.
+  // For a MessageModel a row is the name of the data field and the column should always be 0.
   //  --------------------------------|
   // | Sprite::kBboxLeftFieldNumber   |
   // |--------------------------------|
@@ -59,7 +61,7 @@ class ProtoModel : public QAbstractItemModel {
   // | Sprite::kBboxBottomFieldNumber |
   // |--------------------------------|
 
-  //  For a RepeatedMessage the row is a index in a vector and the column is a data field
+  //  For a RepeatedMessage the row is a index in a vector and the column is a data field/
   //  ----------------------------------------------------------------------------------|
   // | Room::Instance 0 | Room::Instance::kXFieldNumber | Room::Instance::kYFieldNumber |
   // |------------------|-------------------------------|-------------------------------|
@@ -78,6 +80,8 @@ class ProtoModel : public QAbstractItemModel {
   // |---------------|
   // | "spr_0/3.png" |
 
+  // These are convience functions for getting & setting model used almost everywhere in the codebase
+  // because model->setData(model->index(row, col), value, role) is a PITA to type / remember.
   virtual QVariant Data(int row, int column = 0) const = 0;
   virtual bool SetData(const QVariant &value, int row, int column = 0) = 0;
 
@@ -93,8 +97,11 @@ class ProtoModel : public QAbstractItemModel {
 
  signals:
   // QAbstractItemModel has a datachanged signal but it doesn't store the old values
-  // We use old values in some places to revert invalid changes
-  void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVariant &oldValue = QVariant(0),
+  // We use old values in some places to revert invalid changes.
+  // All model changes are then hooked into a resourceMap::DataChanged signal that can be accessed anywhere
+  // for events where the models arent directly nested and need updates.
+  // (ie If you changed a sprite you would want to redraw the object in the room)
+  void DataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVariant &oldValue = QVariant(0),
                    const QVector<int> &roles = QVector<int>());
 
  protected:

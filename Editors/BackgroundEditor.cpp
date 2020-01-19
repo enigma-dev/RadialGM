@@ -21,16 +21,16 @@ BackgroundEditor::BackgroundEditor(MessageModel* model, QWidget* parent)
 
   connect(_ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
 
-  resMapper->addMapping(_ui->smoothCheckBox, Background::kSmoothEdgesFieldNumber);
-  resMapper->addMapping(_ui->preloadCheckBox, Background::kPreloadFieldNumber);
-  resMapper->addMapping(_ui->tilesetGroupBox, Background::kUseAsTilesetFieldNumber);
-  resMapper->addMapping(_ui->tileWidthSpinBox, Background::kTileWidthFieldNumber);
-  resMapper->addMapping(_ui->tileHeightSpinBox, Background::kTileHeightFieldNumber);
-  resMapper->addMapping(_ui->horizontalOffsetSpinBox, Background::kHorizontalOffsetFieldNumber);
-  resMapper->addMapping(_ui->verticalOffsetSpinBox, Background::kVerticalOffsetFieldNumber);
-  resMapper->addMapping(_ui->horizontalSpacingSpinBox, Background::kHorizontalSpacingFieldNumber);
-  resMapper->addMapping(_ui->verticalSpacingSpinBox, Background::kVerticalSpacingFieldNumber);
-  resMapper->toFirst();
+  _resMapper->addMapping(_ui->smoothCheckBox, Background::kSmoothEdgesFieldNumber);
+  _resMapper->addMapping(_ui->preloadCheckBox, Background::kPreloadFieldNumber);
+  _resMapper->addMapping(_ui->tilesetGroupBox, Background::kUseAsTilesetFieldNumber);
+  _resMapper->addMapping(_ui->tileWidthSpinBox, Background::kTileWidthFieldNumber);
+  _resMapper->addMapping(_ui->tileHeightSpinBox, Background::kTileHeightFieldNumber);
+  _resMapper->addMapping(_ui->horizontalOffsetSpinBox, Background::kHorizontalOffsetFieldNumber);
+  _resMapper->addMapping(_ui->verticalOffsetSpinBox, Background::kVerticalOffsetFieldNumber);
+  _resMapper->addMapping(_ui->horizontalSpacingSpinBox, Background::kHorizontalSpacingFieldNumber);
+  _resMapper->addMapping(_ui->verticalSpacingSpinBox, Background::kVerticalSpacingFieldNumber);
+  _resMapper->toFirst();
 
   RebindSubModels();
 }
@@ -46,7 +46,7 @@ void BackgroundEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex
 void BackgroundEditor::RebindSubModels() {
   _backgroundModel = _model->GetSubModel<MessageModel*>(TreeNode::kBackgroundFieldNumber);
   _ui->imagePreviewBackground->SetAssetView(_ui->backgroundView);
-  _ui->backgroundView->SetResourceModel(resMapper->GetModel());
+  _ui->backgroundView->SetResourceModel(_resMapper->GetModel());
   BaseEditor::RebindSubModels();
 }
 

@@ -24,7 +24,7 @@ void ResourceModelMap::AddResource(buffers::TreeNode* child) {
       QPair<buffers::TreeNode*, MessageModel*>(child, model);
 
   if (model != nullptr) {
-    connect(model, &ProtoModel::dataChanged, [this]() { emit dataChanged(); });
+    connect(model, &ProtoModel::DataChanged, [this]() { emit DataChanged(); });
   }
 }
 
@@ -92,7 +92,7 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
   }
 
   _resources[type].remove(name);
-  emit dataChanged();
+  emit DataChanged();
 }
 
 QString ResourceModelMap::CreateResourceName(TreeNode* node) {
@@ -136,7 +136,7 @@ void ResourceModelMap::ResourceRenamed(TypeCase type, const QString& oldName, co
 
   _resources[type].remove(oldName);
 
-  emit dataChanged();
+  emit DataChanged();
 }
 
 MessageModel* GetObjectSprite(const std::string& objName) { return GetObjectSprite(QString::fromStdString(objName)); }

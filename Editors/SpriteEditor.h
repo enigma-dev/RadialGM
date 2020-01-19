@@ -22,6 +22,7 @@ class SpriteEditor : public BaseEditor {
  public slots:
   void RebindSubModels() override;
   void SelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+  void SubImagesRemoved();
 
  private slots:
   void on_bboxComboBox_currentIndexChanged(int index);

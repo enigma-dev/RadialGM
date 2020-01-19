@@ -430,6 +430,9 @@
              </disabled>
             </palette>
            </property>
+           <property name="acceptDrops">
+            <bool>false</bool>
+           </property>
            <property name="dragEnabled">
             <bool>true</bool>
            </property>
@@ -642,12 +645,6 @@
    <class>SpriteView</class>
    <extends>QWidget</extends>
    <header>Widgets/SpriteView.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>AssetScrollAreaBackground</class>
-   <extends>QWidget</extends>
-   <header>Widgets/AssetScrollAreaBackground.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

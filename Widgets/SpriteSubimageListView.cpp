@@ -34,9 +34,13 @@ void SpriteSubimageListView::dropEvent(QDropEvent* e) {
       e->ignore();
       successfulDrop =
           model()->dropMimeData(e->mimeData(), Qt::DropAction::MoveAction, model()->rowCount(), 0, QModelIndex());
-    } else {  // For all other *internal* moves, Qt's behavior is correct
-      QListView::dropEvent(e);
-      return;
+    } else {
+      // NOTE: For all other *internal* moves, Qt's behavior is correct here (if the model inherits QAbstractListView)
+      // However, due to our current ProtoModel inheritence hirearchy we're forced to inherit from QAbstractItemView
+      // so again we force our desired behavior here.
+      e->ignore();
+      successfulDrop = model()->dropMimeData(e->mimeData(), Qt::DropAction::MoveAction, index, 0, QModelIndex());
+      //QListView::dropEvent(e); return;
     }
   } else {  // Drop from another widget
     e->ignore();

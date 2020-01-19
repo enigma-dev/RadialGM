@@ -14,9 +14,11 @@ class RepeatedModel : public ProtoModel {
   RepeatedModel(ProtoModel *parent, Message *message, const FieldDescriptor *field, MutableRepeatedFieldRef<T> fieldRef)
       : ProtoModel(parent, message), _field(field), _fieldRef(fieldRef) {}
 
+  // Need to implement this in all RepeatedModels
+  virtual void AppendNew() = 0;
+
   // Used to apply changes to any underlying data structure if needed
   virtual void Swap(int /*left*/, int /*right*/) {}
-  virtual void AppendNew() {}
   virtual void Resize(int /*newSize*/) {}
   virtual void Clear() { _fieldRef.Clear(); }
 
@@ -52,22 +54,23 @@ class RepeatedModel : public ProtoModel {
   }
 
   virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override {
-    Q_UNUSED(parent);
+    if (parent.isValid()) return 0;
     return _fieldRef.size();
   }
 
   virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override {
-    Q_UNUSED(parent);
+    if (parent.isValid()) return 0;
     return 1;
   }
 
-  virtual QModelIndex index(int row, int column, const QModelIndex & /*parent*/) const override {
+  virtual QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override {
+    Q_UNUSED(parent);
     return this->createIndex(row, column);
   }
 
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override {
     if (section == 0 || role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal) return QVariant();
-    return QString::fromStdString(_field->name());
+    return QString::fromStdString(_field->message_type()->field(section - 1)->name());
   }
 
   // Convience function for internal moves
@@ -87,6 +90,8 @@ class RepeatedModel : public ProtoModel {
     SwapBack(row, p, rowCount());
     ParentDataChanged();
 
+    endInsertRows();
+
     return true;
   };
 
@@ -99,14 +104,17 @@ class RepeatedModel : public ProtoModel {
   // Mimedata stuff required for Drag & Drop and clipboard functions
   virtual Qt::DropActions supportedDropActions() const override { return Qt::MoveAction | Qt::CopyAction; }
 
-  virtual QMimeData *mimeData(const QModelIndexList & /*indexes*/) const override { return nullptr; }
-  virtual bool dropMimeData(const QMimeData * /*data*/, Qt::DropAction /*action*/, int /*row*/, int /*column*/,
-                            const QModelIndex & /*parent*/) override {
-    return false;
+  virtual QStringList mimeTypes() const override {
+    return QStringList("RadialGM/" + QString::fromStdString(_field->DebugString()));
   }
 
-  virtual QStringList mimeTypes() const override {
-    return QStringList("RadialGM/" + QString::fromStdString(_field->name()));
+  virtual Qt::ItemFlags flags(const QModelIndex &index) const override {
+    Qt::ItemFlags defaultFlags = QAbstractItemModel::flags(index);
+
+    if (index.isValid())
+      return Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | defaultFlags;
+    else
+      return Qt::ItemIsDropEnabled | defaultFlags;
   }
 
   // Takes the elements in range [part, right) and move them to `left` by swapping.
@@ -116,7 +124,7 @@ class RepeatedModel : public ProtoModel {
     if (left >= part || part >= right) return;
     int npart = (part - left) % (right - part);
     while (part > left) {
-      Swap(left, right);
+      Swap(--part, --right);
       _fieldRef.SwapElements(part, right);
     }
     SwapBack(left, left + npart, right);
@@ -183,7 +191,7 @@ class RepeatedModel : public ProtoModel {
 
       emit _model.endResetModel();
 
-      _model.GetParentModel<ProtoModel *>()->SetDirty(true);
+      _model.ParentDataChanged();
     }
   };
 

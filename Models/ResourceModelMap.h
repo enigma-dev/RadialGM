@@ -22,7 +22,7 @@ class ResourceModelMap : public QObject {
   void ResourceRenamed(TypeCase type, const QString& oldName, const QString& newName);
 
  signals:
-  void dataChanged();
+  void DataChanged();
 
  protected:
   void recursiveBindRes(buffers::TreeNode* node);

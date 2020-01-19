@@ -12,7 +12,7 @@ ProtoModel::ProtoModel(QObject *parent, Message *protobuf) : ProtoModel(static_c
 
 ProtoModel::ProtoModel(ProtoModel *parent, Message *protobuf)
     : QAbstractItemModel(parent), _dirty(false), _protobuf(protobuf), _parentModel(parent) {
-  connect(this, &ProtoModel::dataChanged, this,
+  connect(this, &ProtoModel::DataChanged, this,
           [this](const QModelIndex &topLeft, const QModelIndex &bottomRight,
                  const QVariant & /*oldValue*/ = QVariant(0), const QVector<int> &roles = QVector<int>()) {
             emit QAbstractItemModel::dataChanged(topLeft, bottomRight, roles);
@@ -22,7 +22,7 @@ ProtoModel::ProtoModel(ProtoModel *parent, Message *protobuf)
 void ProtoModel::ParentDataChanged() {
   ProtoModel *m = GetParentModel<ProtoModel *>();
   while (m != nullptr) {
-    emit m->dataChanged(QModelIndex(), QModelIndex());
+    emit m->DataChanged(m->index(0, 0), m->index(rowCount() - 1, columnCount() - 1));
     m = m->GetParentModel<ProtoModel *>();
   }
 }
@@ -36,6 +36,6 @@ QModelIndex ProtoModel::parent(const QModelIndex & /*index*/) const { return QMo
 Qt::ItemFlags ProtoModel::flags(const QModelIndex &index) const {
   if (!index.isValid()) return nullptr;
   auto flags = QAbstractItemModel::flags(index);
-  if (index.row() > 0) flags |= Qt::ItemIsEditable;
+  flags |= Qt::ItemIsEditable;
   return flags;
 }

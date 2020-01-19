@@ -49,7 +49,7 @@ PathEditor::PathEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   _ui->mainToolBar->addWidget(_roomLineEdit);
 
   connect(roomButton, &QToolButton::pressed, this, &PathEditor::RoomMenuButtonPressed);
-  connect(roomButton->menu, &QMenu::triggered, this, &PathEditor::RoomMenuItemSelected);
+  connect(roomButton->_menu, &QMenu::triggered, this, &PathEditor::RoomMenuItemSelected);
 
   _ui->mainToolBar->addSeparator();
 
@@ -87,13 +87,13 @@ PathEditor::PathEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   connect(this, &BaseEditor::FocusGained, [this]() { _ui->pathPreviewBackground->SetParentHasFocus(true); });
   connect(this, &BaseEditor::FocusLost, [this]() { _ui->pathPreviewBackground->SetParentHasFocus(false); });
 
-  nodeMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
+  _nodeMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
 
-  resMapper->addMapping(_ui->smoothCheckBox, Path::kSmoothFieldNumber);
-  resMapper->addMapping(_ui->closedCheckBox, Path::kClosedFieldNumber);
-  resMapper->addMapping(_ui->precisionSpinBox, Path::kPrecisionFieldNumber);
-  resMapper->addMapping(xSnap, Path::kHsnapFieldNumber);
-  resMapper->addMapping(ySnap, Path::kVsnapFieldNumber);
+  _resMapper->addMapping(_ui->smoothCheckBox, Path::kSmoothFieldNumber);
+  _resMapper->addMapping(_ui->closedCheckBox, Path::kClosedFieldNumber);
+  _resMapper->addMapping(_ui->precisionSpinBox, Path::kPrecisionFieldNumber);
+  _resMapper->addMapping(xSnap, Path::kHsnapFieldNumber);
+  _resMapper->addMapping(ySnap, Path::kVsnapFieldNumber);
 
   RebindSubModels();
 }

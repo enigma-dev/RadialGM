@@ -20,8 +20,8 @@ SoundEditor::SoundEditor(MessageModel* model, QWidget* parent)
       _userPaused(false) {
   _ui->setupUi(this);
 
-  nodeMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
-  resMapper->addMapping(_ui->volumeSpinBox, Sound::kVolumeFieldNumber);
+  _nodeMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
+  _resMapper->addMapping(_ui->volumeSpinBox, Sound::kVolumeFieldNumber);
 
   _ui->volumeSlider->setValue(static_cast<int>(_ui->volumeSpinBox->value() * 100));
 

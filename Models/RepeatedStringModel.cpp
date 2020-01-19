@@ -70,6 +70,7 @@ QMimeData* RepeatedStringModel::mimeData(const QModelIndexList& indexes) const {
 
 bool RepeatedStringModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column,
                                        const QModelIndex& parent) {
+  if (row < 0) return false;
   if (action == Qt::IgnoreAction) return true;
   if (!data->hasFormat(mimeTypes()[0])) return false;
   if (column > 0) return false;

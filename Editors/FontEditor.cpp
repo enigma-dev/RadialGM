@@ -18,11 +18,11 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ\n\
 ~!@#$%^&*()_+{}|:\"<>?`-=[];\',./\n\
 The quick brown fox jumps over the lazy dog.");
 
-  nodeMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
-  resMapper->addMapping(_ui->fontComboBox, Font::kFontNameFieldNumber);
-  resMapper->addMapping(_ui->sizeSpinBox, Font::kSizeFieldNumber);
-  resMapper->addMapping(_ui->boldCheckBox, Font::kBoldFieldNumber);
-  resMapper->addMapping(_ui->italicCheckBox, Font::kItalicFieldNumber);
+  _nodeMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
+  _resMapper->addMapping(_ui->fontComboBox, Font::kFontNameFieldNumber);
+  _resMapper->addMapping(_ui->sizeSpinBox, Font::kSizeFieldNumber);
+  _resMapper->addMapping(_ui->boldCheckBox, Font::kBoldFieldNumber);
+  _resMapper->addMapping(_ui->italicCheckBox, Font::kItalicFieldNumber);
 
   RebindSubModels();
 }
@@ -37,7 +37,7 @@ void FontEditor::RebindSubModels() {
 
   _ui->deleteRangeButton->setDisabled(true);
 
-  connect(_rangesModel, &RepeatedMessageModel::dataChanged, this, &FontEditor::ValidateRangeChange);
+  connect(_rangesModel, &RepeatedMessageModel::DataChanged, this, &FontEditor::ValidateRangeChange);
   connect(_ui->rangeTableView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
           &FontEditor::RangeSelectionChanged);
 

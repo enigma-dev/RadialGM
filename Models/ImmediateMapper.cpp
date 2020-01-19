@@ -48,15 +48,15 @@ void ImmediateDataWidgetMapper::removeMapping(QWidget *widget) {
   // remove the internal widget mapper's event filters and such
   QDataWidgetMapper::removeMapping(widget);
   // disown this widget
-  this->widgetList.removeOne(widget);
+  this->_widgetList.removeOne(widget);
 }
 
 void ImmediateDataWidgetMapper::addMapping(QWidget *widget, int section, QByteArray propertyName) {
   // since QDataWidgetMapper makes its widget map private we have no way of
   // getting all of the widgets registered with this mapper
   // we also do not want to hook up a widget that's already mapped
-  if (widgetList.contains(widget)) return;
-  widgetList.append(widget);
+  if (_widgetList.contains(widget)) return;
+  _widgetList.append(widget);
   QDataWidgetMapper::addMapping(widget, section, propertyName);
   // we use the QDataWidgetMapper to tell us what property we should listen to for changes
   // all widgets have several properties, but most have a "primary" property with which
@@ -73,7 +73,7 @@ void ImmediateDataWidgetMapper::addMapping(QWidget *widget, int section, QByteAr
 void ImmediateDataWidgetMapper::clearMapping() {
   // we have to use our own remove mapping since it does not override
   // to ensure we are disconnected from the meta signal for the property change
-  foreach (auto widget, widgetList)
+  foreach (auto widget, _widgetList)
     this->removeMapping(widget);
   QDataWidgetMapper::clearMapping();
 }
@@ -86,7 +86,7 @@ void ImmediateDataWidgetMapper::setCurrentIndex(int index) {
   // NOTE: this probably is not threadsafe or reentrant, just like the rest of Qt
   // and any other GUI framework, so take care when synchronizing it with other threads
   QList<QWidget *> wasBlocked;
-  for (QWidget *widget : widgetList) {
+  for (QWidget *widget : _widgetList) {
     if (!widget->blockSignals(true)) {
       wasBlocked.append(widget);
     }

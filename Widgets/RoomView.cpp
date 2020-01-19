@@ -53,14 +53,14 @@ QSize RoomView::sizeHint() const {
 }
 
 void RoomView::Paint(QPainter& painter) {
-  grid.type = GridType::Standard;
+  _grid.type = GridType::Standard;
 
   if (!_model) return;
 
   QVariant hsnap = _model->Data(Room::kHsnapFieldNumber);
   QVariant vsnap = _model->Data(Room::kVsnapFieldNumber);
-  grid.horSpacing = hsnap.isValid() ? hsnap.toInt() : 16;
-  grid.vertSpacing = vsnap.isValid() ? vsnap.toInt() : 16;
+  _grid.horSpacing = hsnap.isValid() ? hsnap.toInt() : 16;
+  _grid.vertSpacing = vsnap.isValid() ? vsnap.toInt() : 16;
 
   QColor roomColor = QColor(255, 255, 255, 100);
 
@@ -176,9 +176,9 @@ void RoomView::paintInstances(QPainter& painter) {
     QVariant sprName = _sortedInstances->data(_sortedInstances->index(row, Room::Instance::kObjectTypeFieldNumber));
 
     MessageModel* spr = GetObjectSprite(sprName.toString());
-    if (spr == nullptr)
+    if (spr == nullptr || spr->GetSubModel<RepeatedStringModel*>(Sprite::kSubimagesFieldNumber)->Empty()) {
       imgFile = "object";
-    else {
+    } else {
       imgFile = spr->GetSubModel<RepeatedStringModel*>(Sprite::kSubimagesFieldNumber)->Data(0).toString();
       w = spr->Data(Sprite::kWidthFieldNumber).toInt();
       h = spr->Data(Sprite::kHeightFieldNumber).toInt();

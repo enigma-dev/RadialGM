@@ -4,7 +4,7 @@
 #include <QGraphicsPixmapItem>
 
 SpriteView::SpriteView(AssetScrollAreaBackground *parent) : AssetView(parent), _showBBox(true), _showOrigin(true) {
-  grid.show = false;
+  _grid.show = false;
   parent->SetDrawSolidBackground(true, Qt::GlobalColor::transparent);
 }
 

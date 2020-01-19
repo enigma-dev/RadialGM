@@ -24,19 +24,19 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
 
   _ui->roomPreviewBackground->SetAssetView(_ui->roomView);
 
-  nodeMapper->addMapping(_ui->roomName, TreeNode::kNameFieldNumber);
-  nodeMapper->toFirst();
+  _nodeMapper->addMapping(_ui->roomName, TreeNode::kNameFieldNumber);
+  _nodeMapper->toFirst();
 
-  resMapper->addMapping(_ui->speedSpinBox, Room::kSpeedFieldNumber);
-  resMapper->addMapping(_ui->widthSpinBox, Room::kWidthFieldNumber);
-  resMapper->addMapping(_ui->heightSpinBox, Room::kHeightFieldNumber);
-  resMapper->addMapping(_ui->clearCheckBox, Room::kClearDisplayBufferFieldNumber);
-  resMapper->addMapping(_ui->persistentCheckBox, Room::kPersistentFieldNumber);
-  resMapper->addMapping(_ui->captionLineEdit, Room::kCaptionFieldNumber);
+  _resMapper->addMapping(_ui->speedSpinBox, Room::kSpeedFieldNumber);
+  _resMapper->addMapping(_ui->widthSpinBox, Room::kWidthFieldNumber);
+  _resMapper->addMapping(_ui->heightSpinBox, Room::kHeightFieldNumber);
+  _resMapper->addMapping(_ui->clearCheckBox, Room::kClearDisplayBufferFieldNumber);
+  _resMapper->addMapping(_ui->persistentCheckBox, Room::kPersistentFieldNumber);
+  _resMapper->addMapping(_ui->captionLineEdit, Room::kCaptionFieldNumber);
 
-  resMapper->addMapping(_ui->enableViewsCheckBox, Room::kEnableViewsFieldNumber);
-  resMapper->addMapping(_ui->clearViewportCheckBox, Room::kClearViewBackgroundFieldNumber);
-  resMapper->toFirst();
+  _resMapper->addMapping(_ui->enableViewsCheckBox, Room::kEnableViewsFieldNumber);
+  _resMapper->addMapping(_ui->clearViewportCheckBox, Room::kClearViewBackgroundFieldNumber);
+  _resMapper->toFirst();
 
   _viewMapper = new ImmediateDataWidgetMapper(this);
   _viewMapper->addMapping(_ui->viewVisibleCheckBox, View::kVisibleFieldNumber);
@@ -78,6 +78,13 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
 
   _assetNameLabel = new QLabel("obj_xxx");
   _ui->statusBar->addWidget(_assetNameLabel);
+
+  // This updates all the model views in the event of a sprite is changed
+  connect(MainWindow::resourceMap.get(), &ResourceModelMap::DataChanged, this, [this]() {
+    _ui->instancesListView->reset();
+    _ui->tilesListView->reset();
+    _ui->layersPropertiesView->reset();
+  });
 
   RebindSubModels();
 }

@@ -6,20 +6,20 @@
 using namespace buffers::resources;
 
 ScriptEditor::ScriptEditor(MessageModel* model, QWidget* parent)
-    : BaseEditor(model, parent), codeEditor(new CodeEditor(this)) {
+    : BaseEditor(model, parent), _codeEditor(new CodeEditor(this)) {
   QLayout* layout = new QVBoxLayout(this);
-  layout->addWidget(codeEditor);
+  layout->addWidget(_codeEditor);
   layout->setMargin(0);
   setLayout(layout);
-  resize(codeEditor->geometry().width(), codeEditor->geometry().height());
+  resize(_codeEditor->geometry().width(), _codeEditor->geometry().height());
 
-  Ui::CodeEditor* ui = codeEditor->ui;
+  Ui::CodeEditor* ui = _codeEditor->_ui;
   connect(ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
 
-  CodeWidget* codeWidget = codeEditor->AddCodeWidget();
-  resMapper->addMapping(codeWidget, Script::kCodeFieldNumber);
-  resMapper->toFirst();
+  CodeWidget* codeWidget = _codeEditor->AddCodeWidget();
+  _resMapper->addMapping(codeWidget, Script::kCodeFieldNumber);
+  _resMapper->toFirst();
 
-  codeEditor->updateCursorPositionLabel();
-  codeEditor->updateLineCountLabel();
+  _codeEditor->updateCursorPositionLabel();
+  _codeEditor->updateLineCountLabel();
 }

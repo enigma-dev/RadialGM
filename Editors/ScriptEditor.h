@@ -11,7 +11,7 @@ class ScriptEditor : public BaseEditor {
   ScriptEditor(MessageModel* model, QWidget* parent = nullptr);
 
  private:
-  CodeEditor* codeEditor;
+  CodeEditor* _codeEditor;
 };
 
 #endif  // SCRIPTEDITOR_H
