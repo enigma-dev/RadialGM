@@ -11,20 +11,20 @@ class ResourceSelector : public QToolButton {
  public:
   explicit ResourceSelector(QWidget* parent, TreeNode::TypeCase type = TreeNode::TypeCase::kObject)
       : QToolButton(parent) {
-    menu = new QMenuView(this);
-    treeProxy = new TreeSortFilterProxyModel(this);
-    treeProxy->SetFilterType(type);
-    treeProxy->setSourceModel(MainWindow::treeModel.get());
-    menu->setModel(treeProxy);
-    setMenu(menu);
+    _menu = new QMenuView(this);
+    _treeProxy = new TreeSortFilterProxyModel(this);
+    _treeProxy->SetFilterType(type);
+    _treeProxy->setSourceModel(MainWindow::treeModel.get());
+    _menu->setModel(_treeProxy);
+    setMenu(_menu);
   }
 
-  void SetResourceType(TreeNode::TypeCase type) { treeProxy->SetFilterType(type); }
+  void SetResourceType(TreeNode::TypeCase type) { _treeProxy->SetFilterType(type); }
 
-  QMenuView* menu;
+  QMenuView* _menu;
 
  protected:
-  TreeSortFilterProxyModel* treeProxy;
+  TreeSortFilterProxyModel* _treeProxy;
 };
 
 #endif  // RESOURCESELECTOR_H

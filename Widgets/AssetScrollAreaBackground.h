@@ -26,10 +26,11 @@ class AssetScrollAreaBackground : public QWidget {
   explicit AssetScrollAreaBackground(AssetScrollArea* parent = nullptr);
   ~AssetScrollAreaBackground();
   void SetAssetView(AssetView* asset);
-  void SetDrawSolidBackground(bool b, QColor color);
+  void SetDrawSolidBackground(bool b, QColor color = Qt::GlobalColor::transparent);
   const qreal& GetZoom() const;
   void SetZoomRange(qreal scalingFactor, qreal min, qreal max);
   bool GetGridVisible();
+  QPoint GetCenterOffset();
 
  public slots:
   void SetZoom(qreal _currentZoom);
@@ -47,7 +48,6 @@ class AssetScrollAreaBackground : public QWidget {
   void MouseReleased(Qt::MouseButton button);
 
  protected:
-  QPoint GetCenterOffset();
   // Standard Grid
   void PaintGrid(QPainter& painter, int gridHorSpacing, int gridVertSpacing, int gridHorOff, int gridVertOff);
   // Grid used in tilesets

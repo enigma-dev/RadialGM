@@ -9,15 +9,15 @@
 
 using namespace buffers::resources;
 
-ShaderEditor::ShaderEditor(ProtoModelPtr model, QWidget* parent)
-    : BaseEditor(model, parent), codeEditor(new CodeEditor(this)) {
+ShaderEditor::ShaderEditor(MessageModel* model, QWidget* parent)
+    : BaseEditor(model, parent), _codeEditor(new CodeEditor(this)) {
   QLayout* layout = new QVBoxLayout(this);
-  layout->addWidget(codeEditor);
+  layout->addWidget(_codeEditor);
   layout->setMargin(0);
   setLayout(layout);
-  resize(codeEditor->geometry().width(), codeEditor->geometry().height());
+  resize(_codeEditor->geometry().width(), _codeEditor->geometry().height());
 
-  Ui::CodeEditor* ui = codeEditor->ui;
+  Ui::CodeEditor* ui = _codeEditor->_ui;
   connect(ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
 
   QLabel* shaderLabel = new QLabel(tr("Shader Type: "), ui->mainToolBar);
@@ -28,17 +28,17 @@ ShaderEditor::ShaderEditor(ProtoModelPtr model, QWidget* parent)
   ui->mainToolBar->addWidget(shaderLabel);
   ui->mainToolBar->addWidget(shaderType);
 
-  CodeWidget* vertexWidget = codeEditor->AddCodeWidget();
-  CodeWidget* fragWidget = codeEditor->AddCodeWidget();
+  CodeWidget* vertexWidget = _codeEditor->AddCodeWidget();
+  CodeWidget* fragWidget = _codeEditor->AddCodeWidget();
 
-  resMapper->addMapping(fragWidget, Shader::kFragmentCodeFieldNumber);
-  resMapper->addMapping(vertexWidget, Shader::kVertexCodeFieldNumber);
-  resMapper->toFirst();
+  _resMapper->addMapping(fragWidget, Shader::kFragmentCodeFieldNumber);
+  _resMapper->addMapping(vertexWidget, Shader::kVertexCodeFieldNumber);
+  _resMapper->toFirst();
 
   connect(shaderType, QOverload<int>::of(&QComboBox::currentIndexChanged),
           [=](int index) { ui->stackedWidget->setCurrentIndex(index); });
 
   ui->stackedWidget->setCurrentIndex(0);
-  codeEditor->updateCursorPositionLabel();
-  codeEditor->updateLineCountLabel();
+  _codeEditor->updateCursorPositionLabel();
+  _codeEditor->updateLineCountLabel();
 }

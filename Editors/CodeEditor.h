@@ -21,7 +21,7 @@ class CodeEditor : public QWidget {
   void SetCurrentIndex(int index);
   void RemoveCodeWidget(int index);
   void ClearCodeWidgets();
-  Ui::CodeEditor *ui;
+  Ui::CodeEditor *_ui;
 
  public slots:
   void setCursorPositionLabel(int line, int index);
@@ -30,7 +30,7 @@ class CodeEditor : public QWidget {
   void updateLineCountLabel();
 
  private:
-  QLabel *cursorPositionLabel, *lineCountLabel;
+  QLabel *_cursorPositionLabel, *_lineCountLabel;
 };
 
 #endif  // CODEEDITOR_H

@@ -22,7 +22,7 @@ class ImmediateDataWidgetMapper : public QDataWidgetMapper {
   void widgetChanged();
 
  private:
-  QList<QWidget *> widgetList;
+  QList<QWidget *> _widgetList;
 };
 
 #endif  // IMEDIATEDATAWIDGETWRAPPER_H

@@ -15,41 +15,46 @@
 
 using buffers::resources::Background;
 
-BackgroundEditor::BackgroundEditor(ProtoModelPtr model, QWidget* parent)
-    : BaseEditor(model, parent), ui(new Ui::BackgroundEditor) {
-  ui->setupUi(this);
+BackgroundEditor::BackgroundEditor(MessageModel* model, QWidget* parent)
+    : BaseEditor(model, parent), _ui(new Ui::BackgroundEditor) {
+  _ui->setupUi(this);
 
-  connect(ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
+  connect(_ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
 
-  ui->imagePreviewBackground->SetAssetView(ui->backgroundView);
+  _resMapper->addMapping(_ui->smoothCheckBox, Background::kSmoothEdgesFieldNumber);
+  _resMapper->addMapping(_ui->preloadCheckBox, Background::kPreloadFieldNumber);
+  _resMapper->addMapping(_ui->tilesetGroupBox, Background::kUseAsTilesetFieldNumber);
+  _resMapper->addMapping(_ui->tileWidthSpinBox, Background::kTileWidthFieldNumber);
+  _resMapper->addMapping(_ui->tileHeightSpinBox, Background::kTileHeightFieldNumber);
+  _resMapper->addMapping(_ui->horizontalOffsetSpinBox, Background::kHorizontalOffsetFieldNumber);
+  _resMapper->addMapping(_ui->verticalOffsetSpinBox, Background::kVerticalOffsetFieldNumber);
+  _resMapper->addMapping(_ui->horizontalSpacingSpinBox, Background::kHorizontalSpacingFieldNumber);
+  _resMapper->addMapping(_ui->verticalSpacingSpinBox, Background::kVerticalSpacingFieldNumber);
+  _resMapper->toFirst();
 
-  ui->backgroundView->SetResourceModel(resMapper->GetModel());
-
-  resMapper->addMapping(ui->smoothCheckBox, Background::kSmoothEdgesFieldNumber);
-  resMapper->addMapping(ui->preloadCheckBox, Background::kPreloadFieldNumber);
-  resMapper->addMapping(ui->tilesetGroupBox, Background::kUseAsTilesetFieldNumber);
-  resMapper->addMapping(ui->tileWidthSpinBox, Background::kTileWidthFieldNumber);
-  resMapper->addMapping(ui->tileHeightSpinBox, Background::kTileHeightFieldNumber);
-  resMapper->addMapping(ui->horizontalOffsetSpinBox, Background::kHorizontalOffsetFieldNumber);
-  resMapper->addMapping(ui->verticalOffsetSpinBox, Background::kVerticalOffsetFieldNumber);
-  resMapper->addMapping(ui->horizontalSpacingSpinBox, Background::kHorizontalSpacingFieldNumber);
-  resMapper->addMapping(ui->verticalSpacingSpinBox, Background::kVerticalSpacingFieldNumber);
-  resMapper->toFirst();
+  RebindSubModels();
 }
 
-BackgroundEditor::~BackgroundEditor() { delete ui; }
+BackgroundEditor::~BackgroundEditor() { delete _ui; }
 
 void BackgroundEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVariant& oldValue,
                                    const QVector<int>& roles) {
   BaseEditor::dataChanged(topLeft, bottomRight, oldValue, roles);
-  ui->backgroundView->update();
+  _ui->backgroundView->update();
 }
 
-void BackgroundEditor::on_actionZoomIn_triggered() { ui->imagePreviewBackground->ZoomIn(); }
+void BackgroundEditor::RebindSubModels() {
+  _backgroundModel = _model->GetSubModel<MessageModel*>(TreeNode::kBackgroundFieldNumber);
+  _ui->imagePreviewBackground->SetAssetView(_ui->backgroundView);
+  _ui->backgroundView->SetResourceModel(_resMapper->GetModel());
+  BaseEditor::RebindSubModels();
+}
 
-void BackgroundEditor::on_actionZoomOut_triggered() { ui->imagePreviewBackground->ZoomOut(); }
+void BackgroundEditor::on_actionZoomIn_triggered() { _ui->imagePreviewBackground->ZoomIn(); }
 
-void BackgroundEditor::on_actionZoom_triggered() { ui->imagePreviewBackground->ResetZoom(); }
+void BackgroundEditor::on_actionZoomOut_triggered() { _ui->imagePreviewBackground->ZoomOut(); }
+
+void BackgroundEditor::on_actionZoom_triggered() { _ui->imagePreviewBackground->ResetZoom(); }
 
 void BackgroundEditor::on_actionNewImage_triggered() {
   QDialog dialog(this);
@@ -62,7 +67,7 @@ void BackgroundEditor::on_actionNewImage_triggered() {
   if (result != QDialog::Accepted) return;
   QPixmap img(dialogUI.widthSpinBox->value(), dialogUI.heightSpinBox->value());
   img.fill(Qt::transparent);
-  ui->backgroundView->SetImage(img);
+  _ui->backgroundView->SetImage(img);
 }
 
 void BackgroundEditor::on_actionLoadImage_triggered() {
@@ -83,7 +88,7 @@ void BackgroundEditor::on_actionLoadImage_triggered() {
       }
     } else {
       // TODO: Copy data into our egm
-      SetModelData(Background::kImageFieldNumber, fName);
+      _backgroundModel->SetData(fName, Background::kImageFieldNumber);
     }
   }
 }
@@ -93,12 +98,12 @@ void BackgroundEditor::on_actionSaveImage_triggered() {
 
   if (dialog->exec() && dialog->selectedFiles().size() > 0) {
     QString fName = dialog->selectedFiles()[0];
-    ui->backgroundView->WriteImage(fName, dialog->selectedMimeTypeFilter());
+    _ui->backgroundView->WriteImage(fName, dialog->selectedMimeTypeFilter());
   }
 }
 
 void BackgroundEditor::on_actionEditImage_triggered() {
-  QString fName = GetModelData(Background::kImageFieldNumber).toString();
+  QString fName = _backgroundModel->Data(Background::kImageFieldNumber).toString();
   QDesktopServices::openUrl(QUrl::fromLocalFile(fName));
   // TODO: file watcher reload
   // TODO: editor settings

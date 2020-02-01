@@ -30,12 +30,13 @@ class AssetView : public QWidget {
  public:
   explicit AssetView(AssetScrollAreaBackground* parent);
   virtual void Paint(QPainter& painter) = 0;
+  virtual void PaintTop(QPainter& /*painter*/) {}
   GridDimensions& GetGrid();
 
  protected:
   void paintEvent(QPaintEvent* event);
-
-  GridDimensions grid;
+  AssetScrollAreaBackground* _parent;
+  GridDimensions _grid;
 };
 
 #endif  // ASSETVIEW_H

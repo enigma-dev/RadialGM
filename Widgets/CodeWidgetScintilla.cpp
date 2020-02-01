@@ -55,13 +55,13 @@ void CodeWidget::finalizeKeywords() {
   sciApis->prepare();
 }
 
-CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), font(QFont("Courier", 10)) {
+CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), _font(QFont("Courier", 10)) {
   prepare_scintilla_apis();
 
-  QFontMetrics fontMetrics(font);
+  QFontMetrics fontMetrics(_font);
 
   QsciScintilla* codeEdit = new QsciScintilla(this);
-  this->textWidget = codeEdit;
+  this->_textWidget = codeEdit;
   codeEdit->registerImage(KeywordType::UNKNOWN, QPixmap(":/actions/right-arrow-red.png"));
   codeEdit->registerImage(KeywordType::TYPE_NAME, QPixmap(":/actions/right-arrow-blue.png"));
   codeEdit->registerImage(KeywordType::GLOBAL, QPixmap(":/actions/right-arrow-green.png"));
@@ -82,7 +82,7 @@ CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), font(QFont("Courier",
   codeEdit->setCaretLineBackgroundColor(QColor("#ffe4e4"));
 
   codeEdit->setMarginLineNumbers(0, true);
-  codeEdit->setMarginsFont(font);
+  codeEdit->setMarginsFont(_font);
 
   codeEdit->setLexer(cppLexer);
 
@@ -106,41 +106,41 @@ CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), font(QFont("Courier",
 
 CodeWidget::~CodeWidget() {}
 
-QString CodeWidget::code() const { return static_cast<QsciScintilla*>(this->textWidget)->text(); }
+QString CodeWidget::code() const { return static_cast<QsciScintilla*>(this->_textWidget)->text(); }
 
-void CodeWidget::setCode(QString code) { static_cast<QsciScintilla*>(this->textWidget)->setText(code); }
+void CodeWidget::setCode(QString code) { static_cast<QsciScintilla*>(this->_textWidget)->setText(code); }
 
-void CodeWidget::undo() { static_cast<QsciScintilla*>(this->textWidget)->undo(); }
+void CodeWidget::undo() { static_cast<QsciScintilla*>(this->_textWidget)->undo(); }
 
-void CodeWidget::redo() { static_cast<QsciScintilla*>(this->textWidget)->redo(); }
+void CodeWidget::redo() { static_cast<QsciScintilla*>(this->_textWidget)->redo(); }
 
-void CodeWidget::cut() { static_cast<QsciScintilla*>(this->textWidget)->cut(); }
+void CodeWidget::cut() { static_cast<QsciScintilla*>(this->_textWidget)->cut(); }
 
-void CodeWidget::copy() { static_cast<QsciScintilla*>(this->textWidget)->copy(); }
+void CodeWidget::copy() { static_cast<QsciScintilla*>(this->_textWidget)->copy(); }
 
-void CodeWidget::paste() { static_cast<QsciScintilla*>(this->textWidget)->paste(); }
+void CodeWidget::paste() { static_cast<QsciScintilla*>(this->_textWidget)->paste(); }
 
-int CodeWidget::lineCount() { return static_cast<QsciScintilla*>(this->textWidget)->lines(); }
+int CodeWidget::lineCount() { return static_cast<QsciScintilla*>(this->_textWidget)->lines(); }
 
 QPair<int, int> CodeWidget::cursorPosition() {
-  auto sci = static_cast<QsciScintilla*>(this->textWidget);
+  auto sci = static_cast<QsciScintilla*>(this->_textWidget);
   int line, index;
   sci->getCursorPosition(&line, &index);
   return QPair<int, int>(line + 1, index + 1);
 }
 
-void CodeWidget::gotoLine(int line) { static_cast<QsciScintilla*>(this->textWidget)->setCursorPosition(line - 1, 0); }
+void CodeWidget::gotoLine(int line) { static_cast<QsciScintilla*>(this->_textWidget)->setCursorPosition(line - 1, 0); }
 
 void CodeWidget::printSource() {
   QsciPrinter sciPrinter;
   QPrintDialog printDialog(&sciPrinter, this);
-  auto codeEdit = static_cast<QsciScintilla*>(this->textWidget);
+  auto codeEdit = static_cast<QsciScintilla*>(this->_textWidget);
   if (codeEdit->hasSelectedText()) printDialog.addEnabledOption(QAbstractPrintDialog::PrintSelection);
   if (printDialog.exec() == QDialog::Accepted) this->print(&sciPrinter);
 }
 
 void CodeWidget::print(QPrinter* printer) {
   auto sciPrinter = static_cast<QsciPrinter*>(printer);
-  auto codeEdit = static_cast<QsciScintilla*>(this->textWidget);
+  auto codeEdit = static_cast<QsciScintilla*>(this->_textWidget);
   sciPrinter->printRange(codeEdit);
 }

@@ -1,6 +1,7 @@
 #ifndef BASEEDTIOR_H
 #define BASEEDTIOR_H
 
+#include "Models/MessageModel.h"
 #include "Models/ModelMapper.h"
 
 #include <QObject>
@@ -18,11 +19,9 @@ class BaseEditor : public QWidget {
   Q_OBJECT
 
  public:
-  explicit BaseEditor(ProtoModelPtr treeNodeModel, QWidget *parent);
+  explicit BaseEditor(MessageModel *treeNodeModel, QWidget *parent);
 
   void ReplaceBuffer(google::protobuf::Message *buffer);
-  void SetModelData(int index, const QVariant &value);
-  QVariant GetModelData(int index);
   bool HasFocus();
 
  signals:
@@ -39,10 +38,10 @@ class BaseEditor : public QWidget {
  protected:
   virtual void closeEvent(QCloseEvent *event) override;
 
-  ModelMapper *nodeMapper;
-  ModelMapper *resMapper;
-  ProtoModelPtr _model;
-  bool hasFocus = false;
+  ModelMapper *_nodeMapper;
+  ModelMapper *_resMapper;
+  MessageModel *_model;
+  bool _hasFocus = false;
 };
 
 #endif  // BASEEDTIOR_H

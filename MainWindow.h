@@ -32,7 +32,7 @@ class MainWindow : public QMainWindow {
   explicit MainWindow(QWidget *parent);
   ~MainWindow();
   void openProject(std::unique_ptr<buffers::Project> openedProject);
-  buffers::Game *Game() const { return this->project->mutable_game(); }
+  buffers::Game *Game() const { return this->_project->mutable_game(); }
 
  signals:
   void CurrentConfigChanged(const buffers::resources::Settings &settings);
@@ -100,14 +100,14 @@ class MainWindow : public QMainWindow {
  private:
   void closeEvent(QCloseEvent *event) override;
 
-  static MainWindow *m_instance;
+  static MainWindow *_instance;
 
-  QHash<buffers::TreeNode *, QMdiSubWindow *> subWindows;
+  QHash<buffers::TreeNode *, QMdiSubWindow *> _subWindows;
 
-  Ui::MainWindow *ui;
+  Ui::MainWindow *_ui;
 
-  std::unique_ptr<buffers::Project> project;
-  QPointer<RecentFiles> recentFiles;
+  std::unique_ptr<buffers::Project> _project;
+  QPointer<RecentFiles> _recentFiles;
 
   void openSubWindow(buffers::TreeNode *item);
   void readSettings();

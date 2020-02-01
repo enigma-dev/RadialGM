@@ -25,10 +25,10 @@ class ColorPicker : public QWidget {
   void updateButtonIcon();
 
  private:
-  QColor color_;
-  bool alpha_enabled_;
+  QColor _color;
+  bool _alpha_enabled;
 
-  QToolButton *button;
+  QToolButton *_button;
 };
 
 #endif  // COLORPICKER_H

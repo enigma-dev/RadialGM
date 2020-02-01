@@ -54,11 +54,11 @@
      <addaction name="separator"/>
      <addaction name="actionLoadSubimages"/>
      <addaction name="actionAddSubimages"/>
-     <addaction name="actionAddSpritesheetSubimages"/>
      <addaction name="separator"/>
      <addaction name="actionZoom"/>
      <addaction name="actionZoomIn"/>
      <addaction name="actionZoomOut"/>
+     <addaction name="separator"/>
     </widget>
    </item>
    <item>
@@ -87,42 +87,18 @@
         <number>4</number>
        </property>
        <item>
-        <widget class="QCheckBox" name="smoothCheckBox">
-         <property name="text">
-          <string>&amp;Smooth edges</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="preloadCheckBox">
-         <property name="text">
-          <string>Pre&amp;load texture</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QGroupBox" name="originGroupBox">
          <property name="title">
           <string>Origin</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="2">
-           <widget class="QLabel" name="originYLabel">
+          <item row="0" column="0">
+           <widget class="QLabel" name="originXLabel">
             <property name="text">
-             <string>&amp;Y</string>
+             <string>&amp;X</string>
             </property>
             <property name="buddy">
-             <cstring>originYSpinBox</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
-           <widget class="QSpinBox" name="originYSpinBox">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+             <cstring>originXSpinBox</cstring>
             </property>
            </widget>
           </item>
@@ -136,13 +112,23 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="originXLabel">
+          <item row="0" column="3">
+           <widget class="QSpinBox" name="originYSpinBox">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="originYLabel">
             <property name="text">
-             <string>&amp;X</string>
+             <string>&amp;Y</string>
             </property>
             <property name="buddy">
-             <cstring>originXSpinBox</cstring>
+             <cstring>originYSpinBox</cstring>
             </property>
            </widget>
           </item>
@@ -169,38 +155,114 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
-           <widget class="QRadioButton" name="preciseRadioButton">
-            <property name="text">
-             <string>&amp;Precise</string>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
-            </property>
+           <widget class="QComboBox" name="collisionShapeComboBox">
+            <item>
+             <property name="text">
+              <string>Precise</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Rectangle</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Disk</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Diamond</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Polygon</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="boundingboxGroup">
+         <property name="title">
+          <string>Bounding Box</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <property name="leftMargin">
+           <number>9</number>
+          </property>
+          <item>
+           <widget class="QComboBox" name="bboxComboBox">
+            <item>
+             <property name="text">
+              <string>Automatic</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Full Image</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Manual</string>
+             </property>
+            </item>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="rectangleRadioButton">
-            <property name="text">
-             <string>&amp;Rectangle</string>
+           <layout class="QGridLayout" name="bboxDimensionsLayout">
+            <property name="spacing">
+             <number>0</number>
             </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QRadioButton" name="diskRadioButton">
-            <property name="text">
-             <string>&amp;Disk</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QRadioButton" name="diamondRadioButton">
-            <property name="text">
-             <string>Dia&amp;mond</string>
-            </property>
-           </widget>
+            <item row="3" column="1">
+             <widget class="QSpinBox" name="topSpinBox"/>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="bottomLabel">
+              <property name="text">
+               <string>Bottom</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="topLabel">
+              <property name="text">
+               <string>Top</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="leftLabel">
+              <property name="text">
+               <string>Left</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QSpinBox" name="leftSpinBox"/>
+            </item>
+            <item row="4" column="1">
+             <widget class="QSpinBox" name="bottomSpinBox"/>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="rightLabel">
+              <property name="text">
+               <string>Right</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QSpinBox" name="rightSpinBox"/>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -276,7 +338,7 @@
            <number>4</number>
           </property>
           <item row="0" column="0">
-           <widget class="BackgroundView" name="subimagePreview" native="true">
+           <widget class="SpriteView" name="subimagePreview" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -321,12 +383,10 @@
            <addaction name="actionCopy"/>
            <addaction name="actionPaste"/>
            <addaction name="separator"/>
-           <addaction name="actionPreviousSubimage"/>
-           <addaction name="actionNextSubimage"/>
           </widget>
          </item>
          <item>
-          <widget class="QListView" name="subImageList">
+          <widget class="SpriteSubimageListView" name="subImageList">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
@@ -370,6 +430,9 @@
              </disabled>
             </palette>
            </property>
+           <property name="acceptDrops">
+            <bool>false</bool>
+           </property>
            <property name="dragEnabled">
             <bool>true</bool>
            </property>
@@ -378,6 +441,9 @@
            </property>
            <property name="defaultDropAction">
             <enum>Qt::MoveAction</enum>
+           </property>
+           <property name="alternatingRowColors">
+            <bool>true</bool>
            </property>
            <property name="selectionMode">
             <enum>QAbstractItemView::ExtendedSelection</enum>
@@ -496,30 +562,6 @@
     <string>Paste</string>
    </property>
   </action>
-  <action name="actionPreviousSubimage">
-   <property name="icon">
-    <iconset resource="../images.qrc">
-     <normaloff>:/actions/previous.png</normaloff>:/actions/previous.png</iconset>
-   </property>
-   <property name="text">
-    <string>Previous Subimage</string>
-   </property>
-   <property name="toolTip">
-    <string>Previous Subimage</string>
-   </property>
-  </action>
-  <action name="actionNextSubimage">
-   <property name="icon">
-    <iconset resource="../images.qrc">
-     <normaloff>:/actions/next.png</normaloff>:/actions/next.png</iconset>
-   </property>
-   <property name="text">
-    <string>Next Subimage</string>
-   </property>
-   <property name="toolTip">
-    <string>Next Subimage</string>
-   </property>
-  </action>
   <action name="actionLoadSubimages">
    <property name="icon">
     <iconset resource="../images.qrc">
@@ -542,18 +584,6 @@
    </property>
    <property name="toolTip">
     <string>Add Subimages</string>
-   </property>
-  </action>
-  <action name="actionAddSpritesheetSubimages">
-   <property name="icon">
-    <iconset resource="../images.qrc">
-     <normaloff>:/actions/open-strip.png</normaloff>:/actions/open-strip.png</iconset>
-   </property>
-   <property name="text">
-    <string>Add Spritesheet Subimages</string>
-   </property>
-   <property name="toolTip">
-    <string>Add Spritesheet Subimages</string>
    </property>
   </action>
   <action name="actionZoom">
@@ -601,15 +631,20 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>BackgroundView</class>
-   <extends>QWidget</extends>
-   <header>Widgets/BackgroundView.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>AssetScrollAreaBackground</class>
    <extends>QWidget</extends>
    <header>Widgets/AssetScrollAreaBackground.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>SpriteSubimageListView</class>
+   <extends>QListView</extends>
+   <header>Widgets/SpriteSubimageListView.h</header>
+  </customwidget>
+  <customwidget>
+   <class>SpriteView</class>
+   <extends>QWidget</extends>
+   <header>Widgets/SpriteView.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

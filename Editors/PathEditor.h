@@ -3,6 +3,7 @@
 
 #include "BaseEditor.h"
 #include "Components/ArtManager.h"
+#include "Models/RepeatedMessageModel.h"
 
 #include <QItemSelection>
 #include <QLabel>
@@ -16,7 +17,7 @@ class PathEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit PathEditor(ProtoModelPtr model, QWidget* parent);
+  explicit PathEditor(MessageModel* model, QWidget* parent);
   ~PathEditor() override;
   void RebindSubModels() override;
   bool eventFilter(QObject* obj, QEvent* event) override;
@@ -35,13 +36,13 @@ class PathEditor : public BaseEditor {
   void on_deletePointButton_pressed();
 
  private:
-  Ui::PathEditor* ui;
-  QLabel* cursorPositionLabel;
-  QLineEdit* roomLineEdit;
-  bool snapToGrid = true;
-  ProtoModelPtr pathModel = nullptr;
-  RepeatedProtoModelPtr pointsModel = nullptr;
-  bool draggingPoint = false;
+  Ui::PathEditor* _ui;
+  QLabel* _cursorPositionLabel;
+  QLineEdit* _roomLineEdit;
+  bool _snapToGrid = true;
+  MessageModel* _pathModel = nullptr;
+  RepeatedMessageModel* _pointsModel = nullptr;
+  bool _draggingPoint = false;
 };
 
 #endif  // PATHEDITOR_H

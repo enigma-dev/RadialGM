@@ -13,7 +13,7 @@ class SettingsEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit SettingsEditor(ProtoModelPtr model, QWidget* parent);
+  explicit SettingsEditor(MessageModel* model, QWidget* parent);
   ~SettingsEditor();
 
  private slots:
