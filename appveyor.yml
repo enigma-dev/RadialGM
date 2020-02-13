@@ -39,13 +39,13 @@ init:
        $Env:GENERATOR = "Visual Studio 15 2017"
        $Env:CMAKE_ARGS = -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake"
 
-       if ($Env:$PLATFORM -eq "x64") {
+       if ($Env:PLATFORM -eq "x64") {
          $Env:CMAKE_ARGS += "-A x64"
        } else {
          $Env:CMAKE_ARGS += "-A Win32"
        }
        
-       if ($CONFIGURATION -contains "*Release*") {
+       if ($Env:CONFIGURATION -contains "*Release*") {
          $Env:BUILD_TYPE = MinSizeRel
        }
      }
@@ -53,7 +53,7 @@ init:
 install:
   - git submodule update --init --recursive
   - ps: |
-      if ($Env:$CONFIGURATION -contains "MSVC*") {
+      if ($Env:CONFIGURATION -contains "MSVC*") {
         # this gets the latest release of RadialGM-deps using GitHub API
         $apiURL = "https://api.github.com/repos/enigma-dev/radialgm-deps/releases/latest"
         $latest = Invoke-RestMethod -Method Get -Uri $apiURL
@@ -72,12 +72,12 @@ install:
         appveyor DownloadFile $depsURL -FileName $depsName
         7z x -mmt $depsName -oC:\tools\vcpkg
       } else {
-        if ($Env:$PLATFORM -eq "x64") {
-          $arch = 64
-          $pkg_arch = x
+        if ($Env:PLATFORM -eq "x64") {
+          $arch = "64"
+          $pkg_arch = "x"
         } else {
-          $arch = 32
-          $pkg_arch = i
+          $arch = "32"
+          $pkg_arch = "i"
         }
         $Env:GENERATOR = "MSYS Makefiles"
         $Env:PATH = "C:\msys64;C:\msys64\mingw$arch\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;$Env:Path"
