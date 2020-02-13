@@ -39,7 +39,7 @@ init:
        $Env:GENERATOR = "Visual Studio 15 2017"
        $Env:CMAKE_ARGS = -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake"
 
-       if ($PLATFORM -eq "x64") {
+       if ($Env:$PLATFORM -eq "x64") {
          $Env:CMAKE_ARGS += "-A x64"
        } else {
          $Env:CMAKE_ARGS += "-A Win32"
