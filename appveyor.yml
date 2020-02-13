@@ -34,7 +34,7 @@ environment:
 
 init:
   - ps: |
-     if ($CONFIGURATION -contains "MSVC*") {
+     if ($Env:CONFIGURATION -contains "MSVC*") {
        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" %PLATFORM%
        $Env:GENERATOR = "Visual Studio 15 2017"
        $Env:CMAKE_ARGS = -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake"
@@ -53,7 +53,7 @@ init:
 install:
   - git submodule update --init --recursive
   - ps: |
-      if ($CONFIGURATION -contains "MSVC*") {
+      if ($Env:$CONFIGURATION -contains "MSVC*") {
         # this gets the latest release of RadialGM-deps using GitHub API
         $apiURL = "https://api.github.com/repos/enigma-dev/radialgm-deps/releases/latest"
         $latest = Invoke-RestMethod -Method Get -Uri $apiURL
@@ -72,7 +72,7 @@ install:
         appveyor DownloadFile $depsURL -FileName $depsName
         7z x -mmt $depsName -oC:\tools\vcpkg
       } else {
-        if ($PLATFORM -eq "x64") {
+        if ($Env:$PLATFORM -eq "x64") {
           $arch = 64
           $pkg_arch = x
         } else {
