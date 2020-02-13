@@ -22,7 +22,12 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/Dialogs")
 
 # Include ENIGMA things
 set(ENIGMA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/enigma-dev)
-include_directories("${ENIGMA_DIR}/shared/protos/.eobjs/" "${ENIGMA_DIR}/CommandLine/libEGM")
+include_directories("${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/libEGM/libProtocols" "${ENIGMA_DIR}/CommandLine/libEGM")
+
+# Hack to get msys path
+if(WIN32 AND NOT MSVC)
+  get_filename_component(MINGW_BIN ${CMAKE_C_COMPILER} DIRECTORY)
+endif()
 
 # Populate a CMake variable with the sources
 set(RGM_SOURCES
@@ -208,20 +213,6 @@ include_directories(${EXE} PRIVATE ${RAPIDJSON_INCLUDE_DIRS})
 find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${EXE} PRIVATE yaml-cpp)
 
-# Find libEGM
-# Debug
-find_library(LIB_EGM_D NAMES EGMd EGM PATHS ${ENIGMA_DIR})
-# Release
-find_library(LIB_EGM NAMES EGM PATHS ${ENIGMA_DIR})
-target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_EGM_D},${LIB_EGM}>")
-
-# Find libProtocols
-# Debug
-find_library(LIB_PROTO_D NAMES Protocolsd Protocols PATHS ${ENIGMA_DIR})
-# Release
-find_library(LIB_PROTO NAMES Protocols PATHS ${ENIGMA_DIR})
-target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_PROTO_D},${LIB_PROTO}>")
-
 # Find GRPC
 find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
 find_library(LIB_GRPC NAMES grpc)
@@ -242,7 +233,6 @@ target_link_libraries(${EXE} PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 # Find Qt
 find_package(Qt5 COMPONENTS Core Widgets Gui PrintSupport Multimedia REQUIRED)
 target_link_libraries(${EXE} PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Multimedia)
-
 
 if(MSVC)
     target_link_libraries(${EXE} PRIVATE Qt5::WinMain)
@@ -293,6 +283,11 @@ if(MSVC)
                           )
 endif(MSVC)
 
+# LibProto
+add_subdirectory(Submodules/enigma-dev/CommandLine/libEGM)
+add_dependencies(${EXE} "EGM")
+target_link_libraries(${EXE} PRIVATE "EGM" "Protocols")
+
 # Find FreeType
 find_package(Freetype REQUIRED)
 include_directories(${FREETYPE_INCLUDE_DIRS})
@@ -318,3 +313,39 @@ if(WIN32)
 	# Windows is a turd
 	target_link_libraries(${EXE} PRIVATE Ws2_32 Wtsapi32 Wldap32 Crypt32 Winmm Userenv Netapi32 version Dwmapi Imm32)
 endif(WIN32)
+
+install(TARGETS ${EXE} DESTINATION "${ENIGMA_DIR}")
+
+if(WIN32 AND NOT MSVC)
+  install(FILES 
+            "${MINGW_BIN}/libwinpthread-1.dll"
+            "${MINGW_BIN}/libstdc++-6.dll" 
+            "${MINGW_BIN}/libgcc_s_seh-1.dll"
+            "${MINGW_BIN}/libgrpc++_unsecure.dll"
+            "${MINGW_BIN}/libprotobuf.dll"
+            "${MINGW_BIN}/zlib1.dll"
+            "${MINGW_BIN}/libpng16-16.dll"
+            "${MINGW_BIN}/libpugixml.dll"
+            "${MINGW_BIN}/libgpr.dll"
+            "${MINGW_BIN}/libgrpc_unsecure.dll"
+            "${MINGW_BIN}/yaml-cpp.dll"
+            "${MINGW_BIN}/libdouble-conversion.dll"
+            "${MINGW_BIN}/libicuuc65.dll"
+            "${MINGW_BIN}/libicuin65.dll"
+            "${MINGW_BIN}/libpcre2-16-0.dll"
+            "${MINGW_BIN}/libcares-3.dll"
+            "${MINGW_BIN}/libaddress_sorting.dll"
+            "${MINGW_BIN}/libharfbuzz-0.dll"
+            "${MINGW_BIN}/libzstd.dll"
+            "${MINGW_BIN}/libicudt65.dll"
+            "${MINGW_BIN}/libglib-2.0-0.dll"
+            "${MINGW_BIN}/libfreetype-6.dll"
+            "${MINGW_BIN}/libgraphite2.dll"
+            "${MINGW_BIN}/libbz2-1.dll"
+            "${MINGW_BIN}/libintl-8.dll"
+            "${MINGW_BIN}/libpcre-1.dll"
+            "${MINGW_BIN}/libiconv-2.dll"
+          DESTINATION "${ENIGMA_DIR}")
+
+    install(CODE "execute_process(COMMAND windeployqt.exe --no-translations ${ENIGMA_DIR}/RadialGM.exe)")
+endif() 
