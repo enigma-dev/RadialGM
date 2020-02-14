@@ -5,7 +5,7 @@ jobs:
 - job: RadialGM_MSVC_64
   pool:
     vmImage: 'windows-latest'
-  timeoutInMinutes: 180
+  timeoutInMinutes: 250
 
   steps:
   - task: Cache@2
@@ -35,7 +35,7 @@ jobs:
     displayName: 'Release Build'
     inputs:
       cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
-      cmakeListsTxtPath: 'CmakeLists.txt'
+      cmakeListsTxtPath: 'CMakeLists.txt'
       cmakeGenerator: VS16Win64
       cmakeBuildType: MinSizeRel
       buildDirectory: 'build'
