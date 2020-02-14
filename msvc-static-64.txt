@@ -2,10 +2,3 @@
 x64-windows-static
 qt5-base
 qscintilla
-pugixml 
-rapidjson 
-yaml-cpp 
-protobuf 
-grpc 
-boost
-yaml-cpp
