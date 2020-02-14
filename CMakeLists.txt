@@ -317,10 +317,12 @@ endif(WIN32)
 install(TARGETS ${EXE} DESTINATION "${ENIGMA_DIR}")
 
 if(WIN32 AND NOT MSVC)
-  install(FILES 
+
+  find_file(LIB_GCC NAMES libgcc_s_dw2-1.dll libgcc_s_seh-1.dll PATHS "${MINGW_BIN}")
+  install(FILES
+            "${LIB_GCC}"
             "${MINGW_BIN}/libwinpthread-1.dll"
             "${MINGW_BIN}/libstdc++-6.dll" 
-            "${MINGW_BIN}/libgcc_s_seh-1.dll"
             "${MINGW_BIN}/libgrpc++_unsecure.dll"
             "${MINGW_BIN}/libprotobuf.dll"
             "${MINGW_BIN}/zlib1.dll"
