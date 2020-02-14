@@ -24,25 +24,13 @@ jobs:
       vcpkgGitCommitId: $(vcpkgGitRef)
       vcpkgGitURL: https://github.com/microsoft/vcpkg.git
 
-  - task: run-cmake@0
+  - task: CMake@1
     displayName: 'Debug Build'
     inputs:
-      cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
-      cmakeListsTxtPath: 'CmakeLists.txt'
-      cmakeGenerator: VS16Win64
-      cmakeBuildType: Debug
-      buildDirectory: 'build'
-      useVcpkgToolchainFile: true
-      vcpkgTriplet: x64-windows-static
-      cmakeAppendedArgs: -DPROTOBUF_IMPORT_DIRS="%VCPKG_DIR%\installed\%TRIPLET_NAME%\include"
-  - task: run-cmake@0
+      workingDirectory: build-Debug
+      cmakeArgs: -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE="Debug" -DVCPKG_TARGET_TRIPLET=x64-windows-static -DPROTOBUF_IMPORT_DIRS="%VCPKG_DIR%\installed\x64-windows-static\include" -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
+  - task: CMake@1
     displayName: 'Release Build'
     inputs:
-      cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
-      cmakeListsTxtPath: 'CMakeLists.txt'
-      cmakeGenerator: VS16Win64
-      cmakeBuildType: MinSizeRel
-      buildDirectory: 'build'
-      useVcpkgToolchainFile: true
-      vcpkgTriplet: x64-windows-static
-      cmakeAppendedArgs: -DPROTOBUF_IMPORT_DIRS="%VCPKG_DIR%\installed\%TRIPLET_NAME%\include"
+      workingDirectory: build-Release
+      cmakeArgs: -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE="MinSizeRel" -DVCPKG_TARGET_TRIPLET=x64-windows-static -DPROTOBUF_IMPORT_DIRS="%VCPKG_DIR%\installed\x64-windows-static\include" -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
