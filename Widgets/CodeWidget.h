@@ -48,8 +48,8 @@ class CodeWidget : public QWidget {
   void codeChanged();
 
  protected:
-  QFont font;
-  QWidget* textWidget = nullptr;
+  QFont _font;
+  QWidget* _textWidget = nullptr;
 
  private:
   QStringList fileFilters() {

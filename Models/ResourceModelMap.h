@@ -1,7 +1,7 @@
 #ifndef MODELMAP_H
 #define MODELMAP_H
 
-#include "ProtoModel.h"
+#include "MessageModel.h"
 
 #include <QHash>
 #include <QVector>
@@ -11,9 +11,9 @@ class ResourceModelMap : public QObject {
   Q_OBJECT
  public:
   ResourceModelMap(buffers::TreeNode* root, QObject* parent);
-  ProtoModelPtr GetResourceByName(int type, const QString& name);
-  ProtoModelPtr GetResourceByName(int type, const std::string& name);
-  void AddResource(buffers::TreeNode* node, QObject* parent);
+  MessageModel* GetResourceByName(int type, const QString& name);
+  MessageModel* GetResourceByName(int type, const std::string& name);
+  void AddResource(buffers::TreeNode* node);
   void RemoveResource(TypeCase type, const QString& name);
   QString CreateResourceName(TreeNode* node);
   QString CreateResourceName(int type, const QString& typeName);
@@ -21,12 +21,15 @@ class ResourceModelMap : public QObject {
  public slots:
   void ResourceRenamed(TypeCase type, const QString& oldName, const QString& newName);
 
+ signals:
+  void DataChanged();
+
  protected:
-  void recursiveBindRes(buffers::TreeNode* node, QObject* parent);
-  QHash<int, QHash<QString, QPair<buffers::TreeNode*, ProtoModelPtr>>> _resources;
+  void recursiveBindRes(buffers::TreeNode* node);
+  QHash<int, QHash<QString, QPair<buffers::TreeNode*, MessageModel*>>> _resources;
 };
 
-const ProtoModelPtr GetObjectSprite(const std::string& objName);
-const ProtoModelPtr GetObjectSprite(const QString& objName);
+MessageModel* GetObjectSprite(const std::string& objName);
+MessageModel* GetObjectSprite(const QString& objName);
 
 #endif  // MODELMAP_H

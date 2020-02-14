@@ -8,10 +8,10 @@ class ScriptEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  ScriptEditor(ProtoModelPtr model, QWidget* parent = nullptr);
+  ScriptEditor(MessageModel* model, QWidget* parent = nullptr);
 
  private:
-  CodeEditor* codeEditor;
+  CodeEditor* _codeEditor;
 };
 
 #endif  // SCRIPTEDITOR_H

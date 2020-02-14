@@ -10,7 +10,7 @@ pull_requests:
 
 
 # Build worker image (VM template)
-image: Visual Studio 2017
+image: Visual Studio 2019
 
 # since we're pushing releases we don't want infinite recursion
 # because the release pushes a tag, hence we aren't building on tags
@@ -21,57 +21,77 @@ platform:
   - x64
 
 configuration:
-  - Debug
-  - Release
+  - MinGW-Debug
+  - MinGW-Release
+  - MSVC-Debug
+  - MSVC-Release
 
 environment:
   VCPKG_DIR: C:\tools\vcpkg
   TRIPLET_NAME: $(PLATFORM)-windows-static
   BUILD_TYPE: Debug
-  GENERATOR: "Visual Studio 15 2017"
+  GENERATOR: "Visual Studio 16 2019"
 
 init:
-  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" %PLATFORM%
-  - if %PLATFORM% == x64 set GENERATOR=Visual Studio 15 2017 Win64
-  - if %CONFIGURATION% == Release set BUILD_TYPE=MinSizeRel
+  - ps: |
+     if ($Env:CONFIGURATION -contains "MSVC*") {
+       call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat" %PLATFORM%
+       $Env:GENERATOR = "Visual Studio 15 2017"
+       $Env:CMAKE_ARGS = -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake"
+
+       if ($Env:PLATFORM -eq "x64") {
+         $Env:CMAKE_ARGS += "-A x64"
+       } else {
+         $Env:CMAKE_ARGS += "-A Win32"
+       }
+       
+       if ($Env:CONFIGURATION -contains "*Release*") {
+         $Env:BUILD_TYPE = MinSizeRel
+       }
+     }
 
 install:
   - git submodule update --init --recursive
   - ps: |
-      # this gets the latest release of RadialGM-deps using GitHub API
-      $apiURL = "https://api.github.com/repos/enigma-dev/radialgm-deps/releases/latest"
-      $latest = Invoke-RestMethod -Method Get -Uri $apiURL
-      # find the asset whose name matches the architecture of this build
-      $depsName = "rgmdeps-$env:platform.zip"
-      foreach ($asset in $latest.assets) {
-        Write-Host $asset.name
-        if ($asset.name -eq $depsName) {
-          $depsURL = $asset.browser_download_url
-          break
+      if ($Env:CONFIGURATION -contains "MSVC*") {
+        # this gets the latest release of RadialGM-deps using GitHub API
+        $apiURL = "https://api.github.com/repos/enigma-dev/radialgm-deps/releases/latest"
+        $latest = Invoke-RestMethod -Method Get -Uri $apiURL
+        # find the asset whose name matches the architecture of this build
+        $depsName = "rgmdeps-$env:platform.zip"
+        foreach ($asset in $latest.assets) {
+          Write-Host $asset.name
+          if ($asset.name -eq $depsName) {
+            $depsURL = $asset.browser_download_url
+            break
+          }
         }
-      }
-      Write-Host $depsURL
+        Write-Host $depsURL
 
-      # download and extract the deps matching this job's architecture
-      appveyor DownloadFile $depsURL -FileName $depsName
-      7z x -mmt $depsName -oC:\tools\vcpkg
+        # download and extract the deps matching this job's architecture
+        appveyor DownloadFile $depsURL -FileName $depsName
+        7z x -mmt $depsName -oC:\tools\vcpkg
+      } else {
+        if ($Env:PLATFORM -eq "x64") {
+          $arch = "64"
+          $pkg_arch = "x"
+        } else {
+          $arch = "32"
+          $pkg_arch = "i"
+        }
+        $Env:GENERATOR = "MSYS Makefiles"
+        $Env:PATH = "C:\msys64;C:\msys64\mingw$arch\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;$Env:Path"
+        bash -lc "pacboy --noconfirm -S boost:$pkg_arch pugixml:$pkg_arch rapidjson:$pkg_arch yaml-cpp:$pkg_arch grpc:$pkg_arch protobuf:$pkg_arch glm:$pkg_arch libpng:$pkg_arch qt5:$pkg_arch qscintilla:$pkg_arch"
+        Write-Host "Success"
+      }
 
 build_script:
-  - echo %BUILD_TYPE%
-  - echo %GENERATOR%
-  - cd %APPVEYOR_BUILD_FOLDER%\Submodules\enigma-dev\shared\protos
   - mkdir build && cd build
-  - cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" -DPROTOBUF_IMPORT_DIRS="%VCPKG_DIR%\installed\%TRIPLET_NAME%\include" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
-  - cmake --build . --target install --config "%BUILD_TYPE%"
-  - cd %APPVEYOR_BUILD_FOLDER%\Submodules\enigma-dev\CommandLine\libEGM
-  - mkdir build && cd build
-  - cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
-  - cmake --build . --target install --config "%BUILD_TYPE%"
-  - cd %APPVEYOR_BUILD_FOLDER%
-  - mkdir build && cd build
-  - cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" -DVCPKG_TARGET_TRIPLET=%TRIPLET_NAME% -DCMAKE_TOOLCHAIN_FILE="%VCPKG_DIR%\scripts\buildsystems\vcpkg.cmake" ..
-  - cmake --build . --target ALL_BUILD --config "%BUILD_TYPE%"
-  - appveyor PushArtifact %BUILD_TYPE%\RadialGM.exe -FileName RadialGM-Win32-%CONFIGURATION%-%PLATFORM%.exe -DeploymentName RadialGM
+  - cmake -G "%GENERATOR%" %CMAKE_ARGS% -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" ..
+  - cmake --build . --config "%BUILD_TYPE%"
+  - cmake --install .
+  - 7z a RadialGM-%CONFIGURATION%-%PLATFORM%.zip ../Submodules/enigma-dev
+  - appveyor PushArtifact RadialGM-%CONFIGURATION%-%PLATFORM%.zip -FileName RadialGM-%CONFIGURATION%-%PLATFORM%.zip -DeploymentName RadialGM
 
 deploy:
   release: RadialGM-v$(appveyor_build_version)

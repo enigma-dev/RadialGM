@@ -2,6 +2,7 @@
 #define FONTEDITOR_H
 
 #include "BaseEditor.h"
+#include "Models/RepeatedMessageModel.h"
 
 #include <QFont>
 #include <QItemSelection>
@@ -14,7 +15,7 @@ class FontEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit FontEditor(ProtoModelPtr model, QWidget* parent);
+  explicit FontEditor(MessageModel* model, QWidget* parent);
   ~FontEditor() override;
 
  public slots:
@@ -34,9 +35,9 @@ class FontEditor : public BaseEditor {
 
  private:
   void UpdateRangeText(int min, int max);
-  Ui::FontEditor* ui;
-  QFont font;
-  RepeatedProtoModelPtr rangesModel;
+  Ui::FontEditor* _ui;
+  QFont _font;
+  RepeatedMessageModel* _rangesModel;
 };
 
 #endif  // FONTEDITOR_H

@@ -22,47 +22,59 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/Dialogs")
 
 # Include ENIGMA things
 set(ENIGMA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/enigma-dev)
-include_directories("${ENIGMA_DIR}/shared/protos/codegen" "${ENIGMA_DIR}/CommandLine/libEGM")
+include_directories("${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/libEGM/libProtocols" "${ENIGMA_DIR}/CommandLine/libEGM")
+
+# Hack to get msys path
+if(WIN32 AND NOT MSVC)
+  get_filename_component(MINGW_BIN ${CMAKE_C_COMPILER} DIRECTORY)
+endif()
 
 # Populate a CMake variable with the sources
 set(RGM_SOURCES
+    Plugins/RGMPlugin.cpp
+    Plugins/ServerPlugin.cpp
     main.cpp
     MainWindow.cpp
     Dialogs/PreferencesDialog.cpp
     Dialogs/TimelineChangeMoment.cpp
-    Editors/BaseEditor.cpp
-    Editors/CodeEditor.cpp
-    Editors/BackgroundEditor.cpp
-    Editors/ObjectEditor.cpp
-    Editors/SoundEditor.cpp
-    Editors/ScriptEditor.cpp
-    Editors/ShaderEditor.cpp
-    Editors/FontEditor.cpp
-    Editors/PathEditor.cpp
-    Editors/TimelineEditor.cpp
-    Editors/RoomEditor.cpp
-    Editors/SpriteEditor.cpp
-    Editors/SettingsEditor.cpp
-    Models/TreeModel.cpp
-    Models/SpriteModel.cpp
-    Models/ProtoModel.cpp
-    Models/ModelMapper.cpp
-    Models/ImmediateMapper.cpp
-    Models/ResourceModelMap.cpp
-    Models/RepeatedProtoModel.cpp
-    Models/TreeSortFilterProxyModel.cpp
     Components/ArtManager.cpp
     Components/Utility.cpp
-    Components/RecentFiles.cpp
     Components/QMenuView.cpp
-    Widgets/BackgroundView.cpp
-    Widgets/CodeWidget.cpp
-    Widgets/StackedCodeWidget.cpp
-    Widgets/ColorPicker.cpp
-    Widgets/RoomView.cpp
+    Components/RecentFiles.cpp
+    Models/TreeSortFilterProxyModel.cpp
+    Models/MessageModel.cpp
+    Models/RepeatedImageModel.cpp
+    Models/RepeatedStringModel.cpp
+    Models/ModelMapper.cpp
+    Models/ProtoModel.cpp
+    Models/RepeatedMessageModel.cpp
+    Models/ImmediateMapper.cpp
+    Models/ResourceModelMap.cpp
+    Models/TreeModel.cpp
+    Editors/ObjectEditor.cpp
+    Editors/PathEditor.cpp
+    Editors/CodeEditor.cpp
+    Editors/SoundEditor.cpp
+    Editors/FontEditor.cpp
+    Editors/BackgroundEditor.cpp
+    Editors/TimelineEditor.cpp
+    Editors/ShaderEditor.cpp
+    Editors/ScriptEditor.cpp
+    Editors/SettingsEditor.cpp
+    Editors/SpriteEditor.cpp
+    Editors/BaseEditor.cpp
+    Editors/RoomEditor.cpp
+    Widgets/CodeWidgetPlain.cpp
     Widgets/AssetView.cpp
-    Plugins/RGMPlugin.cpp
-    Plugins/ServerPlugin.cpp
+    Widgets/CodeWidget.cpp
+    Widgets/BackgroundView.cpp
+    Widgets/StackedCodeWidget.cpp
+    Widgets/RoomView.cpp
+    Widgets/PathView.cpp
+    Widgets/AssetScrollAreaBackground.cpp
+    Widgets/SpriteSubimageListView.cpp
+    Widgets/ColorPicker.cpp
+    Widgets/SpriteView.cpp
 )
 
 if (MSVC)
@@ -70,61 +82,73 @@ if (MSVC)
 endif()
 
 set(RGM_HEADERS
-    main.h
+    Plugins/ServerPlugin.h
+    Plugins/RGMPlugin.h
     MainWindow.h
+    main.h
     Dialogs/PreferencesDialog.h
     Dialogs/PreferencesKeys.h
     Dialogs/TimelineChangeMoment.h
-    Editors/CodeEditor.h
-    Editors/BaseEditor.h
-    Editors/BackgroundEditor.h
-    Editors/ObjectEditor.h
-    Editors/SoundEditor.h
-    Editors/ScriptEditor.h
-    Editors/ShaderEditor.h
+    Components/Logger.h
+    Components/RecentFiles.h
+    Components/QMenuView.h
+    Components/ArtManager.h
+    Components/QMenuView_p.h
+    Components/Utility.h
+    Models/TreeModel.h
+    Models/RepeatedStringModel.h
+    Models/ResourceModelMap.h
+    Models/ModelMapper.h
+    Models/TreeSortFilterProxyModel.h
+    Models/RepeatedImageModel.h
+    Models/MessageModel.h
+    Models/ImmediateMapper.h
+    Models/RepeatedMessageModel.h
+    Models/ProtoModel.h
+    Models/RepeatedModel.h
     Editors/FontEditor.h
     Editors/PathEditor.h
-    Editors/TimelineEditor.h
-    Editors/RoomEditor.h
     Editors/SpriteEditor.h
     Editors/SettingsEditor.h
-    Models/TreeModel.h
-    Models/ProtoModel.h
-    Models/ModelMapper.h
-    Models/ImmediateMapper.h
-    Models/SpriteModel.h
-    Models/ResourceModelMap.h
-    Models/RepeatedProtoModel.h
-    Models/TreeSortFilterProxyModel.h
-    Components/ArtManager.h
-    Components/RecentFiles.h
-    Components/Utility.h
-    Components/QMenuView.h
-    Components/Logger.h
-    Widgets/BackgroundView.h
-    Widgets/CodeWidget.h
+    Editors/SoundEditor.h
+    Editors/TimelineEditor.h
+    Editors/BackgroundEditor.h
+    Editors/ObjectEditor.h
+    Editors/RoomEditor.h
+    Editors/BaseEditor.h
+    Editors/ScriptEditor.h
+    Editors/CodeEditor.h
+    Editors/ShaderEditor.h
+    Widgets/AssetScrollArea.h
     Widgets/StackedCodeWidget.h
-    Widgets/ColorPicker.h
+    Widgets/AssetScrollAreaBackground.h
+    Widgets/PathView.h
+    Widgets/ResourceSelector.h
     Widgets/RoomView.h
     Widgets/AssetView.h
-    Plugins/RGMPlugin.h
-    Plugins/ServerPlugin.h
+    Widgets/ColorPicker.h
+    Widgets/SpriteSubimageListView.h
+    Widgets/CodeWidget.h
+    Widgets/SpriteView.h
+    Widgets/BackgroundView.h
+
 )
 
 set(RGM_UI
     MainWindow.ui
+    Dialogs/TimelineChangeMoment.ui
     Dialogs/PreferencesDialog.ui
     Dialogs/AddImageDialog.ui
-    Dialogs/TimelineChangeMoment.ui
     Editors/CodeEditor.ui
+    Editors/SoundEditor.ui
     Editors/BackgroundEditor.ui
-    Editors/ObjectEditor.ui
-    Editors/FontEditor.ui
-    Editors/PathEditor.ui
-    Editors/TimelineEditor.ui
-    Editors/RoomEditor.ui
     Editors/SpriteEditor.ui
+    Editors/PathEditor.ui
     Editors/SettingsEditor.ui
+    Editors/RoomEditor.ui
+    Editors/FontEditor.ui
+    Editors/TimelineEditor.ui
+    Editors/ObjectEditor.ui
 )
 
 set(RGM_RC
@@ -150,9 +174,9 @@ endif(WIN32)
 # we do this even in release mode for "Editor Diagnostics"
 target_compile_definitions(${EXE} PUBLIC QT_MESSAGELOGCONTEXT)
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
-set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT WIN32)
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+  set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
 endif()
 
 message(STATUS "Initial build flags:")
@@ -189,20 +213,6 @@ include_directories(${EXE} PRIVATE ${RAPIDJSON_INCLUDE_DIRS})
 find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${EXE} PRIVATE yaml-cpp)
 
-# Find libEGM
-# Debug
-find_library(LIB_EGM_D NAMES EGMd EGM PATHS ${ENIGMA_DIR})
-# Release
-find_library(LIB_EGM NAMES EGM PATHS ${ENIGMA_DIR})
-target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_EGM_D},${LIB_EGM}>")
-
-# Find libProtocols
-# Debug
-find_library(LIB_PROTO_D NAMES Protocolsd Protocols PATHS ${ENIGMA_DIR})
-# Release
-find_library(LIB_PROTO NAMES Protocols PATHS ${ENIGMA_DIR})
-target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_PROTO_D},${LIB_PROTO}>")
-
 # Find GRPC
 find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
 find_library(LIB_GRPC NAMES grpc)
@@ -223,7 +233,6 @@ target_link_libraries(${EXE} PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 # Find Qt
 find_package(Qt5 COMPONENTS Core Widgets Gui PrintSupport Multimedia REQUIRED)
 target_link_libraries(${EXE} PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Multimedia)
-
 
 if(MSVC)
     target_link_libraries(${EXE} PRIVATE Qt5::WinMain)
@@ -274,6 +283,11 @@ if(MSVC)
                           )
 endif(MSVC)
 
+# LibProto
+add_subdirectory(Submodules/enigma-dev/CommandLine/libEGM)
+add_dependencies(${EXE} "EGM")
+target_link_libraries(${EXE} PRIVATE "EGM" "Protocols")
+
 # Find FreeType
 find_package(Freetype REQUIRED)
 include_directories(${FREETYPE_INCLUDE_DIRS})
@@ -299,3 +313,41 @@ if(WIN32)
 	# Windows is a turd
 	target_link_libraries(${EXE} PRIVATE Ws2_32 Wtsapi32 Wldap32 Crypt32 Winmm Userenv Netapi32 version Dwmapi Imm32)
 endif(WIN32)
+
+install(TARGETS ${EXE} DESTINATION "${ENIGMA_DIR}")
+
+if(WIN32 AND NOT MSVC)
+
+  find_file(LIB_GCC NAMES libgcc_s_dw2-1.dll libgcc_s_seh-1.dll PATHS "${MINGW_BIN}")
+  install(FILES
+            "${LIB_GCC}"
+            "${MINGW_BIN}/libwinpthread-1.dll"
+            "${MINGW_BIN}/libstdc++-6.dll" 
+            "${MINGW_BIN}/libgrpc++_unsecure.dll"
+            "${MINGW_BIN}/libprotobuf.dll"
+            "${MINGW_BIN}/zlib1.dll"
+            "${MINGW_BIN}/libpng16-16.dll"
+            "${MINGW_BIN}/libpugixml.dll"
+            "${MINGW_BIN}/libgpr.dll"
+            "${MINGW_BIN}/libgrpc_unsecure.dll"
+            "${MINGW_BIN}/yaml-cpp.dll"
+            "${MINGW_BIN}/libdouble-conversion.dll"
+            "${MINGW_BIN}/libicuuc65.dll"
+            "${MINGW_BIN}/libicuin65.dll"
+            "${MINGW_BIN}/libpcre2-16-0.dll"
+            "${MINGW_BIN}/libcares-3.dll"
+            "${MINGW_BIN}/libaddress_sorting.dll"
+            "${MINGW_BIN}/libharfbuzz-0.dll"
+            "${MINGW_BIN}/libzstd.dll"
+            "${MINGW_BIN}/libicudt65.dll"
+            "${MINGW_BIN}/libglib-2.0-0.dll"
+            "${MINGW_BIN}/libfreetype-6.dll"
+            "${MINGW_BIN}/libgraphite2.dll"
+            "${MINGW_BIN}/libbz2-1.dll"
+            "${MINGW_BIN}/libintl-8.dll"
+            "${MINGW_BIN}/libpcre-1.dll"
+            "${MINGW_BIN}/libiconv-2.dll"
+          DESTINATION "${ENIGMA_DIR}")
+
+    install(CODE "execute_process(COMMAND windeployqt.exe --no-translations ${ENIGMA_DIR}/RadialGM.exe)")
+endif() 

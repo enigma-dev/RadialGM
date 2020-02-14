@@ -16,7 +16,7 @@ class RoomEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit RoomEditor(ProtoModelPtr model, QWidget* parent);
+  explicit RoomEditor(MessageModel* model, QWidget* parent);
   ~RoomEditor() override;
 
   void setZoom(qreal zoom);
@@ -32,12 +32,10 @@ class RoomEditor : public BaseEditor {
   void updateCursorPositionLabel(const QPoint& pos);
 
  private:
-  Ui::RoomEditor* ui;
-  QLabel *cursorPositionLabel, *assetNameLabel;
-  ProtoModelPtr roomModel;
-  ImmediateDataWidgetMapper* viewMapper;
-
-  bool eventFilter(QObject* obj, QEvent* event) override;
+  Ui::RoomEditor* _ui;
+  QLabel *cursorPositionLabel, *_assetNameLabel;
+  MessageModel* _roomModel;
+  ImmediateDataWidgetMapper* _viewMapper;
 };
 
 #endif  // ROOMEDITOR_H

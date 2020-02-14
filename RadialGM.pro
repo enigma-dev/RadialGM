@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui printsupport multimedia
+QT       += core gui printsupport multimedia testlib
 CONFIG   += c++11
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -21,7 +21,7 @@ QMAKE_TARGET_DESCRIPTION = ENIGMA Development Environment
 QMAKE_TARGET_COPYRIGHT = "Copyright \\251 2007-2018 ENIGMA Dev Team"
 
 # Uncomment if you want QPlainTextEdit used in place of QScintilla
-#CONFIG += rgm_disable_syntaxhighlight
+CONFIG += rgm_disable_syntaxhighlight
 
 rgm_disable_syntaxhighlight {
   SOURCES += Widgets/CodeWidgetPlain.cpp
@@ -46,7 +46,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 INCLUDEPATH += /usr/include/qt/ \
                $$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
-               $$PWD/Submodules/enigma-dev/shared/protos/codegen
+               $$PWD/Submodules/enigma-dev/shared/protos/.eobjs/
 LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
         -lEGM \
         -lprotobuf \
@@ -59,8 +59,16 @@ LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
 SOURCES += \
     Dialogs/TimelineChangeMoment.cpp \
     Editors/ShaderEditor.cpp \
+    Editors/SpriteEditor.cpp \
+    Models/MessageModel.cpp \
+    Models/RepeatedImageModel.cpp \
+    Models/RepeatedMessageModel.cpp \
+    Models/RepeatedStringModel.cpp \
+    Widgets/AssetScrollAreaBackground.cpp \
+    Widgets/PathView.cpp \
+    Widgets/SpriteSubimageListView.cpp \
+    Widgets/SpriteView.cpp \
     Widgets/StackedCodeWidget.cpp \
-    Widgets/StackedCodewidget.cpp \
     main.cpp \
     MainWindow.cpp \
     Dialogs/PreferencesDialog.cpp \
@@ -72,7 +80,6 @@ SOURCES += \
     Editors/PathEditor.cpp \
     Editors/TimelineEditor.cpp \
     Editors/RoomEditor.cpp \
-    Editors/SpriteEditor.cpp \
     Editors/SettingsEditor.cpp \
     Widgets/BackgroundView.cpp \
     Widgets/CodeWidget.cpp \
@@ -83,7 +90,6 @@ SOURCES += \
     Components/ArtManager.cpp \
     Models/ProtoModel.cpp \
     Models/ImmediateMapper.cpp \
-    Models/SpriteModel.cpp \
     Components/Utility.cpp \
     Plugins/RGMPlugin.cpp \
     Plugins/ServerPlugin.cpp \
@@ -92,13 +98,13 @@ SOURCES += \
     Editors/ScriptEditor.cpp \
     Models/ResourceModelMap.cpp \
     Models/ModelMapper.cpp \
-    Models/RepeatedProtoModel.cpp \
     Components/QMenuView.cpp \
     Models/TreeSortFilterProxyModel.cpp
 
 HEADERS += \
     Dialogs/TimelineChangeMoment.h \
     Editors/ShaderEditor.h \
+    Editors/SpriteEditor.h \
     MainWindow.h \
     Dialogs/PreferencesDialog.h \
     Editors/BaseEditor.h \
@@ -109,23 +115,32 @@ HEADERS += \
     Editors/SoundEditor.h \
     Editors/TimelineEditor.h \
     Editors/RoomEditor.h \
-    Editors/SpriteEditor.h \
     Editors/SettingsEditor.h \
+    Models/MessageModel.h \
+    Models/RepeatedImageModel.h \
+    Models/RepeatedMessageModel.h \
+    Models/RepeatedModel.h \
+    Models/RepeatedStringModel.h \
+    Widgets/AssetScrollArea.h \
+    Widgets/AssetScrollAreaBackground.h \
     Widgets/BackgroundView.h \
     Widgets/CodeWidget.h \
     Widgets/ColorPicker.h \
     Widgets/AssetView.h \
+    Widgets/PathView.h \
+    Widgets/ResourceSelector.h \
     Widgets/RoomView.h \
     Models/TreeModel.h \
     Components/Logger.h \
     Components/ArtManager.h \
     Models/ProtoModel.h \
     Models/ImmediateMapper.h \
-    Models/SpriteModel.h \
     Components/Utility.h \
     Plugins/RGMPlugin.h \
     Plugins/ServerPlugin.h \
     Components/RecentFiles.h \
+    Widgets/SpriteSubimageListView.h \
+    Widgets/SpriteView.h \
     Widgets/StackedCodeWidget.h \
     main.h \
     Dialogs/PreferencesKeys.h \
@@ -133,7 +148,6 @@ HEADERS += \
     Editors/ScriptEditor.h \
     Models/ResourceModelMap.h \
     Models/ModelMapper.h \
-    Models/RepeatedProtoModel.h \
     Components/QMenuView.h \
     Components/QMenuView_p.h \
     Models/TreeSortFilterProxyModel.h

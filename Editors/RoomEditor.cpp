@@ -5,6 +5,8 @@
 #include "ui_RoomEditor.h"
 
 #include "Models/ImmediateMapper.h"
+#include "Models/MessageModel.h"
+#include "Models/RepeatedMessageModel.h"
 #include "Models/TreeSortFilterProxyModel.h"
 #include "Room.pb.h"
 
@@ -16,161 +18,148 @@
 
 using View = buffers::resources::Room::View;
 
-RoomEditor::RoomEditor(ProtoModelPtr model, QWidget* parent) : BaseEditor(model, parent), ui(new Ui::RoomEditor) {
-  ui->setupUi(this);
-  connect(ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
+RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model, parent), _ui(new Ui::RoomEditor) {
+  _ui->setupUi(this);
+  connect(_ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
 
-  nodeMapper->addMapping(ui->roomName, TreeNode::kNameFieldNumber);
-  nodeMapper->toFirst();
+  _ui->roomPreviewBackground->SetAssetView(_ui->roomView);
 
-  resMapper->addMapping(ui->speedSpinBox, Room::kSpeedFieldNumber);
-  resMapper->addMapping(ui->widthSpinBox, Room::kWidthFieldNumber);
-  resMapper->addMapping(ui->heightSpinBox, Room::kHeightFieldNumber);
-  resMapper->addMapping(ui->clearCheckBox, Room::kClearDisplayBufferFieldNumber);
-  resMapper->addMapping(ui->persistentCheckBox, Room::kPersistentFieldNumber);
-  resMapper->addMapping(ui->captionLineEdit, Room::kCaptionFieldNumber);
+  _nodeMapper->addMapping(_ui->roomName, TreeNode::kNameFieldNumber);
+  _nodeMapper->toFirst();
 
-  resMapper->addMapping(ui->enableViewsCheckBox, Room::kEnableViewsFieldNumber);
-  resMapper->addMapping(ui->clearViewportCheckBox, Room::kClearViewBackgroundFieldNumber);
-  resMapper->toFirst();
+  _resMapper->addMapping(_ui->speedSpinBox, Room::kSpeedFieldNumber);
+  _resMapper->addMapping(_ui->widthSpinBox, Room::kWidthFieldNumber);
+  _resMapper->addMapping(_ui->heightSpinBox, Room::kHeightFieldNumber);
+  _resMapper->addMapping(_ui->clearCheckBox, Room::kClearDisplayBufferFieldNumber);
+  _resMapper->addMapping(_ui->persistentCheckBox, Room::kPersistentFieldNumber);
+  _resMapper->addMapping(_ui->captionLineEdit, Room::kCaptionFieldNumber);
 
-  viewMapper = new ImmediateDataWidgetMapper(this);
-  viewMapper->addMapping(ui->viewVisibleCheckBox, View::kVisibleFieldNumber);
+  _resMapper->addMapping(_ui->enableViewsCheckBox, Room::kEnableViewsFieldNumber);
+  _resMapper->addMapping(_ui->clearViewportCheckBox, Room::kClearViewBackgroundFieldNumber);
+  _resMapper->toFirst();
 
-  viewMapper->addMapping(ui->cameraXSpinBox, View::kXviewFieldNumber);
-  viewMapper->addMapping(ui->cameraYSpinBox, View::kYviewFieldNumber);
-  viewMapper->addMapping(ui->cameraWidthSpinBox, View::kWviewFieldNumber);
-  viewMapper->addMapping(ui->cameraHeightSpinBox, View::kHviewFieldNumber);
+  _viewMapper = new ImmediateDataWidgetMapper(this);
+  _viewMapper->addMapping(_ui->viewVisibleCheckBox, View::kVisibleFieldNumber);
 
-  viewMapper->addMapping(ui->viewportXSpinBox, View::kXportFieldNumber);
-  viewMapper->addMapping(ui->viewportYSpinBox, View::kYportFieldNumber);
-  viewMapper->addMapping(ui->viewportWidthSpinBox, View::kWportFieldNumber);
-  viewMapper->addMapping(ui->viewportHeightSpinBox, View::kHportFieldNumber);
+  _viewMapper->addMapping(_ui->cameraXSpinBox, View::kXviewFieldNumber);
+  _viewMapper->addMapping(_ui->cameraYSpinBox, View::kYviewFieldNumber);
+  _viewMapper->addMapping(_ui->cameraWidthSpinBox, View::kWviewFieldNumber);
+  _viewMapper->addMapping(_ui->cameraHeightSpinBox, View::kHviewFieldNumber);
 
-  viewMapper->addMapping(ui->followingHBorderSpinBox, View::kHborderFieldNumber);
-  viewMapper->addMapping(ui->followingVBorderSpinBox, View::kVborderFieldNumber);
-  viewMapper->addMapping(ui->followingHSpeedSpinBox, View::kHspeedFieldNumber);
-  viewMapper->addMapping(ui->followingVSpeedSpinBox, View::kVspeedFieldNumber);
-  viewMapper->toFirst();
+  _viewMapper->addMapping(_ui->viewportXSpinBox, View::kXportFieldNumber);
+  _viewMapper->addMapping(_ui->viewportYSpinBox, View::kYportFieldNumber);
+  _viewMapper->addMapping(_ui->viewportWidthSpinBox, View::kWportFieldNumber);
+  _viewMapper->addMapping(_ui->viewportHeightSpinBox, View::kHportFieldNumber);
+
+  _viewMapper->addMapping(_ui->followingHBorderSpinBox, View::kHborderFieldNumber);
+  _viewMapper->addMapping(_ui->followingVBorderSpinBox, View::kVborderFieldNumber);
+  _viewMapper->addMapping(_ui->followingHSpeedSpinBox, View::kHspeedFieldNumber);
+  _viewMapper->addMapping(_ui->followingVSpeedSpinBox, View::kVspeedFieldNumber);
+  _viewMapper->toFirst();
 
   QMenuView* objMenu = new QMenuView(this);
   TreeSortFilterProxyModel* treeProxy = new TreeSortFilterProxyModel(this);
   treeProxy->SetFilterType(TreeNode::TypeCase::kObject);
   treeProxy->setSourceModel(MainWindow::treeModel.get());
   objMenu->setModel(treeProxy);
-  ui->objectSelectButton->setMenu(objMenu);
+  _ui->objectSelectButton->setMenu(objMenu);
 
   connect(objMenu, &QMenu::triggered, this, &RoomEditor::SelectedObjectChanged);
 
-  connect(ui->currentViewComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-          [=](int index) { viewMapper->setCurrentIndex(index); });
-
-  // filter the room preview scroll area to paint
-  // the checkerboard transparency pattern and to
-  // track the cursor position for the status bar
-  ui->roomPreview->widget()->installEventFilter(this);
-  // track the cursor position on the transparency pattern for the status bar
-  ui->roomPreview->widget()->setMouseTracking(true);
-  // also need to track it on the room preview itself so the event is received
-  ui->roomView->setMouseTracking(true);
+  connect(_ui->currentViewComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+          [=](int index) { _viewMapper->setCurrentIndex(index); });
 
   cursorPositionLabel = new QLabel();
-  this->updateCursorPositionLabel(ui->roomPreview->widget()->cursor().pos());
-  assetNameLabel = new QLabel("obj_xxx");
+  connect(_ui->roomPreviewBackground, &AssetScrollAreaBackground::MouseMoved, [=](int x, int y) {
+    const GridDimensions g = _ui->roomView->GetGrid();
+    cursorPositionLabel->setText(tr("X %0, Y %1").arg(RoundNum(x, g.horSpacing)).arg(RoundNum(y, g.vertSpacing)));
+  });
+  _ui->statusBar->addWidget(cursorPositionLabel);
 
-  ui->statusBar->addWidget(cursorPositionLabel);
-  ui->statusBar->addWidget(assetNameLabel);
+  _assetNameLabel = new QLabel("obj_xxx");
+  _ui->statusBar->addWidget(_assetNameLabel);
+
+  // This updates all the model views in the event of a sprite is changed
+  connect(MainWindow::resourceMap.get(), &ResourceModelMap::DataChanged, this, [this]() {
+    _ui->instancesListView->reset();
+    _ui->tilesListView->reset();
+    _ui->layersPropertiesView->reset();
+  });
 
   RebindSubModels();
 }
 
-RoomEditor::~RoomEditor() { delete ui; }
+RoomEditor::~RoomEditor() { delete _ui; }
 
 void RoomEditor::RebindSubModels() {
-  roomModel = _model->GetSubModel(TreeNode::kRoomFieldNumber);
-  ui->roomView->SetResourceModel(roomModel);
+  _roomModel = _model->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
+  _ui->roomView->SetResourceModel(_roomModel);
 
-  RepeatedProtoModelPtr im = roomModel->GetRepeatedSubModel(Room::kInstancesFieldNumber);
+  RepeatedMessageModel* im = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
   QSortFilterProxyModel* imp = new QSortFilterProxyModel(this);
   imp->setSourceModel(im);
-  ui->instancesListView->setModel(imp);
+  _ui->instancesListView->setModel(imp);
 
   for (int c = 0; c < im->columnCount(); ++c) {
     if (c != Room::Instance::kNameFieldNumber && c != Room::Instance::kObjectTypeFieldNumber &&
         c != Room::Instance::kIdFieldNumber)
-      ui->instancesListView->hideColumn(c);
+      _ui->instancesListView->hideColumn(c);
     else
-      ui->instancesListView->resizeColumnToContents(c);
+      _ui->instancesListView->resizeColumnToContents(c);
   }
 
-  ui->instancesListView->header()->swapSections(Room::Instance::kNameFieldNumber,
-                                                Room::Instance::kObjectTypeFieldNumber);
+  _ui->instancesListView->header()->swapSections(Room::Instance::kNameFieldNumber,
+                                                 Room::Instance::kObjectTypeFieldNumber);
 
-  RepeatedProtoModelPtr tm = roomModel->GetRepeatedSubModel(Room::kTilesFieldNumber);
+  RepeatedMessageModel* tm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
   QSortFilterProxyModel* tmp = new QSortFilterProxyModel(this);
   tmp->setSourceModel(tm);
-  ui->tilesListView->setModel(tmp);
+  _ui->tilesListView->setModel(tmp);
 
   for (int c = 0; c < tm->columnCount(); ++c) {
     if (c != Room::Tile::kBackgroundNameFieldNumber && c != Room::Tile::kIdFieldNumber &&
         c != Room::Tile::kDepthFieldNumber && c != Room::Tile::kNameFieldNumber)
-      ui->tilesListView->hideColumn(c);
+      _ui->tilesListView->hideColumn(c);
     else
-      ui->tilesListView->resizeColumnToContents(c);
+      _ui->tilesListView->resizeColumnToContents(c);
   }
 
-  ui->tilesListView->header()->swapSections(Room::Tile::kNameFieldNumber, Room::Tile::kBackgroundNameFieldNumber);
+  _ui->tilesListView->header()->swapSections(Room::Tile::kNameFieldNumber, Room::Tile::kBackgroundNameFieldNumber);
 
-  RepeatedProtoModelPtr vm = roomModel->GetRepeatedSubModel(Room::kViewsFieldNumber);
-  viewMapper->setModel(vm);
+  RepeatedMessageModel* vm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kViewsFieldNumber);
+  _viewMapper->setModel(vm);
 
-  connect(ui->instancesListView->selectionModel(), &QItemSelectionModel::selectionChanged,
+  connect(_ui->instancesListView->selectionModel(), &QItemSelectionModel::selectionChanged,
           [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
             if (selected.empty()) return;
-            ui->tilesListView->clearSelection();
+            RepeatedMessageModel* im = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
+            _ui->tilesListView->clearSelection();
             auto selectedIndex = selected.indexes().first();
-            auto currentInstanceModel = roomModel->GetSubModel(Room::kInstancesFieldNumber, selectedIndex.row());
-            ui->layersPropertiesView->setModel(currentInstanceModel);
+            auto currentInstanceModel = im->GetSubModel<MessageModel*>(selectedIndex.row());
+            _ui->layersPropertiesView->setModel(currentInstanceModel);
           });
 
-  connect(ui->tilesListView->selectionModel(), &QItemSelectionModel::selectionChanged,
+  connect(_ui->tilesListView->selectionModel(), &QItemSelectionModel::selectionChanged,
           [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
             if (selected.empty()) return;
-            ui->instancesListView->clearSelection();
+            RepeatedMessageModel* tm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
+            _ui->instancesListView->clearSelection();
             auto selectedIndex = selected.indexes().first();
-            auto currentInstanceModel = roomModel->GetSubModel(Room::kTilesFieldNumber, selectedIndex.row());
-            ui->layersPropertiesView->setModel(currentInstanceModel);
+            auto currentInstanceModel = tm->GetSubModel<MessageModel*>(selectedIndex.row());
+            _ui->layersPropertiesView->setModel(currentInstanceModel);
           });
 
   BaseEditor::RebindSubModels();
 }
 
-bool RoomEditor::eventFilter(QObject* obj, QEvent* event) {
-  if (obj == ui->roomPreview->widget()) {
-    if (event->type() == QEvent::Paint) {
-      QPainter painter(ui->roomPreview->widget());
-      painter.scale(4, 4);
-      painter.fillRect(painter.viewport(), ArtManager::GetTransparenyBrush());
-      return false;
-    } else if (event->type() == QEvent::MouseMove) {
-      QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
-      QPoint roomPos = mouseEvent->pos() - ui->roomView->pos();
-      roomPos /= ui->roomView->GetZoom();
-      this->updateCursorPositionLabel(roomPos);
-    }
-  }
-
-  return QWidget::eventFilter(obj, event);
-}
-
-void RoomEditor::SelectedObjectChanged(QAction* action) { ui->currentObject->setText(action->text()); }
+void RoomEditor::SelectedObjectChanged(QAction* action) { _ui->currentObject->setText(action->text()); }
 
 void RoomEditor::updateCursorPositionLabel(const QPoint& pos) {
   this->cursorPositionLabel->setText(tr("X %0, Y %1").arg(pos.x()).arg(pos.y()));
 }
 
-void RoomEditor::on_actionZoomIn_triggered() { ui->roomView->SetZoom(ui->roomView->GetZoom() * 2); }
+void RoomEditor::on_actionZoomIn_triggered() { _ui->roomPreviewBackground->ZoomIn(); }
 
-void RoomEditor::on_actionZoomOut_triggered() { ui->roomView->SetZoom(ui->roomView->GetZoom() / 2); }
+void RoomEditor::on_actionZoomOut_triggered() { _ui->roomPreviewBackground->ZoomOut(); }
 
-void RoomEditor::on_actionZoom_triggered() { ui->roomView->SetZoom(1.0); }
+void RoomEditor::on_actionZoom_triggered() { _ui->roomPreviewBackground->ResetZoom(); }
