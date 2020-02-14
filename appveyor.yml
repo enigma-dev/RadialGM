@@ -90,7 +90,7 @@ build_script:
   - cmake -G "%GENERATOR%" %CMAKE_ARGS% -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" ..
   - cmake --build . --config "%BUILD_TYPE%"
   - cmake --install .
-  - 7z a RadialGM-%CONFIGURATION%-%PLATFORM%.zip ./Submodules/enigma-dev
+  - 7z a RadialGM-%CONFIGURATION%-%PLATFORM%.zip ../Submodules/enigma-dev
   - appveyor PushArtifact RadialGM-%CONFIGURATION%-%PLATFORM%.zip -FileName RadialGM-%CONFIGURATION%-%PLATFORM%.zip -DeploymentName RadialGM
 
 deploy:
