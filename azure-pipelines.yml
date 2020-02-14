@@ -5,6 +5,7 @@ jobs:
 - job: RadialGM_MSVC_64
   pool:
     vmImage: 'windows-latest'
+  timeoutInMinutes: 180
 
   steps:
   - task: Cache@2
