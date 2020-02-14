@@ -33,7 +33,7 @@ jobs:
   - script: |
       cmake --build $(Build.BinariesDirectory)/build-Debug --config Debug
       cmake --install $(Build.BinariesDirectory)/build-Debug
-      7z a $(Build.SourcesDirectory)/RadialGM-MSVC-Debug-x64.exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
+      7z a $(Build.BinariesDirectory)/RadialGM-MSVC-Debug-x64.exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
       cd $(Build.SourcesDirectory)/Submodules/enigma-dev && git clean -fx
     displayName: 'Build - Debug'
 
@@ -45,6 +45,6 @@ jobs:
   - script: |
       cmake --build $(Build.BinariesDirectory)/build-Release --config MinSizeRel
       cmake --install $(Build.BinariesDirectory)/build-Release
-      7z a $(Build.SourcesDirectory)/RadialGM-MSVC-Release-x64.exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
+      7z a $(Build.BinariesDirectory)/RadialGM-MSVC-Release-x64.exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
       cd $(Build.SourcesDirectory)/Submodules/enigma-dev && git clean -fx
     displayName: 'Build - Release'
