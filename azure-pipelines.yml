@@ -9,8 +9,8 @@ jobs:
 
   steps:
   - checkout: self
-  submodules: true
-  persistCredentials: true
+    submodules: true
+    persistCredentials: true
 
   - task: Cache@2
     displayName: 'Cache vcpkgs artifacts'
