@@ -8,6 +8,10 @@ jobs:
   timeoutInMinutes: 250
 
   steps:
+  - checkout: self
+  submodules: true
+  persistCredentials: true
+
   - task: Cache@2
     displayName: 'Cache vcpkgs artifacts'
     inputs:
