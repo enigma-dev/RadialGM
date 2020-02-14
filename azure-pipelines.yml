@@ -28,9 +28,20 @@ jobs:
     displayName: 'Debug Build'
     inputs:
       workingDirectory: build-Debug
-      cmakeArgs: '-G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Debug -DVCPKG_TARGET_TRIPLET=x64-windows-static -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows-static\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)'
+      cmakeArgs: '-G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Debug -DVCPKG_TARGET_TRIPLET=x64-windows-static -DPROTOBUF_IMPORT_DIRS=$(Build.SourcesDirectory)\vcpkg\installed\x64-windows-static\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)'
+  - script: |
+      cmake --build . --config Debug
+      cmake --install .
+      7z a $(Build.SourcesDirectory)/RadialGM-MSVC-Debug-x64.exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
+      cd $(Build.SourcesDirectory)/Submodules/enigma-dev && git clean -fx
+
   - task: CMake@1
     displayName: 'Release Build'
     inputs:
       workingDirectory: build-Release
       cmakeArgs: '-G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_TARGET_TRIPLET=x64-windows-static -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows-static\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)'
+  - script: |
+      cmake --build . --config Debug
+      cmake --install .
+      7z a $(Build.SourcesDirectory)/RadialGM-MSVC-Release-x64.exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
+      cd $(Build.SourcesDirectory)/Submodules/enigma-dev && git clean -fx
