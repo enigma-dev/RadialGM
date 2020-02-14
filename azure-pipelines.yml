@@ -19,26 +19,3 @@ jobs:
       vcpkgArguments: "@$(Build.SourcesDirectory)/msvc-static-64.txt"
       vcpkgGitCommitId: $(vcpkgGitRef)
       vcpkgGitURL: https://github.com/microsoft/vcpkg.git
-
-  - task: run-cmake@0
-    displayName: 'Debug Build'
-    inputs:
-      cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
-      cmakeListsTxtPath: 'CmakeLists.txt'
-      cmakeGenerator: VS16Win64
-      cmakeBuildType: Debug
-      buildDirectory: 'build'
-      useVcpkgToolchainFile: true
-      vcpkgTriplet: x64-windows-static
-      cmakeAppendedArgs: -DPROTOBUF_IMPORT_DIRS="%VCPKG_DIR%\installed\%TRIPLET_NAME%\include"
-  - task: run-cmake@0
-    displayName: 'Release Build'
-    inputs:
-      cmakeListsOrSettingsJson: 'CMakeListsTxtBasic'
-      cmakeListsTxtPath: 'CMakeLists.txt'
-      cmakeGenerator: VS16Win64
-      cmakeBuildType: MinSizeRel
-      buildDirectory: 'build'
-      useVcpkgToolchainFile: true
-      vcpkgTriplet: x64-windows-static
-      cmakeAppendedArgs: -DPROTOBUF_IMPORT_DIRS="%VCPKG_DIR%\installed\%TRIPLET_NAME%\include"
