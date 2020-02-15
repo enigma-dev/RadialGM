@@ -1,6 +1,5 @@
 variables:
   vcpkgGitRef: 1be75a28bfce2084bb0b59ec92a6853f13d7be66 # Update this git ref to update vcpkg
-  grpcGitRef: a747a50cc12e21f09001aac622ce649b556d5a10 # Update this git ref to update grpc
 
 jobs:
 - job: Ubuntu
@@ -9,62 +8,22 @@ jobs:
     vmImage: 'ubuntu-latest'
 
   steps:
-  - checkout: self
-    submodules: true
-    persistCredentials: true
-
   - script: |
       sudo apt-get update
       sudo apt-get -y install build-essential cmake zlib1g-dev libboost-dev libboost-filesystem-dev libboost-system-dev libboost-program-options-dev libboost-iostreams-dev libglm-dev libpng-dev pulseaudio libpugixml-dev libyaml-cpp-dev rapidjson-dev qtbase5-dev qtmultimedia5-dev libqscintilla2-dev
     displayName: 'Dependencies'
 
-  - task: Cache@2
-    displayName: 'Cache gRPC'
-    inputs:
-      key: $(grpcGitRef) | "$(Agent.OS)"
-      path: '$(Build.BinariesDirectory)/gRPC'
-      cacheHitVar: CACHE_RESTORED
+  - script: |
+      arch-bootstrap -a x86_64 -r $(Build.BinariesDirectory)/arch-chroot
+      mount --bind /proc $(Build.BinariesDirectory)/arch-chroot/proc
+      mount --bind /sys $(Build.BinariesDirectory)/arch-chroot/sys
+      mount --bind /dev $(Build.BinariesDirectory)/arch-chroot/dev
+      mount --bind /dev/pts $(Build.BinariesDirectory)/arch-chroot/dev/pts
+    displayName: 'Build Arch chroot'
 
   - script: |
-      git clone https://github.com/grpc/grpc.git $(Build.BinariesDirectory)/gRPC
-      cd $(Build.BinariesDirectory)/gRPC
-      git submodule update --init
-      git checkout $(grpcGitRef)
-      mkdir build && cd build
-      cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="/usr" ..
-      make
-      mkdir protoBuild && cd protoBuild
-      cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="/usr" -Dprotobuf_BUILD_TESTS=OFF ../../third_party/protobuf/cmake
-      make
-    displayName: 'Build gRPC'
-    condition: ne(variables.CACHE_RESTORED, 'true')
-
-  - script: |
-      cd $(Build.BinariesDirectory)/gRPC/build
-      sudo make install
-      cd protoBuild
-      sudo make install
-    displayName: 'Install gRPC'
-
-  - task: CMake@1
-    displayName: 'CMake - Release'
-    inputs:
-      workingDirectory: $(Build.BinariesDirectory)/build-Release
-      cmakeArgs: '-G "Unix Makefiles" -DCMAKE_BUILD_TYPE="MinSizeRel" "$(Build.SourcesDirectory)"'
-  - script: |
-      cmake --build $(Build.BinariesDirectory)/build-Release --config MinSizeRel
-      cmake --install $(Build.BinariesDirectory)/build-Release --config MinSizeRel
-    displayName: 'Build - Release'
-
-  - task: CMake@1
-    displayName: 'CMake - Debug'
-    inputs:
-      workingDirectory: $(Build.BinariesDirectory)/build-Debug
-      cmakeArgs: '-G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug $(Build.SourcesDirectory)'
-  - script: |
-      cmake --build $(Build.BinariesDirectory)/build-Debug --config Debug
-      cmake --install $(Build.BinariesDirectory)/build-Debug --config Debug
-    displayName: 'Build - Release'
+      sudo chroot $(Build.BinariesDirectory)/arch-chroot pacman -Sy yaml-cpp
+    displayName: 'Arch Release Build'
 
     
 - job: RadialGM_MSVC_64
