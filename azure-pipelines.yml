@@ -38,34 +38,6 @@ jobs:
       make
     displayName: 'Build gRPC'
     condition: ne(variables.CACHE_RESTORED, 'true')
-
-  - script: |
-      cd $(Build.BinariesDirectory)/gRPC/build
-      sudo make install
-      cd protoBuild
-      sudo make install
-    displayName: 'Install gRPC'
-
-  - task: CMake@1
-    displayName: 'CMake - Release'
-    inputs:
-      workingDirectory: $(Build.BinariesDirectory)/build-Release
-      cmakeArgs: '-G "Unix Makefiles" -DCMAKE_BUILD_TYPE="MinSizeRel" "$(Build.SourcesDirectory)"'
-  - script: |
-      cmake --build $(Build.BinariesDirectory)/build-Release --config MinSizeRel
-      cmake --install $(Build.BinariesDirectory)/build-Release --config MinSizeRel
-    displayName: 'Build - Release'
-
-  - task: CMake@1
-    displayName: 'CMake - Debug'
-    inputs:
-      workingDirectory: $(Build.BinariesDirectory)/build-Debug
-      cmakeArgs: '-G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug $(Build.SourcesDirectory)'
-  - script: |
-      cmake --build $(Build.BinariesDirectory)/build-Debug --config Debug
-      cmake --install $(Build.BinariesDirectory)/build-Debug --config Debug
-    displayName: 'Build - Release'
-
     
 - job: RadialGM_MSVC_64
   displayName: 'RadialGM MSVC x64'
@@ -89,34 +61,3 @@ jobs:
       vcpkgArguments: "@$(Build.SourcesDirectory)/msvc-x64-deps.txt"
       vcpkgGitCommitId: $(vcpkgGitRef)
       vcpkgGitURL: https://github.com/microsoft/vcpkg.git
-
-  - task: CMake@1
-    displayName: 'CMake - Release'
-    inputs:
-      workingDirectory: $(Build.BinariesDirectory)/build-Release
-      cmakeArgs: '-G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)'
-  - script: |
-      cmake --build $(Build.BinariesDirectory)/build-Release --config MinSizeRel
-      cmake --install $(Build.BinariesDirectory)/build-Release --config MinSizeRel
-      if [ $? -ne 0 ]; then
-        exit 1
-      fi
-    displayName: 'Build - Release'
-
-  - task: CMake@1
-    displayName: 'CMake - Debug'
-    inputs:
-      workingDirectory: $(Build.BinariesDirectory)/build-Debug
-      cmakeArgs: '-G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Debug -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)'
-  - script: |
-      cmake --build $(Build.BinariesDirectory)/build-Debug --config Debug
-      cmake --install $(Build.BinariesDirectory)/build-Debug --config Debug
-      if [ $? -ne 0 ]; then
-        exit 1
-      fi
-    displayName: 'Build - Debug'
-
-  - script: |
-      7z a $(Build.BinariesDirectory)/RadialGM-MSVC-x64.exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
-      cd $(Build.SourcesDirectory)/Submodules/enigma-dev && git clean -fx
-    displayName: 'Package'
