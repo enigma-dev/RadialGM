@@ -33,7 +33,6 @@ jobs:
       git checkout $(grpcGitRef)
       mkdir build && cd build
       cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="/usr" ..
-      mkdir build && cd build
       make
     displayName: 'Build gRPC'
     condition: ne(variables.CACHE_RESTORED, 'true')
