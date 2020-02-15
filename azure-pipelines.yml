@@ -20,7 +20,7 @@ jobs:
       sudo cp -R  $(Build.SourcesDirectory) ./root.x86_64/
       cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
       echo 'Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch' >> /etc/pacman.d/mirrorlist
-      sed '\'s/CheckSpace//g\'' -i /etc/pacman.conf
+      sed 's/CheckSpace//g' -i /etc/pacman.conf
       pacman-key --init 
       pacman-key --populate archlinux
       pacman -Sy --noconfirm git gcc cmake protobuf grpc yaml-cpp pugixml rapidjson boost qt5 qscintilla-qt5
