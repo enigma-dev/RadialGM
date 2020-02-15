@@ -28,6 +28,8 @@ jobs:
     displayName: 'Bootstrap Archlinux'
 
   - script: |
+      cd $(Build.BinariesDirectory)
+      sudo cp -R  $(Build.SourcesDirectory) ./root.x86_64/
       cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
       cd RGM
       mkdir build
@@ -35,5 +37,6 @@ jobs:
       cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel ..
       make
       make install
+      sudo rm -rf RGM/
       EOF
     displayName: 'Arch Release Build'
