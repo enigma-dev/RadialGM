@@ -17,9 +17,9 @@ jobs:
       cd $(Build.BinariesDirectory)
       curl http://mirrors.acm.wpi.edu/archlinux/iso/latest/archlinux-bootstrap-2020.02.01-x86_64.tar.gz -o arch.tar.gz
       sudo tar xzf arch.tar.gz
-      sudo echo derp >> ./root.x86_64/etc/pacman.d/mirrorlist
       sudo cp -R  $(Build.SourcesDirectory) ./root.x86_64/
       cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+      sudo echo derp >> /etc/pacman.d/mirrorlist
       pacman-key --init 
       pacman-key --populate archlinux
       pacman -Sy git gcc cmake protobuf grpc yaml-cpp pugixml rapidjson boost qt5 qscintilla
