@@ -19,7 +19,7 @@ jobs:
       sudo tar xzf arch.tar.gz
       sudo cp -R  $(Build.SourcesDirectory) ./root.x86_64/
       cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
-      'echo Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch >> /etc/pacman.d/mirrorlist'
+      echo 'Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch' >> /etc/pacman.d/mirrorlist
       tail /etc/pacman.d/mirrorlist
       pacman-key --init 
       pacman-key --populate archlinux
