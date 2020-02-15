@@ -223,7 +223,7 @@ find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${EXE} PRIVATE yaml-cpp)
 
 # Find Protobuf
-find_package(Protobuf REQUIRED PATHS /usr/lib/x86_64-linux-gnu/cmake/protobuf)
+find_package(Protobuf REQUIRED)
 include_directories(${Protobuf_INCLUDE_DIRS})
 target_link_libraries(${EXE} PRIVATE ${Protobuf_LIBRARIES})
 
