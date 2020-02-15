@@ -12,10 +12,9 @@ jobs:
   - script: |
       curl http://mirrors.acm.wpi.edu/archlinux/iso/latest/archlinux-bootstrap-2020.02.01-x86_64.tar.gz -o arch.tar.gz
       sudo tar xzf arch.tar.gz
-      alias arch-run="sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/"
-      alias
+      arch-run="sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/"
       arch-run ./root.x86_64/ pacman-key --init 
-      arch-run ./root.x86_64/ pacman-key --populate archlinux
+      sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/ pacman-key --populate archlinux
     displayName: 'Build Arch chroot'
 
   - script: |
