@@ -2,6 +2,44 @@ variables:
   vcpkgGitRef: 1be75a28bfce2084bb0b59ec92a6853f13d7be66 # Update this git ref to update vcpkg
 
 jobs:
+- job: Ubuntu
+  displayName: 'RadialGM Ubuntu'
+  pool:
+    vmImage: 'ubuntu-latest'
+
+  steps:
+  - checkout: self
+    submodules: true
+    persistCredentials: true
+
+  - script: |
+      sudo apt-get -y install build-essential cmake zlib1g-dev libboost-dev\
+    libboost-filesystem-dev libboost-system-dev libboost-program-options-dev\
+    libboost-iostreams-dev libprotobuf-dev protobuf-compiler libglm-dev libpng-dev\
+    pulseaudio libpugixml-dev libyaml-cpp-dev rapidjson-dev qtbase5-dev ibqscintilla2-dev
+    displayName: 'Dependencies'
+
+  - task: CMake@1
+    displayName: 'CMake - Release'
+    inputs:
+      workingDirectory: $(Build.BinariesDirectory)/build-Release
+      cmakeArgs: '-G "Unix Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel $(Build.SourcesDirectory)'
+  - script: |
+      cmake --build $(Build.BinariesDirectory)/build-Release --config MinSizeRel
+      cmake --install $(Build.BinariesDirectory)/build-Release --config MinSizeRel
+    displayName: 'Build - Release'
+
+  - task: CMake@1
+    displayName: 'CMake - Debug'
+    inputs:
+      workingDirectory: $(Build.BinariesDirectory)/build-Debug
+      cmakeArgs: '-G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug $(Build.SourcesDirectory)'
+  - script: |
+      cmake --build $(Build.BinariesDirectory)/build-Debug --config Debug
+      cmake --install $(Build.BinariesDirectory)/build-Debug --config Debug
+    displayName: 'Build - Release'
+
+    
 - job: RadialGM_MSVC_64
   displayName: 'RadialGM MSVC x64'
   pool:
@@ -25,7 +63,7 @@ jobs:
       vcpkgGitCommitId: $(vcpkgGitRef)
       vcpkgGitURL: https://github.com/microsoft/vcpkg.git
 
-  - task: CMake@1
+    - task: CMake@1
     displayName: 'CMake - Release'
     inputs:
       workingDirectory: $(Build.BinariesDirectory)/build-Release
