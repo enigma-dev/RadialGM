@@ -15,8 +15,15 @@ jobs:
 
   - script: |
       sudo apt-get update
-      sudo apt-get -y install build-essential cmake zlib1g-dev libboost-dev libboost-filesystem-dev libboost-system-dev libboost-program-options-dev libboost-iostreams-dev libprotobuf-dev protobuf-compiler libglm-dev libpng-dev pulseaudio libpugixml-dev libyaml-cpp-dev rapidjson-dev qtbase5-dev libqscintilla2-dev
+      sudo apt-get -y install build-essential cmake zlib1g-dev libboost-dev libboost-filesystem-dev libboost-system-dev libboost-program-options-dev libboost-iostreams-dev libglm-dev libpng-dev pulseaudio libpugixml-dev libyaml-cpp-dev rapidjson-dev qtbase5-dev libqscintilla2-dev
     displayName: 'Dependencies'
+
+  - task: Cache@2
+    displayName: 'Cache gRPC'
+    inputs:
+      key: $(grpcGitRef) | "$(Agent.OS)"
+      path: '$(Build.BinariesDirectory)/gRPC'
+      cacheHitVar: CACHE_RESTORED
 
   - script: |
       git clone https://github.com/grpc/grpc.git $(Build.BinariesDirectory)/gRPC
@@ -26,8 +33,13 @@ jobs:
       mkdir build && cd build
       cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="/usr" ..
       make
-      make install
     displayName: 'Build gRPC'
+    condition: ne(variables.CACHE_RESTORED, 'true')
+
+  - script: |
+      cd $(Build.BinariesDirectory)/gRPC/build
+      sudo make install
+    displayName: 'Install gRPC'
 
   - task: CMake@1
     displayName: 'CMake - Release'
@@ -62,12 +74,12 @@ jobs:
     persistCredentials: true
 
   - task: Cache@2
-    displayName: 'Cache VCPKG artifacts'
+    displayName: 'Cache VCPKG Artifacts'
     inputs:
       key: $(Build.SourcesDirectory)/msvc-x64-deps.txt | "$(vcpkgGitRef)" | "$(Agent.OS)"
       path: '$(Build.BinariesDirectory)/vcpkg'
   - task: run-vcpkg@0
-    displayName: 'Run vcpkg'
+    displayName: 'Run VCPKG'
     inputs:
       vcpkgArguments: "@$(Build.SourcesDirectory)/msvc-x64-deps.txt"
       vcpkgGitCommitId: $(vcpkgGitRef)
