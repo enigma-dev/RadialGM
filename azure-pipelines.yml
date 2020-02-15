@@ -10,11 +10,13 @@ jobs:
   steps:
 
   - script: |
-      arch-bootstrap -a x86_64 -r $(Build.BinariesDirectory)/arch-chroot
-      mount --bind /proc $(Build.BinariesDirectory)/arch-chroot/proc
-      mount --bind /sys $(Build.BinariesDirectory)/arch-chroot/sys
-      mount --bind /dev $(Build.BinariesDirectory)/arch-chroot/dev
-      mount --bind /dev/pts $(Build.BinariesDirectory)/arch-chroot/dev/pts
+      git clone https://github.com/tokland/arch-bootstrap
+      cd arch-bootstrap
+      sudo arch-bootstrap -a x86_64 -r $(Build.BinariesDirectory)/arch-chroot
+      sudo mount --bind /proc $(Build.BinariesDirectory)/arch-chroot/proc
+      sudo mount --bind /sys $(Build.BinariesDirectory)/arch-chroot/sys
+      sudo mount --bind /dev $(Build.BinariesDirectory)/arch-chroot/dev
+      sudo mount --bind /dev/pts $(Build.BinariesDirectory)/arch-chroot/dev/pts
     displayName: 'Build Arch chroot'
 
   - script: |
