@@ -1,5 +1,6 @@
 variables:
   vcpkgGitRef: 1be75a28bfce2084bb0b59ec92a6853f13d7be66 # Update this git ref to update vcpkg
+  grpcGitRef: a747a50cc12e21f09001aac622ce649b556d5a10 # Update this git ref to update grpc
 
 jobs:
 - job: Ubuntu
@@ -16,6 +17,16 @@ jobs:
       sudo apt-get update
       sudo apt-get -y install build-essential cmake zlib1g-dev libboost-dev libboost-filesystem-dev libboost-system-dev libboost-program-options-dev libboost-iostreams-dev libprotobuf-dev protobuf-compiler libglm-dev libpng-dev pulseaudio libpugixml-dev libyaml-cpp-dev rapidjson-dev qtbase5-dev libqscintilla2-dev
     displayName: 'Dependencies'
+
+  - script: |
+      git clone https://github.com/grpc/grpc.git $(Build.BinariesDirectory)/gRPC
+      cd $(Build.BinariesDirectory)/gRPC
+      git checkout $(grpcGitRef)
+      mkdir build && cd build
+      cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="/usr" ..
+      make
+      make install
+    displayName: 'Build gRPC'
 
   - task: CMake@1
     displayName: 'CMake - Release'
