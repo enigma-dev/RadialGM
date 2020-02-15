@@ -8,17 +8,28 @@ jobs:
     vmImage: 'ubuntu-latest'
 
   steps:
+  - checkout: self
+    submodules: true
+    persistCredentials: true
 
   - script: |
       curl http://mirrors.acm.wpi.edu/archlinux/iso/latest/archlinux-bootstrap-2020.02.01-x86_64.tar.gz -o arch.tar.gz
       sudo tar xzf arch.tar.gz
-      ./root.x86_64/bin/arch-chroot ./root.x86_64/
+      cp -R  $(Build.SourcesDirectory) ./root.x86_64/RGM
       cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
       pacman-key --init 
       pacman-key --populate archlinux
+      pacman -Sy git gcc cmake protobuf grpc yaml-cpp pugixml rapidjson boost qt5 qscintilla
       EOF
-    displayName: 'Build Arch chroot'
+    displayName: 'Bootstrap Archlinux'
 
   - script: |
-      $archrun pacman -Sy yaml-cpp
+      cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+      cd RGM
+      mkdir build
+      cd build
+      cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel ..
+      make
+      make install
+      EOF
     displayName: 'Arch Release Build'
