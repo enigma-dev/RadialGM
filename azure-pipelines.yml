@@ -30,14 +30,17 @@ jobs:
       cd $(Build.BinariesDirectory)/gRPC
       git submodule update --init
       git checkout $(grpcGitRef)
-      mkdir build && cd build
+      mkdir grpcBuild && cd grpcBuild
       cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="/usr" ..
-      make
+      mkdir protoBuild && cd protoBuild
+      cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="./usr" -Dprotobuf_BUILD_TESTS=OFF ../../third_party/protobuf/cmake
     displayName: 'Build gRPC'
     condition: ne(variables.CACHE_RESTORED, 'true')
 
   - script: |
-      cd $(Build.BinariesDirectory)/gRPC/build
+      cd $(Build.BinariesDirectory)/gRPC/grpcBuild
+      sudo make install
+      cd protoBuild
       sudo make install
     displayName: 'Install gRPC'
 
