@@ -1,5 +1,5 @@
 variables:
-  vcpkgGitRef: 1be75a28bfce2084bb0b59ec92a6853f13d7be66
+  vcpkgGitRef: 1be75a28bfce2084bb0b59ec92a6853f13d7be66 # Update this git ref to update vcpkg
 
 jobs:
 - job: RadialGM_MSVC_64
@@ -26,12 +26,12 @@ jobs:
       vcpkgGitURL: https://github.com/microsoft/vcpkg.git
 
   - task: CMake@1
-    displayName: 'CMake Genertor - Debug'
+    displayName: 'CMake - Debug'
     inputs:
       workingDirectory: $(Build.BinariesDirectory)/build-Debug
       cmakeArgs: '-G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Debug -DVCPKG_TARGET_TRIPLET=x64-windows-static -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows-static\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)'
   - script: |
-      cmake --build $(Build.BinariesDirectory)/build-Debug --config Debug
+      cmake --build $(Build.BinariesDirectory)/build-Debug --target ALL_BUILD --config Debug
       cmake --install $(Build.BinariesDirectory)/build-Debug --config Debug
       if [ $? -ne 0 ]; then
         exit 1
@@ -39,12 +39,12 @@ jobs:
     displayName: 'Build - Debug'
 
   - task: CMake@1
-    displayName: 'CMake Genertor - Release'
+    displayName: 'CMake - Release'
     inputs:
       workingDirectory: $(Build.BinariesDirectory)/build-Release
       cmakeArgs: '-G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_TARGET_TRIPLET=x64-windows-static -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows-static\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)'
   - script: |
-      cmake --build $(Build.BinariesDirectory)/build-Release --config MinSizeRel
+      cmake --build $(Build.BinariesDirectory)/build-Release --target ALL_BUILD --config MinSizeRel
       cmake --install $(Build.BinariesDirectory)/build-Release --config MinSizeRel
       if [ $? -ne 0 ]; then
         exit 1

@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.11)
 
-set(EXE "RadialGM")
+if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
+  set(EXE "RadialGM")
+else()
+  set(EXE "RadialGM-Debug")
+endif()
+
 set(EXE_VERSION "0.1")
 set(EXE_DESCRIPTION "ENIGMA IDE")
 
@@ -349,5 +354,5 @@ if(WIN32 AND NOT MSVC)
             "${MINGW_BIN}/libiconv-2.dll"
           DESTINATION "${ENIGMA_DIR}")
 
-    install(CODE "execute_process(COMMAND windeployqt.exe --no-translations ${ENIGMA_DIR}/RadialGM.exe)")
+    install(CODE "execute_process(COMMAND windeployqt.exe --no-translations ${ENIGMA_DIR}/${EXE}.exe)")
 endif() 
