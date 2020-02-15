@@ -94,9 +94,9 @@ jobs:
     displayName: 'CMake - Release'
     inputs:
       workingDirectory: $(Build.BinariesDirectory)/build-Release
-      cmakeArgs: '-G "Visual Studio 16 2019" -A "x64" -DVCPKG_ROOT="$(Build.BinariesDirectory)\vcpkg" -DCMAKE_BUILD_TYPE="MinSizeRel" -DVCPKG_TARGET_TRIPLET="x64-windows" -DPROTOBUF_IMPORT_DIRS="$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE="$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake" "$(Build.SourcesDirectory)"'
+      cmakeArgs: '-G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)'
   - script: |
-      cmake --build $(Build.BinariesDirectory)/build-Release --target ALL_BUILD --config MinSizeRel
+      cmake --build $(Build.BinariesDirectory)/build-Release --config MinSizeRel
       cmake --install $(Build.BinariesDirectory)/build-Release --config MinSizeRel
       if [ $? -ne 0 ]; then
         exit 1
@@ -107,7 +107,7 @@ jobs:
     displayName: 'CMake - Debug'
     inputs:
       workingDirectory: $(Build.BinariesDirectory)/build-Debug
-      cmakeArgs: '-G "Visual Studio 16 2019" -A "x64" -DVCPKG_ROOT="$(Build.BinariesDirectory)\vcpkg" -DCMAKE_BUILD_TYPE="Debug" -DVCPKG_TARGET_TRIPLET="x64-windows" -DPROTOBUF_IMPORT_DIRS="$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE="$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake" "$(Build.SourcesDirectory)"'
+      cmakeArgs: '-G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Debug -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)'
   - script: |
       cmake --build $(Build.BinariesDirectory)/build-Debug --config Debug
       cmake --install $(Build.BinariesDirectory)/build-Debug --config Debug
