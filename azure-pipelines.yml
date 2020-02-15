@@ -25,7 +25,7 @@ jobs:
       vcpkgGitCommitId: $(vcpkgGitRef)
       vcpkgGitURL: https://github.com/microsoft/vcpkg.git
 
-    - task: CMake@1
+  - task: CMake@1
     displayName: 'CMake - Release'
     inputs:
       workingDirectory: $(Build.BinariesDirectory)/build-Release
