@@ -14,35 +14,22 @@ jobs:
     persistCredentials: true
 
   - task: Cache@2
-    displayName: 'Cache vcpkgs artifacts'
+    displayName: 'Cache VCPKG artifacts'
     inputs:
-      key: $(Build.SourcesDirectory)/msvc-static-64.txt | "$(vcpkgGitRef)" | "$(Agent.OS)"
+      key: $(Build.SourcesDirectory)/msvc-x64-deps.txt | "$(vcpkgGitRef)" | "$(Agent.OS)"
       path: '$(Build.BinariesDirectory)/vcpkg'
   - task: run-vcpkg@0
     displayName: 'Run vcpkg'
     inputs:
-      vcpkgArguments: "@$(Build.SourcesDirectory)/msvc-static-64.txt"
+      vcpkgArguments: "@$(Build.SourcesDirectory)/msvc-x64-deps.txt"
       vcpkgGitCommitId: $(vcpkgGitRef)
       vcpkgGitURL: https://github.com/microsoft/vcpkg.git
 
-  - task: CMake@1
-    displayName: 'CMake - Debug'
-    inputs:
-      workingDirectory: $(Build.BinariesDirectory)/build-Debug
-      cmakeArgs: '-G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Debug -DVCPKG_TARGET_TRIPLET=x64-windows-static -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows-static\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)'
-  - script: |
-      cmake --build $(Build.BinariesDirectory)/build-Debug --target ALL_BUILD --config Debug
-      cmake --install $(Build.BinariesDirectory)/build-Debug --config Debug
-      if [ $? -ne 0 ]; then
-        exit 1
-      fi
-    displayName: 'Build - Debug'
-
-  - task: CMake@1
+    - task: CMake@1
     displayName: 'CMake - Release'
     inputs:
       workingDirectory: $(Build.BinariesDirectory)/build-Release
-      cmakeArgs: '-G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_TARGET_TRIPLET=x64-windows-static -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows-static\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)'
+      cmakeArgs: '-G "Visual Studio 16 2019" -A x64 -DVCPKG_ROOT="$(Build.BinariesDirectory)\vcpkg -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)'
   - script: |
       cmake --build $(Build.BinariesDirectory)/build-Release --target ALL_BUILD --config MinSizeRel
       cmake --install $(Build.BinariesDirectory)/build-Release --config MinSizeRel
@@ -50,6 +37,19 @@ jobs:
         exit 1
       fi
     displayName: 'Build - Release'
+
+  - task: CMake@1
+    displayName: 'CMake - Debug'
+    inputs:
+      workingDirectory: $(Build.BinariesDirectory)/build-Debug
+      cmakeArgs: '-G "Visual Studio 16 2019" -A x64 -DVCPKG_ROOT="$(Build.BinariesDirectory)\vcpkg" -DCMAKE_BUILD_TYPE=Debug -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)'
+  - script: |
+      cmake --build $(Build.BinariesDirectory)/build-Debug --target ALL_BUILD --config Debug
+      cmake --install $(Build.BinariesDirectory)/build-Debug --config Debug
+      if [ $? -ne 0 ]; then
+        exit 1
+      fi
+    displayName: 'Build - Debug'
 
   - script: |
       7z a $(Build.BinariesDirectory)/RadialGM-MSVC-x64.exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
