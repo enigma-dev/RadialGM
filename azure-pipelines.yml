@@ -21,6 +21,7 @@ jobs:
   - script: |
       git clone https://github.com/grpc/grpc.git $(Build.BinariesDirectory)/gRPC
       cd $(Build.BinariesDirectory)/gRPC
+      git submodule update --init
       git checkout $(grpcGitRef)
       mkdir build && cd build
       cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="/usr" ..
