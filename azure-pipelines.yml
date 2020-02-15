@@ -15,7 +15,7 @@ jobs:
 
   - script: |
       sudo apt-get update
-      sudo apt-get -y install build-essential cmake zlib1g-dev libboost-dev libboost-filesystem-dev libboost-system-dev libboost-program-options-dev libboost-iostreams-dev libglm-dev libpng-dev pulseaudio libpugixml-dev libyaml-cpp-dev rapidjson-dev qtbase5-dev libqscintilla2-dev
+      sudo apt-get -y install build-essential cmake libprotobuf-dev protobuf-compiler zlib1g-dev libboost-dev libboost-filesystem-dev libboost-system-dev libboost-program-options-dev libboost-iostreams-dev libglm-dev libpng-dev pulseaudio libpugixml-dev libyaml-cpp-dev rapidjson-dev qtbase5-dev libqscintilla2-dev
     displayName: 'Dependencies'
 
   - task: Cache@2
