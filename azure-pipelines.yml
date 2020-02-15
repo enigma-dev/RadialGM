@@ -12,7 +12,7 @@ jobs:
   - script: |
       git clone https://github.com/tokland/arch-bootstrap
       cd arch-bootstrap
-      sudo arch-bootstrap -a x86_64 -r $(Build.BinariesDirectory)/arch-chroot
+      sudo ./arch-bootstrap.sh -a x86_64 -r $(Build.BinariesDirectory)/arch-chroot
       sudo mount --bind /proc $(Build.BinariesDirectory)/arch-chroot/proc
       sudo mount --bind /sys $(Build.BinariesDirectory)/arch-chroot/sys
       sudo mount --bind /dev $(Build.BinariesDirectory)/arch-chroot/dev
