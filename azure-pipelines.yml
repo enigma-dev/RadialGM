@@ -34,7 +34,7 @@ jobs:
       cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="/usr" ..
       make
       mkdir protoBuild && cd protoBuild
-      cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="./usr" -Dprotobuf_BUILD_TESTS=OFF ../../third_party/protobuf/cmake
+      cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="/usr" -Dprotobuf_BUILD_TESTS=OFF ../../third_party/protobuf/cmake
       make
     displayName: 'Build gRPC'
     condition: ne(variables.CACHE_RESTORED, 'true')
