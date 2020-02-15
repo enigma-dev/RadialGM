@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.11)
 
+if(NOT MSVC)
+  include(GNUInstallDirs)
+endif()
+
 if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
   set(EXE "RadialGM")
 else()
@@ -34,7 +38,6 @@ if(WIN32)
     file(TO_CMAKE_PATH ${VCPKG_ROOT} VCPKG_ROOT)
     if(CMAKE_BUILD_TYPE  MATCHES Debug)
       set (DEBUG_POSTFIX d)
-      message("hmm: ${VCPKG_ROOT}")
       set(DLL_DIR "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/debug/bin")
     else()
       set(DLL_DIR "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/bin")
