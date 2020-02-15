@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.11)
 
-if(NOT MSVC)
-  include(GNUInstallDirs)
-endif()
-
 if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
   set(EXE "RadialGM")
 else()
@@ -226,13 +222,14 @@ include_directories(${EXE} PRIVATE ${RAPIDJSON_INCLUDE_DIRS})
 find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${EXE} PRIVATE yaml-cpp)
 
-find_package(gRPC CONFIG REQUIRED)
-target_link_libraries(${EXE} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++ gRPC::grpc++_alts)
-
 # Find Protobuf
-include(FindProtobuf)
+find_package(Protobuf REQUIRED PATHS /usr/lib/x86_64-linux-gnu/cmake/protobuf)
 include_directories(${Protobuf_INCLUDE_DIRS})
 target_link_libraries(${EXE} PRIVATE ${Protobuf_LIBRARIES})
+
+# Find gRPC
+find_package(gRPC CONFIG REQUIRED)
+target_link_libraries(${EXE} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++ gRPC::grpc++_alts)
 
 # Find OpenSSL
 find_package(OpenSSL REQUIRED)
@@ -337,4 +334,4 @@ if(WIN32)
       "${DLL_DIR}/libiconv-2.dll"
     DESTINATION "${ENIGMA_DIR}")
   endif()
-endif() 
+endif()
