@@ -3,15 +3,11 @@ variables:
 
 jobs:
 - job: Ubuntu
-  displayName: 'RadialGM Ubuntu'
+  displayName: 'RadialGM Linux'
   pool:
     vmImage: 'ubuntu-latest'
 
   steps:
-  - script: |
-      sudo apt-get update
-      sudo apt-get -y install build-essential cmake zlib1g-dev libboost-dev libboost-filesystem-dev libboost-system-dev libboost-program-options-dev libboost-iostreams-dev libglm-dev libpng-dev pulseaudio libpugixml-dev libyaml-cpp-dev rapidjson-dev qtbase5-dev qtmultimedia5-dev libqscintilla2-dev
-    displayName: 'Dependencies'
 
   - script: |
       arch-bootstrap -a x86_64 -r $(Build.BinariesDirectory)/arch-chroot
@@ -25,7 +21,6 @@ jobs:
       sudo chroot $(Build.BinariesDirectory)/arch-chroot pacman -Sy yaml-cpp
     displayName: 'Arch Release Build'
 
-    
 - job: RadialGM_MSVC_64
   displayName: 'RadialGM MSVC x64'
   pool:
