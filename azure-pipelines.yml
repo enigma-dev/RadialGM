@@ -19,7 +19,7 @@ jobs:
       cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
       pacman-key --init 
       pacman-key --populate archlinux
-      pacman -Sy git gcc cmake protobuf grpc yaml-cpp pugixml rapidjson boost qt5 qscintilla
+      pacstrap / base git gcc cmake protobuf grpc yaml-cpp pugixml rapidjson boost qt5 qscintilla
       EOF
     displayName: 'Bootstrap Archlinux'
 
