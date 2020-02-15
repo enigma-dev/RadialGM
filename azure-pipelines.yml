@@ -14,6 +14,7 @@ jobs:
     persistCredentials: true
 
   - script: |
+      sudo add-apt-repository -y ppa:maarten-fonville/protobuf
       sudo apt-get update
       sudo apt-get -y install build-essential cmake libprotobuf-dev protobuf-compiler zlib1g-dev libboost-dev libboost-filesystem-dev libboost-system-dev libboost-program-options-dev libboost-iostreams-dev libglm-dev libpng-dev pulseaudio libpugixml-dev libyaml-cpp-dev rapidjson-dev qtbase5-dev libqscintilla2-dev
     displayName: 'Dependencies'
@@ -30,17 +31,15 @@ jobs:
       cd $(Build.BinariesDirectory)/gRPC
       git submodule update --init
       git checkout $(grpcGitRef)
-      mkdir grpcBuild && cd grpcBuild
+      mkdir build && cd build
       cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="/usr" ..
-      mkdir protoBuild && cd protoBuild
-      cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="./usr" -Dprotobuf_BUILD_TESTS=OFF ../../third_party/protobuf/cmake
+      mkdir build && cd build
+      make
     displayName: 'Build gRPC'
     condition: ne(variables.CACHE_RESTORED, 'true')
 
   - script: |
-      cd $(Build.BinariesDirectory)/gRPC/grpcBuild
-      sudo make install
-      cd protoBuild
+      cd $(Build.BinariesDirectory)/gRPC/build
       sudo make install
     displayName: 'Install gRPC'
 
