@@ -24,10 +24,16 @@ jobs:
       pacman-key --init 
       pacman-key --populate archlinux
       pacman -Sy --noconfirm base base-devel git gcc cmake protobuf yaml-cpp pugixml rapidjson boost qt5 qscintilla-qt5
+      adduser grpc
       mkdir grpc
-      cd grpc
+      chown grpc grpc
+      su grpc
+      cd $(Build.BinariesDirectory)/grpc
       curl https://pastebin.com/raw/njXhAKw2 -o PKGBUILD
-      makepkg -si
+      makepkg -s
+      exit
+      ls
+      pacman -U derp.tgz
       EOF
     displayName: 'Bootstrap Archlinux'
 
