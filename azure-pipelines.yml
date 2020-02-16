@@ -28,7 +28,7 @@ jobs:
       mkdir grpc
       chown grpc grpc
       su grpc
-      cd $(Build.BinariesDirectory)/grpc
+      cd grpc
       curl https://pastebin.com/raw/njXhAKw2 -o PKGBUILD
       makepkg -s
       exit
