@@ -24,7 +24,7 @@ jobs:
       pacman-key --init 
       pacman-key --populate archlinux
       pacman -Sy --noconfirm base base-devel git gcc cmake protobuf yaml-cpp pugixml rapidjson boost qt5 qscintilla-qt5
-      adduser grpc
+      useradd grpc
       mkdir grpc
       chown grpc grpc
       su grpc
