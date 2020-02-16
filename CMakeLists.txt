@@ -226,7 +226,7 @@ target_link_libraries(${EXE} PRIVATE yaml-cpp)
 #Find gRPC
 if (WIN32) # Windows actually does something right for once
   find_package(gRPC CONFIG REQUIRED)
-  target_link_libraries(${EXE} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++ gRPC::grpc++_alts)
+  target_link_libraries(${EXE} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
 else() # https://tinyurl.com/arch-grpc-bug
   find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
   find_library(LIB_GRPC NAMES grpc)
