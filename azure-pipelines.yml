@@ -29,8 +29,7 @@ jobs:
       chown grpc grpc
       su grpc
       cd grpc
-      curl https://pastebin.com/raw/njXhAKw2 -o PKGBUILD
-      sed -i 's/^M//' PKGBUILD
+      curl https://gist.githubusercontent.com/fundies/3312ff095fe27b32e0ec84833ac423df/raw/ee395789c3f18c41a7741d0adbd18e5b213c0f8a/PKGBUILD -o PKGBUILD
       makepkg -s
       exit
       ls
