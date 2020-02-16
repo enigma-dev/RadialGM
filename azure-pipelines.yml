@@ -50,7 +50,7 @@ jobs:
     displayName: 'Build - Debug'
 
 - job: Arch
-  displayName: 'RadialGM Linux'
+  displayName: 'Arch Linux'
   pool:
     vmImage: 'ubuntu-latest'
 
