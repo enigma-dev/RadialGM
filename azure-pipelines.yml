@@ -23,7 +23,11 @@ jobs:
       echo 'Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch' >> /etc/pacman.d/mirrorlist
       pacman-key --init 
       pacman-key --populate archlinux
-      pacman -Sy --noconfirm base base-devel git gcc cmake protobuf grpc yaml-cpp pugixml rapidjson boost qt5 qscintilla-qt5
+      pacman -Sy --noconfirm base base-devel git gcc cmake protobuf yaml-cpp pugixml rapidjson boost qt5 qscintilla-qt5
+      mkdir grpc
+      cd grpc
+      curl https://pastebin.com/raw/njXhAKw2 -o PKGBUILD
+      makepkg -si
       EOF
     displayName: 'Bootstrap Archlinux'
 
