@@ -25,7 +25,7 @@ jobs:
       vcpkgGitCommitId: $(vcpkgGitRef)
       vcpkgGitURL: https://github.com/microsoft/vcpkg.git
 
-  - script: |
+  - powershell: |
       $ErrorActionPreference = "Stop"
       gnfjghjf
       mkdir $(Build.BinariesDirectory)/Release && cd $(Build.BinariesDirectory)/Release
@@ -34,7 +34,7 @@ jobs:
       cmake --install $(Build.BinariesDirectory)/Release --config MinSizeRel
     displayName: 'Release Build'
 
-  - script: |
+  - powershell: |
       $ErrorActionPreference = "Stop"
       mkdir $(Build.BinariesDirectory)/Debug && cd $(Build.BinariesDirectory)/Debug
       cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Debug -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory) 
@@ -53,7 +53,7 @@ jobs:
     persistCredentials: true
     path: RGM
 
-  - script: |
+  - bash: |
       set -e
       cd $(Build.BinariesDirectory)
       curl http://mirrors.acm.wpi.edu/archlinux/iso/latest/archlinux-bootstrap-2020.02.01-x86_64.tar.gz -o arch.tar.gz
@@ -68,7 +68,7 @@ jobs:
       EOF
     displayName: 'Bootstrap Archlinux'
 
-  - script: |
+  - bash: |
       set -e
       cd $(Build.BinariesDirectory)
       cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
@@ -83,7 +83,7 @@ jobs:
       EOF
     displayName: 'Release Build'
 
-  - script: |
+  - bash: |
       set -e
       cd $(Build.BinariesDirectory)
       cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
