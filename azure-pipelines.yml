@@ -1,5 +1,6 @@
 variables:
   vcpkgGitRef: 1be75a28bfce2084bb0b59ec92a6853f13d7be66 # Update this git ref to update vcpkg
+  releasetag: 'RadialGM-$(Build.SourceVersion)'
 
 jobs:
 - job: MSVC_64
@@ -51,7 +52,7 @@ jobs:
       gitHubConnection: github.com_fundies
       repositoryName: fundies/RadialGM
       tagSource: manual
-      tag: RadialGM-$(Date:yyyyMMdd)$(Rev:.r)
+      tag: '$(releasetag)'
       isPreRelease: true
       assets: |
          $(Build.SourcesDirectory)/RadialGM-MSVC-x64.exe
