@@ -2,7 +2,54 @@ variables:
   vcpkgGitRef: 1be75a28bfce2084bb0b59ec92a6853f13d7be66 # Update this git ref to update vcpkg
 
 jobs:
-- job: Ubuntu
+- job: MSVC_64
+  displayName: 'MSVC 64bit'
+  pool:
+    vmImage: 'windows-latest'
+  timeoutInMinutes: 250
+
+  steps:
+  - checkout: self
+    submodules: true
+    persistCredentials: true
+
+  - task: Cache@2
+    displayName: 'Cache VCPKG Artifacts'
+    inputs:
+      key: $(Build.SourcesDirectory)/msvc-x64-deps.txt | "$(vcpkgGitRef)" | "$(Agent.OS)"
+      path: '$(Build.BinariesDirectory)/vcpkg'
+  - task: run-vcpkg@0
+    displayName: 'Run VCPKG'
+    inputs:
+      vcpkgArguments: "@$(Build.SourcesDirectory)/msvc-x64-deps.txt"
+      vcpkgGitCommitId: $(vcpkgGitRef)
+      vcpkgGitURL: https://github.com/microsoft/vcpkg.git
+  - task: CMake@1
+    displayName: 'CMake - Release'
+    inputs:
+      workingDirectory: $(Build.BinariesDirectory)/build-Release
+      cmakeArgs: '-G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)'
+  - script: |
+      cmake --build $(Build.BinariesDirectory)/build-Release --config MinSizeRel
+      cmake --install $(Build.BinariesDirectory)/build-Release --config MinSizeRel
+      if [ $? -ne 0 ]; then
+        exit 1
+      fi
+    displayName: 'Build - Release'
+  - task: CMake@1
+    displayName: 'CMake - Debug'
+    inputs:
+      workingDirectory: $(Build.BinariesDirectory)/build-Debug
+      cmakeArgs: '-G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Debug -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)'
+  - script: |
+      cmake --build $(Build.BinariesDirectory)/build-Debug --config Debug
+      cmake --install $(Build.BinariesDirectory)/build-Debug --config Debug
+      if [ $? -ne 0 ]; then
+        exit 1
+      fi
+    displayName: 'Build - Debug'
+
+- job: Arch
   displayName: 'RadialGM Linux'
   pool:
     vmImage: 'ubuntu-latest'
@@ -41,4 +88,19 @@ jobs:
       cd ..
       git clean -fx
       EOF
-    displayName: 'Arch Release Build'
+    displayName: 'Release Build'
+
+  - script: |
+      set -e
+      cd $(Build.BinariesDirectory)
+      cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+      cd RGM
+      mkdir build
+      cd build
+      cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
+      make
+      make install
+      cd ..
+      git clean -fx
+      EOF
+    displayName: 'Debug Build'
