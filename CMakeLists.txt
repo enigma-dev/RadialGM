@@ -34,6 +34,7 @@ if(WIN32)
     file(TO_CMAKE_PATH ${VCPKG_ROOT} VCPKG_ROOT)
     if(CMAKE_BUILD_TYPE  MATCHES Debug)
       set (DEBUG_POSTFIX d)
+      message("hmm: ${VCPKG_ROOT}")
       set(DLL_DIR "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/debug/bin")
     else()
       set(DLL_DIR "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/bin")
@@ -222,14 +223,23 @@ include_directories(${EXE} PRIVATE ${RAPIDJSON_INCLUDE_DIRS})
 find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${EXE} PRIVATE yaml-cpp)
 
+#Find gRPC
+if (WIN32) # Windows actually does something right for once
+  find_package(gRPC CONFIG REQUIRED)
+  target_link_libraries(${EXE} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++ gRPC::grpc++_alts)
+else() # https://tinyurl.com/arch-grpc-bug
+  find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
+  find_library(LIB_GRPC NAMES grpc)
+  find_library(LIB_GPR NAMES gpr)
+  find_library(LIB_CARES NAMES cares)
+  find_library(LIB_ADDRESS_SORTING NAMES address_sorting)
+  target_link_libraries(${EXE} PRIVATE ${LIB_CARES} ${LIB_ADDRESS_SORTING} ${LIB_GPR} ${LIB_GRPC} ${LIB_GRPC_UNSECURE})
+endif()
+
 # Find Protobuf
-find_package(Protobuf REQUIRED)
+include(FindProtobuf)
 include_directories(${Protobuf_INCLUDE_DIRS})
 target_link_libraries(${EXE} PRIVATE ${Protobuf_LIBRARIES})
-
-# Find gRPC
-find_package(gRPC CONFIG REQUIRED)
-target_link_libraries(${EXE} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++ gRPC::grpc++_alts)
 
 # Find OpenSSL
 find_package(OpenSSL REQUIRED)
@@ -334,4 +344,4 @@ if(WIN32)
       "${DLL_DIR}/libiconv-2.dll"
     DESTINATION "${ENIGMA_DIR}")
   endif()
-endif()
+endif() 
