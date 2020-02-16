@@ -49,7 +49,7 @@ jobs:
   - task: GithubRelease@0 
     displayName: 'Create GitHub Release'      
     inputs:
-      gitHubConnection: enigma-dev
+      gitHubConnection: github.com_JoshDreamland
       repositoryName: enigma-dev/RadialGM
       tagSource: manual
       tag: '$(releasetag)'
