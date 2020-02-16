@@ -42,7 +42,7 @@ jobs:
     displayName: 'Debug Build'
 
   - script: |
-      7z a $(Build.BinariesDirectory)/RadialGM-MSVC-x64.exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
+      7z a $(Build.SourcesDirectory)/RadialGM-MSVC-x64.exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
     displayName: 'Package'
 
   - task: GithubRelease@0 
@@ -51,10 +51,10 @@ jobs:
       gitHubConnection: github.com_fundies
       repositoryName: fundies/RadialGM
       tagSource: manual
-      tag: $(Build.BuildNumber)
+      tag: RadialGM-$(Date:yyyyMMdd)
       isPreRelease: true
       assets: |
-         $(Build.ArtifactStagingDirectory)/RadialGM-MSVC-x64.exe
+         $(Build.SourcesDirectory)/RadialGM-MSVC-x64.exe
 
 - job: Arch
   displayName: 'Arch Linux'
