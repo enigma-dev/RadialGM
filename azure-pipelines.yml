@@ -24,13 +24,14 @@ jobs:
       echo 'Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch' >> /etc/pacman.d/mirrorlist
       pacman-key --init 
       pacman-key --populate archlinux
+      pacman -Sy --noconfirm base base-devel git gcc cmake protobuf grpc gflags re2c php chrpath cython yaml-cpp pugixml rapidjson boost qt5 qscintilla-qt5
+      sudo cp -R  $(Build.SourcesDirectory) ./root.x86_64/RGM
       EOF
     displayName: 'Bootstrap Archlinux'
 
   - script: |
       set -e
       cd $(Build.BinariesDirectory)
-      sudo cp -R  $(Build.SourcesDirectory) ./root.x86_64/
       cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
       cd RGM
       mkdir build
@@ -38,6 +39,7 @@ jobs:
       cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel ..
       make
       make install
-      sudo rm -rf RGM/
+      cd ..
+      git clean -fx
       EOF
     displayName: 'Arch Release Build'
