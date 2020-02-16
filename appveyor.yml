@@ -23,8 +23,10 @@ platform:
 configuration:
   - MinGW-Debug
   - MinGW-Release
-  - MSVC-Debug
-  - MSVC-Release
+  # Configs are broken due to appveyor time limit issue.
+  # They have been migrated to azure but logic remains incase we have issue with azure in future
+  # - MSVC-Debug
+  # - MSVC-Release
 
 environment:
   VCPKG_DIR: C:\tools\vcpkg
@@ -90,8 +92,8 @@ build_script:
   - cmake -G "%GENERATOR%" %CMAKE_ARGS% -DCMAKE_BUILD_TYPE="%BUILD_TYPE%" ..
   - cmake --build . --config "%BUILD_TYPE%"
   - cmake --install .
-  - 7z a RadialGM-%CONFIGURATION%-%PLATFORM%.zip ../Submodules/enigma-dev
-  - appveyor PushArtifact RadialGM-%CONFIGURATION%-%PLATFORM%.zip -FileName RadialGM-%CONFIGURATION%-%PLATFORM%.zip -DeploymentName RadialGM
+  - 7z a RadialGM-%CONFIGURATION%-%PLATFORM%.exe -mmt -mx5 -sfx ../Submodules/enigma-dev
+  - appveyor PushArtifact RadialGM-%CONFIGURATION%-%PLATFORM%.exe -FileName RadialGM-%CONFIGURATION%-%PLATFORM%.exe -DeploymentName RadialGM
 
 deploy:
   release: RadialGM-v$(appveyor_build_version)
@@ -100,6 +102,6 @@ deploy:
     secure: 0dfPI8cYNeLks0iLSmTyzrI/H0K3CfMrBsvfslzZp66w5gqg8pqSf4Edhovsox9k
   artifact: RadialGM
   draft: false
-  prerelease: false
+  prerelease: true
   on:
     branch: master
