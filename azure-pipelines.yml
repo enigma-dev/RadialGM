@@ -1,0 +1,113 @@
+variables:
+  vcpkgGitRef: 1be75a28bfce2084bb0b59ec92a6853f13d7be66 # Update this git ref to update vcpkg
+
+jobs:
+- job: MSVC_64
+  displayName: 'MSVC 64bit'
+  pool:
+    vmImage: 'windows-latest'
+  timeoutInMinutes: 250
+
+  steps:
+  - checkout: self
+    submodules: true
+    persistCredentials: true
+
+  - task: Cache@2
+    displayName: 'Cache VCPKG Artifacts'
+    inputs:
+      key: $(Build.SourcesDirectory)/msvc-x64-deps.txt | "$(vcpkgGitRef)" | "$(Agent.OS)"
+      path: '$(Build.BinariesDirectory)/vcpkg'
+  - task: run-vcpkg@0
+    displayName: 'Run VCPKG'
+    inputs:
+      vcpkgArguments: "@$(Build.SourcesDirectory)/msvc-x64-deps.txt"
+      vcpkgGitCommitId: $(vcpkgGitRef)
+      vcpkgGitURL: https://github.com/microsoft/vcpkg.git
+
+  - powershell: |
+      mkdir $(Build.BinariesDirectory)/Release
+      cd $(Build.BinariesDirectory)/Release
+      cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)
+      cmake --build $(Build.BinariesDirectory)/Release --config MinSizeRel
+      cmake --install $(Build.BinariesDirectory)/Release --config MinSizeRel
+    displayName: 'Release Build'
+
+  - powershell: |
+      mkdir $(Build.BinariesDirectory)/Debug
+      cd $(Build.BinariesDirectory)/Debug
+      cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Debug -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory) 
+      cmake --build $(Build.BinariesDirectory)/Debug --config Debug
+      cmake --install $(Build.BinariesDirectory)/Debug --config Debug
+    displayName: 'Debug Build'
+
+  - script: |
+      7z a $(Build.SourcesDirectory)/RadialGM-MSVC-x64.exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
+    displayName: 'Package'
+
+  - task: GithubRelease@0 
+    displayName: 'Create GitHub Release'      
+    inputs:
+      gitHubConnection: github.com_fundies
+      repositoryName: fundies/RadialGM
+      tagSource: manual
+      tag: RadialGM-$(Date:yyyyMMdd)$(Rev:.r)
+      isPreRelease: true
+      assets: |
+         $(Build.SourcesDirectory)/RadialGM-MSVC-x64.exe
+
+- job: Arch
+  displayName: 'Arch Linux'
+  pool:
+    vmImage: 'ubuntu-latest'
+
+  steps:
+  - checkout: self
+    submodules: true
+    persistCredentials: true
+    path: RGM
+
+  - bash: |
+      set -e
+      cd $(Build.BinariesDirectory)
+      curl http://mirrors.acm.wpi.edu/archlinux/iso/latest/archlinux-bootstrap-2020.02.01-x86_64.tar.gz -o arch.tar.gz
+      sudo tar xzf arch.tar.gz
+      sudo mount --bind ./root.x86_64/ ./root.x86_64/
+      sudo cp -R  $(Build.SourcesDirectory) ./root.x86_64/RGM
+      cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+      echo 'Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch' >> /etc/pacman.d/mirrorlist
+      pacman-key --init 
+      pacman-key --populate archlinux
+      pacman -Sy --noconfirm base base-devel git gcc cmake protobuf grpc gflags re2c php chrpath cython yaml-cpp pugixml rapidjson boost qt5 qscintilla-qt5
+      EOF
+    displayName: 'Bootstrap Archlinux'
+
+  - bash: |
+      set -e
+      cd $(Build.BinariesDirectory)
+      cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+      cd RGM
+      mkdir build
+      cd build
+      cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel ..
+      make
+      make install
+      cd ..
+      git clean -fx
+      EOF
+    displayName: 'Release Build'
+
+  - bash: |
+      set -e
+      cd $(Build.BinariesDirectory)
+      cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+      cd RGM
+      mkdir build
+      cd build
+      cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
+      make
+      make install
+      cd ..
+      git clean -fx
+      EOF
+    displayName: 'Debug Build'
