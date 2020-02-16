@@ -96,7 +96,7 @@ build_script:
   - appveyor PushArtifact RadialGM-%CONFIGURATION%-%PLATFORM%.exe -FileName RadialGM-%CONFIGURATION%-%PLATFORM%.exe -DeploymentName RadialGM
 
 deploy:
-  release: RadialGM-v$(appveyor_build_version)
+  release: RadialGM-$(appveyor_build_version))
   provider: GitHub
   auth_token:
     secure: 0dfPI8cYNeLks0iLSmTyzrI/H0K3CfMrBsvfslzZp66w5gqg8pqSf4Edhovsox9k
