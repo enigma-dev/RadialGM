@@ -32,7 +32,7 @@ jobs:
       curl https://gist.githubusercontent.com/fundies/3312ff095fe27b32e0ec84833ac423df/raw/ee395789c3f18c41a7741d0adbd18e5b213c0f8a/PKGBUILD -o PKGBUILD
       makepkg -s
       exit
-      ls
+      ls grpc
       pacman -U derp.tgz
       EOF
     displayName: 'Bootstrap Archlinux'
