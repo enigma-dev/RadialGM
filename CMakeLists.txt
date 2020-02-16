@@ -34,7 +34,6 @@ if(WIN32)
     file(TO_CMAKE_PATH ${VCPKG_ROOT} VCPKG_ROOT)
     if(CMAKE_BUILD_TYPE  MATCHES Debug)
       set (DEBUG_POSTFIX d)
-      message("hmm: ${VCPKG_ROOT}")
       set(DLL_DIR "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/debug/bin")
     else()
       set(DLL_DIR "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/bin")
@@ -313,9 +312,13 @@ if(WIN32)
     DESTINATION "${ENIGMA_DIR}")
   else()
     find_file(LIB_GCC NAMES libgcc_s_dw2-1.dll libgcc_s_seh-1.dll PATHS "${DLL_DIR}")
+    find_file(LIB_SSL NAMES libssl-1_1.dll libssl-1_1-x64.dll PATHS "${DLL_DIR}")
+    find_file(LIB_CRYPTO NAMES libcrypto-1_1.dll libcrypto-1_1-x64.dll PATHS "${DLL_DIR}")
     install(CODE "execute_process(COMMAND windeployqt.exe --no-translations ${ENIGMA_DIR}/${EXE}.exe)")
     install(FILES
       "${LIB_GCC}"
+      "${LIB_SSL}"
+      "${LIB_CRYPTO}"
       "${DLL_DIR}/libwinpthread-1.dll"
       "${DLL_DIR}/libstdc++-6.dll" 
       "${DLL_DIR}/libgrpc++_unsecure.dll"
@@ -325,6 +328,8 @@ if(WIN32)
       "${DLL_DIR}/libpugixml.dll"
       "${DLL_DIR}/libgpr.dll"
       "${DLL_DIR}/libgrpc_unsecure.dll"
+      "${DLL_DIR}/libgrpc.dll"
+      "${DLL_DIR}/libgrpc++.dll"
       "${DLL_DIR}/yaml-cpp.dll"
       "${DLL_DIR}/libdouble-conversion.dll"
       "${DLL_DIR}/libicuuc65.dll"
