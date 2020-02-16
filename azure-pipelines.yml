@@ -51,7 +51,7 @@ jobs:
       gitHubConnection: github.com_fundies
       repositoryName: fundies/RadialGM
       tagSource: manual
-      tag: RadialGM-$(Date:yyyyMMdd)
+      tag: RadialGM-$(Date:yyyyMMdd)$(Rev:.r)
       isPreRelease: true
       assets: |
          $(Build.SourcesDirectory)/RadialGM-MSVC-x64.exe
