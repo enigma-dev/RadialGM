@@ -26,19 +26,20 @@ jobs:
       vcpkgGitURL: https://github.com/microsoft/vcpkg.git
 
   - script: |
-      '$ErrorActionPreference = "Stop"'
+      $ErrorActionPreference = "Stop"
       gnfjghjf
       mkdir $(Build.BinariesDirectory)/Release && cd $(Build.BinariesDirectory)/Release
       cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)
-      cmake --build $(Build.BinariesDirectory)/build-Release --config MinSizeRel
-      cmake --install $(Build.BinariesDirectory)/build-Release --config MinSizeRel
+      cmake --build $(Build.BinariesDirectory)/Release --config MinSizeRel
+      cmake --install $(Build.BinariesDirectory)/Release --config MinSizeRel
+    displayName: 'Release Build'
 
   - script: |
-      '$ErrorActionPreference = "Stop"'
+      $ErrorActionPreference = "Stop"
       mkdir $(Build.BinariesDirectory)/Debug && cd $(Build.BinariesDirectory)/Debug
       cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Debug -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory) 
-      cmake --build $(Build.BinariesDirectory)/build-Debug --config Debug
-      cmake --install $(Build.BinariesDirectory)/build-Debug --config Debug
+      cmake --build $(Build.BinariesDirectory)/Debug --config Debug
+      cmake --install $(Build.BinariesDirectory)/Debug --config Debug
     displayName: 'Debug Build'
 
 - job: Arch
