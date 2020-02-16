@@ -32,7 +32,6 @@ jobs:
       cmake --build $(Build.BinariesDirectory)/Release --config MinSizeRel
       cmake --install $(Build.BinariesDirectory)/Release --config MinSizeRel
     displayName: 'Release Build'
-     
 
   - powershell: |
       mkdir $(Build.BinariesDirectory)/Debug
@@ -41,6 +40,21 @@ jobs:
       cmake --build $(Build.BinariesDirectory)/Debug --config Debug
       cmake --install $(Build.BinariesDirectory)/Debug --config Debug
     displayName: 'Debug Build'
+
+  - script: |
+      7z a $(Build.BinariesDirectory)/RadialGM-MSVC-x64.exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
+    displayName: 'Package'
+
+  - task: GithubRelease@0 
+    displayName: 'Create GitHub Release'      
+    inputs:
+      gitHubConnection: fundies
+      repositoryName: fundies/RadialGM
+      tagSource: manual
+      tag: $(Build.BuildNumber)
+      isPreRelease: true
+      assets: |
+         $(Build.ArtifactStagingDirectory)/RadialGM-MSVC-x64.exe
 
 - job: Arch
   displayName: 'Arch Linux'
