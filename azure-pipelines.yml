@@ -14,6 +14,7 @@ jobs:
     path: RGM
 
   - script: |
+      set -e
       cd $(Build.BinariesDirectory)
       curl http://mirrors.acm.wpi.edu/archlinux/iso/latest/archlinux-bootstrap-2020.02.01-x86_64.tar.gz -o arch.tar.gz
       sudo tar xzf arch.tar.gz
@@ -23,12 +24,11 @@ jobs:
       echo 'Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch' >> /etc/pacman.d/mirrorlist
       pacman-key --init 
       pacman-key --populate archlinux
-      pacman -Sy --noconfirm base base-devel git gcc cmake protobuf grpc gflags re2c php chrpath cython yaml-cpp pugixml rapidjson boost qt5 qscintilla-qt5
-      git clone https://github.com/fundies/grpc-cmake.git /usr/lib/cmake/grpc
       EOF
     displayName: 'Bootstrap Archlinux'
 
   - script: |
+      set -e
       cd $(Build.BinariesDirectory)
       sudo cp -R  $(Build.SourcesDirectory) ./root.x86_64/
       cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
