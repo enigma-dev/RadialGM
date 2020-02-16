@@ -30,6 +30,7 @@ jobs:
       su grpc
       cd grpc
       curl https://pastebin.com/raw/njXhAKw2 -o PKGBUILD
+      sed -i 's/^M//' PKGBUILD
       makepkg -s
       exit
       ls
