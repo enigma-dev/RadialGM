@@ -32,8 +32,8 @@ jobs:
       curl https://gist.githubusercontent.com/fundies/3312ff095fe27b32e0ec84833ac423df/raw/ee395789c3f18c41a7741d0adbd18e5b213c0f8a/PKGBUILD -o PKGBUILD
       makepkg
       exit
-      ls grpc
-      pacman -U derp.tgz
+      cd grpc
+      pacman -U grpc-*.tar.xz
       EOF
     displayName: 'Bootstrap Archlinux'
 
