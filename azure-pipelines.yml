@@ -33,7 +33,7 @@ jobs:
       makepkg
       exit
       cd grpc
-      pacman -U grpc-*.tar.xz
+      pacman -U --noconfirm grpc-*.tar.xz
       EOF
     displayName: 'Bootstrap Archlinux'
 
