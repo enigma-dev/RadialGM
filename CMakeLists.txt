@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.11)
 
-if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
-  set(EXE "RadialGM")
-else()
+if (CMAKE_BUILD_TYPE EQUAL "Debug")
   set(EXE "RadialGM-Debug")
+else()
+  set(EXE "RadialGM")
 endif()
 
 set(EXE_VERSION "0.1")
