@@ -3,8 +3,24 @@ variables:
   releasetag: 'RadialGM-$(Build.SourceVersion)'
 
 jobs:
+- job: CreateReleaseCandidate
+  displayName: 'Create Release Candidate'
+  timeoutInMinutes: 15
+  steps:
+    - task: GithubRelease@0 
+      displayName: 'Create GitHub Release Candidate'
+      inputs:
+        gitHubConnection: github.com_EnigmaBot
+        repositoryName: enigma-dev/RadialGM
+        action: create
+        tagSource: manual
+        tag: '$(releasetag)'
+        isDraft: true
+        isPreRelease: true
+    
 - job: MINGW
   timeoutInMinutes: 360
+  dependsOn: CreateReleaseCandidate
   pool:
     vmImage: windows-latest
   strategy:
@@ -61,10 +77,11 @@ jobs:
       displayName: 'Package'
 
     - task: GithubRelease@0 
-      displayName: 'Create GitHub Release'      
+      displayName: 'Add MinGW to GitHub Release'
       inputs:
-        gitHubConnection: github.com_JoshDreamland
+        gitHubConnection: github.com_EnigmaBot
         repositoryName: enigma-dev/RadialGM
+        action: edit
         tagSource: manual
         tag: '$(releasetag)'
         isPreRelease: true
@@ -73,6 +90,7 @@ jobs:
 
 - job: MSVC_64
   displayName: 'MSVC x86_64'
+  dependsOn: CreateReleaseCandidate
   pool:
     vmImage: 'windows-latest'
   timeoutInMinutes: 250
@@ -115,10 +133,11 @@ jobs:
     displayName: 'Package'
 
   - task: GithubRelease@0 
-    displayName: 'Create GitHub Release'      
+    displayName: 'Add MSVC to GitHub Release'
     inputs:
-      gitHubConnection: github.com_JoshDreamland
+      gitHubConnection: github.com_EnigmaBot
       repositoryName: enigma-dev/RadialGM
+      action: edit
       tagSource: manual
       tag: '$(releasetag)'
       isPreRelease: true
@@ -182,3 +201,21 @@ jobs:
       git clean -fx
       EOF
     displayName: 'Debug Build'
+
+- job: PublishRelease
+  displayName: 'Publish Release'
+  timeoutInMinutes: 15
+  dependsOn:
+    - MINGW
+    - MSVC_64
+  steps:
+    - task: GithubRelease@0 
+      displayName: 'Publish GitHub Release Candidate'
+      inputs:
+        gitHubConnection: github.com_EnigmaBot
+        repositoryName: enigma-dev/RadialGM
+        action: edit
+        tagSource: manual
+        tag: '$(releasetag)'
+        isDraft: false
+        isPreRelease: false
