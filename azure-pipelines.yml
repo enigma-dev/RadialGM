@@ -50,20 +50,20 @@ jobs:
         MSYSTEM: $(MINGW_UPPER)
         CHERE_INVOKING: yes
         MINGW_INSTALLS: $(MINGW_LOWER)
-    
+
     - script: |
-      7z a $(Build.SourcesDirectory)/RadialGM-MinGW-$(MINGW_ARCH).exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
-    displayName: 'Package'
+        7z a $(Build.SourcesDirectory)/RadialGM-MinGW-$(MINGW_ARCH).exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
+      displayName: 'Package'
 
     - task: GithubRelease@0 
-    displayName: 'Create GitHub Release'      
-    inputs:
-      gitHubConnection: github.com_JoshDreamland
-      repositoryName: enigma-dev/RadialGM
-      tagSource: manual
-      tag: '$(releasetag)'
-      isPreRelease: true
-      assets: |
+      displayName: 'Create GitHub Release'      
+      inputs:
+        gitHubConnection: github.com_JoshDreamland
+        repositoryName: enigma-dev/RadialGM
+        tagSource: manual
+        tag: '$(releasetag)'
+        isPreRelease: true
+        assets: |
          $(Build.SourcesDirectory)/RadialGM-MinGW-$(MINGW_ARCH).exe 
 
 - job: MSVC_64
@@ -118,7 +118,7 @@ jobs:
       tag: '$(releasetag)'
       isPreRelease: true
       assets: |
-         $(Build.SourcesDirectory)/RadialGM-MSVC-x64.exe
+        $(Build.SourcesDirectory)/RadialGM-MSVC-x64.exe
 
 - job: Arch
   displayName: 'Arch Linux'
@@ -144,7 +144,7 @@ jobs:
       echo 'Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch' >> /etc/pacman.d/mirrorlist
       pacman-key --init 
       pacman-key --populate archlinux
-      pacman -Sy --noconfirm base base-devel git gcc cmake protobuf grpc gflags re2c php chrpath cython yaml-cpp pugixml rapidjson boost qt5 qscintilla-qt5
+      pacman -Sy --noconfirm base base-devel git gcc cmake protobuf grpc yaml-cpp pugixml rapidjson boost qt5 qscintilla-qt5
       EOF
     displayName: 'Bootstrap Archlinux'
 
