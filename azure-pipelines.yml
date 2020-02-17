@@ -57,7 +57,7 @@ jobs:
         MINGW_INSTALLS: $(MINGW_LOWER)
 
     - script: |
-        7z a $(Build.SourcesDirectory)/RadialGM-MinGW-$(MINGW_ARCH).exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
+        7z a $(Build.SourcesDirectory)/RadialGM-Installer-MinGW-$(MINGW_ARCH).exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
       displayName: 'Package'
 
     - task: GithubRelease@0 
@@ -69,7 +69,9 @@ jobs:
         tag: '$(releasetag)'
         isPreRelease: true
         assets: |
-         $(Build.SourcesDirectory)/RadialGM-MinGW-$(MINGW_ARCH).exe 
+         $(Build.SourcesDirectory)/RadialGM-Installer-MinGW-$(MINGW_ARCH).exe
+         $(Build.SourcesDirectory)/Submodules/enigma-dev/RadialGM.exe
+         $(Build.SourcesDirectory)/Submodules/enigma-dev/RadialGM-Debug.exe
 
 - job: MSVC_64
   displayName: 'MSVC x86_64'
@@ -111,7 +113,7 @@ jobs:
     displayName: 'Debug Build'
 
   - script: |
-      7z a $(Build.SourcesDirectory)/RadialGM-MSVC-x64.exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
+      7z a $(Build.SourcesDirectory)/RadialGM-Installer-MSVC-x64.exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
     displayName: 'Package'
 
   - task: GithubRelease@0 
@@ -123,7 +125,9 @@ jobs:
       tag: '$(releasetag)'
       isPreRelease: true
       assets: |
-        $(Build.SourcesDirectory)/RadialGM-MSVC-x64.exe
+        $(Build.SourcesDirectory)/RadialGM-Installer-MSVC-x64.exe
+        $(Build.SourcesDirectory)/Submodules/enigma-dev/RadialGM.exe
+        $(Build.SourcesDirectory)/Submodules/enigma-dev/RadialGM-Debug.exe
 
 - job: Arch
   displayName: 'Arch Linux'
