@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.11)
 
-set(EXE "RadialGM")
+if (CMAKE_BUILD_TYPE EQUAL "Debug")
+  set(EXE "RadialGM-Debug")
+else()
+  set(EXE "RadialGM")
+endif()
+
 set(EXE_VERSION "0.1")
 set(EXE_DESCRIPTION "ENIGMA IDE")
 
@@ -22,7 +27,22 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/Dialogs")
 
 # Include ENIGMA things
 set(ENIGMA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/enigma-dev)
-include_directories("${ENIGMA_DIR}/shared/protos/.eobjs/" "${ENIGMA_DIR}/CommandLine/libEGM")
+include_directories("${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/libEGM/libProtocols" "${ENIGMA_DIR}/CommandLine/libEGM")
+
+if(WIN32)
+  if(MSVC)
+    file(TO_CMAKE_PATH ${VCPKG_ROOT} VCPKG_ROOT)
+    if(CMAKE_BUILD_TYPE  MATCHES Debug)
+      set (DEBUG_POSTFIX d)
+      set(DLL_DIR "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/debug/bin")
+    else()
+      set(DLL_DIR "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/bin")
+    endif()
+  else()
+    # Hack to get msys path
+    get_filename_component(DLL_DIR ${CMAKE_C_COMPILER} DIRECTORY)
+  endif()
+endif()
 
 # Populate a CMake variable with the sources
 set(RGM_SOURCES
@@ -71,10 +91,6 @@ set(RGM_SOURCES
     Widgets/ColorPicker.cpp
     Widgets/SpriteView.cpp
 )
-
-if (MSVC)
-  set(RGM_SOURCES ${RGM_SOURCES} qtplugins.cpp)
-endif()
 
 set(RGM_HEADERS
     Plugins/ServerPlugin.h
@@ -159,6 +175,8 @@ else()
     set(EDITOR_SOURCES Widgets/CodeWidgetScintilla.cpp)
 endif()
 
+set(CMAKE_INSTALL_RPATH "${ENIGMA_DIR}")
+
 # Tell CMake to create the RadialGM executable
 if(WIN32)
   add_executable(${EXE} WIN32 ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${EDITOR_SOURCES} ${RGM_RC})
@@ -169,9 +187,9 @@ endif(WIN32)
 # we do this even in release mode for "Editor Diagnostics"
 target_compile_definitions(${EXE} PUBLIC QT_MESSAGELOGCONTEXT)
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
-set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT WIN32)
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+  set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
 endif()
 
 message(STATUS "Initial build flags:")
@@ -185,10 +203,8 @@ set(CompilerFlags
 	  CMAKE_CXX_FLAGS_RELEASE
 	  CMAKE_CXX_FLAGS_RELWITHDEBINFO
 	  )
+  
 foreach(CompilerFlag ${CompilerFlags})
-  if(MSVC)
-	string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
-  endif(MSVC)
   message(STATUS "  '${CompilerFlag}': ${${CompilerFlag}}")
 endforeach()
 
@@ -208,27 +224,18 @@ include_directories(${EXE} PRIVATE ${RAPIDJSON_INCLUDE_DIRS})
 find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${EXE} PRIVATE yaml-cpp)
 
-# Find libEGM
-# Debug
-find_library(LIB_EGM_D NAMES EGMd EGM PATHS ${ENIGMA_DIR})
-# Release
-find_library(LIB_EGM NAMES EGM PATHS ${ENIGMA_DIR})
-target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_EGM_D},${LIB_EGM}>")
-
-# Find libProtocols
-# Debug
-find_library(LIB_PROTO_D NAMES Protocolsd Protocols PATHS ${ENIGMA_DIR})
-# Release
-find_library(LIB_PROTO NAMES Protocols PATHS ${ENIGMA_DIR})
-target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_PROTO_D},${LIB_PROTO}>")
-
-# Find GRPC
-find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
-find_library(LIB_GRPC NAMES grpc)
-find_library(LIB_GPR NAMES gpr)
-find_library(LIB_CARES NAMES cares)
-find_library(LIB_ADDRESS_SORTING NAMES address_sorting)
-target_link_libraries(${EXE} PRIVATE ${LIB_CARES} ${LIB_ADDRESS_SORTING} ${LIB_GPR} ${LIB_GRPC} ${LIB_GRPC_UNSECURE})
+#Find gRPC
+if (WIN32) # Windows actually does something right for once
+  find_package(gRPC CONFIG REQUIRED)
+  target_link_libraries(${EXE} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
+else() # https://tinyurl.com/arch-grpc-bug
+  find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
+  find_library(LIB_GRPC NAMES grpc)
+  find_library(LIB_GPR NAMES gpr)
+  find_library(LIB_CARES NAMES cares)
+  find_library(LIB_ADDRESS_SORTING NAMES address_sorting)
+  target_link_libraries(${EXE} PRIVATE ${LIB_CARES} ${LIB_ADDRESS_SORTING} ${LIB_GPR} ${LIB_GRPC} ${LIB_GRPC_UNSECURE})
+endif()
 
 # Find Protobuf
 include(FindProtobuf)
@@ -243,55 +250,10 @@ target_link_libraries(${EXE} PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 find_package(Qt5 COMPONENTS Core Widgets Gui PrintSupport Multimedia REQUIRED)
 target_link_libraries(${EXE} PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Multimedia)
 
-
-if(MSVC)
-    target_link_libraries(${EXE} PRIVATE Qt5::WinMain)
-
-    # === Debug
-    find_library(LIB_QT_PLATFORM_D NAMES Qt5PlatformCompositorSupportd)
-    find_library(LIB_QT_FONT_D NAMES Qt5FontDatabaseSupportd)
-    find_library(LIB_QT_UI_D NAMES Qt5WindowsUIAutomationSupportd)
-    find_library(LIB_QT_EVENT_D NAMES Qt5EventDispatcherSupportd)
-    find_library(LIB_QT_THEME_D NAMES Qt5ThemeSupportd)
-    find_library(LIB_QT_PRINT_D NAMES Qt5PrintSupportd)
-    find_library(LIB_QT_ICO_D NAMES qicod PATHS "${QT_DIR}/plugins/imageformats")
-    find_library(LIB_QT_GIF_D NAMES qgifd PATHS "${QT_DIR}/plugins/imageformats")
-    find_library(LIB_QT_JPEG_D NAMES qjpegd PATHS "${QT_DIR}/plugins/imageformats")
-    # Windows 10 SDK doesn't include a debug version of Uxtheme
-    find_library(LIB_WIN_UXTHEME_D NAMES Uxtheme)
-    find_library(LIB_QT_WINVISTASTYLE_D NAMES qwindowsvistastyled PATHS "${QT_DIR}/plugins/styles")
-    find_library(LIB_QT_WIN_D NAMES qwindowsd PATHS "${QT_DIR}/plugins/platforms")
-
-    # === Release
-    find_library(LIB_QT_PLATFORM NAMES Qt5PlatformCompositorSupport)
-    find_library(LIB_QT_FONT NAMES Qt5FontDatabaseSupport)
-    find_library(LIB_QT_UI NAMES Qt5WindowsUIAutomationSupport)
-    find_library(LIB_QT_EVENT NAMES Qt5EventDispatcherSupport)
-    find_library(LIB_QT_THEME NAMES Qt5ThemeSupport)
-    find_library(LIB_QT_PRINT NAMES Qt5PrintSupport)
-    # ICO is needed to set Win32 icon on the Window
-    # also all of these image plugins are very small about 100kb~ each
-    find_library(LIB_QT_ICO NAMES qico PATHS "${QT_DIR}/plugins/imageformats")
-    find_library(LIB_QT_GIF NAMES qgif PATHS "${QT_DIR}/plugins/imageformats")
-    find_library(LIB_QT_JPEG NAMES qjpeg PATHS "${QT_DIR}/plugins/imageformats")
-    find_library(LIB_WIN_UXTHEME NAMES Uxtheme)
-    find_library(LIB_QT_WINVISTASTYLE NAMES qwindowsvistastyle PATHS "${QT_DIR}/plugins/styles")
-    find_library(LIB_QT_WIN NAMES qwindows PATHS "${QT_DIR}/plugins/platforms")
-
-    target_link_libraries(${EXE} PRIVATE "$<IF:$<CONFIG:Debug>,${LIB_QT_PLATFORM_D},${LIB_QT_PLATFORM}>"
-                          "$<IF:$<CONFIG:Debug>,${LIB_QT_FONT_D},${LIB_QT_FONT}>"
-                          "$<IF:$<CONFIG:Debug>,${LIB_QT_UI_D},${LIB_QT_UI}>"
-                          "$<IF:$<CONFIG:Debug>,${LIB_QT_EVENT_D},${LIB_QT_EVENT}>"
-                          "$<IF:$<CONFIG:Debug>,${LIB_QT_THEME_D},${LIB_QT_THEME}>"
-                          "$<IF:$<CONFIG:Debug>,${LIB_QT_PRINT_D},${LIB_QT_PRINT}>"
-                          "$<IF:$<CONFIG:Debug>,${LIB_QT_ICO_D},${LIB_QT_ICO}>"
-                          "$<IF:$<CONFIG:Debug>,${LIB_QT_GIF_D},${LIB_QT_GIF}>"
-                          "$<IF:$<CONFIG:Debug>,${LIB_QT_JPEG_D},${LIB_QT_JPEG}>"
-                          "$<IF:$<CONFIG:Debug>,${LIB_WIN_UXTHEME_D},${LIB_WIN_UXTHEME}>"
-                          "$<IF:$<CONFIG:Debug>,${LIB_QT_WINVISTASTYLE_D},${LIB_QT_WINVISTASTYLE}>"
-                          "$<IF:$<CONFIG:Debug>,${LIB_QT_WIN_D},${LIB_QT_WIN}>"
-                          )
-endif(MSVC)
+# LibProto
+add_subdirectory(Submodules/enigma-dev/CommandLine/libEGM)
+add_dependencies(${EXE} "EGM")
+target_link_libraries(${EXE} PRIVATE "EGM" "Protocols")
 
 # Find FreeType
 find_package(Freetype REQUIRED)
@@ -315,6 +277,78 @@ find_library(LIB_DOUBLE_CONVERSION NAMES double-conversion)
 target_link_libraries(${EXE} PRIVATE ${LIB_DOUBLE_CONVERSION})
 
 if(WIN32)
-	# Windows is a turd
-	target_link_libraries(${EXE} PRIVATE Ws2_32 Wtsapi32 Wldap32 Crypt32 Winmm Userenv Netapi32 version Dwmapi Imm32)
+  # Windows is a turd
+  target_link_libraries(${EXE} PRIVATE Ws2_32 Wtsapi32 Wldap32 Crypt32 Winmm Userenv Netapi32 version Dwmapi Imm32)
 endif(WIN32)
+
+install(TARGETS ${EXE} DESTINATION "${ENIGMA_DIR}")
+
+if(WIN32)
+  if (MSVC)
+    # Default MSVC warnings are overkill. Set to Lvl 2
+    target_compile_options(${EXE} PRIVATE /W1)
+    target_compile_options("EGM" PRIVATE /W1)
+    target_compile_options("Protocols" PRIVATE /W1)
+
+    install(FILES
+      "${DLL_DIR}/libprotobuf${DEBUG_POSTFIX}.dll"
+      "${DLL_DIR}/Qt5PrintSupport${DEBUG_POSTFIX}.dll"
+      "${DLL_DIR}/Qt5MultiMedia${DEBUG_POSTFIX}.dll"
+      "${DLL_DIR}/Qt5Widgets${DEBUG_POSTFIX}.dll"
+      "${DLL_DIR}/Qt5Gui${DEBUG_POSTFIX}.dll"
+      "${DLL_DIR}/Qt5Core${DEBUG_POSTFIX}.dll"
+      "${DLL_DIR}/Qt5Network${DEBUG_POSTFIX}.dll"
+      "${DLL_DIR}/zlib${DEBUG_POSTFIX}1.dll"
+      "${DLL_DIR}/libpng16${DEBUG_POSTFIX}.dll"
+      "${DLL_DIR}/pugixml.dll"
+      "${DLL_DIR}/libssl-1_1-x64.dll"
+      "${DLL_DIR}/libcrypto-1_1-x64.dll"
+      "${DLL_DIR}/cares.dll"
+      "${DLL_DIR}/harfbuzz.dll"
+      "${DLL_DIR}/icuin${DEBUG_POSTFIX}65.dll"
+      "${DLL_DIR}/icuuc${DEBUG_POSTFIX}65.dll"
+      "${DLL_DIR}/pcre2-16${DEBUG_POSTFIX}.dll"
+      "${DLL_DIR}/freetype${DEBUG_POSTFIX}.dll"
+      "${DLL_DIR}/icudt${DEBUG_POSTFIX}65.dll"
+      "${DLL_DIR}/bz2${DEBUG_POSTFIX}.dll"
+    DESTINATION "${ENIGMA_DIR}")
+  else()
+    find_file(LIB_GCC NAMES libgcc_s_dw2-1.dll libgcc_s_seh-1.dll PATHS "${DLL_DIR}")
+    find_file(LIB_SSL NAMES libssl-1_1.dll libssl-1_1-x64.dll PATHS "${DLL_DIR}")
+    find_file(LIB_CRYPTO NAMES libcrypto-1_1.dll libcrypto-1_1-x64.dll PATHS "${DLL_DIR}")
+    install(CODE "execute_process(COMMAND windeployqt.exe --no-translations ${ENIGMA_DIR}/${EXE}.exe)")
+    install(FILES
+      "${LIB_GCC}"
+      "${LIB_SSL}"
+      "${LIB_CRYPTO}"
+      "${DLL_DIR}/libwinpthread-1.dll"
+      "${DLL_DIR}/libstdc++-6.dll" 
+      "${DLL_DIR}/libgrpc++_unsecure.dll"
+      "${DLL_DIR}/libprotobuf.dll"
+      "${DLL_DIR}/zlib1.dll"
+      "${DLL_DIR}/libpng16-16.dll"
+      "${DLL_DIR}/libpugixml.dll"
+      "${DLL_DIR}/libgpr.dll"
+      "${DLL_DIR}/libgrpc_unsecure.dll"
+      "${DLL_DIR}/libgrpc.dll"
+      "${DLL_DIR}/libgrpc++.dll"
+      "${DLL_DIR}/yaml-cpp.dll"
+      "${DLL_DIR}/libdouble-conversion.dll"
+      "${DLL_DIR}/libicuuc65.dll"
+      "${DLL_DIR}/libicuin65.dll"
+      "${DLL_DIR}/libpcre2-16-0.dll"
+      "${DLL_DIR}/libcares-3.dll"
+      "${DLL_DIR}/libaddress_sorting.dll"
+      "${DLL_DIR}/libharfbuzz-0.dll"
+      "${DLL_DIR}/libzstd.dll"
+      "${DLL_DIR}/libicudt65.dll"
+      "${DLL_DIR}/libglib-2.0-0.dll"
+      "${DLL_DIR}/libfreetype-6.dll"
+      "${DLL_DIR}/libgraphite2.dll"
+      "${DLL_DIR}/libbz2-1.dll"
+      "${DLL_DIR}/libintl-8.dll"
+      "${DLL_DIR}/libpcre-1.dll"
+      "${DLL_DIR}/libiconv-2.dll"
+    DESTINATION "${ENIGMA_DIR}")
+  endif()
+endif() 
