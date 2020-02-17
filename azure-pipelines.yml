@@ -17,7 +17,12 @@ jobs:
         MINGW_UPPER: MINGW64
         MINGW_LOWER: mingw64
         MINGW_ARCH: x86_64
+  
   steps:
+    - checkout: self
+      submodules: true
+      persistCredentials: true
+
     - script: |
         git clone https://github.com/msys2/msys2-ci-base.git %CD:~0,2%\msys64
         %CD:~0,2%\msys64\usr\bin\rm -rf %CD:~0,2%\msys64\.git
@@ -45,7 +50,7 @@ jobs:
         set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
         %CD:~0,2%\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
         %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build.sh Debug"
-      displayName: 'Release Build'
+      displayName: 'Debug Build'
       env:
         MSYSTEM: $(MINGW_UPPER)
         CHERE_INVOKING: yes
@@ -67,7 +72,7 @@ jobs:
          $(Build.SourcesDirectory)/RadialGM-MinGW-$(MINGW_ARCH).exe 
 
 - job: MSVC_64
-  displayName: 'MSVC 64bit'
+  displayName: 'MSVC x86_64'
   pool:
     vmImage: 'windows-latest'
   timeoutInMinutes: 250
