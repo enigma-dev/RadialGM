@@ -175,6 +175,8 @@ else()
     set(EDITOR_SOURCES Widgets/CodeWidgetScintilla.cpp)
 endif()
 
+set(CMAKE_INSTALL_RPATH "${ENIGMA_DIR}")
+
 # Tell CMake to create the RadialGM executable
 if(WIN32)
   add_executable(${EXE} WIN32 ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${EDITOR_SOURCES} ${RGM_RC})
@@ -275,8 +277,8 @@ find_library(LIB_DOUBLE_CONVERSION NAMES double-conversion)
 target_link_libraries(${EXE} PRIVATE ${LIB_DOUBLE_CONVERSION})
 
 if(WIN32)
-	# Windows is a turd
-	target_link_libraries(${EXE} PRIVATE Ws2_32 Wtsapi32 Wldap32 Crypt32 Winmm Userenv Netapi32 version Dwmapi Imm32)
+  # Windows is a turd
+  target_link_libraries(${EXE} PRIVATE Ws2_32 Wtsapi32 Wldap32 Crypt32 Winmm Userenv Netapi32 version Dwmapi Imm32)
 endif(WIN32)
 
 install(TARGETS ${EXE} DESTINATION "${ENIGMA_DIR}")
