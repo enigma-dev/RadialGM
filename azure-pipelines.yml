@@ -57,7 +57,9 @@ jobs:
         MINGW_INSTALLS: $(MINGW_LOWER)
 
     - script: |
-        7z a $(Build.SourcesDirectory)/RadialGM-Installer-MinGW-$(MINGW_ARCH).exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
+        cd $(Build.SourcesDirectory)/Submodules/enigma-dev
+        7z a $(Build.SourcesDirectory)/RadialGM-Installer-MSVC-x64.exe -mmt -mx5 -sfx ./
+        7z a $(Build.SourcesDirectory)/RadialGM-Update-MSVC-x64.exe -mmt -mx5 -sfx RadialGM.exe RadialGM-Debug.exe libProtocols.dll libProtocolsd.dll libEGM.dll libEGMd.dll
       displayName: 'Package'
 
     - task: GithubRelease@0 
@@ -69,9 +71,8 @@ jobs:
         tag: '$(releasetag)'
         isPreRelease: true
         assets: |
-         $(Build.SourcesDirectory)/RadialGM-Installer-MinGW-$(MINGW_ARCH).exe
-         $(Build.SourcesDirectory)/Submodules/enigma-dev/RadialGM.exe
-         $(Build.SourcesDirectory)/Submodules/enigma-dev/RadialGM-Debug.exe
+          $(Build.SourcesDirectory)/RadialGM-Installer-MSVC-x64.exe
+          $(Build.SourcesDirectory)/RadialGM-Update-MSVC-x64.exe
 
 - job: MSVC_64
   displayName: 'MSVC x86_64'
@@ -113,7 +114,9 @@ jobs:
     displayName: 'Debug Build'
 
   - script: |
-      7z a $(Build.SourcesDirectory)/RadialGM-Installer-MSVC-x64.exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
+      cd $(Build.SourcesDirectory)/Submodules/enigma-dev
+      7z a $(Build.SourcesDirectory)/RadialGM-Installer-MSVC-x64.exe -mmt -mx5 -sfx ./
+      7z a $(Build.SourcesDirectory)/RadialGM-Update-MSVC-x64.exe -mmt -mx5 -sfx RadialGM.exe RadialGM-Debug.exe libProtocols.dll libProtocolsd.dll libEGM.dll libEGMd.dll
     displayName: 'Package'
 
   - task: GithubRelease@0 
@@ -126,8 +129,8 @@ jobs:
       isPreRelease: true
       assets: |
         $(Build.SourcesDirectory)/RadialGM-Installer-MSVC-x64.exe
-        $(Build.SourcesDirectory)/Submodules/enigma-dev/RadialGM.exe
-        $(Build.SourcesDirectory)/Submodules/enigma-dev/RadialGM-Debug.exe
+        $(Build.SourcesDirectory)/RadialGM-Update-MSVC-x64.exe
+
 
 - job: Arch
   displayName: 'Arch Linux'
