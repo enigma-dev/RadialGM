@@ -57,9 +57,7 @@ jobs:
         MINGW_INSTALLS: $(MINGW_LOWER)
 
     - script: |
-        cd $(Build.SourcesDirectory)/Submodules/enigma-dev
-        7z a $(Build.SourcesDirectory)/RadialGM-Installer-MSVC-x64.exe -mmt -mx5 -sfx ./
-        7z a $(Build.SourcesDirectory)/RadialGM-Update-MSVC-x64.exe -mmt -mx5 -sfx RadialGM.exe RadialGM-Debug.exe libProtocols.dll libProtocolsd.dll libEGM.dll libEGMd.dll
+        7z a $(Build.SourcesDirectory)/RadialGM-MinGW-$(MINGW_ARCH).exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
       displayName: 'Package'
 
     - task: GithubRelease@0 
@@ -71,8 +69,7 @@ jobs:
         tag: '$(releasetag)'
         isPreRelease: true
         assets: |
-          $(Build.SourcesDirectory)/RadialGM-Installer-MSVC-x64.exe
-          $(Build.SourcesDirectory)/RadialGM-Update-MSVC-x64.exe
+         $(Build.SourcesDirectory)/RadialGM-MinGW-$(MINGW_ARCH).exe 
 
 - job: MSVC_64
   displayName: 'MSVC x86_64'
@@ -114,9 +111,7 @@ jobs:
     displayName: 'Debug Build'
 
   - script: |
-      cd $(Build.SourcesDirectory)/Submodules/enigma-dev
-      7z a $(Build.SourcesDirectory)/RadialGM-Installer-MSVC-x64.exe -mmt -mx5 -sfx ./
-      7z a $(Build.SourcesDirectory)/RadialGM-Update-MSVC-x64.exe -mmt -mx5 -sfx RadialGM.exe RadialGM-Debug.exe libProtocols.dll libProtocolsd.dll libEGM.dll libEGMd.dll
+      7z a $(Build.SourcesDirectory)/RadialGM-MSVC-x64.exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
     displayName: 'Package'
 
   - task: GithubRelease@0 
@@ -128,9 +123,7 @@ jobs:
       tag: '$(releasetag)'
       isPreRelease: true
       assets: |
-        $(Build.SourcesDirectory)/RadialGM-Installer-MSVC-x64.exe
-        $(Build.SourcesDirectory)/RadialGM-Update-MSVC-x64.exe
-
+        $(Build.SourcesDirectory)/RadialGM-MSVC-x64.exe
 
 - job: Arch
   displayName: 'Arch Linux'
