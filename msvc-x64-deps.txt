@@ -1,6 +1,7 @@
 --triplet
 x64-windows
 qt5-base
+qt5-tools
 qscintilla
 pugixml 
 rapidjson 

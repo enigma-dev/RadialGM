@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 
-if (CMAKE_BUILD_TYPE EQUAL "Debug")
+if (CMAKE_BUILD_TYPE MATCHES "Debug")
   set(EXE "RadialGM-Debug")
 else()
   set(EXE "RadialGM")
@@ -289,15 +289,15 @@ if(WIN32)
     target_compile_options(${EXE} PRIVATE /W1)
     target_compile_options("EGM" PRIVATE /W1)
     target_compile_options("Protocols" PRIVATE /W1)
+    
+    if (CMAKE_BUILD_TYPE MATCHES "Debug")
+      install(CODE "execute_process(COMMAND windeployqt.exe --pdb --no-angle --no-translations ${ENIGMA_DIR}/${EXE}.exe)")
+    else()
+      install(CODE "execute_process(COMMAND windeployqt.exe --no-angle --no-translations ${ENIGMA_DIR}/${EXE}.exe)")
+    endif()
 
     install(FILES
       "${DLL_DIR}/libprotobuf${DEBUG_POSTFIX}.dll"
-      "${DLL_DIR}/Qt5PrintSupport${DEBUG_POSTFIX}.dll"
-      "${DLL_DIR}/Qt5MultiMedia${DEBUG_POSTFIX}.dll"
-      "${DLL_DIR}/Qt5Widgets${DEBUG_POSTFIX}.dll"
-      "${DLL_DIR}/Qt5Gui${DEBUG_POSTFIX}.dll"
-      "${DLL_DIR}/Qt5Core${DEBUG_POSTFIX}.dll"
-      "${DLL_DIR}/Qt5Network${DEBUG_POSTFIX}.dll"
       "${DLL_DIR}/zlib${DEBUG_POSTFIX}1.dll"
       "${DLL_DIR}/libpng16${DEBUG_POSTFIX}.dll"
       "${DLL_DIR}/pugixml.dll"
@@ -351,4 +351,4 @@ if(WIN32)
       "${DLL_DIR}/libiconv-2.dll"
     DESTINATION "${ENIGMA_DIR}")
   endif()
-endif() 
+endif()
