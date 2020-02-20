@@ -276,7 +276,9 @@ install(TARGETS "EGM" DESTINATION .)
 
 set(APPS \${CMAKE_INSTALL_PREFIX}/${EXE}${CMAKE_EXECUTABLE_SUFFIX})
 
-if (NOT MSVC)
+if (MSVC)
+  set(SEARCH_PATHS \${VCPKG_ROOT}/nstalled/x64-windows/debug/bin ${VCPKG_ROOT}/nstalled/x64-windows/bin)
+else()
   set(LIBS \${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}EGM${CMAKE_SHARED_LIBRARY_SUFFIX} ${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}Protocols${CMAKE_SHARED_LIBRARY_SUFFIX})
 endif()
 
@@ -289,7 +291,7 @@ if (WIN32)
 
   install(CODE "
           include(BundleUtilities)
-          fixup_bundle(\"${APPS}\" \"${LIBS}\" \"\")
+          fixup_bundle(\"${APPS}\" \"${LIBS}\" \"${SEARCH_PATHS}\")
           execute_process(COMMAND windeployqt.exe --no-translations --pdb --no-angle ${APPS})
           ")
 endif()
