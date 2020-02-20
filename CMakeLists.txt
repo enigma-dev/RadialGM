@@ -277,7 +277,11 @@ install(TARGETS "EGM" DESTINATION .)
 set(APPS "${CMAKE_INSTALL_PREFIX}/${EXE}${CMAKE_EXECUTABLE_SUFFIX}")
 
 if (MSVC)
-  set(SEARCH_PATHS "${VCPKG_ROOT}/installed/x64-windows/bin/")
+  if (CMAKE_BUILD_TYPE MATCHES "Debug")
+    set(SEARCH_PATHS "${VCPKG_ROOT}/installed/x64-windows/debug/bin/")
+  else()
+    set(SEARCH_PATHS "${VCPKG_ROOT}/installed/x64-windows/bin/")
+  endif()
 else()
   set(LIBS "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}EGM${CMAKE_SHARED_LIBRARY_SUFFIX}" 
            "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}Protocols${CMAKE_SHARED_LIBRARY_SUFFIX}")
