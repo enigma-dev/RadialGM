@@ -58,7 +58,7 @@ jobs:
     - script: |
         set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
         %CD:~0,2%\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
-        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build.sh MinSizeRel $(Build.SourcesDirectory)/cmake-package"
+        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build.sh MinSizeRel $(PWD)/cmake-package"
       displayName: 'Release Build'
       env:
         MSYSTEM: $(MINGW_UPPER)
@@ -68,7 +68,7 @@ jobs:
     - script: |
         set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
         %CD:~0,2%\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
-        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build.sh Debug $(Build.SourcesDirectory)/cmake-package"
+        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build.sh Debug $(PWD)/cmake-package"
       displayName: 'Debug Build'
       env:
         MSYSTEM: $(MINGW_UPPER)
@@ -132,9 +132,10 @@ jobs:
         vcpkgGitCommitId: $(vcpkgGitRef)
         vcpkgGitURL: https://github.com/microsoft/vcpkg.git
 
-    - powershell: |
-        Set-Item -Path Env:Path -Value ($Env:Path + ";$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\tools\qt5\bin\")
-        Set-Item -Path Env:VCINSTALLDIR -Value (${Env:ProgramFiles(x86)} + "\Microsoft Visual Studio\2019\Enterprise\VC")
+    - script: |
+        set PATH=%PATH%;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\tools\qt5\bin\
+        set VCINSTALLDIR=%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC
+        %VCINSTALLDIR%\Auxiliary\Build\vcvars64.bat"
         mkdir $(Build.BinariesDirectory)/Release
         cd $(Build.BinariesDirectory)/Release
         cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=$(Build.SourcesDirectory)/cmake-package -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)
@@ -156,7 +157,7 @@ jobs:
         mkdir $(Build.BinariesDirectory)/package
         cd $(Build.BinariesDirectory)/package
         cmake -G "Visual Studio 16 2019" -A x64 $(Build.SourcesDirectory)/cmake-package
-        cmake --build . --target package
+        cmake --install . --config package
       displayName: 'Package'
       
     - task: PublishBuildArtifacts@1
