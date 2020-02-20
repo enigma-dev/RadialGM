@@ -58,7 +58,7 @@ jobs:
     - script: |
         set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
         %CD:~0,2%\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
-        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build.sh MinSizeRel"
+        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build.sh MinSizeRel $(Build.SourcesDirectory)/cmake-package"
       displayName: 'Release Build'
       env:
         MSYSTEM: $(MINGW_UPPER)
@@ -68,7 +68,7 @@ jobs:
     - script: |
         set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
         %CD:~0,2%\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
-        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build.sh Debug"
+        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build.sh Debug $(Build.SourcesDirectory)/cmake-package"
       displayName: 'Debug Build'
       env:
         MSYSTEM: $(MINGW_UPPER)
@@ -137,7 +137,7 @@ jobs:
         Set-Item -Path Env:VCINSTALLDIR -Value (${Env:ProgramFiles(x86)} + "\Microsoft Visual Studio\2019\Enterprise\VC")
         mkdir $(Build.BinariesDirectory)/Release
         cd $(Build.BinariesDirectory)/Release
-        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=cmake-package -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)
+        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=$(Build.SourcesDirectory)/cmake-package -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)
         cmake --build $(Build.BinariesDirectory)/Release --config MinSizeRel
         cmake --install $(Build.BinariesDirectory)/Release --config MinSizeRel
       displayName: 'Release Build'
@@ -147,7 +147,7 @@ jobs:
         Set-Item -Path Env:VCINSTALLDIR -Value (${Env:ProgramFiles(x86)} + "\Microsoft Visual Studio\2019\Enterprise\VC")
         mkdir $(Build.BinariesDirectory)/Debug
         cd $(Build.BinariesDirectory)/Debug
-        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=cmake-package -DCMAKE_BUILD_TYPE=Debug -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory) 
+        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=$(Build.SourcesDirectory)/cmake-package -DCMAKE_BUILD_TYPE=Debug -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory) 
         cmake --build $(Build.BinariesDirectory)/Debug --config Debug
         cmake --install $(Build.BinariesDirectory)/Debug --config Debug
       displayName: 'Debug Build'
