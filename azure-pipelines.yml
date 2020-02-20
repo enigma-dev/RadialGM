@@ -81,11 +81,6 @@ jobs:
         cmake -G "MSYS Makefiles" ../cmake-package
         make package
       displayName: 'Package'
-
-    - script: |
-        cat package/_CPack_Packages/win64/NSIS/NSISOutput.log
-      displayName: 'Package'
-      condition: always()
       
     - task: PublishBuildArtifacts@1
       displayName: 'Push Build Artifacts'
@@ -134,23 +129,23 @@ jobs:
 
     - script: |
         set PATH=%PATH%;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\tools\qt5\bin\
-        set VCINSTALLDIR=%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC
-        %VCINSTALLDIR%\Auxiliary\Build\vcvars64.bat"
-        mkdir $(Build.BinariesDirectory)/Release
-        cd $(Build.BinariesDirectory)/Release
-        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=$(Build.SourcesDirectory)/cmake-package -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)
-        cmake --build $(Build.BinariesDirectory)/Release --config MinSizeRel
-        cmake --install $(Build.BinariesDirectory)/Release --config MinSizeRel
+        set VCINSTALLDIR="%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC"
+        "%VCINSTALLDIR%\Auxiliary\Build\vcvars64.bat"
+        mkdir Release
+        cd Release
+        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=../cmake-package -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)
+        cmake --build Release --config MinSizeRel
+        cmake --install Release --config MinSizeRel
       displayName: 'Release Build'
     
     - powershell: |
         Set-Item -Path Env:Path -Value ($Env:Path + ";$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\debug\bin;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\bin;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\tools\qt5\debug\bin\")
         Set-Item -Path Env:VCINSTALLDIR -Value (${Env:ProgramFiles(x86)} + "\Microsoft Visual Studio\2019\Enterprise\VC")
-        mkdir $(Build.BinariesDirectory)/Debug
-        cd $(Build.BinariesDirectory)/Debug
+        mkdir Debug
+        cd Debug
         cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=$(Build.SourcesDirectory)/cmake-package -DCMAKE_BUILD_TYPE=Debug -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory) 
-        cmake --build $(Build.BinariesDirectory)/Debug --config Debug
-        cmake --install $(Build.BinariesDirectory)/Debug --config Debug
+        cmake --build Debug --config Debug
+        cmake --install Debug --config Debug
       displayName: 'Debug Build'
     
     - script: |
