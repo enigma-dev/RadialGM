@@ -51,7 +51,7 @@ jobs:
     
     - script: |
         set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
-        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm --needed -S git base-devel mingw-w64-$(MINGW_ARCH)-toolchain mingw-w64-$(MINGW_ARCH)-cmake mingw-w64-$(MINGW_ARCH)-protobuf mingw-w64-$(MINGW_ARCH)-grpc mingw-w64-$(MINGW_ARCH)-gflags mingw-w64-$(MINGW_ARCH)-yaml-cpp mingw-w64-$(MINGW_ARCH)-pugixml mingw-w64-$(MINGW_ARCH)-rapidjson mingw-w64-$(MINGW_ARCH)-boost mingw-w64-$(MINGW_ARCH)-qt5 mingw-w64-$(MINGW_ARCH)-qscintilla
+        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm --needed -S git base-devel mingw-w64-$(MINGW_ARCH)-toolchain mingw-w64-$(MINGW_ARCH)-cmake mingw-w64-$(MINGW_ARCH)-nsis mingw-w64-$(MINGW_ARCH)-protobuf mingw-w64-$(MINGW_ARCH)-grpc mingw-w64-$(MINGW_ARCH)-gflags mingw-w64-$(MINGW_ARCH)-yaml-cpp mingw-w64-$(MINGW_ARCH)-pugixml mingw-w64-$(MINGW_ARCH)-rapidjson mingw-w64-$(MINGW_ARCH)-boost mingw-w64-$(MINGW_ARCH)-qt5 mingw-w64-$(MINGW_ARCH)-qscintilla
         %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Scc
       displayName: Install Toolchain
     
@@ -76,7 +76,10 @@ jobs:
         MINGW_INSTALLS: $(MINGW_LOWER)
     
     - script: |
-        7z a $(Build.SourcesDirectory)/RadialGM-MinGW-$(MINGW_ARCH).exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
+        mkdir package
+        cd package
+        cmake -G "MSYS Makefiles" ../cmake-package
+        make package || cat package/_CPack_Packages/win64/NSIS/NSISOutput.log
       displayName: 'Package'
       
     - task: PublishBuildArtifacts@1
@@ -129,10 +132,9 @@ jobs:
         Set-Item -Path Env:VCINSTALLDIR -Value (${Env:ProgramFiles(x86)} + "\Microsoft Visual Studio\2019\Enterprise\VC")
         mkdir $(Build.BinariesDirectory)/Release
         cd $(Build.BinariesDirectory)/Release
-        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)
+        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=cmake-package -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)
         cmake --build $(Build.BinariesDirectory)/Release --config MinSizeRel
         cmake --install $(Build.BinariesDirectory)/Release --config MinSizeRel
-        windeployqt.exe --verbose 2 --no-translations --no-angle $(Build.SourcesDirectory)/Submodules/enigma-dev/RadialGM.exe
       displayName: 'Release Build'
     
     - powershell: |
@@ -140,13 +142,16 @@ jobs:
         Set-Item -Path Env:VCINSTALLDIR -Value (${Env:ProgramFiles(x86)} + "\Microsoft Visual Studio\2019\Enterprise\VC")
         mkdir $(Build.BinariesDirectory)/Debug
         cd $(Build.BinariesDirectory)/Debug
-        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Debug -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory) 
+        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=cmake-package -DCMAKE_BUILD_TYPE=Debug -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory) 
         cmake --build $(Build.BinariesDirectory)/Debug --config Debug
         cmake --install $(Build.BinariesDirectory)/Debug --config Debug
       displayName: 'Debug Build'
     
     - script: |
-        7z a $(Build.SourcesDirectory)/RadialGM-MSVC-x86_64.exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
+        mkdir $(Build.BinariesDirectory)/package
+        cd $(Build.BinariesDirectory)/package
+        cmake -G "Visual Studio 16 2019" -A x64 $(Build.SourcesDirectory)/cmake-package
+        cmake --build . --target package
       displayName: 'Package'
       
     - task: PublishBuildArtifacts@1
