@@ -288,7 +288,15 @@ else()
 endif()
 
 if (WIN32)
+
+  set(WINDEPLOY_ARGS "--no-translations --no-angle")
+
   if (MSVC)
+    if (CMAKE_BUILD_TYPE MATCHES "Debug")
+      set(WINDEPLOY_ARGS "${WINDEPLOY_ARGS} --pdb --no-compiler-runtime")
+    else()
+      set(WINDEPLOY_ARGS "${WINDEPLOY_ARGS} --no-compiler-runtime")
+    endif()
     set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
     include(InstallRequiredSystemLibraries)
     install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION .)
@@ -297,6 +305,6 @@ if (WIN32)
   install(CODE "
           include(BundleUtilities)
           fixup_bundle(\"${APPS}\" \"${LIBS}\" \"${SEARCH_PATHS}\")
-          execute_process(COMMAND windeployqt.exe --no-translations --pdb --no-angle ${APPS})
+          execute_process(COMMAND windeployqt.exe ${WINDEPLOY_ARGS} ${APPS})
           ")
 endif()
