@@ -15,7 +15,7 @@ set(CPACK_PACKAGE_INSTALL_DIRECTORY "enigma-dev")
 #set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/license.txt")
 set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/enigma-dev/Resources/icon.ico")
 set(CPACK_NSIS_MUI_UNIICON "${CMAKE_SOURCE_DIR}/enigma-dev/Resources/icon.ico")
-set(CPACK_NSIS_MENU_LINKS "RadialGM${CMAKE_EXECUTABLE_SUFFIX}" "RadialGM"
-                          "RadialGM-Debug${CMAKE_EXECUTABLE_SUFFIX}" "RadialGM-Debug")
+#set(CPACK_NSIS_MENU_LINKS "RadialGM${CMAKE_EXECUTABLE_SUFFIX}" "RadialGM"
+#                          "RadialGM-Debug${CMAKE_EXECUTABLE_SUFFIX}" "RadialGM-Debug")
 
 include(CPack)
