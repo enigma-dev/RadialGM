@@ -162,7 +162,7 @@ endif()
 set(CMAKE_INSTALL_RPATH "${ENIGMA_DIR}")
 
 # Tell CMake to create the RadialGM executable
-add_executable(${EXE} WIN32 ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${EDITOR_SOURCES} ${RGM_RC})
+add_executable(${EXE} ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${EDITOR_SOURCES} ${RGM_RC})
 
 # we do this even in release mode for "Editor Diagnostics"
 target_compile_definitions(${EXE} PUBLIC QT_MESSAGELOGCONTEXT)
