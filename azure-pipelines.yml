@@ -80,6 +80,7 @@ jobs:
         cd package
         cmake -G "MSYS Makefiles" ../cmake-package
         make package
+        mv package/ENIGMA-Installer*.exe $(Build.SourcesDirectory)/RadialGM-MinGW-$(MINGW_ARCH).exe
       displayName: 'Package'
       
     - task: PublishBuildArtifacts@1
@@ -154,6 +155,7 @@ jobs:
         cd package
         cmake -G "Visual Studio 16 2019" -A x64 ../cmake-package
         cmake --build . --config Release --target PACKAGE
+        mv package/ENIGMA-Installer*.exe $(Build.SourcesDirectory)/RadialGM-MSVC-x86_64.exe
       displayName: 'Package'
       
     - task: PublishBuildArtifacts@1
