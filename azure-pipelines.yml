@@ -164,7 +164,7 @@ jobs:
         type _CPack_Packages/win64/NSIS/NSISOutput.log
       condition: failed()
     
-      - task: PublishBuildArtifacts@1
+    - task: PublishBuildArtifacts@1
       displayName: 'Push Build Artifacts'
       inputs:
         pathtoPublish: '$(Build.SourcesDirectory)/RadialGM-MSVC-x86_64.exe'
