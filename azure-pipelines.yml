@@ -140,7 +140,7 @@ jobs:
       displayName: 'Release Build'
     
     - script: |
-        set PATH=%PATH%;C:\vcpkg\installed\x64-windows\tools\qt5\debug\bin\;C:\vcpkg\installed\x64-windows\debug\bin;C:\vcpkg\installed\x64-windows\bin
+        set PATH=%PATH%;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\debug\bin;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\bin;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\tools\qt5\debug\bin\"
         set VCINSTALLDIR=%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC
         call "%VCINSTALLDIR%\Auxiliary\Build\vcvars64.bat"
         mkdir Debug
