@@ -129,13 +129,13 @@ jobs:
 
     - script: |
         set PATH=%PATH%;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\tools\qt5\bin\
-        set VCINSTALLDIR="%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC"
+        set VCINSTALLDIR=%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC
         "%VCINSTALLDIR%\Auxiliary\Build\vcvars64.bat"
         mkdir Release
         cd Release
         cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=../cmake-package -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)
-        cmake --build Release --config MinSizeRel
-        cmake --install Release --config MinSizeRel
+        cmake --build . --config MinSizeRel
+        cmake --install . --config MinSizeRel
       displayName: 'Release Build'
     
     - powershell: |
