@@ -275,21 +275,29 @@ install(TARGETS "EGM" DESTINATION .)
 
 set(APPS "${CMAKE_INSTALL_PREFIX}/${EXE}${CMAKE_EXECUTABLE_SUFFIX}")
 
-if (WIN32)
-  set(WINDEPLOY_ARGS "--no-translations --no-angle")
-  if (MSVC)
-    file(TO_CMAKE_PATH ${VCPKG_ROOT} VCPKG_ROOT)
-    set(LIBS "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}EGM${CMAKE_SHARED_LIBRARY_SUFFIX}" 
+if (MSVC)
+file(TO_CMAKE_PATH ${VCPKG_ROOT} VCPKG_ROOT)
+  if (CMAKE_BUILD_TYPE MATCHES "Debug")
+    set(SEARCH_PATHS "${VCPKG_ROOT}/installed/x64-windows/debug/bin/")
+  else()
+    set(SEARCH_PATHS "${VCPKG_ROOT}/installed/x64-windows/bin/")
+  endif()
+else()
+  set(LIBS "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}EGM${CMAKE_SHARED_LIBRARY_SUFFIX}" 
            "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}Protocols${CMAKE_SHARED_LIBRARY_SUFFIX}")
+endif()
+
+if (WIN32)
+
+  set(WINDEPLOY_ARGS "--no-translations --no-angle")
+
+  if (MSVC)
     if (CMAKE_BUILD_TYPE MATCHES "Debug")
       set(CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY TRUE)
-      set(SEARCH_PATHS "${VCPKG_ROOT}/installed/x64-windows/debug/bin/")
       set(WINDEPLOY_ARGS "${WINDEPLOY_ARGS} --pdb --no-compiler-runtime")
     else()
-      set(SEARCH_PATHS "${VCPKG_ROOT}/installed/x64-windows/bin/")
       set(WINDEPLOY_ARGS "${WINDEPLOY_ARGS} --no-compiler-runtime")
     endif()
-    
     set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
     include(InstallRequiredSystemLibraries)
     install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION .)
