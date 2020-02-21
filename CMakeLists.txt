@@ -270,6 +270,7 @@ if(MSVC)
     target_compile_options("Protocols" PRIVATE /W1)
 endif()
 
+install(DIRECTORY "${ENIGMA_DIR}" DESTINATION .)
 install(TARGETS "Protocols" DESTINATION .)
 install(TARGETS "EGM" DESTINATION .)
 
