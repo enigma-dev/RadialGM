@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.11)
 
 project(RadialGM-Package)
 
-install(DIRECTORY "${CMAKE_SOURCE_DIR}/../Submodules/enigma-dev" DESTINATION ..)
-install(DIRECTORY ${CMAKE_SOURCE_DIR} DESTINATION ..)
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/../Submodules/enigma-dev" DESTINATION .)
+install(DIRECTORY ${CMAKE_SOURCE_DIR} DESTINATION .)
 
 ########################################################################
 # CPack configuration
