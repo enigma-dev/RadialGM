@@ -159,9 +159,7 @@ jobs:
       displayName: 'Package'
       
     - script: |
-        cd package
-        dir
-        type _CPack_Packages/win64/NSIS/NSISOutput.log
+        type package\_CPack_Packages\win64\NSIS\NSISOutput.log
       condition: failed()
     
     - task: PublishBuildArtifacts@1
