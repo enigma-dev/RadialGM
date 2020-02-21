@@ -158,7 +158,13 @@ jobs:
         mv ENIGMA-Installer*.exe $(Build.SourcesDirectory)/RadialGM-MSVC-x86_64.exe
       displayName: 'Package'
       
-    - task: PublishBuildArtifacts@1
+    - script: |
+        cd package
+        dir
+        type _CPack_Packages/win64/NSIS/NSISOutput.log
+      condition: failed()
+    
+      - task: PublishBuildArtifacts@1
       displayName: 'Push Build Artifacts'
       inputs:
         pathtoPublish: '$(Build.SourcesDirectory)/RadialGM-MSVC-x86_64.exe'
