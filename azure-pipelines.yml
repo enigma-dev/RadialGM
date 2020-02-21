@@ -138,8 +138,8 @@ jobs:
         cmake --install . --config MinSizeRel
       displayName: 'Release Build'
     
-    - powershell: |
-        set PATH=%PATH%;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\tools\qt5\bin\
+    - script: |
+        set PATH=%PATH%;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\tools\qt5\debug\bin\;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\debug\bin;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\bin
         set VCINSTALLDIR=%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC
         call "%VCINSTALLDIR%\Auxiliary\Build\vcvars64.bat"
         mkdir Release
