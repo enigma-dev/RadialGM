@@ -1,12 +1,11 @@
 cmake_minimum_required(VERSION 3.11)
 
-if (CMAKE_BUILD_TYPE EQUAL "Debug")
+if (CMAKE_BUILD_TYPE MATCHES "Debug")
   set(EXE "RadialGM-Debug")
 else()
   set(EXE "RadialGM")
 endif()
 
-set(EXE_VERSION "0.1")
 set(EXE_DESCRIPTION "ENIGMA IDE")
 
 project(RadialGM)
@@ -28,21 +27,6 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/Dialogs")
 # Include ENIGMA things
 set(ENIGMA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/enigma-dev)
 include_directories("${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/libEGM/libProtocols" "${ENIGMA_DIR}/CommandLine/libEGM")
-
-if(WIN32)
-  if(MSVC)
-    file(TO_CMAKE_PATH ${VCPKG_ROOT} VCPKG_ROOT)
-    if(CMAKE_BUILD_TYPE  MATCHES Debug)
-      set (DEBUG_POSTFIX d)
-      set(DLL_DIR "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/debug/bin")
-    else()
-      set(DLL_DIR "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/bin")
-    endif()
-  else()
-    # Hack to get msys path
-    get_filename_component(DLL_DIR ${CMAKE_C_COMPILER} DIRECTORY)
-  endif()
-endif()
 
 # Populate a CMake variable with the sources
 set(RGM_SOURCES
@@ -178,11 +162,7 @@ endif()
 set(CMAKE_INSTALL_RPATH "${ENIGMA_DIR}")
 
 # Tell CMake to create the RadialGM executable
-if(WIN32)
-  add_executable(${EXE} WIN32 ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${EDITOR_SOURCES} ${RGM_RC})
-else()
-  add_executable(${EXE} ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${EDITOR_SOURCES} ${RGM_RC})
-endif(WIN32)
+add_executable(${EXE} WIN32 ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${EDITOR_SOURCES} ${RGM_RC})
 
 # we do this even in release mode for "Editor Diagnostics"
 target_compile_definitions(${EXE} PUBLIC QT_MESSAGELOGCONTEXT)
@@ -225,7 +205,7 @@ find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${EXE} PRIVATE yaml-cpp)
 
 #Find gRPC
-if (WIN32) # Windows actually does something right for once
+if (MSVC) # Windows actually does something right for once
   find_package(gRPC CONFIG REQUIRED)
   target_link_libraries(${EXE} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
 else() # https://tinyurl.com/arch-grpc-bug
@@ -281,74 +261,51 @@ if(WIN32)
   target_link_libraries(${EXE} PRIVATE Ws2_32 Wtsapi32 Wldap32 Crypt32 Winmm Userenv Netapi32 version Dwmapi Imm32)
 endif(WIN32)
 
-install(TARGETS ${EXE} DESTINATION "${ENIGMA_DIR}")
+install(TARGETS ${EXE} RUNTIME DESTINATION .)
 
-if(WIN32)
-  if (MSVC)
+if(MSVC)
     # Default MSVC warnings are overkill. Set to Lvl 2
     target_compile_options(${EXE} PRIVATE /W1)
     target_compile_options("EGM" PRIVATE /W1)
     target_compile_options("Protocols" PRIVATE /W1)
+endif()
 
-    install(FILES
-      "${DLL_DIR}/libprotobuf${DEBUG_POSTFIX}.dll"
-      "${DLL_DIR}/Qt5PrintSupport${DEBUG_POSTFIX}.dll"
-      "${DLL_DIR}/Qt5MultiMedia${DEBUG_POSTFIX}.dll"
-      "${DLL_DIR}/Qt5Widgets${DEBUG_POSTFIX}.dll"
-      "${DLL_DIR}/Qt5Gui${DEBUG_POSTFIX}.dll"
-      "${DLL_DIR}/Qt5Core${DEBUG_POSTFIX}.dll"
-      "${DLL_DIR}/Qt5Network${DEBUG_POSTFIX}.dll"
-      "${DLL_DIR}/zlib${DEBUG_POSTFIX}1.dll"
-      "${DLL_DIR}/libpng16${DEBUG_POSTFIX}.dll"
-      "${DLL_DIR}/pugixml.dll"
-      "${DLL_DIR}/libssl-1_1-x64.dll"
-      "${DLL_DIR}/libcrypto-1_1-x64.dll"
-      "${DLL_DIR}/cares.dll"
-      "${DLL_DIR}/harfbuzz.dll"
-      "${DLL_DIR}/icuin${DEBUG_POSTFIX}65.dll"
-      "${DLL_DIR}/icuuc${DEBUG_POSTFIX}65.dll"
-      "${DLL_DIR}/pcre2-16${DEBUG_POSTFIX}.dll"
-      "${DLL_DIR}/freetype${DEBUG_POSTFIX}.dll"
-      "${DLL_DIR}/icudt${DEBUG_POSTFIX}65.dll"
-      "${DLL_DIR}/bz2${DEBUG_POSTFIX}.dll"
-    DESTINATION "${ENIGMA_DIR}")
+install(TARGETS "Protocols" DESTINATION .)
+install(TARGETS "EGM" DESTINATION .)
+
+set(APPS "${CMAKE_INSTALL_PREFIX}/${EXE}${CMAKE_EXECUTABLE_SUFFIX}")
+
+if (MSVC)
+file(TO_CMAKE_PATH ${VCPKG_ROOT} VCPKG_ROOT)
+  if (CMAKE_BUILD_TYPE MATCHES "Debug")
+    set(SEARCH_PATHS "${VCPKG_ROOT}/installed/x64-windows/debug/bin/")
   else()
-    find_file(LIB_GCC NAMES libgcc_s_dw2-1.dll libgcc_s_seh-1.dll PATHS "${DLL_DIR}")
-    find_file(LIB_SSL NAMES libssl-1_1.dll libssl-1_1-x64.dll PATHS "${DLL_DIR}")
-    find_file(LIB_CRYPTO NAMES libcrypto-1_1.dll libcrypto-1_1-x64.dll PATHS "${DLL_DIR}")
-    install(CODE "execute_process(COMMAND windeployqt.exe --no-translations ${ENIGMA_DIR}/${EXE}.exe)")
-    install(FILES
-      "${LIB_GCC}"
-      "${LIB_SSL}"
-      "${LIB_CRYPTO}"
-      "${DLL_DIR}/libwinpthread-1.dll"
-      "${DLL_DIR}/libstdc++-6.dll" 
-      "${DLL_DIR}/libgrpc++_unsecure.dll"
-      "${DLL_DIR}/libprotobuf.dll"
-      "${DLL_DIR}/zlib1.dll"
-      "${DLL_DIR}/libpng16-16.dll"
-      "${DLL_DIR}/libpugixml.dll"
-      "${DLL_DIR}/libgpr.dll"
-      "${DLL_DIR}/libgrpc_unsecure.dll"
-      "${DLL_DIR}/libgrpc.dll"
-      "${DLL_DIR}/libgrpc++.dll"
-      "${DLL_DIR}/yaml-cpp.dll"
-      "${DLL_DIR}/libdouble-conversion.dll"
-      "${DLL_DIR}/libicuuc65.dll"
-      "${DLL_DIR}/libicuin65.dll"
-      "${DLL_DIR}/libpcre2-16-0.dll"
-      "${DLL_DIR}/libcares-3.dll"
-      "${DLL_DIR}/libaddress_sorting.dll"
-      "${DLL_DIR}/libharfbuzz-0.dll"
-      "${DLL_DIR}/libzstd.dll"
-      "${DLL_DIR}/libicudt65.dll"
-      "${DLL_DIR}/libglib-2.0-0.dll"
-      "${DLL_DIR}/libfreetype-6.dll"
-      "${DLL_DIR}/libgraphite2.dll"
-      "${DLL_DIR}/libbz2-1.dll"
-      "${DLL_DIR}/libintl-8.dll"
-      "${DLL_DIR}/libpcre-1.dll"
-      "${DLL_DIR}/libiconv-2.dll"
-    DESTINATION "${ENIGMA_DIR}")
+    set(SEARCH_PATHS "${VCPKG_ROOT}/installed/x64-windows/bin/")
   endif()
-endif() 
+else()
+  set(LIBS "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}EGM${CMAKE_SHARED_LIBRARY_SUFFIX}" 
+           "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}Protocols${CMAKE_SHARED_LIBRARY_SUFFIX}")
+endif()
+
+if (WIN32)
+
+  set(WINDEPLOY_ARGS "--no-translations --no-angle")
+
+  if (MSVC)
+    if (CMAKE_BUILD_TYPE MATCHES "Debug")
+      set(CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY TRUE)
+      set(WINDEPLOY_ARGS "${WINDEPLOY_ARGS} --pdb --no-compiler-runtime")
+    else()
+      set(WINDEPLOY_ARGS "${WINDEPLOY_ARGS} --no-compiler-runtime")
+    endif()
+    set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
+    include(InstallRequiredSystemLibraries)
+    install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION .)
+  endif()
+
+  install(CODE "
+          include(BundleUtilities)
+          fixup_bundle(\"${APPS}\" \"${LIBS}\" \"${SEARCH_PATHS}\")
+          execute_process(COMMAND windeployqt.exe ${WINDEPLOY_ARGS} ${APPS})
+          ")
+endif()

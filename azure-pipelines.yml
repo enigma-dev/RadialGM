@@ -43,39 +43,52 @@ jobs:
         git clone https://github.com/msys2/msys2-ci-base.git %CD:~0,2%\msys64
         %CD:~0,2%\msys64\usr\bin\rm -rf %CD:~0,2%\msys64\.git
       displayName: Install MSYS2
+    
     - script: |
         set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
         %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Syyuu
       displayName: Update MSYS2
+    
     - script: |
         set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
-        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm --needed -S git base-devel mingw-w64-$(MINGW_ARCH)-toolchain mingw-w64-$(MINGW_ARCH)-cmake mingw-w64-$(MINGW_ARCH)-protobuf mingw-w64-$(MINGW_ARCH)-grpc mingw-w64-$(MINGW_ARCH)-gflags mingw-w64-$(MINGW_ARCH)-yaml-cpp mingw-w64-$(MINGW_ARCH)-pugixml mingw-w64-$(MINGW_ARCH)-rapidjson mingw-w64-$(MINGW_ARCH)-boost mingw-w64-$(MINGW_ARCH)-qt5 mingw-w64-$(MINGW_ARCH)-qscintilla
+        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm --needed -S git base-devel mingw-w64-$(MINGW_ARCH)-toolchain mingw-w64-$(MINGW_ARCH)-cmake mingw-w64-$(MINGW_ARCH)-nsis mingw-w64-$(MINGW_ARCH)-protobuf mingw-w64-$(MINGW_ARCH)-grpc mingw-w64-$(MINGW_ARCH)-gflags mingw-w64-$(MINGW_ARCH)-yaml-cpp mingw-w64-$(MINGW_ARCH)-pugixml mingw-w64-$(MINGW_ARCH)-rapidjson mingw-w64-$(MINGW_ARCH)-boost mingw-w64-$(MINGW_ARCH)-qt5 mingw-w64-$(MINGW_ARCH)-qscintilla
         %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Scc
       displayName: Install Toolchain
+    
     - script: |
         set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
         %CD:~0,2%\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
-        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build.sh MinSizeRel"
+        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build.sh MinSizeRel $(PWD)/cmake-package"
       displayName: 'Release Build'
       env:
         MSYSTEM: $(MINGW_UPPER)
         CHERE_INVOKING: yes
         MINGW_INSTALLS: $(MINGW_LOWER)
-
+    
     - script: |
         set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
         %CD:~0,2%\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
-        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build.sh Debug"
+        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build.sh Debug $(PWD)/cmake-package"
       displayName: 'Debug Build'
       env:
         MSYSTEM: $(MINGW_UPPER)
         CHERE_INVOKING: yes
         MINGW_INSTALLS: $(MINGW_LOWER)
-
+    
     - script: |
-        7z a $(Build.SourcesDirectory)/RadialGM-MinGW-$(MINGW_ARCH).exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
+        mkdir package
+        cd package
+        cmake -G "MSYS Makefiles" ../cmake-package
+        make package
+        mv ENIGMA-Installer*.exe $(Build.SourcesDirectory)/RadialGM-MinGW-$(MINGW_ARCH).exe
       displayName: 'Package'
-
+      
+    - task: PublishBuildArtifacts@1
+      displayName: 'Push Build Artifacts'
+      inputs:
+        pathtoPublish: '$(Build.SourcesDirectory)/RadialGM-MinGW-$(MINGW_ARCH).exe'
+        artifactName: RadialGM-MinGW-$(MINGW_ARCH)
+    
     - task: GithubRelease@0 
       displayName: 'Add MinGW to GitHub Release'
       inputs:
@@ -107,6 +120,7 @@ jobs:
       inputs:
         key: $(Build.SourcesDirectory)/msvc-x64-deps.txt | "$(vcpkgGitRef)" | "$(Agent.OS)"
         path: '$(Build.BinariesDirectory)/vcpkg'
+    
     - task: run-vcpkg@0
       displayName: 'Run VCPKG'
       inputs:
@@ -114,26 +128,42 @@ jobs:
         vcpkgGitCommitId: $(vcpkgGitRef)
         vcpkgGitURL: https://github.com/microsoft/vcpkg.git
 
-    - powershell: |
-        mkdir $(Build.BinariesDirectory)/Release
-        cd $(Build.BinariesDirectory)/Release
-        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)
-        cmake --build $(Build.BinariesDirectory)/Release --config MinSizeRel
-        cmake --install $(Build.BinariesDirectory)/Release --config MinSizeRel
-      displayName: 'Release Build'
-
-    - powershell: |
-        mkdir $(Build.BinariesDirectory)/Debug
-        cd $(Build.BinariesDirectory)/Debug
-        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Debug -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory) 
-        cmake --build $(Build.BinariesDirectory)/Debug --config Debug
-        cmake --install $(Build.BinariesDirectory)/Debug --config Debug
-      displayName: 'Debug Build'
-
     - script: |
-        7z a $(Build.SourcesDirectory)/RadialGM-MSVC-x64.exe -mmt -mx5 -sfx $(Build.SourcesDirectory)/Submodules/enigma-dev
+        set PATH=%PATH%;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\tools\qt5\bin\
+        set VCINSTALLDIR=%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC
+        call "%VCINSTALLDIR%\Auxiliary\Build\vcvars64.bat"
+        mkdir Release
+        cd Release
+        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=../cmake-package/Release -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)
+        cmake --build . --config MinSizeRel
+        cmake --install . --config MinSizeRel
+      displayName: 'Release Build'
+    
+    - script: |
+        set PATH=%PATH%;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\debug\bin;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\bin;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\tools\qt5\debug\bin\
+        set VCINSTALLDIR=%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC
+        call "%VCINSTALLDIR%\Auxiliary\Build\vcvars64.bat"
+        mkdir Debug
+        cd Debug
+        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=../cmake-package/Debug -DCMAKE_BUILD_TYPE=Debug -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)
+        cmake --build . --config Debug
+        cmake --install . --config Debug
+      displayName: 'Debug Build'
+    
+    - script: |
+        mkdir package
+        cd package
+        cmake -G "Visual Studio 16 2019" -A x64 ../cmake-package
+        cmake --build . --config Release --target PACKAGE
+        mv ENIGMA-Installer*.exe $(Build.SourcesDirectory)/RadialGM-MSVC-x86_64.exe
       displayName: 'Package'
-
+    
+    - task: PublishBuildArtifacts@1
+      displayName: 'Push Build Artifacts'
+      inputs:
+        pathtoPublish: '$(Build.SourcesDirectory)/RadialGM-MSVC-x86_64.exe'
+        artifactName: RadialGM-MSVC-x86_64
+    
     - task: GithubRelease@0 
       displayName: 'Add MSVC to GitHub Release'
       inputs:
@@ -146,7 +176,7 @@ jobs:
         isPreRelease: true
         assetUploadMode: replace
         assets: |
-          $(Build.SourcesDirectory)/RadialGM-MSVC-x64.exe
+          $(Build.SourcesDirectory)/RadialGM-MSVC-x86_64.exe
 
 - job: Arch
   displayName: 'Arch Linux'
@@ -175,7 +205,7 @@ jobs:
         pacman -Sy --noconfirm base base-devel git gcc cmake protobuf grpc yaml-cpp pugixml rapidjson boost qt5 qscintilla-qt5
         EOF
       displayName: 'Bootstrap Archlinux'
-
+    
     - bash: |
         set -e
         cd $(Build.BinariesDirectory)
@@ -190,7 +220,7 @@ jobs:
         git clean -fx
         EOF
       displayName: 'Release Build'
-
+    
     - bash: |
         set -e
         cd $(Build.BinariesDirectory)

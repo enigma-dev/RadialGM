@@ -240,6 +240,11 @@ void CompilerClient::UpdateLoop() {
 }
 
 ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
+  /* 
+  
+    FIXME: gRPC currently causes infinite hang on linux and segfault on MinGW
+    disabling until fixed. Uncomment all methods below when fixed.
+
   // create a new child process for us to launch an emake server
   process = new QProcess(this);
 
@@ -287,21 +292,22 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   // update initial keyword set and systems
   compilerClient->GetResources();
   compilerClient->GetSystems();
+  */
 }
 
-ServerPlugin::~ServerPlugin() { process->close(); }
+ServerPlugin::~ServerPlugin() { /*process->close();*/ }
 
-void ServerPlugin::Run() { compilerClient->CompileBuffer(mainWindow.Game(), CompileRequest::RUN); };
+void ServerPlugin::Run() { /*compilerClient->CompileBuffer(mainWindow.Game(), CompileRequest::RUN);*/ };
 
-void ServerPlugin::Debug() { compilerClient->CompileBuffer(mainWindow.Game(), CompileRequest::DEBUG); };
+void ServerPlugin::Debug() { /*compilerClient->CompileBuffer(mainWindow.Game(), CompileRequest::DEBUG);*/ };
 
 void ServerPlugin::CreateExecutable() {
-  const QString& fileName =
+  /*const QString& fileName =
       QFileDialog::getSaveFileName(&mainWindow, tr("Create Executable"), "", tr("Executable (*.exe);;All Files (*)"));
   if (!fileName.isEmpty())
-    compilerClient->CompileBuffer(mainWindow.Game(), CompileRequest::COMPILE, fileName.toStdString());
+    compilerClient->CompileBuffer(mainWindow.Game(), CompileRequest::COMPILE, fileName.toStdString());*/
 };
 
 void ServerPlugin::SetCurrentConfig(const resources::Settings& settings) {
-  compilerClient->SetCurrentConfig(settings);
+  /*compilerClient->SetCurrentConfig(settings);*/
 };
