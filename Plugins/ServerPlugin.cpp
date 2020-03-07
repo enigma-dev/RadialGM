@@ -131,12 +131,14 @@ CompilerClient::~CompilerClient() {}
 
 CompilerClient::CompilerClient(std::shared_ptr<Channel> channel, MainWindow& mainWindow)
     : QObject(&mainWindow), stub(Compiler::NewStub(channel)), mainWindow(mainWindow) {
+  // start a blocking thread to poll for GRPC events
+  // and dispatch them back to the GUI thread
   std::thread([this](){
     while(true) {
-      void* got_tag = nullptr;
-      bool ok = false;
-      bool not_shutdown = this->cq.Next(&got_tag, &ok);
-      if (!not_shutdown) break;
+      void* got_tag = nullptr; bool ok = false;
+      // block for next GRPC event, break if shutdown
+      if (!this->cq.Next(&got_tag, &ok)) break;
+      // block until GUI thread handles GRPC event
       QMetaObject::invokeMethod(this, "UpdateLoop", Qt::BlockingQueuedConnection,
                                 Q_ARG(void*, got_tag), Q_ARG(bool, ok));
     }
