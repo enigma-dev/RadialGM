@@ -18,7 +18,7 @@ VERSION = 0.0.0.0
 QMAKE_TARGET_COMPANY = ENIGMA Dev Team
 QMAKE_TARGET_PRODUCT = RadialGM IDE
 QMAKE_TARGET_DESCRIPTION = ENIGMA Development Environment
-QMAKE_TARGET_COPYRIGHT = "Copyright \\251 2007-2018 ENIGMA Dev Team"
+QMAKE_TARGET_COPYRIGHT = "Copyright \\251 2007-2020 ENIGMA Dev Team"
 
 # Uncomment if you want QPlainTextEdit used in place of QScintilla
 CONFIG += rgm_disable_syntaxhighlight
@@ -28,6 +28,15 @@ rgm_disable_syntaxhighlight {
 } else {
   SOURCES += Widgets/CodeWidgetScintilla.cpp
   CONFIG += qscintilla2
+}
+
+# Comment out if you do not want the GRPC plugin
+#CONFIG += rgm_enable_grpc_server
+
+rgm_enable_grpc_server {
+  DEFINES += RGM_SERVER_ENABLED
+  SOURCES += Plugins/ServerPlugin.cpp
+  HEADERS += Plugins/ServerPlugin.h
 }
 
 # we do this even in release mode for "Editor Diagnostics"
@@ -92,7 +101,6 @@ SOURCES += \
     Models/ImmediateMapper.cpp \
     Components/Utility.cpp \
     Plugins/RGMPlugin.cpp \
-    Plugins/ServerPlugin.cpp \
     Components/RecentFiles.cpp \
     Editors/CodeEditor.cpp \
     Editors/ScriptEditor.cpp \
@@ -137,7 +145,6 @@ HEADERS += \
     Models/ImmediateMapper.h \
     Components/Utility.h \
     Plugins/RGMPlugin.h \
-    Plugins/ServerPlugin.h \
     Components/RecentFiles.h \
     Widgets/SpriteSubimageListView.h \
     Widgets/SpriteView.h \
