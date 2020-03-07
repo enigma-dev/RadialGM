@@ -214,12 +214,9 @@ T* CompilerClient::ScheduleTask() {
   std::unique_ptr<T> callData(new T());
   bool wasNotBusy = tasks.empty();
   tasks.push(std::move(callData));
-  // if we didn't already have a task
-  // in the queue then we have to fire
-  // the update loop in order to get
-  // this one started, otherwise the
-  // one in the queue will start the
-  // next one for us
+  // if we didn't already have a task in the queue then we have to fire
+  // the update loop in order to get this one started, otherwise the
+  // one in the queue will start the next one for us
   if (wasNotBusy)
     QMetaObject::invokeMethod(this, "UpdateLoop", Qt::QueuedConnection);
   return (T*)tasks.back().get();
@@ -274,7 +271,7 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   }
 
   // use the closest matching emake file we found and launch it in a child process
-  qDebug() << emakeFileInfo.fileName();
+  qDebug() << emakeFileInfo.absoluteFilePath();
   process->setWorkingDirectory(emakeFileInfo.absolutePath());
   QString program = emakeFileInfo.fileName();
   QStringList arguments;
