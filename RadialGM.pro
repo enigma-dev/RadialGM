@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui printsupport multimedia testlib
+QT       += core concurrent gui printsupport multimedia testlib
 CONFIG   += c++11
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -21,7 +21,7 @@ QMAKE_TARGET_DESCRIPTION = ENIGMA Development Environment
 QMAKE_TARGET_COPYRIGHT = "Copyright \\251 2007-2018 ENIGMA Dev Team"
 
 # Uncomment if you want QPlainTextEdit used in place of QScintilla
-CONFIG += rgm_disable_syntaxhighlight
+#CONFIG += rgm_disable_syntaxhighlight
 
 rgm_disable_syntaxhighlight {
   SOURCES += Widgets/CodeWidgetPlain.cpp
