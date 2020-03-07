@@ -7,7 +7,6 @@
 #include <QTimer>
 #include <QtConcurrent>
 
-#include <chrono>
 #include <memory>
 
 namespace {
