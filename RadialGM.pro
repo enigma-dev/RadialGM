@@ -20,14 +20,14 @@ QMAKE_TARGET_PRODUCT = RadialGM IDE
 QMAKE_TARGET_DESCRIPTION = ENIGMA Development Environment
 QMAKE_TARGET_COPYRIGHT = "Copyright \\251 2007-2020 ENIGMA Dev Team"
 
-# Uncomment if you want QPlainTextEdit used in place of QScintilla
-CONFIG += rgm_disable_syntaxhighlight
+# Uncomment if you want QScintilla
+#CONFIG += rgm_enable_syntaxhighlight
 
-rgm_disable_syntaxhighlight {
-  SOURCES += Widgets/CodeWidgetPlain.cpp
-} else {
+rgm_enable_syntaxhighlight {
   SOURCES += Widgets/CodeWidgetScintilla.cpp
   CONFIG += qscintilla2
+} else {
+  SOURCES += Widgets/CodeWidgetPlain.cpp
 }
 
 # Comment out if you do not want the GRPC plugin
