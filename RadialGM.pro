@@ -30,7 +30,7 @@ rgm_enable_syntaxhighlight {
   SOURCES += Widgets/CodeWidgetPlain.cpp
 }
 
-# Comment out if you do not want the GRPC plugin
+# Uncomment if you want compilation & code analysis
 #CONFIG += rgm_enable_grpc_server
 
 rgm_enable_grpc_server {
