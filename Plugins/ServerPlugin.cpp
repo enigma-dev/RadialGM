@@ -12,10 +12,6 @@
 
 namespace {
 
-inline std::chrono::system_clock::time_point future_deadline(size_t us) {
-  return (std::chrono::system_clock::now() + std::chrono::microseconds(us));
-}
-
 void* tag(int i) { return reinterpret_cast<void*>(static_cast<intptr_t>(i)); }
 int detag(void* p) { return static_cast<int>(reinterpret_cast<intptr_t>(p)); }
 
