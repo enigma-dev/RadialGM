@@ -258,7 +258,7 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   }
 
   // use the closest matching emake file we found and launch it in a child process
-  qDebug() << emakeFileInfo.fileName();
+  qDebug() << emakeFileInfo.absoluteFilePath();
   process->setWorkingDirectory(emakeFileInfo.absolutePath());
   QString program = emakeFileInfo.fileName();
   QStringList arguments;
