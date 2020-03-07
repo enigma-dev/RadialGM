@@ -42,13 +42,15 @@ static QTextEdit *diagnosticTextEdit = nullptr;
 static QAction *toggleDiagnosticsAction = nullptr;
 
 void diagnosticHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
-  if (toggleDiagnosticsAction && !toggleDiagnosticsAction->isChecked()) {
-    toggleDiagnosticsAction->setIcon(QIcon(":/actions/log-debug.png"));
-    toggleDiagnosticsAction->setToolTip(
-        QT_TR_NOOP("The editor encountered issues which have been logged in the diagnostics output."));
+  if (toggleDiagnosticsAction) {
+    if (!toggleDiagnosticsAction->isChecked()) {
+      toggleDiagnosticsAction->setIcon(QIcon(":/actions/log-debug.png"));
+      toggleDiagnosticsAction->setToolTip(
+          QT_TR_NOOP("The editor encountered issues which have been logged in the diagnostics output."));
+    }
   } else {
     // this should never happen!
-    // NOTE: if we used R_EXPECT_V here it would be recursive
+    // NOTE: if we used R_EXPECT_V here it would be infinite recursion
     std::cerr << "Critical: Diagnostics toggle button does not exist!" << std::endl;
   }
 
