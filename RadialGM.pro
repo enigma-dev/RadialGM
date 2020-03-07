@@ -20,7 +20,7 @@ QMAKE_TARGET_PRODUCT = RadialGM IDE
 QMAKE_TARGET_DESCRIPTION = ENIGMA Development Environment
 QMAKE_TARGET_COPYRIGHT = "Copyright \\251 2007-2018 ENIGMA Dev Team"
 
-# Comment out if you want QPlainTextEdit used in place of QScintilla
+# Uncomment if you want QScintilla
 #CONFIG += rgm_enable_syntaxhighlight
 
 rgm_enable_syntaxhighlight {
