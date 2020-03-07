@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core concurrent gui printsupport multimedia testlib
+QT       += core gui printsupport multimedia testlib
 CONFIG   += c++11
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets

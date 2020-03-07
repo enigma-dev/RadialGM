@@ -5,8 +5,8 @@
 #include <QList>
 #include <QTemporaryFile>
 #include <QTimer>
-#include <QtConcurrent>
 
+#include <thread>
 #include <memory>
 
 namespace {
@@ -131,7 +131,7 @@ CompilerClient::~CompilerClient() {}
 
 CompilerClient::CompilerClient(std::shared_ptr<Channel> channel, MainWindow& mainWindow)
     : QObject(&mainWindow), stub(Compiler::NewStub(channel)), mainWindow(mainWindow) {
-  QtConcurrent::run([this](){
+  std::thread([this](){
     while(true) {
       void* got_tag = nullptr;
       bool ok = false;
@@ -140,7 +140,7 @@ CompilerClient::CompilerClient(std::shared_ptr<Channel> channel, MainWindow& mai
       QMetaObject::invokeMethod(this, "UpdateLoop", Qt::BlockingQueuedConnection,
                                 Q_ARG(void*, got_tag), Q_ARG(bool, ok));
     }
-  });
+  }).detach();
 }
 
 void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string name) {
