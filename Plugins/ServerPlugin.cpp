@@ -240,11 +240,6 @@ void CompilerClient::UpdateLoop() {
 }
 
 ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
-  /* 
-  
-    FIXME: gRPC currently causes infinite hang on linux and segfault on MinGW
-    disabling until fixed. Uncomment all methods below when fixed.
-
   // create a new child process for us to launch an emake server
   process = new QProcess(this);
 
@@ -255,7 +250,7 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
     const QDir dir(path);
     QDir::Filters filters = QDir::Filter::Executable | QDir::Filter::Files;
     // we use a wildcard because we want it to find emake.exe on Windows
-    auto entryList = dir.entryInfoList(QStringList("emake*"), filters, QDir::SortFlag::NoSort);
+    auto entryList = dir.entryInfoList(QStringList({"emake","emake.exe"}), filters, QDir::SortFlag::NoSort);
     if (!entryList.empty()) {
       emakeFileInfo = entryList.first();
       break;
@@ -263,6 +258,7 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   }
 
   // use the closest matching emake file we found and launch it in a child process
+  qDebug() << emakeFileInfo.absoluteFilePath();
   process->setWorkingDirectory(emakeFileInfo.absolutePath());
   QString program = emakeFileInfo.fileName();
   QStringList arguments;
@@ -287,27 +283,28 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   // without us needing any threading or blocking the main thread
   QTimer* timer = new QTimer(this);
   connect(timer, &QTimer::timeout, compilerClient, &CompilerClient::UpdateLoop);
-  timer->start();
+  // timer delay larger than one so we don't hog the CPU core
+  timer->start(1);
 
   // update initial keyword set and systems
   compilerClient->GetResources();
   compilerClient->GetSystems();
-  */
+
 }
 
-ServerPlugin::~ServerPlugin() { /*process->close();*/ }
+ServerPlugin::~ServerPlugin() { process->close(); }
 
-void ServerPlugin::Run() { /*compilerClient->CompileBuffer(mainWindow.Game(), CompileRequest::RUN);*/ };
+void ServerPlugin::Run() { compilerClient->CompileBuffer(mainWindow.Game(), CompileRequest::RUN); };
 
-void ServerPlugin::Debug() { /*compilerClient->CompileBuffer(mainWindow.Game(), CompileRequest::DEBUG);*/ };
+void ServerPlugin::Debug() { compilerClient->CompileBuffer(mainWindow.Game(), CompileRequest::DEBUG); };
 
 void ServerPlugin::CreateExecutable() {
-  /*const QString& fileName =
+  const QString& fileName =
       QFileDialog::getSaveFileName(&mainWindow, tr("Create Executable"), "", tr("Executable (*.exe);;All Files (*)"));
   if (!fileName.isEmpty())
-    compilerClient->CompileBuffer(mainWindow.Game(), CompileRequest::COMPILE, fileName.toStdString());*/
+    compilerClient->CompileBuffer(mainWindow.Game(), CompileRequest::COMPILE, fileName.toStdString());
 };
 
 void ServerPlugin::SetCurrentConfig(const resources::Settings& settings) {
-  /*compilerClient->SetCurrentConfig(settings);*/
+  compilerClient->SetCurrentConfig(settings);
 };
