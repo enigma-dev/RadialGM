@@ -125,6 +125,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
   this->_recentFiles = new RecentFiles(this, this->_ui->menuRecent, this->_ui->actionClearRecentMenu);
 
   _ui->mdiArea->setBackground(QImage(":/banner.png"));
+  connect(_ui->mdiArea, &QMdiArea::subWindowActivated, this, &MainWindow::MDIWindowChanged);
   connect(_ui->menuWindow, &QMenu::aboutToShow, this, &MainWindow::updateWindowMenu);
 
   auto settingsButton = static_cast<QToolButton *>(_ui->mainToolBar->widgetForAction(_ui->actionSettings));
@@ -132,6 +133,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
   settingsButton->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextBesideIcon);
   _ui->actionSettings->setMenu(_ui->menuChangeGameSettings);
 
+#ifdef RGM_SERVER_ENABLED
   RGMPlugin *pluginServer = new ServerPlugin(*this);
   auto outputTextBrowser = this->_ui->outputTextBrowser;
   connect(pluginServer, &RGMPlugin::LogOutput, outputTextBrowser, &QTextBrowser::append);
@@ -145,8 +147,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
   connect(_ui->actionRun, &QAction::triggered, pluginServer, &RGMPlugin::Run);
   connect(_ui->actionDebug, &QAction::triggered, pluginServer, &RGMPlugin::Debug);
   connect(_ui->actionCreateExecutable, &QAction::triggered, pluginServer, &RGMPlugin::CreateExecutable);
-
-  connect(_ui->mdiArea, &QMdiArea::subWindowActivated, this, &MainWindow::MDIWindowChanged);
+#endif
 
   openNewProject();
 }

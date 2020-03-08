@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.11)
 
+option(RGM_ENABLE_GRPC_SERVER "Enable the GRPC client plugin for compilation and code analysis." OFF)
+
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
   set(EXE "RadialGM-Debug")
 else()
@@ -31,7 +33,6 @@ include_directories("${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/libEG
 # Populate a CMake variable with the sources
 set(RGM_SOURCES
     Plugins/RGMPlugin.cpp
-    Plugins/ServerPlugin.cpp
     main.cpp
     MainWindow.cpp
     Dialogs/PreferencesDialog.cpp
@@ -77,7 +78,6 @@ set(RGM_SOURCES
 )
 
 set(RGM_HEADERS
-    Plugins/ServerPlugin.h
     Plugins/RGMPlugin.h
     MainWindow.h
     main.h
@@ -158,6 +158,13 @@ if (NOT LIB_QSCINTILLA)
 else()
     set(EDITOR_SOURCES Widgets/CodeWidgetScintilla.cpp)
 endif()
+
+if (RGM_ENABLE_GRPC_SERVER)
+  add_definitions(-DRGM_SERVER_ENABLED)
+  set(RGM_SOURCES ${RGM_SOURCES} Plugins/ServerPlugin.cpp PARENT_SCOPE)
+  set(RGM_HEADERS ${RGM_HEADERS} Plugins/ServerPlugin.h PARENT_SCOPE)
+endif()
+
 
 set(CMAKE_INSTALL_RPATH "${ENIGMA_DIR}")
 
