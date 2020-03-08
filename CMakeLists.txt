@@ -161,8 +161,8 @@ endif()
 
 if (RGM_ENABLE_GRPC_SERVER)
   add_definitions(-DRGM_SERVER_ENABLED)
-  set(RGM_SOURCES ${RGM_SOURCES} Plugins/ServerPlugin.cpp PARENT_SCOPE)
-  set(RGM_HEADERS ${RGM_HEADERS} Plugins/ServerPlugin.h PARENT_SCOPE)
+  set(RGM_SOURCES ${RGM_SOURCES} Plugins/ServerPlugin.cpp)
+  set(RGM_HEADERS ${RGM_HEADERS} Plugins/ServerPlugin.h)
 endif()
 
 
