@@ -4,7 +4,6 @@
 #include <QFileDialog>
 #include <QList>
 #include <QTemporaryFile>
-#include <QTimer>
 
 #include <thread>
 #include <memory>
