@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.11)
 
-option(RGM_ENABLE_GRPC_SERVER "Enable the GRPC client plugin for compilation and code analysis." OFF)
+include(CMakeDependentOption)
+cmake_dependent_option(RGM_ENABLE_GRPC_SERVER "Enable the GRPC client plugin for compilation and code analysis." ON "WIN32" OFF)
 
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
   set(EXE "RadialGM-Debug")
@@ -160,8 +161,8 @@ endif()
 
 if (RGM_ENABLE_GRPC_SERVER)
   add_definitions(-DRGM_SERVER_ENABLED)
-  set(RGM_SOURCES ${RGM_SOURCES} Plugins/ServerPlugin.cpp PARENT_SCOPE)
-  set(RGM_HEADERS ${RGM_HEADERS} Plugins/ServerPlugin.h PARENT_SCOPE)
+  set(RGM_SOURCES ${RGM_SOURCES} Plugins/ServerPlugin.cpp)
+  set(RGM_HEADERS ${RGM_HEADERS} Plugins/ServerPlugin.h)
 endif()
 
 
