@@ -195,7 +195,7 @@ foreach(CompilerFlag ${CompilerFlags})
 endforeach()
 
 if (LIB_QSCINTILLA)
-    message(STATUS "QScintilla found. Headers: ${QSCINTILLA_INCLUDE_DIR}")
+    message(STATUS "Found QScintilla: ${LIB_QSCINTILLA}")
     add_definitions(-DQSCINTILLA_DLL)
     target_link_libraries(${EXE} PRIVATE ${LIB_QSCINTILLA})
 endif()
