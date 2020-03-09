@@ -4,16 +4,11 @@
 #include <QFileDialog>
 #include <QList>
 #include <QTemporaryFile>
-#include <QTimer>
 
-#include <chrono>
+#include <thread>
 #include <memory>
 
 namespace {
-
-inline std::chrono::system_clock::time_point future_deadline(size_t us) {
-  return (std::chrono::system_clock::now() + std::chrono::microseconds(us));
-}
 
 void* tag(int i) { return reinterpret_cast<void*>(static_cast<intptr_t>(i)); }
 int detag(void* p) { return static_cast<int>(reinterpret_cast<intptr_t>(p)); }
@@ -134,7 +129,20 @@ struct SyntaxCheckReader : public AsyncResponseReadWorker<SyntaxError> {
 CompilerClient::~CompilerClient() {}
 
 CompilerClient::CompilerClient(std::shared_ptr<Channel> channel, MainWindow& mainWindow)
-    : QObject(&mainWindow), stub(Compiler::NewStub(channel)), mainWindow(mainWindow) {}
+    : QObject(&mainWindow), stub(Compiler::NewStub(channel)), mainWindow(mainWindow) {
+  // start a blocking thread to poll for GRPC events
+  // and dispatch them back to the GUI thread
+  std::thread([this](){
+    while(true) {
+      void* got_tag = nullptr; bool ok = false;
+      // block for next GRPC event, break if shutdown
+      if (!this->cq.Next(&got_tag, &ok)) break;
+      // block until GUI thread handles GRPC event
+      QMetaObject::invokeMethod(this, "UpdateLoop", Qt::BlockingQueuedConnection,
+                                Q_ARG(void*, got_tag), Q_ARG(bool, ok));
+    }
+  }).detach();
+}
 
 void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string name) {
   emit CompileStatusChanged();
@@ -204,16 +212,19 @@ void CompilerClient::SyntaxCheck() {
 template <typename T>
 T* CompilerClient::ScheduleTask() {
   std::unique_ptr<T> callData(new T());
+  bool wasNotBusy = tasks.empty();
   tasks.push(std::move(callData));
+  // if we didn't already have a task in the queue then we have to fire
+  // the update loop in order to get this one started, otherwise the
+  // one in the queue will start the next one for us
+  if (wasNotBusy)
+    QMetaObject::invokeMethod(this, "UpdateLoop", Qt::QueuedConnection);
   return (T*)tasks.back().get();
 }
 
-void CompilerClient::UpdateLoop() {
+void CompilerClient::UpdateLoop(void* got_tag, bool ok) {
   static bool started = false;
-  void* got_tag = nullptr;
-  bool ok = false;
 
-  if (this->tasks.empty()) return;
   auto* task = this->tasks.front().get();
   if (!started) {
     connect(task, &CallData::LogOutput, this, &CompilerClient::LogOutput);
@@ -221,14 +232,12 @@ void CompilerClient::UpdateLoop() {
     task->start();
     started = true;
   }
-  auto asyncStatus = cq.AsyncNext(&got_tag, &ok, future_deadline(0));
+  if (!got_tag) return;
   auto state = static_cast<AsyncState>(detag(got_tag));
   if (state != AsyncState::DISCONNECTED && !ok) {
     task->finish();
     return;
   }
-  // yield to application main event loop
-  if (asyncStatus != CompletionQueue::NextStatus::GOT_EVENT || !got_tag) return;
 
   (*task)(state, task->status);
   if (state == AsyncState::FINISH) {
@@ -236,6 +245,10 @@ void CompilerClient::UpdateLoop() {
     tasks.pop();
     // next task needs to be started
     started = false;
+    // if we already have the next task,
+    // let's get it started
+    if (!this->tasks.empty())
+      QMetaObject::invokeMethod(this, "UpdateLoop", Qt::QueuedConnection);
   }
 }
 
@@ -279,17 +292,9 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   // main output dock widget (thread safe and don't block the main event loop!)
   connect(compilerClient, &CompilerClient::LogOutput, this, &RGMPlugin::LogOutput);
 
-  // use a timer to process async grpc events at regular intervals
-  // without us needing any threading or blocking the main thread
-  QTimer* timer = new QTimer(this);
-  connect(timer, &QTimer::timeout, compilerClient, &CompilerClient::UpdateLoop);
-  // timer delay larger than one so we don't hog the CPU core
-  timer->start(1);
-
   // update initial keyword set and systems
   compilerClient->GetResources();
   compilerClient->GetSystems();
-
 }
 
 ServerPlugin::~ServerPlugin() { process->close(); }
