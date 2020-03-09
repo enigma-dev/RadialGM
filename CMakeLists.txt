@@ -152,7 +152,7 @@ set(RGM_RC
 )
 
 # Check for QScintilla
-find_library(LIB_QSCINTILLA NAMES qscintilla2)
+find_library(LIB_QSCINTILLA NAMES qscintilla2 qscintilla2_qt5 qscintilla2-qt5 qt5scintilla2 libqscintilla2_qt5.so libqscintilla2.so libqscintilla2.a qscintilla2.lib)
 if (NOT LIB_QSCINTILLA)
     set(EDITOR_SOURCES Widgets/CodeWidgetPlain.cpp)
 else()
