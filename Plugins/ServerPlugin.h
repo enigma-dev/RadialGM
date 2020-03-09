@@ -65,7 +65,7 @@ class CompilerClient : public QObject {
   void LogOutput(const QString& output);
 
  public slots:
-  void UpdateLoop();
+  void UpdateLoop(void* got_tag = nullptr, bool ok = false);
 
  private:
   CompletionQueue cq;
