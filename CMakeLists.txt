@@ -195,7 +195,18 @@ foreach(CompilerFlag ${CompilerFlags})
 endforeach()
 
 if (LIB_QSCINTILLA)
-    target_link_libraries(${EXE} PUBLIC ${LIB_QSCINTILLA})
+  FIND_PATH(QSCINTILLA_INCLUDE_DIR
+    NAMES Qsci/qsciglobal.h
+    PATHS
+      "${_qsci_fw}/Headers"
+      ${Qt5Core_INCLUDE_DIRS}
+      "${QT_INCLUDE_DIR}"
+      /usr/local/include
+      /usr/include
+    PATH_SUFFIXES qt
+    )
+    include_directories(${EXE} PRIVATE ${QSCINTILLA_INCLUDE_DIR})
+    target_link_libraries(${EXE} PRIVATE ${LIB_QSCINTILLA})
 endif()
 
 # Find PugiXML
