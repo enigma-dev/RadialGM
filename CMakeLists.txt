@@ -65,7 +65,6 @@ set(RGM_SOURCES
     Editors/SpriteEditor.cpp
     Editors/BaseEditor.cpp
     Editors/RoomEditor.cpp
-    Widgets/CodeWidgetPlain.cpp
     Widgets/AssetView.cpp
     Widgets/CodeWidget.cpp
     Widgets/BackgroundView.cpp
@@ -153,7 +152,7 @@ set(RGM_RC
 )
 
 # Check for QScintilla
-find_library(LIB_QSCINTILLA NAMES qscintilla2)
+find_library(LIB_QSCINTILLA NAMES qscintilla2 qscintilla2_qt5 qscintilla2-qt5 qt5scintilla2 libqscintilla2_qt5.so libqscintilla2.so libqscintilla2.a qscintilla2.lib)
 if (NOT LIB_QSCINTILLA)
     set(EDITOR_SOURCES Widgets/CodeWidgetPlain.cpp)
 else()
@@ -197,6 +196,8 @@ foreach(CompilerFlag ${CompilerFlags})
 endforeach()
 
 if (LIB_QSCINTILLA)
+    message(STATUS "Found QScintilla: ${LIB_QSCINTILLA}")
+    add_definitions(-DQSCINTILLA_DLL)
     target_link_libraries(${EXE} PRIVATE ${LIB_QSCINTILLA})
 endif()
 
