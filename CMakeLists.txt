@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 
+include(CMakeDependentOption)
 cmake_dependent_option(RGM_ENABLE_GRPC_SERVER "Enable the GRPC client plugin for compilation and code analysis." OFF "WIN32" ON)
 
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
