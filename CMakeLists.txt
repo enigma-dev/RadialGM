@@ -64,7 +64,6 @@ set(RGM_SOURCES
     Editors/SpriteEditor.cpp
     Editors/BaseEditor.cpp
     Editors/RoomEditor.cpp
-    Widgets/CodeWidgetPlain.cpp
     Widgets/AssetView.cpp
     Widgets/CodeWidget.cpp
     Widgets/BackgroundView.cpp
