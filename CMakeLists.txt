@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.11)
 
-include(CMakeDependentOption)
-cmake_dependent_option(RGM_ENABLE_GRPC_SERVER "Enable the GRPC client plugin for compilation and code analysis." ON "WIN32" OFF)
+if (WIN32)
+  option(RGM_ENABLE_GRPC_SERVER "Enable the GRPC client plugin for compilation and code analysis." ON)
+else()
+  option(RGM_ENABLE_GRPC_SERVER "Enable the GRPC client plugin for compilation and code analysis." OFF)
+endif()
 
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
   set(EXE "RadialGM-Debug")
@@ -181,15 +184,15 @@ endif()
 
 message(STATUS "Initial build flags:")
 set(CompilerFlags
-	  CMAKE_C_FLAGS_DEBUG
-	  CMAKE_C_FLAGS_MINSIZEREL
-	  CMAKE_C_FLAGS_RELEASE
-	  CMAKE_C_FLAGS_RELWITHDEBINFO
-	  CMAKE_CXX_FLAGS_DEBUG
-	  CMAKE_CXX_FLAGS_MINSIZEREL
-	  CMAKE_CXX_FLAGS_RELEASE
-	  CMAKE_CXX_FLAGS_RELWITHDEBINFO
-	  )
+    CMAKE_C_FLAGS_DEBUG
+    CMAKE_C_FLAGS_MINSIZEREL
+    CMAKE_C_FLAGS_RELEASE
+    CMAKE_C_FLAGS_RELWITHDEBINFO
+    CMAKE_CXX_FLAGS_DEBUG
+    CMAKE_CXX_FLAGS_MINSIZEREL
+    CMAKE_CXX_FLAGS_RELEASE
+    CMAKE_CXX_FLAGS_RELWITHDEBINFO
+    )
   
 foreach(CompilerFlag ${CompilerFlags})
   message(STATUS "  '${CompilerFlag}': ${${CompilerFlag}}")
@@ -213,17 +216,19 @@ include_directories(${EXE} PRIVATE ${RAPIDJSON_INCLUDE_DIRS})
 find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${EXE} PRIVATE yaml-cpp)
 
-#Find gRPC
-if (MSVC) # Windows actually does something right for once
-  find_package(gRPC CONFIG REQUIRED)
-  target_link_libraries(${EXE} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
-else() # https://tinyurl.com/arch-grpc-bug
-  find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
-  find_library(LIB_GRPC NAMES grpc)
-  find_library(LIB_GPR NAMES gpr)
-  find_library(LIB_CARES NAMES cares)
-  find_library(LIB_ADDRESS_SORTING NAMES address_sorting)
-  target_link_libraries(${EXE} PRIVATE ${LIB_CARES} ${LIB_ADDRESS_SORTING} ${LIB_GPR} ${LIB_GRPC} ${LIB_GRPC_UNSECURE})
+if (RGM_ENABLE_GRPC_SERVER)
+  #Find gRPC
+  if (MSVC) # Windows actually does something right for once
+    find_package(gRPC CONFIG REQUIRED)
+    target_link_libraries(${EXE} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
+  else() # https://tinyurl.com/arch-grpc-bug
+    find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
+    find_library(LIB_GRPC NAMES grpc)
+    find_library(LIB_GPR NAMES gpr)
+    find_library(LIB_CARES NAMES cares)
+    find_library(LIB_ADDRESS_SORTING NAMES address_sorting)
+    target_link_libraries(${EXE} PRIVATE ${LIB_CARES} ${LIB_ADDRESS_SORTING} ${LIB_GPR} ${LIB_GRPC} ${LIB_GRPC_UNSECURE})
+  endif()
 endif()
 
 # Find Protobuf
