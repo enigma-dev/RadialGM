@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 
-if (WIN32)
-  option(RGM_ENABLE_GRPC_SERVER "Enable the GRPC client plugin for compilation and code analysis." ON)
-else()
-  option(RGM_ENABLE_GRPC_SERVER "Enable the GRPC client plugin for compilation and code analysis." OFF)
-endif()
+option(RGM_ENABLE_GRPC_SERVER "Enable the GRPC client plugin for compilation and code analysis." ON)
 
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
   set(EXE "RadialGM-Debug")
@@ -223,11 +219,10 @@ if (RGM_ENABLE_GRPC_SERVER)
     target_link_libraries(${EXE} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
   else() # https://tinyurl.com/arch-grpc-bug
     find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
-    find_library(LIB_GRPC NAMES grpc)
     find_library(LIB_GPR NAMES gpr)
     find_library(LIB_CARES NAMES cares)
     find_library(LIB_ADDRESS_SORTING NAMES address_sorting)
-    target_link_libraries(${EXE} PRIVATE ${LIB_CARES} ${LIB_ADDRESS_SORTING} ${LIB_GPR} ${LIB_GRPC} ${LIB_GRPC_UNSECURE})
+    target_link_libraries(${EXE} PRIVATE ${LIB_CARES} ${LIB_ADDRESS_SORTING} ${LIB_GPR} ${LIB_GRPC_UNSECURE})
   endif()
 endif()
 
