@@ -244,7 +244,7 @@ jobs:
         cd $(Build.BinariesDirectory)
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
         set -e
-        pacman -S grpc
+        pacman -S --noconfirm grpc
         EOF
       displayName: 'Install gRPC'
     
