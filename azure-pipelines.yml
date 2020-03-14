@@ -254,3 +254,8 @@ jobs:
         assetUploadMode: replace
         isDraft: false
         isPreRelease: true
+
+pr:  # Trigger a build on every PR.
+  branches:
+    include:
+      - '*'  # Must quote since "*" is a YAML reserved character
