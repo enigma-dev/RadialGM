@@ -1,4 +1,4 @@
-#include "main.h"
+#include "main.h"mj;klj;
 #include "MainWindow.h"
 
 #include "Dialogs/PreferencesKeys.h"
