@@ -96,6 +96,7 @@ SOURCES += \
     Widgets/AssetView.cpp \
     Widgets/RoomView.cpp \
     Models/TreeModel.cpp \
+    Components/ANSIescapeCodeHandler.cpp \
     Components/ArtManager.cpp \
     Models/ProtoModel.cpp \
     Models/ImmediateMapper.cpp \
@@ -140,6 +141,7 @@ HEADERS += \
     Widgets/RoomView.h \
     Models/TreeModel.h \
     Components/Logger.h \
+    Components/ANSIescapeCodeHandler.h \
     Components/ArtManager.h \
     Models/ProtoModel.h \
     Models/ImmediateMapper.h \

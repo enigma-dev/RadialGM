@@ -18,6 +18,7 @@
 #include <QList>
 #include <QPointer>
 #include <QProcess>
+#include <QTextCharFormat>
 
 #include <functional>
 #include <memory>
@@ -42,7 +43,7 @@ class CallData : public QObject {
 
  signals:
   void CompileStatusChanged(bool finished = false);
-  void LogOutput(const QString& output);
+  void LogOutput(const QString& output, const QTextCharFormat &format);
 };
 
 class CompilerClient : public QObject {
@@ -62,7 +63,7 @@ class CompilerClient : public QObject {
 
  signals:
   void CompileStatusChanged(bool finished = false);
-  void LogOutput(const QString& output);
+  void LogOutput(const QString& output, const QTextCharFormat &format);
 
  public slots:
   void UpdateLoop();
