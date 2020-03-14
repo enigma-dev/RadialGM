@@ -210,6 +210,7 @@ jobs:
         set -e
         cd $(Build.BinariesDirectory)
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+        set -e
         cd RGM
         mkdir build
         cd build
@@ -225,6 +226,7 @@ jobs:
         set -e
         cd $(Build.BinariesDirectory)
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+        set -e
         cd RGM
         mkdir build
         cd build
