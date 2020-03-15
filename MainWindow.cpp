@@ -142,19 +142,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
   connect(pluginServer, &RGMPlugin::LogOutput, [=](const QString& text, const QTextCharFormat &format) {
     int startPos = 0;
     int crPos = -1;
+    auto cursor = outputTextBrowser->textCursor();
+
     while ((crPos = text.indexOf('\r', startPos)) >= 0)  {
         if (text.size() > crPos + 1 && text.at(crPos + 1) == '\n') {
-            outputTextBrowser->textCursor().insertText(text.mid(startPos, crPos - startPos) + '\n', format);
+            cursor.insertText(text.mid(startPos, crPos - startPos) + '\n', format);
             startPos = crPos + 2;
             continue;
         }
-        outputTextBrowser->textCursor().insertText(text.mid(startPos, crPos - startPos), format);
-        outputTextBrowser->textCursor().clearSelection();
-        outputTextBrowser->textCursor().movePosition(QTextCursor::StartOfBlock, QTextCursor::KeepAnchor);
+        cursor.insertText(text.mid(startPos, crPos - startPos), format);
+        cursor.clearSelection();
+        cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::KeepAnchor);
         startPos = crPos + 1;
     }
     if (startPos < text.count())
-        outputTextBrowser->textCursor().insertText(text.mid(startPos), format);
+        cursor.insertText(text.mid(startPos), format);
+
+    outputTextBrowser->setTextCursor(cursor);
   });
   
   connect(pluginServer, &RGMPlugin::CompileStatusChanged, [=](bool finished) {
