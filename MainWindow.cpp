@@ -143,6 +143,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
     int startPos = 0;
     int crPos = -1;
     auto cursor = outputTextBrowser->textCursor();
+    auto vbar = outputTextBrowser->verticalScrollBar();
+    const bool atBottom = outputTextBrowser->isReadOnly() ?
+                vbar->value() >= vbar->maximum() : cursor.atEnd();
 
     if (!cursor.atEnd())
         cursor.movePosition(QTextCursor::End);
@@ -161,7 +164,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
     if (startPos < text.count())
         cursor.insertText(text.mid(startPos), format);
 
-    outputTextBrowser->setTextCursor(cursor);
+    if (atBottom) vbar->setValue(vbar->maximum());
   });
   
   connect(pluginServer, &RGMPlugin::CompileStatusChanged, [=](bool finished) {
