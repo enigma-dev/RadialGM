@@ -20,7 +20,10 @@
 #include "Components/Logger.h"
 
 #include "Plugins/RGMPlugin.h"
+
+#ifdef RGM_SERVER_ENABLED
 #include "Plugins/ServerPlugin.h"
+#endif
 
 #include "gmk.h"
 #include "gmx.h"
