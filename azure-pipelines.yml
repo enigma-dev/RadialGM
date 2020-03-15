@@ -199,17 +199,62 @@ jobs:
         sudo mount --bind ./root.x86_64/ ./root.x86_64/
         sudo cp -R  $(Build.SourcesDirectory) ./root.x86_64/RGM
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+        set -e
         echo 'Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch' >> /etc/pacman.d/mirrorlist
         pacman-key --init 
         pacman-key --populate archlinux
-        pacman -Sy --noconfirm base base-devel git gcc cmake protobuf grpc yaml-cpp pugixml rapidjson boost qt5 qscintilla-qt5
+        pacman -Sy --noconfirm base base-devel git gcc cmake protobuf yaml-cpp pugixml rapidjson boost qt5 qscintilla-qt5
         EOF
       displayName: 'Bootstrap Archlinux'
+
+    - bash: |
+        set -e
+        cd $(Build.BinariesDirectory)
+        cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+        set -e
+        cd RGM
+        mkdir build
+        cd build
+        cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel -DRGM_ENABLE_GRPC_SERVER=OFF ..
+        make
+        make install
+        cd ..
+        git clean -fx
+        rm -rf build/
+        EOF
+      displayName: 'Release Build (No gRPC)'
     
     - bash: |
         set -e
         cd $(Build.BinariesDirectory)
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+        set -e
+        cd RGM
+        mkdir build
+        cd build
+        cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DRGM_ENABLE_GRPC_SERVER=OFF ..
+        make
+        make install
+        cd ..
+        git clean -fx
+        rm -rf build/
+        EOF
+      displayName: 'Debug Build (No gRPC)'
+
+    - bash: |
+        set -e
+        cd $(Build.BinariesDirectory)
+        cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+        set -e
+        pacman -S --noconfirm grpc
+        EOF
+      displayName: 'Install gRPC'
+    
+    - bash: |
+        set -e
+        cd $(Build.BinariesDirectory)
+        cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+        set -e
         cd RGM
         mkdir build
         cd build
@@ -218,6 +263,7 @@ jobs:
         make install
         cd ..
         git clean -fx
+        rm -rf build/
         EOF
       displayName: 'Release Build'
     
@@ -225,6 +271,7 @@ jobs:
         set -e
         cd $(Build.BinariesDirectory)
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+        set -e
         cd RGM
         mkdir build
         cd build
@@ -233,6 +280,7 @@ jobs:
         make install
         cd ..
         git clean -fx
+        rm -rf build/
         EOF
       displayName: 'Debug Build'
 

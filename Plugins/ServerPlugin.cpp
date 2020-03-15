@@ -272,7 +272,8 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   process->waitForStarted();
 
   // construct the channel and connect to the server running in the process
-  std::shared_ptr<Channel> channel = CreateChannel("localhost:37818", InsecureChannelCredentials());
+  // Note: gRPC is too dumb to resolve localhost on linux
+  std::shared_ptr<Channel> channel = CreateChannel("127.0.0.1:37818", InsecureChannelCredentials());
   compilerClient = new CompilerClient(channel, mainWindow);
   connect(compilerClient, &CompilerClient::CompileStatusChanged, this, &RGMPlugin::CompileStatusChanged);
   // hookup emake's output to our plugin's output signals so it redirects to the
