@@ -144,6 +144,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
     int crPos = -1;
     auto cursor = outputTextBrowser->textCursor();
 
+    if (!cursor.atEnd())
+        cursor.movePosition(QTextCursor::End);
+
     while ((crPos = text.indexOf('\r', startPos)) >= 0)  {
         if (text.size() > crPos + 1 && text.at(crPos + 1) == '\n') {
             cursor.insertText(text.mid(startPos, crPos - startPos) + '\n', format);
