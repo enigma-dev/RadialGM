@@ -238,10 +238,9 @@ jobs:
         pacman-key --populate archlinux
         pacman -Sy --noconfirm base base-devel git gcc cmake protobuf yaml-cpp pugixml rapidjson boost qt5 qscintilla-qt5
         EOF
-        ls ./root.x86_64/RadialGM
       displayName: 'Bootstrap Archlinux'
       
-    - bash: sudo cp -R $(Build.SourcesDirectory)/enigma-dev ./root.x86_64/RadialGM/Submodules/
+    - bash: sudo cp -R $(Build.SourcesDirectory)/enigma-dev $(Build.BinariesDirectory)/root.x86_64/RadialGM/Submodules/
       displayName: Install ENIGMA Submodule
 
     - bash: |
