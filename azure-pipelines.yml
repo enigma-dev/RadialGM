@@ -56,7 +56,7 @@ jobs:
       persistCredentials: true
 
     - checkout: enigma
-      condition: ne(variables['Build.Reason'], 'BuildCompletion')
+      condition: ne('1', '1')
     
     - script: mv $(Build.SourcesDirectory)/enigma-dev $(Build.SourcesDirectory)/RadialGM/Submodules/
       condition: ne(variables['Build.TriggeredBy.ProjectID'], 'RadialGM')
