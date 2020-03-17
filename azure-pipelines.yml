@@ -1,3 +1,19 @@
+
+pr:  # Trigger a build on every PR.
+  branches:
+    include:
+      - '*'  # Must quote since "*" is a YAML reserved character
+      
+resources:         
+  repositories:
+  - repository: enigma   
+    type: GitHub
+    connection: github.com_EnigmaBot
+    source: enigma-dev/enigma-dev
+    pr:
+      branches:
+      include:
+        - '*'  # Must quote since "*" is a YAML reserved character
 variables:
   vcpkgGitRef: 1be75a28bfce2084bb0b59ec92a6853f13d7be66 # Update this git ref to update vcpkg
   releasetag: 'RadialGM-$(Build.SourceVersion)'
@@ -304,19 +320,3 @@ jobs:
         assetUploadMode: replace
         isDraft: false
         isPreRelease: true
-
-pr:  # Trigger a build on every PR.
-  branches:
-    include:
-      - '*'  # Must quote since "*" is a YAML reserved character
-      
-resources:         
-  repositories:
-  - repository: enigma   
-    type: GitHub
-    connection: github.com_EnigmaBot
-    source: enigma-dev/enigma-dev
-    pr:
-      branches:
-      include:
-        - '*'  # Must quote since "*" is a YAML reserved character
