@@ -59,10 +59,7 @@ jobs:
     
     - script: mv $(Build.SourcesDirectory)/enigma-dev $(Build.SourcesDirectory)/RadialGM/Submodules/enigma-dev
       displayName: Install ENIGMA Submodule
-
-    - script: cd $(Build.SourcesDirectory)/RadialGM/
-      displayName: Change Directory
-     
+      
     - script: |
         git clone https://github.com/msys2/msys2-ci-base.git %CD:~0,2%\msys64
         %CD:~0,2%\msys64\usr\bin\rm -rf %CD:~0,2%\msys64\.git
@@ -82,6 +79,7 @@ jobs:
     - script: |
         set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
         %CD:~0,2%\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
+        cd $(Build.SourcesDirectory)/RadialGM/
         %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build.sh MinSizeRel $(PWD)/cmake-package"
       displayName: 'Release Build'
       env:
@@ -92,6 +90,7 @@ jobs:
     - script: |
         set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
         %CD:~0,2%\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
+        cd $(Build.SourcesDirectory)/RadialGM/
         %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build.sh Debug $(PWD)/cmake-package"
       displayName: 'Debug Build'
       env:
