@@ -99,6 +99,7 @@ jobs:
         MINGW_INSTALLS: $(MINGW_LOWER)
     
     - script: |
+        cd $(Build.SourcesDirectory)/RadialGM
         mkdir package
         cd package
         cmake -G "MSYS Makefiles" ../cmake-package
@@ -139,6 +140,9 @@ jobs:
       persistCredentials: true
 
     - checkout: enigma
+    
+    - script: mv $(Build.SourcesDirectory)/enigma-dev $(Build.SourcesDirectory)/RadialGM/Submodules/
+      displayName: Install ENIGMA Submodule
 
     - task: Cache@2
       displayName: 'Cache VCPKG Artifacts'
@@ -157,6 +161,7 @@ jobs:
         set PATH=%PATH%;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\tools\qt5\bin\
         set VCINSTALLDIR=%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC
         call "%VCINSTALLDIR%\Auxiliary\Build\vcvars64.bat"
+        cd $(Build.SourcesDirectory)/RadialGM
         mkdir Release
         cd Release
         cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=../cmake-package/Release -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)
@@ -168,6 +173,7 @@ jobs:
         set PATH=%PATH%;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\debug\bin;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\bin;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\tools\qt5\debug\bin\
         set VCINSTALLDIR=%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC
         call "%VCINSTALLDIR%\Auxiliary\Build\vcvars64.bat"
+        cd $(Build.SourcesDirectory)/RadialGM
         mkdir Debug
         cd Debug
         cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=../cmake-package/Debug -DCMAKE_BUILD_TYPE=Debug -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Build.SourcesDirectory)
@@ -176,6 +182,7 @@ jobs:
       displayName: 'Debug Build'
     
     - script: |
+        cd $(Build.SourcesDirectory)/RadialGM
         mkdir package
         cd package
         cmake -G "Visual Studio 16 2019" -A x64 ../cmake-package
@@ -212,7 +219,6 @@ jobs:
     - checkout: self
       submodules: false
       persistCredentials: true
-      path: RGM
 
     - checkout: enigma
 
@@ -224,7 +230,7 @@ jobs:
         curl http://mirrors.acm.wpi.edu/archlinux/iso/latest/$ARCH_URL -o arch.tar.gz
         sudo tar xzf arch.tar.gz
         sudo mount --bind ./root.x86_64/ ./root.x86_64/
-        sudo cp -R  $(Build.SourcesDirectory) ./root.x86_64/RGM
+        sudo cp -R  $(Build.SourcesDirectory)/RadialGM ./root.x86_64/RadialGM
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
         set -e
         echo 'Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch' >> /etc/pacman.d/mirrorlist
@@ -233,16 +239,19 @@ jobs:
         pacman -Sy --noconfirm base base-devel git gcc cmake protobuf yaml-cpp pugixml rapidjson boost qt5 qscintilla-qt5
         EOF
       displayName: 'Bootstrap Archlinux'
+      
+    - bash: sudo cp -R  $(Build.SourcesDirectory)/enigma-dev ./root.x86_64/RadialGM/Submodules/
+    displayName: Install ENIGMA Submodule
 
     - bash: |
         set -e
         cd $(Build.BinariesDirectory)
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
         set -e
-        cd RGM
+        cd RadialGM
         mkdir build
         cd build
-        cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel -DRGM_ENABLE_GRPC_SERVER=OFF ..
+        cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel -DRadialGM_ENABLE_GRPC_SERVER=OFF ..
         make
         make install
         cd ..
@@ -256,10 +265,10 @@ jobs:
         cd $(Build.BinariesDirectory)
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
         set -e
-        cd RGM
+        cd RadialGM
         mkdir build
         cd build
-        cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DRGM_ENABLE_GRPC_SERVER=OFF ..
+        cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DRadialGM_ENABLE_GRPC_SERVER=OFF ..
         make
         make install
         cd ..
@@ -282,7 +291,7 @@ jobs:
         cd $(Build.BinariesDirectory)
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
         set -e
-        cd RGM
+        cd RadialGM
         mkdir build
         cd build
         cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel ..
@@ -299,7 +308,7 @@ jobs:
         cd $(Build.BinariesDirectory)
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
         set -e
-        cd RGM
+        cd RadialGM
         mkdir build
         cd build
         cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
