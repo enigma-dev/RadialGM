@@ -51,18 +51,20 @@ jobs:
         MINGW_ARCH: x86_64
   
   steps:
-    - script: echo $(Build.Reason)
-    
     - checkout: self
       submodules: false
       persistCredentials: true
 
     - checkout: enigma
-      condition: ne('1', '1')
+      condition: eq(variables['Build.Reason'], 'BuildCompletion')
     
     - script: mv $(Build.SourcesDirectory)/enigma-dev $(Build.SourcesDirectory)/RadialGM/Submodules/
-      condition: ne(variables['Build.TriggeredBy.ProjectID'], 'RadialGM')
+      condition: eq(variables['Build.Reason'], 'BuildCompletion')
       displayName: Install ENIGMA Sources (upstream)
+      
+    - script: cd $(Build.SourcesDirectory)/RadialGM/ && git submodule update --init --recursive
+      condition: ne(variables['Build.Reason'], 'BuildCompletion')
+      displayName: Install ENIGMA Sources (submodule)
       
     - script: |
         git clone https://github.com/msys2/msys2-ci-base.git %CD:~0,2%\msys64
@@ -143,9 +145,15 @@ jobs:
       persistCredentials: true
 
     - checkout: enigma
+      condition: eq(variables['Build.Reason'], 'BuildCompletion')
     
     - script: mv $(Build.SourcesDirectory)/enigma-dev $(Build.SourcesDirectory)/RadialGM/Submodules/
-      displayName: Install ENIGMA Submodule
+      condition: eq(variables['Build.Reason'], 'BuildCompletion')
+      displayName: Install ENIGMA Sources (upstream)
+      
+    - script: cd $(Build.SourcesDirectory)/RadialGM/ && git submodule update --init --recursive
+      condition: ne(variables['Build.Reason'], 'BuildCompletion')
+      displayName: Install ENIGMA Sources (submodule)
 
     - task: Cache@2
       displayName: 'Cache VCPKG Artifacts'
@@ -218,11 +226,16 @@ jobs:
     vmImage: 'ubuntu-latest'
 
   steps:
-    - checkout: self
-      submodules: false
-      persistCredentials: true
-
     - checkout: enigma
+      condition: eq(variables['Build.Reason'], 'BuildCompletion')
+    
+    - script: mv $(Build.SourcesDirectory)/enigma-dev $(Build.SourcesDirectory)/RadialGM/Submodules/
+      condition: eq(variables['Build.Reason'], 'BuildCompletion')
+      displayName: Install ENIGMA Sources (upstream)
+      
+    - script: cd $(Build.SourcesDirectory)/RadialGM/ && git submodule update --init --recursive
+      condition: ne(variables['Build.Reason'], 'BuildCompletion')
+      displayName: Install ENIGMA Sources (submodule)
 
     - bash: |
         set -e
@@ -241,9 +254,6 @@ jobs:
         pacman -Sy --noconfirm base base-devel git gcc cmake protobuf yaml-cpp pugixml rapidjson boost qt5 qscintilla-qt5
         EOF
       displayName: 'Bootstrap Archlinux'
-      
-    - bash: sudo cp -R $(Build.SourcesDirectory)/enigma-dev/ $(Build.BinariesDirectory)/root.x86_64/RadialGM/Submodules/
-      displayName: Install ENIGMA Submodule
 
     - bash: |
         set -e
