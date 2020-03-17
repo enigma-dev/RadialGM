@@ -51,6 +51,8 @@ jobs:
         MINGW_ARCH: x86_64
   
   steps:
+    - script: echo $(Build.Reason)
+    
     - checkout: self
       submodules: false
       persistCredentials: true
