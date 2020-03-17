@@ -241,7 +241,7 @@ jobs:
       displayName: 'Bootstrap Archlinux'
       
     - bash: sudo cp -R  $(Build.SourcesDirectory)/enigma-dev ./root.x86_64/RadialGM/Submodules/
-    displayName: Install ENIGMA Submodule
+      displayName: Install ENIGMA Submodule
 
     - bash: |
         set -e
