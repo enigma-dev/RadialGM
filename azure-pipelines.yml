@@ -52,7 +52,7 @@ jobs:
   
   steps:
     - checkout: self
-      submodules: false
+      submodules: ne(variables['Build.Reason'], 'BuildCompletion')
       persistCredentials: true
 
     - checkout: enigma
@@ -61,10 +61,6 @@ jobs:
     - script: mv $(Build.SourcesDirectory)/enigma-dev $(Build.SourcesDirectory)/RadialGM/Submodules/
       condition: eq(variables['Build.Reason'], 'BuildCompletion')
       displayName: Install ENIGMA Sources (upstream)
-      
-    - script: cd $(Build.SourcesDirectory)/RadialGM/ && git submodule update --init --recursive
-      condition: ne(variables['Build.Reason'], 'BuildCompletion')
-      displayName: Install ENIGMA Sources (submodule)
       
     - script: |
         git clone https://github.com/msys2/msys2-ci-base.git %CD:~0,2%\msys64
