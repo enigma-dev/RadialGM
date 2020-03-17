@@ -57,7 +57,9 @@ jobs:
       persistCredentials: true
 
     - checkout: enigma
-      path: $(Build.SourcesDirectory)/Submodules/
+    
+    - script: mv $(Build.SourcesDirectory)/enigma-dev $(Build.SourcesDirectory)/Submodules/enigma-dev
+      displayName: Install ENIGMA Submodule 
 
     - script: |
         git clone https://github.com/msys2/msys2-ci-base.git %CD:~0,2%\msys64
@@ -136,7 +138,6 @@ jobs:
       persistCredentials: true
 
     - checkout: enigma
-      path: $(Build.SourcesDirectory)/Submodules/
 
     - task: Cache@2
       displayName: 'Cache VCPKG Artifacts'
@@ -213,7 +214,6 @@ jobs:
       path: RGM
 
     - checkout: enigma
-      path: $(Build.SourcesDirectory)/Submodules/
 
     - bash: |
         set -e
