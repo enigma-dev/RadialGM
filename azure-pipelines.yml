@@ -147,7 +147,7 @@ jobs:
     - task: Cache@2
       displayName: 'Cache VCPKG Artifacts'
       inputs:
-        key: $(Build.SourcesDirectory)/msvc-x64-deps.txt | "$(vcpkgGitRef)" | "$(Agent.OS)"
+        key: $(Build.SourcesDirectory)//RadialGM/msvc-x64-deps.txt | "$(vcpkgGitRef)" | "$(Agent.OS)"
         path: '$(Build.BinariesDirectory)/vcpkg'
     
     - task: run-vcpkg@0
@@ -230,7 +230,7 @@ jobs:
         curl http://mirrors.acm.wpi.edu/archlinux/iso/latest/$ARCH_URL -o arch.tar.gz
         sudo tar xzf arch.tar.gz
         sudo mount --bind ./root.x86_64/ ./root.x86_64/
-        sudo cp -R  $(Build.SourcesDirectory)/RadialGM ./root.x86_64/
+        sudo cp -R $(Build.SourcesDirectory)/RadialGM ./root.x86_64/
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
         set -e
         echo 'Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch' >> /etc/pacman.d/mirrorlist
@@ -238,6 +238,7 @@ jobs:
         pacman-key --populate archlinux
         pacman -Sy --noconfirm base base-devel git gcc cmake protobuf yaml-cpp pugixml rapidjson boost qt5 qscintilla-qt5
         EOF
+        ls ./root.x86_64/
       displayName: 'Bootstrap Archlinux'
       
     - bash: sudo cp -R $(Build.SourcesDirectory)/enigma-dev ./root.x86_64/RadialGM/Submodules/
