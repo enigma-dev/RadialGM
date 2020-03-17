@@ -240,10 +240,11 @@ jobs:
         EOF
       displayName: 'Bootstrap Archlinux'
       
-    - bash: sudo cp -R $(Build.SourcesDirectory)/enigma-dev $(Build.BinariesDirectory)/root.x86_64/RadialGM/Submodules/enigma-dev
+    - bash: sudo cp -R $(Build.SourcesDirectory)/enigma-dev/ $(Build.BinariesDirectory)/root.x86_64/RadialGM/Submodules/
       displayName: Install ENIGMA Submodule
 
     - bash: |
+        ls $(Build.BinariesDirectory)/root.x86_64/RadialGM/Submodules/enigma-dev
         set -e
         cd $(Build.BinariesDirectory)
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
