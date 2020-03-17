@@ -226,6 +226,10 @@ jobs:
     vmImage: 'ubuntu-latest'
 
   steps:
+    - checkout: self
+      submodules: false
+      persistCredentials: true
+      
     - checkout: enigma
       condition: eq(variables['Build.Reason'], 'BuildCompletion')
     
