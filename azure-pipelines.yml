@@ -8,7 +8,7 @@ resources:
   repositories:
   - repository: enigma   
     type: GitHub
-    connection: github.com_EnigmaBot
+    endpoint: github.com_EnigmaBot
     source: enigma-dev/enigma-dev
     name: enigma-dev/enigma-dev
     pr:
