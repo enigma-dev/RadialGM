@@ -10,6 +10,7 @@ resources:
     type: GitHub
     connection: github.com_EnigmaBot
     source: enigma-dev/enigma-dev
+    name: enigma-dev/enigma-dev
     pr:
       branches:
       include:
