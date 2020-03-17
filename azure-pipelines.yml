@@ -137,7 +137,7 @@ jobs:
 
   steps:
     - checkout: self
-      submodules: false
+      submodules: ${{ ne(variables['Build.Reason'], 'BuildCompletion') }}
       persistCredentials: true
 
     - checkout: enigma
@@ -146,10 +146,6 @@ jobs:
     - script: mv $(Build.SourcesDirectory)/enigma-dev $(Build.SourcesDirectory)/RadialGM/Submodules/
       condition: eq(variables['Build.Reason'], 'BuildCompletion')
       displayName: Install ENIGMA Sources (upstream)
-      
-    - script: cd $(Build.SourcesDirectory)/RadialGM/ && git submodule update --init --recursive
-      condition: ne(variables['Build.Reason'], 'BuildCompletion')
-      displayName: Install ENIGMA Sources (submodule)
 
     - task: Cache@2
       displayName: 'Cache VCPKG Artifacts'
@@ -223,19 +219,15 @@ jobs:
 
   steps:
     - checkout: self
-      submodules: false
+      submodules: ${{ ne(variables['Build.Reason'], 'BuildCompletion') }}
       persistCredentials: true
-      
+
     - checkout: enigma
       condition: eq(variables['Build.Reason'], 'BuildCompletion')
     
     - script: mv $(Build.SourcesDirectory)/enigma-dev $(Build.SourcesDirectory)/RadialGM/Submodules/
       condition: eq(variables['Build.Reason'], 'BuildCompletion')
       displayName: Install ENIGMA Sources (upstream)
-      
-    - script: cd $(Build.SourcesDirectory)/RadialGM/ && git submodule update --init --recursive
-      condition: ne(variables['Build.Reason'], 'BuildCompletion')
-      displayName: Install ENIGMA Sources (submodule)
 
     - bash: |
         set -e
@@ -326,6 +318,7 @@ jobs:
         rm -rf build/
         EOF
       displayName: 'Debug Build'
+      
 - job: PublishRelease
   displayName: 'Publish Release'
   timeoutInMinutes: 15
