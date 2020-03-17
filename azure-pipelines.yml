@@ -58,7 +58,7 @@ jobs:
 
     - checkout: enigma
     
-    - script: mv $(Build.SourcesDirectory)/enigma-dev $(Build.SourcesDirectory)/Submodules/enigma-dev
+    - script: mv $(Build.SourcesDirectory)/enigma-dev $(Build.SourcesDirectory)/RadialGM/Submodules/enigma-dev
       displayName: Install ENIGMA Submodule 
 
     - script: |
