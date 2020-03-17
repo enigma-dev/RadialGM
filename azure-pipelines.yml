@@ -51,6 +51,8 @@ jobs:
         MINGW_ARCH: x86_64
   
   steps:
+    - script: echo $(Build.TriggeredBy.ProjectID)
+    
     - checkout: self
       submodules: false
       persistCredentials: true
