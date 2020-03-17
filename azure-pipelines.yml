@@ -56,9 +56,11 @@ jobs:
       persistCredentials: true
 
     - checkout: enigma
+      condition: ne(variables['Build.TriggeredBy.ProjectID'], 'RadialGM')
     
     - script: mv $(Build.SourcesDirectory)/enigma-dev $(Build.SourcesDirectory)/RadialGM/Submodules/
-      displayName: Install ENIGMA Submodule
+      condition: ne(variables['Build.TriggeredBy.ProjectID'], 'RadialGM')
+      displayName: Install ENIGMA Sources (upstream)
       
     - script: |
         git clone https://github.com/msys2/msys2-ci-base.git %CD:~0,2%\msys64
@@ -126,7 +128,6 @@ jobs:
         assetUploadMode: replace
         assets: |
          $(Build.SourcesDirectory)/RadialGM-MinGW-$(MINGW_ARCH).exe 
-
 - job: MSVC_64
   displayName: 'MSVC x86_64'
   dependsOn: CreateReleaseCandidate
@@ -209,7 +210,6 @@ jobs:
         assetUploadMode: replace
         assets: |
           $(Build.SourcesDirectory)/RadialGM-MSVC-x86_64.exe
-
 - job: Arch
   displayName: 'Arch Linux'
   pool:
@@ -274,7 +274,6 @@ jobs:
         rm -rf build/
         EOF
       displayName: 'Debug Build (No gRPC)'
-
     - bash: |
         set -e
         cd $(Build.BinariesDirectory)
@@ -315,7 +314,6 @@ jobs:
         rm -rf build/
         EOF
       displayName: 'Debug Build'
-
 - job: PublishRelease
   displayName: 'Publish Release'
   timeoutInMinutes: 15
