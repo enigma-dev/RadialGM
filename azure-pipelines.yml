@@ -51,14 +51,12 @@ jobs:
         MINGW_ARCH: x86_64
   
   steps:
-    - script: echo $(Build.TriggeredBy.ProjectID)
-    
     - checkout: self
       submodules: false
       persistCredentials: true
 
     - checkout: enigma
-      condition: ne(variables['Build.TriggeredBy.ProjectID'], 'RadialGM')
+      condition: ne(variables['Build.Reason'], 'BuildCompletion')
     
     - script: mv $(Build.SourcesDirectory)/enigma-dev $(Build.SourcesDirectory)/RadialGM/Submodules/
       condition: ne(variables['Build.TriggeredBy.ProjectID'], 'RadialGM')
