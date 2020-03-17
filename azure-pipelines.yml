@@ -244,20 +244,17 @@ jobs:
       displayName: Install ENIGMA Submodule
 
     - bash: |
-        ls $(Build.BinariesDirectory)/root.x86_64/RadialGM/Submodules/enigma-dev
         set -e
         cd $(Build.BinariesDirectory)
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
         set -e
         cd RadialGM
-        ls Submodules/enigma-dev
         mkdir build
         cd build
-        cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel -DRadialGM_ENABLE_GRPC_SERVER=OFF ..
+        cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel -DRGM_ENABLE_GRPC_SERVER=OFF ..
         make
         make install
         cd ..
-        git clean -fx
         rm -rf build/
         EOF
       displayName: 'Release Build (No gRPC)'
@@ -270,11 +267,10 @@ jobs:
         cd RadialGM
         mkdir build
         cd build
-        cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DRadialGM_ENABLE_GRPC_SERVER=OFF ..
+        cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DRGM_ENABLE_GRPC_SERVER=OFF ..
         make
         make install
         cd ..
-        git clean -fx
         rm -rf build/
         EOF
       displayName: 'Debug Build (No gRPC)'
@@ -300,7 +296,6 @@ jobs:
         make
         make install
         cd ..
-        git clean -fx
         rm -rf build/
         EOF
       displayName: 'Release Build'
@@ -317,7 +312,6 @@ jobs:
         make
         make install
         cd ..
-        git clean -fx
         rm -rf build/
         EOF
       displayName: 'Debug Build'
