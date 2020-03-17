@@ -153,7 +153,7 @@ jobs:
     - task: run-vcpkg@0
       displayName: 'Run VCPKG'
       inputs:
-        vcpkgArguments: "@$(Build.SourcesDirectory)/msvc-x64-deps.txt"
+        vcpkgArguments: "@$(Build.SourcesDirectory)/RadialGM/msvc-x64-deps.txt"
         vcpkgGitCommitId: $(vcpkgGitRef)
         vcpkgGitURL: https://github.com/microsoft/vcpkg.git
 
@@ -230,7 +230,7 @@ jobs:
         curl http://mirrors.acm.wpi.edu/archlinux/iso/latest/$ARCH_URL -o arch.tar.gz
         sudo tar xzf arch.tar.gz
         sudo mount --bind ./root.x86_64/ ./root.x86_64/
-        sudo cp -R  $(Build.SourcesDirectory)/RadialGM ./root.x86_64/RadialGM
+        sudo cp -R  $(Build.SourcesDirectory)/RadialGM ./root.x86_64/
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
         set -e
         echo 'Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch' >> /etc/pacman.d/mirrorlist
@@ -240,8 +240,8 @@ jobs:
         EOF
       displayName: 'Bootstrap Archlinux'
       
-    - bash: sudo cp -R  $(Build.SourcesDirectory)/enigma-dev ./root.x86_64/RadialGM/Submodules/
-      displayName: Install ENIGMA Submodule
+    - bash: sudo cp -R $(Build.SourcesDirectory)/enigma-dev ./root.x86_64/RadialGM/Submodules/
+    displayName: Install ENIGMA Submodule
 
     - bash: |
         set -e
