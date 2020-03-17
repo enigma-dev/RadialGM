@@ -52,7 +52,7 @@ jobs:
   
   steps:
     - checkout: self
-      submodules: ne(variables['Build.Reason'], 'BuildCompletion')
+      submodules: ${{ ne(variables['Build.Reason'], 'BuildCompletion') }}
       persistCredentials: true
 
     - checkout: enigma
