@@ -1,6 +1,8 @@
 parameters:
-- name: submodule  # defaults for any parameters that aren't specified
-  default: 'true'
+- name: enigmaref
+  default: ''
+- name: repo
+  default: 'self'
   
 jobs:
 - job: CreateReleaseCandidate
@@ -35,14 +37,14 @@ jobs:
         MINGW_ARCH: x86_64
   
   steps:
-    - checkout: self
-      submodules: ${{ parameters.submodule }}
+    - checkout: ${{ parameters.repo }}
+      submodules: true
       path: RadialGM
       persistCredentials: true
     
     - script: mv $(Build.SourcesDirectory)/enigma-dev $(Build.SourcesDirectory)/RadialGM/Submodules/
-      condition: eq('${{ parameters.submodule }}', false)
-      displayName: Install ENIGMA Sources (upstream)
+      condition: ne('${{ parameters.submodule }}', '')
+      displayName: Checkout ENIGMA Reference
       
     - script: |
         git clone https://github.com/msys2/msys2-ci-base.git %CD:~0,2%\msys64
@@ -119,14 +121,14 @@ jobs:
   timeoutInMinutes: 250
 
   steps:
-    - checkout: self
-      submodules: ${{ parameters.submodule }}
+    - checkout: ${{ parameters.repo }}
+      submodules: true
       path: RadialGM
       persistCredentials: true
     
     - script: mv $(Build.SourcesDirectory)/enigma-dev $(Build.SourcesDirectory)/RadialGM/Submodules/
-      condition: eq('${{ parameters.submodule }}', false)
-      displayName: Install ENIGMA Sources (upstream)
+      condition: ne('${{ parameters.submodule }}', '')
+      displayName: Checkout ENIGMA Reference
 
     - task: Cache@2
       displayName: 'Cache VCPKG Artifacts'
@@ -199,14 +201,14 @@ jobs:
     vmImage: 'ubuntu-latest'
 
   steps:
-    - checkout: self
-      submodules: ${{ parameters.submodule }}
+    - checkout: ${{ parameters.repo }}
+      submodules: true
       path: RadialGM
       persistCredentials: true
     
     - script: mv $(Build.SourcesDirectory)/enigma-dev $(Build.SourcesDirectory)/RadialGM/Submodules/
-      condition: eq('${{ parameters.submodule }}', false)
-      displayName: Install ENIGMA Sources (upstream)
+      condition: ne('${{ parameters.submodule }}', '')
+      displayName: Checkout ENIGMA Reference
 
     - bash: |
         set -e
