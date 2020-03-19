@@ -2,6 +2,10 @@ parameters:
 - name: submodule  # defaults for any parameters that aren't specified
   default: 'true'
   
+variables:
+  vcpkgGitRef: 1be75a28bfce2084bb0b59ec92a6853f13d7be66 # Update this git ref to update vcpkg
+  releasetag: 'RadialGM-$(Build.SourceVersion)'
+  
 jobs:
 - job: CreateReleaseCandidate
   displayName: 'Create Release Candidate'
