@@ -131,7 +131,7 @@ jobs:
     - task: Cache@2
       displayName: 'Cache VCPKG Artifacts'
       inputs:
-        key: $(Build.SourcesDirectory)/RadialGM/msvc-x64-deps.txt | "$(vcpkgGitRef)" | "$(Agent.OS)"
+        key: $(BAgent.BuildDirectory)/RadialGM/msvc-x64-deps.txt | "$(vcpkgGitRef)" | "$(Agent.OS)"
         path: '$(Build.BinariesDirectory)/vcpkg'
     
     - task: run-vcpkg@0
@@ -166,12 +166,12 @@ jobs:
       displayName: 'Debug Build'
     
     - script: |
-        cd $(Build.SourcesDirectory)/RadialGM
+        cd $(Agent.BuildDirectory)/RadialGM
         mkdir package
         cd package
         cmake -G "Visual Studio 16 2019" -A x64 ../cmake-package
         cmake --build . --config Release --target PACKAGE
-        mv ENIGMA-Installer*.exe $(Build.SourcesDirectory)/RadialGM-MSVC-x86_64.exe
+        mv ENIGMA-Installer*.exe $(Agent.BuildDirectory)/RadialGM-MSVC-x86_64.exe
       displayName: 'Package'
     
     - task: PublishBuildArtifacts@1
