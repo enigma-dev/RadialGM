@@ -2,6 +2,8 @@ pr:  # Trigger a build on every PR.
   branches:
     include:
       - '*'  # Must quote since "*" is a YAML reserved character
+variables:
+- template: azure-vars.yml  # Template reference
 
 - template: azure-jobs.yml  # Template reference
   parameters:
