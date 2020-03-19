@@ -44,7 +44,7 @@ jobs:
     
     - script: | 
         cd $(Agent.BuildDirectory)/RadialGM/Submodules/
-        git remove origin
+        git remote remove origin
         git remote add origin https://github.com/enigma-dev/enigma-dev.git
         git remote -v
         git fetch origin --force --tags --prune --progress ${{ parameters.enigmaref }}:enigmaref
@@ -134,7 +134,7 @@ jobs:
     
     - script: | 
         cd $(Agent.BuildDirectory)/RadialGM/Submodules/
-        git remove origin
+        git remote remove origin
         git remote add origin https://github.com/enigma-dev/enigma-dev.git
         git remote -v
         git fetch origin --force --tags --prune --progress ${{ parameters.enigmaref }}:enigmaref
@@ -220,7 +220,7 @@ jobs:
     
     - script: | 
         cd $(Agent.BuildDirectory)/RadialGM/Submodules/
-        git remove origin
+        git remote remove origin
         git remote add origin https://github.com/enigma-dev/enigma-dev.git
         git fetch origin --force --tags --prune --progress ${{ parameters.enigmaref }}:enigmaref
         git checkout --progress --force enigmaref
