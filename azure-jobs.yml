@@ -36,7 +36,6 @@ jobs:
   
   steps:
     - checkout: self
-      path: RadialGM 
       submodules: ${{ parameters.submodule }}
       persistCredentials: true
     
@@ -119,7 +118,6 @@ jobs:
 
   steps:
     - checkout: self
-      path: RadialGM 
       submodules: ${{ parameters.submodule }}
       persistCredentials: true
     
@@ -199,7 +197,6 @@ jobs:
 
   steps:
     - checkout: self
-      path: RadialGM 
       submodules: ${{ parameters.submodule }}
       persistCredentials: true
     
