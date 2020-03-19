@@ -131,7 +131,7 @@ jobs:
     - task: Cache@2
       displayName: 'Cache VCPKG Artifacts'
       inputs:
-        key: $(BAgent.BuildDirectory)/RadialGM/msvc-x64-deps.txt | "$(vcpkgGitRef)" | "$(Agent.OS)"
+        key: $(Agent.BuildDirectory)/RadialGM/msvc-x64-deps.txt | "$(vcpkgGitRef)" | "$(Agent.OS)"
         path: '$(Build.BinariesDirectory)/vcpkg'
     
     - task: run-vcpkg@0
