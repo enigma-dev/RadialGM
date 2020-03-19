@@ -2,7 +2,11 @@ pr:  # Trigger a build on every PR.
   branches:
     include:
       - '*'  # Must quote since "*" is a YAML reserved character
-      
+
+variables:
+  vcpkgGitRef: 1be75a28bfce2084bb0b59ec92a6853f13d7be66 # Update this git ref to update vcpkg
+  releasetag: 'RadialGM-$(Build.SourceVersion)'
+
 jobs:
 - template: azure-jobs.yml  # Template reference
   parameters:
