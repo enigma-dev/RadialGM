@@ -177,7 +177,7 @@ jobs:
     - task: PublishBuildArtifacts@1
       displayName: 'Push Build Artifacts'
       inputs:
-        pathtoPublish: '$(Build.SourcesDirectory)/RadialGM-MSVC-x86_64.exe'
+        pathtoPublish: '$(Agent.BuildDirectory)/RadialGM-MSVC-x86_64.exe'
         artifactName: RadialGM-MSVC-x86_64
     
     - task: GithubRelease@0 
@@ -192,7 +192,7 @@ jobs:
         isPreRelease: true
         assetUploadMode: replace
         assets: |
-          $(Build.SourcesDirectory)/RadialGM-MSVC-x86_64.exe
+          $(Agent.BuildDirectory)/RadialGM-MSVC-x86_64.exe
 - job: Arch
   displayName: 'Arch Linux'
   pool:
