@@ -5,6 +5,7 @@ pr:  # Trigger a build on every PR.
 variables:
 - template: azure-vars.yml  # Template reference
 
+jobs:
 - template: azure-jobs.yml  # Template reference
   parameters:
     submodule: true
