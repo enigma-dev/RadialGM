@@ -43,7 +43,7 @@ jobs:
       persistCredentials: true
     
     - script: | 
-        cd $(Agent.BuildDirectory)/RadialGM/Submodules/
+        cd $(Agent.BuildDirectory)/RadialGM/Submodules/enigma-dev
         git remote remove origin
         git remote add origin https://github.com/enigma-dev/enigma-dev.git
         git remote -v
@@ -133,7 +133,7 @@ jobs:
       persistCredentials: true
     
     - script: | 
-        cd $(Agent.BuildDirectory)/RadialGM/Submodules/
+        cd $(Agent.BuildDirectory)/RadialGM/Submodules/enigma-dev
         git remote remove origin
         git remote add origin https://github.com/enigma-dev/enigma-dev.git
         git remote -v
@@ -219,7 +219,7 @@ jobs:
       persistCredentials: true
     
     - script: | 
-        cd $(Agent.BuildDirectory)/RadialGM/Submodules/
+        cd $(Agent.BuildDirectory)/RadialGM/Submodules/enigma-dev
         git remote remove origin
         git remote add origin https://github.com/enigma-dev/enigma-dev.git
         git fetch origin --force --tags --prune --progress ${{ parameters.enigmaref }}:enigmaref
