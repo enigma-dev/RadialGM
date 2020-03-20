@@ -24,7 +24,7 @@ jobs:
 - job: MINGW
   timeoutInMinutes: 360
   dependsOn: CreateReleaseCandidate
-  condition: always()
+  condition: succeededOrFailed()
   pool:
     vmImage: windows-latest
   strategy:
@@ -124,7 +124,7 @@ jobs:
 - job: MSVC_64
   displayName: 'MSVC x86_64'
   dependsOn: CreateReleaseCandidate
-  condition: always()
+  condition: succeededOrFailed()
   pool:
     vmImage: 'windows-latest'
   timeoutInMinutes: 250
