@@ -8,6 +8,7 @@ jobs:
 - job: CreateReleaseCandidate
   displayName: 'Create Release Candidate'
   timeoutInMinutes: 15
+  condition: eq('${{ parameters.repo }}', 'self')
   steps:
     - task: GithubRelease@0 
       displayName: 'Create GitHub Release Candidate'
