@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.14)
 
 option(RGM_ENABLE_GRPC_SERVER "Enable the GRPC client plugin for compilation and code analysis." ON)
 
@@ -11,6 +11,10 @@ endif()
 set(EXE_DESCRIPTION "ENIGMA IDE")
 
 project(RadialGM)
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+SET(CMAKE_SKIP_BUILD_RPATH ON)
+set(CMAKE_INSTALL_RPATH $ORIGIN)
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -164,9 +168,6 @@ if (RGM_ENABLE_GRPC_SERVER)
   set(RGM_HEADERS ${RGM_HEADERS} Plugins/ServerPlugin.h)
 endif()
 
-
-set(CMAKE_INSTALL_RPATH "${ENIGMA_DIR}")
-
 # Tell CMake to create the RadialGM executable
 add_executable(${EXE} WIN32 ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${EDITOR_SOURCES} ${RGM_RC})
 
@@ -269,6 +270,9 @@ if(WIN32)
   # Windows is a turd
   target_link_libraries(${EXE} PRIVATE Ws2_32 Wtsapi32 Wldap32 Crypt32 Winmm Userenv Netapi32 version Dwmapi Imm32)
 endif(WIN32)
+
+add_subdirectory(Submodules/enigma-dev/CompilerSource)
+add_dependencies(${EXE} "compileEGMf")
 
 install(TARGETS ${EXE} RUNTIME DESTINATION .)
 
