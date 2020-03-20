@@ -322,6 +322,7 @@ jobs:
   dependsOn:
     - MINGW
     - MSVC_64
+  condition: eq('${{ parameters.repo }}', 'self')
   steps:
     - task: GithubRelease@0 
       displayName: 'Publish GitHub Release Candidate'
