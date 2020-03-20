@@ -109,6 +109,7 @@ jobs:
     
     - task: GithubRelease@0 
       displayName: 'Add MinGW to GitHub Release'
+      condition: eq('${{ parameters.repo }}', 'self')
       inputs:
         gitHubConnection: github.com_EnigmaBot
         repositoryName: enigma-dev/RadialGM
@@ -199,6 +200,7 @@ jobs:
     
     - task: GithubRelease@0 
       displayName: 'Add MSVC to GitHub Release'
+      condition: eq('${{ parameters.repo }}', 'self')
       inputs:
         gitHubConnection: github.com_EnigmaBot
         repositoryName: enigma-dev/RadialGM
