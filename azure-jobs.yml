@@ -6,7 +6,7 @@ parameters:
   
 jobs:
 - ${{ if eq(parameters.repo, 'self') }}:
-    job: CreateReleaseCandidate
+  - job: CreateReleaseCandidate
     displayName: 'Create Release Candidate'
     timeoutInMinutes: 15
     steps:
@@ -137,7 +137,7 @@ jobs:
       persistCredentials: true
     
     - ${{ if ne(parameters.repo, 'self') }}:
-        script: | 
+      - script: | 
           cd $(Agent.BuildDirectory)/RadialGM/Submodules/enigma-dev
           git remote remove origin
           git remote add origin https://github.com/enigma-dev/enigma-dev.git
@@ -225,7 +225,7 @@ jobs:
       persistCredentials: true
     
     - ${{ if ne(parameters.repo, 'self') }}:
-        script: | 
+      - script: | 
           cd $(Agent.BuildDirectory)/RadialGM/Submodules/enigma-dev
           git remote remove origin
           git remote add origin https://github.com/enigma-dev/enigma-dev.git
@@ -323,7 +323,7 @@ jobs:
       displayName: 'Debug Build'
       
 - ${{ if eq(parameters.repo, 'self') }}:
-    job: PublishRelease
+  - job: PublishRelease
     displayName: 'Publish Release'
     timeoutInMinutes: 15
     dependsOn:
