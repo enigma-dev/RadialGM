@@ -19,7 +19,7 @@ jobs:
           tagSource: manual
           tag: '$(releasetag)'
           isDraft: true
-      isPreRelease: true
+          isPreRelease: true
     
 - job: MINGW
   timeoutInMinutes: 360
