@@ -5,26 +5,26 @@ parameters:
   default: 'self'
   
 jobs:
-- job: CreateReleaseCandidate
-  displayName: 'Create Release Candidate'
-  timeoutInMinutes: 15
-  condition: eq('${{ parameters.repo }}', 'self')
-  steps:
-    - task: GithubRelease@0 
-      displayName: 'Create GitHub Release Candidate'
-      inputs:
-        gitHubConnection: github.com_EnigmaBot
-        repositoryName: enigma-dev/RadialGM
-        action: create
-        tagSource: manual
-        tag: '$(releasetag)'
-        isDraft: true
-        isPreRelease: true
+- ${{ if eq(parameters.repo, 'self') }}:
+  - job: CreateReleaseCandidate
+    displayName: 'Create Release Candidate'
+    timeoutInMinutes: 15
+    steps:
+      - task: GithubRelease@0 
+        displayName: 'Create GitHub Release Candidate'
+        inputs:
+          gitHubConnection: github.com_EnigmaBot
+          repositoryName: enigma-dev/RadialGM
+          action: create
+          tagSource: manual
+          tag: '$(releasetag)'
+          isDraft: true
+          isPreRelease: true
     
 - job: MINGW
   timeoutInMinutes: 360
-  dependsOn: CreateReleaseCandidate
-  condition: or(succeeded(), ne('${{ parameters.repo }}', 'self'))
+  ${{ if eq(parameters.repo, 'self') }}:
+    dependsOn: CreateReleaseCandidate
   pool:
     vmImage: windows-latest
   strategy:
@@ -44,15 +44,15 @@ jobs:
       path: RadialGM
       persistCredentials: true
     
-    - script: | 
-        cd $(Agent.BuildDirectory)/RadialGM/Submodules/enigma-dev
-        git remote remove origin
-        git remote add origin https://github.com/enigma-dev/enigma-dev.git
-        git remote -v
-        git fetch origin --force --tags --prune --progress ${{ parameters.enigmaref }}:enigmaref
-        git checkout --progress --force enigmaref
-      condition: ne('${{ parameters.enigmaref }}', '')
-      displayName: Checkout ENIGMA Reference
+    - ${{ if ne(parameters.repo, 'self') }}:
+      - script: | 
+          cd $(Agent.BuildDirectory)/RadialGM/Submodules/enigma-dev
+          git remote remove origin
+          git remote add origin https://github.com/enigma-dev/enigma-dev.git
+          git remote -v
+          git fetch origin --force --tags --prune --progress ${{ parameters.enigmaref }}:enigmaref
+          git checkout --progress --force enigmaref
+        displayName: Checkout ENIGMA Reference
       
     - script: |
         git clone https://github.com/msys2/msys2-ci-base.git %CD:~0,2%\msys64
@@ -107,25 +107,25 @@ jobs:
         pathtoPublish: '$(Agent.BuildDirectory)/RadialGM-MinGW-$(MINGW_ARCH).exe'
         artifactName: RadialGM-MinGW-$(MINGW_ARCH)
     
-    - task: GithubRelease@0 
-      displayName: 'Add MinGW to GitHub Release'
-      condition: eq('${{ parameters.repo }}', 'self')
-      inputs:
-        gitHubConnection: github.com_EnigmaBot
-        repositoryName: enigma-dev/RadialGM
-        action: edit
-        tagSource: manual
-        tag: '$(releasetag)'
-        isDraft: true
-        isPreRelease: true
-        assetUploadMode: replace
-        assets: |
-         $(Agent.BuildDirectory)/RadialGM-MinGW-$(MINGW_ARCH).exe
+    - ${{ if eq(parameters.repo, 'self') }}:
+      - task: GithubRelease@0 
+        displayName: 'Add MinGW to GitHub Release'
+        inputs:
+          gitHubConnection: github.com_EnigmaBot
+          repositoryName: enigma-dev/RadialGM
+          action: edit
+          tagSource: manual
+          tag: '$(releasetag)'
+          isDraft: true
+          isPreRelease: true
+          assetUploadMode: replace
+          assets: |
+           $(Agent.BuildDirectory)/RadialGM-MinGW-$(MINGW_ARCH).exe
          
 - job: MSVC_64
   displayName: 'MSVC x86_64'
-  dependsOn: CreateReleaseCandidate
-  condition: or(succeeded(), ne('${{ parameters.repo }}', 'self'))
+  ${{ if eq(parameters.repo, 'self') }}:
+    dependsOn: CreateReleaseCandidate
   pool:
     vmImage: 'windows-latest'
   timeoutInMinutes: 250
@@ -136,15 +136,15 @@ jobs:
       path: RadialGM
       persistCredentials: true
     
-    - script: | 
-        cd $(Agent.BuildDirectory)/RadialGM/Submodules/enigma-dev
-        git remote remove origin
-        git remote add origin https://github.com/enigma-dev/enigma-dev.git
-        git remote -v
-        git fetch origin --force --tags --prune --progress ${{ parameters.enigmaref }}:enigmaref
-        git checkout --progress --force enigmaref
-      condition: ne('${{ parameters.enigmaref }}', '')
-      displayName: Checkout ENIGMA Reference
+    - ${{ if ne(parameters.repo, 'self') }}:
+      - script: | 
+          cd $(Agent.BuildDirectory)/RadialGM/Submodules/enigma-dev
+          git remote remove origin
+          git remote add origin https://github.com/enigma-dev/enigma-dev.git
+          git remote -v
+          git fetch origin --force --tags --prune --progress ${{ parameters.enigmaref }}:enigmaref
+          git checkout --progress --force enigmaref
+        displayName: Checkout ENIGMA Reference
 
     - task: Cache@2
       displayName: 'Cache VCPKG Artifacts'
@@ -198,20 +198,21 @@ jobs:
         pathtoPublish: '$(Agent.BuildDirectory)/RadialGM-MSVC-x86_64.exe'
         artifactName: RadialGM-MSVC-x86_64
     
-    - task: GithubRelease@0 
-      displayName: 'Add MSVC to GitHub Release'
-      condition: eq('${{ parameters.repo }}', 'self')
-      inputs:
-        gitHubConnection: github.com_EnigmaBot
-        repositoryName: enigma-dev/RadialGM
-        action: edit
-        tagSource: manual
-        tag: '$(releasetag)'
-        isDraft: true
-        isPreRelease: true
-        assetUploadMode: replace
-        assets: |
-          $(Agent.BuildDirectory)/RadialGM-MSVC-x86_64.exe
+    - ${{ if eq(parameters.repo, 'self') }}:
+      - task: GithubRelease@0 
+        displayName: 'Add MSVC to GitHub Release'
+        inputs:
+          gitHubConnection: github.com_EnigmaBot
+          repositoryName: enigma-dev/RadialGM
+          action: edit
+          tagSource: manual
+          tag: '$(releasetag)'
+          isDraft: true
+          isPreRelease: true
+          assetUploadMode: replace
+          assets: |
+            $(Agent.BuildDirectory)/RadialGM-MSVC-x86_64.exe
+          
 - job: Arch
   displayName: 'Arch Linux'
   pool:
@@ -223,14 +224,14 @@ jobs:
       path: RadialGM
       persistCredentials: true
     
-    - script: | 
-        cd $(Agent.BuildDirectory)/RadialGM/Submodules/enigma-dev
-        git remote remove origin
-        git remote add origin https://github.com/enigma-dev/enigma-dev.git
-        git fetch origin --force --tags --prune --progress ${{ parameters.enigmaref }}:enigmaref
-        git checkout --progress --force enigmaref
-      condition: ne('${{ parameters.enigmaref }}', '')
-      displayName: Checkout ENIGMA Reference
+    - ${{ if ne(parameters.repo, 'self') }}:
+      - script: | 
+          cd $(Agent.BuildDirectory)/RadialGM/Submodules/enigma-dev
+          git remote remove origin
+          git remote add origin https://github.com/enigma-dev/enigma-dev.git
+          git fetch origin --force --tags --prune --progress ${{ parameters.enigmaref }}:enigmaref
+          git checkout --progress --force enigmaref
+        displayName: Checkout ENIGMA Reference
 
     - bash: |
         set -e
@@ -321,22 +322,22 @@ jobs:
         EOF
       displayName: 'Debug Build'
       
-- job: PublishRelease
-  displayName: 'Publish Release'
-  timeoutInMinutes: 15
-  dependsOn:
-    - MINGW
-    - MSVC_64
-  condition: eq('${{ parameters.repo }}', 'self')
-  steps:
-    - task: GithubRelease@0 
-      displayName: 'Publish GitHub Release Candidate'
-      inputs:
-        gitHubConnection: github.com_EnigmaBot
-        repositoryName: enigma-dev/RadialGM
-        action: edit
-        tagSource: manual
-        tag: '$(releasetag)'
-        assetUploadMode: replace
-        isDraft: false
-        isPreRelease: true
+- ${{ if eq(parameters.repo, 'self') }}:
+  - job: PublishRelease
+    displayName: 'Publish Release'
+    timeoutInMinutes: 15
+    dependsOn:
+      - MINGW
+      - MSVC_64
+    steps:
+      - task: GithubRelease@0 
+        displayName: 'Publish GitHub Release Candidate'
+        inputs:
+          gitHubConnection: github.com_EnigmaBot
+          repositoryName: enigma-dev/RadialGM
+          action: edit
+          tagSource: manual
+          tag: '$(releasetag)'
+          assetUploadMode: replace
+          isDraft: false
+          isPreRelease: true
