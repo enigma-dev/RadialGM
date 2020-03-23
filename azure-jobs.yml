@@ -1,0 +1,343 @@
+parameters:
+- name: enigmaref
+  default: ''
+- name: repo
+  default: 'self'
+  
+jobs:
+- ${{ if eq(parameters.repo, 'self') }}:
+  - job: CreateReleaseCandidate
+    displayName: 'Create Release Candidate'
+    timeoutInMinutes: 15
+    steps:
+      - task: GithubRelease@0 
+        displayName: 'Create GitHub Release Candidate'
+        inputs:
+          gitHubConnection: github.com_EnigmaBot
+          repositoryName: enigma-dev/RadialGM
+          action: create
+          tagSource: manual
+          tag: '$(releasetag)'
+          isDraft: true
+          isPreRelease: true
+    
+- job: MINGW
+  timeoutInMinutes: 360
+  ${{ if eq(parameters.repo, 'self') }}:
+    dependsOn: CreateReleaseCandidate
+  pool:
+    vmImage: windows-latest
+  strategy:
+    matrix:
+      i686:
+        MINGW_UPPER: MINGW32
+        MINGW_LOWER: mingw32
+        MINGW_ARCH: i686
+      x86_64:
+        MINGW_UPPER: MINGW64
+        MINGW_LOWER: mingw64
+        MINGW_ARCH: x86_64
+  
+  steps:
+    - checkout: ${{ parameters.repo }}
+      submodules: true
+      path: RadialGM
+      persistCredentials: true
+    
+    - ${{ if ne(parameters.repo, 'self') }}:
+      - script: | 
+          cd $(Agent.BuildDirectory)/RadialGM/Submodules/enigma-dev
+          git remote remove origin
+          git remote add origin https://github.com/enigma-dev/enigma-dev.git
+          git remote -v
+          git fetch origin --force --tags --prune --progress ${{ parameters.enigmaref }}:enigmaref
+          git checkout --progress --force enigmaref
+        displayName: Checkout ENIGMA Reference
+      
+    - script: |
+        git clone https://github.com/msys2/msys2-ci-base.git %CD:~0,2%\msys64
+        %CD:~0,2%\msys64\usr\bin\rm -rf %CD:~0,2%\msys64\.git
+      displayName: Install MSYS2
+    
+    - script: |
+        set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
+        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Syyuu
+      displayName: Update MSYS2
+    
+    - script: |
+        set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
+        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm --needed -S git base-devel mingw-w64-$(MINGW_ARCH)-toolchain mingw-w64-$(MINGW_ARCH)-cmake mingw-w64-$(MINGW_ARCH)-nsis mingw-w64-$(MINGW_ARCH)-protobuf mingw-w64-$(MINGW_ARCH)-grpc mingw-w64-$(MINGW_ARCH)-gflags mingw-w64-$(MINGW_ARCH)-yaml-cpp mingw-w64-$(MINGW_ARCH)-pugixml mingw-w64-$(MINGW_ARCH)-rapidjson mingw-w64-$(MINGW_ARCH)-boost mingw-w64-$(MINGW_ARCH)-qt5 mingw-w64-$(MINGW_ARCH)-qscintilla
+        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Scc
+      displayName: Install Toolchain
+    
+    - script: |
+        set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
+        %CD:~0,2%\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
+        cd $(Agent.BuildDirectory)/RadialGM/
+        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build.sh MinSizeRel $(PWD)/cmake-package"
+      displayName: 'Release Build'
+      env:
+        MSYSTEM: $(MINGW_UPPER)
+        CHERE_INVOKING: yes
+        MINGW_INSTALLS: $(MINGW_LOWER)
+    
+    - script: |
+        set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
+        %CD:~0,2%\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
+        cd $(Agent.BuildDirectory)/RadialGM/
+        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build.sh Debug $(PWD)/cmake-package"
+      displayName: 'Debug Build'
+      env:
+        MSYSTEM: $(MINGW_UPPER)
+        CHERE_INVOKING: yes
+        MINGW_INSTALLS: $(MINGW_LOWER)
+    
+    - script: |
+        cd $(Agent.BuildDirectory)/RadialGM
+        mkdir package
+        cd package
+        cmake -G "MSYS Makefiles" ../cmake-package
+        make package
+        mv ENIGMA-Installer*.exe $(Agent.BuildDirectory)/RadialGM-MinGW-$(MINGW_ARCH).exe
+      displayName: 'Package'
+      
+    - task: PublishBuildArtifacts@1
+      displayName: 'Push Build Artifacts'
+      inputs:
+        pathtoPublish: '$(Agent.BuildDirectory)/RadialGM-MinGW-$(MINGW_ARCH).exe'
+        artifactName: RadialGM-MinGW-$(MINGW_ARCH)
+    
+    - ${{ if eq(parameters.repo, 'self') }}:
+      - task: GithubRelease@0 
+        displayName: 'Add MinGW to GitHub Release'
+        inputs:
+          gitHubConnection: github.com_EnigmaBot
+          repositoryName: enigma-dev/RadialGM
+          action: edit
+          tagSource: manual
+          tag: '$(releasetag)'
+          isDraft: true
+          isPreRelease: true
+          assetUploadMode: replace
+          assets: |
+           $(Agent.BuildDirectory)/RadialGM-MinGW-$(MINGW_ARCH).exe
+         
+- job: MSVC_64
+  displayName: 'MSVC x86_64'
+  ${{ if eq(parameters.repo, 'self') }}:
+    dependsOn: CreateReleaseCandidate
+  pool:
+    vmImage: 'windows-latest'
+  timeoutInMinutes: 250
+
+  steps:
+    - checkout: ${{ parameters.repo }}
+      submodules: true
+      path: RadialGM
+      persistCredentials: true
+    
+    - ${{ if ne(parameters.repo, 'self') }}:
+      - script: | 
+          cd $(Agent.BuildDirectory)/RadialGM/Submodules/enigma-dev
+          git remote remove origin
+          git remote add origin https://github.com/enigma-dev/enigma-dev.git
+          git remote -v
+          git fetch origin --force --tags --prune --progress ${{ parameters.enigmaref }}:enigmaref
+          git checkout --progress --force enigmaref
+        displayName: Checkout ENIGMA Reference
+
+    - task: Cache@2
+      displayName: 'Cache VCPKG Artifacts'
+      inputs:
+        key: $(Agent.BuildDirectory)/RadialGM/msvc-x64-deps.txt | "$(vcpkgGitRef)" | "$(Agent.OS)"
+        path: '$(Build.BinariesDirectory)/vcpkg'
+    
+    - task: run-vcpkg@0
+      displayName: 'Run VCPKG'
+      inputs:
+        vcpkgArguments: "@$(Agent.BuildDirectory)/RadialGM/msvc-x64-deps.txt"
+        vcpkgGitCommitId: $(vcpkgGitRef)
+        vcpkgGitURL: https://github.com/microsoft/vcpkg.git
+
+    - script: |
+        set PATH=%PATH%;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\tools\qt5\bin\
+        set VCINSTALLDIR=%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC
+        call "%VCINSTALLDIR%\Auxiliary\Build\vcvars64.bat"
+        cd $(Build.SourcesDirectory)/RadialGM
+        mkdir Release
+        cd Release
+        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=../cmake-package/Release -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Agent.BuildDirectory)\RadialGM
+        cmake --build . --config MinSizeRel
+        cmake --install . --config MinSizeRel
+      displayName: 'Release Build'
+    
+    - script: |
+        set PATH=%PATH%;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\debug\bin;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\bin;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\tools\qt5\debug\bin\
+        set VCINSTALLDIR=%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC
+        call "%VCINSTALLDIR%\Auxiliary\Build\vcvars64.bat"
+        cd $(Build.SourcesDirectory)/RadialGM
+        mkdir Debug
+        cd Debug
+        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=../cmake-package/Debug -DCMAKE_BUILD_TYPE=Debug -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Agent.BuildDirectory)\RadialGM
+        cmake --build . --config Debug
+        cmake --install . --config Debug
+      displayName: 'Debug Build'
+    
+    - script: |
+        cd $(Agent.BuildDirectory)/RadialGM
+        mkdir package
+        cd package
+        cmake -G "Visual Studio 16 2019" -A x64 ../cmake-package
+        cmake --build . --config Release --target PACKAGE
+        mv ENIGMA-Installer*.exe $(Agent.BuildDirectory)/RadialGM-MSVC-x86_64.exe
+      displayName: 'Package'
+    
+    - task: PublishBuildArtifacts@1
+      displayName: 'Push Build Artifacts'
+      inputs:
+        pathtoPublish: '$(Agent.BuildDirectory)/RadialGM-MSVC-x86_64.exe'
+        artifactName: RadialGM-MSVC-x86_64
+    
+    - ${{ if eq(parameters.repo, 'self') }}:
+      - task: GithubRelease@0 
+        displayName: 'Add MSVC to GitHub Release'
+        inputs:
+          gitHubConnection: github.com_EnigmaBot
+          repositoryName: enigma-dev/RadialGM
+          action: edit
+          tagSource: manual
+          tag: '$(releasetag)'
+          isDraft: true
+          isPreRelease: true
+          assetUploadMode: replace
+          assets: |
+            $(Agent.BuildDirectory)/RadialGM-MSVC-x86_64.exe
+          
+- job: Arch
+  displayName: 'Arch Linux'
+  pool:
+    vmImage: 'ubuntu-latest'
+
+  steps:
+    - checkout: ${{ parameters.repo }}
+      submodules: true
+      path: RadialGM
+      persistCredentials: true
+    
+    - ${{ if ne(parameters.repo, 'self') }}:
+      - script: | 
+          cd $(Agent.BuildDirectory)/RadialGM/Submodules/enigma-dev
+          git remote remove origin
+          git remote add origin https://github.com/enigma-dev/enigma-dev.git
+          git fetch origin --force --tags --prune --progress ${{ parameters.enigmaref }}:enigmaref
+          git checkout --progress --force enigmaref
+        displayName: Checkout ENIGMA Reference
+
+    - bash: |
+        set -e
+        cd $(Build.BinariesDirectory)
+        ARCH_URL=`curl -s http://mirrors.acm.wpi.edu/archlinux/iso/latest/ | egrep -o 'archlinux-bootstrap-([0-9._]+)-x86_64.tar.gz' | head -n1`
+        echo http://mirrors.acm.wpi.edu/archlinux/iso/latest/$ARCH_URL
+        curl http://mirrors.acm.wpi.edu/archlinux/iso/latest/$ARCH_URL -o arch.tar.gz
+        sudo tar xzf arch.tar.gz
+        sudo mount --bind ./root.x86_64/ ./root.x86_64/
+        sudo cp -R $(Agent.BuildDirectory)/RadialGM ./root.x86_64/
+        cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+        set -e
+        echo 'Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch' >> /etc/pacman.d/mirrorlist
+        pacman-key --init 
+        pacman-key --populate archlinux
+        pacman -Sy --noconfirm base base-devel git gcc cmake protobuf yaml-cpp pugixml rapidjson boost qt5 qscintilla-qt5
+        EOF
+      displayName: 'Bootstrap Archlinux'
+    - bash: |
+        set -e
+        cd $(Build.BinariesDirectory)
+        cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+        set -e
+        cd RadialGM
+        mkdir build
+        cd build
+        cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel -DRGM_ENABLE_GRPC_SERVER=OFF ..
+        make
+        make install
+        cd ..
+        rm -rf build/
+        EOF
+      displayName: 'Release Build (No gRPC)'
+    
+    - bash: |
+        set -e
+        cd $(Build.BinariesDirectory)
+        cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+        set -e
+        cd RadialGM
+        mkdir build
+        cd build
+        cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DRGM_ENABLE_GRPC_SERVER=OFF ..
+        make
+        make install
+        cd ..
+        rm -rf build/
+        EOF
+      displayName: 'Debug Build (No gRPC)'
+    - bash: |
+        set -e
+        cd $(Build.BinariesDirectory)
+        cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+        set -e
+        pacman -S --noconfirm grpc
+        EOF
+      displayName: 'Install gRPC'
+    
+    - bash: |
+        set -e
+        cd $(Build.BinariesDirectory)
+        cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+        set -e
+        cd RadialGM
+        mkdir build
+        cd build
+        cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=MinSizeRel ..
+        make
+        make install
+        cd ..
+        rm -rf build/
+        EOF
+      displayName: 'Release Build'
+    
+    - bash: |
+        set -e
+        cd $(Build.BinariesDirectory)
+        cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
+        set -e
+        cd RadialGM
+        mkdir build
+        cd build
+        cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
+        make
+        make install
+        cd ..
+        rm -rf build/
+        EOF
+      displayName: 'Debug Build'
+      
+- ${{ if eq(parameters.repo, 'self') }}:
+  - job: PublishRelease
+    displayName: 'Publish Release'
+    timeoutInMinutes: 15
+    dependsOn:
+      - MINGW
+      - MSVC_64
+    steps:
+      - task: GithubRelease@0 
+        displayName: 'Publish GitHub Release Candidate'
+        inputs:
+          gitHubConnection: github.com_EnigmaBot
+          repositoryName: enigma-dev/RadialGM
+          action: edit
+          tagSource: manual
+          tag: '$(releasetag)'
+          assetUploadMode: replace
+          isDraft: false
+          isPreRelease: true
