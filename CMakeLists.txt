@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 3.14)
 
 option(RGM_ENABLE_GRPC_SERVER "Enable the GRPC client plugin for compilation and code analysis." ON)
+option(RGM_BUILD_EMAKE "Build Emake and the compiler." ON)
 
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
   set(EXE "RadialGM-Debug")
+  add_definitions(-DRGM_DEBUG)
 else()
   set(EXE "RadialGM")
 endif()
@@ -32,7 +34,7 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/Dialogs")
 
 # Include ENIGMA things
 set(ENIGMA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/enigma-dev)
-include_directories("${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/libEGM/libProtocols" "${ENIGMA_DIR}/CommandLine/libEGM")
+include_directories("${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/protos/" "${ENIGMA_DIR}/CommandLine/libEGM" "${ENIGMA_DIR}/shared")
 
 # Populate a CMake variable with the sources
 set(RGM_SOURCES
@@ -241,9 +243,11 @@ find_package(Qt5 COMPONENTS Core Widgets Gui PrintSupport Multimedia REQUIRED)
 target_link_libraries(${EXE} PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Multimedia)
 
 # LibProto
+add_subdirectory(Submodules/enigma-dev/shared)
+add_subdirectory(Submodules/enigma-dev/shared/protos)
 add_subdirectory(Submodules/enigma-dev/CommandLine/libEGM)
 add_dependencies(${EXE} "EGM")
-target_link_libraries(${EXE} PRIVATE "EGM" "Protocols")
+target_link_libraries(${EXE} PRIVATE "EGM" "Protocols" "ENIGMAShared")
 
 # Find FreeType
 find_package(Freetype REQUIRED)
@@ -271,22 +275,26 @@ if(WIN32)
   target_link_libraries(${EXE} PRIVATE Ws2_32 Wtsapi32 Wldap32 Crypt32 Winmm Userenv Netapi32 version Dwmapi Imm32)
 endif(WIN32)
 
-add_subdirectory(Submodules/enigma-dev/CompilerSource)
-add_dependencies(${EXE} "compileEGMf")
-
-install(TARGETS ${EXE} RUNTIME DESTINATION .)
-
 if(MSVC)
-    # Default MSVC warnings are overkill. Set to Lvl 2
-    target_compile_options(${EXE} PRIVATE /W1)
-    target_compile_options("EGM" PRIVATE /W1)
-    target_compile_options("Protocols" PRIVATE /W1)
+  # Default MSVC warnings are overkill. Set to Lvl 2
+  target_compile_options(${EXE} PRIVATE /W1)
 endif()
 
-install(TARGETS "Protocols" DESTINATION .)
-install(TARGETS "EGM" DESTINATION .)
+if (RGM_BUILD_EMAKE)
+  add_subdirectory(Submodules/enigma-dev/CompilerSource)
+  add_subdirectory(Submodules/enigma-dev/CommandLine/emake)
+  if (CMAKE_BUILD_TYPE MATCHES "Debug")
+    set(CLI_TARGET "emake-debug")
+  else()
+    set(CLI_TARGET "emake")
+  endif()
+  add_dependencies(${EXE} ${CLI_TARGET})
+endif()
 
-set(APPS "${CMAKE_INSTALL_PREFIX}/${EXE}${CMAKE_EXECUTABLE_SUFFIX}")
+install(TARGETS ${EXE} RUNTIME DESTINATION .)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${EXE}.dir/Debug/${EXE}.pdb" DESTINATION . OPTIONAL)
+
+set(APPS "${CMAKE_INSTALL_PREFIX}/${EXE}${CMAKE_EXECUTABLE_SUFFIX}" "${CMAKE_INSTALL_PREFIX}/${CLI_TARGET}${CMAKE_EXECUTABLE_SUFFIX}")
 
 if (MSVC)
 file(TO_CMAKE_PATH ${VCPKG_ROOT} VCPKG_ROOT)
