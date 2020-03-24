@@ -251,6 +251,7 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
   
   #ifdef _WIN32
+  // FIXME: this is just an approximate guess on how to get emake running outside a msys shell and currently causes emake to crash
   QString msysPath;
   if (!env.contains("MSYS_ROOT")) {
     msysPath = env.value("SystemDrive", "C:") + "/msys64/";
