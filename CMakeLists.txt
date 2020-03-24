@@ -294,7 +294,8 @@ endif()
 install(TARGETS ${EXE} RUNTIME DESTINATION .)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${EXE}.dir/Debug/${EXE}.pdb" DESTINATION . OPTIONAL)
 
-set(APPS "${CMAKE_INSTALL_PREFIX}/${EXE}${CMAKE_EXECUTABLE_SUFFIX}" "${CMAKE_INSTALL_PREFIX}/${CLI_TARGET}${CMAKE_EXECUTABLE_SUFFIX}")
+set(RGM_APP "${CMAKE_INSTALL_PREFIX}/${EXE}${CMAKE_EXECUTABLE_SUFFIX}")
+set(EMAKE_APP "${CMAKE_INSTALL_PREFIX}/${CLI_TARGET}${CMAKE_EXECUTABLE_SUFFIX})
 
 if (MSVC)
 file(TO_CMAKE_PATH ${VCPKG_ROOT} VCPKG_ROOT)
@@ -305,7 +306,8 @@ file(TO_CMAKE_PATH ${VCPKG_ROOT} VCPKG_ROOT)
   endif()
 else()
   set(LIBS "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}EGM${CMAKE_SHARED_LIBRARY_SUFFIX}" 
-           "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}Protocols${CMAKE_SHARED_LIBRARY_SUFFIX}")
+           "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}Protocols${CMAKE_SHARED_LIBRARY_SUFFIX}"
+           "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}ENIGMAShared${CMAKE_SHARED_LIBRARY_SUFFIX}")
 endif()
 
 if (WIN32)
@@ -326,7 +328,8 @@ if (WIN32)
 
   install(CODE "
           include(BundleUtilities)
-          fixup_bundle(\"${APPS}\" \"${LIBS}\" \"${SEARCH_PATHS}\")
-          execute_process(COMMAND windeployqt.exe ${WINDEPLOY_ARGS} ${APPS})
+          fixup_bundle(\"${RGM_APP}\" \"${LIBS}\" \"${SEARCH_PATHS}\")
+          fixup_bundle(\"${EMAKE_APP}\" \"${LIBS}\" \"${SEARCH_PATHS}\")
+          execute_process(COMMAND windeployqt.exe ${WINDEPLOY_ARGS} ${RGM_APP})
           ")
 endif()
