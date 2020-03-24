@@ -253,11 +253,11 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   #ifdef _WIN32
   QString msysPath;
   if (!env.contains("MSYS_ROOT")) {
-    msysPath = env.value("SystemDrive", "C:") + "/msys64/"
+    msysPath = env.value("SystemDrive", "C:") + "/msys64/";
     qDebug() << "Enviornmental variable \"MSYS_ROOT\" is not set defaulting MSYS path to: " + msysPath; 
   } else msysPath = env.value("MSYS_ROOT");
   
-  env.insert("Path", mysyPath + "mingw64/bin/;" + mysyPath + "mingw32/bin/;");
+  env.insert("Path", msysPath + "mingw64/bin/;" + msysPath + "mingw32/bin/;");
   process->setProcessEnvironment(env);  
   #endif 
 
