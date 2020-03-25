@@ -8,13 +8,6 @@
 #include <thread>
 #include <memory>
 
-namespace {
-
-void* tag(int i) { return reinterpret_cast<void*>(static_cast<intptr_t>(i)); }
-int detag(void* p) { return static_cast<int>(reinterpret_cast<intptr_t>(p)); }
-
-}  // anonymous namespace
-
 CallData::~CallData() {}
 
 template <class T>
@@ -23,16 +16,18 @@ struct AsyncReadWorker : public CallData {
   std::unique_ptr<ClientAsyncReader<T>> stream;
 
   virtual ~AsyncReadWorker() override {}
-  void operator()(const AsyncState state, const Status& /*status*/) override {
+  void operator()(const Status& /*status*/) override {
     switch (state) {
       case AsyncState::CONNECT: {
         started();
-        stream->Read(&element, tag(AsyncState::READ));
+        state = AsyncState::READ;
+        stream->Read(&element, this);
         break;
       }
       case AsyncState::READ: {
         process(element);
-        stream->Read(&element, tag(AsyncState::READ));
+        state = AsyncState::READ;
+        stream->Read(&element, this);
         break;
       }
       case AsyncState::FINISH: {
@@ -44,8 +39,14 @@ struct AsyncReadWorker : public CallData {
         break;
     }
   }
-  virtual void start() final { stream->StartCall(tag(AsyncState::CONNECT)); }
-  virtual void finish() final { stream->Finish(&status, tag(AsyncState::FINISH)); }
+  virtual void start() final {
+    state = AsyncState::CONNECT;
+    stream->StartCall(this);
+  }
+  virtual void finish() final {
+    state = AsyncState::FINISH;
+    stream->Finish(&status, this);
+  }
 
   virtual void started() {}
   virtual void finished() {}
@@ -58,7 +59,7 @@ struct AsyncResponseReadWorker : public CallData {
   std::unique_ptr<ClientAsyncResponseReader<T>> stream;
 
   virtual ~AsyncResponseReadWorker() override {}
-  void operator()(const AsyncState state, const Status& /*status*/) override {
+  void operator()(const Status& /*status*/) override {
     switch (state) {
       case AsyncState::FINISH: {
         finished(element);
@@ -72,7 +73,8 @@ struct AsyncResponseReadWorker : public CallData {
   virtual void start() final {
     stream->StartCall();
     started();
-    stream->Finish(&element, &status, tag(AsyncState::FINISH));
+    state = AsyncState::FINISH;
+    stream->Finish(&element, &status, this);
   }
   virtual void finish() final {}
 
@@ -156,6 +158,7 @@ void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string nam
 
   auto worker = dynamic_cast<AsyncReadWorker<CompileReply>*>(callData);
   worker->stream = stub->PrepareAsyncCompileBuffer(&worker->context, request, &cq);
+  callData->start();
 }
 
 void CompilerClient::CompileBuffer(Game* game, CompileMode mode) {
@@ -171,6 +174,7 @@ void CompilerClient::GetResources() {
 
   auto worker = dynamic_cast<AsyncReadWorker<Resource>*>(callData);
   worker->stream = stub->PrepareAsyncGetResources(&worker->context, emptyRequest, &cq);
+  callData->start();
 }
 
 void CompilerClient::GetSystems() {
@@ -179,6 +183,7 @@ void CompilerClient::GetSystems() {
 
   auto worker = dynamic_cast<AsyncReadWorker<SystemType>*>(callData);
   worker->stream = stub->PrepareAsyncGetSystems(&worker->context, emptyRequest, &cq);
+  callData->start();
 }
 
 void CompilerClient::SetDefinitions(std::string code, std::string yaml) {
@@ -190,6 +195,7 @@ void CompilerClient::SetDefinitions(std::string code, std::string yaml) {
 
   auto worker = dynamic_cast<AsyncResponseReadWorker<SyntaxError>*>(callData);
   worker->stream = stub->PrepareAsyncSetDefinitions(&worker->context, definitionsRequest, &cq);
+  callData->start();
 }
 
 void CompilerClient::SetCurrentConfig(const resources::Settings& settings) {
@@ -199,6 +205,7 @@ void CompilerClient::SetCurrentConfig(const resources::Settings& settings) {
 
   auto worker = dynamic_cast<AsyncResponseReadWorker<Empty>*>(callData);
   worker->stream = stub->PrepareAsyncSetCurrentConfig(&worker->context, setConfigRequest, &cq);
+  callData->start();
 }
 
 void CompilerClient::SyntaxCheck() {
@@ -207,48 +214,28 @@ void CompilerClient::SyntaxCheck() {
 
   auto worker = dynamic_cast<AsyncResponseReadWorker<SyntaxError>*>(callData);
   worker->stream = stub->PrepareAsyncSyntaxCheck(&worker->context, syntaxCheckRequest, &cq);
+  callData->start();
 }
 
 template <typename T>
 T* CompilerClient::ScheduleTask() {
-  std::unique_ptr<T> callData(new T());
-  bool wasNotBusy = tasks.empty();
-  tasks.push(std::move(callData));
-  // if we didn't already have a task in the queue then we have to fire
-  // the update loop in order to get this one started, otherwise the
-  // one in the queue will start the next one for us
-  if (wasNotBusy)
-    QMetaObject::invokeMethod(this, "UpdateLoop", Qt::QueuedConnection);
-  return (T*)tasks.back().get();
+  auto callData = new T();
+  connect(callData, &CallData::LogOutput, this, &CompilerClient::LogOutput);
+  connect(callData, &CallData::CompileStatusChanged, this, &CompilerClient::CompileStatusChanged);
+  return callData;
 }
 
 void CompilerClient::UpdateLoop(void* got_tag, bool ok) {
-  static bool started = false;
-
-  auto* task = this->tasks.front().get();
-  if (!started) {
-    connect(task, &CallData::LogOutput, this, &CompilerClient::LogOutput);
-    connect(task, &CallData::CompileStatusChanged, this, &CompilerClient::CompileStatusChanged);
-    task->start();
-    started = true;
-  }
   if (!got_tag) return;
-  auto state = static_cast<AsyncState>(detag(got_tag));
-  if (state != AsyncState::DISCONNECTED && !ok) {
-    task->finish();
+  auto callData = static_cast<CallData*>(got_tag);
+  if (callData->state != AsyncState::DISCONNECTED && !ok) {
+    callData->finish();
     return;
   }
 
-  (*task)(state, task->status);
-  if (state == AsyncState::FINISH) {
-    // go to the next task
-    tasks.pop();
-    // next task needs to be started
-    started = false;
-    // if we already have the next task,
-    // let's get it started
-    if (!this->tasks.empty())
-      QMetaObject::invokeMethod(this, "UpdateLoop", Qt::QueuedConnection);
+  (*callData)(callData->status);
+  if (callData->state == AsyncState::FINISH) {
+    delete callData;
   }
 }
 
