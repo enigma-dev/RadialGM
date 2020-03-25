@@ -109,7 +109,6 @@ struct ResourceReader : public AsyncReadWorker<Resource> {
       if (resource.is_type_name()) type = KeywordType::TYPE_NAME;
       CodeWidget::addKeyword(name, type);
     }
-    qDebug() << name;
   }
   virtual void finished() final { CodeWidget::finalizeKeywords(); }
 };
@@ -120,7 +119,6 @@ struct SystemReader : public AsyncReadWorker<SystemType> {
     static auto& systemCache = MainWindow::systemCache;
     const QString systemName = QString::fromStdString(system.name());
     systemCache.append(system);
-    qDebug() << systemName;
   }
 };
 
