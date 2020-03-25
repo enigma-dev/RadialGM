@@ -4,18 +4,9 @@
 #include <QFileDialog>
 #include <QList>
 #include <QTemporaryFile>
-#include <QTimer>
 
-#include <chrono>
+#include <thread>
 #include <memory>
-
-namespace {
-
-inline std::chrono::system_clock::time_point future_deadline(size_t us) {
-  return (std::chrono::system_clock::now() + std::chrono::microseconds(us));
-}
-
-}  // anonymous namespace
 
 CallData::~CallData() {}
 
@@ -140,7 +131,20 @@ struct SyntaxCheckReader : public AsyncResponseReadWorker<SyntaxError> {
 CompilerClient::~CompilerClient() {}
 
 CompilerClient::CompilerClient(std::shared_ptr<Channel> channel, MainWindow& mainWindow)
-    : QObject(&mainWindow), stub(Compiler::NewStub(channel)), mainWindow(mainWindow) {}
+    : QObject(&mainWindow), stub(Compiler::NewStub(channel)), mainWindow(mainWindow) {
+  // start a blocking thread to poll for GRPC events
+  // and dispatch them back to the GUI thread
+  std::thread([this](){
+    while(true) {
+      void* got_tag = nullptr; bool ok = false;
+      // block for next GRPC event, break if shutdown
+      if (!this->cq.Next(&got_tag, &ok)) break;
+      // block until GUI thread handles GRPC event
+      QMetaObject::invokeMethod(this, "UpdateLoop", Qt::BlockingQueuedConnection,
+                                Q_ARG(void*, got_tag), Q_ARG(bool, ok));
+    }
+  }).detach();
+}
 
 void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string name) {
   emit CompileStatusChanged();
@@ -221,18 +225,13 @@ T* CompilerClient::ScheduleTask() {
   return callData;
 }
 
-void CompilerClient::UpdateLoop() {
-  void* got_tag = nullptr;
-  bool ok = false;
-
-  auto asyncStatus = cq.AsyncNext(&got_tag, &ok, future_deadline(0));
+void CompilerClient::UpdateLoop(void* got_tag, bool ok) {
+  if (!got_tag) return;
   auto callData = static_cast<CallData*>(got_tag);
-  if (callData && callData->state != AsyncState::DISCONNECTED && !ok) {
+  if (callData->state != AsyncState::DISCONNECTED && !ok) {
     callData->finish();
     return;
   }
-  // yield to application main event loop
-  if (asyncStatus != CompletionQueue::NextStatus::GOT_EVENT || !got_tag) return;
 
   (*callData)(callData->status);
   if (callData->state == AsyncState::FINISH) {
@@ -280,13 +279,6 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   // hookup emake's output to our plugin's output signals so it redirects to the
   // main output dock widget (thread safe and don't block the main event loop!)
   connect(compilerClient, &CompilerClient::LogOutput, this, &RGMPlugin::LogOutput);
-
-  // use a timer to process async grpc events at regular intervals
-  // without us needing any threading or blocking the main thread
-  QTimer* timer = new QTimer(this);
-  connect(timer, &QTimer::timeout, compilerClient, &CompilerClient::UpdateLoop);
-  // timer delay larger than one so we don't hog the CPU core
-  timer->start(1);
 
   // update initial keyword set and systems
   compilerClient->GetResources();
