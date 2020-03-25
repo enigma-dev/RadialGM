@@ -33,11 +33,12 @@ class CallData : public QObject {
   Q_OBJECT
 
  public:
+  AsyncState state = DISCONNECTED;
   Status status;
   ClientContext context;
   virtual ~CallData();
   virtual void start() {}
-  virtual void operator()(const AsyncState state, const Status& status) = 0;
+  virtual void operator()(const Status& status) = 0;
   virtual void finish() {}
 
  signals:
@@ -69,7 +70,6 @@ class CompilerClient : public QObject {
 
  private:
   CompletionQueue cq;
-  std::queue<std::unique_ptr<CallData>> tasks;
 
   template <typename T>
   T* ScheduleTask();
