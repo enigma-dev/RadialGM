@@ -14,6 +14,7 @@ struct LolCookie {
   CallData* callData;
   virtual void fireoff() = 0;
   LolCookie(CallData* callData): callData(callData) {}
+  virtual ~LolCookie() {}
 };
 
 template <class T>
@@ -230,12 +231,10 @@ T* CompilerClient::ScheduleTask() {
 void CompilerClient::UpdateLoop(void* got_tag, bool ok) {
   if (!got_tag) return;
   auto cookie = static_cast<LolCookie*>(got_tag);
-  if (!ok) {
+  if (!ok)
     cookie->callData->finish();
-    delete cookie;
-    return;
-  }
-  cookie->fireoff();
+  else
+    cookie->fireoff();
   delete cookie;
 }
 
