@@ -36,11 +36,15 @@ struct AsyncReadWorker : public CallData {
     stream->StartCall(new Cookie<AsyncReadWorker<T>>(this, &started));
   }
   virtual void finish() final {
-    stream->Finish(&status, new Cookie<AsyncReadWorker<T>>(this, &finished));
+    stream->Finish(&status, new Cookie<AsyncReadWorker<T>>(this, &finalize));
+  }
+  virtual void finalize() final {
+    finished();
+    delete this;
   }
 
   virtual void started() { finish(); }
-  virtual void finished() { delete this; }
+  virtual void finished() { }
 };
 
 template <class T>
@@ -53,12 +57,16 @@ struct AsyncResponseReadWorker : public CallData {
   virtual void start() final {
     stream->StartCall();
     started();
-    //stream->Finish(&element, &status, new Cookie<AsyncResponseReadWorker<T>>(this, &finished));
+    //stream->Finish(&element, &status, new Cookie<AsyncResponseReadWorker<T>>(this, &finalize));
   }
   virtual void finish() final {}
+  virtual void finalize() final {
+    //finished();
+    delete this;
+  }
 
   virtual void started() {}
-  virtual void finished(const T&) { delete this; }
+  virtual void finished(const T&) { }
 };
 
 struct ResourceReader : public AsyncReadWorker<Resource> {
@@ -85,10 +93,7 @@ struct ResourceReader : public AsyncReadWorker<Resource> {
     }
     stream->Read(&element, new Cookie<ResourceReader>(this, &process));
   }
-  virtual void finished() final {
-    CodeWidget::finalizeKeywords();
-    delete this;
-  }
+  virtual void finished() final { CodeWidget::finalizeKeywords(); }
 };
 
 struct SystemReader : public AsyncReadWorker<SystemType> {
@@ -117,15 +122,12 @@ struct CompileReader : public AsyncReadWorker<CompileReply> {
     }
     stream->Read(&element, new Cookie<CompileReader>(this, &process));
   }
-  virtual void finished() final {
-    emit CompileStatusChanged(true);
-    delete this;
-  }
+  virtual void finished() final { emit CompileStatusChanged(true); }
 };
 
 struct SyntaxCheckReader : public AsyncResponseReadWorker<SyntaxError> {
   virtual ~SyntaxCheckReader() {}
-  virtual void finished(const SyntaxError&) final { delete this; }
+  virtual void finished(const SyntaxError&) final { }
 };
 
 CompilerClient::~CompilerClient() {}
