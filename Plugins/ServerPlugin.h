@@ -27,18 +27,14 @@ using namespace grpc;
 using namespace buffers;
 using CompileMode = CompileRequest_CompileMode;
 
-enum AsyncState { DISCONNECTED = 0, READ = 1, WRITE = 2, CONNECT = 3, WRITES_DONE = 4, FINISH = 5 };
-
 class CallData : public QObject {
   Q_OBJECT
 
  public:
-  AsyncState state = DISCONNECTED;
   Status status;
   ClientContext context;
   virtual ~CallData();
   virtual void start() {}
-  virtual void operator()(const Status& status) = 0;
   virtual void finish() {}
 
  signals:

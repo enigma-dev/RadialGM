@@ -10,47 +10,37 @@
 
 CallData::~CallData() {}
 
+struct LolCookie {
+  CallData* callData;
+  virtual void fireoff() = 0;
+  LolCookie(CallData* callData): callData(callData) {}
+};
+
+template <class T>
+struct Cookie : public LolCookie {
+  void (T::*callback)();
+  Cookie(CallData* callData, void (T::*callback)()):
+    LolCookie(callData), callback(callback) {}
+  virtual void fireoff() {
+    (*(T*)callData.*callback)();
+  }
+};
+
 template <class T>
 struct AsyncReadWorker : public CallData {
   T element;
   std::unique_ptr<ClientAsyncReader<T>> stream;
 
   virtual ~AsyncReadWorker() override {}
-  void operator()(const Status& /*status*/) override {
-    switch (state) {
-      case AsyncState::CONNECT: {
-        started();
-        state = AsyncState::READ;
-        stream->Read(&element, this);
-        break;
-      }
-      case AsyncState::READ: {
-        process(element);
-        state = AsyncState::READ;
-        stream->Read(&element, this);
-        break;
-      }
-      case AsyncState::FINISH: {
-        finished();
-        break;
-      }
-      default:
-        // TODO: Report error
-        break;
-    }
-  }
   virtual void start() final {
-    state = AsyncState::CONNECT;
-    stream->StartCall(this);
+    stream->StartCall(new Cookie<AsyncReadWorker<T>>(this, &started));
   }
   virtual void finish() final {
-    state = AsyncState::FINISH;
-    stream->Finish(&status, this);
+    stream->Finish(&status, new Cookie<AsyncReadWorker<T>>(this, &finished));
   }
 
-  virtual void started() {}
-  virtual void finished() {}
-  virtual void process(const T&) = 0;
+  virtual void started() { finish(); }
+  virtual void finished() { delete this; }
 };
 
 template <class T>
@@ -59,33 +49,26 @@ struct AsyncResponseReadWorker : public CallData {
   std::unique_ptr<ClientAsyncResponseReader<T>> stream;
 
   virtual ~AsyncResponseReadWorker() override {}
-  void operator()(const Status& /*status*/) override {
-    switch (state) {
-      case AsyncState::FINISH: {
-        finished(element);
-        break;
-      }
-      default:
-        // TODO: Report error
-        break;
-    }
-  }
+
   virtual void start() final {
     stream->StartCall();
     started();
-    state = AsyncState::FINISH;
-    stream->Finish(&element, &status, this);
+    //stream->Finish(&element, &status, new Cookie<AsyncResponseReadWorker<T>>(this, &finished));
   }
   virtual void finish() final {}
 
   virtual void started() {}
-  virtual void finished(const T&) {}
+  virtual void finished(const T&) { delete this; }
 };
 
 struct ResourceReader : public AsyncReadWorker<Resource> {
   virtual ~ResourceReader() {}
-  virtual void started() final { CodeWidget::prepareKeywordStore(); }
-  virtual void process(const Resource& resource) final {
+  virtual void started() final {
+    stream->Read(&element, new Cookie<ResourceReader>(this, &process));
+    CodeWidget::prepareKeywordStore();
+  }
+  virtual void process() final {
+    auto resource = element;
     const QString& name = QString::fromStdString(resource.name().c_str());
     KeywordType type = KeywordType::UNKNOWN;
     if (resource.is_function()) {
@@ -100,32 +83,49 @@ struct ResourceReader : public AsyncReadWorker<Resource> {
       if (resource.is_type_name()) type = KeywordType::TYPE_NAME;
       CodeWidget::addKeyword(name, type);
     }
+    stream->Read(&element, new Cookie<ResourceReader>(this, &process));
   }
-  virtual void finished() final { CodeWidget::finalizeKeywords(); }
+  virtual void finished() final {
+    CodeWidget::finalizeKeywords();
+    delete this;
+  }
 };
 
 struct SystemReader : public AsyncReadWorker<SystemType> {
   virtual ~SystemReader() {}
-  virtual void process(const SystemType& system) final {
+  virtual void started() final {
+    stream->Read(&element, new Cookie<SystemReader>(this, &process));
+  }
+  virtual void process() final {
+    auto system = element;
     static auto& systemCache = MainWindow::systemCache;
     const QString systemName = QString::fromStdString(system.name());
     systemCache.append(system);
+    stream->Read(&element, new Cookie<SystemReader>(this, &process));
   }
 };
 
 struct CompileReader : public AsyncReadWorker<CompileReply> {
   virtual ~CompileReader() {}
-  virtual void process(const CompileReply& reply) final {
+  virtual void started() final {
+    stream->Read(&element, new Cookie<CompileReader>(this, &process));
+  }
+  virtual void process() final {
+    auto reply = element;
     for (auto log : reply.message()) {
       emit LogOutput(log.message().c_str());
     }
+    stream->Read(&element, new Cookie<CompileReader>(this, &process));
   }
-  virtual void finished() final { emit CompileStatusChanged(true); }
+  virtual void finished() final {
+    emit CompileStatusChanged(true);
+    delete this;
+  }
 };
 
 struct SyntaxCheckReader : public AsyncResponseReadWorker<SyntaxError> {
   virtual ~SyntaxCheckReader() {}
-  virtual void finished(const SyntaxError&) final {}
+  virtual void finished(const SyntaxError&) final { delete this; }
 };
 
 CompilerClient::~CompilerClient() {}
@@ -227,16 +227,14 @@ T* CompilerClient::ScheduleTask() {
 
 void CompilerClient::UpdateLoop(void* got_tag, bool ok) {
   if (!got_tag) return;
-  auto callData = static_cast<CallData*>(got_tag);
-  if (callData->state != AsyncState::DISCONNECTED && !ok) {
-    callData->finish();
+  auto cookie = static_cast<LolCookie*>(got_tag);
+  if (!ok) {
+    cookie->callData->finish();
+    delete cookie;
     return;
   }
-
-  (*callData)(callData->status);
-  if (callData->state == AsyncState::FINISH) {
-    delete callData;
-  }
+  cookie->fireoff();
+  delete cookie;
 }
 
 ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
