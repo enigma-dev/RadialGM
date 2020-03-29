@@ -236,9 +236,9 @@ jobs:
     - bash: |
         set -e
         cd $(Build.BinariesDirectory)
-        ARCH_URL=`curl -s http://mirrors.acm.wpi.edu/archlinux/iso/latest/ | egrep -o 'archlinux-bootstrap-([0-9._]+)-x86_64.tar.gz' | head -n1`
-        echo http://mirrors.acm.wpi.edu/archlinux/iso/latest/$ARCH_URL
-        curl http://mirrors.acm.wpi.edu/archlinux/iso/latest/$ARCH_URL -o arch.tar.gz
+        ARCH_URL=`curl -s https://mirrors.acm.wpi.edu/archlinux/iso/latest/ | egrep -o 'archlinux-bootstrap-([0-9._]+)-x86_64.tar.gz' | head -n1`
+        echo https://mirrors.acm.wpi.edu/archlinux/iso/latest/$ARCH_URL
+        curl https://mirrors.acm.wpi.edu/archlinux/iso/latest/$ARCH_URL -o arch.tar.gz
         sudo tar xzf arch.tar.gz
         sudo mount --bind ./root.x86_64/ ./root.x86_64/
         sudo cp -R $(Agent.BuildDirectory)/RadialGM ./root.x86_64/
