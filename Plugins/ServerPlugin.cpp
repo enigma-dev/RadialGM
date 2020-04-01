@@ -247,20 +247,25 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
     qDebug() << "QProcess error: " << error << endl; 
   });
   
+  #ifdef _WIN32
+  auto msys2Proc = new QProcess(this);
+
   //TODO: Make all this stuff configurable in IDE
   QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-  
-  #ifdef _WIN32
+
   // FIXME: this is just an approximate guess on how to get emake running outside a msys shell and currently causes emake to crash
   QString msysPath;
   if (!env.contains("MSYS_ROOT")) {
     msysPath = env.value("SystemDrive", "C:") + "/msys64/";
-    qDebug() << "Enviornmental variable \"MSYS_ROOT\" is not set defaulting MSYS path to: " + msysPath; 
+    qDebug() << "Enviornmental variable \"MSYS_ROOT\" is not set defaulting MSYS path to: " + msysPath;
   } else msysPath = env.value("MSYS_ROOT");
-  
-  env.insert("Path", env.value("Path") + msysPath + "mingw64/bin/;" + msysPath + "mingw32/bin/;");
-  process->setProcessEnvironment(env);  
-  #endif 
+
+  msys2Proc->start(msysPath + "/msys2_shell.cmd");
+  msys2Proc->waitForStarted();
+  QProcessEnvironment msys2Env = msys2Proc->processEnvironment();
+  process->setProcessEnvironment(msys2Env);
+  msys2Proc->kill(); // msys2 does not shutdown nicely
+  #endif
 
   // look for an executable file that looks like emake in some common directories
   QList<QString> searchPaths = {QDir::currentPath(), "./enigma-dev", "../enigma-dev", "../RadialGM/Submodules/enigma-dev"};
