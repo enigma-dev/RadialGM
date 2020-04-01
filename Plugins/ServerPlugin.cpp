@@ -4,21 +4,9 @@
 #include <QFileDialog>
 #include <QList>
 #include <QTemporaryFile>
-#include <QTimer>
 
-#include <chrono>
+#include <thread>
 #include <memory>
-
-namespace {
-
-inline std::chrono::system_clock::time_point future_deadline(size_t us) {
-  return (std::chrono::system_clock::now() + std::chrono::microseconds(us));
-}
-
-void* tag(int i) { return reinterpret_cast<void*>(static_cast<intptr_t>(i)); }
-int detag(void* p) { return static_cast<int>(reinterpret_cast<intptr_t>(p)); }
-
-}  // anonymous namespace
 
 CallData::~CallData() {}
 
@@ -28,16 +16,18 @@ struct AsyncReadWorker : public CallData {
   std::unique_ptr<ClientAsyncReader<T>> stream;
 
   virtual ~AsyncReadWorker() override {}
-  void operator()(const AsyncState state, const Status& /*status*/) override {
+  void operator()(const Status& /*status*/) override {
     switch (state) {
       case AsyncState::CONNECT: {
         started();
-        stream->Read(&element, tag(AsyncState::READ));
+        state = AsyncState::READ;
+        stream->Read(&element, this);
         break;
       }
       case AsyncState::READ: {
         process(element);
-        stream->Read(&element, tag(AsyncState::READ));
+        state = AsyncState::READ;
+        stream->Read(&element, this);
         break;
       }
       case AsyncState::FINISH: {
@@ -49,8 +39,14 @@ struct AsyncReadWorker : public CallData {
         break;
     }
   }
-  virtual void start() final { stream->StartCall(tag(AsyncState::CONNECT)); }
-  virtual void finish() final { stream->Finish(&status, tag(AsyncState::FINISH)); }
+  virtual void start() final {
+    state = AsyncState::CONNECT;
+    stream->StartCall(this);
+  }
+  virtual void finish() final {
+    state = AsyncState::FINISH;
+    stream->Finish(&status, this);
+  }
 
   virtual void started() {}
   virtual void finished() {}
@@ -63,7 +59,7 @@ struct AsyncResponseReadWorker : public CallData {
   std::unique_ptr<ClientAsyncResponseReader<T>> stream;
 
   virtual ~AsyncResponseReadWorker() override {}
-  void operator()(const AsyncState state, const Status& /*status*/) override {
+  void operator()(const Status& /*status*/) override {
     switch (state) {
       case AsyncState::FINISH: {
         finished(element);
@@ -77,7 +73,8 @@ struct AsyncResponseReadWorker : public CallData {
   virtual void start() final {
     stream->StartCall();
     started();
-    stream->Finish(&element, &status, tag(AsyncState::FINISH));
+    state = AsyncState::FINISH;
+    stream->Finish(&element, &status, this);
   }
   virtual void finish() final {}
 
@@ -134,7 +131,20 @@ struct SyntaxCheckReader : public AsyncResponseReadWorker<SyntaxError> {
 CompilerClient::~CompilerClient() {}
 
 CompilerClient::CompilerClient(std::shared_ptr<Channel> channel, MainWindow& mainWindow)
-    : QObject(&mainWindow), stub(Compiler::NewStub(channel)), mainWindow(mainWindow) {}
+    : QObject(&mainWindow), stub(Compiler::NewStub(channel)), mainWindow(mainWindow) {
+  // start a blocking thread to poll for GRPC events
+  // and dispatch them back to the GUI thread
+  std::thread([this](){
+    while(true) {
+      void* got_tag = nullptr; bool ok = false;
+      // block for next GRPC event, break if shutdown
+      if (!this->cq.Next(&got_tag, &ok)) break;
+      // block until GUI thread handles GRPC event
+      QMetaObject::invokeMethod(this, "UpdateLoop", Qt::BlockingQueuedConnection,
+                                Q_ARG(void*, got_tag), Q_ARG(bool, ok));
+    }
+  }).detach();
+}
 
 void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string name) {
   emit CompileStatusChanged();
@@ -148,6 +158,7 @@ void CompilerClient::CompileBuffer(Game* game, CompileMode mode, std::string nam
 
   auto worker = dynamic_cast<AsyncReadWorker<CompileReply>*>(callData);
   worker->stream = stub->PrepareAsyncCompileBuffer(&worker->context, request, &cq);
+  callData->start();
 }
 
 void CompilerClient::CompileBuffer(Game* game, CompileMode mode) {
@@ -163,6 +174,7 @@ void CompilerClient::GetResources() {
 
   auto worker = dynamic_cast<AsyncReadWorker<Resource>*>(callData);
   worker->stream = stub->PrepareAsyncGetResources(&worker->context, emptyRequest, &cq);
+  callData->start();
 }
 
 void CompilerClient::GetSystems() {
@@ -171,6 +183,7 @@ void CompilerClient::GetSystems() {
 
   auto worker = dynamic_cast<AsyncReadWorker<SystemType>*>(callData);
   worker->stream = stub->PrepareAsyncGetSystems(&worker->context, emptyRequest, &cq);
+  callData->start();
 }
 
 void CompilerClient::SetDefinitions(std::string code, std::string yaml) {
@@ -182,6 +195,7 @@ void CompilerClient::SetDefinitions(std::string code, std::string yaml) {
 
   auto worker = dynamic_cast<AsyncResponseReadWorker<SyntaxError>*>(callData);
   worker->stream = stub->PrepareAsyncSetDefinitions(&worker->context, definitionsRequest, &cq);
+  callData->start();
 }
 
 void CompilerClient::SetCurrentConfig(const resources::Settings& settings) {
@@ -191,6 +205,7 @@ void CompilerClient::SetCurrentConfig(const resources::Settings& settings) {
 
   auto worker = dynamic_cast<AsyncResponseReadWorker<Empty>*>(callData);
   worker->stream = stub->PrepareAsyncSetCurrentConfig(&worker->context, setConfigRequest, &cq);
+  callData->start();
 }
 
 void CompilerClient::SyntaxCheck() {
@@ -199,77 +214,67 @@ void CompilerClient::SyntaxCheck() {
 
   auto worker = dynamic_cast<AsyncResponseReadWorker<SyntaxError>*>(callData);
   worker->stream = stub->PrepareAsyncSyntaxCheck(&worker->context, syntaxCheckRequest, &cq);
+  callData->start();
 }
 
 template <typename T>
 T* CompilerClient::ScheduleTask() {
-  std::unique_ptr<T> callData(new T());
-  tasks.push(std::move(callData));
-  return (T*)tasks.back().get();
+  auto callData = new T();
+  connect(callData, &CallData::LogOutput, this, &CompilerClient::LogOutput);
+  connect(callData, &CallData::CompileStatusChanged, this, &CompilerClient::CompileStatusChanged);
+  return callData;
 }
 
-void CompilerClient::UpdateLoop() {
-  static bool started = false;
-  void* got_tag = nullptr;
-  bool ok = false;
-
-  if (this->tasks.empty()) return;
-  auto* task = this->tasks.front().get();
-  if (!started) {
-    connect(task, &CallData::LogOutput, this, &CompilerClient::LogOutput);
-    connect(task, &CallData::CompileStatusChanged, this, &CompilerClient::CompileStatusChanged);
-    task->start();
-    started = true;
-  }
-  auto asyncStatus = cq.AsyncNext(&got_tag, &ok, future_deadline(0));
-  auto state = static_cast<AsyncState>(detag(got_tag));
-  if (state != AsyncState::DISCONNECTED && !ok) {
-    task->finish();
+void CompilerClient::UpdateLoop(void* got_tag, bool ok) {
+  if (!got_tag) return;
+  auto callData = static_cast<CallData*>(got_tag);
+  if (callData->state != AsyncState::DISCONNECTED && !ok) {
+    callData->finish();
     return;
   }
-  // yield to application main event loop
-  if (asyncStatus != CompletionQueue::NextStatus::GOT_EVENT || !got_tag) return;
 
-  (*task)(state, task->status);
-  if (state == AsyncState::FINISH) {
-    // go to the next task
-    tasks.pop();
-    // next task needs to be started
-    started = false;
+  (*callData)(callData->status);
+  if (callData->state == AsyncState::FINISH) {
+    delete callData;
   }
 }
 
 ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   // create a new child process for us to launch an emake server
   process = new QProcess(this);
-  
-  connect(process, &QProcess::errorOccurred, [=](QProcess::ProcessError error) { 
-    qDebug() << "QProcess error: " << error << endl; 
+
+  connect(process, &QProcess::errorOccurred, [=](QProcess::ProcessError error) {
+    qDebug() << "QProcess error: " << error << endl;
   });
-  
+
+  #ifdef _WIN32
+  auto msys2Proc = new QProcess(this);
+
   //TODO: Make all this stuff configurable in IDE
   QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-  
-  #ifdef _WIN32
+
   // FIXME: this is just an approximate guess on how to get emake running outside a msys shell and currently causes emake to crash
   QString msysPath;
   if (!env.contains("MSYS_ROOT")) {
     msysPath = env.value("SystemDrive", "C:") + "/msys64/";
-    qDebug() << "Enviornmental variable \"MSYS_ROOT\" is not set defaulting MSYS path to: " + msysPath; 
+    qDebug() << "Enviornmental variable \"MSYS_ROOT\" is not set defaulting MSYS path to: " + msysPath;
   } else msysPath = env.value("MSYS_ROOT");
-  
-  env.insert("Path", env.value("Path") + msysPath + "mingw64/bin/;" + msysPath + "mingw32/bin/;");
-  process->setProcessEnvironment(env);  
-  #endif 
+
+  msys2Proc->start(msysPath + "/msys2_shell.cmd");
+  msys2Proc->waitForStarted();
+  QProcessEnvironment msys2Env = msys2Proc->processEnvironment();
+  process->setProcessEnvironment(msys2Env);
+  msys2Proc->kill(); // msys2 does not shutdown nicely
+  #endif
 
   // look for an executable file that looks like emake in some common directories
   QList<QString> searchPaths = {QDir::currentPath(), "./enigma-dev", "../enigma-dev", "../RadialGM/Submodules/enigma-dev"};
   #ifndef RGM_DEBUG
-   QString emakeName = "emake"; 
+   QString emakeName = "emake";
   #else
-    QString emakeName = "emake-debug"; 
+    QString emakeName = "emake-debug";
   #endif
-  
+
   QFileInfo emakeFileInfo;
   foreach (auto path, searchPaths) {
     const QDir dir(path);
@@ -280,12 +285,12 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
       break;
     }
   }
-  
+
   if (emakeFileInfo.filePath().isEmpty()) {
     qDebug() << "Error: Failed to locate emake. Compiling and syntax check will not work.\n" << "Search Paths:\n" << searchPaths;
     return;
   }
-  
+
   QFileInfo enigmaFileInfo;
   foreach (auto path, searchPaths) {
     const QDir dir(path);
@@ -296,7 +301,7 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
       break;
     }
   }
-  
+
   if (enigmaFileInfo.filePath().isEmpty()) {
     qDebug() << "Error: Failed to locate ENIGMA sources. Compiling and syntax check will not work.\n" << "Search Paths:\n" << searchPaths;
     return;
@@ -313,9 +318,9 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
             << "Paths"
             << "-r"
             << "--quiet"
-            << "--enigma-root" 
+            << "--enigma-root"
             << enigmaFileInfo.absolutePath();
-            
+
   qDebug() << "Running: " << program << " " << arguments;
 
   process->start(program, arguments);
@@ -330,17 +335,9 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   // main output dock widget (thread safe and don't block the main event loop!)
   connect(compilerClient, &CompilerClient::LogOutput, this, &RGMPlugin::LogOutput);
 
-  // use a timer to process async grpc events at regular intervals
-  // without us needing any threading or blocking the main thread
-  QTimer* timer = new QTimer(this);
-  connect(timer, &QTimer::timeout, compilerClient, &CompilerClient::UpdateLoop);
-  // timer delay larger than one so we don't hog the CPU core
-  timer->start(1);
-
   // update initial keyword set and systems
   compilerClient->GetResources();
   compilerClient->GetSystems();
-
 }
 
 ServerPlugin::~ServerPlugin() { process->close(); }
