@@ -257,7 +257,7 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   QString msysPath;
   if (!env.contains("MSYS_ROOT")) {
     msysPath = env.value("SystemDrive", "C:") + "/msys64/";
-    qDebug() << "Enviornmental variable \"MSYS_ROOT\" is not set defaulting MSYS path to: " + msysPath;
+    qDebug().noquote() << "Environmental variable \"MSYS_ROOT\" is not set defaulting MSYS path to: " + msysPath;
   } else msysPath = env.value("MSYS_ROOT");
 
   msys2Proc->start(msysPath + "/msys2_shell.cmd");
