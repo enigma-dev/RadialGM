@@ -11,7 +11,9 @@ else()
 endif()
 # FIXME: MSVC dynamic linking requires US TO DLLEXPORT our funcs
 # since we currently don't, I'm force disabling the option on MSVC
-set(LIB_TYPE STATIC)
+if (MSVC)
+  set(LIB_TYPE STATIC)
+endif()
 
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
   set(EXE "RadialGM-Debug")
