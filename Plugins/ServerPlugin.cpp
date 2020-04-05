@@ -243,8 +243,14 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   // create a new child process for us to launch an emake server
   process = new QProcess(this);
   
-  connect(process, &QProcess::errorOccurred, [=](QProcess::ProcessError error) { 
-    qDebug() << "QProcess error: " << error << endl; 
+  connect(process, &QProcess::errorOccurred, [&](QProcess::ProcessError error) {
+    qDebug() << "QProcess error: " << error << endl;
+  });
+  connect(process, &QProcess::readyReadStandardOutput, [&]() {
+    emit LogOutput(process->readAllStandardOutput());
+  });
+  connect(process, &QProcess::readyReadStandardError, [&]() {
+    emit LogOutput(process->readAllStandardError());
   });
   
   #ifdef _WIN32
