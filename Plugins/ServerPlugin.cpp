@@ -265,20 +265,8 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
     msysPath = env.value("SystemDrive", "C:") + "/msys64/";
     qDebug().noquote() << "Environmental variable \"MSYS_ROOT\" is not set defaulting MSYS path to: " + msysPath;
   } else msysPath = env.value("MSYS_ROOT");
-
-  connect(msys2Proc, &QProcess::readyReadStandardOutput, [&]() {
-    qDebug() << ("MSYS2: " + msys2Proc->readAllStandardOutput());
-  });
-  msys2Proc->start(msysPath + "/msys2_shell.cmd -mingw64 -full-path -no-start -lc \"env\"");
-  msys2Proc->waitForStarted();
-  QProcessEnvironment msys2Env = msys2Proc->processEnvironment();
-  auto loldebug = qDebug();
-  for (QString& lolvar : msys2Env.toStringList())
-    loldebug << lolvar;
-  QProcessEnvironment lolenv = process->processEnvironment();
-  lolenv.insert(msys2Env);
-  process->setProcessEnvironment(lolenv);
-  msys2Proc->kill(); // msys2 does not shutdown nicely
+  
+  system((msysPath + "/msys2_shell.cmd -defterm -mingw64 -full-path -no-start -lc \"env\"").toStdString().c_str());
   #endif
 
   // look for an executable file that looks like emake in some common directories
