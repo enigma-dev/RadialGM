@@ -266,7 +266,7 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
     qDebug().noquote() << "Environmental variable \"MSYS_ROOT\" is not set defaulting MSYS path to: " + msysPath;
   } else msysPath = env.value("MSYS_ROOT");
 
-  msys2Proc->start(msysPath + "/msys2_shell.cmd -mingw64 -full-path -no-start");
+  msys2Proc->start(msysPath + "/msys2_shell.cmd -defterm -mingw64 -full-path -no-start");
   msys2Proc->waitForStarted();
   QProcessEnvironment msys2Env = msys2Proc->processEnvironment();
   process->setProcessEnvironment(process->processEnvironment().insert(msys2Env));
