@@ -267,14 +267,14 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   } else msysPath = env.value("MSYS_ROOT");
 
   msys2Proc->start(msysPath + "/msys2_shell.cmd -mingw64 -full-path -no-start -lc \"env\"");
-  LogOutput("loloutput");
   connect(msys2Proc, &QProcess::readyReadStandardOutput, [&]() {
-    emit LogOutput("MSYS2: " + msys2Proc->readAllStandardOutput());
+    qDebug() << ("MSYS2: " + msys2Proc->readAllStandardOutput());
   });
   msys2Proc->waitForStarted();
   QProcessEnvironment msys2Env = msys2Proc->processEnvironment();
+  auto loldebug = qDebug();
   for (QString& lolvar : msys2Env.toStringList())
-    LogOutput(lolvar);
+    loldebug << lolvar;
   QProcessEnvironment lolenv = process->processEnvironment();
   lolenv.insert(msys2Env);
   process->setProcessEnvironment(lolenv);
