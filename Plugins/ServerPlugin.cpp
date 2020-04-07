@@ -269,7 +269,9 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   msys2Proc->start(msysPath + "/msys2_shell.cmd -defterm -mingw64 -full-path -no-start");
   msys2Proc->waitForStarted();
   QProcessEnvironment msys2Env = msys2Proc->processEnvironment();
-  process->setProcessEnvironment(process->processEnvironment().insert(msys2Env));
+  QProcessEnvironment lolenv = process->processEnvironment();
+  lolenv.insert(msys2Env);
+  process->setProcessEnvironment(lolenv);
   msys2Proc->kill(); // msys2 does not shutdown nicely
   #endif
 
