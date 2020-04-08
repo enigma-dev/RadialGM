@@ -264,7 +264,7 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
     qDebug().noquote() << "Environmental variable \"MSYS_ROOT\" is not set defaulting MSYS path to: " + msysPath;
   } else msysPath = env.value("MSYS_ROOT");
 
-  env.insert("PATH", env.value("PATH") + msysPath + "/usr/bin;" + msysPath + "/mingw64/bin");
+  env.insert("PATH", env.value("PATH") + ";" + msysPath + "/usr/bin;" + msysPath + "/mingw64/bin");
   process->setProcessEnvironment(env);
   #endif
 
