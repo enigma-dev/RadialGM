@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
+project(RadialGM)
 
 include(CMakeDependentOption)
 
@@ -23,8 +24,6 @@ else()
 endif()
 
 set(EXE_DESCRIPTION "ENIGMA IDE")
-
-project(RadialGM)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 SET(CMAKE_SKIP_BUILD_RPATH ON)
