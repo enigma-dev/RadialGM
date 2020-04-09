@@ -4,15 +4,12 @@ option(RGM_ENABLE_GRPC_SERVER "Enable the GRPC client plugin for compilation and
 option(RGM_BUILD_EMAKE "Build Emake and the compiler." ON)
 option(RGM_BUILD_STATIC "Build static libs." OFF)
 
-if (RGM_BUILD_STATIC)
+# FIXME: MSVC dynamic linking requires US TO DLLEXPORT our funcs
+# since we currently don't, I'm force disabling the option on MSVC
+if (RGM_BUILD_STATIC OR MSVC)
  set(LIB_TYPE STATIC)
 else()
  set(LIB_TYPE SHARED)
-endif()
-# FIXME: MSVC dynamic linking requires US TO DLLEXPORT our funcs
-# since we currently don't, I'm force disabling the option on MSVC
-if (MSVC)
-  set(LIB_TYPE STATIC)
 endif()
 
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
