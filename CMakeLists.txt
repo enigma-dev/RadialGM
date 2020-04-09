@@ -1,12 +1,15 @@
 cmake_minimum_required(VERSION 3.14)
 
+include(CMakeDependentOption)
+
 option(RGM_ENABLE_GRPC_SERVER "Enable the GRPC client plugin for compilation and code analysis." ON)
 option(RGM_BUILD_EMAKE "Build Emake and the compiler." ON)
-option(RGM_BUILD_STATIC "Build static libs." OFF)
 
 # FIXME: MSVC dynamic linking requires US TO DLLEXPORT our funcs
 # since we currently don't, I'm force disabling the option on MSVC
-if (RGM_BUILD_STATIC OR MSVC)
+cmake_dependent_option(RGM_BUILD_STATIC "Build static libs." ON "MSVC" OFF)
+
+if (RGM_BUILD_STATIC)
  set(LIB_TYPE STATIC)
 else()
  set(LIB_TYPE SHARED)
