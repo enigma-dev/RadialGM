@@ -242,23 +242,75 @@ void CompilerClient::UpdateLoop(void* got_tag, bool ok) {
 ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   // create a new child process for us to launch an emake server
   process = new QProcess(this);
+  
+  connect(process, &QProcess::errorOccurred, [&](QProcess::ProcessError error) {
+    qDebug() << "QProcess error: " << error << endl;
+  });
+  connect(process, &QProcess::readyReadStandardOutput, [&]() {
+    emit LogOutput(process->readAllStandardOutput());
+  });
+  connect(process, &QProcess::readyReadStandardError, [&]() {
+    emit LogOutput(process->readAllStandardError());
+  });
+  
+  #ifdef _WIN32
+  //TODO: Make all this stuff configurable in IDE
+  QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+
+  // FIXME: this is just an approximate guess on how to get emake running outside a msys shell and currently causes emake to crash
+  QString msysPath;
+  if (!env.contains("MSYS_ROOT")) {
+    msysPath = env.value("SystemDrive", "C:") + "/msys64";
+    qDebug().noquote() << "Environmental variable \"MSYS_ROOT\" is not set defaulting MSYS path to: " + msysPath;
+  } else msysPath = env.value("MSYS_ROOT");
+
+  env.insert("PATH", env.value("PATH") + ";" + msysPath + "/usr/bin;" + msysPath + "/mingw64/bin");
+  process->setProcessEnvironment(env);
+  #endif
 
   // look for an executable file that looks like emake in some common directories
-  QList<QString> searchPaths = {QDir::currentPath(), "./enigma-dev", "../RadialGM/Submodules/enigma-dev"};
-  QFileInfo emakeFileInfo(QFile("emake"));
+  QList<QString> searchPaths = {QDir::currentPath(), "./enigma-dev", "../enigma-dev", "../RadialGM/Submodules/enigma-dev"};
+  #ifndef RGM_DEBUG
+   QString emakeName = "emake"; 
+  #else
+    QString emakeName = "emake-debug"; 
+  #endif
+  
+  QFileInfo emakeFileInfo;
   foreach (auto path, searchPaths) {
     const QDir dir(path);
     QDir::Filters filters = QDir::Filter::Executable | QDir::Filter::Files;
-    // we use a wildcard because we want it to find emake.exe on Windows
-    auto entryList = dir.entryInfoList(QStringList({"emake","emake.exe"}), filters, QDir::SortFlag::NoSort);
+    auto entryList = dir.entryInfoList(QStringList({emakeName, emakeName + ".exe"}), filters, QDir::SortFlag::NoSort);
     if (!entryList.empty()) {
       emakeFileInfo = entryList.first();
       break;
     }
   }
+  
+  if (emakeFileInfo.filePath().isEmpty()) {
+    qDebug() << "Error: Failed to locate emake. Compiling and syntax check will not work.\n" << "Search Paths:\n" << searchPaths;
+    return;
+  }
+  
+  QFileInfo enigmaFileInfo;
+  foreach (auto path, searchPaths) {
+    const QDir dir(path);
+    QDir::Filters filters = QDir::Filter::AllEntries;
+    auto entryList = dir.entryInfoList(QStringList({"ENIGMAsystem"}), filters, QDir::SortFlag::NoSort);
+    if (!entryList.empty()) {
+      enigmaFileInfo = entryList.first();
+      break;
+    }
+  }
+  
+  if (enigmaFileInfo.filePath().isEmpty()) {
+    qDebug() << "Error: Failed to locate ENIGMA sources. Compiling and syntax check will not work.\n" << "Search Paths:\n" << searchPaths;
+    return;
+  }
 
   // use the closest matching emake file we found and launch it in a child process
-  qDebug() << emakeFileInfo.absoluteFilePath();
+  qDebug() << "Using emake exe at: " << emakeFileInfo.absolutePath();
+  qDebug() << "Using ENIGMA sources at: " << enigmaFileInfo.absolutePath();
   process->setWorkingDirectory(emakeFileInfo.absolutePath());
   QString program = emakeFileInfo.fileName();
   QStringList arguments;
@@ -266,7 +318,11 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
             << "-e"
             << "Paths"
             << "-r"
-            << "--quiet";
+            << "--quiet"
+            << "--enigma-root" 
+            << enigmaFileInfo.absolutePath();
+            
+  qDebug() << "Running: " << program << " " << arguments;
 
   process->start(program, arguments);
   process->waitForStarted();
