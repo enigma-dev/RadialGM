@@ -24,14 +24,7 @@ struct Point {
   }
 };
 
-struct Proxy {
-  Point pt;
-  int width, height;
-  void* userdata;
-  Proxy(const Point& pt, int width, int height, void* userdata):
-    pt(pt), width(width), height(height), userdata(userdata) {}
-};
-
+template<typename T>
 class SpatialHash {
   struct PointHash {
     inline std::size_t operator()(const Point &v) const {
@@ -40,7 +33,7 @@ class SpatialHash {
   };
 
   int cell_width, cell_height;
-  using CellBucket = std::pair<std::vector<Proxy*>,std::vector<Proxy*>>;
+  using CellBucket = std::pair<std::vector<void*>,std::vector<void*>>;
   std::unordered_map<Point, CellBucket, PointHash> cells;
 
 public:
@@ -69,60 +62,56 @@ public:
     return cell_height;
   }
 
-  Proxy* addPoint(const int x, const int y, void *const userdata) {
-    Point pt(x, y);
-    Proxy* proxy = new Proxy(pt, 1, 1, userdata);
-    cells[Point(x / cell_width, y / cell_height)].first.push_back(proxy);
-    return proxy;
+  void addPoint(void *const userdata) {
+    T t(userdata);
+    cells[Point(t.x() / cell_width, t.y() / cell_height)].first.push_back(userdata);
   }
 
-  Proxy* addRectangle(
-      const int x, const int y, const int width, const int height, void *const userdata) {
+  void addRectangle(void *const userdata) {
+    T t(userdata);
+    int x = t.x(), y = t.y(), width = t.width(), height = t.height();
     int xx = x / cell_width, yy = y / cell_height;
-    Point pt(x, y);
-    Proxy* proxy = new Proxy(pt, width, height, userdata);
     for (int i = xx; i < ((x + width) / cell_width) + 1; ++i) {
       for (int ii = yy; ii < ((y + height) / cell_height) + 1; ++ii) {
         auto& cell = cells[Point(i, ii)];
         const bool origin = (i == xx && ii == yy);
         auto& cellProxies = origin ? cell.first : cell.second;
-        cellProxies.push_back(proxy);
+        cellProxies.push_back(userdata);
       }
     }
-    return proxy;
   }
 
-  void removeProxy(Proxy* proxy, bool free=true) {
-    int x = proxy->pt.x, y = proxy->pt.y,
-        width = proxy->width, height = proxy->height;
+  void removeProxy(void *const userdata) {
+    T t(userdata);
+    int x = t.x(), y = t.y(), width = t.width(), height = t.height();
     int xx = x / cell_width, yy = y / cell_height;
     for (int i = xx; i < ((x + width) / cell_width) + 1; ++i) {
       for (int ii = yy; ii < ((y + height) / cell_height) + 1; ++ii) {
         auto& cell = cells[Point(i, ii)];
         const bool origin = (i == xx && ii == yy);
         auto& cellProxies = origin ? cell.first : cell.second;
-        const auto it = std::find(cellProxies.begin(), cellProxies.end(), proxy);
+        const auto it = std::find(cellProxies.begin(), cellProxies.end(), userdata);
         cellProxies.erase(it);
       }
     }
-    if (free) delete proxy;
   }
 
-  std::vector<Proxy*> queryWindow(const int x, const int y, const int width, const int height) {
-    std::vector<Proxy*> hits;
+  std::vector<void*> queryWindow(const int x, const int y, const int width, const int height) {
+    std::vector<void*> hits;
     const int xx = x / cell_width, yy = y / cell_height;
     for (int i = xx; i < ((x + width) / cell_width) + 1; ++i) {
       for (int ii = yy; ii < ((y + height) / cell_height) + 1; ++ii) {
         auto& cell = cells[Point(i, ii)];
-        for (auto proxy : cell.first) {
-          hits.push_back(proxy);
+        for (auto userdata : cell.first) {
+          hits.push_back(userdata);
         }
-        for (auto proxy : cell.second) {
-          auto px = proxy->pt.x / cell_width,
-               py = proxy->pt.y / cell_height;
+        for (auto userdata : cell.second) {
+          T t(userdata);
+          auto px = t.x() / cell_width,
+               py = t.y() / cell_height;
           // already looked at this proxy?
           if (std::max(px, xx) < i || std::max(py, yy) < ii) continue;
-          hits.push_back(proxy);
+          hits.push_back(userdata);
         }
       }
     }
@@ -130,9 +119,6 @@ public:
   }
 
   void clear() {
-    for (auto& cell : cells)
-      for (auto proxy : cell.second.first)
-        delete proxy;
     std::unordered_map<Point, CellBucket, PointHash>().swap(cells);
   }
 };
