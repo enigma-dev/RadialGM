@@ -34,11 +34,20 @@ RoomView::RoomView(AssetScrollAreaBackground* parent) : AssetView(parent), _mode
 void RoomView::SetResourceModel(MessageModel* model) {
   this->_model = model;
 
+  instanceHash.clear();
+
   if (model != nullptr) {
     this->_sortedInstances->setSourceModel(model->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber));
     this->_sortedInstances->sort(Room::Instance::kObjectTypeFieldNumber);
     this->_sortedTiles->setSourceModel(model->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber));
     this->_sortedTiles->sort(Room::Tile::kDepthFieldNumber);
+
+    for (int row = 0; row < _sortedInstances->rowCount(); row++) {
+      auto wtf = _sortedInstances->index(row, 0);
+      qDebug() << wtf.internalPointer();
+      //auto instanceModel = _sortedInstances->GetSubModel(row);
+      //instanceHash.addRectangle(InstanceProxy((MessageModel*)wtf.internalPointer()));
+    }
   }
   setFixedSize(sizeHint());
   repaint();
