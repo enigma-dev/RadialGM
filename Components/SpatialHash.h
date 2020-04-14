@@ -33,7 +33,7 @@ class SpatialHash {
   };
 
   int cell_width, cell_height;
-  using CellBucket = std::pair<std::vector<void*>,std::vector<void*>>;
+  using CellBucket = std::pair<std::vector<T>,std::vector<T>>;
   std::unordered_map<Point, CellBucket, PointHash> cells;
 
 public:
@@ -62,56 +62,52 @@ public:
     return cell_height;
   }
 
-  void addPoint(void *const userdata) {
-    T t(userdata);
-    cells[Point(t.x() / cell_width, t.y() / cell_height)].first.push_back(userdata);
+  void addPoint(const T& proxy) {
+    cells[Point(proxy.x() / cell_width, proxy.y() / cell_height)].first.push_back(proxy);
   }
 
-  void addRectangle(void *const userdata) {
-    T t(userdata);
-    int x = t.x(), y = t.y(), width = t.width(), height = t.height();
-    int xx = x / cell_width, yy = y / cell_height;
-    for (int i = xx; i < ((x + width) / cell_width) + 1; ++i) {
-      for (int ii = yy; ii < ((y + height) / cell_height) + 1; ++ii) {
+  void addRectangle(const T& proxy) {
+    int xmin = proxy.xmin(), ymin = proxy.ymin();
+    int xx = xmin / cell_width, yy = ymin / cell_height;
+    for (int i = xx; i < (proxy.xmax() / cell_width) + 1; ++i) {
+      for (int ii = yy; ii < (proxy.ymax() / cell_height) + 1; ++ii) {
         auto& cell = cells[Point(i, ii)];
         const bool origin = (i == xx && ii == yy);
         auto& cellProxies = origin ? cell.first : cell.second;
-        cellProxies.push_back(userdata);
+        cellProxies.push_back(proxy);
       }
     }
   }
 
-  void removeProxy(void *const userdata) {
-    T t(userdata);
-    int x = t.x(), y = t.y(), width = t.width(), height = t.height();
-    int xx = x / cell_width, yy = y / cell_height;
-    for (int i = xx; i < ((x + width) / cell_width) + 1; ++i) {
-      for (int ii = yy; ii < ((y + height) / cell_height) + 1; ++ii) {
+  void removeProxy(const T& proxy) {
+    int xmin = proxy.xmin(), ymin = proxy.ymin();
+    int xx = xmin / cell_width, yy = ymin / cell_height;
+    for (int i = xx; i < (proxy.xmax() / cell_width) + 1; ++i) {
+      for (int ii = yy; ii < (proxy.ymax() / cell_height) + 1; ++ii) {
         auto& cell = cells[Point(i, ii)];
         const bool origin = (i == xx && ii == yy);
         auto& cellProxies = origin ? cell.first : cell.second;
-        const auto it = std::find(cellProxies.begin(), cellProxies.end(), userdata);
+        const auto it = std::find(cellProxies.begin(), cellProxies.end(), proxy);
         cellProxies.erase(it);
       }
     }
   }
 
-  std::vector<void*> queryWindow(const int x, const int y, const int width, const int height) {
-    std::vector<void*> hits;
+  std::vector<T> queryWindow(const int x, const int y, const int width, const int height) {
+    std::vector<T> hits;
     const int xx = x / cell_width, yy = y / cell_height;
     for (int i = xx; i < ((x + width) / cell_width) + 1; ++i) {
       for (int ii = yy; ii < ((y + height) / cell_height) + 1; ++ii) {
         auto& cell = cells[Point(i, ii)];
-        for (auto userdata : cell.first) {
-          hits.push_back(userdata);
+        for (auto proxy : cell.first) {
+          hits.push_back(proxy);
         }
-        for (auto userdata : cell.second) {
-          T t(userdata);
-          auto px = t.x() / cell_width,
-               py = t.y() / cell_height;
+        for (auto proxy : cell.second) {
+          auto px = proxy.xmin() / cell_width,
+               py = proxy.ymin() / cell_height;
           // already looked at this proxy?
           if (std::max(px, xx) < i || std::max(py, yy) < ii) continue;
-          hits.push_back(userdata);
+          hits.push_back(proxy);
         }
       }
     }
