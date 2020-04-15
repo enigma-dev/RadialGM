@@ -1,9 +1,7 @@
 #include "RoomView.h"
 #include "Components/ArtManager.h"
 #include "MainWindow.h"
-#include "Models/MessageModel.h"
 #include "Models/RepeatedMessageModel.h"
-#include "Models/RepeatedStringModel.h"
 
 #include <QDebug>
 #include <QPainter>
@@ -34,11 +32,30 @@ RoomView::RoomView(AssetScrollAreaBackground* parent) : AssetView(parent), _mode
 void RoomView::SetResourceModel(MessageModel* model) {
   this->_model = model;
 
+  instanceHash.clear();
+
   if (model != nullptr) {
     this->_sortedInstances->setSourceModel(model->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber));
     this->_sortedInstances->sort(Room::Instance::kObjectTypeFieldNumber);
     this->_sortedTiles->setSourceModel(model->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber));
     this->_sortedTiles->sort(Room::Tile::kDepthFieldNumber);
+
+    for (int row = 0; row < _sortedInstances->rowCount(); row++) {
+      instanceHash.addRectangle(InstanceProxy(_sortedInstances, row));
+    }
+    connect(_sortedInstances, &QAbstractItemModel::modelReset, [&]() {
+      instanceHash.clear();
+    });
+    connect(_sortedInstances, &QAbstractItemModel::rowsInserted, [&](const QModelIndex &/*parent*/, int first, int last) {
+      for (int row = first; row <= last; row++) {
+        instanceHash.addRectangle(InstanceProxy(_sortedInstances, row));
+      }
+    });
+    connect(_sortedInstances, &QAbstractItemModel::rowsAboutToBeRemoved, [&](const QModelIndex &/*parent*/, int first, int last) {
+      for (int row = first; row <= last; row++) {
+        instanceHash.removeProxy(InstanceProxy(_sortedInstances, row));
+      }
+    });
   }
   setFixedSize(sizeHint());
   repaint();
