@@ -110,6 +110,7 @@ SOURCES += \
     Models/TreeSortFilterProxyModel.cpp
 
 HEADERS += \
+    Components/SpatialHash.h \
     Dialogs/TimelineChangeMoment.h \
     Editors/ShaderEditor.h \
     Editors/SpriteEditor.h \
