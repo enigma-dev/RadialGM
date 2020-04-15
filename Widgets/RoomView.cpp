@@ -43,6 +43,19 @@ void RoomView::SetResourceModel(MessageModel* model) {
     for (int row = 0; row < _sortedInstances->rowCount(); row++) {
       instanceHash.addRectangle(InstanceProxy(_sortedInstances, row));
     }
+    connect(_sortedInstances, &QAbstractItemModel::modelReset, [&]() {
+      instanceHash.clear();
+    });
+    connect(_sortedInstances, &QAbstractItemModel::rowsInserted, [&](const QModelIndex &/*parent*/, int first, int last) {
+      for (int row = first; row <= last; row++) {
+        instanceHash.addRectangle(InstanceProxy(_sortedInstances, row));
+      }
+    });
+    connect(_sortedInstances, &QAbstractItemModel::rowsAboutToBeRemoved, [&](const QModelIndex &/*parent*/, int first, int last) {
+      for (int row = first; row <= last; row++) {
+        instanceHash.removeProxy(InstanceProxy(_sortedInstances, row));
+      }
+    });
   }
   setFixedSize(sizeHint());
   repaint();

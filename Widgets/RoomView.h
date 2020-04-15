@@ -18,6 +18,8 @@ class InstanceSortFilterProxyModel : public QSortFilterProxyModel {
 };
 
 struct Proxy {
+  int row;
+  Proxy(int row): row(row) {}
   virtual int x1() const = 0;
   virtual int x2() const = 0;
   virtual int y1() const = 0;
@@ -26,12 +28,15 @@ struct Proxy {
   int xmax() const { return x1() > x2() ? x1() : x2(); }
   int ymin() const { return y1() < y2() ? y1() : y2(); }
   int ymax() const { return y1() > y2() ? y1() : y2(); }
+  friend inline bool operator==(Proxy const& lhs, Proxy const& rhs)
+  {
+    return lhs.row == rhs.row;
+  }
 };
 
 struct InstanceProxy : Proxy {
   InstanceSortFilterProxyModel *model;
-  int row;
-  InstanceProxy(InstanceSortFilterProxyModel *model, int row): model(model), row(row) {}
+  InstanceProxy(InstanceSortFilterProxyModel *model, int row): Proxy(row), model(model) {}
   int x1() const override { return model->data(model->index(row, Room::Instance::kXFieldNumber)).toInt(); }
   int y1() const override { return model->data(model->index(row, Room::Instance::kYFieldNumber)).toInt(); }
   int x2() const override {
@@ -57,7 +62,7 @@ struct InstanceProxy : Proxy {
   MessageModel* spr() const {
     QVariant sprName = model->data(model->index(row, Room::Instance::kObjectTypeFieldNumber));
     MessageModel* spr = GetObjectSprite(sprName.toString());
-    if (spr->GetSubModel<RepeatedStringModel*>(Sprite::kSubimagesFieldNumber)->Empty())
+    if (spr == nullptr || spr->GetSubModel<RepeatedStringModel*>(Sprite::kSubimagesFieldNumber)->Empty())
       return nullptr;
     return spr;
   }
