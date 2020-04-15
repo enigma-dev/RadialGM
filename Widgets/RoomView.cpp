@@ -1,9 +1,7 @@
 #include "RoomView.h"
 #include "Components/ArtManager.h"
 #include "MainWindow.h"
-#include "Models/MessageModel.h"
 #include "Models/RepeatedMessageModel.h"
-#include "Models/RepeatedStringModel.h"
 
 #include <QDebug>
 #include <QPainter>
@@ -43,10 +41,7 @@ void RoomView::SetResourceModel(MessageModel* model) {
     this->_sortedTiles->sort(Room::Tile::kDepthFieldNumber);
 
     for (int row = 0; row < _sortedInstances->rowCount(); row++) {
-      auto wtf = _sortedInstances->index(row, 0);
-      qDebug() << wtf.internalPointer();
-      //auto instanceModel = _sortedInstances->GetSubModel(row);
-      //instanceHash.addRectangle(InstanceProxy((MessageModel*)wtf.internalPointer()));
+      instanceHash.addRectangle(InstanceProxy(_sortedInstances, row));
     }
   }
   setFixedSize(sizeHint());

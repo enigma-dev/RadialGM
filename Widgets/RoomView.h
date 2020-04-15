@@ -3,6 +3,8 @@
 
 #include "AssetView.h"
 #include "Models/MessageModel.h"
+#include "Models/ResourceModelMap.h"
+#include "Models/RepeatedStringModel.h"
 #include "Components/SpatialHash.h"
 
 #include <QObject>
@@ -27,12 +29,38 @@ struct Proxy {
 };
 
 struct InstanceProxy : Proxy {
-  MessageModel* model;
-  InstanceProxy(MessageModel* model): model(model) {}
-  int x1() const override { return model->Data(Room::Instance::kXFieldNumber, 0).toInt(); }
-  int y1() const override { return model->Data(Room::Instance::kYFieldNumber, 0).toInt(); }
-  int x2() const override { return model->Data(Room::Instance::kXscaleFieldNumber, 0).toInt(); }
-  int y2() const override { return model->Data(Room::Instance::kYscaleFieldNumber, 0).toInt(); }
+  InstanceSortFilterProxyModel *model;
+  int row;
+  InstanceProxy(InstanceSortFilterProxyModel *model, int row): model(model), row(row) {}
+  int x1() const override { return model->data(model->index(row, Room::Instance::kXFieldNumber)).toInt(); }
+  int y1() const override { return model->data(model->index(row, Room::Instance::kYFieldNumber)).toInt(); }
+  int x2() const override {
+    int w = sprw();
+    double xscale = model->data(model->index(row, Room::Instance::kXscaleFieldNumber)).toDouble();
+    return x1() + (double)w * xscale;
+  }
+  int y2() const override {
+    int h = sprh();
+    double yscale = model->data(model->index(row, Room::Instance::kYscaleFieldNumber)).toDouble();
+    return y1() + (double)h * yscale;
+  }
+  int sprw() const {
+    auto sprite = spr();
+    if (!sprite) return 16;
+    return sprite->Data(Sprite::kWidthFieldNumber).toInt();
+  }
+  int sprh() const {
+    auto sprite = spr();
+    if (!sprite) return 16;
+    return sprite->Data(Sprite::kHeightFieldNumber).toInt();
+  }
+  MessageModel* spr() const {
+    QVariant sprName = model->data(model->index(row, Room::Instance::kObjectTypeFieldNumber));
+    MessageModel* spr = GetObjectSprite(sprName.toString());
+    if (spr->GetSubModel<RepeatedStringModel*>(Sprite::kSubimagesFieldNumber)->Empty())
+      return nullptr;
+    return spr;
+  }
 };
 
 class RoomView : public AssetView {
