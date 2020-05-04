@@ -32,7 +32,7 @@ RoomView::RoomView(AssetScrollAreaBackground* parent) : AssetView(parent), _mode
 void RoomView::SetResourceModel(MessageModel* model) {
   this->_model = model;
 
-  instanceHash.clear();
+  _instanceHash.clear();
 
   if (model != nullptr) {
     this->_sortedInstances->setSourceModel(model->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber));
@@ -41,19 +41,19 @@ void RoomView::SetResourceModel(MessageModel* model) {
     this->_sortedTiles->sort(Room::Tile::kDepthFieldNumber);
 
     for (int row = 0; row < _sortedInstances->rowCount(); row++) {
-      instanceHash.addRectangle(InstanceProxy(_sortedInstances, row));
+      _instanceHash.addRectangle(InstanceProxy(_sortedInstances, row));
     }
     connect(_sortedInstances, &QAbstractItemModel::modelReset, [&]() {
-      instanceHash.clear();
+      _instanceHash.clear();
     });
     connect(_sortedInstances, &QAbstractItemModel::rowsInserted, [&](const QModelIndex &/*parent*/, int first, int last) {
       for (int row = first; row <= last; row++) {
-        instanceHash.addRectangle(InstanceProxy(_sortedInstances, row));
+        _instanceHash.addRectangle(InstanceProxy(_sortedInstances, row));
       }
     });
     connect(_sortedInstances, &QAbstractItemModel::rowsAboutToBeRemoved, [&](const QModelIndex &/*parent*/, int first, int last) {
       for (int row = first; row <= last; row++) {
-        instanceHash.removeProxy(InstanceProxy(_sortedInstances, row));
+        _instanceHash.removeProxy(InstanceProxy(_sortedInstances, row));
       }
     });
   }

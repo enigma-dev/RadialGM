@@ -82,7 +82,7 @@ class RoomView : public AssetView {
   InstanceSortFilterProxyModel *_sortedInstances;
   QSortFilterProxyModel *_sortedTiles;
   QPixmap _transparentPixmap;
-  SpatialHash<InstanceProxy> instanceHash;
+  SpatialHash<InstanceProxy> _instanceHash;
 
   void paintTiles(QPainter &painter);
   void paintBackgrounds(QPainter &painter, bool foregrounds = false);
