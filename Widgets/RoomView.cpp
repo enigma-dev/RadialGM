@@ -183,7 +183,11 @@ void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
 }
 
 void RoomView::paintInstances(QPainter& painter) {
-  for (int row = 0; row < _sortedInstances->rowCount(); row++) {
+  QRectF clip = painter.clipBoundingRect();
+  auto visibleInstances = _instanceHash.queryWindow(clip.x(), clip.y(), clip.width(), clip.height());
+  for (auto& proxy : visibleInstances) {
+    int row = proxy.row;
+
     QString imgFile = ":/actions/help.png";
     int w = 16;
     int h = 16;
