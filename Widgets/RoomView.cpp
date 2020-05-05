@@ -32,6 +32,7 @@ RoomView::RoomView(AssetScrollAreaBackground* parent) : AssetView(parent), _mode
 void RoomView::SetResourceModel(MessageModel* model) {
   this->_model = model;
 
+  // TODO: Add tile hash.
   _instanceHash.clear();
 
   if (model != nullptr) {
@@ -43,6 +44,7 @@ void RoomView::SetResourceModel(MessageModel* model) {
     for (int row = 0; row < _sortedInstances->rowCount(); row++) {
       _instanceHash.addRectangle(InstanceProxy(_sortedInstances, row));
     }
+    //TODO: Handle data changed with correct depth sorted order.
     connect(_sortedInstances, &QAbstractItemModel::modelReset, [&]() {
       _instanceHash.clear();
     });
@@ -184,6 +186,7 @@ void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
 
 void RoomView::paintInstances(QPainter& painter) {
   QRectF clip = painter.clipBoundingRect();
+  // TODO: Merge sort the visible instances from query window by bucket.
   auto visibleInstances = _instanceHash.queryWindow(clip.x(), clip.y(), clip.width(), clip.height());
   for (auto& proxy : visibleInstances) {
     int row = proxy.row;

@@ -17,6 +17,7 @@ class InstanceSortFilterProxyModel : public QSortFilterProxyModel {
   bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
 };
 
+// TODO: Use full transform.
 struct Proxy {
   int row;
   Proxy(int row): row(row) {}
@@ -41,11 +42,13 @@ struct InstanceProxy : Proxy {
   int y1() const override { return model->data(model->index(row, Room::Instance::kYFieldNumber)).toInt(); }
   int x2() const override {
     int w = sprw();
+    // TODO: Resolve #122
     double xscale = model->data(model->index(row, Room::Instance::kXscaleFieldNumber)).toDouble();
     return x1() + (double)w * xscale;
   }
   int y2() const override {
     int h = sprh();
+    // TODO: Resolve #122
     double yscale = model->data(model->index(row, Room::Instance::kYscaleFieldNumber)).toDouble();
     return y1() + (double)h * yscale;
   }
