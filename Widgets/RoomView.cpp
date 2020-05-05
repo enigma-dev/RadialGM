@@ -1,9 +1,7 @@
 #include "RoomView.h"
 #include "Components/ArtManager.h"
 #include "MainWindow.h"
-#include "Models/MessageModel.h"
 #include "Models/RepeatedMessageModel.h"
-#include "Models/RepeatedStringModel.h"
 
 #include <QDebug>
 #include <QPainter>
@@ -34,11 +32,32 @@ RoomView::RoomView(AssetScrollAreaBackground* parent) : AssetView(parent), _mode
 void RoomView::SetResourceModel(MessageModel* model) {
   this->_model = model;
 
+  // TODO: Add tile hash.
+  _instanceHash.clear();
+
   if (model != nullptr) {
     this->_sortedInstances->setSourceModel(model->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber));
     this->_sortedInstances->sort(Room::Instance::kObjectTypeFieldNumber);
     this->_sortedTiles->setSourceModel(model->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber));
     this->_sortedTiles->sort(Room::Tile::kDepthFieldNumber);
+
+    for (int row = 0; row < _sortedInstances->rowCount(); row++) {
+      _instanceHash.addRectangle(InstanceProxy(_sortedInstances, row));
+    }
+    //TODO: Handle data changed with correct depth sorted order.
+    connect(_sortedInstances, &QAbstractItemModel::modelReset, [&]() {
+      _instanceHash.clear();
+    });
+    connect(_sortedInstances, &QAbstractItemModel::rowsInserted, [&](const QModelIndex &/*parent*/, int first, int last) {
+      for (int row = first; row <= last; row++) {
+        _instanceHash.addRectangle(InstanceProxy(_sortedInstances, row));
+      }
+    });
+    connect(_sortedInstances, &QAbstractItemModel::rowsAboutToBeRemoved, [&](const QModelIndex &/*parent*/, int first, int last) {
+      for (int row = first; row <= last; row++) {
+        _instanceHash.removeProxy(InstanceProxy(_sortedInstances, row));
+      }
+    });
   }
   setFixedSize(sizeHint());
   repaint();
@@ -166,7 +185,12 @@ void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
 }
 
 void RoomView::paintInstances(QPainter& painter) {
-  for (int row = 0; row < _sortedInstances->rowCount(); row++) {
+  QRectF clip = painter.clipBoundingRect();
+  // TODO: Merge sort the visible instances from query window by bucket.
+  auto visibleInstances = _instanceHash.queryWindow(clip.x(), clip.y(), clip.width(), clip.height());
+  for (auto& proxy : visibleInstances) {
+    int row = proxy.row;
+
     QString imgFile = ":/actions/help.png";
     int w = 16;
     int h = 16;
