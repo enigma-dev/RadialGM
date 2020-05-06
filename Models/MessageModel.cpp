@@ -92,6 +92,22 @@ QVariant MessageModel::Data(int row, int column) const {
 }
 
 QVariant MessageModel::data(const QModelIndex &index, int role) const {
+  QVariant ret = dataOrDefault(index, role);
+  if (!ret.isValid()) return QVariant();
+
+  const Descriptor *desc = _protobuf->GetDescriptor();
+  const Reflection *refl = _protobuf->GetReflection();
+  const FieldDescriptor *field = desc->FindFieldByNumber(index.row());
+
+  if (!field) return ret; // TODO: Wipe out table hack below.
+
+  // If the field has't been initialized return an invalid QVariant. (see QVariant.isValid())
+  if (!refl->HasField(*_protobuf, field)) return QVariant();
+
+  return ret;
+}
+
+QVariant MessageModel::dataOrDefault(const QModelIndex &index, int role) const {
   R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
   if (role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::DecorationRole) return QVariant();
 
@@ -129,9 +145,6 @@ QVariant MessageModel::data(const QModelIndex &index, int role) const {
 
     return QVariant();
   }
-
-  // If the field has't been initialized return an invalid QVariant. (see QVariant.isValid())
-  if (!refl->HasField(*_protobuf, field)) return QVariant();
 
   switch (field->cpp_type()) {
     case CppType::CPPTYPE_MESSAGE: R_EXPECT(false, QVariant()) << "The requested field " << index << " is a message";
