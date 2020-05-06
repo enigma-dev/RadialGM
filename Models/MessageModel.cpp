@@ -99,7 +99,7 @@ QVariant MessageModel::data(const QModelIndex &index, int role) const {
   const Reflection *refl = _protobuf->GetReflection();
   const FieldDescriptor *field = desc->FindFieldByNumber(index.row());
 
-  if (!field) return ret; // TODO: Wipe out table hack below.
+  if (!field) return ret; // TODO: Wipe out table hack below in dataOrDefault.
 
   // If the field has't been initialized return an invalid QVariant. (see QVariant.isValid())
   if (!refl->HasField(*_protobuf, field)) return QVariant();
