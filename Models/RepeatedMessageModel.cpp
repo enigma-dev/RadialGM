@@ -41,5 +41,7 @@ bool RepeatedMessageModel::setData(const QModelIndex &index, const QVariant &val
 }
 
 QVariant RepeatedMessageModel::data(const QModelIndex &index, int role) const {
+  // protobuf field number with 0 is impossible, use as sentinel to get model itself
+  if (index.column() == 0) return QVariant::fromValue(_subModels[index.row()]);
   return _subModels[index.row()]->data(_subModels[index.row()]->index(index.column()), role);
 }
