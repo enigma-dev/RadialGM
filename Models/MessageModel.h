@@ -8,6 +8,10 @@
 // Model representing a protobuf message
 class MessageModel : public ProtoModel {
   Q_OBJECT
+
+  template<bool HasField>
+  QVariant dataInternal(const QModelIndex &index, int role) const;
+
  public:
   MessageModel(ProtoModel *parent, Message *protobuf);
   MessageModel(QObject *parent, Message *protobuf);
