@@ -8,6 +8,10 @@
 // Model representing a protobuf message
 class MessageModel : public ProtoModel {
   Q_OBJECT
+
+  template<bool HasField>
+  QVariant dataInternal(const QModelIndex &index, int role) const;
+
  public:
   MessageModel(ProtoModel *parent, Message *protobuf);
   MessageModel(QObject *parent, Message *protobuf);
@@ -43,6 +47,7 @@ class MessageModel : public ProtoModel {
   virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override;
   virtual QVariant data(const QModelIndex &index, int role) const override;
+  virtual QVariant dataOrDefault(const QModelIndex &index, int role) const;
   virtual QModelIndex parent(const QModelIndex &index) const override;
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
   virtual QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override;
