@@ -85,6 +85,7 @@ void RoomView::paintTiles(QPainter& painter) {
     bkg = bkg->GetSubModel<MessageModel*>(TreeNode::kBackgroundFieldNumber);
     if (!bkg) continue;
 
+    MessageModel* tile = _sortedTiles->data(_sortedTiles->index(row, 0)).value<MessageModel*>();
     int x = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kXFieldNumber)).toInt();
     int y = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kYFieldNumber)).toInt();
     int xOff = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kXoffsetFieldNumber)).toInt();
@@ -92,11 +93,8 @@ void RoomView::paintTiles(QPainter& painter) {
     int w = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kWidthFieldNumber)).toInt();
     int h = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kHeightFieldNumber)).toInt();
 
-    QVariant xScale = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kXscaleFieldNumber));
-    QVariant yScale = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kYscaleFieldNumber));
-
-    if (xScale.isNull()) xScale.setValue(1);
-    if (yScale.isNull()) yScale.setValue(1);
+    QVariant xScale = tile->dataOrDefault(tile->index(Room::Tile::kXscaleFieldNumber), Qt::DisplayRole);
+    QVariant yScale = tile->dataOrDefault(tile->index(Room::Tile::kYscaleFieldNumber), Qt::DisplayRole);
 
     QString imgFile = bkg->Data(Background::kImageFieldNumber).toString();
     QPixmap pixmap = ArtManager::GetCachedPixmap(imgFile);
