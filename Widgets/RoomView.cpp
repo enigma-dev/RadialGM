@@ -87,7 +87,7 @@ void RoomView::paintTiles(QPainter& painter) {
     if (!bkg) continue;
 
     MessageModel* tile = _sortedTiles->data(_sortedTiles->index(row, 0)).value<MessageModel*>();
-    R_ASSESS(tile);
+    R_ASSESS_C(tile);
     int x = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kXFieldNumber)).toInt();
     int y = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kYFieldNumber)).toInt();
     int xOff = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kXoffsetFieldNumber)).toInt();
@@ -190,7 +190,7 @@ void RoomView::paintInstances(QPainter& painter) {
     if (pixmap.isNull()) continue;
 
     MessageModel* inst = _sortedInstances->data(_sortedInstances->index(row, 0)).value<MessageModel*>();
-    R_ASSESS(inst);
+    R_ASSESS_C(inst);
     QVariant x = _sortedInstances->data(_sortedInstances->index(row, Room::Instance::kXFieldNumber));
     QVariant y = _sortedInstances->data(_sortedInstances->index(row, Room::Instance::kYFieldNumber));
     QVariant xScale = inst->dataOrDefault(inst->index(Room::Instance::kXscaleFieldNumber), Qt::DisplayRole);
