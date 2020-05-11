@@ -1,5 +1,6 @@
 #include "RoomView.h"
 #include "Components/ArtManager.h"
+#include "Components/Logger.h"
 #include "MainWindow.h"
 #include "Models/MessageModel.h"
 #include "Models/RepeatedMessageModel.h"
@@ -85,6 +86,8 @@ void RoomView::paintTiles(QPainter& painter) {
     bkg = bkg->GetSubModel<MessageModel*>(TreeNode::kBackgroundFieldNumber);
     if (!bkg) continue;
 
+    MessageModel* tile = _sortedTiles->data(_sortedTiles->index(row, 0)).value<MessageModel*>();
+    R_ASSESS_C(tile);
     int x = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kXFieldNumber)).toInt();
     int y = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kYFieldNumber)).toInt();
     int xOff = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kXoffsetFieldNumber)).toInt();
@@ -92,11 +95,8 @@ void RoomView::paintTiles(QPainter& painter) {
     int w = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kWidthFieldNumber)).toInt();
     int h = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kHeightFieldNumber)).toInt();
 
-    QVariant xScale = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kXscaleFieldNumber));
-    QVariant yScale = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kYscaleFieldNumber));
-
-    if (xScale.isNull()) xScale.setValue(1);
-    if (yScale.isNull()) yScale.setValue(1);
+    QVariant xScale = tile->dataOrDefault(tile->index(Room::Tile::kXscaleFieldNumber), Qt::DisplayRole);
+    QVariant yScale = tile->dataOrDefault(tile->index(Room::Tile::kYscaleFieldNumber), Qt::DisplayRole);
 
     QString imgFile = bkg->Data(Background::kImageFieldNumber).toString();
     QPixmap pixmap = ArtManager::GetCachedPixmap(imgFile);
@@ -189,17 +189,19 @@ void RoomView::paintInstances(QPainter& painter) {
     QPixmap pixmap = ArtManager::GetCachedPixmap(imgFile);
     if (pixmap.isNull()) continue;
 
+    MessageModel* inst = _sortedInstances->data(_sortedInstances->index(row, 0)).value<MessageModel*>();
+    R_ASSESS_C(inst);
     QVariant x = _sortedInstances->data(_sortedInstances->index(row, Room::Instance::kXFieldNumber));
     QVariant y = _sortedInstances->data(_sortedInstances->index(row, Room::Instance::kYFieldNumber));
-    QVariant xScale = _sortedInstances->data(_sortedInstances->index(row, Room::Instance::kXscaleFieldNumber));
-    QVariant yScale = _sortedInstances->data(_sortedInstances->index(row, Room::Instance::kYscaleFieldNumber));
-    QVariant rot = _sortedInstances->data(_sortedInstances->index(row, Room::Instance::kRotationFieldNumber));
+    QVariant xScale = inst->dataOrDefault(inst->index(Room::Instance::kXscaleFieldNumber), Qt::DisplayRole);
+    QVariant yScale = inst->dataOrDefault(inst->index(Room::Instance::kYscaleFieldNumber), Qt::DisplayRole);
+    QVariant rot = inst->dataOrDefault(inst->index(Room::Instance::kRotationFieldNumber), Qt::DisplayRole);
 
     QRectF dest(0, 0, w, h);
     QRectF src(0, 0, w, h);
     const QTransform transform = painter.transform();
     painter.translate(x.toInt(), y.toInt());
-    painter.scale(xScale.isValid() ? xScale.toFloat() : 1, yScale.isValid() ? yScale.toFloat() : 1);
+    painter.scale(xScale.toFloat(), yScale.toFloat());
     painter.rotate(rot.toFloat());
     painter.translate(-xoff, -yoff);
     painter.drawPixmap(dest, pixmap, src);

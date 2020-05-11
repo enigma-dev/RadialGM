@@ -37,10 +37,18 @@ T operator,(T x, const LogAndReturn&) {
   } else                 \
     return LogAndReturn::Void(), LogAndReturn(qWarning()) << "Check `" #cond "` failed."
 
-// check and log the condition, but continue on failure
+// check and log the condition
 #define R_ASSESS(cond) \
   if (cond) {          \
   } else               \
     LogAndReturn(qWarning()) << "Check `" #cond "` failed."
+
+// check and log the condition, but continue on failure
+#define R_ASSESS_C(cond)                                     \
+  if (cond) {                                                \
+  } else {                                                   \
+    LogAndReturn(qWarning()) << "Check `" #cond "` failed."; \
+    continue;                                                \
+  }
 
 #endif  // LOGGER_H
