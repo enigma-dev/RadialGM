@@ -91,7 +91,7 @@ QVariant MessageModel::Data(int row, int column) const {
   return data(this->index(row, column, QModelIndex()), Qt::DisplayRole);
 }
 
-template<bool HasField>
+template<bool NO_DEFAULT>
 QVariant MessageModel::dataInternal(const QModelIndex &index, int role) const {
   R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
   if (role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::DecorationRole) return QVariant();
@@ -132,7 +132,7 @@ QVariant MessageModel::dataInternal(const QModelIndex &index, int role) const {
   }
 
   // If the field has't been initialized return an invalid QVariant. (see QVariant.isValid())
-  if (HasField && !refl->HasField(*_protobuf, field)) return QVariant();
+  if (NO_DEFAULT && !refl->HasField(*_protobuf, field)) return QVariant();
 
   switch (field->cpp_type()) {
     case CppType::CPPTYPE_MESSAGE: R_EXPECT(false, QVariant()) << "The requested field " << index << " is a message";

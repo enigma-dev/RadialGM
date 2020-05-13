@@ -9,7 +9,7 @@
 class MessageModel : public ProtoModel {
   Q_OBJECT
 
-  template<bool HasField>
+  template<bool NO_DEFAULT>
   QVariant dataInternal(const QModelIndex &index, int role) const;
 
  public:
