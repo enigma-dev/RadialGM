@@ -1,3 +1,4 @@
+#include "Components/Logger.h"
 #include "RepeatedMessageModel.h"
 #include "MessageModel.h"
 
@@ -26,9 +27,15 @@ void RepeatedMessageModel::Clear() {
   _subModels.clear();
 }
 
-QVariant RepeatedMessageModel::Data(int row, int column) const { return _subModels[row]->Data(column); }
+QVariant RepeatedMessageModel::Data(int row, int column) const {
+  R_EXPECT(row >= 0 && row < _subModels.size(), QVariant()) <<
+    "Supplied row was out of bounds:" << row;
+  return _subModels[row]->Data(column);
+}
 
 bool RepeatedMessageModel::SetData(const QVariant &value, int row, int column) {
+  R_EXPECT(row >= 0 && row < _subModels.size(), false) <<
+    "Supplied row was out of bounds:" << row;
   return _subModels[row]->SetData(value, column);
 }
 
@@ -37,9 +44,18 @@ int RepeatedMessageModel::columnCount(const QModelIndex & /*parent*/) const {
 }
 
 bool RepeatedMessageModel::setData(const QModelIndex &index, const QVariant &value, int role) {
+  R_EXPECT(index.row() >= 0 && index.row() < _subModels.size(), false) <<
+    "Supplied row was out of bounds:" << index.row();
   return _subModels[index.row()]->setData(_subModels[index.row()]->index(index.column()), value, role);
 }
 
 QVariant RepeatedMessageModel::data(const QModelIndex &index, int role) const {
+  R_EXPECT(index.row() >= 0 && index.row() < _subModels.size(), QVariant()) <<
+    "Supplied row was out of bounds:" << index.row();
+
+  // protobuf field number with 0 is impossible, use as sentinel to get model itself
+  if (index.column() == 0)
+    return QVariant::fromValue(_subModels[index.row()]);
+
   return _subModels[index.row()]->data(_subModels[index.row()]->index(index.column()), role);
 }
