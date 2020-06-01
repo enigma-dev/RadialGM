@@ -1,6 +1,8 @@
 #include "PathView.h"
 #include "Models/RepeatedMessageModel.h"
 
+#include <QPainterPath>
+
 PathView::PathView(AssetScrollAreaBackground *parent) : RoomView(parent) {}
 
 // Perform cubic bezier interpolation
