@@ -1,6 +1,5 @@
 #include "RoomView.h"
 #include "Components/ArtManager.h"
-#include "Components/Logger.h"
 #include "MainWindow.h"
 #include "Models/RepeatedMessageModel.h"
 

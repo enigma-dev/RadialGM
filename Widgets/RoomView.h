@@ -6,6 +6,7 @@
 #include "Models/ResourceModelMap.h"
 #include "Models/RepeatedStringModel.h"
 #include "Components/SpatialHash.h"
+#include "Components/Logger.h"
 
 #include <QObject>
 #include <QSortFilterProxyModel>
@@ -42,14 +43,16 @@ struct InstanceProxy : Proxy {
   int y1() const override { return model->data(model->index(row, Room::Instance::kYFieldNumber)).toInt(); }
   int x2() const override {
     int w = sprw();
-    // TODO: Resolve #122
-    double xscale = model->data(model->index(row, Room::Instance::kXscaleFieldNumber)).toDouble();
+    MessageModel* inst = model->data(model->index(row, 0)).value<MessageModel*>();
+    R_EXPECT(inst, 0);
+    double xscale = inst->dataOrDefault(inst->index(Room::Instance::kXscaleFieldNumber)).toDouble();
     return x1() + (double)w * xscale;
   }
   int y2() const override {
     int h = sprh();
-    // TODO: Resolve #122
-    double yscale = model->data(model->index(row, Room::Instance::kYscaleFieldNumber)).toDouble();
+    MessageModel* inst = model->data(model->index(row, 0)).value<MessageModel*>();
+    R_EXPECT(inst, 0);
+    double yscale = inst->dataOrDefault(inst->index(Room::Instance::kYscaleFieldNumber)).toDouble();
     return y1() + (double)h * yscale;
   }
   int sprw() const {
