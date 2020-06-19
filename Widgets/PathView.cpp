@@ -126,8 +126,8 @@ QVector<QPoint> PathView::RenderPoints(const QVector<QPoint> &user_points) const
   return points;
 }
 
-void PathView::Paint(QPainter &painter) {
-  RoomView::Paint(painter);
+void PathView::Paint(QPainter &painter, QRect visible) {
+  RoomView::Paint(painter, visible);
 
   RepeatedMessageModel *pointsModel = _pathModel->GetSubModel<RepeatedMessageModel *>(Path::kPointsFieldNumber);
   if (!pointsModel->Empty()) {

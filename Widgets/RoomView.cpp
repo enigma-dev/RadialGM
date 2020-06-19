@@ -71,7 +71,7 @@ QSize RoomView::sizeHint() const {
   return QSize(roomWidth.toUInt(), roomHeight.toUInt());
 }
 
-void RoomView::Paint(QPainter& painter) {
+void RoomView::Paint(QPainter& painter, QRect visible) {
   _grid.type = GridType::Standard;
 
   if (!_model) return;
@@ -90,13 +90,13 @@ void RoomView::Paint(QPainter& painter) {
       QRectF(0, 0, roomWidth.isValid() ? roomWidth.toUInt() : 640, roomWidth.isValid() ? roomHeight.toUInt() : 480),
       QBrush(roomColor));
 
-  this->paintBackgrounds(painter, false);
-  this->paintTiles(painter);
-  this->paintInstances(painter);
-  this->paintBackgrounds(painter, true);
+  this->paintBackgrounds(painter, visible, false);
+  this->paintTiles(painter, visible);
+  this->paintInstances(painter, visible);
+  this->paintBackgrounds(painter, visible, true);
 }
 
-void RoomView::paintTiles(QPainter& painter) {
+void RoomView::paintTiles(QPainter& painter, QRect visible) {
   for (int row = 0; row < _sortedTiles->rowCount(); row++) {
     QVariant bkgName = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kBackgroundNameFieldNumber));
     MessageModel* bkg = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, bkgName.toString());
@@ -129,7 +129,7 @@ void RoomView::paintTiles(QPainter& painter) {
   }
 }
 
-void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
+void RoomView::paintBackgrounds(QPainter& painter, QRect visible, bool foregrounds) {
   RepeatedMessageModel* backgrounds = _model->GetSubModel<RepeatedMessageModel*>(Room::kBackgroundsFieldNumber);
   for (int row = 0; row < backgrounds->rowCount(); row++) {
     bool visible = backgrounds->Data(row, Room::Background::kVisibleFieldNumber).toBool();
@@ -183,10 +183,9 @@ void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
   }
 }
 
-void RoomView::paintInstances(QPainter& painter) {
-  QRectF clip = painter.clipBoundingRect();
+void RoomView::paintInstances(QPainter& painter, QRect visible) {
   // TODO: Merge sort the visible instances from query window by bucket.
-  auto visibleInstances = _instanceHash.queryWindow(clip.x(), clip.y(), clip.width(), clip.height());
+  auto visibleInstances = _instanceHash.queryWindow(visible.x(), visible.y(), visible.width(), visible.height());
   for (auto& proxy : visibleInstances) {
     int row = proxy.row;
 
