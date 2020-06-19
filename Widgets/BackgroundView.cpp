@@ -56,7 +56,7 @@ void BackgroundView::WriteImage(QString fName, QString type) {
 
 QSize BackgroundView::sizeHint() const { return QSize(_pixmap.width(), _pixmap.height()); }
 
-void BackgroundView::Paint(QPainter &painter) {
+void BackgroundView::Paint(QPainter &painter, QRect /*visible*/) {
   if (!_model) {
     _grid.show = false;
     return;
