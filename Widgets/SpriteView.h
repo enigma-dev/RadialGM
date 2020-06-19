@@ -14,7 +14,7 @@ class SpriteView : public AssetView {
   SpriteView(AssetScrollAreaBackground *parent);
   QSize sizeHint() const override;
   void SetResourceModel(MessageModel *model);
-  void Paint(QPainter &painter) override;
+  void Paint(QPainter &painter, QRect visible) override;
   void PaintTop(QPainter &painter) override;
   QRectF AutomaticBBoxRect();
   QPixmap &GetPixmap();
