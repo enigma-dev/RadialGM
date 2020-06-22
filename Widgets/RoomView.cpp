@@ -184,7 +184,7 @@ void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
 }
 
 void RoomView::paintInstances(QPainter& painter) {
-  QRectF clip = painter.clipBoundingRect();
+  QRect clip = this->getVisibleHint();
   // TODO: Merge sort the visible instances from query window by bucket.
   auto visibleInstances = _instanceHash.queryWindow(clip.x(), clip.y(), clip.width(), clip.height());
   for (auto& proxy : visibleInstances) {

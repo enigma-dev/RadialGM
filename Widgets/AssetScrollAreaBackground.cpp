@@ -184,10 +184,11 @@ void AssetScrollAreaBackground::paintEvent(QPaintEvent* /* event */) {
     _totalDrawOffset = GetCenterOffset() + _userDrawOffset;
 
     painter.save();
-    QRect clip(-this->pos(), ((QWidget*)this->parent())->size());
-    painter.setClipRect(clip);
+    QRect visible(-this->pos(), ((QWidget*)this->parent())->size());
     painter.translate(_totalDrawOffset);
     painter.scale(_currentZoom, _currentZoom);
+    visible = painter.transform().inverted().mapRect(visible);
+    _assetView->setVisibleHint(visible);
     _assetView->Paint(painter);
     painter.restore();
 
