@@ -81,7 +81,7 @@ class RoomView : public AssetView {
   explicit RoomView(AssetScrollAreaBackground *parent = nullptr);
   QSize sizeHint() const override;
   void SetResourceModel(MessageModel *_model);
-  void Paint(QPainter &painter, QRect visible) override;
+  void Paint(QPainter &painter) override;
 
  protected:
   MessageModel *_model;
@@ -90,9 +90,9 @@ class RoomView : public AssetView {
   QPixmap _transparentPixmap;
   SpatialHash<InstanceProxy> _instanceHash;
 
-  void paintTiles(QPainter &painter, QRect visible);
-  void paintBackgrounds(QPainter &painter, QRect visible, bool foregrounds = false);
-  void paintInstances(QPainter &painter, QRect visible);
+  void paintTiles(QPainter &painter);
+  void paintBackgrounds(QPainter &painter, bool foregrounds = false);
+  void paintInstances(QPainter &painter);
 };
 
 #endif  // ROOMVIEW_H

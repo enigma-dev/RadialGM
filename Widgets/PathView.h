@@ -9,7 +9,7 @@ class PathView : public RoomView {
 
  public:
   explicit PathView(AssetScrollAreaBackground *parent = nullptr);
-  void Paint(QPainter &painter, QRect visible) override;
+  void Paint(QPainter &painter) override;
   void SetPathModel(MessageModel *_model);
 
   // Retrieves the number of points in the path.

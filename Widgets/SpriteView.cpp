@@ -54,7 +54,7 @@ QRectF SpriteView::BBoxRect() {
   return QRectF(x, y, right - x, bottom - y);
 }
 
-void SpriteView::Paint(QPainter &painter, QRect /*visible*/) { painter.drawPixmap(0, 0, _pixmap); }
+void SpriteView::Paint(QPainter &painter) { painter.drawPixmap(0, 0, _pixmap); }
 
 void SpriteView::PaintTop(QPainter &painter) {
   qreal zoom = _parent->GetZoom();

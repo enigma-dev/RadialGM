@@ -29,7 +29,7 @@ class AssetView : public QWidget {
   Q_OBJECT
  public:
   explicit AssetView(AssetScrollAreaBackground* parent);
-  virtual void Paint(QPainter& painter, QRect visible) = 0;
+  virtual void Paint(QPainter& painter) = 0;
   virtual void PaintTop(QPainter& /*painter*/) {}
   GridDimensions& GetGrid();
 
