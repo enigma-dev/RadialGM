@@ -16,7 +16,7 @@ class BackgroundView : public AssetView {
   bool SetImage(QString fName);
   bool SetImage(QPixmap image);
   void WriteImage(QString fName, QString type);
-  void Paint(QPainter &painter) override;
+  void Paint(QPainter &painter, QRect visible) override;
 
  private:
   MessageModel *_model;
