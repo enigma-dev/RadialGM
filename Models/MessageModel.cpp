@@ -11,10 +11,8 @@ MessageModel::MessageModel(ProtoModel *parent, Message *protobuf) : ProtoModel(p
 MessageModel::MessageModel(QObject *parent, Message *protobuf) : ProtoModel(parent, protobuf) { RebuildSubModels(); }
 
 void MessageModel::RebuildSubModels() {
-  const Descriptor *desc = _protobuf->GetDescriptor();
-  const Reflection *refl = _protobuf->GetReflection();
-  for (int i = 0; i < desc->field_count(); i++) {
-    const FieldDescriptor *field = desc->field(i);
+  for (int i = 0; i < _desc->field_count(); i++) {
+    const FieldDescriptor *field = _desc->field(i);
 
     if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
       if (field->is_repeated()) {
@@ -22,14 +20,14 @@ void MessageModel::RebuildSubModels() {
       } else {
         const OneofDescriptor *oneof = field->containing_oneof();
         if (oneof) {
-          if (refl->HasOneof(*_protobuf, oneof)) {
-            field = refl->GetOneofFieldDescriptor(*_protobuf, oneof);
+          if (_refl->HasOneof(*_protobuf, oneof)) {
+            field = _refl->GetOneofFieldDescriptor(*_protobuf, oneof);
             if (field->cpp_type() != CppType::CPPTYPE_MESSAGE) continue;  // is prolly folder
           } else {
             continue;  // don't allocate if not set
           }
         }
-        _subModels[field->number()] = new MessageModel(this, refl->MutableMessage(_protobuf, field));
+        _subModels[field->number()] = new MessageModel(this, _refl->MutableMessage(_protobuf, field));
       }
     } else if (field->cpp_type() == CppType::CPPTYPE_STRING && field->is_repeated()) {
       if (field->options().GetExtension(buffers::file_kind) == buffers::FileKind::IMAGE) {
@@ -43,8 +41,7 @@ void MessageModel::RebuildSubModels() {
 
 int MessageModel::rowCount(const QModelIndex &parent) const {
   if (parent.isValid()) return 0;
-  const Descriptor *desc = _protobuf->GetDescriptor();
-  return desc->field_count();
+  return _desc->field_count();
 }
 
 int MessageModel::columnCount(const QModelIndex & /*parent*/) const { return 1; }
@@ -56,9 +53,7 @@ bool MessageModel::SetData(const QVariant &value, int row, int column) {
 bool MessageModel::setData(const QModelIndex &index, const QVariant &value, int role) {
   R_EXPECT(index.isValid(), false) << "Supplied index was invalid:" << index;
 
-  const Descriptor *desc = _protobuf->GetDescriptor();
-  const Reflection *refl = _protobuf->GetReflection();
-  const FieldDescriptor *field = desc->FindFieldByNumber(index.row());
+  const FieldDescriptor *field = _desc->FindFieldByNumber(index.row());
   if (!field) return false;
 
   const QVariant oldValue = this->data(index, role);
@@ -67,17 +62,17 @@ bool MessageModel::setData(const QModelIndex &index, const QVariant &value, int 
     case CppType::CPPTYPE_MESSAGE: {
       break;
     }
-    case CppType::CPPTYPE_INT32: refl->SetInt32(_protobuf, field, value.toInt()); break;
-    case CppType::CPPTYPE_INT64: refl->SetInt64(_protobuf, field, value.toLongLong()); break;
-    case CppType::CPPTYPE_UINT32: refl->SetUInt32(_protobuf, field, value.toUInt()); break;
-    case CppType::CPPTYPE_UINT64: refl->SetUInt64(_protobuf, field, value.toULongLong()); break;
-    case CppType::CPPTYPE_DOUBLE: refl->SetDouble(_protobuf, field, value.toDouble()); break;
-    case CppType::CPPTYPE_FLOAT: refl->SetFloat(_protobuf, field, value.toFloat()); break;
-    case CppType::CPPTYPE_BOOL: refl->SetBool(_protobuf, field, value.toBool()); break;
+    case CppType::CPPTYPE_INT32: _refl->SetInt32(_protobuf, field, value.toInt()); break;
+    case CppType::CPPTYPE_INT64: _refl->SetInt64(_protobuf, field, value.toLongLong()); break;
+    case CppType::CPPTYPE_UINT32: _refl->SetUInt32(_protobuf, field, value.toUInt()); break;
+    case CppType::CPPTYPE_UINT64: _refl->SetUInt64(_protobuf, field, value.toULongLong()); break;
+    case CppType::CPPTYPE_DOUBLE: _refl->SetDouble(_protobuf, field, value.toDouble()); break;
+    case CppType::CPPTYPE_FLOAT: _refl->SetFloat(_protobuf, field, value.toFloat()); break;
+    case CppType::CPPTYPE_BOOL: _refl->SetBool(_protobuf, field, value.toBool()); break;
     case CppType::CPPTYPE_ENUM:
-      refl->SetEnum(_protobuf, field, field->enum_type()->FindValueByNumber(value.toInt()));
+      _refl->SetEnum(_protobuf, field, field->enum_type()->FindValueByNumber(value.toInt()));
       break;
-    case CppType::CPPTYPE_STRING: refl->SetString(_protobuf, field, value.toString().toStdString()); break;
+    case CppType::CPPTYPE_STRING: _refl->SetString(_protobuf, field, value.toString().toStdString()); break;
   }
 
   SetDirty(true);
@@ -96,9 +91,7 @@ QVariant MessageModel::dataInternal(const QModelIndex &index, int role) const {
   R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
   if (role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::DecorationRole) return QVariant();
 
-  const Descriptor *desc = _protobuf->GetDescriptor();
-  const Reflection *refl = _protobuf->GetReflection();
-  const FieldDescriptor *field = desc->FindFieldByNumber(index.row());
+  const FieldDescriptor *field = _desc->FindFieldByNumber(index.row());
 
   if (!field) {
     // Proto fields always start at one. So this bit of a hack for displaying data in a table
@@ -132,19 +125,19 @@ QVariant MessageModel::dataInternal(const QModelIndex &index, int role) const {
   }
 
   // If the field has't been initialized return an invalid QVariant. (see QVariant.isValid())
-  if (NO_DEFAULT && !refl->HasField(*_protobuf, field)) return QVariant();
+  if (NO_DEFAULT && !_refl->HasField(*_protobuf, field)) return QVariant();
 
   switch (field->cpp_type()) {
     case CppType::CPPTYPE_MESSAGE: R_EXPECT(false, QVariant()) << "The requested field " << index << " is a message";
-    case CppType::CPPTYPE_INT32: return refl->GetInt32(*_protobuf, field);
-    case CppType::CPPTYPE_INT64: return static_cast<long long>(refl->GetInt64(*_protobuf, field));
-    case CppType::CPPTYPE_UINT32: return refl->GetUInt32(*_protobuf, field);
-    case CppType::CPPTYPE_UINT64: return static_cast<unsigned long long>(refl->GetUInt64(*_protobuf, field));
-    case CppType::CPPTYPE_DOUBLE: return refl->GetDouble(*_protobuf, field);
-    case CppType::CPPTYPE_FLOAT: return refl->GetFloat(*_protobuf, field);
-    case CppType::CPPTYPE_BOOL: return refl->GetBool(*_protobuf, field);
-    case CppType::CPPTYPE_ENUM: return refl->GetEnumValue(*_protobuf, field);
-    case CppType::CPPTYPE_STRING: return QString::fromStdString(refl->GetString(*_protobuf, field));
+    case CppType::CPPTYPE_INT32: return _refl->GetInt32(*_protobuf, field);
+    case CppType::CPPTYPE_INT64: return static_cast<long long>(_refl->GetInt64(*_protobuf, field));
+    case CppType::CPPTYPE_UINT32: return _refl->GetUInt32(*_protobuf, field);
+    case CppType::CPPTYPE_UINT64: return static_cast<unsigned long long>(_refl->GetUInt64(*_protobuf, field));
+    case CppType::CPPTYPE_DOUBLE: return _refl->GetDouble(*_protobuf, field);
+    case CppType::CPPTYPE_FLOAT: return _refl->GetFloat(*_protobuf, field);
+    case CppType::CPPTYPE_BOOL: return _refl->GetBool(*_protobuf, field);
+    case CppType::CPPTYPE_ENUM: return _refl->GetEnumValue(*_protobuf, field);
+    case CppType::CPPTYPE_STRING: return QString::fromStdString(_refl->GetString(*_protobuf, field));
   }
 
   return QVariant();
@@ -166,8 +159,7 @@ QVariant MessageModel::headerData(int section, Qt::Orientation /*orientation*/, 
   // Proto fields always start at one. So this bit of a hack for displaying data in a table
   if (section == 0) return tr("Property");
 
-  const Descriptor *desc = _protobuf->GetDescriptor();
-  const FieldDescriptor *field = desc->FindFieldByNumber(section);
+  const FieldDescriptor *field = _desc->FindFieldByNumber(section);
 
   if (field != nullptr) return QString::fromStdString(field->name());
 
@@ -218,8 +210,8 @@ void UpdateReferences(MessageModel *model, const QString &type, const QString &o
   for (int row = 0; row < rows; row++) {
     Message *protobuf = model->GetBuffer();
 
-    const Descriptor *desc = protobuf->GetDescriptor();
-    const FieldDescriptor *field = desc->FindFieldByNumber(row);
+    const Descriptor *_desc = protobuf->GetDescriptor();
+    const FieldDescriptor *field = _desc->FindFieldByNumber(row);
     if (field != nullptr) {
       if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
         if (field->is_repeated()) {

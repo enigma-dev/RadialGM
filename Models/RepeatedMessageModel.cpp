@@ -5,9 +5,8 @@
 RepeatedMessageModel::RepeatedMessageModel(ProtoModel *parent, Message *message, const FieldDescriptor *field)
     : RepeatedModel<Message>(parent, message, field,
                              message->GetReflection()->GetMutableRepeatedFieldRef<Message>(message, field)) {
-  const Reflection *refl = _protobuf->GetReflection();
-  for (int j = 0; j < refl->FieldSize(*_protobuf, field); j++) {
-    _subModels.append(new MessageModel(parent, refl->MutableRepeatedMessage(_protobuf, field, j)));
+  for (int j = 0; j < _refl->FieldSize(*_protobuf, field); j++) {
+    _subModels.append(new MessageModel(parent, _refl->MutableRepeatedMessage(_protobuf, field, j)));
   }
 }
 

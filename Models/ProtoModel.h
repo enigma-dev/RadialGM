@@ -108,6 +108,8 @@ class ProtoModel : public QAbstractItemModel {
   bool _dirty;
   Message *_protobuf;
   ProtoModel *_parentModel;
+  const Descriptor *_desc;
+  const Reflection *_refl;
 };
 
 #endif
