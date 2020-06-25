@@ -61,7 +61,7 @@ jobs:
     
     - script: |
         set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
-        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -S dash
+        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Syu dash
         %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Syyuu
       displayName: Update MSYS2
     
