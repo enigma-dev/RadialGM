@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>211</width>
-    <height>281</height>
+    <width>194</width>
+    <height>286</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -43,7 +43,13 @@
     <number>4</number>
    </property>
    <item>
-    <widget class="QGroupBox" name="groupBox">
+    <widget class="QGroupBox" name="basicGroup">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
       <string>Basic</string>
      </property>
@@ -53,10 +59,7 @@
      <property name="checkable">
       <bool>false</bool>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_3">
-      <property name="spacing">
-       <number>4</number>
-      </property>
+     <layout class="QGridLayout" name="gridLayout">
       <property name="leftMargin">
        <number>4</number>
       </property>
@@ -69,8 +72,11 @@
       <property name="bottomMargin">
        <number>4</number>
       </property>
-      <item>
-       <widget class="QToolButton" name="toolButton_7">
+      <property name="spacing">
+       <number>4</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="QToolButton" name="createButton">
         <property name="toolTip">
          <string>Create</string>
         </property>
@@ -98,8 +104,8 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QToolButton" name="toolButton_6">
+      <item row="0" column="1">
+       <widget class="QToolButton" name="stepButton">
         <property name="toolTip">
          <string>Step</string>
         </property>
@@ -124,8 +130,8 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QToolButton" name="toolButton_5">
+      <item row="0" column="2">
+       <widget class="QToolButton" name="drawButton">
         <property name="toolTip">
          <string>Draw</string>
         </property>
@@ -150,8 +156,8 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QToolButton" name="toolButton_9">
+      <item row="0" column="3">
+       <widget class="QToolButton" name="destroyButton">
         <property name="toolTip">
          <string>Destroy</string>
         </property>
@@ -180,16 +186,22 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox_2">
+    <widget class="QGroupBox" name="specialGroup">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
       <string>Special</string>
      </property>
      <property name="flat">
       <bool>true</bool>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0">
-      <property name="spacing">
-       <number>4</number>
+     <layout class="QGridLayout" name="gridLayout_2" rowstretch="0" columnstretch="0,0,0">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetDefaultConstraint</enum>
       </property>
       <property name="leftMargin">
        <number>4</number>
@@ -203,8 +215,51 @@
       <property name="bottomMargin">
        <number>4</number>
       </property>
-      <item>
-       <widget class="QToolButton" name="toolButton">
+      <property name="spacing">
+       <number>4</number>
+      </property>
+      <item row="0" column="2">
+       <widget class="QToolButton" name="otherButton">
+        <property name="toolTip">
+         <string>Other</string>
+        </property>
+        <property name="text">
+         <string>Other</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../images.qrc">
+          <normaloff>:/events/other.png</normaloff>:/events/other.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QToolButton" name="alarmButton">
+        <property name="toolTip">
+         <string>Alarm</string>
+        </property>
+        <property name="text">
+         <string>Alarm</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../images.qrc">
+          <normaloff>:/events/alarm.png</normaloff>:/events/alarm.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QToolButton" name="collisionButton">
         <property name="toolTip">
          <string>Collision</string>
         </property>
@@ -226,51 +281,17 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QToolButton" name="toolButton_2">
-        <property name="toolTip">
-         <string>Alarm</string>
-        </property>
-        <property name="text">
-         <string>Alarm</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../images.qrc">
-          <normaloff>:/events/alarm.png</normaloff>:/events/alarm.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>32</width>
-          <height>32</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="toolButton_10">
-        <property name="toolTip">
-         <string>Other</string>
-        </property>
-        <property name="text">
-         <string>Other</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../images.qrc">
-          <normaloff>:/events/other.png</normaloff>:/events/other.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>32</width>
-          <height>32</height>
-         </size>
-        </property>
-       </widget>
-      </item>
      </layout>
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox_3">
+    <widget class="QGroupBox" name="inputGroup">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
       <string>Input</string>
      </property>
@@ -294,7 +315,7 @@
        <number>4</number>
       </property>
       <item>
-       <widget class="QToolButton" name="toolButton_3">
+       <widget class="QToolButton" name="keyboardButton">
         <property name="toolTip">
          <string>Keyboard</string>
         </property>
@@ -314,7 +335,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="toolButton_8">
+       <widget class="QToolButton" name="keyDownButton">
         <property name="toolTip">
          <string>Key Pressed</string>
         </property>
@@ -334,7 +355,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="toolButton_4">
+       <widget class="QToolButton" name="keyUpButton">
         <property name="toolTip">
          <string>Key Released</string>
         </property>
@@ -354,7 +375,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="toolButton_11">
+       <widget class="QToolButton" name="mouseButton">
         <property name="toolTip">
          <string>Mouse</string>
         </property>
@@ -377,14 +398,20 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox_4">
+    <widget class="QGroupBox" name="settingsGroup">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
       <string>Settings</string>
      </property>
      <property name="flat">
       <bool>true</bool>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
       <property name="spacing">
        <number>4</number>
       </property>
@@ -401,38 +428,69 @@
        <number>4</number>
       </property>
       <item>
-       <widget class="QRadioButton" name="radioButton">
-        <property name="text">
-         <string>Add</string>
+       <layout class="QHBoxLayout" name="modeGroup">
+        <property name="spacing">
+         <number>4</number>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QRadioButton" name="radioButton_3">
-        <property name="text">
-         <string>Duplicate</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QRadioButton" name="radioButton_2">
-        <property name="text">
-         <string>Replace</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
+        <item>
+         <widget class="QToolButton" name="modeButton">
+          <property name="toolTip">
+           <string>Mode</string>
+          </property>
+          <property name="text">
+           <string>Mode</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../images.qrc">
+            <normaloff>:/actions/add.png</normaloff>:/actions/add.png</iconset>
+          </property>
+          <property name="popupMode">
+           <enum>QToolButton::MenuButtonPopup</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="stayOpenButton">
+          <property name="toolTip">
+           <string>Stay Open</string>
+          </property>
+          <property name="text">
+           <string>Stay Open</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../images.qrc">
+            <normaloff>:/actions/preferences.png</normaloff>:/actions/preferences.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>16</width>
+            <height>16</height>
+           </size>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="objectCombo">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <item>
+           <property name="text">
+            <string>obj1</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
