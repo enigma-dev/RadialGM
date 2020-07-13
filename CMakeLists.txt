@@ -54,6 +54,7 @@ set(RGM_SOURCES
     MainWindow.cpp
     Dialogs/PreferencesDialog.cpp
     Dialogs/TimelineChangeMoment.cpp
+    Dialogs/EventDialog.cpp
     Components/ArtManager.cpp
     Components/Utility.cpp
     Components/QMenuView.cpp
@@ -100,6 +101,7 @@ set(RGM_HEADERS
     Dialogs/PreferencesDialog.h
     Dialogs/PreferencesKeys.h
     Dialogs/TimelineChangeMoment.h
+    Dialogs/EventDialog.h
     Components/Logger.h
     Components/RecentFiles.h
     Components/QMenuView.h
@@ -150,6 +152,7 @@ set(RGM_UI
     Dialogs/TimelineChangeMoment.ui
     Dialogs/PreferencesDialog.ui
     Dialogs/AddImageDialog.ui
+    Dialogs/EventDialog.ui
     Editors/CodeEditor.ui
     Editors/SoundEditor.ui
     Editors/BackgroundEditor.ui
