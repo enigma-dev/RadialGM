@@ -1,4 +1,5 @@
 #include "ObjectEditor.h"
+#include "Dialogs/EventDialog.h"
 
 #include "ui_ObjectEditor.h"
 
@@ -8,3 +9,8 @@ ObjectEditor::ObjectEditor(MessageModel* model, QWidget* parent) : BaseEditor(mo
 }
 
 ObjectEditor::~ObjectEditor() { delete _ui; }
+
+void ObjectEditor::on_actionAddEvent_triggered() {
+  auto evts = new EventDialog(this);
+  evts->show();
+}
