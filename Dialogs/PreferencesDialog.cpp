@@ -42,6 +42,19 @@ void PreferencesDialog::setupKeybindingUI() {
 
     ui->keybindingTree->addTopLevelItem(item);
   }
+
+  connect(ui->buttonBox->button(QDialogButtonBox::Reset), &QAbstractButton::clicked, this,
+          []() {
+    //TODO: Do something.
+  });
+  connect(ui->buttonBox->button(QDialogButtonBox::Open), &QAbstractButton::clicked, this,
+          []() {
+    //TODO: Do something.
+  });
+  connect(ui->buttonBox->button(QDialogButtonBox::Save), &QAbstractButton::clicked, this,
+          []() {
+    //TODO: Do something.
+  });
 }
 
 void PreferencesDialog::setupKeybindingContextUI() {
