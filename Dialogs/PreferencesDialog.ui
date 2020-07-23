@@ -345,10 +345,16 @@
                 <property name="text">
                  <string>Action</string>
                 </property>
+                <property name="textAlignment">
+                 <set>AlignCenter</set>
+                </property>
                </column>
                <column>
                 <property name="text">
                  <string>Shortcut</string>
+                </property>
+                <property name="textAlignment">
+                 <set>AlignCenter</set>
                 </property>
                </column>
                <item>
