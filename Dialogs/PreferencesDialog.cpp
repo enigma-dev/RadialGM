@@ -97,6 +97,8 @@ void PreferencesDialog::setupKeybindingUI() {
 
     settings.endGroup();
     settings.endGroup();
+
+    this->setupKeybindingContextUI();
   });
 
   connect(ui->keybindingButtons->button(QDialogButtonBox::Save), &QAbstractButton::clicked, this,
