@@ -3,22 +3,55 @@
 
 #include "PreferencesKeys.h"
 #include "main.h"
+#include "Components/Logger.h"
 
 #include "ui_MainWindow.h"
 #include "ui_SpriteEditor.h"
 #include "ui_SoundEditor.h"
+#include "ui_BackgroundEditor.h"
+#include "ui_PathEditor.h"
+#include "ui_FontEditor.h"
+#include "ui_SettingsEditor.h"
+#include "ui_TimelineEditor.h"
+#include "ui_ObjectEditor.h"
+#include "ui_RoomEditor.h"
 
 #include <QKeySequenceEdit>
 #include <QPushButton>
 #include <QSettings>
 #include <QStyleFactory>
 
+template <typename T, typename P = QWidget>
+P *keybindingFactory() {
+  P* context = new P();
+  T *form = new T();
+  form->setupUi(context);
+  return context;
+}
+
+using KeybindingFactory = std::function<QWidget*()>;
+using KeybindingContext = QPair<QString,KeybindingFactory>;
+static QList<KeybindingContext> keybindingContexts = {
+  {QObject::tr("Global"),keybindingFactory<Ui::MainWindow,QMainWindow>},
+  {QObject::tr("Sprite Editor"),keybindingFactory<Ui::SpriteEditor>},
+  {QObject::tr("Sound Editor"),keybindingFactory<Ui::SoundEditor>},
+  {QObject::tr("Background Editor"),keybindingFactory<Ui::BackgroundEditor>},
+  {QObject::tr("Path Editor"),keybindingFactory<Ui::PathEditor>},
+  //{QObject::tr("Script Editor"),keybindingFactory<Ui::ScriptEditor>},
+  //{QObject::tr("Shader Editor"),keybindingFactory<Ui::ShaderEditor>},
+  {QObject::tr("Font Editor"),keybindingFactory<Ui::FontEditor>},
+  {QObject::tr("Timeline Editor"),keybindingFactory<Ui::TimelineEditor>},
+  {QObject::tr("Object Editor"),keybindingFactory<Ui::ObjectEditor>},
+  {QObject::tr("Room Editor"),keybindingFactory<Ui::RoomEditor>}
+};
+
 PreferencesDialog::PreferencesDialog(QWidget *parent) : QDialog(parent), ui(new Ui::PreferencesDialog) {
   ui->setupUi(this);
   this->setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 
   foreach (QString styleName, QStyleFactory::keys()) { ui->styleCombo->addItem(styleName); }
-
+  this->setupKeybindingUI();
+  this->setupKeybindingContextUI();
   this->reset();
 
   connect(ui->buttonBox->button(QDialogButtonBox::RestoreDefaults), &QAbstractButton::clicked, this,
@@ -28,6 +61,65 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) : QDialog(parent), ui(new 
 }
 
 PreferencesDialog::~PreferencesDialog() { delete ui; }
+
+void PreferencesDialog::setupKeybindingUI() {
+  ui->keybindingTree->clear();
+  ui->keybindingTree->header()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
+  ui->keybindingTree->header()->setSectionResizeMode(1,QHeaderView::ResizeToContents);
+
+  foreach (KeybindingContext kctx, keybindingContexts) {
+    QTreeWidgetItem *item = new QTreeWidgetItem({kctx.first,"",""});
+    //item->setFirstColumnSpanned(true);
+    item->setExpanded(true);
+    QFont boldFont = item->font(0);
+    boldFont.setBold(true);
+    item->setFont(0,boldFont);
+    ui->keybindingTree->addTopLevelItem(item);
+  }
+  ui->keybindingTree->headerItem()->setFirstColumnSpanned(true);
+}
+
+void PreferencesDialog::setupKeybindingContextUI() {
+  R_EXPECT_V(keybindingContexts.size() == ui->keybindingTree->topLevelItemCount());
+  for (int i = 0; i < keybindingContexts.size(); ++i) {
+    auto tctx = ui->keybindingTree->topLevelItem(i);
+    for (int j = 0; j < tctx->childCount(); ++j)
+      tctx->removeChild(tctx->child(j));
+
+    auto kctx = keybindingContexts[i];
+    std::function<QWidget*()> ctxFactory = kctx.second;
+    QWidget *widget = ctxFactory();
+    R_EXPECT_V(widget);
+
+    QList<QAction*> actions = widget->findChildren<QAction*>(QString(),Qt::FindDirectChildrenOnly);
+    for (int i = 0; i < actions.size(); ++i) {
+      auto action = actions[i];
+      auto item = new QTreeWidgetItem();
+      //item->setFirstColumnSpanned(true);
+      item->setIcon(1, action->icon());
+
+      QHBoxLayout *hLayout = new QHBoxLayout();
+      auto shortcutEdit = new QKeySequenceEdit(action->shortcut());
+      QLabel *item1 = new QLabel(action->text());
+      item1->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+      QLabel *item2 = new QLabel();
+      item2->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
+      item1->setBuddy(shortcutEdit);
+      item2->setPixmap(action->icon().pixmap(16));
+
+      hLayout->addWidget(item2);
+      hLayout->addWidget(item1);
+      QWidget* actionWidget = new QWidget();
+      actionWidget->setLayout(hLayout);
+
+      tctx->addChild(item);
+      ui->keybindingTree->setItemWidget(item,0,item1);
+      ui->keybindingTree->setItemWidget(item,2,shortcutEdit);
+    }
+
+    delete widget;
+  }
+}
 
 void PreferencesDialog::apply() {
   QSettings settings;
@@ -81,47 +173,3 @@ void PreferencesDialog::restoreDefaultsClicked() {
 void PreferencesDialog::on_PreferencesDialog_accepted() { this->apply(); }
 
 void PreferencesDialog::on_PreferencesDialog_rejected() {}
-
-template <typename T, typename P = QWidget>
-P *KeybindingFactory() {
-  P* context = new P();
-  T *lol = new T();
-  lol->setupUi(context);
-  return context;
-}
-
-static QList<QPair<QString,std::function<QWidget*()>>> keybindingFactories = {
-  {QObject::tr("Global"),KeybindingFactory<Ui::MainWindow,QMainWindow>},
-  {QObject::tr("Sprite Editor"),KeybindingFactory<Ui::SpriteEditor>},
-  {QObject::tr("Sound Editor"),KeybindingFactory<Ui::SoundEditor>}
-};
-
-void PreferencesDialog::on_keybindingList_currentRowChanged(int row) {
-  auto keybindingFactory = keybindingFactories[0];
-  std::function<QWidget*()> factoryFunction = keybindingFactory.second;
-  QWidget *widget = factoryFunction();
-  QList<QAction*> actions = widget->findChildren<QAction*>(QString(),Qt::FindDirectChildrenOnly);
-  ui->keybindingTable->clearContents();
-  ui->keybindingTable->setRowCount(actions.size());
-  for (int i = 0; i < actions.size(); ++i) {
-    auto action = actions[i];
-    QHBoxLayout *hLayout = new QHBoxLayout();
-    auto shortcutValue = new QKeySequenceEdit(action->shortcut());
-    QLabel *item = new QLabel(action->text());
-    item->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
-    QLabel *item2 = new QLabel();
-    item2->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
-    item->setBuddy(shortcutValue);
-    item2->setPixmap(action->icon().pixmap(16));
-
-   // QFont boldFont = item->font();
-    //boldFont.setItalic(true);
-    //item->setFont(boldFont);
-    hLayout->addWidget(item2);
-    hLayout->addWidget(item);
-    QWidget* actionWidget = new QWidget();
-    actionWidget->setLayout(hLayout);
-    ui->keybindingTable->setCellWidget(i, 0, actionWidget);
-    ui->keybindingTable->setCellWidget(i, 1, shortcutValue);
-  }
-}
