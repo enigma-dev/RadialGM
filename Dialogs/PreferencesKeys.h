@@ -19,6 +19,8 @@ inline QString submitIssueURLKey() { return QStringLiteral("submitIssueURL"); }
 inline QString appearanceKey() { return QStringLiteral("Appearance"); }
 inline QString styleNameKey() { return QStringLiteral("styleName"); }
 
+inline QString keybindingKey() { return QStringLiteral("Keybinding"); }
+
 #include <QSettings>
 
 // settings value helpers to prevent duplication of the defaults

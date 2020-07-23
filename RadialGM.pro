@@ -66,6 +66,7 @@ LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
         -lgrpc++
 
 SOURCES += \
+    Dialogs/KeybindingPreferences.cpp \
     Dialogs/TimelineChangeMoment.cpp \
     Editors/ShaderEditor.cpp \
     Editors/SpriteEditor.cpp \
@@ -110,6 +111,7 @@ SOURCES += \
     Models/TreeSortFilterProxyModel.cpp
 
 HEADERS += \
+    Dialogs/KeybindingPreferences.h \
     Dialogs/TimelineChangeMoment.h \
     Editors/ShaderEditor.h \
     Editors/SpriteEditor.h \

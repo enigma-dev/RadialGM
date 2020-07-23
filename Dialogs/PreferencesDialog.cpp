@@ -2,48 +2,14 @@
 #include "ui_PreferencesDialog.h"
 
 #include "PreferencesKeys.h"
+#include "KeybindingPreferences.h"
 #include "main.h"
 #include "Components/Logger.h"
-
-#include "ui_MainWindow.h"
-#include "ui_SpriteEditor.h"
-#include "ui_SoundEditor.h"
-#include "ui_BackgroundEditor.h"
-#include "ui_PathEditor.h"
-#include "ui_FontEditor.h"
-#include "ui_SettingsEditor.h"
-#include "ui_TimelineEditor.h"
-#include "ui_ObjectEditor.h"
-#include "ui_RoomEditor.h"
 
 #include <QKeySequenceEdit>
 #include <QPushButton>
 #include <QSettings>
 #include <QStyleFactory>
-
-template <typename T, typename P = QWidget>
-P *keybindingFactory() {
-  P* context = new P();
-  T *form = new T();
-  form->setupUi(context);
-  return context;
-}
-
-using KeybindingFactory = std::function<QWidget*()>;
-using KeybindingContext = QPair<QString,KeybindingFactory>;
-static QList<KeybindingContext> keybindingContexts = {
-  {QObject::tr("Global"),keybindingFactory<Ui::MainWindow,QMainWindow>},
-  {QObject::tr("Sprite Editor"),keybindingFactory<Ui::SpriteEditor>},
-  {QObject::tr("Sound Editor"),keybindingFactory<Ui::SoundEditor>},
-  {QObject::tr("Background Editor"),keybindingFactory<Ui::BackgroundEditor>},
-  {QObject::tr("Path Editor"),keybindingFactory<Ui::PathEditor>},
-  //{QObject::tr("Script Editor"),keybindingFactory<Ui::ScriptEditor>},
-  //{QObject::tr("Shader Editor"),keybindingFactory<Ui::ShaderEditor>},
-  {QObject::tr("Font Editor"),keybindingFactory<Ui::FontEditor>},
-  {QObject::tr("Timeline Editor"),keybindingFactory<Ui::TimelineEditor>},
-  {QObject::tr("Object Editor"),keybindingFactory<Ui::ObjectEditor>},
-  {QObject::tr("Room Editor"),keybindingFactory<Ui::RoomEditor>}
-};
 
 PreferencesDialog::PreferencesDialog(QWidget *parent) : QDialog(parent), ui(new Ui::PreferencesDialog) {
   ui->setupUi(this);
@@ -64,19 +30,16 @@ PreferencesDialog::~PreferencesDialog() { delete ui; }
 
 void PreferencesDialog::setupKeybindingUI() {
   ui->keybindingTree->clear();
-  // ui->keybindingTree->headerItem()->setFirstColumnSpanned(true);
-  ui->keybindingTree->header()->resizeSections(QHeaderView::ResizeToContents);
-  ui->keybindingTree->header()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
-  ui->keybindingTree->header()->setSectionResizeMode(1,QHeaderView::ResizeToContents);
-  ui->keybindingTree->header()->setSectionResizeMode(2,QHeaderView::Stretch);
+  ui->keybindingTree->header()->setSectionResizeMode(0,QHeaderView::Stretch);
+  ui->keybindingTree->header()->setSectionResizeMode(1,QHeaderView::Stretch);
 
   foreach (KeybindingContext kctx, keybindingContexts) {
-    QTreeWidgetItem *item = new QTreeWidgetItem({kctx.first,"",""});
-    //item->setFirstColumnSpanned(true);
+    QTreeWidgetItem *item = new QTreeWidgetItem({kctx.first,""});
 
     QFont boldFont = item->font(0);
     boldFont.setBold(true);
     item->setFont(0,boldFont);
+
     ui->keybindingTree->addTopLevelItem(item);
   }
 }
@@ -97,17 +60,22 @@ void PreferencesDialog::setupKeybindingContextUI() {
     for (int i = 0; i < actions.size(); ++i) {
       auto action = actions[i];
       auto item = new QTreeWidgetItem();
-      //item->setFirstColumnSpanned(true);
-      item->setIcon(1, action->icon());
+
+      QIcon icon = action->icon();
+      if (icon.isNull()) {
+        QPixmap pm(18,18);
+        pm.fill(Qt::transparent);
+        icon = QIcon(pm);
+      }
+      item->setIcon(0, icon);
 
       auto shortcutEdit = new QKeySequenceEdit(action->shortcut());
       QLabel *label = new QLabel(action->text());
-      label->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
       label->setBuddy(shortcutEdit);
 
       tctx->addChild(item);
       ui->keybindingTree->setItemWidget(item,0,label);
-      ui->keybindingTree->setItemWidget(item,2,shortcutEdit);
+      ui->keybindingTree->setItemWidget(item,1,shortcutEdit);
     }
 
     tctx->setExpanded(true);

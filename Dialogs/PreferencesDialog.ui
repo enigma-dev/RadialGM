@@ -339,16 +339,11 @@
                 <number>100</number>
                </attribute>
                <attribute name="headerStretchLastSection">
-                <bool>true</bool>
+                <bool>false</bool>
                </attribute>
                <column>
                 <property name="text">
                  <string>Action</string>
-                </property>
-               </column>
-               <column>
-                <property name="text">
-                 <string>Icon</string>
                 </property>
                </column>
                <column>
@@ -366,9 +361,6 @@
                 <property name="text">
                  <string/>
                 </property>
-                <property name="text">
-                 <string/>
-                </property>
                 <property name="flags">
                  <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
                 </property>
@@ -378,9 +370,6 @@
                  </property>
                  <property name="textAlignment">
                   <set>AlignTrailing|AlignVCenter</set>
-                 </property>
-                 <property name="text">
-                  <string/>
                  </property>
                  <property name="icon">
                   <iconset resource="../images.qrc">
@@ -399,9 +388,6 @@
                  </property>
                  <property name="textAlignment">
                   <set>AlignTrailing|AlignVCenter</set>
-                 </property>
-                 <property name="text">
-                  <string/>
                  </property>
                  <property name="icon">
                   <iconset resource="../images.qrc">
@@ -423,9 +409,6 @@
                  </property>
                  <property name="textAlignment">
                   <set>AlignTrailing|AlignVCenter</set>
-                 </property>
-                 <property name="text">
-                  <string/>
                  </property>
                  <property name="icon">
                   <iconset resource="../images.qrc">
