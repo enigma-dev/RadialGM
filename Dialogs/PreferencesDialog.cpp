@@ -6,9 +6,10 @@
 #include "main.h"
 #include "Components/Logger.h"
 
+#include <QFileDialog>
+#include <QJsonDocument>
 #include <QKeySequenceEdit>
 #include <QPushButton>
-#include <QSettings>
 #include <QStyleFactory>
 
 PreferencesDialog::PreferencesDialog(QWidget *parent) : QDialog(parent), ui(new Ui::PreferencesDialog) {
@@ -17,7 +18,6 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) : QDialog(parent), ui(new 
 
   foreach (QString styleName, QStyleFactory::keys()) { ui->styleCombo->addItem(styleName); }
   this->setupKeybindingUI();
-  this->setupKeybindingContextUI();
   this->reset();
 
   connect(ui->buttonBox->button(QDialogButtonBox::RestoreDefaults), &QAbstractButton::clicked, this,
@@ -27,6 +27,31 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) : QDialog(parent), ui(new 
 }
 
 PreferencesDialog::~PreferencesDialog() { delete ui; }
+
+QJsonObject PreferencesDialog::groupToJson(const QSettings& settings) {
+  QJsonObject json;
+  QStringList ctxGroups = settings.childGroups();
+  for (QString ctx : ctxGroups) {
+    QJsonObject ctxJson;
+    QStringList keybindings = settings.childGroups();
+    for (QString keybinding : keybindings)
+      ctxJson[keybinding] = settings.value(ctx + "/" + keybinding).toString();
+    json[ctx] = ctxJson;
+  }
+  return json;
+}
+
+void PreferencesDialog::groupFromJson(QSettings& settings, QJsonObject obj) {
+  QStringList ctxGroups = obj.keys();
+  for (QString ctx : ctxGroups) {
+    settings.beginGroup(ctx);
+    QJsonObject ctxJson = obj[ctx].toObject();
+    QStringList keybindings = ctxJson.keys();
+    for (QString keybinding : keybindings)
+      settings.setValue(keybinding, ctxJson[keybinding].toString());
+    settings.endGroup();
+  }
+}
 
 void PreferencesDialog::setupKeybindingUI() {
   ui->keybindingTree->clear();
@@ -43,17 +68,58 @@ void PreferencesDialog::setupKeybindingUI() {
     ui->keybindingTree->addTopLevelItem(item);
   }
 
-  connect(ui->buttonBox->button(QDialogButtonBox::Reset), &QAbstractButton::clicked, this,
-          []() {
-    //TODO: Do something.
+  connect(ui->keybindingButtons->button(QDialogButtonBox::RestoreDefaults), &QAbstractButton::clicked, this,
+          [&]() {
+    QSettings settings;
+    settings.beginGroup(preferencesKey());
+    settings.remove(keybindingKey());
+    settings.endGroup(); // Preferences/Keybinding
+    this->setupKeybindingContextUI();
   });
-  connect(ui->buttonBox->button(QDialogButtonBox::Open), &QAbstractButton::clicked, this,
+
+  connect(ui->keybindingButtons->button(QDialogButtonBox::Open), &QAbstractButton::clicked, this,
           []() {
-    //TODO: Do something.
+    QString openFileName = QFileDialog::getOpenFileName(
+          nullptr, tr("Open Keybindings"), "",
+          tr("All Files (*.*);;JSON (*.json)")
+    );
+    QFile openFile(openFileName);
+
+    openFile.open(QFile::ReadOnly | QFile::Text);
+    QJsonDocument doc = QJsonDocument::fromJson(openFile.readAll());
+    openFile.close();
+
+    QSettings settings;
+    settings.beginGroup(preferencesKey());
+    settings.beginGroup(keybindingKey());
+
+    groupFromJson(settings, doc.object());
+
+    settings.endGroup();
+    settings.endGroup();
   });
-  connect(ui->buttonBox->button(QDialogButtonBox::Save), &QAbstractButton::clicked, this,
+
+  connect(ui->keybindingButtons->button(QDialogButtonBox::Save), &QAbstractButton::clicked, this,
           []() {
-    //TODO: Do something.
+    QString saveFileName = QFileDialog::getSaveFileName(
+          nullptr, tr("Save Keybindings"), "",
+          tr("All Files (*.*);;JSON (*.json)")
+    );
+    QFile saveFile(saveFileName);
+
+    QSettings settings;
+    settings.beginGroup(preferencesKey());
+    settings.beginGroup(keybindingKey());
+
+    QJsonObject json = groupToJson(settings);
+
+    settings.endGroup();
+    settings.endGroup();
+
+    QJsonDocument doc(json);
+    saveFile.open(QFile::WriteOnly | QFile::Text | QFile::Truncate);
+    saveFile.write(doc.toJson());
+    saveFile.close();
   });
 }
 
@@ -61,8 +127,8 @@ void PreferencesDialog::setupKeybindingContextUI() {
   R_EXPECT_V(keybindingContexts.size() == ui->keybindingTree->topLevelItemCount());
   for (int i = 0; i < keybindingContexts.size(); ++i) {
     auto tctx = ui->keybindingTree->topLevelItem(i);
-    for (int j = 0; j < tctx->childCount(); ++j)
-      tctx->removeChild(tctx->child(j));
+    while (tctx->childCount() > 0)
+      tctx->removeChild(tctx->child(0));
 
     auto kctx = keybindingContexts[i];
     std::function<QWidget*()> ctxFactory = kctx.second;
@@ -84,7 +150,7 @@ void PreferencesDialog::setupKeybindingContextUI() {
 
       auto shortcutEdit = new QKeySequenceEdit(action->shortcut());
       QLabel *label = new QLabel(action->text());
-      label->setBuddy(shortcutEdit);
+      label->setBuddy(label);
 
       tctx->addChild(item);
       ui->keybindingTree->setItemWidget(item,0,label);
@@ -130,8 +196,11 @@ void PreferencesDialog::reset() {
   settings.endGroup();  // Preferences
 
   foreach (QString styleName, QStyleFactory::keys()) {
-    if (style()->objectName().toLower() == styleName.toLower()) ui->styleCombo->setCurrentText(styleName);
+    if (style()->objectName().toLower() == styleName.toLower())
+      ui->styleCombo->setCurrentText(styleName);
   }
+
+  this->setupKeybindingContextUI();
 }
 
 void PreferencesDialog::applyClicked() { this->apply(); }
