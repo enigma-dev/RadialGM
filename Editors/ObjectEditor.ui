@@ -324,6 +324,35 @@
         <number>4</number>
        </property>
        <item>
+        <widget class="QToolButton" name="addEventButton">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Add Event</string>
+         </property>
+         <property name="text">
+          <string>Add Event</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../images.qrc">
+           <normaloff>:/actions/add.png</normaloff>:/actions/add.png</iconset>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <property name="popupMode">
+          <enum>QToolButton::MenuButtonPopup</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QToolButton" name="changeEventButton">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
@@ -347,73 +376,27 @@
         </widget>
        </item>
        <item>
-        <widget class="QToolButton" name="addEventButton">
-         <property name="toolTip">
-          <string>Add Event</string>
-         </property>
-         <property name="text">
-          <string>Add Event</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../images.qrc">
-           <normaloff>:/actions/add.png</normaloff>:/actions/add.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QToolButton" name="toolButton">
-         <property name="toolTip">
-          <string>Replace Event</string>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
          <property name="text">
-          <string>Replace Event</string>
+          <string>Create Event</string>
          </property>
          <property name="icon">
           <iconset resource="../images.qrc">
-           <normaloff>:/events/event.png</normaloff>:/events/event.png</iconset>
+           <normaloff>:/events/create.png</normaloff>:/events/create.png</iconset>
+         </property>
+         <property name="popupMode">
+          <enum>QToolButton::MenuButtonPopup</enum>
+         </property>
+         <property name="toolButtonStyle">
+          <enum>Qt::ToolButtonTextBesideIcon</enum>
          </property>
         </widget>
-       </item>
-       <item>
-        <widget class="QToolButton" name="toolButton_2">
-         <property name="toolTip">
-          <string>Duplicate Event</string>
-         </property>
-         <property name="text">
-          <string>Duplicate Event</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../images.qrc">
-           <normaloff>:/actions/copy.png</normaloff>:/actions/copy.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QToolButton" name="editEventButton">
-         <property name="toolTip">
-          <string>Edit Event</string>
-         </property>
-         <property name="text">
-          <string>Edit Event</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../images.qrc">
-           <normaloff>:/actions/edit.png</normaloff>:/actions/edit.png</iconset>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="undoEditSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
        </item>
        <item>
         <widget class="QToolButton" name="deleteEventButton">
@@ -441,6 +424,53 @@
          </property>
          <property name="arrowType">
           <enum>Qt::NoArrow</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="undoButton">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Undo</string>
+         </property>
+         <property name="text">
+          <string>Undo</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../images.qrc">
+           <normaloff>:/actions/undo.png</normaloff>:/actions/undo.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="undoEditSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QToolButton" name="editEventButton">
+         <property name="toolTip">
+          <string>Edit Event</string>
+         </property>
+         <property name="text">
+          <string>Edit Event</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../images.qrc">
+           <normaloff>:/actions/edit.png</normaloff>:/actions/edit.png</iconset>
          </property>
         </widget>
        </item>
@@ -543,22 +573,5 @@
  <resources>
   <include location="../images.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>addEventButton</sender>
-   <signal>pressed()</signal>
-   <receiver>actionAddEvent</receiver>
-   <slot>trigger()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>215</x>
-     <y>18</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>
