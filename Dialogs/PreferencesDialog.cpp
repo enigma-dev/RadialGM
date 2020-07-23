@@ -64,19 +64,21 @@ PreferencesDialog::~PreferencesDialog() { delete ui; }
 
 void PreferencesDialog::setupKeybindingUI() {
   ui->keybindingTree->clear();
+  // ui->keybindingTree->headerItem()->setFirstColumnSpanned(true);
+  ui->keybindingTree->header()->resizeSections(QHeaderView::ResizeToContents);
   ui->keybindingTree->header()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
   ui->keybindingTree->header()->setSectionResizeMode(1,QHeaderView::ResizeToContents);
+  ui->keybindingTree->header()->setSectionResizeMode(2,QHeaderView::Stretch);
 
   foreach (KeybindingContext kctx, keybindingContexts) {
     QTreeWidgetItem *item = new QTreeWidgetItem({kctx.first,"",""});
     //item->setFirstColumnSpanned(true);
-    item->setExpanded(true);
+
     QFont boldFont = item->font(0);
     boldFont.setBold(true);
     item->setFont(0,boldFont);
     ui->keybindingTree->addTopLevelItem(item);
   }
-  ui->keybindingTree->headerItem()->setFirstColumnSpanned(true);
 }
 
 void PreferencesDialog::setupKeybindingContextUI() {
@@ -98,25 +100,17 @@ void PreferencesDialog::setupKeybindingContextUI() {
       //item->setFirstColumnSpanned(true);
       item->setIcon(1, action->icon());
 
-      QHBoxLayout *hLayout = new QHBoxLayout();
       auto shortcutEdit = new QKeySequenceEdit(action->shortcut());
-      QLabel *item1 = new QLabel(action->text());
-      item1->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
-      QLabel *item2 = new QLabel();
-      item2->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
-      item1->setBuddy(shortcutEdit);
-      item2->setPixmap(action->icon().pixmap(16));
-
-      hLayout->addWidget(item2);
-      hLayout->addWidget(item1);
-      QWidget* actionWidget = new QWidget();
-      actionWidget->setLayout(hLayout);
+      QLabel *label = new QLabel(action->text());
+      label->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
+      label->setBuddy(shortcutEdit);
 
       tctx->addChild(item);
-      ui->keybindingTree->setItemWidget(item,0,item1);
+      ui->keybindingTree->setItemWidget(item,0,label);
       ui->keybindingTree->setItemWidget(item,2,shortcutEdit);
     }
 
+    tctx->setExpanded(true);
     delete widget;
   }
 }

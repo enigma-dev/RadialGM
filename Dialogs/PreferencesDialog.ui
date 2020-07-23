@@ -305,12 +305,6 @@
                <property name="selectionBehavior">
                 <enum>QAbstractItemView::SelectItems</enum>
                </property>
-               <property name="iconSize">
-                <size>
-                 <width>18</width>
-                 <height>18</height>
-                </size>
-               </property>
                <property name="textElideMode">
                 <enum>Qt::ElideRight</enum>
                </property>
