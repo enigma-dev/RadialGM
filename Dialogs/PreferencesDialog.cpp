@@ -4,6 +4,11 @@
 #include "PreferencesKeys.h"
 #include "main.h"
 
+#include "ui_MainWindow.h"
+#include "ui_SpriteEditor.h"
+#include "ui_SoundEditor.h"
+
+#include <QKeySequenceEdit>
 #include <QPushButton>
 #include <QSettings>
 #include <QStyleFactory>
@@ -76,3 +81,47 @@ void PreferencesDialog::restoreDefaultsClicked() {
 void PreferencesDialog::on_PreferencesDialog_accepted() { this->apply(); }
 
 void PreferencesDialog::on_PreferencesDialog_rejected() {}
+
+template <typename T, typename P = QWidget>
+P *KeybindingFactory() {
+  P* context = new P();
+  T *lol = new T();
+  lol->setupUi(context);
+  return context;
+}
+
+static QList<QPair<QString,std::function<QWidget*()>>> keybindingFactories = {
+  {QObject::tr("Global"),KeybindingFactory<Ui::MainWindow,QMainWindow>},
+  {QObject::tr("Sprite Editor"),KeybindingFactory<Ui::SpriteEditor>},
+  {QObject::tr("Sound Editor"),KeybindingFactory<Ui::SoundEditor>}
+};
+
+void PreferencesDialog::on_keybindingList_currentRowChanged(int row) {
+  auto keybindingFactory = keybindingFactories[0];
+  std::function<QWidget*()> factoryFunction = keybindingFactory.second;
+  QWidget *widget = factoryFunction();
+  QList<QAction*> actions = widget->findChildren<QAction*>(QString(),Qt::FindDirectChildrenOnly);
+  ui->keybindingTable->clearContents();
+  ui->keybindingTable->setRowCount(actions.size());
+  for (int i = 0; i < actions.size(); ++i) {
+    auto action = actions[i];
+    QHBoxLayout *hLayout = new QHBoxLayout();
+    auto shortcutValue = new QKeySequenceEdit(action->shortcut());
+    QLabel *item = new QLabel(action->text());
+    item->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+    QLabel *item2 = new QLabel();
+    item2->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
+    item->setBuddy(shortcutValue);
+    item2->setPixmap(action->icon().pixmap(16));
+
+   // QFont boldFont = item->font();
+    //boldFont.setItalic(true);
+    //item->setFont(boldFont);
+    hLayout->addWidget(item2);
+    hLayout->addWidget(item);
+    QWidget* actionWidget = new QWidget();
+    actionWidget->setLayout(hLayout);
+    ui->keybindingTable->setCellWidget(i, 0, actionWidget);
+    ui->keybindingTable->setCellWidget(i, 1, shortcutValue);
+  }
+}

@@ -22,6 +22,8 @@ class PreferencesDialog : public QDialog {
   void on_PreferencesDialog_accepted();
   void on_PreferencesDialog_rejected();
 
+  void on_keybindingList_currentRowChanged(int row);
+
  private:
   Ui::PreferencesDialog *ui;
 
