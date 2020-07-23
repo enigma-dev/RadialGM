@@ -78,11 +78,12 @@ void PreferencesDialog::setupKeybindingUI() {
   });
 
   connect(ui->keybindingButtons->button(QDialogButtonBox::Open), &QAbstractButton::clicked, this,
-          []() {
+          [&]() {
     QString openFileName = QFileDialog::getOpenFileName(
           nullptr, tr("Open Keybindings"), "",
           tr("All Files (*.*);;JSON (*.json)")
     );
+    if (openFileName.isNull()) return; // cancelled
     QFile openFile(openFileName);
 
     openFile.open(QFile::ReadOnly | QFile::Text);
@@ -107,6 +108,7 @@ void PreferencesDialog::setupKeybindingUI() {
           nullptr, tr("Save Keybindings"), "",
           tr("All Files (*.*);;JSON (*.json)")
     );
+    if (saveFileName.isNull()) return; // cancelled
     QFile saveFile(saveFileName);
 
     QSettings settings;
