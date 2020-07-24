@@ -6,6 +6,7 @@
 #include "ui_BackgroundEditor.h"
 #include "ui_PathEditor.h"
 #include "ui_FontEditor.h"
+#include "ui_CodeEditor.h"
 #include "ui_SettingsEditor.h"
 #include "ui_TimelineEditor.h"
 #include "ui_ObjectEditor.h"
@@ -25,8 +26,7 @@ QList<KeybindingContext> keybindingContexts = {
   {QObject::tr("Sound Editor"),keybindingFactory<Ui::SoundEditor>},
   {QObject::tr("Background Editor"),keybindingFactory<Ui::BackgroundEditor>},
   {QObject::tr("Path Editor"),keybindingFactory<Ui::PathEditor>},
-  //{QObject::tr("Script Editor"),keybindingFactory<Ui::ScriptEditor>},
-  //{QObject::tr("Shader Editor"),keybindingFactory<Ui::ShaderEditor>},
+  {QObject::tr("Code Editor"),keybindingFactory<Ui::CodeEditor>},
   {QObject::tr("Font Editor"),keybindingFactory<Ui::FontEditor>},
   {QObject::tr("Timeline Editor"),keybindingFactory<Ui::TimelineEditor>},
   {QObject::tr("Object Editor"),keybindingFactory<Ui::ObjectEditor>},
