@@ -284,8 +284,10 @@ void MainWindow::openFile(QString fName) {
   QFileInfo fileInfo(fName);
   const QString suffix = fileInfo.suffix();
 
-  buffers::Project *loadedProject = nullptr;
-  if (suffix == "gm81" || suffix == "gmk" || suffix == "gm6" || suffix == "gmd") {
+  std::unique_ptr<buffers::Project> loadedProject = nullptr;
+  if (suffix == "egm") {
+    loadedProject = egm::LoadEGM(fName.toStdString());
+  } else if (suffix == "gm81" || suffix == "gmk" || suffix == "gm6" || suffix == "gmd") {
     loadedProject = gmk::LoadGMK(fName.toStdString());
   } else if (suffix == "gmx") {
     loadedProject = gmx::LoadGMX(fName.toStdString());
@@ -301,7 +303,7 @@ void MainWindow::openFile(QString fName) {
 
   MainWindow::setWindowTitle(fileInfo.fileName() + " - ENIGMA");
   _recentFiles->prependFile(fName);
-  openProject(std::unique_ptr<buffers::Project>(loadedProject));
+  openProject(std::move(loadedProject));
 }
 
 void MainWindow::openNewProject() {
