@@ -25,6 +25,7 @@
 #include "Plugins/ServerPlugin.h"
 #endif
 
+#include "egm.h"
 #include "gmk.h"
 #include "gmx.h"
 #include "yyp.h"
