@@ -287,7 +287,8 @@ void MainWindow::openFile(QString fName) {
 
   std::unique_ptr<buffers::Project> loadedProject = nullptr;
   if (suffix == "egm") {
-    loadedProject = egm::LoadEGM(fName.toStdString());
+    egm::EGM egm;
+    loadedProject = egm.LoadEGM(fName.toStdString());
   } else if (suffix == "gm81" || suffix == "gmk" || suffix == "gm6" || suffix == "gmd") {
     loadedProject = gmk::LoadGMK(fName.toStdString());
   } else if (suffix == "gmx") {
