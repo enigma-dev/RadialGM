@@ -2,7 +2,7 @@
 #include "RepeatedMessageModel.h"
 #include "MessageModel.h"
 
-RepeatedMessageModel::RepeatedMessageModel(ProtoModel *parent, Message *message, const FieldDescriptor *field)
+RepeatedMessageModel::RepeatedMessageModel(QObject *parent, Message *message, const FieldDescriptor *field)
     : RepeatedModel<Message>(parent, message, field,
                              message->GetReflection()->GetMutableRepeatedFieldRef<Message>(message, field)) {
   const Reflection *refl = _protobuf->GetReflection();

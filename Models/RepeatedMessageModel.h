@@ -8,7 +8,7 @@ class MessageModel;
 class RepeatedMessageModel : public RepeatedModel<Message> {
   Q_OBJECT
  public:
-  RepeatedMessageModel(ProtoModel *parent, Message *message, const FieldDescriptor *field);
+  RepeatedMessageModel(QObject *parent, Message *message, const FieldDescriptor *field);
 
   // RepeatedMessage models hold multiple MessageModels
   // You can access a submodel by it's position within the data structure.

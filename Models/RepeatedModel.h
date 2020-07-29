@@ -11,7 +11,7 @@
 template <class T>
 class RepeatedModel : public ProtoModel {
  public:
-  RepeatedModel(ProtoModel *parent, Message *message, const FieldDescriptor *field, MutableRepeatedFieldRef<T> fieldRef)
+  RepeatedModel(QObject *parent, Message *message, const FieldDescriptor *field, MutableRepeatedFieldRef<T> fieldRef)
       : ProtoModel(parent, message), _field(field), _fieldRef(fieldRef) {}
 
   // Need to implement this in all RepeatedModels

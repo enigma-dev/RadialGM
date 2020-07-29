@@ -3,6 +3,7 @@
 
 #include "Components/ArtManager.h"
 #include "Models/ResourceModelMap.h"
+#include "RepeatedMessageModel.h"
 #include "treenode.pb.h"
 
 #include <QAbstractItemModel>
@@ -13,7 +14,7 @@
 using TypeCase = buffers::TreeNode::TypeCase;
 using IconMap = std::unordered_map<TypeCase, QIcon>;
 
-class TreeModel : public QAbstractItemModel {
+class TreeModel : public RepeatedMessageModel {
   Q_OBJECT
 
  public:

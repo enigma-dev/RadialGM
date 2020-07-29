@@ -11,7 +11,8 @@
 IconMap TreeModel::iconMap;
 
 TreeModel::TreeModel(buffers::TreeNode *root, ResourceModelMap *resourceMap, QObject *parent)
-    : QAbstractItemModel(parent), root(root), resourceMap(resourceMap) {
+    : RepeatedMessageModel(parent, root, root->GetDescriptor()->FindFieldByNumber(TreeNode::kChildFieldNumber)),
+      root(root), resourceMap(resourceMap) {
   iconMap = {{TypeCase::kFolder, ArtManager::GetIcon("group")},
              {TypeCase::kSprite, ArtManager::GetIcon("sprite")},
              {TypeCase::kSound, ArtManager::GetIcon("sound")},
