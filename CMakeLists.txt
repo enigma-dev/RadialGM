@@ -59,12 +59,8 @@ set(RGM_SOURCES
     Components/QMenuView.cpp
     Components/RecentFiles.cpp
     Models/TreeSortFilterProxyModel.cpp
-    Models/MessageModel.cpp
-    Models/RepeatedImageModel.cpp
-    Models/RepeatedStringModel.cpp
     Models/ModelMapper.cpp
     Models/ProtoModel.cpp
-    Models/RepeatedMessageModel.cpp
     Models/ImmediateMapper.cpp
     Models/ResourceModelMap.cpp
     Models/TreeModel.cpp
@@ -107,16 +103,11 @@ set(RGM_HEADERS
     Components/QMenuView_p.h
     Components/Utility.h
     Models/TreeModel.h
-    Models/RepeatedStringModel.h
     Models/ResourceModelMap.h
     Models/ModelMapper.h
     Models/TreeSortFilterProxyModel.h
-    Models/RepeatedImageModel.h
-    Models/MessageModel.h
     Models/ImmediateMapper.h
-    Models/RepeatedMessageModel.h
     Models/ProtoModel.h
-    Models/RepeatedModel.h
     Editors/FontEditor.h
     Editors/PathEditor.h
     Editors/SpriteEditor.h
