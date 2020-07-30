@@ -11,6 +11,7 @@ using namespace buffers::resources;
 
 ShaderEditor::ShaderEditor(MessageModel* model, QWidget* parent)
     : BaseEditor(model, parent), _codeEditor(new CodeEditor(this)) {
+  this->setWindowIcon(QIcon(":/resources/shader.png"));
   QLayout* layout = new QVBoxLayout(this);
   layout->addWidget(_codeEditor);
   layout->setMargin(0);
