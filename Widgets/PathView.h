@@ -1,7 +1,6 @@
 #ifndef PATHVIEW_H
 #define PATHVIEW_H
 
-#include "Models/MessageModel.h"
 #include "RoomView.h"
 
 class PathView : public RoomView {
@@ -10,7 +9,6 @@ class PathView : public RoomView {
  public:
   explicit PathView(AssetScrollAreaBackground *parent = nullptr);
   void Paint(QPainter &painter) override;
-  void SetPathModel(MessageModel *_model);
 
   // Retrieves the number of points in the path.
   int Size() const;
@@ -41,7 +39,6 @@ class PathView : public RoomView {
   int selectedPointIndex = -1;
 
  protected:
-  MessageModel *_pathModel;
   // Used internally to reduce the number of proto model interactions.
   int EffectiveIndex(int n, int size, bool closed) const;
   // Used internally to reduce the number of proto model interactions.

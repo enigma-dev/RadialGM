@@ -69,10 +69,6 @@ SOURCES += \
     Dialogs/TimelineChangeMoment.cpp \
     Editors/ShaderEditor.cpp \
     Editors/SpriteEditor.cpp \
-    Models/MessageModel.cpp \
-    Models/RepeatedImageModel.cpp \
-    Models/RepeatedMessageModel.cpp \
-    Models/RepeatedStringModel.cpp \
     Widgets/AssetScrollAreaBackground.cpp \
     Widgets/PathView.cpp \
     Widgets/SpriteSubimageListView.cpp \
@@ -124,11 +120,6 @@ HEADERS += \
     Editors/TimelineEditor.h \
     Editors/RoomEditor.h \
     Editors/SettingsEditor.h \
-    Models/MessageModel.h \
-    Models/RepeatedImageModel.h \
-    Models/RepeatedMessageModel.h \
-    Models/RepeatedModel.h \
-    Models/RepeatedStringModel.h \
     Widgets/AssetScrollArea.h \
     Widgets/AssetScrollAreaBackground.h \
     Widgets/BackgroundView.h \

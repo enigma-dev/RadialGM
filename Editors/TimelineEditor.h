@@ -4,8 +4,6 @@
 #include "BaseEditor.h"
 #include "CodeEditor.h"
 
-#include "Models/RepeatedMessageModel.h"
-
 namespace Ui {
 class TimelineEditor;
 class CodeEditor;
@@ -15,7 +13,7 @@ class TimelineEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit TimelineEditor(MessageModel* model, QWidget* parent);
+  explicit TimelineEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent);
   ~TimelineEditor() override;
 
  public slots:
@@ -33,8 +31,7 @@ class TimelineEditor : public BaseEditor {
 
   CodeEditor* _codeEditor;
   Ui::TimelineEditor* _ui;
-  MessageModel* _timelineModel;
-  RepeatedMessageModel* _momentsModel;
+  ProtoModel* _timelineModel;
 };
 
 #endif  // TIMELINEEDITOR_H

@@ -1,8 +1,8 @@
 #ifndef MODELMAPPER_H
 #define MODELMAPPER_H
 
-#include "Models/ImmediateMapper.h"
-#include "Models/MessageModel.h"
+#include "ProtoModel.h"
+#include "ImmediateMapper.h"
 
 #include <google/protobuf/message.h>
 
@@ -10,7 +10,7 @@ class BaseEditor;
 
 class ModelMapper : public QObject {
  public:
-  ModelMapper(MessageModel *_model, BaseEditor *parent);
+  explicit ModelMapper(ProtoModel* model, BaseEditor* parent);
 
   // mapper
   void addMapping(QWidget *widget, int section, QByteArray propName = "");
@@ -18,14 +18,14 @@ class ModelMapper : public QObject {
   void toFirst();
 
   // model
-  MessageModel *GetModel();
+  ProtoModel* GetModel();
   void ReplaceBuffer(google::protobuf::Message *buffer);
   bool RestoreBackup();
   void SetDirty(bool dirty);
   bool IsDirty();
 
  protected:
-  MessageModel *_model;
+  ProtoModel* _model;
   ImmediateDataWidgetMapper *_mapper;
 };
 

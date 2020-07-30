@@ -11,7 +11,7 @@ class ObjectEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit ObjectEditor(MessageModel* model, QWidget* parent);
+  explicit ObjectEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent);
   ~ObjectEditor() override;
 
  private:

@@ -1,11 +1,15 @@
 #ifndef BASEEDTIOR_H
 #define BASEEDTIOR_H
 
-#include "Models/MessageModel.h"
+#include "Models/ProtoModel.h"
 #include "Models/ModelMapper.h"
+#include "treenode.pb.h"
 
 #include <QObject>
 #include <QWidget>
+
+using TreeNode = buffers::TreeNode;
+using TypeCase = TreeNode::TypeCase;
 
 static const QHash<int, int> ResTypeFields = {
     {TypeCase::kFolder, TreeNode::kFolderFieldNumber},     {TypeCase::kSprite, TreeNode::kSpriteFieldNumber},
@@ -19,7 +23,7 @@ class BaseEditor : public QWidget {
   Q_OBJECT
 
  public:
-  explicit BaseEditor(MessageModel *treeNodeModel, QWidget *parent);
+  explicit BaseEditor(ProtoModel *model, const QPersistentModelIndex& root, QWidget *parent);
 
   void ReplaceBuffer(google::protobuf::Message *buffer);
   bool HasFocus();
@@ -40,7 +44,7 @@ class BaseEditor : public QWidget {
 
   ModelMapper *_nodeMapper;
   ModelMapper *_resMapper;
-  MessageModel *_model;
+  ProtoModel *_model;
   bool _hasFocus = false;
 };
 

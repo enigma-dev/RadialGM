@@ -1,18 +1,11 @@
 #include "BaseEditor.h"
-#include "Models/MessageModel.h"
 
 #include <QCloseEvent>
 #include <QDebug>
 #include <QMessageBox>
 
-BaseEditor::BaseEditor(MessageModel* treeNodeModel, QWidget* parent)
-    : QWidget(parent), _nodeMapper(new ModelMapper(treeNodeModel, this)), _model(treeNodeModel) {
-  buffers::TreeNode* n = static_cast<buffers::TreeNode*>(treeNodeModel->GetBuffer());
-  _resMapper = new ModelMapper(treeNodeModel->GetSubModel<MessageModel*>(ResTypeFields[n->type_case()]), this);
-
-  // Backup should be deleted by Qt's garbage collector when this editor is closed
-  _resMapper->GetModel()->BackupModel(this);
-
+BaseEditor::BaseEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent)
+    : QWidget(parent), _nodeMapper(new ModelMapper(model, this)), _model(model) {
   connect(_model, &QAbstractItemModel::modelReset, [this]() { this->RebindSubModels(); });
 
   connect(this, &BaseEditor::FocusGained, [=]() { _hasFocus = true; });
@@ -48,12 +41,7 @@ void BaseEditor::ReplaceBuffer(google::protobuf::Message* buffer) { _resMapper->
 
 void BaseEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex& /*bottomRight*/, const QVariant& oldValue,
                              const QVector<int>& /*roles*/) {
-  buffers::TreeNode* n = static_cast<buffers::TreeNode*>(_nodeMapper->GetModel()->GetBuffer());
-  if (n == topLeft.internalPointer() && topLeft.row() == TreeNode::kNameFieldNumber) {
-    this->setWindowTitle(QString::fromStdString(n->name()));
-    emit ResourceRenamed(n->type_case(), oldValue.toString(), QString::fromStdString(n->name()));
-  }
-  _resMapper->SetDirty(true);
+
 }
 
 void BaseEditor::RebindSubModels() {

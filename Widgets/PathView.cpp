@@ -1,5 +1,4 @@
 #include "PathView.h"
-#include "Models/RepeatedMessageModel.h"
 
 #include <QPainterPath>
 
@@ -25,19 +24,13 @@ QPoint quadratic(QPoint start, QPoint handle, QPoint end, double position) {
 }
 
 int PathView::Size() const {
-  RepeatedMessageModel *pointsModel = _pathModel->GetSubModel<RepeatedMessageModel *>(Path::kPointsFieldNumber);
-  return pointsModel->rowCount();
+
 }
 
-bool PathView::Closed() const { return _pathModel->Data(Path::kClosedFieldNumber).toBool(); }
-bool PathView::Smooth() const { return _pathModel->Data(Path::kSmoothFieldNumber).toBool(); }
+bool PathView::Closed() const { return false; }
+bool PathView::Smooth() const { return false; }
 int PathView::Precision() const {
-  QVariant prec = _pathModel->Data(Path::kPrecisionFieldNumber);
-  if (!prec.isValid()) return 4;
-  int res = prec.toInt();
-  if (res < 1) return 1;
-  if (res > 8) return 8;
-  return res;
+  return 0;
 }
 
 int PathView::EffectiveIndex(int n, int size, bool closed) const {
@@ -56,9 +49,7 @@ int PathView::EffectiveIndex(int n, int size, bool closed) const {
 }
 QPoint PathView::EffectivePoint(int n, int size, bool closed) const { return Point(EffectiveIndex(n, size, closed)); }
 QPoint PathView::Point(int n) const {
-  RepeatedMessageModel *pointsModel = _pathModel->GetSubModel<RepeatedMessageModel *>(Path::kPointsFieldNumber);
-  return QPoint(pointsModel->Data(n, Path::Point::kXFieldNumber).toInt(),
-                pointsModel->Data(n, Path::Point::kYFieldNumber).toInt());
+  return QPoint();
 }
 
 namespace {
@@ -127,54 +118,5 @@ QVector<QPoint> PathView::RenderPoints(const QVector<QPoint> &user_points) const
 }
 
 void PathView::Paint(QPainter &painter) {
-  RoomView::Paint(painter);
 
-  RepeatedMessageModel *pointsModel = _pathModel->GetSubModel<RepeatedMessageModel *>(Path::kPointsFieldNumber);
-  if (!pointsModel->Empty()) {
-    int size = pointsModel->rowCount();
-
-    QPainterPath path;
-    QVector<QPoint> user_points(size);
-    for (int i = 0; i < size; ++i) user_points[i] = Point(i);
-
-    QVector<QPoint> rendered_points = RenderPoints(user_points);
-    path.moveTo(rendered_points[0]);
-    for (int i = 0; i < rendered_points.size(); ++i) {
-      path.lineTo(rendered_points[i]);
-    }
-
-    painter.setPen(QPen(Qt::white, 3));
-    painter.setBrush(Qt::NoBrush);
-    painter.drawPath(path);
-
-    painter.setPen(QPen(Qt::black, 1));
-
-    painter.setBrush(QBrush(Qt::blue));
-    for (const QPoint &point : user_points) {
-      painter.drawEllipse(point, 4, 4);
-    }
-
-    painter.setBrush(QBrush(Qt::green));
-    if (rendered_points.size() >= 2) {
-      QLineF start_vector(rendered_points[0], rendered_points[1]);
-      float angle = start_vector.angle();
-
-      painter.save();
-      painter.translate(rendered_points[0]);
-      painter.rotate(90 - angle);
-      const QPolygon startArrow({{0, -8}, {-6, 8}, {0, 4}, {6, 8}});
-      painter.drawPolygon(startArrow);
-      painter.restore();
-    }
-
-    if (selectedPointIndex != -1 && selectedPointIndex < user_points.size()) {
-      painter.setBrush(QBrush(Qt::red));
-      painter.drawEllipse(user_points[selectedPointIndex], 4, 4);
-    }
-  }
-
-  painter.setBrush(QBrush(Qt::yellow));
-  painter.drawEllipse(mousePos, 4, 4);
 }
-
-void PathView::SetPathModel(MessageModel *model) { _pathModel = model; }

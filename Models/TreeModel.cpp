@@ -2,7 +2,6 @@
 
 #include "Components/ArtManager.h"
 #include "Components/Logger.h"
-#include "Models/RepeatedImageModel.h"
 #include "Models/ResourceModelMap.h"
 
 #include <QCoreApplication>
@@ -11,7 +10,7 @@
 IconMap TreeModel::iconMap;
 
 TreeModel::TreeModel(buffers::TreeNode *root, ResourceModelMap *resourceMap, QObject *parent)
-    : QAbstractItemModel(parent), root(root), resourceMap(resourceMap) {
+    : ProtoModel(parent, root), root(root), resourceMap(resourceMap) {
   iconMap = {{TypeCase::kFolder, ArtManager::GetIcon("group")},
              {TypeCase::kSprite, ArtManager::GetIcon("sprite")},
              {TypeCase::kSound, ArtManager::GetIcon("sound")},
@@ -71,15 +70,6 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
       return bkg.isEmpty() ? QVariant() : ArtManager::GetIcon(bkg);
     }
 
-    if (item->type_case() == TypeCase::kObject) {
-      MessageModel *sprModel = GetObjectSprite(item->name());
-      if (sprModel == nullptr) return QVariant();
-      if (!sprModel->GetSubModel<RepeatedImageModel *>(Sprite::kSubimagesFieldNumber)->Empty()) {
-        QString spr = sprModel->GetSubModel<RepeatedImageModel *>(Sprite::kSubimagesFieldNumber)->Data(0).toString();
-        return spr.isEmpty() ? QVariant() : ArtManager::GetIcon(spr);
-      }
-    }
-
     const QIcon &icon = it->second;
     if (item->type_case() == TypeCase::kFolder && item->child_size() <= 0) {
       return QIcon(icon.pixmap(icon.availableSizes().first(), QIcon::Disabled));
@@ -90,17 +80,6 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
   }
 
   return QVariant();
-}
-
-Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const {
-  Qt::ItemFlags flags = QAbstractItemModel::flags(index);
-
-  if (index.isValid()) {
-    auto *node = static_cast<TreeNode *>(index.internalPointer());
-    if (node->folder()) flags |= Qt::ItemIsDropEnabled;
-    return Qt::ItemIsDragEnabled | Qt::ItemIsEditable | flags;
-  } else
-    return Qt::ItemIsDropEnabled | flags;
 }
 
 QVariant TreeModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int role) const {
@@ -154,36 +133,6 @@ int TreeModel::rowCount(const QModelIndex &parent) const {
     parentItem = static_cast<buffers::TreeNode *>(parent.internalPointer());
 
   return parentItem->child_size();
-}
-
-Qt::DropActions TreeModel::supportedDropActions() const { return Qt::MoveAction | Qt::CopyAction; }
-
-QStringList TreeModel::mimeTypes() const { return QStringList(treeNodeMime()); }
-
-QMimeData *TreeModel::mimeData(const QModelIndexList &indexes) const {
-  QMimeData *mimeData = new QMimeData();
-  QByteArray data;
-
-  QDataStream stream(&data, QIODevice::WriteOnly);
-  QList<QModelIndex> nodes;
-
-  for (const QModelIndex &index : indexes) {
-    if (!index.isValid() || nodes.contains(index)) continue;
-    nodes << index;
-  }
-
-  // rows are moved starting with the lowest so we can create
-  // unique names in the order of insertion
-  std::sort(nodes.begin(), nodes.end(), std::less<QModelIndex>());
-
-  stream << QCoreApplication::applicationPid();
-  stream << nodes.count();
-  for (const QModelIndex &index : nodes) {
-    TreeNode *node = static_cast<TreeNode *>(index.internalPointer());
-    stream << reinterpret_cast<qlonglong>(node) << index.row();
-  }
-  mimeData->setData(treeNodeMime(), data);
-  return mimeData;
 }
 
 template <typename T>

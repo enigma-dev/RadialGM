@@ -2,8 +2,6 @@
 #define SPRITEVIEW_H
 
 #include "AssetView.h"
-#include "Models/MessageModel.h"
-#include "Models/RepeatedImageModel.h"
 
 #include <QObject>
 #include <QWidget>
@@ -13,7 +11,6 @@ class SpriteView : public AssetView {
  public:
   SpriteView(AssetScrollAreaBackground *parent);
   QSize sizeHint() const override;
-  void SetResourceModel(MessageModel *model);
   void Paint(QPainter &painter) override;
   void PaintTop(QPainter &painter) override;
   QRectF AutomaticBBoxRect();
@@ -26,9 +23,7 @@ class SpriteView : public AssetView {
   void SetShowOrigin(bool show);
 
  private:
-  MessageModel *_model;
   QPixmap _pixmap;
-  RepeatedImageModel *_subimgs;
   bool _showBBox;
   bool _showOrigin;
 };

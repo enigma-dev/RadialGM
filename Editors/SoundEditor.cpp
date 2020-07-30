@@ -5,15 +5,15 @@
 
 #include "Components/ArtManager.h"
 #include "Components/Utility.h"
-#include "Models/MessageModel.h"
+#include "Models/ProtoModel.h"
 
 #include <QDebug>
 #include <QDesktopServices>
 #include <QSlider>
 #include <QTime>
 
-SoundEditor::SoundEditor(MessageModel* model, QWidget* parent)
-    : BaseEditor(model, parent),
+SoundEditor::SoundEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent)
+    : BaseEditor(model, root, parent),
       _ui(new Ui::SoundEditor),
       _mediaPlayer(new QMediaPlayer(this)),
       _playlist(new QMediaPlaylist(_mediaPlayer)),
@@ -63,10 +63,7 @@ SoundEditor::SoundEditor(MessageModel* model, QWidget* parent)
 SoundEditor::~SoundEditor() { delete _ui; }
 
 void SoundEditor::RebindSubModels() {
-  _playlist->clear();
-  _soundModel = _model->GetSubModel<MessageModel*>(TreeNode::kSoundFieldNumber);
-  _playlist->addMedia(QUrl::fromLocalFile(_soundModel->Data(Sound::kDataFieldNumber).toString()));
-  BaseEditor::RebindSubModels();
+
 }
 
 void SoundEditor::on_playButton_clicked() {

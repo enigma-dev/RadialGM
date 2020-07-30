@@ -8,7 +8,7 @@ class ScriptEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  ScriptEditor(MessageModel* model, QWidget* parent = nullptr);
+  ScriptEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent = nullptr);
 
  private:
   CodeEditor* _codeEditor;

@@ -4,6 +4,7 @@
 #include "treenode.pb.h"
 
 #include <QAbstractItemModel>
+#include <QMimeData>
 #include <QDebug>
 #include <QHash>
 #include <QList>
@@ -50,7 +51,7 @@ class ProtoModel : public QAbstractItemModel {
   bool IsDirty();
 
   // The layout of the data varies between the model types.
-  // For a MessageModel a row is the name of the data field and the column should always be 0.
+  // For a ProtoModel a row is the name of the data field and the column should always be 0.
   //  --------------------------------|
   // | Sprite::kBboxLeftFieldNumber   |
   // |--------------------------------|
@@ -82,18 +83,25 @@ class ProtoModel : public QAbstractItemModel {
 
   // These are convience functions for getting & setting model used almost everywhere in the codebase
   // because model->setData(model->index(row, col), value, role) is a PITA to type / remember.
-  virtual QVariant Data(int row, int column = 0) const = 0;
-  virtual bool SetData(const QVariant &value, int row, int column = 0) = 0;
+  //virtual QVariant Data(int row, int column = 0) const = 0;
+  //virtual bool SetData(const QVariant &value, int row, int column = 0) = 0;
 
   // From here down marks QAbstractItemModel functions required to be implemented
   virtual QModelIndex parent(const QModelIndex &) const override;
   virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override = 0;
   virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override = 0;
   virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override = 0;
+  virtual bool canSetData(const QModelIndex &index) const {
+    // use test role to see if setting the data will be successful
+    return const_cast<ProtoModel*>(this)->setData(index,QVariant(),Qt::UserRole);
+  }
   virtual QVariant data(const QModelIndex &index, int role) const override = 0;
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override = 0;
   virtual QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override = 0;
   virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
+  virtual Qt::DropActions supportedDropActions() const override;
+  virtual QStringList mimeTypes() const override;
+  virtual QMimeData *mimeData(const QModelIndexList &indexes) const override;
 
  signals:
   // QAbstractItemModel has a datachanged signal but it doesn't store the old values
@@ -108,6 +116,9 @@ class ProtoModel : public QAbstractItemModel {
   bool _dirty;
   Message *_protobuf;
   ProtoModel *_parentModel;
+  QStringList _mimes;
+
+  void setupMimes(const Descriptor* desc, QSet<QString>& uniqueMimes, QSet<const Descriptor*>& visitedDesc);
 };
 
 #endif

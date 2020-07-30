@@ -10,23 +10,8 @@ SpriteView::SpriteView(AssetScrollAreaBackground *parent) : AssetView(parent), _
 
 QSize SpriteView::sizeHint() const { return _pixmap.size(); }
 
-void SpriteView::SetResourceModel(MessageModel *model) {
-  _model = model;
-  _subimgs = _model->GetSubModel<RepeatedImageModel *>(Sprite::kSubimagesFieldNumber);
-  if (_subimgs->rowCount() > 0) SetSubimage(0);
-}
-
 void SpriteView::SetSubimage(int index) {
-  if (index == -1) {
-    _pixmap = QPixmap();
-  } else if (index < -1 || index >= _subimgs->rowCount()) {
-    qDebug() << "Invalid subimage index specified";
-    return;
-  } else {
-    _pixmap = ArtManager::GetCachedPixmap(_subimgs->Data(index).toString());
-  }
 
-  _parent->update();
 }
 
 void SpriteView::SetShowBBox(bool show) {
@@ -47,11 +32,7 @@ QRectF SpriteView::AutomaticBBoxRect() {
 }
 
 QRectF SpriteView::BBoxRect() {
-  int x = _model->Data(Sprite::kBboxLeftFieldNumber).toInt();
-  int y = _model->Data(Sprite::kBboxTopFieldNumber).toInt();
-  int right = _model->Data(Sprite::kBboxRightFieldNumber).toInt();
-  int bottom = _model->Data(Sprite::kBboxBottomFieldNumber).toInt();
-  return QRectF(x, y, right - x, bottom - y);
+
 }
 
 void SpriteView::Paint(QPainter &painter) { painter.drawPixmap(0, 0, _pixmap); }
@@ -74,10 +55,7 @@ void SpriteView::PaintTop(QPainter &painter) {
   }
 
   if (_showOrigin) {
-    painter.setBrush(QBrush(Qt::yellow));
-    painter.drawEllipse(QPoint(_model->Data(Sprite::kOriginXFieldNumber).toInt() * zoom,
-                               _model->Data(Sprite::kOriginYFieldNumber).toInt() * zoom),
-                        2, 2);
+
   }
 
   painter.restore();

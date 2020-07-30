@@ -10,7 +10,8 @@
 #include <QSpinBox>
 #include <QToolButton>
 
-PathEditor::PathEditor(MessageModel* model, QWidget* parent) : BaseEditor(model, parent), _ui(new Ui::PathEditor) {
+PathEditor::PathEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent) :
+    BaseEditor(model, root, parent), _ui(new Ui::PathEditor) {
   _ui->setupUi(this);
   connect(_ui->saveButton, &QAbstractButton::pressed, this, &BaseEditor::OnSave);
 
@@ -101,103 +102,33 @@ PathEditor::PathEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
 PathEditor::~PathEditor() { delete _ui; }
 
 void PathEditor::RebindSubModels() {
-  _pathModel = _model->GetSubModel<MessageModel*>(TreeNode::kPathFieldNumber);
 
-  _ui->roomView->SetPathModel(_pathModel);
-  _pointsModel = _pathModel->GetSubModel<RepeatedMessageModel*>(Path::kPointsFieldNumber);
-  _ui->pointsTableView->setModel(_pointsModel);
-  _ui->pointsTableView->hideColumn(0);
-
-  QString roomName = _pathModel->Data(Path::kBackgroundRoomNameFieldNumber).toString();
-  if (roomName != "") {
-    _ui->roomView->SetResourceModel(MainWindow::resourceMap->GetResourceByName(TypeCase::kRoom, roomName)
-                                        ->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber));
-  }
-  _roomLineEdit->setText(roomName);
-
-  connect(_ui->pathPreviewBackground, &AssetScrollAreaBackground::MouseMoved, this, &PathEditor::MouseMoved);
-  connect(_ui->pathPreviewBackground, &AssetScrollAreaBackground::MousePressed, this, &PathEditor::MousePressed);
-  connect(_ui->pathPreviewBackground, &AssetScrollAreaBackground::MouseReleased, this, &PathEditor::MouseReleased);
-
-  connect(_ui->pointsTableView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
-          &PathEditor::UpdateSelection);
-
-  _ui->deletePointButton->setDisabled(true);
-
-  BaseEditor::RebindSubModels();
 }
 
 bool PathEditor::eventFilter(QObject* obj, QEvent* event) {
-  if (_pointsModel != nullptr) {
-    // Resize columns to view size
-    if (obj == _ui->pointsTableView && event->type() == QEvent::Resize) {
-      QResizeEvent* resizeEvent = static_cast<QResizeEvent*>(event);
-      int cc = _pointsModel->columnCount() - 1;
-      for (int c = 1; c < cc; ++c) {  // column 1 is hidden
-        _ui->pointsTableView->setColumnWidth(c, (resizeEvent->size().width()) / cc);
-      }
-    }
-  }
-  return QWidget::eventFilter(obj, event);
+
 }
 
 void PathEditor::InsertPoint(int index, int x, int y, int speed) {
-  _pointsModel->insertRow(index);
-  _pointsModel->SetData(x, index, Path::Point::kXFieldNumber);
-  _pointsModel->SetData(y, index, Path::Point::kYFieldNumber);
-  _pointsModel->SetData(speed, index, Path::Point::kSpeedFieldNumber);
-  _ui->roomView->selectedPointIndex = index;
+
 }
 
 void PathEditor::SetSnapToGrid(bool snap) { this->_snapToGrid = snap; }
 
 void PathEditor::RoomMenuItemSelected(QAction* action) {
-  _roomLineEdit->setText(action->text());
-  _ui->roomView->SetResourceModel(MainWindow::resourceMap->GetResourceByName(TypeCase::kRoom, action->text())
-                                      ->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber));
-  _ui->pathPreviewBackground->SetZoom(1);
-  _pathModel->SetData(action->text(), Path::kBackgroundRoomNameFieldNumber, 0);
+
 }
 
 void PathEditor::RoomMenuButtonPressed() {
-  // Manually clear selected room because we cant use a mapping here
-  _roomLineEdit->setText("");
-  _ui->roomView->SetResourceModel(nullptr);
-  _pathModel->SetData("", Path::kBackgroundRoomNameFieldNumber, 0);
+
 }
 
 void PathEditor::MouseMoved(int x, int y) {
-  const GridDimensions g = _ui->roomView->GetGrid();
-  QPoint mousePos(x, y);
-  if (_snapToGrid) mousePos = QPoint(RoundNum(x, g.horSpacing), RoundNum(y, g.vertSpacing));
-  _ui->roomView->mousePos = mousePos;
-  _cursorPositionLabel->setText(tr("X %0, Y %1").arg(mousePos.x()).arg(mousePos.y()));
-  if (_draggingPoint) {
-    _pointsModel->SetData(_ui->roomView->mousePos.x(), _ui->roomView->selectedPointIndex, Path::Point::kXFieldNumber);
-    _pointsModel->SetData(_ui->roomView->mousePos.y(), _ui->roomView->selectedPointIndex, Path::Point::kYFieldNumber);
-  } else {
-    _ui->pathPreviewBackground->update();  // manually call update to redraw cursor if no data changes
-  }
+
 }
 
 void PathEditor::MousePressed(Qt::MouseButton button) {
-  if (button == Qt::MouseButton::LeftButton) {
-    _draggingPoint = true;
-    // Check for point at location (reverse loop to get last added one if dups)
-    for (int i = _pointsModel->rowCount() - 1; i >= 0; i--) {
-      QPoint pt = _ui->roomView->Point(i);
-      if (pt == _ui->roomView->mousePos) {
-        QModelIndex newSelectIndex = _pointsModel->index(i, Path::Point::kXFieldNumber);
-        _ui->pointsTableView->setCurrentIndex(newSelectIndex);
-        _ui->pointsTableView->selectionModel()->select(newSelectIndex,
-                                                       QItemSelectionModel::QItemSelectionModel::ClearAndSelect);
-        return;
-      }
-    }
-    // No point found. Add one and select it
-    InsertPoint(_pointsModel->rowCount(), _ui->roomView->mousePos.x(), _ui->roomView->mousePos.y(),
-                _ui->speedSpinBox->value());
-  }
+
 }
 
 void PathEditor::MouseReleased(Qt::MouseButton button) {
@@ -215,7 +146,7 @@ void PathEditor::UpdateSelection(const QItemSelection& selected, const QItemSele
 }
 
 void PathEditor::on_addPointButton_pressed() {
-  InsertPoint(_pointsModel->rowCount(), _ui->xSpinBox->value(), _ui->yspinBox->value(), _ui->speedSpinBox->value());
+
 }
 
 void PathEditor::on_insertPointButton_pressed() {
@@ -225,21 +156,5 @@ void PathEditor::on_insertPointButton_pressed() {
 }
 
 void PathEditor::on_deletePointButton_pressed() {
-  int deleteIndex = _ui->pointsTableView->selectionModel()->currentIndex().row();
-  {
-    RepeatedMessageModel::RowRemovalOperation remover(_pointsModel);
-    remover.RemoveRow(deleteIndex);
-  }
 
-  if (_pointsModel->rowCount() > 0) {
-    QModelIndex newSelectIndex =
-        _pointsModel->index((deleteIndex == 0) ? 0 : deleteIndex - 1, Path::Point::kXFieldNumber);
-    _ui->pointsTableView->setCurrentIndex(newSelectIndex);
-    _ui->pointsTableView->selectionModel()->select(newSelectIndex,
-                                                   QItemSelectionModel::QItemSelectionModel::ClearAndSelect);
-  } else {
-    _ui->deletePointButton->setDisabled(true);
-    _ui->pointsTableView->selectionModel()->clearSelection();
-    _ui->pathPreviewBackground->update();
-  }
 }

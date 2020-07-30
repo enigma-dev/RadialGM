@@ -15,8 +15,8 @@
 
 using buffers::resources::Background;
 
-BackgroundEditor::BackgroundEditor(MessageModel* model, QWidget* parent)
-    : BaseEditor(model, parent), _ui(new Ui::BackgroundEditor) {
+BackgroundEditor::BackgroundEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent)
+    : BaseEditor(model, root, parent), _ui(new Ui::BackgroundEditor) {
   _ui->setupUi(this);
 
   connect(_ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
@@ -44,10 +44,7 @@ void BackgroundEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex
 }
 
 void BackgroundEditor::RebindSubModels() {
-  _backgroundModel = _model->GetSubModel<MessageModel*>(TreeNode::kBackgroundFieldNumber);
-  _ui->imagePreviewBackground->SetAssetView(_ui->backgroundView);
-  _ui->backgroundView->SetResourceModel(_resMapper->GetModel());
-  BaseEditor::RebindSubModels();
+
 }
 
 void BackgroundEditor::on_actionZoomIn_triggered() { _ui->imagePreviewBackground->ZoomIn(); }

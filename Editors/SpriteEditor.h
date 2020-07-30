@@ -2,7 +2,6 @@
 #define SPRITEEDITOR_H
 
 #include "BaseEditor.h"
-#include "Models/RepeatedImageModel.h"
 
 #include <QItemSelection>
 
@@ -14,7 +13,7 @@ class SpriteEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit SpriteEditor(MessageModel* model, QWidget* parent);
+  explicit SpriteEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent);
   ~SpriteEditor() override;
   void LoadedMismatchedImage(QSize expectedSize, QSize actualSize);
   void RemoveSelectedIndexes();
@@ -42,7 +41,6 @@ class SpriteEditor : public BaseEditor {
  private:
   Ui::SpriteEditor* _ui;
   ProtoModel* _spriteModel;
-  RepeatedImageModel* _subimagesModel;
 };
 
 #endif  // SPRITEEDITOR_H

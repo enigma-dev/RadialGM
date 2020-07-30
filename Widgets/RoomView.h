@@ -2,7 +2,6 @@
 #define ROOMVIEW_H
 
 #include "AssetView.h"
-#include "Models/MessageModel.h"
 
 #include <QObject>
 #include <QSortFilterProxyModel>
@@ -20,11 +19,9 @@ class RoomView : public AssetView {
  public:
   explicit RoomView(AssetScrollAreaBackground *parent = nullptr);
   QSize sizeHint() const override;
-  void SetResourceModel(MessageModel *_model);
   void Paint(QPainter &painter) override;
 
  protected:
-  MessageModel *_model;
   InstanceSortFilterProxyModel *_sortedInstances;
   QSortFilterProxyModel *_sortedTiles;
   QPixmap _transparentPixmap;

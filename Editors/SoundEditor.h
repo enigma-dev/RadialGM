@@ -14,7 +14,7 @@ class SoundEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit SoundEditor(MessageModel* model, QWidget* parent);
+  explicit SoundEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent);
   ~SoundEditor() override;
 
  public slots:
@@ -37,7 +37,7 @@ class SoundEditor : public BaseEditor {
   QMediaPlayer* _mediaPlayer;
   QMediaPlaylist* _playlist;  //it's only one song but Qt puts looping stuff here
   bool _userPaused;
-  MessageModel* _soundModel;
+  ProtoModel* _soundModel;
 };
 
 #endif  // SOUNDEDITOR_H

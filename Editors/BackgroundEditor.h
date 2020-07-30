@@ -13,7 +13,7 @@ class BackgroundEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit BackgroundEditor(MessageModel *model, QWidget *parent);
+  explicit BackgroundEditor(ProtoModel *model, const QPersistentModelIndex& root, QWidget *parent);
   ~BackgroundEditor() override;
 
  private slots:
@@ -30,7 +30,7 @@ class BackgroundEditor : public BaseEditor {
  private:
   void RebindSubModels() override;
   Ui::BackgroundEditor *_ui;
-  MessageModel *_backgroundModel;
+  ProtoModel *_backgroundModel;
   BackgroundView *_renderer;
 };
 

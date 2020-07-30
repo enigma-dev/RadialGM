@@ -189,28 +189,29 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   event->accept();
 }
 
+using EditorFactory = std::function<BaseEditor *(ProtoModel * m, const QPersistentModelIndex & r, QWidget * p)>;
 template <typename T>
-T *EditorFactory(MessageModel *model, QWidget *parent) {
-  return new T(model, parent);
+T *editorFactory(ProtoModel *model, const QPersistentModelIndex& root, QWidget *parent) {
+  return new T(model, root, parent);
 }
 
 void MainWindow::openSubWindow(buffers::TreeNode *item) {
   using namespace google::protobuf;
 
   using TypeCase = buffers::TreeNode::TypeCase;
-  using FactoryMap = std::unordered_map<TypeCase, std::function<BaseEditor *(MessageModel * m, QWidget * p)>>;
+  using FactoryMap = std::unordered_map<TypeCase,EditorFactory>;
 
-  static FactoryMap factoryMap({{TypeCase::kSprite, EditorFactory<SpriteEditor>},
-                                {TypeCase::kSound, EditorFactory<SoundEditor>},
-                                {TypeCase::kBackground, EditorFactory<BackgroundEditor>},
-                                {TypeCase::kPath, EditorFactory<PathEditor>},
-                                {TypeCase::kFont, EditorFactory<FontEditor>},
-                                {TypeCase::kScript, EditorFactory<ScriptEditor>},
-                                {TypeCase::kShader, EditorFactory<ShaderEditor>},
-                                {TypeCase::kTimeline, EditorFactory<TimelineEditor>},
-                                {TypeCase::kObject, EditorFactory<ObjectEditor>},
-                                {TypeCase::kRoom, EditorFactory<RoomEditor>},
-                                {TypeCase::kSettings, EditorFactory<SettingsEditor>}});
+  static FactoryMap factoryMap({{TypeCase::kSprite, editorFactory<SpriteEditor>},
+                                {TypeCase::kSound, editorFactory<SoundEditor>},
+                                {TypeCase::kBackground, editorFactory<BackgroundEditor>},
+                                {TypeCase::kPath, editorFactory<PathEditor>},
+                                {TypeCase::kFont, editorFactory<FontEditor>},
+                                {TypeCase::kScript, editorFactory<ScriptEditor>},
+                                {TypeCase::kShader, editorFactory<ShaderEditor>},
+                                {TypeCase::kTimeline, editorFactory<TimelineEditor>},
+                                {TypeCase::kObject, editorFactory<ObjectEditor>},
+                                {TypeCase::kRoom, editorFactory<RoomEditor>},
+                                {TypeCase::kSettings, editorFactory<SettingsEditor>}});
 
   auto swIt = _subWindows.find(item);
   QMdiSubWindow *subWindow;
@@ -218,15 +219,15 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     auto factoryFunction = factoryMap.find(item->type_case());
     if (factoryFunction == factoryMap.end()) return;  // no registered editor
 
-    MessageModel *res = resourceMap->GetResourceByName(item->type_case(), item->name());
-    BaseEditor *editor = factoryFunction->second(res, this);
+    //const QPersistentModelIndex& root = resourceMap->GetResourceByName(item->type_case(), item->name());
+    BaseEditor *editor = factoryFunction->second(nullptr, QPersistentModelIndex(), this);
 
     connect(editor, &BaseEditor::ResourceRenamed, resourceMap.get(), &ResourceModelMap::ResourceRenamed);
     connect(editor, &BaseEditor::ResourceRenamed, [=]() { treeModel->dataChanged(QModelIndex(), QModelIndex()); });
     connect(treeModel.get(), &TreeModel::ResourceRenamed, editor,
-            [res](TypeCase /*type*/, const QString & /*oldName*/, const QString & /*newName*/) {
-              const QModelIndex index = res->index(TreeNode::kNameFieldNumber);
-              emit res->DataChanged(index, index);
+            [](TypeCase /*type*/, const QString & /*oldName*/, const QString & /*newName*/) {
+              //const QModelIndex index = res->index(TreeNode::kNameFieldNumber);
+              //emit res->DataChanged(index, index);
             });
 
     subWindow = _subWindows[item] = _ui->mdiArea->addSubWindow(editor);
