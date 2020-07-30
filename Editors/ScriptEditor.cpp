@@ -7,6 +7,7 @@ using namespace buffers::resources;
 
 ScriptEditor::ScriptEditor(MessageModel* model, QWidget* parent)
     : BaseEditor(model, parent), _codeEditor(new CodeEditor(this)) {
+  this->setWindowIcon(QIcon(":/resources/script.png"));
   QLayout* layout = new QVBoxLayout(this);
   layout->addWidget(_codeEditor);
   layout->setMargin(0);
