@@ -22,28 +22,13 @@ using Sound = buffers::resources::Sound;
 using Sprite = buffers::resources::Sprite;
 using Timeline = buffers::resources::Timeline;
 
-class ProtoModel;
+using IconMap = std::unordered_map<TypeCase, QIcon>;
 
 // This is a parent to all internal models
 class ProtoModel : public QAbstractItemModel {
   Q_OBJECT
  public:
   explicit ProtoModel(QObject *parent, Message *protobuf);
-  explicit ProtoModel(ProtoModel *parent, Message *protobuf);
-
-  // The parent model is the model that own's the current model
-  // For resource models like a Room this will be a nullptr
-  // For instances it would be a pointer to the room
-  // For *a* instance it would be a pointer to a room's instances field's model
-  // FIXME: Sanity check this cast
-  template <class T>
-  T GetParentModel() const {
-    return static_cast<T>(_parentModel);
-  };
-
-  // If a submodel changed technically any model that owns it has also changed.
-  // so we need to notify all parents when anything changes in their descendants.
-  void ParentDataChanged();
 
   // A model is "dirty" if the user has made any changes to it since opening the editor.
   // This is mostly used in "Would you like to save?" dialogs when closing editors.
@@ -89,19 +74,21 @@ class ProtoModel : public QAbstractItemModel {
   // From here down marks QAbstractItemModel functions required to be implemented
   virtual QModelIndex parent(const QModelIndex &) const override;
   virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override = 0;
-  virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override = 0;
-  virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override = 0;
+  virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+  virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override;
   virtual bool canSetData(const QModelIndex &index) const {
     // use test role to see if setting the data will be successful
     return const_cast<ProtoModel*>(this)->setData(index,QVariant(),Qt::UserRole);
   }
-  virtual QVariant data(const QModelIndex &index, int role) const override = 0;
+  virtual QVariant data(const QModelIndex &index, int role) const override;
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override = 0;
-  virtual QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override = 0;
+  virtual QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
   virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
   virtual Qt::DropActions supportedDropActions() const override;
   virtual QStringList mimeTypes() const override;
   virtual QMimeData *mimeData(const QModelIndexList &indexes) const override;
+  virtual bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
+                    const QModelIndex &parent) override;
 
  signals:
   // QAbstractItemModel has a datachanged signal but it doesn't store the old values
@@ -111,12 +98,15 @@ class ProtoModel : public QAbstractItemModel {
   // (ie If you changed a sprite you would want to redraw the object in the room)
   void DataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVariant &oldValue = QVariant(0),
                    const QVector<int> &roles = QVector<int>());
+  void ResourceRenamed(TypeCase type, const QString &oldName, const QString &newName);
 
  protected:
+  static IconMap iconMap;
+
   bool _dirty;
   Message *_protobuf;
-  ProtoModel *_parentModel;
   QStringList _mimes;
+  QHash<QPersistentModelIndex,QPersistentModelIndex> parents;
 
   void setupMimes(const Descriptor* desc, QSet<QString>& uniqueMimes, QSet<const Descriptor*>& visitedDesc);
 };

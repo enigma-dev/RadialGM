@@ -1,19 +1,33 @@
 #include "ProtoModel.h"
 
 #include "Components/Logger.h"
+#include "Components/ArtManager.h"
 
 #include <QDataStream>
 #include <QCoreApplication>
 
-ProtoModel::ProtoModel(QObject *parent, Message *protobuf) : ProtoModel(static_cast<ProtoModel *>(nullptr), protobuf) {
-  QObject::setParent(parent);
+IconMap ProtoModel::iconMap;
 
+ProtoModel::ProtoModel(QObject *parent, Message *protobuf) : QAbstractItemModel(parent), _protobuf(protobuf) {
   const Descriptor *desc = _protobuf->GetDescriptor();
   QSet<QString> uniqueMimes;
   QSet<const Descriptor*> visitedDesc;
   setupMimes(desc, uniqueMimes, visitedDesc);
   _mimes = uniqueMimes.values();
   qDebug() << _mimes;
+
+  iconMap = {{TypeCase::kFolder, ArtManager::GetIcon("group")},
+             {TypeCase::kSprite, ArtManager::GetIcon("sprite")},
+             {TypeCase::kSound, ArtManager::GetIcon("sound")},
+             {TypeCase::kBackground, ArtManager::GetIcon("background")},
+             {TypeCase::kPath, ArtManager::GetIcon("path")},
+             {TypeCase::kScript, ArtManager::GetIcon("script")},
+             {TypeCase::kShader, ArtManager::GetIcon("shader")},
+             {TypeCase::kFont, ArtManager::GetIcon("font")},
+             {TypeCase::kTimeline, ArtManager::GetIcon("timeline")},
+             {TypeCase::kObject, ArtManager::GetIcon("object")},
+             {TypeCase::kRoom, ArtManager::GetIcon("room")},
+             {TypeCase::kSettings, ArtManager::GetIcon("settings")}};
 }
 
 void ProtoModel::setupMimes(const Descriptor* desc, QSet<QString>& uniqueMimes,
@@ -39,28 +53,89 @@ void ProtoModel::setupMimes(const Descriptor* desc, QSet<QString>& uniqueMimes,
   }
 }
 
-ProtoModel::ProtoModel(ProtoModel *parent, Message *protobuf)
-    : QAbstractItemModel(parent), _dirty(false), _protobuf(protobuf), _parentModel(parent) {
-  connect(this, &ProtoModel::DataChanged, this,
-          [this](const QModelIndex &topLeft, const QModelIndex &bottomRight,
-                 const QVariant & /*oldValue*/ = QVariant(0), const QVector<int> &roles = QVector<int>()) {
-            emit QAbstractItemModel::dataChanged(topLeft, bottomRight, roles);
-          });
+QVariant ProtoModel::data(const QModelIndex &index, int role) const {
+  R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
+
+  buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
+  if (role == Qt::DecorationRole) {
+    auto it = iconMap.find(item->type_case());
+    if (it == iconMap.end()) return ArtManager::GetIcon("info");
+
+    if (item->type_case() == TypeCase::kSprite) {
+      if (item->sprite().subimages_size() <= 0) return QVariant();
+      QString spr = QString::fromStdString(item->sprite().subimages(0));
+      return spr.isEmpty() ? QVariant() : ArtManager::GetIcon(spr);
+    }
+
+    if (item->type_case() == TypeCase::kBackground) {
+      QString bkg = QString::fromStdString(item->background().image());
+      return bkg.isEmpty() ? QVariant() : ArtManager::GetIcon(bkg);
+    }
+
+    const QIcon &icon = it->second;
+    if (item->type_case() == TypeCase::kFolder && item->child_size() <= 0) {
+      return QIcon(icon.pixmap(icon.availableSizes().first(), QIcon::Disabled));
+    }
+    return icon;
+  } else if (role == Qt::EditRole || role == Qt::DisplayRole) {
+    return QString::fromStdString(item->name());
+  }
+
+  return QVariant();
 }
 
-void ProtoModel::ParentDataChanged() {
-  ProtoModel *m = GetParentModel<ProtoModel *>();
-  while (m != nullptr) {
-    emit m->DataChanged(m->index(0, 0), m->index(rowCount() - 1, columnCount() - 1));
-    m = m->GetParentModel<ProtoModel *>();
-  }
+bool ProtoModel::setData(const QModelIndex &index, const QVariant &value, int role) {
+  R_EXPECT(index.isValid(), false) << "Supplied index was invalid:" << index;
+  if (role != Qt::EditRole) return false;
+
+  buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
+  const QString oldName = QString::fromStdString(item->name());
+  const QString newName = value.toString();
+  if (oldName == newName) return true;
+  item->set_name(newName.toStdString());
+  emit ResourceRenamed(item->type_case(), oldName, value.toString());
+  emit dataChanged(index, index);
+  return true;
 }
 
 void ProtoModel::SetDirty(bool dirty) { _dirty = dirty; }
 
 bool ProtoModel::IsDirty() { return _dirty; }
 
-QModelIndex ProtoModel::parent(const QModelIndex & /*index*/) const { return QModelIndex(); }
+int ProtoModel::columnCount(const QModelIndex &parent) const {
+  Message *parentItem;
+  if (!parent.isValid())
+    parentItem = _protobuf;
+  else
+    parentItem = static_cast<Message *>(parent.internalPointer());
+
+  const Descriptor *desc = parentItem->GetDescriptor();
+  return desc->field_count();
+}
+
+QModelIndex ProtoModel::index(int row, int column, const QModelIndex &parent) const {
+  if (!hasIndex(row, column, parent)) return QModelIndex();
+
+  Message *parentItem;
+  if (!parent.isValid())
+    parentItem = _protobuf;
+  else
+    parentItem = static_cast<Message *>(parent.internalPointer());
+
+  const Descriptor *desc = parentItem->GetDescriptor();
+  const Reflection *refl = parentItem->GetReflection();
+  const FieldDescriptor *field = desc->FindFieldByNumber(parent.column());
+  Message *childItem = refl->MutableRepeatedMessage(parentItem, field, parent.row());
+  if (childItem)
+    return createIndex(row, column, childItem);
+  else
+    return QModelIndex();
+}
+
+QModelIndex ProtoModel::parent(const QModelIndex &index) const {
+  if (!index.isValid()) return QModelIndex();
+  return parents[index];
+}
 
 Qt::ItemFlags ProtoModel::flags(const QModelIndex &index) const {
   if (!index.isValid()) return nullptr;
@@ -113,4 +188,9 @@ QMimeData *ProtoModel::mimeData(const QModelIndexList &indexes) const {
   }
 
   return mimeData;
+}
+
+bool ProtoModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, int row, int /*column*/,
+                             const QModelIndex &parent) {
+  return false;
 }
