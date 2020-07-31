@@ -68,7 +68,7 @@ jobs:
         %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Syyuu
       displayName: Update MSYS2
       
-    - powershell: Get-Process | Where-Object {$_.path -like '%CD:~0,2%\msys64*'} | Stop-Process
+    - script: taskkill /f /fi "MODULES eq msys-2.0.dll" || exit /b 0s
     
     - script: |
         set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
