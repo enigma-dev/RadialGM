@@ -274,12 +274,10 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
       // count this row as having been moved from this parent
       if (parentNode != oldParent || row > itemRow) removedCount[oldParent]++;
 
-      // if moving the node within the same parent we need to adjust the row
-      // since its own removal will affect the row we reinsert it at
-      if (parentNode == oldParent && row > itemRow) --row;
-
       endMoveRows();
-      ++row;
+      // the insert row doesn't need incremented if we moved a node in the
+      // same parent from a row greater than we are inserting at
+      if (parentNode != oldParent || row < itemRow) ++row;
     } else {
       if (node->folder()) continue;
       node = duplicateNode(*node);
