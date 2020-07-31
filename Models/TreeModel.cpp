@@ -244,7 +244,7 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
   // organize rows being moved into buckets by their old parents
   // and store them as persistent model indexes so that as we move
   // the rows the indexes will be updated automagically
-  QHash<QPersistentModelIndex,QSet<QPersistentModelIndex>> indexesByParent;
+  QHash<QPersistentModelIndex,QList<QPersistentModelIndex>> indexesByParent;
   QPersistentModelIndex insertIndex = this->createIndex(row, 0, nullptr);
   for (int i = 0; i < count; ++i) {
     qlonglong nodePtr;
@@ -253,7 +253,7 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
     stream >> itemRow;
     TreeNode *node = reinterpret_cast<TreeNode *>(nodePtr);
     auto index = this->createIndex(itemRow, 0, node);
-    indexesByParent[index.parent()].insert(index);
+    indexesByParent[index.parent()].append(index);
   }
 
   for (auto it = indexesByParent.begin(); it != indexesByParent.end(); ++it) {
