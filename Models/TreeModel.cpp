@@ -177,9 +177,7 @@ QMimeData *TreeModel::mimeData(const QModelIndexList &indexes) const {
   using pathComparator = std::function<bool(const QModelIndex & a, const QModelIndex & b)>;
   pathComparator compareIndexes =
     [&compareIndexes](const QModelIndex & a, const QModelIndex & b) -> bool {
-      if (a.parent() == b.parent())
-        return a < b;
-      return compareIndexes(a.parent(),b.parent());
+      return a < b && compareIndexes(a.parent(),b.parent());
     };
   std::sort(nodes.begin(), nodes.end(), compareIndexes);
 
