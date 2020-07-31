@@ -194,6 +194,16 @@ static void RepeatedFieldInsert(RepeatedPtrField<T> *field, T *newItem, int inde
   }
 }
 
+template <typename T>
+static void RepeatedFieldMove(RepeatedPtrField<T> *field, int index1, int index2) {
+  if (index1 < index2)
+    for (int j = index1; j < index2 - 1; ++j)
+      field->SwapElements(j, j + 1);
+  else
+    for (int j = index1; j > index2; --j)
+      field->SwapElements(j, j - 1);
+}
+
 QModelIndex TreeModel::insert(const QModelIndex &parent, int row, buffers::TreeNode *node) {
   auto insertIndex = parent;
   if (!parent.isValid()) insertIndex = QModelIndex();
@@ -251,6 +261,16 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
       bool canDo = beginMoveRows(index.parent(), itemRow, itemRow, parent, row);
       if (!canDo) continue;
 
+      if (parentNode != oldParent) {
+        auto oldRepeated = oldParent->mutable_child();
+        oldRepeated->ExtractSubrange(itemRow, 1, nullptr);
+        RepeatedFieldInsert<buffers::TreeNode>(parentNode->mutable_child(), node, row);
+        parents[node] = parentNode;
+      } else {
+        RepeatedFieldMove<buffers::TreeNode>(
+              parentNode->mutable_child(), itemRow, row);
+      }
+
       // count this row as having been moved from this parent
       if (parentNode != oldParent || row > itemRow) removedCount[oldParent]++;
 
@@ -258,10 +278,6 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
       // since its own removal will affect the row we reinsert it at
       if (parentNode == oldParent && row > itemRow) --row;
 
-      auto oldRepeated = oldParent->mutable_child();
-      oldRepeated->ExtractSubrange(itemRow, 1, nullptr);
-      RepeatedFieldInsert<buffers::TreeNode>(parentNode->mutable_child(), node, row);
-      parents[node] = parentNode;
       endMoveRows();
       ++row;
     } else {
