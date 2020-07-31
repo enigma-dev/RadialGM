@@ -241,10 +241,9 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
   if (row == -1) row = rowCount(parent);
 
 
-  // organize rows being moved into buckets by their old parents
-  // and store them as persistent model indexes so that as we move
+  // store rows as persistent model indexes so that as we move
   // the rows the indexes will be updated automagically
-  QHash<QPersistentModelIndex,QList<QPersistentModelIndex>> indexesByParent;
+  QList<QPersistentModelIndex> indexes;
   QPersistentModelIndex insertIndex = this->createIndex(row, 0, nullptr);
   for (int i = 0; i < count; ++i) {
     qlonglong nodePtr;
@@ -253,34 +252,32 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
     stream >> itemRow;
     TreeNode *node = reinterpret_cast<TreeNode *>(nodePtr);
     auto index = this->createIndex(itemRow, 0, node);
-    indexesByParent[index.parent()].append(index);
+    indexes.append(index);
   }
 
-  for (auto it = indexesByParent.begin(); it != indexesByParent.end(); ++it) {
-    for (auto index : it.value()) {
-      TreeNode *node = static_cast<TreeNode *>(index.internalPointer());
-      if (action != Qt::CopyAction) {
-        bool canDo = beginMoveRows(it.key(), index.row(), index.row(), parent, insertIndex.row());
-        if (!canDo) continue;
+  for (auto index : indexes) {
+    TreeNode *node = static_cast<TreeNode *>(index.internalPointer());
+    if (action != Qt::CopyAction) {
+      bool canDo = beginMoveRows(index.parent(), index.row(), index.row(), parent, insertIndex.row());
+      if (!canDo) continue;
 
-        auto *oldParent = parents[node];
-        if (oldParent != parentNode) {
-          auto oldRepeated = oldParent->mutable_child();
-          oldRepeated->ExtractSubrange(index.row(), 1, nullptr);
-          RepeatedFieldInsert<buffers::TreeNode>(
-                parentNode->mutable_child(), node, insertIndex.row());
-          parents[node] = parentNode;
-        } else {
-          RepeatedFieldMove<buffers::TreeNode>(
-                parentNode->mutable_child(), index.row(), insertIndex.row());
-        }
-
-        endMoveRows();
+      auto *oldParent = parents[node];
+      if (oldParent != parentNode) {
+        auto oldRepeated = oldParent->mutable_child();
+        oldRepeated->ExtractSubrange(index.row(), 1, nullptr);
+        RepeatedFieldInsert<buffers::TreeNode>(
+              parentNode->mutable_child(), node, insertIndex.row());
+        parents[node] = parentNode;
       } else {
-        if (node->folder()) continue;
-        node = duplicateNode(*node);
-        insert(parent, row++, node);
+        RepeatedFieldMove<buffers::TreeNode>(
+              parentNode->mutable_child(), index.row(), insertIndex.row());
       }
+
+      endMoveRows();
+    } else {
+      if (node->folder()) continue;
+      node = duplicateNode(*node);
+      insert(parent, row++, node);
     }
   }
 
