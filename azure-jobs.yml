@@ -61,6 +61,10 @@ jobs:
     
     - script: |
         set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
+        %CD:~0,2%\msys64\usr\bin\curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz
+        %CD:~0,2%\msys64\usr\bin\curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig
+        %CD:~0,2%\msys64\usr\bin\pacman-key --verify msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig
+        %CD:~0,2%\msys64\usr\bin\pacman --overwrite='*' --noconfirm -U msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz
         %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Syyuu
       displayName: Update MSYS2
     
