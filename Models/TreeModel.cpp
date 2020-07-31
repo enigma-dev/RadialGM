@@ -240,8 +240,7 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
     int itemRow;
     stream >> itemRow;
     TreeNode *node = reinterpret_cast<TreeNode *>(nodePtr);
-    auto index = this->createIndex(itemRow, 0, node);
-    indexes.append(index);
+    indexes.append(this->createIndex(itemRow, 0, node));
   }
 
   for (auto index : indexes) {
