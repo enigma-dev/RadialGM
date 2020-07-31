@@ -194,16 +194,6 @@ static void RepeatedFieldInsert(RepeatedPtrField<T> *field, T *newItem, int inde
   }
 }
 
-template <typename T>
-static void RepeatedFieldMove(RepeatedPtrField<T> *field, int index1, int index2) {
-  if (index1 < index2)
-    for (int j = index1; j < index2 - 1; ++j)
-      field->SwapElements(j, j + 1);
-  else
-    for (int j = index1; j > index2; --j)
-      field->SwapElements(j, j - 1);
-}
-
 QModelIndex TreeModel::insert(const QModelIndex &parent, int row, buffers::TreeNode *node) {
   auto insertIndex = parent;
   if (!parent.isValid()) insertIndex = QModelIndex();
@@ -240,7 +230,6 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
   if (count <= 0) return false;
   if (row == -1) row = rowCount(parent);
 
-
   // store rows as persistent model indexes so that as we move
   // the rows the indexes will be updated automagically
   QList<QPersistentModelIndex> indexes;
@@ -262,16 +251,17 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
       if (!canDo) continue;
 
       auto *oldParent = parents[node];
-      if (oldParent != parentNode) {
-        auto oldRepeated = oldParent->mutable_child();
-        oldRepeated->ExtractSubrange(index.row(), 1, nullptr);
-        RepeatedFieldInsert<buffers::TreeNode>(
-              parentNode->mutable_child(), node, insertIndex.row());
-        parents[node] = parentNode;
-      } else {
-        RepeatedFieldMove<buffers::TreeNode>(
-              parentNode->mutable_child(), index.row(), insertIndex.row());
-      }
+      auto oldRepeated = oldParent->mutable_child();
+      oldRepeated->ExtractSubrange(index.row(), 1, nullptr);
+      // if moving the node within the same parent we need to adjust the row
+      // since its own extraction will affect the row we reinsert it at and
+      // the persistent model index does not update because we don't remove
+      int insertRow = insertIndex.row();
+      if (parentNode == oldParent && insertIndex.row() > index.row())
+        --insertRow;
+      RepeatedFieldInsert<buffers::TreeNode>(
+            parentNode->mutable_child(), node, insertRow);
+      parents[node] = parentNode;
 
       endMoveRows();
     } else {
