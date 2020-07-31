@@ -67,6 +67,8 @@ jobs:
         %CD:~0,2%\msys64\usr\bin\pacman --overwrite='*' --noconfirm -U msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz
         %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Syyuu
       displayName: Update MSYS2
+      
+   - powershell: Get-Process | Where-Object {$_.path -like '%CD:~0,2%\msys64*'} | Stop-Process
     
     - script: |
         set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
