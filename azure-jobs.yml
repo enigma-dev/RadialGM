@@ -69,6 +69,7 @@ jobs:
       displayName: Update MSYS2
       
     - script: taskkill /f /fi "MODULES eq msys-2.0.dll" || exit /b 0s
+      displayName: Reset MSYS2
     
     - script: |
         set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
