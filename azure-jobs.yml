@@ -70,6 +70,7 @@ jobs:
     
     - script: |
         set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
+        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Syyuu
         %CD:~0,2%\msys64\usr\bin\pacman --noconfirm --needed -S git base-devel mingw-w64-$(MINGW_ARCH)-toolchain mingw-w64-$(MINGW_ARCH)-cmake mingw-w64-$(MINGW_ARCH)-nsis mingw-w64-$(MINGW_ARCH)-protobuf mingw-w64-$(MINGW_ARCH)-grpc mingw-w64-$(MINGW_ARCH)-gflags mingw-w64-$(MINGW_ARCH)-yaml-cpp mingw-w64-$(MINGW_ARCH)-pugixml mingw-w64-$(MINGW_ARCH)-rapidjson mingw-w64-$(MINGW_ARCH)-boost mingw-w64-$(MINGW_ARCH)-qt5 mingw-w64-$(MINGW_ARCH)-qscintilla
         %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Scc
       displayName: Install Toolchain
