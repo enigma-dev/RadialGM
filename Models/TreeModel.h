@@ -31,8 +31,6 @@ class TreeModel : public ProtoModel {
  private:
   buffers::TreeNode *root;
   ResourceModelMap *resourceMap;
-
-  inline QString treeNodeMime() const { return QStringLiteral("RadialGM/buffers.TreeNode"); }
 };
 
 #endif  // TREEMODEL_H

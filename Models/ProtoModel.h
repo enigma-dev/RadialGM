@@ -35,37 +35,6 @@ class ProtoModel : public QAbstractItemModel {
   void SetDirty(bool dirty);
   bool IsDirty();
 
-  // The layout of the data varies between the model types.
-  // For a ProtoModel a row is the name of the data field and the column should always be 0.
-  //  --------------------------------|
-  // | Sprite::kBboxLeftFieldNumber   |
-  // |--------------------------------|
-  // | Sprite::kBboxRightFieldNumber  |
-  // |--------------------------------|
-  // | Sprite::kBboxTopFieldNumber    |
-  // |--------------------------------|
-  // | Sprite::kBboxBottomFieldNumber |
-  // |--------------------------------|
-
-  //  For a RepeatedMessage the row is a index in a vector and the column is a data field/
-  //  ----------------------------------------------------------------------------------|
-  // | Room::Instance 0 | Room::Instance::kXFieldNumber | Room::Instance::kYFieldNumber |
-  // |------------------|-------------------------------|-------------------------------|
-  // | Room::Instance 1 | Room::Instance::kXFieldNumber | Room::Instance::kYFieldNumber |
-  // |------------------|-------------------------------|-------------------------------|
-  // | Room::Instance 2 | Room::Instance::kXFieldNumber | Room::Instance::kYFieldNumber |
-  // |------------------|-------------------------------|-------------------------------|
-  // | Room::Instance 3 | Room::Instance::kXFieldNumber | Room::Instance::kYFieldNumber |
-  // |------------------|-------------------------------|-------------------------------|
-
-  // For a RepeatedType like RepeatedString the row is the index and the column should always be 0
-  //  ---------------|
-  // | "spr_0/1.png" |
-  // |---------------|
-  // | "spr_0/2.png" |
-  // |---------------|
-  // | "spr_0/3.png" |
-
   // These are convience functions for getting & setting model used almost everywhere in the codebase
   // because model->setData(model->index(row, col), value, role) is a PITA to type / remember.
   //virtual QVariant Data(int row, int column = 0) const = 0;
@@ -102,6 +71,7 @@ class ProtoModel : public QAbstractItemModel {
 
  protected:
   static IconMap iconMap;
+  inline QString treeNodeMime() const { return QStringLiteral("RadialGM/buffers.TreeNode"); }
 
   bool _dirty;
   Message *_protobuf;

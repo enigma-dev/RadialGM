@@ -16,7 +16,7 @@ QVariant TreeModel::headerData(int /*section*/, Qt::Orientation /*orientation*/,
 }
 
 QModelIndex TreeModel::index(int row, int column, const QModelIndex &parent) const {
-  qDebug() << "index";
+  //qDebug() << "index" << hasIndex(0,0,QModelIndex()) << row;
   if (!hasIndex(row, column, parent)) return QModelIndex();
 
   buffers::TreeNode *parentItem;

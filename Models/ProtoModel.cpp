@@ -138,7 +138,8 @@ QModelIndex ProtoModel::parent(const QModelIndex &index) const {
 }
 
 Qt::ItemFlags ProtoModel::flags(const QModelIndex &index) const {
-  if (!index.isValid()) return nullptr;
+  // invalid indexes are accepted here because they correspond
+  // to the root and allow dropping between children of the root
   auto flags = QAbstractItemModel::flags(index);
   if (canSetData(index))
     flags |= Qt::ItemIsEditable;
@@ -190,7 +191,82 @@ QMimeData *ProtoModel::mimeData(const QModelIndexList &indexes) const {
   return mimeData;
 }
 
+template <typename T>
+static void RepeatedFieldInsert(RepeatedPtrField<T> *field, T *newItem, int index) {
+  field->AddAllocated(newItem);
+  for (int j = field->size() - 1; j > index; --j) {
+    field->SwapElements(j, j - 1);
+  }
+}
+
 bool ProtoModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, int row, int /*column*/,
                              const QModelIndex &parent) {
-  return false;
+  if (action != Qt::MoveAction && action != Qt::CopyAction) return false;
+  // TODO: Handle other mimes than TreeNode!
+  // ensure the data is in the format we expect
+  if (!mimeData->hasFormat(treeNodeMime())) return false;
+  QByteArray data = mimeData->data(treeNodeMime());
+  QDataStream stream(&data, QIODevice::ReadOnly);
+
+  qint64 senderPid;
+  stream >> senderPid;
+  // ensure the data is coming from the same process since mime is pointer based
+  if (senderPid != QCoreApplication::applicationPid()) return false;
+
+  TreeNode *parentNode = static_cast<TreeNode *>(parent.internalPointer());
+  if (!parentNode) parentNode = static_cast<TreeNode *>(_protobuf);
+  int count;
+  stream >> count;
+  if (count <= 0) return false;
+  if (row == -1) row = rowCount(parent);
+  QHash<TreeNode *, unsigned> removedCount;
+
+  for (int i = 0; i < count; ++i) {
+    qlonglong nodePtr;
+    stream >> nodePtr;
+    int itemRow;
+    stream >> itemRow;
+    TreeNode *node = reinterpret_cast<TreeNode *>(nodePtr);
+
+    if (action == Qt::MoveAction) {
+      auto index = this->createIndex(itemRow, 0, node);
+      R_ASSESS_C(index.isValid());
+      auto oldParent = parents.value(index);
+      auto *oldParentNode = static_cast<TreeNode *>(
+            oldParent.isValid() ? oldParent.internalPointer() : _protobuf);
+
+      qDebug() << parentNode << oldParentNode;
+
+      // offset the row we are removing by the number of
+      // rows already removed from the same parent
+      if (parentNode != oldParentNode || row > itemRow) {
+        itemRow -= removedCount[oldParentNode];
+      }
+
+      bool canDo = beginMoveRows(oldParent, itemRow, itemRow, parent, row);
+      if (!canDo) continue;
+
+      // count this row as having been moved from this parent
+      if (parentNode != oldParentNode || row > itemRow) removedCount[oldParentNode]++;
+
+      // if moving the node within the same parent we need to adjust the row
+      // since its own removal will affect the row we reinsert it at
+      if (parentNode == oldParentNode && row > itemRow) --row;
+
+      auto oldRepeated = oldParentNode->mutable_child();
+      oldRepeated->ExtractSubrange(itemRow, 1, nullptr);
+      RepeatedFieldInsert<buffers::TreeNode>(parentNode->mutable_child(), node, row);
+      parents[index] = parent;
+      endMoveRows();
+      ++row;
+    } else {
+      if (node->folder()) continue;
+      //TODO: FIXME
+      //node = duplicateNode(*node);
+      //insert(parent, row++, node);
+    }
+  }
+
+  return true;
 }
+
