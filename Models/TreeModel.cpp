@@ -8,6 +8,14 @@
 #include <QCoreApplication>
 #include <QMimeData>
 
+template <typename T>
+static void RepeatedFieldInsert(RepeatedPtrField<T> *field, T *newItem, int index) {
+  field->AddAllocated(newItem);
+  for (int j = field->size() - 1; j > index; --j) {
+    field->SwapElements(j, j - 1);
+  }
+}
+
 IconMap TreeModel::iconMap;
 
 TreeModel::TreeModel(buffers::TreeNode *root, ResourceModelMap *resourceMap, QObject *parent)
@@ -156,6 +164,35 @@ int TreeModel::rowCount(const QModelIndex &parent) const {
   return parentItem->child_size();
 }
 
+bool TreeModel::moveRows(const QModelIndex &sourceParent, int sourceRow,
+                         int count, const QModelIndex &destinationParent,
+                         int destinationChild) {
+  TreeNode *sourceNode = static_cast<TreeNode *>(
+        sourceParent.isValid() ? sourceParent.internalPointer() : root);
+  TreeNode *destNode = static_cast<TreeNode *>(
+        destinationParent.isValid() ? destinationParent.internalPointer() : root);
+  int destinationDelta = 0;
+  if (sourceNode == destNode && sourceRow < destinationChild)
+    destinationDelta = count;
+  if (!beginMoveRows(sourceParent, sourceRow,
+                     sourceRow + count - 1, destinationParent,
+                     destinationChild + destinationDelta))
+    return false;
+
+  auto sourceRepeated = sourceNode->mutable_child();
+  TreeNode** nodes = new TreeNode*[count];
+  sourceRepeated->ExtractSubrange(sourceRow, count, nodes);
+  for (int i = 0; i < count; ++i) {
+    RepeatedFieldInsert<buffers::TreeNode>(
+          destNode->mutable_child(), nodes[i], destinationChild++);
+    parents[nodes[i]] = destNode;
+  }
+  delete[] nodes;
+
+  endMoveRows();
+  return true;
+}
+
 Qt::DropActions TreeModel::supportedDropActions() const { return Qt::MoveAction | Qt::CopyAction; }
 
 QStringList TreeModel::mimeTypes() const { return QStringList(treeNodeMime()); }
@@ -184,14 +221,6 @@ QMimeData *TreeModel::mimeData(const QModelIndexList &indexes) const {
   }
   mimeData->setData(treeNodeMime(), data);
   return mimeData;
-}
-
-template <typename T>
-static void RepeatedFieldInsert(RepeatedPtrField<T> *field, T *newItem, int index) {
-  field->AddAllocated(newItem);
-  for (int j = field->size() - 1; j > index; --j) {
-    field->SwapElements(j, j - 1);
-  }
 }
 
 QModelIndex TreeModel::insert(const QModelIndex &parent, int row, buffers::TreeNode *node) {
@@ -247,10 +276,6 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
         itemRow -= removedCount[oldParent];
       }
 
-      auto index = this->createIndex(itemRow, 0, node);
-      bool canDo = beginMoveRows(index.parent(), itemRow, itemRow, parent, row);
-      if (!canDo) continue;
-
       // count this row as having been moved from this parent
       if (parentNode != oldParent || row > itemRow) removedCount[oldParent]++;
 
@@ -258,11 +283,10 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
       // since its own removal will affect the row we reinsert it at
       if (parentNode == oldParent && row > itemRow) --row;
 
-      auto oldRepeated = oldParent->mutable_child();
-      oldRepeated->ExtractSubrange(itemRow, 1, nullptr);
-      RepeatedFieldInsert<buffers::TreeNode>(parentNode->mutable_child(), node, row);
-      parents[node] = parentNode;
-      endMoveRows();
+      auto index = this->createIndex(row,0,node);
+      if (!moveRow(index.parent(),itemRow,parent,row))
+          continue;
+
       ++row;
     } else {
       if (node->folder()) continue;

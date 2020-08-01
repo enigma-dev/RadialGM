@@ -29,6 +29,8 @@ class TreeModel : public QAbstractItemModel {
   QModelIndex parent(const QModelIndex &index) const override;
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+  bool moveRows(const QModelIndex &sourceParent, int sourceRow, int count,
+                const QModelIndex &destinationParent, int destinationChild) override;
 
   Qt::DropActions supportedDropActions() const override;
   QStringList mimeTypes() const override;
