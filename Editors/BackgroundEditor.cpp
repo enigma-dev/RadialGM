@@ -70,24 +70,6 @@ void BackgroundEditor::on_actionNewImage_triggered() {
 void BackgroundEditor::on_actionLoadImage_triggered() {
   FileDialog* dialog = new FileDialog(this, FileDialog_t::BackgroundLoad, false);
 
-  if (dialog->exec() && dialog->selectedFiles().size() > 0) {
-    QString fName = dialog->selectedFiles()[0];
-    if (fName.endsWith("Background.gmx")) {
-      Background* bkg = gmx::LoadBackground(fName.toStdString());
-      if (bkg != nullptr) {
-        // QString lastData = GetModelData(Background::kImageFieldNumber).toString();
-        ReplaceBuffer(bkg);
-        // QString newData = GetModelData(Background::kImageFieldNumber).toString();
-        // TODO: Copy data into our egm and reset the path
-        // SetModelData(Background::kImageFieldNumber, lastData);
-      } else {
-        qDebug() << "Failed to load gmx Background";
-      }
-    } else {
-      // TODO: Copy data into our egm
-      _backgroundModel->SetData(fName, Background::kImageFieldNumber);
-    }
-  }
 }
 
 void BackgroundEditor::on_actionSaveImage_triggered() {
@@ -100,8 +82,5 @@ void BackgroundEditor::on_actionSaveImage_triggered() {
 }
 
 void BackgroundEditor::on_actionEditImage_triggered() {
-  QString fName = _backgroundModel->Data(Background::kImageFieldNumber).toString();
-  QDesktopServices::openUrl(QUrl::fromLocalFile(fName));
-  // TODO: file watcher reload
-  // TODO: editor settings
+
 }

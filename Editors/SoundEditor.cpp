@@ -43,11 +43,6 @@ SoundEditor::SoundEditor(ProtoModel* model, const QPersistentModelIndex& root, Q
     _ui->playbackPositionLabel->setText(timestamp.addMSecs(static_cast<int>(_mediaPlayer->position())).toString());
   });
 
-  connect(_mediaPlayer, &QMediaPlayer::mediaChanged, [=]() {
-    _playlist->clear();
-    _playlist->addMedia(QUrl::fromLocalFile(_soundModel->Data(Sound::kDataFieldNumber).toString()));
-  });
-
   connect(_mediaPlayer, &QMediaPlayer::stateChanged, [=]() {
     if (_mediaPlayer->state() == QMediaPlayer::PausedState || _mediaPlayer->state() == QMediaPlayer::StoppedState)
       _ui->playButton->setIcon(ArtManager::GetIcon(":/actions/play.png"));
@@ -107,33 +102,11 @@ void SoundEditor::on_saveAsButton_clicked() {
 }
 
 void SoundEditor::on_loadButton_clicked() {
-  FileDialog* dialog = new FileDialog(this, FileDialog_t::SoundLoad, false);
 
-  if (dialog->exec() && dialog->selectedFiles().size() > 0) {
-    QString fName = dialog->selectedFiles()[0];
-    if (fName.endsWith("Sound.gmx")) {
-      Sound* snd = gmx::LoadSound(fName.toStdString());
-      if (snd != nullptr) {
-        // QString lastData = GetModelData(Sound::kDataFieldNumber).toString();
-        ReplaceBuffer(snd);
-        // QString newData = GetModelData(Sound::kDataFieldNumber).toString();
-        // TODO: Copy data into our egm and reset the path
-        // SetModelData(Sound::kDataFieldNumber, lastData);
-      } else
-        qDebug() << "Failed to load gmx sound";
-    } else {
-      // TODO: Copy data into our egm
-      _soundModel->SetData(fName, Sound::kDataFieldNumber);
-      emit _mediaPlayer->mediaChanged(_mediaPlayer->media());
-    }
-  }
 }
 
 void SoundEditor::on_editButton_clicked() {
-  QString fName = _model->Data(Sound::kDataFieldNumber).toString();
-  QDesktopServices::openUrl(QUrl::fromLocalFile(fName));
-  // TODO: file watcher reload
-  // TODO: editor settings
+
 }
 
 void SoundEditor::on_stopButton_clicked() { _mediaPlayer->stop(); }
