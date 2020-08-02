@@ -56,12 +56,34 @@ void ProtoModel::setupMimes(const Descriptor* desc, QSet<QString>& uniqueMimes,
 QVariant ProtoModel::data(const QModelIndex &index, int role) const {
   R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
   if (role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::DecorationRole) return QVariant();
-
   auto message = static_cast<Message *>(index.internalPointer());
+
   if (IsMessage(index)) {
-    return QString::fromStdString(message->GetTypeName());
+    // let's be nice and automagically handle tree nodes
+    // for some simple convenience
+    if (message->GetTypeName() == "buffers.TreeNode") {
+      buffers::TreeNode *item = static_cast<buffers::TreeNode *>(message);
+      if (role == Qt::DecorationRole) {
+        auto it = iconMap.find(item->type_case());
+        if (it == iconMap.end()) return ArtManager::GetIcon("info");
+
+        const QIcon &icon = it->second;
+        if (item->type_case() == TypeCase::kFolder && item->child_size() <= 0) {
+          return QIcon(icon.pixmap(icon.availableSizes().first(), QIcon::Disabled));
+        }
+        return icon;
+      } else if (role == Qt::DisplayRole || role == Qt::EditRole) {
+        return QString::fromStdString(item->name());
+      }
+    }
+
+    if (role == Qt::DisplayRole || role == Qt::EditRole)
+        return QString::fromStdString(message->GetTypeName());
+
+    return QVariant();
   }
 
+  if (role != Qt::DisplayRole && role != Qt::EditRole) return QVariant();
   auto desc = message->GetDescriptor();
   auto refl = message->GetReflection();
   auto field = desc->field(index.row());
