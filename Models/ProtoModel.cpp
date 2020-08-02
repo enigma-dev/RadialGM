@@ -55,57 +55,38 @@ void ProtoModel::setupMimes(const Descriptor* desc, QSet<QString>& uniqueMimes,
 
 QVariant ProtoModel::data(const QModelIndex &index, int role) const {
   R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
+  if (role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::DecorationRole) return QVariant();
 
-  buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
-  if (index.column() == 0) {
-    if (role == Qt::DecorationRole) {
-      auto it = iconMap.find(item->type_case());
-      if (it == iconMap.end()) return ArtManager::GetIcon("info");
+  auto message = static_cast<Message *>(index.internalPointer());
+  if (IsMessage(index)) {
+    return QString::fromStdString(message->GetTypeName());
+  }
 
-      if (item->type_case() == TypeCase::kSprite) {
-        if (item->sprite().subimages_size() <= 0) return QVariant();
-        QString spr = QString::fromStdString(item->sprite().subimages(0));
-        return spr.isEmpty() ? QVariant() : ArtManager::GetIcon(spr);
-      }
+  auto desc = message->GetDescriptor();
+  auto refl = message->GetReflection();
+  auto field = desc->field(index.row());
 
-      if (item->type_case() == TypeCase::kBackground) {
-        QString bkg = QString::fromStdString(item->background().image());
-        return bkg.isEmpty() ? QVariant() : ArtManager::GetIcon(bkg);
-      }
-
-      const QIcon &icon = it->second;
-      if (item->type_case() == TypeCase::kFolder && item->child_size() <= 0) {
-        return QIcon(icon.pixmap(icon.availableSizes().first(), QIcon::Disabled));
-      }
-      return icon;
-    } else if (role == Qt::EditRole || role == Qt::DisplayRole) {
-      return QString::fromStdString(item->name());
-    }
-  } else if (item->type_case() != TypeCase::kFolder) {
-    if (role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::DecorationRole) return QVariant();
-
-    const Descriptor *desc = item->GetDescriptor();
-    const Reflection *refl = item->GetReflection();
-    auto oneOf = desc->oneof_decl(0);
-    auto msgField = refl->GetOneofFieldDescriptor(*item, oneOf);
-    const Message &msg = refl->GetMessage(*item,msgField);
-    auto msgDesc = msg.GetDescriptor();
-    auto msgRefl = msg.GetReflection();
-    auto field = msgDesc->FindFieldByNumber(index.column());
-    if (!field) return QVariant(); // some messages have more fields/columns than others
-
-    switch (field->cpp_type()) {
-      case CppType::CPPTYPE_MESSAGE: R_EXPECT(false, QVariant()) << "The requested field " << index << " is a message";
-      case CppType::CPPTYPE_INT32: return msgRefl->GetInt32(msg, field);
-      case CppType::CPPTYPE_INT64: return static_cast<long long>(msgRefl->GetInt64(msg, field));
-      case CppType::CPPTYPE_UINT32: return msgRefl->GetUInt32(msg, field);
-      case CppType::CPPTYPE_UINT64: return static_cast<unsigned long long>(msgRefl->GetUInt64(msg, field));
-      case CppType::CPPTYPE_DOUBLE: return msgRefl->GetDouble(msg, field);
-      case CppType::CPPTYPE_FLOAT: return msgRefl->GetFloat(msg, field);
-      case CppType::CPPTYPE_BOOL: return msgRefl->GetBool(msg, field);
-      case CppType::CPPTYPE_ENUM: return msgRefl->GetEnumValue(msg, field);
-      case CppType::CPPTYPE_STRING: return QString::fromStdString(msgRefl->GetString(msg, field));
-    }
+  switch (field->cpp_type()) {
+    case CppType::CPPTYPE_MESSAGE:
+      return QVariant::fromValue((void*)refl->MutableMessage(message, field));
+    case CppType::CPPTYPE_INT32:
+      return refl->GetInt32(*message, field);
+    case CppType::CPPTYPE_INT64:
+      return static_cast<long long>(refl->GetInt64(*message, field));
+    case CppType::CPPTYPE_UINT32:
+      return refl->GetUInt32(*message, field);
+    case CppType::CPPTYPE_UINT64:
+      return static_cast<unsigned long long>(refl->GetUInt64(*message, field));
+    case CppType::CPPTYPE_DOUBLE:
+      return refl->GetDouble(*message, field);
+    case CppType::CPPTYPE_FLOAT:
+      return refl->GetFloat(*message, field);
+    case CppType::CPPTYPE_BOOL:
+      return refl->GetBool(*message, field);
+    case CppType::CPPTYPE_ENUM:
+      return refl->GetEnumValue(*message, field);
+    case CppType::CPPTYPE_STRING:
+      return QString::fromStdString(refl->GetString(*message, field));
   }
 
   return QVariant();
@@ -130,9 +111,14 @@ void ProtoModel::SetDirty(bool dirty) { _dirty = dirty; }
 bool ProtoModel::IsDirty() { return _dirty; }
 
 int ProtoModel::rowCount(const QModelIndex &parent) const {
-  auto message = static_cast<const Message*>(parent.internalPointer());
+  auto message = static_cast<const Message*>(
+        parent.isValid() ? parent.internalPointer() : _protobuf);
   auto desc = message->GetDescriptor();
+
+  // message children are always fields
+  // that includes the root message
   if (IsMessage(parent)) return desc->field_count();
+
   auto field = desc->field(parent.row());
   if (field->is_repeated()) {
     auto refl = message->GetReflection();
@@ -157,8 +143,8 @@ QModelIndex ProtoModel::index(int row, int column, const QModelIndex &parent) co
   else
     parentItem = static_cast<Message *>(parent.internalPointer());
 
-  // fields are only children of message
-  // and the root is always message, never field
+  // all children of messages are fields
+  // the root is always message, never field
   if (IsMessage(parent)) {
     return createIndex(row, column, parentItem);
   }
