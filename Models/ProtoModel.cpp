@@ -88,9 +88,11 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
   auto refl = message->GetReflection();
   auto field = desc->field(index.row());
 
+  if (field->is_repeated()) return QVariant("REPEATED"); // TODO: need another switch
+
   switch (field->cpp_type()) {
     case CppType::CPPTYPE_MESSAGE:
-      return QVariant::fromValue((void*)refl->MutableMessage(message, field));
+      return QString::fromStdString(field->name());
     case CppType::CPPTYPE_INT32:
       return refl->GetInt32(*message, field);
     case CppType::CPPTYPE_INT64:
@@ -162,27 +164,26 @@ QModelIndex ProtoModel::index(int row, int column, const QModelIndex &parent) co
   Message *parentItem;
   if (!parent.isValid())
     parentItem = _protobuf;
-  else
+  else {
     parentItem = static_cast<Message *>(parent.internalPointer());
-
-  // all children of messages are fields
-  // the root is always message, never field
-  if (IsMessage(parent)) {
-    return createIndex(row, column, parentItem);
+    // if parent is a field, we could be anything
+    if (IsField(parent)) {
+      auto desc = parentItem->GetDescriptor();
+      auto refl = parentItem->GetReflection();
+      auto field = desc->field(parent.row());
+      qDebug() << field->cpp_type() << CppType::CPPTYPE_MESSAGE;
+      if (field->cpp_type() == CppType::CPPTYPE_MESSAGE)
+        parentItem = field->is_repeated() ?
+              refl->MutableRepeatedMessage(parentItem,field,row) :
+              refl->MutableMessage(parentItem,field);
+    }
   }
 
-  const Descriptor *desc = parentItem->GetDescriptor();
-  const Reflection *refl = parentItem->GetReflection();
-
-
-
-
-  const FieldDescriptor *field = desc->FindFieldByNumber(parent.column());
-  Message *childItem = refl->MutableRepeatedMessage(parentItem, field, parent.row());
-  if (childItem)
-    return createIndex(row, column, childItem);
-  else
-    return QModelIndex();
+  auto mutableParents = const_cast<ProtoModel*>(this)->parents;
+  auto index = createIndex(row, column, parentItem);
+  qDebug() << index << index.internalId();
+  mutableParents[index] = parent;
+  return index;
 }
 
 QModelIndex ProtoModel::parent(const QModelIndex &index) const {

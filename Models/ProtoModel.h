@@ -24,15 +24,16 @@ using Timeline = buffers::resources::Timeline;
 
 using IconMap = std::unordered_map<TypeCase, QIcon>;
 
-// This is a parent to all internal models
+// This is the mother of all models.
 class ProtoModel : public QAbstractItemModel {
   Q_OBJECT
  public:
   explicit ProtoModel(QObject *parent, Message *protobuf);
 
   inline bool IsMessage(const QModelIndex& index) const {
-    return !index.parent().isValid() ||
-        index.internalPointer() != index.parent().internalPointer();
+    return !index.isValid() || // << root is always message in this model
+        (index.parent().isValid() &&
+         index.internalPointer() != index.parent().internalPointer());
   }
   inline bool IsField(const QModelIndex& index) const {
     return !IsMessage(index);
