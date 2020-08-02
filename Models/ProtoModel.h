@@ -30,6 +30,14 @@ class ProtoModel : public QAbstractItemModel {
  public:
   explicit ProtoModel(QObject *parent, Message *protobuf);
 
+  inline bool IsMessage(const QModelIndex& index) const {
+    return !index.parent().isValid() ||
+        index.internalPointer() != index.parent().internalPointer();
+  }
+  inline bool IsField(const QModelIndex& index) const {
+    return !IsMessage(index);
+  }
+
   // A model is "dirty" if the user has made any changes to it since opening the editor.
   // This is mostly used in "Would you like to save?" dialogs when closing editors.
   void SetDirty(bool dirty);
@@ -42,7 +50,7 @@ class ProtoModel : public QAbstractItemModel {
 
   // From here down marks QAbstractItemModel functions required to be implemented
   virtual QModelIndex parent(const QModelIndex &) const override;
-  virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override = 0;
+  virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override;
   virtual bool canSetData(const QModelIndex &index) const {

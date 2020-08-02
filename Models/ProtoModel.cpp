@@ -129,15 +129,23 @@ void ProtoModel::SetDirty(bool dirty) { _dirty = dirty; }
 
 bool ProtoModel::IsDirty() { return _dirty; }
 
-int ProtoModel::columnCount(const QModelIndex &parent) const {
-  Message *parentItem;
-  if (!parent.isValid())
-    parentItem = _protobuf;
-  else
-    parentItem = static_cast<Message *>(parent.internalPointer());
+int ProtoModel::rowCount(const QModelIndex &parent) const {
+  auto message = static_cast<const Message*>(parent.internalPointer());
+  auto desc = message->GetDescriptor();
+  if (IsMessage(parent)) return desc->field_count();
+  auto field = desc->field(parent.row());
+  if (field->is_repeated()) {
+    auto refl = message->GetReflection();
+    return refl->FieldSize(*message,field);
+  }
+  if (field->cpp_type() == CppType::CPPTYPE_MESSAGE)
+    return 1;
+  //TODO: Handle enum?
+  return 0;
+}
 
-  const Descriptor *desc = parentItem->GetDescriptor();
-  return desc->field_count();
+int ProtoModel::columnCount(const QModelIndex &parent) const {
+  return 1;
 }
 
 QModelIndex ProtoModel::index(int row, int column, const QModelIndex &parent) const {
@@ -149,8 +157,18 @@ QModelIndex ProtoModel::index(int row, int column, const QModelIndex &parent) co
   else
     parentItem = static_cast<Message *>(parent.internalPointer());
 
+  // fields are only children of message
+  // and the root is always message, never field
+  if (IsMessage(parent)) {
+    return createIndex(row, column, parentItem);
+  }
+
   const Descriptor *desc = parentItem->GetDescriptor();
   const Reflection *refl = parentItem->GetReflection();
+
+
+
+
   const FieldDescriptor *field = desc->FindFieldByNumber(parent.column());
   Message *childItem = refl->MutableRepeatedMessage(parentItem, field, parent.row());
   if (childItem)
