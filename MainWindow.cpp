@@ -274,7 +274,8 @@ void MainWindow::updateWindowMenu() {
     QString text = tr("%1 %2").arg(numberString).arg(windowTitle);
 
     QAction *action = _ui->menuWindow->addAction(
-        text, mdiSubWindow, [this, mdiSubWindow]() { _ui->mdiArea->setActiveSubWindow(mdiSubWindow); });
+        mdiSubWindow->windowIcon(), text, mdiSubWindow,
+          [this, mdiSubWindow]() { _ui->mdiArea->setActiveSubWindow(mdiSubWindow); });
     windowActions.append(action);
     action->setCheckable(true);
     action->setChecked(mdiSubWindow == _ui->mdiArea->activeSubWindow());
