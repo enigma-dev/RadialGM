@@ -57,28 +57,55 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
   R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
 
   buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
-  if (role == Qt::DecorationRole) {
-    auto it = iconMap.find(item->type_case());
-    if (it == iconMap.end()) return ArtManager::GetIcon("info");
+  if (index.column() == 0) {
+    if (role == Qt::DecorationRole) {
+      auto it = iconMap.find(item->type_case());
+      if (it == iconMap.end()) return ArtManager::GetIcon("info");
 
-    if (item->type_case() == TypeCase::kSprite) {
-      if (item->sprite().subimages_size() <= 0) return QVariant();
-      QString spr = QString::fromStdString(item->sprite().subimages(0));
-      return spr.isEmpty() ? QVariant() : ArtManager::GetIcon(spr);
-    }
+      if (item->type_case() == TypeCase::kSprite) {
+        if (item->sprite().subimages_size() <= 0) return QVariant();
+        QString spr = QString::fromStdString(item->sprite().subimages(0));
+        return spr.isEmpty() ? QVariant() : ArtManager::GetIcon(spr);
+      }
 
-    if (item->type_case() == TypeCase::kBackground) {
-      QString bkg = QString::fromStdString(item->background().image());
-      return bkg.isEmpty() ? QVariant() : ArtManager::GetIcon(bkg);
-    }
+      if (item->type_case() == TypeCase::kBackground) {
+        QString bkg = QString::fromStdString(item->background().image());
+        return bkg.isEmpty() ? QVariant() : ArtManager::GetIcon(bkg);
+      }
 
-    const QIcon &icon = it->second;
-    if (item->type_case() == TypeCase::kFolder && item->child_size() <= 0) {
-      return QIcon(icon.pixmap(icon.availableSizes().first(), QIcon::Disabled));
+      const QIcon &icon = it->second;
+      if (item->type_case() == TypeCase::kFolder && item->child_size() <= 0) {
+        return QIcon(icon.pixmap(icon.availableSizes().first(), QIcon::Disabled));
+      }
+      return icon;
+    } else if (role == Qt::EditRole || role == Qt::DisplayRole) {
+      return QString::fromStdString(item->name());
     }
-    return icon;
-  } else if (role == Qt::EditRole || role == Qt::DisplayRole) {
-    return QString::fromStdString(item->name());
+  } else if (item->type_case() != TypeCase::kFolder) {
+    if (role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::DecorationRole) return QVariant();
+
+    const Descriptor *desc = item->GetDescriptor();
+    const Reflection *refl = item->GetReflection();
+    auto oneOf = desc->oneof_decl(0);
+    auto msgField = refl->GetOneofFieldDescriptor(*item, oneOf);
+    const Message &msg = refl->GetMessage(*item,msgField);
+    auto msgDesc = msg.GetDescriptor();
+    auto msgRefl = msg.GetReflection();
+    auto field = msgDesc->FindFieldByNumber(index.column());
+    if (!field) return QVariant(); // some messages have more fields/columns than others
+
+    switch (field->cpp_type()) {
+      case CppType::CPPTYPE_MESSAGE: R_EXPECT(false, QVariant()) << "The requested field " << index << " is a message";
+      case CppType::CPPTYPE_INT32: return msgRefl->GetInt32(msg, field);
+      case CppType::CPPTYPE_INT64: return static_cast<long long>(msgRefl->GetInt64(msg, field));
+      case CppType::CPPTYPE_UINT32: return msgRefl->GetUInt32(msg, field);
+      case CppType::CPPTYPE_UINT64: return static_cast<unsigned long long>(msgRefl->GetUInt64(msg, field));
+      case CppType::CPPTYPE_DOUBLE: return msgRefl->GetDouble(msg, field);
+      case CppType::CPPTYPE_FLOAT: return msgRefl->GetFloat(msg, field);
+      case CppType::CPPTYPE_BOOL: return msgRefl->GetBool(msg, field);
+      case CppType::CPPTYPE_ENUM: return msgRefl->GetEnumValue(msg, field);
+      case CppType::CPPTYPE_STRING: return QString::fromStdString(msgRefl->GetString(msg, field));
+    }
   }
 
   return QVariant();
