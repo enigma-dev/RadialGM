@@ -2,10 +2,10 @@
 #define RESOURCEMODEL_H
 
 #include "treenode.pb.h"
+#include "Components/Logger.h"
 
 #include <QAbstractItemModel>
 #include <QMimeData>
-#include <QDebug>
 #include <QHash>
 #include <QList>
 
@@ -24,16 +24,37 @@ using Timeline = buffers::resources::Timeline;
 
 using IconMap = std::unordered_map<TypeCase, QIcon>;
 
+template <typename T = void>
+T* pointer_byte_offset(T* ptr, size_t n) {
+  return (T*)((char*)ptr + n);
+}
+
 // This is the mother of all models.
 class ProtoModel : public QAbstractItemModel {
   Q_OBJECT
  public:
   explicit ProtoModel(QObject *parent, Message *protobuf);
 
+  inline Message* GetMessage(const QModelIndex& index) const {
+    auto msg = static_cast<Message*>(_protobuf);
+    if (index.isValid()) {
+      if (IsMessage(index))
+        msg = static_cast<Message*>(index.internalPointer());
+      else {
+        R_EXPECT(index != index.parent(), msg)
+            << "Message index equal to parent: " << index;
+        msg = GetMessage(index.parent());
+      }
+    }
+    return msg;
+  }
   inline bool IsMessage(const QModelIndex& index) const {
     return !index.isValid() || // << root is always message in this model
         (index.parent().isValid() &&
-         index.internalPointer() != index.parent().internalPointer());
+         index.internalPointer() !=
+         // row is incremented by at least 1 plus the field index
+         // to differentiate its id from the parent
+         pointer_byte_offset(index.parent().internalPointer(), index.row()+1));
   }
   inline bool IsField(const QModelIndex& index) const {
     return !IsMessage(index);

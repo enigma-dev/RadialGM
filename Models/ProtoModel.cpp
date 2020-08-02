@@ -1,10 +1,11 @@
 #include "ProtoModel.h"
 
-#include "Components/Logger.h"
 #include "Components/ArtManager.h"
 
 #include <QDataStream>
 #include <QCoreApplication>
+
+#include <QDebug>
 
 IconMap ProtoModel::iconMap;
 
@@ -56,7 +57,9 @@ void ProtoModel::setupMimes(const Descriptor* desc, QSet<QString>& uniqueMimes,
 QVariant ProtoModel::data(const QModelIndex &index, int role) const {
   R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
   if (role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::DecorationRole) return QVariant();
-  auto message = static_cast<Message *>(index.internalPointer());
+  //return QString::number((quintptr)index.internalId(), 16) + " " +
+      //QString::number((quintptr)index.parent().internalId(), 16);
+  auto message = GetMessage(index);
 
   if (IsMessage(index)) {
     // let's be nice and automagically handle tree nodes
@@ -135,8 +138,7 @@ void ProtoModel::SetDirty(bool dirty) { _dirty = dirty; }
 bool ProtoModel::IsDirty() { return _dirty; }
 
 int ProtoModel::rowCount(const QModelIndex &parent) const {
-  auto message = static_cast<const Message*>(
-        parent.isValid() ? parent.internalPointer() : _protobuf);
+  auto message = GetMessage(parent);
   auto desc = message->GetDescriptor();
 
   // message children are always fields
@@ -148,8 +150,10 @@ int ProtoModel::rowCount(const QModelIndex &parent) const {
     auto refl = message->GetReflection();
     return refl->FieldSize(*message,field);
   }
-  if (field->cpp_type() == CppType::CPPTYPE_MESSAGE)
-    return 1;
+  if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
+    auto refl = message->GetReflection();
+    return refl->HasField(*message,field);
+  }
   //TODO: Handle enum?
   return 0;
 }
@@ -161,34 +165,39 @@ int ProtoModel::columnCount(const QModelIndex &parent) const {
 QModelIndex ProtoModel::index(int row, int column, const QModelIndex &parent) const {
   if (!hasIndex(row, column, parent)) return QModelIndex();
 
-  Message *parentItem;
-  if (!parent.isValid())
-    parentItem = _protobuf;
-  else {
-    parentItem = static_cast<Message *>(parent.internalPointer());
-    // if parent is a field, we could be anything
-    if (IsField(parent)) {
-      auto desc = parentItem->GetDescriptor();
-      auto refl = parentItem->GetReflection();
-      auto field = desc->field(parent.row());
-      qDebug() << field->cpp_type() << CppType::CPPTYPE_MESSAGE;
-      if (field->cpp_type() == CppType::CPPTYPE_MESSAGE)
-        parentItem = field->is_repeated() ?
-              refl->MutableRepeatedMessage(parentItem,field,row) :
-              refl->MutableMessage(parentItem,field);
-    }
+  Message *parentItem = GetMessage(parent);
+  // if parent is a message, we are a field
+  if (IsMessage(parent)) {
+    // because QModelIndex equality uses row, column, & parent
+    // we distinguish fields from messages by byte offsetting
+    // the message pointer by 1 plus the field index
+    parentItem = pointer_byte_offset(parentItem, row+1);
+  } else {
+    auto desc = parentItem->GetDescriptor();
+    auto refl = parentItem->GetReflection();
+    auto field = desc->field(parent.row());
+    if (field->cpp_type() == CppType::CPPTYPE_MESSAGE)
+      parentItem = field->is_repeated() ?
+            refl->MutableRepeatedMessage(parentItem,field,row) :
+            refl->MutableMessage(parentItem,field);
   }
 
-  auto mutableParents = const_cast<ProtoModel*>(this)->parents;
   auto index = createIndex(row, column, parentItem);
-  qDebug() << index << index.internalId();
+  auto& mutableParents = const_cast<ProtoModel*>(this)->parents;
+  if (index == parent) {
+    TreeNode *msg = nullptr;
+    msg->name();
+  }
+  R_EXPECT(index != parent, QModelIndex()) << "Model index equal to parent: " << index;
   mutableParents[index] = parent;
   return index;
 }
 
 QModelIndex ProtoModel::parent(const QModelIndex &index) const {
   if (!index.isValid()) return QModelIndex();
-  return parents[index];
+  auto it = parents.find(index);
+  if (it == parents.end()) return QModelIndex();
+  return it.value();
 }
 
 Qt::ItemFlags ProtoModel::flags(const QModelIndex &index) const {
