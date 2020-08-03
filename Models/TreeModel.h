@@ -7,20 +7,22 @@
 #include "treenode.pb.h"
 
 #include <QHash>
+#include <QSortFilterProxyModel>
 
 #include <unordered_map>
 
 using TypeCase = buffers::TreeNode::TypeCase;
 
-class TreeModel : public ProtoModel {
+class TreeModel : public QSortFilterProxyModel {
   Q_OBJECT
 
  public:
-  explicit TreeModel(buffers::TreeNode *root, ResourceModelMap *resourceMap, QObject *parent);
+  explicit TreeModel(ProtoModel *source, ResourceModelMap *resourceMap, QObject *parent);
 
-  QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-  QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
-  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  virtual QModelIndex mapToSource(const QModelIndex &sourceIndex) const override;
+  virtual bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const override;
+  virtual QVariant data(const QModelIndex &index, int role) const override;
+  virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
   QModelIndex insert(const QModelIndex &parent, int row, buffers::TreeNode *node);
   QModelIndex addNode(buffers::TreeNode *child, const QModelIndex &parent);
@@ -29,7 +31,7 @@ class TreeModel : public ProtoModel {
   void sortByName(const QModelIndex &index);
 
  private:
-  buffers::TreeNode *root;
+  ProtoModel *protoModel;
   ResourceModelMap *resourceMap;
 };
 

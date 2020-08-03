@@ -100,7 +100,7 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>31</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -216,6 +216,8 @@
     <addaction name="separator"/>
     <addaction name="actionExploreENIGMA"/>
     <addaction name="actionExploreProject"/>
+    <addaction name="separator"/>
+    <addaction name="actionShowDiagnosticInspector"/>
     <addaction name="separator"/>
     <addaction name="actionAbout"/>
    </widget>
@@ -481,7 +483,7 @@
         <bool>true</bool>
        </property>
        <property name="sortingEnabled">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="allColumnsShowFocus">
         <bool>false</bool>
@@ -979,6 +981,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+G</string>
+   </property>
+  </action>
+  <action name="actionShowDiagnosticInspector">
+   <property name="text">
+    <string>Show &amp;Diagnostic Inspector</string>
    </property>
   </action>
   <actiongroup name="configActionGroup">

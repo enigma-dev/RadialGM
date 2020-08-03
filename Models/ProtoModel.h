@@ -28,6 +28,17 @@ template <typename T = void>
 T* pointer_byte_offset(T* ptr, size_t n) {
   return (T*)((char*)ptr + n);
 }
+template <typename T = void>
+T* field_pointer(T* msg, size_t fieldIndex) {
+  // because QModelIndex equality uses row, column, & parent
+  // we distinguish fields from messages by byte offsetting
+  // the message pointer by 1 plus the field index
+  return pointer_byte_offset<T>(msg, fieldIndex+1);
+}
+template <typename T = void>
+T* field_pointer(const QModelIndex& index) {
+  return field_pointer<T>(index.internalPointer(), index.row());
+}
 
 // This is the mother of all models.
 class ProtoModel : public QAbstractItemModel {
@@ -48,16 +59,33 @@ class ProtoModel : public QAbstractItemModel {
     }
     return msg;
   }
-  inline bool IsMessage(const QModelIndex& index) const {
+  static inline bool IsMessage(const QModelIndex& index) {
     return !index.isValid() || // << root is always message in this model
         (index.parent().isValid() &&
          index.internalPointer() !=
-         // row is incremented by at least 1 plus the field index
-         // to differentiate its id from the parent
-         pointer_byte_offset(index.parent().internalPointer(), index.row()+1));
+         field_pointer(index.parent().internalPointer(), index.row()));
   }
-  inline bool IsField(const QModelIndex& index) const {
+  static inline bool IsField(const QModelIndex& index) {
     return !IsMessage(index);
+  }
+
+  // These are conveniences for finding model indexes for fields & messages.
+  inline QModelIndex indexOfField(Message* message, int fieldIndex) const {
+    void *ptr = field_pointer(message, fieldIndex);
+    return this->createIndex(fieldIndex,0,ptr);
+  }
+  inline QModelIndex indexOfField(Message* message, const FieldDescriptor* field) const {
+    return indexOfField(message,field->index());
+  }
+  inline QModelIndex indexOfFieldByNumber(Message* message, int fieldNumber) const {
+    auto desc = message->GetDescriptor();
+    auto field = desc->FindFieldByNumber(fieldNumber);
+    return indexOfField(message,field);
+  }
+  inline QModelIndex indexOfFieldByName(Message* message, std::string fieldName) const {
+    auto desc = message->GetDescriptor();
+    auto field = desc->FindFieldByName(fieldName);
+    return indexOfField(message,field);
   }
 
   // A model is "dirty" if the user has made any changes to it since opening the editor.
@@ -80,7 +108,7 @@ class ProtoModel : public QAbstractItemModel {
     return const_cast<ProtoModel*>(this)->setData(index,QVariant(),Qt::UserRole);
   }
   virtual QVariant data(const QModelIndex &index, int role) const override;
-  virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override = 0;
+  //virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
   virtual QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
   virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
   virtual Qt::DropActions supportedDropActions() const override;

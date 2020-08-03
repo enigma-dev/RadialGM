@@ -168,10 +168,7 @@ QModelIndex ProtoModel::index(int row, int column, const QModelIndex &parent) co
   Message *parentItem = GetMessage(parent);
   // if parent is a message, we are a field
   if (IsMessage(parent)) {
-    // because QModelIndex equality uses row, column, & parent
-    // we distinguish fields from messages by byte offsetting
-    // the message pointer by 1 plus the field index
-    parentItem = pointer_byte_offset(parentItem, row+1);
+    parentItem = field_pointer(parentItem, row);
   } else {
     auto desc = parentItem->GetDescriptor();
     auto refl = parentItem->GetReflection();

@@ -39,6 +39,7 @@
 QList<buffers::SystemType> MainWindow::systemCache;
 MainWindow *MainWindow::_instance = nullptr;
 QScopedPointer<ResourceModelMap> MainWindow::resourceMap;
+QScopedPointer<ProtoModel> MainWindow::protoModel;
 QScopedPointer<TreeModel> MainWindow::treeModel;
 
 static QTextEdit *diagnosticTextEdit = nullptr;
@@ -224,7 +225,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
 
     connect(editor, &BaseEditor::ResourceRenamed, resourceMap.get(), &ResourceModelMap::ResourceRenamed);
     connect(editor, &BaseEditor::ResourceRenamed, [=]() { treeModel->dataChanged(QModelIndex(), QModelIndex()); });
-    connect(treeModel.get(), &TreeModel::ResourceRenamed, editor,
+    connect(protoModel.get(), &ProtoModel::ResourceRenamed, editor,
             [](TypeCase /*type*/, const QString & /*oldName*/, const QString & /*newName*/) {
               //const QModelIndex index = res->index(TreeNode::kNameFieldNumber);
               //emit res->DataChanged(index, index);
@@ -328,11 +329,14 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   _project = std::move(openedProject);
 
   resourceMap.reset(new ResourceModelMap(_project->mutable_game()->mutable_root(), nullptr));
-  treeModel.reset(new TreeModel(_project->mutable_game()->mutable_root(), resourceMap.get(), nullptr));
+  protoModel.reset(new ProtoModel(nullptr, _project.get()));
+  treeModel.reset(new TreeModel(protoModel.get(), resourceMap.get(), nullptr));
 
   _ui->treeView->setModel(treeModel.get());
-  treeModel->connect(treeModel.get(), &TreeModel::ResourceRenamed, resourceMap.get(),
+  treeModel->connect(protoModel.get(), &ProtoModel::ResourceRenamed, resourceMap.get(),
                      &ResourceModelMap::ResourceRenamed);
+  treeModel->connect(_ui->treeFilterEdit, &QLineEdit::textChanged, treeModel.get(),
+                     &TreeModel::setFilterFixedString);
 }
 
 void MainWindow::on_actionNew_triggered() { openNewProject(); }
@@ -408,7 +412,17 @@ void MainWindow::on_actionSubmitIssue_triggered() {
   QDesktopServices::openUrl(url);
 }
 
-void MainWindow::on_actionExploreENIGMA_triggered() { QDesktopServices::openUrl(QUrl(".", QUrl::TolerantMode)); }
+void MainWindow::on_actionExploreENIGMA_triggered() {
+  QDesktopServices::openUrl(QUrl(".", QUrl::TolerantMode));
+}
+
+void MainWindow::on_actionShowDiagnosticInspector_triggered() {
+  QTreeView *inspectorTable = new QTreeView(this);
+  inspectorTable->setModel(protoModel.get());
+  inspectorTable->setWindowTitle(tr("Diagnostic Inspector"));
+  inspectorTable->setWindowFlags(Qt::Window);
+  inspectorTable->show();
+}
 
 void MainWindow::on_actionAbout_triggered() {
   QMessageBox aboutBox(QMessageBox::Information, tr("About"),
@@ -423,6 +437,8 @@ void MainWindow::on_actionAbout_triggered() {
 }
 
 void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
+  //TODO: Handle
+  return;
   buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
   const QString name = QString::fromStdString(item->name());
 

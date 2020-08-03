@@ -26,6 +26,7 @@ class MainWindow : public QMainWindow {
 
  public:
   static QScopedPointer<ResourceModelMap> resourceMap;
+  static QScopedPointer<ProtoModel> protoModel;
   static QScopedPointer<TreeModel> treeModel;
   static QList<buffers::SystemType> systemCache;
 
@@ -92,6 +93,7 @@ class MainWindow : public QMainWindow {
   void on_actionCommunity_triggered();
   void on_actionSubmitIssue_triggered();
   void on_actionExploreENIGMA_triggered();
+  void on_actionShowDiagnosticInspector_triggered();
   void on_actionAbout_triggered();
 
   void on_treeView_doubleClicked(const QModelIndex &index);
