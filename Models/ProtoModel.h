@@ -117,6 +117,8 @@ class ProtoModel : public QAbstractItemModel {
   virtual bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
                     const QModelIndex &parent) override;
 
+  virtual bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+
  signals:
   // QAbstractItemModel has a datachanged signal but it doesn't store the old values
   // We use old values in some places to revert invalid changes.

@@ -27,7 +27,6 @@ class TreeModel : public QSortFilterProxyModel {
   QModelIndex insert(const QModelIndex &parent, int row, buffers::TreeNode *node);
   QModelIndex addNode(buffers::TreeNode *child, const QModelIndex &parent);
   buffers::TreeNode *duplicateNode(const buffers::TreeNode &node);
-  void removeNode(const QModelIndex &index);
   void sortByName(const QModelIndex &index);
 
  private:

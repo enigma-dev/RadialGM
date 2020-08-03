@@ -197,6 +197,24 @@ QModelIndex ProtoModel::parent(const QModelIndex &index) const {
   return it.value();
 }
 
+bool ProtoModel::removeRows(int row, int count, const QModelIndex &parent) {
+  if (!IsField(parent)) return false;
+  auto message = GetMessage(parent);
+  auto desc = message->GetDescriptor();
+  auto field = desc->field(parent.row());
+  if (!field->is_repeated()) return false;
+  auto refl = message->GetReflection();
+  beginRemoveRows(parent, row, row+count-1);
+  //TODO: Fix quadratic behavior below, ask Josh how to rotate.
+  for (int i = 0; i < count; ++i) {
+    for (int j = row + i; j < refl->FieldSize(*message,field)-1; ++j)
+      refl->SwapElements(message,field,j,j+1);
+    refl->RemoveLast(message,field);
+  }
+  endRemoveRows();
+  return true;
+}
+
 Qt::ItemFlags ProtoModel::flags(const QModelIndex &index) const {
   // invalid indexes are accepted here because they correspond
   // to the root and allow dropping between children of the root

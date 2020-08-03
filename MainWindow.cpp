@@ -560,32 +560,32 @@ static void CollectNodes(buffers::TreeNode *root, QSet<buffers::TreeNode *> &cac
 void MainWindow::on_actionDelete_triggered() {
   if (!_ui->treeView->selectionModel()->hasSelection()) return;
   auto selected = _ui->treeView->selectionModel()->selectedIndexes();
-  QSet<buffers::TreeNode *> selectedNodes;
-  for (auto index : selected) {
-    auto *treeNode = static_cast<buffers::TreeNode *>(index.internalPointer());
-    CollectNodes(treeNode, selectedNodes);
-  }
+
   QString selectedNames = "";
-  for (auto node : selectedNodes) {
-    selectedNames += (node == *selectedNodes.begin() ? "" : ", ") + QString::fromStdString(node->name());
+  for (auto index : selected) {
+    auto name = treeModel->data(index, Qt::DisplayRole);
+    selectedNames += (index == *selected.begin() ? "" : ", ") + name.toString();
   }
 
-  QMessageBox::StandardButton reply;
-  reply = QMessageBox::question(
-      this, tr("Delete Resources"),
-      tr("Do you want to delete the following resources from the project?\n%0").arg(selectedNames),
-      QMessageBox::Yes | QMessageBox::No);
-  if (reply != QMessageBox::Yes) return;
+  QMessageBox mb(
+    QMessageBox::Icon::Question,
+    tr("Delete Resources"),
+    tr("Do you want to delete the following resources from the project?"),
+    QMessageBox::Yes | QMessageBox::No, this
+  );
+  mb.setDetailedText(selectedNames);
+  int ret = mb.exec();
+  if (ret != QMessageBox::Yes) return;
 
   // close subwindows
-  for (auto node : selectedNodes) {
-    if (_subWindows.contains(node)) _subWindows[node]->close();
-  }
+  //TODO: FIXME
+  //for (auto node : selectedNodes) {
+    //if (_subWindows.contains(node)) _subWindows[node]->close();
+  //}
 
   // remove tree nodes (recursively unmaps names)
-  for (auto index : selected) {
-    this->treeModel->removeNode(index);
-  }
+  for (auto index : selected)
+    this->treeModel->removeRow(index.row(),index.parent());
 }
 
 void MainWindow::on_actionExpand_triggered() { _ui->treeView->expandAll(); }
