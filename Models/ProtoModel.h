@@ -43,6 +43,10 @@ T* field_pointer(const QModelIndex& index) {
 // This is the mother of all models.
 class ProtoModel : public QAbstractItemModel {
   Q_OBJECT
+
+  bool RepeatedMutateSetup(Message** message, const FieldDescriptor** field,
+                           const QModelIndex& parent) const;
+
  public:
   explicit ProtoModel(QObject *parent, Message *protobuf);
 
@@ -117,6 +121,9 @@ class ProtoModel : public QAbstractItemModel {
   virtual bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
                     const QModelIndex &parent) override;
 
+  virtual bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+  virtual bool moveRows(const QModelIndex &sourceParent, int sourceRow, int count,
+                        const QModelIndex &destinationParent, int destinationChild) override;
   virtual bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
 
  signals:

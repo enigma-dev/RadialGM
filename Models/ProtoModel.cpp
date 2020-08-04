@@ -2,6 +2,8 @@
 
 #include "Components/ArtManager.h"
 
+#include <google/protobuf/reflection.h>
+
 #include <QDataStream>
 #include <QCoreApplication>
 
@@ -197,18 +199,107 @@ QModelIndex ProtoModel::parent(const QModelIndex &index) const {
   return it.value();
 }
 
-bool ProtoModel::removeRows(int row, int count, const QModelIndex &parent) {
-  if (!IsField(parent)) return false;
-  auto message = GetMessage(parent);
-  auto desc = message->GetDescriptor();
-  auto field = desc->field(parent.row());
-  if (!field->is_repeated()) return false;
+static void RepeatedFieldAdd(Message* message, const Reflection* refl,
+                             const FieldDescriptor* field) {
+  switch (field->cpp_type()) {
+    case CppType::CPPTYPE_MESSAGE:
+      refl->AddMessage(message,field); break;
+    case CppType::CPPTYPE_INT32:
+      refl->GetMutableRepeatedFieldRef<int32_t>(message,field).Add(
+            field->default_value_int32());
+      break;
+    case CppType::CPPTYPE_INT64:
+      refl->GetMutableRepeatedFieldRef<int64_t>(message,field).Add(
+            field->default_value_int64());
+      break;
+    case CppType::CPPTYPE_UINT32:
+      refl->GetMutableRepeatedFieldRef<uint32_t>(message,field).Add(
+            field->default_value_uint32());
+      break;
+    case CppType::CPPTYPE_UINT64:
+      refl->GetMutableRepeatedFieldRef<uint64_t>(message,field).Add(
+            field->default_value_uint64());
+      break;
+    case CppType::CPPTYPE_DOUBLE:
+      refl->GetMutableRepeatedFieldRef<double>(message,field).Add(
+            field->default_value_double());
+      break;
+    case CppType::CPPTYPE_FLOAT:
+      refl->GetMutableRepeatedFieldRef<float>(message,field).Add(
+            field->default_value_float());
+      break;
+    case CppType::CPPTYPE_BOOL:
+      refl->GetMutableRepeatedFieldRef<bool>(message,field).Add(
+          field->default_value_bool());
+      break;
+    case CppType::CPPTYPE_ENUM:
+      refl->GetMutableRepeatedFieldRef<int32_t>(message,field).Add(
+            field->default_value_enum()->number());
+      break;
+    case CppType::CPPTYPE_STRING:
+      refl->GetMutableRepeatedFieldRef<std::string>(message,field).Add(
+            field->default_value_string());
+      break;
+  }
+}
+
+bool ProtoModel::RepeatedMutateSetup(Message** message, const FieldDescriptor** field,
+                                     const QModelIndex& parent) const {
+  R_EXPECT(IsField(parent),false)
+      << "Repeated mutate of non-field index: " << parent;
+  *message = GetMessage(parent);
+  auto desc = (*message)->GetDescriptor();
+  *field = desc->field(parent.row());
+  R_EXPECT((*field)->is_repeated(),false)
+      << "Repeated mutate of non-repeated field: " << parent;
+  return true;
+}
+
+//TODO: Fix this quadratic behavior, ask Josh how to rotate.
+//And how to rotate it in block + count too for efficiency.
+static void RepeatedFieldMove(Message* message, const Reflection* refl,
+                             const FieldDescriptor* field, int index1, int index2) {
+  if (index1 < index2)
+    for (int j = index1; j < index2; ++j)
+      refl->SwapElements(message, field, j, j + 1);
+  else
+    for (int j = index1; j > index2; --j)
+      refl->SwapElements(message, field, j, j - 1);
+}
+
+bool ProtoModel::insertRows(int row, int count, const QModelIndex &parent) {
+  Message* message; const FieldDescriptor* field;
+  if (!RepeatedMutateSetup(&message, &field, parent))
+    return false;
   auto refl = message->GetReflection();
+
+  beginInsertRows(parent, row, row+count-1);
+  //TODO: Fix quadratic behavior below, ask Josh how to rotate.
+  for (int i = 0; i < count; ++i) {
+    RepeatedFieldAdd(message, refl, field);
+    RepeatedFieldMove(message, refl, field, refl->FieldSize(*message,field)-1, row+i);
+  }
+  endInsertRows();
+  return true;
+}
+
+bool ProtoModel::moveRows(const QModelIndex &sourceParent, int sourceRow, int count,
+                          const QModelIndex &destinationParent, int destinationChild) {
+  //if (!RepeatedMutateSetup()) return false;
+  return true;
+}
+
+bool ProtoModel::removeRows(int row, int count, const QModelIndex &parent) {
+  Message* message; const FieldDescriptor* field;
+  if (!RepeatedMutateSetup(&message, &field, parent))
+    return false;
+  auto refl = message->GetReflection();
+
   beginRemoveRows(parent, row, row+count-1);
   //TODO: Fix quadratic behavior below, ask Josh how to rotate.
   for (int i = 0; i < count; ++i) {
-    for (int j = row + i; j < refl->FieldSize(*message,field)-1; ++j)
-      refl->SwapElements(message,field,j,j+1);
+    // Remove the elements from last to first to keep correct rows.
+    RepeatedFieldMove(message, refl, field, row+count-1-i, refl->FieldSize(*message,field)-1);
     refl->RemoveLast(message,field);
   }
   endRemoveRows();
@@ -269,14 +360,6 @@ QMimeData *ProtoModel::mimeData(const QModelIndexList &indexes) const {
   return mimeData;
 }
 
-template <typename T>
-static void RepeatedFieldInsert(RepeatedPtrField<T> *field, T *newItem, int index) {
-  field->AddAllocated(newItem);
-  for (int j = field->size() - 1; j > index; --j) {
-    field->SwapElements(j, j - 1);
-  }
-}
-
 bool ProtoModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, int row, int /*column*/,
                              const QModelIndex &parent) {
   if (action != Qt::MoveAction && action != Qt::CopyAction) return false;
@@ -333,7 +416,7 @@ bool ProtoModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, 
 
       auto oldRepeated = oldParentNode->mutable_child();
       oldRepeated->ExtractSubrange(itemRow, 1, nullptr);
-      RepeatedFieldInsert<buffers::TreeNode>(parentNode->mutable_child(), node, row);
+      //RepeatedFieldInsert<buffers::TreeNode>(parentNode->mutable_child(), node, row);
       parents[index] = parent;
       endMoveRows();
       ++row;

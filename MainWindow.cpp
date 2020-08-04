@@ -584,6 +584,8 @@ void MainWindow::on_actionDelete_triggered() {
   //}
 
   // remove tree nodes (recursively unmaps names)
+  //TODO: FIXME
+  //QList<QPersistentModelIndex> persistent = selected.value();
   for (auto index : selected)
     this->treeModel->removeRow(index.row(),index.parent());
 }
@@ -594,7 +596,7 @@ void MainWindow::on_actionCollapse_triggered() { _ui->treeView->collapseAll(); }
 
 void MainWindow::on_actionSortByName_triggered() {
   if (!_ui->treeView->selectionModel()->hasSelection()) return;
-  treeModel->sortByName(_ui->treeView->currentIndex());
+  treeModel->sort(_ui->treeView->currentIndex());
 }
 
 void MainWindow::on_treeView_customContextMenuRequested(const QPoint &pos) {
