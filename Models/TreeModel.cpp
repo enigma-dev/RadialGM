@@ -67,12 +67,26 @@ QVariant TreeModel::headerData(int /*section*/, Qt::Orientation /*orientation*/,
   return tr("Name");
 }
 
-QModelIndex TreeModel::insert(const QModelIndex &parent, int row, buffers::TreeNode *node) {
+QModelIndex TreeModel::addNode(const QModelIndex &parent) {
+  auto insertParent = parent;
+  int pos = rowCount(parent);
 
-}
+  if (parent.isValid()) { // << not the root
+    TreeNode *parentNode = static_cast<TreeNode *>(parent.internalPointer());
+    if (!parentNode->has_folder()) { // << not a folder
+      //TODO: FIXME
+      //insertParent = mapFromSource(mapToSource(insertParent).parent());
+      //pos = parent.row();
+    }
+  }
 
-QModelIndex TreeModel::addNode(buffers::TreeNode *child, const QModelIndex &parent) {
+  beginInsertRows(insertParent,pos,pos);
+  insertRow(pos,insertParent);
+  endInsertRows();
 
+  auto sourceIndex = sourceModel()->index(pos,0,mapToSource(insertParent));
+  qDebug() << "jesus" << sourceIndex << mapFromSource(sourceIndex);
+  return sourceIndex;
 }
 
 buffers::TreeNode *TreeModel::duplicateNode(const buffers::TreeNode &node) {

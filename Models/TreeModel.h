@@ -24,8 +24,7 @@ class TreeModel : public QSortFilterProxyModel {
   virtual QVariant data(const QModelIndex &index, int role) const override;
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
-  QModelIndex insert(const QModelIndex &parent, int row, buffers::TreeNode *node);
-  QModelIndex addNode(buffers::TreeNode *child, const QModelIndex &parent);
+  QModelIndex addNode(const QModelIndex &parent);
   buffers::TreeNode *duplicateNode(const buffers::TreeNode &node);
   void sort(const QModelIndex &index);
 

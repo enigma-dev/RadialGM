@@ -452,29 +452,40 @@ void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
 void MainWindow::on_actionClearRecentMenu_triggered() { _recentFiles->clear(); }
 
 void MainWindow::CreateResource(TypeCase typeCase) {
-  auto child = std::unique_ptr<TreeNode>(new TreeNode());
-  auto fieldNum = ResTypeFields[typeCase];
-  const Descriptor *desc = child->GetDescriptor();
-  const Reflection *refl = child->GetReflection();
-  const FieldDescriptor *field = desc->FindFieldByNumber(fieldNum);
+  // insert us into the proto model through tree proxy
+  auto index = treeModel->addNode(_ui->treeView->currentIndex());
+  auto child = static_cast<TreeNode*>(index.internalPointer());
 
-  // allocate and set the child's resource field
-  refl->MutableMessage(child.get(), field);
+  bool is_folder = (typeCase == TypeCase::kFolder);
+  if (is_folder) {
+    child->set_folder(true);
+  } else {
+    // allocate and set the child's resource field
+    auto desc = child->GetDescriptor();
+    auto refl = child->GetReflection();
+    auto fieldNum = ResTypeFields[typeCase];
+    auto field = desc->FindFieldByNumber(fieldNum);
+    refl->MutableMessage(child, field);
+  }
 
+  // keep track of it?
+  resourceMap->AddResource(child);
   // find a unique name for the new resource
-  const QString name = resourceMap->CreateResourceName(child.get());
+  const QString name = is_folder ?
+      resourceMap->CreateResourceName(TypeCase::kFolder, "group") :
+      resourceMap->CreateResourceName(child);
   child->set_name(name.toStdString());
-  // open the new resource for editing
-  this->resourceMap->AddResource(child.get());
-  openSubWindow(child.get());
-  // release ownership of the new child to its parent and the tree
-  auto index = this->treeModel->addNode(child.release(), _ui->treeView->currentIndex());
 
   // select the new node so that it gets "revealed" and its parent is expanded
   _ui->treeView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
   // start editing the name of the resource in the tree for convenience
   _ui->treeView->edit(index);
+  // open the new resource for editing
+  //TODO: FIXME
+  //if (!is_folder) openSubWindow(child);
 }
+
+void MainWindow::on_actionCreateGroup_triggered() { CreateResource(TypeCase::kFolder); }
 
 void MainWindow::on_actionCreateSprite_triggered() { CreateResource(TypeCase::kSprite); }
 
@@ -504,34 +515,7 @@ void MainWindow::on_actionDuplicate_triggered() {
   const auto *node = static_cast<const buffers::TreeNode *>(index.internalPointer());
   if (node->has_folder()) return;
 
-  // duplicate the node
-  auto *dup = treeModel->duplicateNode(*node);
-  // insert the duplicate into the tree
-  const auto dupIndex = treeModel->insert(index.parent(), index.row() + 1, dup);
-  // open an editor for the duplicate node
-  openSubWindow(dup);
-
-  // select the new node so that it gets "revealed" and its parent is expanded
-  _ui->treeView->selectionModel()->setCurrentIndex(dupIndex, QItemSelectionModel::ClearAndSelect);
-  // start editing the name of the resource in the tree for convenience
-  _ui->treeView->edit(dupIndex);
-}
-
-void MainWindow::on_actionCreateGroup_triggered() {
-  auto child = std::unique_ptr<TreeNode>(new TreeNode());
-  child->set_folder(true);
-
-  // find a unique name for the new group
-  const QString name = resourceMap->CreateResourceName(TypeCase::kFolder, "group");
-  child->set_name(name.toStdString());
-  // release ownership of the new child to its parent and the tree
-  this->resourceMap->AddResource(child.get());
-  auto index = this->treeModel->addNode(child.release(), _ui->treeView->currentIndex());
-
-  // select the new node so that it gets "revealed" and its parent is expanded
-  _ui->treeView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
-  // start editing the name of the resource in the tree for convenience
-  _ui->treeView->edit(index);
+  //TODO: FIXME
 }
 
 void MainWindow::on_actionRename_triggered() {
