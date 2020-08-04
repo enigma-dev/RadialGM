@@ -246,12 +246,12 @@ static void RepeatedFieldAdd(Message* message, const Reflection* refl,
 bool ProtoModel::RepeatedMutateSetup(Message** message, const FieldDescriptor** field,
                                      const QModelIndex& parent) const {
   R_EXPECT(IsField(parent),false)
-      << "Repeated mutate of non-field index: " << parent;
+      << "Repeated mutate of non-field index:" << parent;
   *message = GetMessage(parent);
   auto desc = (*message)->GetDescriptor();
   *field = desc->field(parent.row());
   R_EXPECT((*field)->is_repeated(),false)
-      << "Repeated mutate of non-repeated field: " << parent;
+      << "Repeated mutate of non-repeated field:" << parent;
   return true;
 }
 
@@ -285,7 +285,26 @@ bool ProtoModel::insertRows(int row, int count, const QModelIndex &parent) {
 
 bool ProtoModel::moveRows(const QModelIndex &sourceParent, int sourceRow, int count,
                           const QModelIndex &destinationParent, int destinationChild) {
-  //if (!RepeatedMutateSetup()) return false;
+  Message *sourceMessage, *destMessage; const FieldDescriptor *sourceField, *destField;
+  if (!RepeatedMutateSetup(&sourceMessage, &sourceField, sourceParent) ||
+      !RepeatedMutateSetup(&destMessage, &destField, destinationParent))
+    return false;
+  R_EXPECT(sourceField->cpp_type() == destField->cpp_type(), false)
+      << "Move repeated fields with incompatible types:"
+      << "from" << sourceParent << "to" << destinationParent
+      << "with types" << sourceField->cpp_type() << "&" << destField->cpp_type();
+  auto sourceRefl = sourceMessage->GetReflection();
+  auto destRefl = destMessage->GetReflection();
+
+  int destinationDelta = 0;
+  if (sourceParent == destinationParent && sourceRow < destinationChild)
+    destinationDelta = count;
+  if (!beginMoveRows(sourceParent, sourceRow,
+                     sourceRow + count-1, destinationParent,
+                     destinationChild + destinationDelta))
+    return false;
+
+  endMoveRows();
   return true;
 }
 
@@ -351,8 +370,7 @@ QMimeData *ProtoModel::mimeData(const QModelIndexList &indexes) const {
     stream << QCoreApplication::applicationPid();
     stream << nodes.count();
     for (const QModelIndex &index : it.value()) {
-      Message *node = static_cast<Message *>(index.internalPointer());
-      stream << reinterpret_cast<qlonglong>(node) << index.row();
+      stream << reinterpret_cast<qlonglong>(index.internalPointer()) << index.row();
     }
     mimeData->setData(it.key(), data);
   }
