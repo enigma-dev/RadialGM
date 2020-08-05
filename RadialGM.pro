@@ -178,4 +178,5 @@ FORMS += \
 RESOURCES += \
     images.qrc
 
-DISTFILES +=
+DISTFILES += \
+  Submodules/enigma-dev/events.ey

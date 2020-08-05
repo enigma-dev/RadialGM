@@ -10,12 +10,15 @@ class MainWindow;
 
 #include "project.pb.h"
 #include "server.pb.h"
+#include "event_reader/event_parser.h"
+#include "egm.h"
 
 #include <QList>
 #include <QMainWindow>
 #include <QMdiSubWindow>
 #include <QPointer>
 #include <QProcess>
+#include <QFileInfo>
 
 namespace Ui {
 class MainWindow;
@@ -33,6 +36,9 @@ class MainWindow : public QMainWindow {
   ~MainWindow();
   void openProject(std::unique_ptr<buffers::Project> openedProject);
   buffers::Game *Game() const { return this->_project->mutable_game(); }
+  
+  static QList<QString> EnigmaSearchPaths;
+  static QFileInfo EnigmaRoot;
 
  signals:
   void CurrentConfigChanged(const buffers::resources::Settings &settings);
@@ -108,11 +114,15 @@ class MainWindow : public QMainWindow {
 
   std::unique_ptr<buffers::Project> _project;
   QPointer<RecentFiles> _recentFiles;
+  
+  std::unique_ptr<EventData> _event_data;
+  egm::EGM egm;
 
   void openSubWindow(buffers::TreeNode *item);
   void readSettings();
   void writeSettings();
   void setTabbedMode(bool enabled);
+  static QFileInfo getEnigmaRoot();
 };
 
 #endif  // MAINWINDOW_H

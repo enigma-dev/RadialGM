@@ -100,5 +100,6 @@
         <file alias="banner.png">Images/banner.png</file>
         <file alias="icon.ico">Images/icon.ico</file>
         <file alias="transparent.png">Images/transparent.png</file>
+        <file alias="events.ey">Submodules/enigma-dev/events.ey</file>
     </qresource>
 </RCC>
