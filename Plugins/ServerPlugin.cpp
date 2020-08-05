@@ -245,7 +245,7 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   process = new QProcess(this);
   
   connect(process, &QProcess::errorOccurred, [&](QProcess::ProcessError error) {
-    qDebug() << "QProcess error: " << error << Qt::endl;
+    qDebug() << "QProcess error: " << error << endl;
   });
   connect(process, &QProcess::readyReadStandardOutput, [&]() {
     emit LogOutput(process->readAllStandardOutput());
