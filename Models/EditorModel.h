@@ -5,11 +5,11 @@
 
 /**
  * @brief The EditorModel class used to root and sandbox editor windows.
- * This model acts as an identity transformation of the super model rooted
- * at an editor's associated tree node. This prevents an editor from
+ * This model acts as a transformation of the super model rooted at an
+ * editor's associated tree node. This prevents an editor from
  * accidentally corrupting other parts of the super model. This does not
  * preclude the editor from obtaining a super model index elsewhere and
- * editing other resources that way.
+ * editing other resources.
  */
 class EditorModel : public QIdentityProxyModel
 {
