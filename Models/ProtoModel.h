@@ -116,12 +116,18 @@ class ProtoModel : public QAbstractItemModel {
   virtual QModelIndex index(int row, int column,
                             const QModelIndex &parent = QModelIndex()) const override;
   virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
+
+  // this is all the generic drag and drop stuff
   virtual Qt::DropActions supportedDropActions() const override;
   virtual QStringList mimeTypes() const override;
   virtual QMimeData *mimeData(const QModelIndexList &indexes) const override;
+  virtual bool canDropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
+                               const QModelIndex &parent) const override;
   virtual bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
                     const QModelIndex &parent) override;
 
+  // part of the abstract item model API for rearranging the rows
+  // used by the generic drag and drop to move stuff around
   virtual bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
   virtual bool moveRows(const QModelIndex &sourceParent, int sourceRow, int count,
                         const QModelIndex &destinationParent, int destinationChild) override;

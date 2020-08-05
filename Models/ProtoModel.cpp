@@ -17,7 +17,6 @@ ProtoModel::ProtoModel(QObject *parent, Message *protobuf) : QAbstractItemModel(
   QSet<const Descriptor*> visitedDesc;
   setupMimes(desc, uniqueMimes, visitedDesc);
   _mimes = uniqueMimes.values();
-  qDebug() << _mimes;
 
   iconMap = {{TypeCase::kFolder, ArtManager::GetIcon("group")},
              {TypeCase::kSprite, ArtManager::GetIcon("sprite")},
@@ -379,6 +378,11 @@ QMimeData *ProtoModel::mimeData(const QModelIndexList &indexes) const {
   }
 
   return mimeData;
+}
+
+bool ProtoModel::canDropMimeData(const QMimeData *data, Qt::DropAction action, int row,
+                                 int column, const QModelIndex &parent) const {
+  return false; // << TODO: FINISH/Check if field or message supports MIME
 }
 
 bool ProtoModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, int row, int /*column*/,

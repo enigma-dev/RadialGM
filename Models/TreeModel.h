@@ -19,6 +19,8 @@ class TreeModel : public QSortFilterProxyModel {
   explicit TreeModel(ProtoModel *source, QObject *parent);
   void setSourceModel(QAbstractItemModel *sourceModel) override;
 
+  // basic abstract item model stuff we override to organize the
+  // super model to only show the tree nodes
   virtual QModelIndex index(int row, int column,
                             const QModelIndex &parent = QModelIndex()) const override;
   virtual QModelIndex parent(const QModelIndex &index) const override;
@@ -50,7 +52,19 @@ class TreeModel : public QSortFilterProxyModel {
   virtual bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override {
     return protoModel->removeRows(row, count, getRepeatedChildFieldIndex(parent));
   }
+  virtual bool canDropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
+                               const QModelIndex &parent) const override {
+    return protoModel->canDropMimeData(data, action, row, column,
+                                       getRepeatedChildFieldIndex(parent));
+  }
+  virtual bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
+                            const QModelIndex &parent) override {
+    return protoModel->dropMimeData(data, action, row, column,
+                                    getRepeatedChildFieldIndex(parent));
+  }
 
+  // our public API for manipulating the tree or the super model
+  // through the tree and for mapping resources
   QModelIndex addNode(const QModelIndex &parent);
   buffers::TreeNode *duplicateNode(const buffers::TreeNode &node);
   void sort(const QModelIndex &index);
