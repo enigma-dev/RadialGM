@@ -78,22 +78,9 @@ RoomEditor::RoomEditor(ProtoModel* model, const QPersistentModelIndex& root, QWi
 
   _assetNameLabel = new QLabel("obj_xxx");
   _ui->statusBar->addWidget(_assetNameLabel);
-
-  // This updates all the model views in the event of a sprite is changed
-  connect(MainWindow::resourceMap.get(), &ResourceModelMap::DataChanged, this, [this]() {
-    _ui->instancesListView->reset();
-    _ui->tilesListView->reset();
-    _ui->layersPropertiesView->reset();
-  });
-
-  RebindSubModels();
 }
 
 RoomEditor::~RoomEditor() { delete _ui; }
-
-void RoomEditor::RebindSubModels() {
-
-}
 
 void RoomEditor::SelectedObjectChanged(QAction* action) { _ui->currentObject->setText(action->text()); }
 

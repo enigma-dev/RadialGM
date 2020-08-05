@@ -101,7 +101,6 @@ SOURCES += \
     Components/RecentFiles.cpp \
     Editors/CodeEditor.cpp \
     Editors/ScriptEditor.cpp \
-    Models/ResourceModelMap.cpp \
     Models/ModelMapper.cpp \
     Components/QMenuView.cpp \
     Models/TreeSortFilterProxyModel.cpp
@@ -146,7 +145,6 @@ HEADERS += \
     Dialogs/PreferencesKeys.h \
     Editors/CodeEditor.h \
     Editors/ScriptEditor.h \
-    Models/ResourceModelMap.h \
     Models/ModelMapper.h \
     Components/QMenuView.h \
     Components/QMenuView_p.h \

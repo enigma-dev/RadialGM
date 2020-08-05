@@ -1,7 +1,6 @@
 #ifndef TREEMODEL_H
 #define TREEMODEL_H
 
-#include "ResourceModelMap.h"
 #include "ProtoModel.h"
 #include "Components/ArtManager.h"
 #include "treenode.pb.h"
@@ -17,7 +16,7 @@ class TreeModel : public QSortFilterProxyModel {
   Q_OBJECT
 
  public:
-  explicit TreeModel(ProtoModel *source, ResourceModelMap *resourceMap, QObject *parent);
+  explicit TreeModel(ProtoModel *source, QObject *parent);
   void setSourceModel(QAbstractItemModel *sourceModel) override;
 
   virtual QModelIndex index(int row, int column,
@@ -58,7 +57,6 @@ class TreeModel : public QSortFilterProxyModel {
 
  private:
   ProtoModel *protoModel;
-  ResourceModelMap *resourceMap;
 };
 
 #endif  // TREEMODEL_H

@@ -22,7 +22,6 @@ class RoomEditor : public BaseEditor {
   void setZoom(qreal zoom);
 
  public slots:
-  void RebindSubModels() override;
   void SelectedObjectChanged(QAction* action);
 
  private slots:

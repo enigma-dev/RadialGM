@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include "Models/ProtoModel.h"
-#include "Models/ResourceModelMap.h"
 #include "Models/TreeModel.h"
 #include "Models/DiagnosticModel.h"
 
@@ -26,7 +25,6 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
  public:
-  static QScopedPointer<ResourceModelMap> resourceMap;
   static QScopedPointer<ProtoModel> protoModel;
   static QScopedPointer<TreeModel> treeModel;
   static QScopedPointer<DiagnosticModel> diagModel;

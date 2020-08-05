@@ -40,7 +40,6 @@
 
 QList<buffers::SystemType> MainWindow::systemCache;
 MainWindow *MainWindow::_instance = nullptr;
-QScopedPointer<ResourceModelMap> MainWindow::resourceMap;
 QScopedPointer<ProtoModel> MainWindow::protoModel;
 QScopedPointer<TreeModel> MainWindow::treeModel;
 QScopedPointer<DiagnosticModel> MainWindow::diagModel;
@@ -226,7 +225,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     //const QPersistentModelIndex& root = resourceMap->GetResourceByName(item->type_case(), item->name());
     BaseEditor *editor = factoryFunction->second(nullptr, QPersistentModelIndex(), this);
 
-    connect(editor, &BaseEditor::ResourceRenamed, resourceMap.get(), &ResourceModelMap::ResourceRenamed);
+    //connect(editor, &BaseEditor::ResourceRenamed, resourceMap.get(), &ResourceModelMap::ResourceRenamed);
     connect(editor, &BaseEditor::ResourceRenamed, [=]() { treeModel->dataChanged(QModelIndex(), QModelIndex()); });
     connect(protoModel.get(), &ProtoModel::ResourceRenamed, editor,
             [](TypeCase /*type*/, const QString & /*oldName*/, const QString & /*newName*/) {
@@ -331,11 +330,10 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
 
   _project = std::move(openedProject);
 
-  resourceMap.reset(new ResourceModelMap(_project->mutable_game()->mutable_root(), nullptr));
   protoModel.reset(new ProtoModel(nullptr, _project.get()));
 
   if (treeModel.isNull()) // << construct it
-    treeModel.reset(new TreeModel(protoModel.get(), resourceMap.get(), nullptr));
+    treeModel.reset(new TreeModel(protoModel.get(), nullptr));
   else // << just update its source instead
     treeModel->setSourceModel(protoModel.get());
 
@@ -345,8 +343,6 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
     diagModel->setSourceModel(protoModel.get());
 
   _ui->treeView->setModel(treeModel.get());
-  treeModel->connect(protoModel.get(), &ProtoModel::ResourceRenamed, resourceMap.get(),
-                     &ResourceModelMap::ResourceRenamed);
   treeModel->connect(_ui->treeFilterEdit, &QLineEdit::textChanged, treeModel.get(),
                      &TreeModel::setFilterFixedString);
 }
@@ -519,13 +515,13 @@ void MainWindow::CreateResource(TypeCase typeCase) {
     refl->MutableMessage(child, field);
   }
 
-  // keep track of it?
-  resourceMap->AddResource(child);
   // find a unique name for the new resource
+  //TODO: FIXME
+  /*
   const QString name = is_folder ?
       resourceMap->CreateResourceName(TypeCase::kFolder, "group") :
-      resourceMap->CreateResourceName(child);
-  child->set_name(name.toStdString());
+      resourceMap->CreateResourceName(child);*/
+  child->set_name("resource");
 
   // select the new node so that it gets "revealed" and its parent is expanded
   _ui->treeView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);

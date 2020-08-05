@@ -2,15 +2,14 @@
 
 #include "Components/ArtManager.h"
 #include "Components/Logger.h"
-#include "Models/ResourceModelMap.h"
 
 #include "project.pb.h"
 
 #include <QCoreApplication>
 #include <QMimeData>
 
-TreeModel::TreeModel(ProtoModel *source, ResourceModelMap *resourceMap, QObject *parent)
-    : QSortFilterProxyModel(parent), protoModel(source), resourceMap(resourceMap) {
+TreeModel::TreeModel(ProtoModel *source, QObject *parent)
+    : QSortFilterProxyModel(parent), protoModel(source) {
   this->setSourceModel(source);
   this->setFilterRole(Qt::DisplayRole);
   this->setFilterKeyColumn(0);
@@ -119,15 +118,7 @@ QModelIndex TreeModel::addNode(const QModelIndex &parent) {
 }
 
 buffers::TreeNode *TreeModel::duplicateNode(const buffers::TreeNode &node) {
-  // duplicate the node
-  auto *dup = node.New();
-  dup->CopyFrom(node);
-  // give the duplicate node a new name
-  const QString name = resourceMap->CreateResourceName(dup);
-  dup->set_name(name.toStdString());
-  // add the new node to the resource map
-  resourceMap->AddResource(dup);
-  return dup;
+  return nullptr;
 }
 
 void TreeModel::sort(const QModelIndex &index) {
