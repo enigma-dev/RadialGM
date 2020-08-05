@@ -58,12 +58,14 @@ void ProtoModel::setupMimes(const Descriptor* desc, QSet<QString>& uniqueMimes,
 
 QVariant ProtoModel::data(const QModelIndex &index, int role) const {
   R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
-  if (role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::DecorationRole) return QVariant();
-  //return QString::number((quintptr)index.internalId(), 16) + " " +
-      //QString::number((quintptr)index.parent().internalId(), 16);
+  if (role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::DecorationRole &&
+      role != Qt::UserRole+1) return QVariant();
   auto message = GetMessage(index);
 
   if (IsMessage(index)) {
+    // mutable pointer to the message requested for editing
+    if (role == Qt::UserRole+1) return QVariant::fromValue<void*>(message);
+
     // let's be nice and automagically handle tree nodes
     // for some simple convenience
     if (message->GetTypeName() == "buffers.TreeNode") {
@@ -83,7 +85,7 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
     }
 
     if (role == Qt::DisplayRole || role == Qt::EditRole)
-        return QString::fromStdString(message->GetTypeName());
+      return QString::fromStdString(message->GetTypeName());
 
     return QVariant();
   }
@@ -123,6 +125,7 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
 
 bool ProtoModel::setData(const QModelIndex &index, const QVariant &value, int role) {
   R_EXPECT(index.isValid(), false) << "Supplied index was invalid:" << index;
+  if (role == Qt::UserRole) return true; // << was an editable test for flags
   if (role != Qt::EditRole) return false;
 
   buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());

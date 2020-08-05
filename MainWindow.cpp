@@ -1,6 +1,8 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
+#include "Models/DiagnosticModel.h"
+
 #include "Dialogs/PreferencesDialog.h"
 #include "Dialogs/PreferencesKeys.h"
 
@@ -41,6 +43,7 @@ MainWindow *MainWindow::_instance = nullptr;
 QScopedPointer<ResourceModelMap> MainWindow::resourceMap;
 QScopedPointer<ProtoModel> MainWindow::protoModel;
 QScopedPointer<TreeModel> MainWindow::treeModel;
+QScopedPointer<DiagnosticModel> MainWindow::diagModel;
 
 static QTextEdit *diagnosticTextEdit = nullptr;
 static QAction *toggleDiagnosticsAction = nullptr;
@@ -330,7 +333,16 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
 
   resourceMap.reset(new ResourceModelMap(_project->mutable_game()->mutable_root(), nullptr));
   protoModel.reset(new ProtoModel(nullptr, _project.get()));
-  treeModel.reset(new TreeModel(protoModel.get(), resourceMap.get(), nullptr));
+
+  if (treeModel.isNull()) // << construct it
+    treeModel.reset(new TreeModel(protoModel.get(), resourceMap.get(), nullptr));
+  else // << just update its source instead
+    treeModel->setSourceModel(protoModel.get());
+
+  if (diagModel.isNull()) // << construct it
+    diagModel.reset(new DiagnosticModel(protoModel.get(), nullptr));
+  else // << update source/cascades to inspector & sort filter automagically
+    diagModel->setSourceModel(protoModel.get());
 
   _ui->treeView->setModel(treeModel.get());
   treeModel->connect(protoModel.get(), &ProtoModel::ResourceRenamed, resourceMap.get(),
@@ -417,11 +429,48 @@ void MainWindow::on_actionExploreENIGMA_triggered() {
 }
 
 void MainWindow::on_actionShowDiagnosticInspector_triggered() {
-  QTreeView *inspectorTable = new QTreeView(this);
-  inspectorTable->setModel(protoModel.get());
-  inspectorTable->setWindowTitle(tr("Diagnostic Inspector"));
-  inspectorTable->setWindowFlags(Qt::Window);
-  inspectorTable->show();
+  // lazy loaded so it can be reactivated if already shown
+  static QDialog *window = nullptr;
+
+  if (window) {
+    window->show();
+    window->activateWindow();
+    return;
+  }
+
+  // only QDialog centers on the parent out of the box
+  window = new QDialog(this);
+  QVBoxLayout *vbl = new QVBoxLayout();
+
+  QLineEdit *filterEdit = new QLineEdit();
+  filterEdit->setPlaceholderText(tr("Filter"));
+
+  // the filter model then lets us filter on the additional columns too
+  QSortFilterProxyModel *filterModel = new QSortFilterProxyModel(window);
+  filterModel->setRecursiveFilteringEnabled(true); // << no pruning
+  filterModel->setFilterKeyColumn(-1); // << all columns
+  filterModel->setSourceModel(diagModel.get());
+  filterModel->connect(filterEdit, &QLineEdit::textChanged, filterModel,
+                       &QSortFilterProxyModel::setFilterFixedString);
+
+  QTreeView *inspectorTable = new QTreeView();
+  // we only want to filter not sort
+  // we need to see repeated fields in the correct order
+  // since it's for diagnostics only
+  inspectorTable->setSortingEnabled(false);
+  inspectorTable->setModel(filterModel);
+  //inspectorTable->header()->setCascadingSectionResizes(true);
+  inspectorTable->header()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
+  inspectorTable->header()->setSectionResizeMode(1,QHeaderView::Stretch);
+
+  vbl->addWidget(filterEdit);
+  vbl->addWidget(inspectorTable);
+
+  window->setLayout(vbl);
+  window->setWindowTitle(tr("Diagnostic Inspector"));
+  // give us a maximize button
+  window->setWindowFlags(Qt::Window);
+  window->show();
 }
 
 void MainWindow::on_actionAbout_triggered() {
@@ -454,7 +503,9 @@ void MainWindow::on_actionClearRecentMenu_triggered() { _recentFiles->clear(); }
 void MainWindow::CreateResource(TypeCase typeCase) {
   // insert us into the proto model through tree proxy
   auto index = treeModel->addNode(_ui->treeView->currentIndex());
-  auto child = static_cast<TreeNode*>(index.internalPointer());
+  return;
+  auto ptr = treeModel->data(index,Qt::UserRole+1).value<void*>();
+  auto child = static_cast<TreeNode*>(ptr);
 
   bool is_folder = (typeCase == TypeCase::kFolder);
   if (is_folder) {

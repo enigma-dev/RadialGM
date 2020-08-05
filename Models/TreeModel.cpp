@@ -15,51 +15,85 @@ TreeModel::TreeModel(ProtoModel *source, ResourceModelMap *resourceMap, QObject 
   this->setFilterRole(Qt::DisplayRole);
   this->setFilterKeyColumn(0);
 
-  this->setRecursiveFilteringEnabled(true);
+  //this->setRecursiveFilteringEnabled(true);
   //this->setFilterFixedString("timeline");
 }
 
-QModelIndex TreeModel::mapToSource(const QModelIndex &proxyIndex) const {
-  auto hrm = QSortFilterProxyModel::mapToSource(proxyIndex);
+void TreeModel::setSourceModel(QAbstractItemModel *sourceModel) {
+  //TODO: Sanity check that sourceModel is a ProtoModel
+  this->protoModel = static_cast<ProtoModel*>(sourceModel);
+  QSortFilterProxyModel::setSourceModel(sourceModel);
+}
 
-  if (!proxyIndex.isValid()) {
-    auto *lol = (buffers::Project*)protoModel->GetMessage(QModelIndex());
-    auto wtf = lol->mutable_game()->mutable_root();
-    auto p = protoModel->indexOfFieldByNumber(wtf, buffers::TreeNode::kChildFieldNumber);
-    auto omg = protoModel->index(0,0,protoModel->index(0,0,protoModel->index(0,0,hrm)));
-    return protoModel->index(14,0,protoModel->index(0,0,omg));
-    //return protoModel->index(0,0,hrm);
-    //return QSortFilterProxyModel::mapToSource(proxyIndex.parent());
-  } else if (protoModel->IsMessage(hrm)) {
-    auto msg = protoModel->GetMessage(hrm);
+QModelIndex TreeModel::index(int row, int column, const QModelIndex &parent) const {
+  auto index = QSortFilterProxyModel::index(row, column, parent);
+  auto sourceIndex = mapToSource(index);
+  auto sourceParent = mapToSource(parent); // << parent was already mapped
+
+  if (protoModel->IsMessage(sourceParent) &&
+      protoModel->GetMessage(sourceParent)->GetTypeName() == "buffers.TreeNode") {
+    auto childIndex = getRepeatedChildFieldIndex(parent);
+    return mapFromSource(protoModel->index(row, column, childIndex));
+  }
+
+  return QModelIndex(); // reject everything else
+}
+
+QModelIndex TreeModel::parent(const QModelIndex &index) const {
+  auto sourceIndex = mapToSource(index);
+
+  if (protoModel->IsMessage(sourceIndex)) {
+    auto msg = protoModel->GetMessage(sourceIndex);
     if (msg->GetTypeName() == "buffers.TreeNode") {
-      hrm = protoModel->index(14,0,hrm);
+      auto backAgain = mapFromSource(sourceIndex.parent().parent());
+      return backAgain;
     }
   }
 
-  return hrm;
+  return QModelIndex(); // << reject everything else
 }
 
+QModelIndex TreeModel::mapFromSource(const QModelIndex &sourceIndex) const {
+  //return QSortFilterProxyModel::mapFromSource(sourceIndex);
+  //qDebug() << "mapFrom" << sourceIndex;
+  auto omg = protoModel->index(0,0,protoModel->index(0,0,protoModel->index(0,0,QModelIndex())));
+  omg = protoModel->index(0,0,omg);
+  if (!sourceIndex.isValid()) {
+      //return QModelIndex();
+  }
+  if (sourceIndex == omg) {
+    return QModelIndex(); // this is our tree root
+  }
+
+  return QSortFilterProxyModel::mapFromSource(sourceIndex);
+}
+
+QModelIndex TreeModel::mapToSource(const QModelIndex &proxyIndex) const {
+  //return QSortFilterProxyModel::mapToSource(proxyIndex);
+  if (!proxyIndex.isValid()) {
+    //auto *lol = (buffers::Project*)protoModel->GetMessage(QModelIndex());
+    //auto wtf = lol->mutable_game()->mutable_root();
+    //auto p = protoModel->indexOfFieldByNumber(wtf, buffers::TreeNode::kChildFieldNumber);
+    auto omg = protoModel->index(0,0,protoModel->index(0,0,protoModel->index(0,0,QModelIndex())));
+    omg = protoModel->index(0,0,omg);
+    return omg;
+  }
+
+  return QSortFilterProxyModel::mapToSource(proxyIndex);
+}
 
 bool TreeModel::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const {
   return QSortFilterProxyModel::filterAcceptsRow(source_row, source_parent);
-  QModelIndex sourceIndex = sourceModel()->index(source_row,0,source_parent);
+  QModelIndex sourceIndex = sourceModel()->index(source_row, 0, source_parent);
   if (protoModel->IsMessage(sourceIndex) &&
       protoModel->GetMessage(sourceIndex)->GetTypeName() == "buffers.TreeNode") {
-    //QModelIndex sourceFieldIndex = sourceModel()->index(14,0,sourceIndex);
-    return QSortFilterProxyModel::filterAcceptsRow(14, sourceIndex);
+    //mapToSource(mapFromSource(source_parent));
+    qDebug() << "filterAccepts" << source_row << source_parent;
+    return QSortFilterProxyModel::filterAcceptsRow(source_row, sourceIndex);
   }
+  qDebug() << "filterRejects" << source_row << source_parent;
   return false;
   return QSortFilterProxyModel::filterAcceptsRow(source_row, source_parent);
-}
-
-QVariant TreeModel::data(const QModelIndex &index, int role) const {
-  QModelIndex sourceIndex = QSortFilterProxyModel::mapToSource(index);
-  if (protoModel->IsMessage(sourceIndex) &&
-      protoModel->GetMessage(sourceIndex)->GetTypeName() == "buffers.TreeNode") {
-    return protoModel->data(sourceIndex,role);
-  }
-  return QSortFilterProxyModel::data(index,role);
 }
 
 QVariant TreeModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int role) const {
@@ -72,21 +106,16 @@ QModelIndex TreeModel::addNode(const QModelIndex &parent) {
   int pos = rowCount(parent);
 
   if (parent.isValid()) { // << not the root
-    TreeNode *parentNode = static_cast<TreeNode *>(parent.internalPointer());
-    if (!parentNode->has_folder()) { // << not a folder
+    //TreeNode *parentNode = static_cast<TreeNode *>(parent.internalPointer());
+    //if (!parentNode->has_folder()) { // << not a folder
       //TODO: FIXME
-      //insertParent = mapFromSource(mapToSource(insertParent).parent());
+      //insertParent = insertParent.parent();
       //pos = parent.row();
-    }
+    //}
   }
 
-  beginInsertRows(insertParent,pos,pos);
   insertRow(pos,insertParent);
-  endInsertRows();
-
-  auto sourceIndex = sourceModel()->index(pos,0,mapToSource(insertParent));
-  qDebug() << "jesus" << sourceIndex << mapFromSource(sourceIndex);
-  return sourceIndex;
+  return index(pos, 0, insertParent);
 }
 
 buffers::TreeNode *TreeModel::duplicateNode(const buffers::TreeNode &node) {

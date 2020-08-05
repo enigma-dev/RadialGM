@@ -1,5 +1,5 @@
-#ifndef RESOURCEMODEL_H
-#define RESOURCEMODEL_H
+#ifndef PROTOMODEL_H
+#define PROTOMODEL_H
 
 #include "treenode.pb.h"
 #include "Components/Logger.h"
@@ -113,7 +113,8 @@ class ProtoModel : public QAbstractItemModel {
   }
   virtual QVariant data(const QModelIndex &index, int role) const override;
   //virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-  virtual QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
+  virtual QModelIndex index(int row, int column,
+                            const QModelIndex &parent = QModelIndex()) const override;
   virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
   virtual Qt::DropActions supportedDropActions() const override;
   virtual QStringList mimeTypes() const override;
@@ -148,4 +149,4 @@ class ProtoModel : public QAbstractItemModel {
   void setupMimes(const Descriptor* desc, QSet<QString>& uniqueMimes, QSet<const Descriptor*>& visitedDesc);
 };
 
-#endif
+#endif // PROTOMODEL_H

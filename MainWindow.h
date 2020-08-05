@@ -4,6 +4,7 @@
 #include "Models/ProtoModel.h"
 #include "Models/ResourceModelMap.h"
 #include "Models/TreeModel.h"
+#include "Models/DiagnosticModel.h"
 
 class MainWindow;
 #include "Components/RecentFiles.h"
@@ -28,6 +29,7 @@ class MainWindow : public QMainWindow {
   static QScopedPointer<ResourceModelMap> resourceMap;
   static QScopedPointer<ProtoModel> protoModel;
   static QScopedPointer<TreeModel> treeModel;
+  static QScopedPointer<DiagnosticModel> diagModel;
   static QList<buffers::SystemType> systemCache;
 
   explicit MainWindow(QWidget *parent);
