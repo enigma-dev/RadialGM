@@ -344,7 +344,8 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
 
   _ui->treeView->setModel(treeModel.get());
   treeModel->connect(_ui->treeFilterEdit, &QLineEdit::textChanged, treeModel.get(),
-                     &TreeModel::setFilterFixedString);
+                     static_cast<void (TreeModel::*)(const QString&)>(
+                       &TreeModel::setFilterRegularExpression));
 }
 
 void MainWindow::on_actionNew_triggered() { openNewProject(); }
@@ -447,7 +448,8 @@ void MainWindow::on_actionShowDiagnosticInspector_triggered() {
   filterModel->setFilterKeyColumn(-1); // << all columns
   filterModel->setSourceModel(diagModel.get());
   filterModel->connect(filterEdit, &QLineEdit::textChanged, filterModel,
-                       &QSortFilterProxyModel::setFilterFixedString);
+                       static_cast<void (QSortFilterProxyModel::*)(const QString&)>(
+                         &QSortFilterProxyModel::setFilterRegularExpression));
 
   QTreeView *inspectorTable = new QTreeView();
   // we only want to filter not sort
