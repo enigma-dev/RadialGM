@@ -14,7 +14,7 @@ class SoundEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit SoundEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent);
+  explicit SoundEditor(EditorModel* model, QWidget* parent);
   ~SoundEditor() override;
 
  public slots:

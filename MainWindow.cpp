@@ -192,10 +192,10 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   event->accept();
 }
 
-using EditorFactory = std::function<BaseEditor *(ProtoModel * m, const QPersistentModelIndex & r, QWidget * p)>;
+using EditorFactory = std::function<BaseEditor *(EditorModel * m, QWidget * p)>;
 template <typename T>
-T *editorFactory(ProtoModel *model, const QPersistentModelIndex& root, QWidget *parent) {
-  return new T(model, root, parent);
+T *editorFactory(EditorModel *model, QWidget *parent) {
+  return new T(model, parent);
 }
 
 void MainWindow::openSubWindow(buffers::TreeNode *item) {
@@ -223,7 +223,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     if (factoryFunction == factoryMap.end()) return;  // no registered editor
 
     //const QPersistentModelIndex& root = resourceMap->GetResourceByName(item->type_case(), item->name());
-    BaseEditor *editor = factoryFunction->second(nullptr, QPersistentModelIndex(), this);
+    BaseEditor *editor = factoryFunction->second(nullptr, this);
 
     //connect(editor, &BaseEditor::ResourceRenamed, resourceMap.get(), &ResourceModelMap::ResourceRenamed);
     connect(editor, &BaseEditor::ResourceRenamed, [=]() { treeModel->dataChanged(QModelIndex(), QModelIndex()); });

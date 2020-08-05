@@ -12,8 +12,8 @@
 #include <QSizePolicy>
 #include <QSplitter>
 
-TimelineEditor::TimelineEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent)
-    : BaseEditor(model, root, parent), _codeEditor(new CodeEditor(this, true)), _ui(new Ui::TimelineEditor) {
+TimelineEditor::TimelineEditor(EditorModel* model, QWidget* parent)
+    : BaseEditor(model, parent), _codeEditor(new CodeEditor(this, true)), _ui(new Ui::TimelineEditor) {
   QLayout* layout = new QVBoxLayout(this);
   QSplitter* splitter = new QSplitter(this);
 

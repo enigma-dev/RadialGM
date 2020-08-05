@@ -2,8 +2,8 @@
 
 #include "ui_ObjectEditor.h"
 
-ObjectEditor::ObjectEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent) :
-    BaseEditor(model, root, parent), _ui(new Ui::ObjectEditor) {
+ObjectEditor::ObjectEditor(EditorModel* model, QWidget* parent) :
+    BaseEditor(model, parent), _ui(new Ui::ObjectEditor) {
   _ui->setupUi(this);
   connect(_ui->saveButton, &QAbstractButton::pressed, this, &BaseEditor::OnSave);
 }

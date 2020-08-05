@@ -16,8 +16,8 @@ static std::string get_combo_system_id(const QComboBox* combo) {
   return subsystem.id();
 }
 
-SettingsEditor::SettingsEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent)
-    : BaseEditor(model, root, parent), ui(new Ui::SettingsEditor) {
+SettingsEditor::SettingsEditor(EditorModel* model, QWidget* parent)
+    : BaseEditor(model, parent), ui(new Ui::SettingsEditor) {
   ui->setupUi(this);
 
   QPushButton* saveButton = ui->buttonBox->button(QDialogButtonBox::Save);

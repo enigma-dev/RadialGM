@@ -13,7 +13,7 @@ class TimelineEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit TimelineEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent);
+  explicit TimelineEditor(EditorModel* model, QWidget* parent);
   ~TimelineEditor() override;
 
  public slots:

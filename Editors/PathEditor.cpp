@@ -10,8 +10,8 @@
 #include <QSpinBox>
 #include <QToolButton>
 
-PathEditor::PathEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent) :
-    BaseEditor(model, root, parent), _ui(new Ui::PathEditor) {
+PathEditor::PathEditor(EditorModel* model, QWidget* parent) :
+    BaseEditor(model, parent), _ui(new Ui::PathEditor) {
   _ui->setupUi(this);
   connect(_ui->saveButton, &QAbstractButton::pressed, this, &BaseEditor::OnSave);
 

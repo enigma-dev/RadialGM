@@ -16,7 +16,7 @@ class PathEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit PathEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent);
+  explicit PathEditor(EditorModel* model, QWidget* parent);
   ~PathEditor() override;
   void RebindSubModels() override;
   bool eventFilter(QObject* obj, QEvent* event) override;

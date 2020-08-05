@@ -17,8 +17,8 @@
 
 using View = buffers::resources::Room::View;
 
-RoomEditor::RoomEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent) :
-    BaseEditor(model, root, parent), _ui(new Ui::RoomEditor) {
+RoomEditor::RoomEditor(EditorModel* model, QWidget* parent) :
+    BaseEditor(model, parent), _ui(new Ui::RoomEditor) {
   _ui->setupUi(this);
   connect(_ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
 

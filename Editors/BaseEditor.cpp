@@ -4,8 +4,8 @@
 #include <QDebug>
 #include <QMessageBox>
 
-BaseEditor::BaseEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent)
-    : QWidget(parent), _nodeMapper(new ModelMapper(model, this)), _model(model) {
+BaseEditor::BaseEditor(EditorModel* model, QWidget* parent)
+    : QWidget(parent), _model(model) {
   connect(_model, &QAbstractItemModel::modelReset, [this]() { this->RebindSubModels(); });
 
   connect(this, &BaseEditor::FocusGained, [=]() { _hasFocus = true; });

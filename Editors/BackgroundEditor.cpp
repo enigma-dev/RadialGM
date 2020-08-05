@@ -15,8 +15,8 @@
 
 using buffers::resources::Background;
 
-BackgroundEditor::BackgroundEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent)
-    : BaseEditor(model, root, parent), _ui(new Ui::BackgroundEditor) {
+BackgroundEditor::BackgroundEditor(EditorModel* model, QWidget* parent)
+    : BaseEditor(model, parent), _ui(new Ui::BackgroundEditor) {
   _ui->setupUi(this);
 
   connect(_ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);

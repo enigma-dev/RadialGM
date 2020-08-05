@@ -14,7 +14,7 @@ class FontEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit FontEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent);
+  explicit FontEditor(EditorModel* model, QWidget* parent);
   ~FontEditor() override;
 
  public slots:

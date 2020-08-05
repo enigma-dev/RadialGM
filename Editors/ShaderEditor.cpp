@@ -9,8 +9,8 @@
 
 using namespace buffers::resources;
 
-ShaderEditor::ShaderEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent)
-    : BaseEditor(model, root, parent), _codeEditor(new CodeEditor(this)) {
+ShaderEditor::ShaderEditor(EditorModel* model, QWidget* parent) : BaseEditor(model, parent),
+    _codeEditor(new CodeEditor(this)) {
   this->setWindowIcon(QIcon(":/resources/shader.png"));
   QLayout* layout = new QVBoxLayout(this);
   layout->addWidget(_codeEditor);

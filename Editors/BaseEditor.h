@@ -1,7 +1,7 @@
 #ifndef BASEEDTIOR_H
 #define BASEEDTIOR_H
 
-#include "Models/ProtoModel.h"
+#include "Models/EditorModel.h"
 #include "Models/ModelMapper.h"
 #include "treenode.pb.h"
 
@@ -23,7 +23,7 @@ class BaseEditor : public QWidget {
   Q_OBJECT
 
  public:
-  explicit BaseEditor(ProtoModel *model, const QPersistentModelIndex& root, QWidget *parent);
+  explicit BaseEditor(EditorModel *model, QWidget *parent);
 
   void ReplaceBuffer(google::protobuf::Message *buffer);
   bool HasFocus();
@@ -44,7 +44,7 @@ class BaseEditor : public QWidget {
 
   ModelMapper *_nodeMapper;
   ModelMapper *_resMapper;
-  ProtoModel *_model;
+  EditorModel *_model;
   bool _hasFocus = false;
 };
 

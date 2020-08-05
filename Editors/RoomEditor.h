@@ -16,7 +16,7 @@ class RoomEditor : public BaseEditor {
   Q_OBJECT
 
  public:
-  explicit RoomEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent);
+  explicit RoomEditor(EditorModel* model, QWidget* parent);
   ~RoomEditor() override;
 
   void setZoom(qreal zoom);

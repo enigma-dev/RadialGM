@@ -3,8 +3,8 @@
 
 #include "ui_FontEditor.h"
 
-FontEditor::FontEditor(ProtoModel *model, const QPersistentModelIndex& root, QWidget *parent) :
-    BaseEditor(model, root, parent), _ui(new Ui::FontEditor) {
+FontEditor::FontEditor(EditorModel *model, QWidget *parent) :
+    BaseEditor(model, parent), _ui(new Ui::FontEditor) {
   _ui->setupUi(this);
   connect(_ui->saveButton, &QAbstractButton::pressed, this, &BaseEditor::OnSave);
 

@@ -13,8 +13,8 @@
 #include <QMessageBox>
 #include <QUuid>
 
-SpriteEditor::SpriteEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent)
-    : BaseEditor(model, root, parent), _ui(new Ui::SpriteEditor) {
+SpriteEditor::SpriteEditor(EditorModel* model, QWidget* parent)
+    : BaseEditor(model, parent), _ui(new Ui::SpriteEditor) {
   _ui->setupUi(this);
   connect(_ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
   _ui->scrollAreaWidget->SetAssetView(_ui->subimagePreview);

@@ -12,8 +12,8 @@
 #include <QSlider>
 #include <QTime>
 
-SoundEditor::SoundEditor(ProtoModel* model, const QPersistentModelIndex& root, QWidget* parent)
-    : BaseEditor(model, root, parent),
+SoundEditor::SoundEditor(EditorModel* model, QWidget* parent)
+    : BaseEditor(model, parent),
       _ui(new Ui::SoundEditor),
       _mediaPlayer(new QMediaPlayer(this)),
       _playlist(new QMediaPlaylist(_mediaPlayer)),
