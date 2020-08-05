@@ -62,8 +62,8 @@ set(RGM_SOURCES
     Models/ModelMapper.cpp
     Models/ProtoModel.cpp
     Models/ImmediateMapper.cpp
-    Models/ResourceModelMap.cpp
     Models/TreeModel.cpp
+    Models/DiagnosticModel.cpp
     Editors/ObjectEditor.cpp
     Editors/PathEditor.cpp
     Editors/CodeEditor.cpp
@@ -103,11 +103,11 @@ set(RGM_HEADERS
     Components/QMenuView_p.h
     Components/Utility.h
     Models/TreeModel.h
-    Models/ResourceModelMap.h
     Models/ModelMapper.h
     Models/TreeSortFilterProxyModel.h
     Models/ImmediateMapper.h
     Models/ProtoModel.h
+    Models/DiagnosticModel.h
     Editors/FontEditor.h
     Editors/PathEditor.h
     Editors/SpriteEditor.h
