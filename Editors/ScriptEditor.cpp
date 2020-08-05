@@ -18,8 +18,9 @@ ScriptEditor::ScriptEditor(EditorModel* model, QWidget* parent)
   connect(ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
 
   CodeWidget* codeWidget = _codeEditor->AddCodeWidget();
-  _resMapper->addMapping(codeWidget, Script::kCodeFieldNumber);
-  _resMapper->toFirst();
+
+  //_resMapper->addMapping(codeWidget, Script::kCodeFieldNumber);
+  //_resMapper->toFirst();
 
   _codeEditor->updateCursorPositionLabel();
   _codeEditor->updateLineCountLabel();

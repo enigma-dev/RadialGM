@@ -55,13 +55,6 @@ TimelineEditor::TimelineEditor(EditorModel* model, QWidget* parent)
 
 TimelineEditor::~TimelineEditor() { delete _ui; }
 
-void TimelineEditor::RebindSubModels() {
-  _codeEditor->ClearCodeWidgets();
-
-
-
-}
-
 void TimelineEditor::AddMoment(int step) {
 
 }

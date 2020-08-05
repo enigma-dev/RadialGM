@@ -17,8 +17,6 @@ class BackgroundEditor : public BaseEditor {
   ~BackgroundEditor() override;
 
  private slots:
-  void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVariant &oldValue = QVariant(0),
-                   const QVector<int> &roles = QVector<int>()) override;
   void on_actionZoomIn_triggered();
   void on_actionZoomOut_triggered();
   void on_actionZoom_triggered();
@@ -28,7 +26,6 @@ class BackgroundEditor : public BaseEditor {
   void on_actionEditImage_triggered();
 
  private:
-  void RebindSubModels() override;
   Ui::BackgroundEditor *_ui;
   ProtoModel *_backgroundModel;
   BackgroundView *_renderer;

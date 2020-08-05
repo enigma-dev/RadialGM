@@ -31,21 +31,9 @@ BackgroundEditor::BackgroundEditor(EditorModel* model, QWidget* parent)
   _resMapper->addMapping(_ui->horizontalSpacingSpinBox, Background::kHorizontalSpacingFieldNumber);
   _resMapper->addMapping(_ui->verticalSpacingSpinBox, Background::kVerticalSpacingFieldNumber);
   _resMapper->toFirst();
-
-  RebindSubModels();
 }
 
 BackgroundEditor::~BackgroundEditor() { delete _ui; }
-
-void BackgroundEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVariant& oldValue,
-                                   const QVector<int>& roles) {
-  BaseEditor::dataChanged(topLeft, bottomRight, oldValue, roles);
-  _ui->backgroundView->update();
-}
-
-void BackgroundEditor::RebindSubModels() {
-
-}
 
 void BackgroundEditor::on_actionZoomIn_triggered() { _ui->imagePreviewBackground->ZoomIn(); }
 

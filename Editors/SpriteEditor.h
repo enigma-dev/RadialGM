@@ -19,7 +19,6 @@ class SpriteEditor : public BaseEditor {
   void RemoveSelectedIndexes();
 
  public slots:
-  void RebindSubModels() override;
   void SelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
   void SubImagesRemoved();
 

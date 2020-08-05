@@ -198,7 +198,7 @@ T *editorFactory(EditorModel *model, QWidget *parent) {
   return new T(model, parent);
 }
 
-void MainWindow::openSubWindow(buffers::TreeNode *item) {
+void MainWindow::openEditor(const QPersistentModelIndex& protoIndex) {
   using namespace google::protobuf;
 
   using TypeCase = buffers::TreeNode::TypeCase;
@@ -216,28 +216,23 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
                                 {TypeCase::kRoom, editorFactory<RoomEditor>},
                                 {TypeCase::kSettings, editorFactory<SettingsEditor>}});
 
-  auto swIt = _subWindows.find(item);
+  auto swIt = _editors.find(protoIndex);
   QMdiSubWindow *subWindow;
-  if (swIt == _subWindows.end() || !*swIt) {
+  if (swIt == _editors.end() || !*swIt) {
+    auto ptr = protoModel->data(protoIndex,Qt::UserRole+1).value<void*>();
+    auto item = static_cast<TreeNode*>(ptr);
     auto factoryFunction = factoryMap.find(item->type_case());
     if (factoryFunction == factoryMap.end()) return;  // no registered editor
 
-    //const QPersistentModelIndex& root = resourceMap->GetResourceByName(item->type_case(), item->name());
-    BaseEditor *editor = factoryFunction->second(nullptr, this);
+    // ths base editor will take over ownership of the model
+    EditorModel *model = new EditorModel(protoIndex, nullptr);
+    BaseEditor *editor = factoryFunction->second(model, this);
 
-    //connect(editor, &BaseEditor::ResourceRenamed, resourceMap.get(), &ResourceModelMap::ResourceRenamed);
-    connect(editor, &BaseEditor::ResourceRenamed, [=]() { treeModel->dataChanged(QModelIndex(), QModelIndex()); });
-    connect(protoModel.get(), &ProtoModel::ResourceRenamed, editor,
-            [](TypeCase /*type*/, const QString & /*oldName*/, const QString & /*newName*/) {
-              //const QModelIndex index = res->index(TreeNode::kNameFieldNumber);
-              //emit res->DataChanged(index, index);
-            });
-
-    subWindow = _subWindows[item] = _ui->mdiArea->addSubWindow(editor);
+    subWindow = _editors[protoIndex] = _ui->mdiArea->addSubWindow(editor);
     subWindow->resize(subWindow->frameSize().expandedTo(editor->size()));
     editor->setParent(subWindow);
 
-    subWindow->connect(subWindow, &QObject::destroyed, [=]() { _subWindows.remove(item); });
+    subWindow->connect(subWindow, &QObject::destroyed, [=]() { _editors.remove(protoIndex); });
 
     subWindow->setWindowIcon(subWindow->widget()->windowIcon());
     editor->setWindowTitle(QString::fromStdString(item->name()));
@@ -250,7 +245,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
 }
 
 void MainWindow::MDIWindowChanged(QMdiSubWindow *window) {
-  for (QMdiSubWindow *subWindow : _subWindows) {
+  for (QMdiSubWindow *subWindow : _editors) {
     if (subWindow == nullptr) continue;
     BaseEditor *editor = static_cast<BaseEditor *>(subWindow->widget());
     if (window == subWindow) {
@@ -299,7 +294,7 @@ void MainWindow::openFile(QString fName) {
   }
 
   if (!loadedProject) {
-    QMessageBox::warning(this, tr("Failed To Open Project"), tr("There was a problem loading the project: ") + fName,
+    QMessageBox::warning(this, tr("Failed To Open Project"),tr("There was a problem loading the project: ") + fName,
                          QMessageBox::Ok);
     return;
   }
@@ -484,16 +479,7 @@ void MainWindow::on_actionAbout_triggered() {
 }
 
 void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
-  //TODO: Handle
-  return;
-  buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
-  const QString name = QString::fromStdString(item->name());
-
-  if (item->has_folder()) {
-    return;
-  }
-
-  openSubWindow(item);
+  openEditor(treeModel->mapToSource(index));
 }
 
 void MainWindow::on_actionClearRecentMenu_triggered() { _recentFiles->clear(); }
@@ -531,7 +517,7 @@ void MainWindow::CreateResource(TypeCase typeCase) {
   _ui->treeView->edit(index);
   // open the new resource for editing
   //TODO: FIXME
-  //if (!is_folder) openSubWindow(child);
+  //if (!is_folder) openEditor(treeModel->mapToSource(index));
 }
 
 void MainWindow::on_actionCreateGroup_triggered() { CreateResource(TypeCase::kFolder); }
@@ -576,17 +562,7 @@ void MainWindow::on_actionProperties_triggered() {
   if (!_ui->treeView->selectionModel()->hasSelection()) return;
   auto selected = _ui->treeView->selectionModel()->selectedIndexes();
   for (auto index : selected) {
-    auto *treeNode = static_cast<buffers::TreeNode *>(index.internalPointer());
-    openSubWindow(treeNode);
-  }
-}
-
-static void CollectNodes(buffers::TreeNode *root, QSet<buffers::TreeNode *> &cache) {
-  cache.insert(root);
-  for (int i = 0; i < root->child_size(); ++i) {
-    auto *child = root->mutable_child(i);
-    cache.insert(child);
-    if (child->has_folder()) CollectNodes(child, cache);
+    openEditor(treeModel->mapToSource(index));
   }
 }
 

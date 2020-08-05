@@ -18,7 +18,6 @@ class PathEditor : public BaseEditor {
  public:
   explicit PathEditor(EditorModel* model, QWidget* parent);
   ~PathEditor() override;
-  void RebindSubModels() override;
   bool eventFilter(QObject* obj, QEvent* event) override;
   void InsertPoint(int index, int x, int y, int speed);
 

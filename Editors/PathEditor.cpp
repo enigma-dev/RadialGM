@@ -95,15 +95,9 @@ PathEditor::PathEditor(EditorModel* model, QWidget* parent) :
   _resMapper->addMapping(_ui->precisionSpinBox, Path::kPrecisionFieldNumber);
   _resMapper->addMapping(xSnap, Path::kHsnapFieldNumber);
   _resMapper->addMapping(ySnap, Path::kVsnapFieldNumber);
-
-  RebindSubModels();
 }
 
 PathEditor::~PathEditor() { delete _ui; }
-
-void PathEditor::RebindSubModels() {
-
-}
 
 bool PathEditor::eventFilter(QObject* obj, QEvent* event) {
 

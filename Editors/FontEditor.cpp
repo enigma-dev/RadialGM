@@ -24,15 +24,9 @@ The quick brown fox jumps over the lazy dog.");
   _resMapper->addMapping(_ui->sizeSpinBox, Font::kSizeFieldNumber);
   _resMapper->addMapping(_ui->boldCheckBox, Font::kBoldFieldNumber);
   _resMapper->addMapping(_ui->italicCheckBox, Font::kItalicFieldNumber);
-
-  RebindSubModels();
 }
 
 FontEditor::~FontEditor() { delete _ui; }
-
-void FontEditor::RebindSubModels() {
-
-}
 
 void FontEditor::ValidateRangeChange(const QModelIndex &topLeft, const QModelIndex & /*bottomRight*/,
                                      const QVariant &oldValue) {

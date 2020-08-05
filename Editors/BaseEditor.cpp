@@ -6,8 +6,7 @@
 
 BaseEditor::BaseEditor(EditorModel* model, QWidget* parent)
     : QWidget(parent), _model(model) {
-  connect(_model, &QAbstractItemModel::modelReset, [this]() { this->RebindSubModels(); });
-
+  model->setParent(this);
   connect(this, &BaseEditor::FocusGained, [=]() { _hasFocus = true; });
   connect(this, &BaseEditor::FocusLost, [=]() { _hasFocus = false; });
 }
@@ -38,16 +37,6 @@ void BaseEditor::closeEvent(QCloseEvent* event) {
 bool BaseEditor::HasFocus() { return _hasFocus; }
 
 void BaseEditor::ReplaceBuffer(google::protobuf::Message* buffer) { _resMapper->ReplaceBuffer(buffer); }
-
-void BaseEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex& /*bottomRight*/, const QVariant& oldValue,
-                             const QVector<int>& /*roles*/) {
-
-}
-
-void BaseEditor::RebindSubModels() {
-  _resMapper->toFirst();
-  _nodeMapper->toFirst();
-}
 
 void BaseEditor::OnSave() {
   _resMapper->SetDirty(false);

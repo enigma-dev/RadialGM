@@ -41,6 +41,7 @@ class MainWindow : public QMainWindow {
  public slots:
   void openFile(QString fName);
   void openNewProject();
+  void openEditor(const QPersistentModelIndex& protoIndex);
   void CreateResource(TypeCase typeCase);
   static void setCurrentConfig(const buffers::resources::Settings &settings);
 
@@ -103,15 +104,14 @@ class MainWindow : public QMainWindow {
   void closeEvent(QCloseEvent *event) override;
 
   static MainWindow *_instance;
-
-  QHash<buffers::TreeNode *, QMdiSubWindow *> _subWindows;
-
   Ui::MainWindow *_ui;
+
+  // super model indexes to open editor windows
+  QHash<QPersistentModelIndex, QMdiSubWindow *> _editors;
 
   std::unique_ptr<buffers::Project> _project;
   QPointer<RecentFiles> _recentFiles;
 
-  void openSubWindow(buffers::TreeNode *item);
   void readSettings();
   void writeSettings();
   void setTabbedMode(bool enabled);

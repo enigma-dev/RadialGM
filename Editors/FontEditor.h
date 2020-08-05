@@ -17,9 +17,6 @@ class FontEditor : public BaseEditor {
   explicit FontEditor(EditorModel* model, QWidget* parent);
   ~FontEditor() override;
 
- public slots:
-  void RebindSubModels() override;
-
  private slots:
   void ValidateRangeChange(const QModelIndex& topLeft, const QModelIndex& /*bottomRight*/, const QVariant& oldValue);
   void RangeSelectionChanged(const QItemSelection& selected, const QItemSelection& /*deselected*/);

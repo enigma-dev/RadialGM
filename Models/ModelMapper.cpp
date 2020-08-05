@@ -6,7 +6,6 @@ ModelMapper::ModelMapper(ProtoModel *model, BaseEditor *parent) : QObject(parent
   _mapper = new ImmediateDataWidgetMapper(this);
   _mapper->setOrientation(Qt::Vertical);
   _mapper->setModel(model);
-  parent->connect(model, &ProtoModel::DataChanged, parent, &BaseEditor::dataChanged);
 }
 
 // mapper

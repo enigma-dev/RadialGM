@@ -41,15 +41,9 @@ SpriteEditor::SpriteEditor(EditorModel* model, QWidget* parent)
   _resMapper->addMapping(_ui->rightSpinBox, Sprite::kBboxRightFieldNumber);
   _resMapper->addMapping(_ui->topSpinBox, Sprite::kBboxTopFieldNumber);
   _resMapper->addMapping(_ui->bottomSpinBox, Sprite::kBboxBottomFieldNumber);
-
-  RebindSubModels();
 }
 
 SpriteEditor::~SpriteEditor() { delete _ui; }
-
-void SpriteEditor::RebindSubModels() {
-
-}
 
 void SpriteEditor::LoadedMismatchedImage(QSize expectedSize, QSize actualSize) {
   QString expected =

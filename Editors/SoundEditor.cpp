@@ -51,15 +51,9 @@ SoundEditor::SoundEditor(EditorModel* model, QWidget* parent)
   });
 
   _mediaPlayer->setPlaylist(_playlist);
-
-  RebindSubModels();
 }
 
 SoundEditor::~SoundEditor() { delete _ui; }
-
-void SoundEditor::RebindSubModels() {
-
-}
 
 void SoundEditor::on_playButton_clicked() {
   if (_mediaPlayer->state() == QMediaPlayer::PausedState || _mediaPlayer->state() == QMediaPlayer::StoppedState) {

@@ -16,9 +16,6 @@ class TimelineEditor : public BaseEditor {
   explicit TimelineEditor(EditorModel* model, QWidget* parent);
   ~TimelineEditor() override;
 
- public slots:
-  void RebindSubModels() override;
-
  private:
   void CheckDisableButtons(int value);
   void AddMoment(int step);
