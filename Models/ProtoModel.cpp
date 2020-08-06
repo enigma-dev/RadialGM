@@ -137,10 +137,6 @@ bool ProtoModel::setData(const QModelIndex &index, const QVariant &value, int ro
   return true;
 }
 
-void ProtoModel::SetDirty(bool dirty) { _dirty = dirty; }
-
-bool ProtoModel::IsDirty() { return _dirty; }
-
 int ProtoModel::rowCount(const QModelIndex &parent) const {
   auto message = GetMessage(parent);
   auto desc = message->GetDescriptor();

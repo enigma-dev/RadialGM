@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>&lt;new game&gt; - ENIGMA</string>
+   <string>&lt;new game&gt;[*] - ENIGMA</string>
   </property>
   <property name="windowIcon">
    <iconset resource="images.qrc">

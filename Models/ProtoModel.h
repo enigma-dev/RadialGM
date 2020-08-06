@@ -92,11 +92,6 @@ class ProtoModel : public QAbstractItemModel {
     return indexOfField(message,field);
   }
 
-  // A model is "dirty" if the user has made any changes to it since opening the editor.
-  // This is mostly used in "Would you like to save?" dialogs when closing editors.
-  void SetDirty(bool dirty);
-  bool IsDirty();
-
   // These are convience functions for getting & setting model used almost everywhere in the codebase
   // because model->setData(model->index(row, col), value, role) is a PITA to type / remember.
   //virtual QVariant Data(int row, int column = 0) const = 0;
@@ -147,7 +142,6 @@ class ProtoModel : public QAbstractItemModel {
   static IconMap iconMap;
   inline QString treeNodeMime() const { return QStringLiteral("RadialGM/buffers.TreeNode"); }
 
-  bool _dirty;
   Message *_protobuf;
   QStringList _mimes;
   QHash<QPersistentModelIndex,QPersistentModelIndex> parents;

@@ -11,12 +11,19 @@ BaseEditor::BaseEditor(EditorModel* model, QWidget* parent)
   _model->setParent(this); // << take ownership
   _model->submit(); // << prepare initial backup
   _mapper = new EditorMapper(_model, this);
+
   // the editor only becomes modified if it was edited
   // through its editor model because that is the only
   // case in which it is able to restore from a backup
-  connect(_model, &EditorModel::dataChanged, [this](){
+  auto markDirty = [this]() {
     this->setWindowModified(true);
-  });
+  };
+  // handle fields being changed
+  connect(_model, &EditorModel::dataChanged, markDirty);
+  // handle repeated fields being changed (e.g, insert/move/remove)
+  connect(_model, &EditorModel::rowsInserted, markDirty);
+  connect(_model, &EditorModel::rowsMoved, markDirty);
+  connect(_model, &EditorModel::rowsRemoved, markDirty);
 }
 
 void BaseEditor::closeEvent(QCloseEvent* event) {

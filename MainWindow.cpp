@@ -186,6 +186,20 @@ void MainWindow::writeSettings() {
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
+  if (isWindowModified()) {
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, tr("Project Changed"),
+                                  tr("Do you want to save the changes?"),
+                                  QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+
+    if (reply == QMessageBox::Cancel) {
+      event->ignore();
+      return;
+    } else if (reply == QMessageBox::Yes) {
+      //TODO: show EGM save dialog saveProject here
+    }
+  }
+
   _ui->mdiArea->closeAllSubWindows();
   this->writeSettings();
   event->accept();
@@ -289,13 +303,13 @@ void MainWindow::openFile(QString fName) {
     return;
   }
 
-  MainWindow::setWindowTitle(fileInfo.fileName() + " - ENIGMA");
+  MainWindow::setWindowTitle(fileInfo.fileName() + "[*] - ENIGMA");
   _recentFiles->prependFile(fName);
   openProject(std::unique_ptr<buffers::Project>(loadedProject));
 }
 
 void MainWindow::openNewProject() {
-  MainWindow::setWindowTitle(tr("<new game> - ENIGMA"));
+  setWindowTitle(tr("<new game>[*] - ENIGMA"));
   auto newProject = std::unique_ptr<buffers::Project>(new buffers::Project());
   auto *root = newProject->mutable_game()->mutable_root();
   QList<QString> defaultGroups = {tr("Sprites"), tr("Sounds"),  tr("Backgrounds"), tr("Paths"),
@@ -316,6 +330,18 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   _project = std::move(openedProject);
 
   protoModel.reset(new ProtoModel(nullptr, _project.get()));
+  // anybody who fucks with the super model also
+  // fucks with the main window so let them know
+  setWindowModified(false);
+  auto markDirty = [this]() {
+    this->setWindowModified(true);
+  };
+  // handle fields being changed
+  connect(protoModel.get(), &ProtoModel::dataChanged, markDirty);
+  // handle repeated fields being changed (e.g, insert/move/remove)
+  connect(protoModel.get(), &ProtoModel::rowsInserted, markDirty);
+  connect(protoModel.get(), &ProtoModel::rowsMoved, markDirty);
+  connect(protoModel.get(), &ProtoModel::rowsRemoved, markDirty);
 
   if (treeModel.isNull()) // << construct it
     treeModel.reset(new TreeModel(protoModel.get(), nullptr));
