@@ -15,6 +15,7 @@ BaseEditor::BaseEditor(EditorModel* model, QWidget* parent)
   // through its editor model because that is the only
   // case in which it is able to restore from a backup
   auto markDirty = [this]() {
+    if (QObject::sender() != _model) return; // << ignore all else/super model
     this->setWindowModified(true);
   };
   // handle fields being changed
@@ -42,6 +43,16 @@ void BaseEditor::closeEvent(QCloseEvent* event) {
                                  << this->windowTitle();
     }
   }
+
+  // this fixes a bug? in QMdiSubWindow destructor where it
+  // indiscriminately clears the ancestor window modified
+  // https://bugreports.qt.io/browse/QTBUG-85924
+  // for now we workaround by resetting it right after it's destroyed
+  auto ancestorWindow = window();
+  bool wasMainWindowModified = ancestorWindow->isWindowModified();
+  connect(this, &QObject::destroyed, [ancestorWindow,wasMainWindowModified]() {
+    ancestorWindow->setWindowModified(wasMainWindowModified);
+  });
 
   event->accept();
 }
