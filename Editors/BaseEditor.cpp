@@ -3,13 +3,12 @@
 #include "Components/Logger.h"
 
 #include <QCloseEvent>
-#include <QDebug>
 #include <QMessageBox>
 
 BaseEditor::BaseEditor(EditorModel* model, QWidget* parent)
     : QWidget(parent), _model(model) {
   _model->setParent(this); // << take ownership
-  _model->submit(); // << prepare initial backup
+  _model->revert(); // << prepare initial backup
   _mapper = new EditorMapper(_model, this);
 
   // the editor only becomes modified if it was edited
