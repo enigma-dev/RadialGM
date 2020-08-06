@@ -11,6 +11,12 @@ BaseEditor::BaseEditor(EditorModel* model, QWidget* parent)
   _model->setParent(this); // << take ownership
   _model->submit(); // << prepare initial backup
   _mapper = new EditorMapper(_model, this);
+  // the editor only becomes modified if it was edited
+  // through its editor model because that is the only
+  // case in which it is able to restore from a backup
+  connect(_model, &EditorModel::dataChanged, [this](){
+    this->setWindowModified(true);
+  });
 }
 
 void BaseEditor::closeEvent(QCloseEvent* event) {
