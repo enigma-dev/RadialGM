@@ -532,8 +532,7 @@ void MainWindow::CreateResource(TypeCase typeCase) {
   // start editing the name of the resource in the tree for convenience
   _ui->treeView->edit(index);
   // open the new resource for editing
-  //TODO: FIXME
-  //if (!is_folder) openEditor(treeModel->mapToSource(index));
+  if (!is_folder) openEditor(treeModel->mapToSource(index));
 }
 
 void MainWindow::on_actionCreateGroup_triggered() { CreateResource(TypeCase::kFolder); }
