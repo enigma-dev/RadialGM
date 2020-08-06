@@ -34,7 +34,7 @@ BackgroundEditor::BackgroundEditor(EditorModel* model, QWidget* parent)
   mapper->setOrientation(Qt::Vertical);
   mapper->setModel(model);
   mapper->addMapping(_ui->nameEdit, 13);//TreeNode::kNameFieldNumber);
-  mapper->setRootIndex(model->index(5, 0, model->protoRoot));
+  mapper->setRootIndex(model->index(5, 0, model->_protoRoot));
   mapper->addMapping(_ui->tilesetGroupBox, 3);
   mapper->setRootIndex(QModelIndex());
   mapper->toFirst();

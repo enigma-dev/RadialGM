@@ -2,6 +2,11 @@
 #define EDITORMODEL_H
 
 #include <QIdentityProxyModel>
+#include <QScopedPointer>
+
+#include <google/protobuf/message.h>
+
+using namespace google::protobuf;
 
 /**
  * @brief The EditorModel class used to root and sandbox editor windows.
@@ -13,6 +18,7 @@
  */
 class EditorModel : public QIdentityProxyModel
 {
+  QScopedPointer<Message> _backup;
 
 public:
   explicit EditorModel(const QPersistentModelIndex &protoRoot, QObject *parent);
@@ -23,7 +29,15 @@ public:
   virtual QModelIndex mapToSource(const QModelIndex &sourceIndex) const override;
   virtual QModelIndex mapFromSource(const QModelIndex &sourceIndex) const override;
 
-  const QPersistentModelIndex &protoRoot;
+  const QPersistentModelIndex &_protoRoot;
+
+public slots:
+
+  // these are for reverting the editor and since we edit the
+  // super model directly, like GM, their meaning is somewhat
+  // inverted to this editor model
+  virtual void revert() override;
+  virtual bool submit() override;
 };
 
 #endif // EDITORMODEL_H
