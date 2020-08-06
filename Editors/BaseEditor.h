@@ -25,12 +25,6 @@ class BaseEditor : public QWidget {
  public:
   explicit BaseEditor(EditorModel *model, QWidget *parent);
 
-  bool HasFocus();
-
- signals:
-  void FocusGained();
-  void FocusLost();
-
  public slots:
   void OnSave();
 
@@ -39,7 +33,6 @@ class BaseEditor : public QWidget {
 
   EditorMapper *_mapper;
   EditorModel *_model;
-  bool _hasFocus = false;
 };
 
 #endif  // BASEEDTIOR_H

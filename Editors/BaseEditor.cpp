@@ -11,8 +11,6 @@ BaseEditor::BaseEditor(EditorModel* model, QWidget* parent)
   _model->setParent(this); // << take ownership
   _model->submit(); // << prepare initial backup
   _mapper = new EditorMapper(_model, this);
-  connect(this, &BaseEditor::FocusGained, [=]() { _hasFocus = true; });
-  connect(this, &BaseEditor::FocusLost, [=]() { _hasFocus = false; });
 }
 
 void BaseEditor::closeEvent(QCloseEvent* event) {
@@ -35,8 +33,6 @@ void BaseEditor::closeEvent(QCloseEvent* event) {
 
   event->accept();
 }
-
-bool BaseEditor::HasFocus() { return _hasFocus; }
 
 void BaseEditor::OnSave() {
   // our editor model already mutated the super model so we

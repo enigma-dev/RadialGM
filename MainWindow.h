@@ -46,8 +46,6 @@ class MainWindow : public QMainWindow {
   static void setCurrentConfig(const buffers::resources::Settings &settings);
 
  private slots:
-  void MDIWindowChanged(QMdiSubWindow *window);
-
   // file menu
   void on_actionNew_triggered();
   void on_actionOpen_triggered();

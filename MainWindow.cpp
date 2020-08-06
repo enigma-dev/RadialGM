@@ -131,7 +131,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
   this->_recentFiles = new RecentFiles(this, this->_ui->menuRecent, this->_ui->actionClearRecentMenu);
 
   _ui->mdiArea->setBackground(QImage(":/banner.png"));
-  connect(_ui->mdiArea, &QMdiArea::subWindowActivated, this, &MainWindow::MDIWindowChanged);
   connect(_ui->menuWindow, &QMenu::aboutToShow, this, &MainWindow::updateWindowMenu);
 
   auto settingsButton = static_cast<QToolButton *>(_ui->mainToolBar->widgetForAction(_ui->actionSettings));
@@ -245,18 +244,6 @@ void MainWindow::openEditor(const QPersistentModelIndex& protoIndex) {
 
   subWindow->show();
   _ui->mdiArea->setActiveSubWindow(subWindow);
-}
-
-void MainWindow::MDIWindowChanged(QMdiSubWindow *window) {
-  for (QMdiSubWindow *subWindow : _editors) {
-    if (subWindow == nullptr) continue;
-    BaseEditor *editor = static_cast<BaseEditor *>(subWindow->widget());
-    if (window == subWindow) {
-      emit editor->FocusGained();
-    } else if (editor->HasFocus()) {
-      emit editor->FocusLost();
-    }
-  }
 }
 
 void MainWindow::updateWindowMenu() {
