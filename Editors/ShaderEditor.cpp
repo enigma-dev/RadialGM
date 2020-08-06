@@ -32,9 +32,11 @@ ShaderEditor::ShaderEditor(EditorModel* model, QWidget* parent) : BaseEditor(mod
   CodeWidget* vertexWidget = _codeEditor->AddCodeWidget();
   CodeWidget* fragWidget = _codeEditor->AddCodeWidget();
 
+  //TODO: FIXME
+  /*
   _resMapper->addMapping(fragWidget, Shader::kFragmentCodeFieldNumber);
   _resMapper->addMapping(vertexWidget, Shader::kVertexCodeFieldNumber);
-  _resMapper->toFirst();
+  _resMapper->toFirst();*/
 
   connect(shaderType, QOverload<int>::of(&QComboBox::currentIndexChanged),
           [=](int index) { ui->stackedWidget->setCurrentIndex(index); });

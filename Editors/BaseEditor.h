@@ -2,7 +2,7 @@
 #define BASEEDTIOR_H
 
 #include "Models/EditorModel.h"
-#include "Models/ModelMapper.h"
+#include "Models/EditorMapper.h"
 #include "treenode.pb.h"
 
 #include <QObject>
@@ -25,7 +25,6 @@ class BaseEditor : public QWidget {
  public:
   explicit BaseEditor(EditorModel *model, QWidget *parent);
 
-  void ReplaceBuffer(google::protobuf::Message *buffer);
   bool HasFocus();
 
  signals:
@@ -38,8 +37,7 @@ class BaseEditor : public QWidget {
  protected:
   virtual void closeEvent(QCloseEvent *event) override;
 
-  ModelMapper *_nodeMapper;
-  ModelMapper *_resMapper;
+  EditorMapper *_mapper;
   EditorModel *_model;
   bool _hasFocus = false;
 };

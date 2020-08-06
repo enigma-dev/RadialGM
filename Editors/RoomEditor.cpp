@@ -24,8 +24,9 @@ RoomEditor::RoomEditor(EditorModel* model, QWidget* parent) :
 
   _ui->roomPreviewBackground->SetAssetView(_ui->roomView);
 
-  _nodeMapper->addMapping(_ui->roomName, TreeNode::kNameFieldNumber);
-  _nodeMapper->toFirst();
+    //TODO: FIXME
+  /*
+  _resMapper->addMapping(_ui->roomName, TreeNode::kNameFieldNumber);
 
   _resMapper->addMapping(_ui->speedSpinBox, Room::kSpeedFieldNumber);
   _resMapper->addMapping(_ui->widthSpinBox, Room::kWidthFieldNumber);
@@ -55,7 +56,7 @@ RoomEditor::RoomEditor(EditorModel* model, QWidget* parent) :
   _viewMapper->addMapping(_ui->followingVBorderSpinBox, View::kVborderFieldNumber);
   _viewMapper->addMapping(_ui->followingHSpeedSpinBox, View::kHspeedFieldNumber);
   _viewMapper->addMapping(_ui->followingVSpeedSpinBox, View::kVspeedFieldNumber);
-  _viewMapper->toFirst();
+  _viewMapper->toFirst();*/
 
   QMenuView* objMenu = new QMenuView(this);
   TreeSortFilterProxyModel* treeProxy = new TreeSortFilterProxyModel(this);

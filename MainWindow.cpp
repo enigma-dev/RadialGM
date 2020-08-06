@@ -224,8 +224,11 @@ void MainWindow::openEditor(const QPersistentModelIndex& protoIndex) {
     auto factoryFunction = factoryMap.find(item->type_case());
     if (factoryFunction == factoryMap.end()) return;  // no registered editor
 
-    // ths base editor will take over ownership of the model
+    // editors proxy the super model from their tree index
     EditorModel *model = new EditorModel(protoIndex, nullptr);
+    // we don't give editors direct access to the super model for safety
+    model->setSourceModel(protoModel.get());
+    // ths base editor will now take over ownership of the proxy model
     BaseEditor *editor = factoryFunction->second(model, this);
 
     subWindow = _editors[protoIndex] = _ui->mdiArea->addSubWindow(editor);

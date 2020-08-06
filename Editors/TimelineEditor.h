@@ -28,7 +28,6 @@ class TimelineEditor : public BaseEditor {
 
   CodeEditor* _codeEditor;
   Ui::TimelineEditor* _ui;
-  ProtoModel* _timelineModel;
 };
 
 #endif  // TIMELINEEDITOR_H

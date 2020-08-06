@@ -13,7 +13,6 @@
  */
 class EditorModel : public QIdentityProxyModel
 {
-  const QPersistentModelIndex &protoRoot;
 
 public:
   explicit EditorModel(const QPersistentModelIndex &protoRoot, QObject *parent);
@@ -23,6 +22,8 @@ public:
   // of the super model which it will never be editing anyway
   virtual QModelIndex mapToSource(const QModelIndex &sourceIndex) const override;
   virtual QModelIndex mapFromSource(const QModelIndex &sourceIndex) const override;
+
+  const QPersistentModelIndex &protoRoot;
 };
 
 #endif // EDITORMODEL_H

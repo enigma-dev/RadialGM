@@ -19,11 +19,13 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ\n\
 ~!@#$%^&*()_+{}|:\"<>?`-=[];\',./\n\
 The quick brown fox jumps over the lazy dog.");
 
-  _nodeMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
+          //TODO: FIXME
+        /*
+  _resMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
   _resMapper->addMapping(_ui->fontComboBox, Font::kFontNameFieldNumber);
   _resMapper->addMapping(_ui->sizeSpinBox, Font::kSizeFieldNumber);
   _resMapper->addMapping(_ui->boldCheckBox, Font::kBoldFieldNumber);
-  _resMapper->addMapping(_ui->italicCheckBox, Font::kItalicFieldNumber);
+  _resMapper->addMapping(_ui->italicCheckBox, Font::kItalicFieldNumber);*/
 }
 
 FontEditor::~FontEditor() { delete _ui; }

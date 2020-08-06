@@ -33,6 +33,8 @@ SpriteEditor::SpriteEditor(EditorModel* model, QWidget* parent)
   _ui->mainToolBar->addWidget(showOrigin);
   connect(showOrigin, &QCheckBox::stateChanged, _ui->subimagePreview, &SpriteView::SetShowOrigin);
 
+    //TODO: FIXME
+  /*
   _resMapper->addMapping(_ui->originXSpinBox, Sprite::kOriginXFieldNumber);
   _resMapper->addMapping(_ui->originYSpinBox, Sprite::kOriginYFieldNumber);
   _resMapper->addMapping(_ui->collisionShapeGroupBox, Sprite::kShapeFieldNumber, "currentIndex");
@@ -40,7 +42,7 @@ SpriteEditor::SpriteEditor(EditorModel* model, QWidget* parent)
   _resMapper->addMapping(_ui->leftSpinBox, Sprite::kBboxLeftFieldNumber);
   _resMapper->addMapping(_ui->rightSpinBox, Sprite::kBboxRightFieldNumber);
   _resMapper->addMapping(_ui->topSpinBox, Sprite::kBboxTopFieldNumber);
-  _resMapper->addMapping(_ui->bottomSpinBox, Sprite::kBboxBottomFieldNumber);
+  _resMapper->addMapping(_ui->bottomSpinBox, Sprite::kBboxBottomFieldNumber);*/
 }
 
 SpriteEditor::~SpriteEditor() { delete _ui; }
@@ -71,25 +73,7 @@ void SpriteEditor::SelectionChanged(const QItemSelection& selected, const QItemS
 }
 
 void SpriteEditor::on_bboxComboBox_currentIndexChanged(int index) {
-  bool manual = (index != Sprite::BoundingBox::Sprite_BoundingBox_MANUAL);
-  _ui->leftSpinBox->setDisabled(manual);
-  _ui->rightSpinBox->setDisabled(manual);
-  _ui->topSpinBox->setDisabled(manual);
-  _ui->bottomSpinBox->setDisabled(manual);
 
-  if (index == Sprite::BoundingBox::Sprite_BoundingBox_AUTOMATIC) {
-    QRectF rect = _ui->subimagePreview->AutomaticBBoxRect();
-    _ui->leftSpinBox->setValue(rect.x());
-    _ui->topSpinBox->setValue(rect.y());
-    _ui->rightSpinBox->setValue(rect.x() + rect.width());
-    _ui->bottomSpinBox->setValue(rect.y() + rect.height());
-  } else if (index == Sprite::BoundingBox::Sprite_BoundingBox_FULL_IMAGE) {
-    QPixmap p = _ui->subimagePreview->GetPixmap();
-    _ui->leftSpinBox->setValue(0);
-    _ui->topSpinBox->setValue(0);
-    _ui->rightSpinBox->setValue(p.width());
-    _ui->bottomSpinBox->setValue(p.height());
-  }
 }
 
 void SpriteEditor::on_actionNewSubimage_triggered() {

@@ -38,7 +38,6 @@ class PathEditor : public BaseEditor {
   QLabel* _cursorPositionLabel;
   QLineEdit* _roomLineEdit;
   bool _snapToGrid = true;
-  ProtoModel* _pathModel = nullptr;
   bool _draggingPoint = false;
 };
 

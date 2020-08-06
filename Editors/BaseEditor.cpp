@@ -6,39 +6,18 @@
 
 BaseEditor::BaseEditor(EditorModel* model, QWidget* parent)
     : QWidget(parent), _model(model) {
-  model->setParent(this);
+  _model->setParent(this);
+  _mapper = new EditorMapper(_model, this);
   connect(this, &BaseEditor::FocusGained, [=]() { _hasFocus = true; });
   connect(this, &BaseEditor::FocusLost, [=]() { _hasFocus = false; });
 }
 
 void BaseEditor::closeEvent(QCloseEvent* event) {
-  if (_resMapper->IsDirty()) {
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, tr("Unsaved Changes"), tr("Would you like to save the changes?"),
-                                  QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-
-    if (reply == QMessageBox::Cancel) {
-      event->ignore();
-      return;
-    } else if (reply == QMessageBox::No) {
-      _nodeMapper->clearMapping();
-      if (!_resMapper->RestoreBackup()) {
-        // This should never happen but here incase someone decides to incorrectly null the backup
-        qDebug() << "Failed to revert editor changes";
-      }
-      _resMapper->clearMapping();
-    }
-  }
-
-  _resMapper->SetDirty(false);
-  event->accept();
+  //TODO: FIXME
 }
 
 bool BaseEditor::HasFocus() { return _hasFocus; }
 
-void BaseEditor::ReplaceBuffer(google::protobuf::Message* buffer) { _resMapper->ReplaceBuffer(buffer); }
-
 void BaseEditor::OnSave() {
-  _resMapper->SetDirty(false);
-  this->parentWidget()->close();
+  //TODO: FIXME
 }

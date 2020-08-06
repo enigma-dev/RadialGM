@@ -127,7 +127,7 @@ bool ProtoModel::setData(const QModelIndex &index, const QVariant &value, int ro
   if (role == Qt::UserRole) return true; // << was an editable test for flags
   if (role != Qt::EditRole) return false;
 
-  buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
+  buffers::TreeNode *item = static_cast<buffers::TreeNode *>(GetMessage(index));
   const QString oldName = QString::fromStdString(item->name());
   const QString newName = value.toString();
   if (oldName == newName) return true;

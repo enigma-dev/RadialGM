@@ -70,6 +70,7 @@ SOURCES += \
     Editors/ShaderEditor.cpp \
     Editors/SpriteEditor.cpp \
     Models/DiagnosticModel.cpp \
+    Models/EditorMapper.cpp \
     Models/EditorModel.cpp \
     Widgets/AssetScrollAreaBackground.cpp \
     Widgets/PathView.cpp \
@@ -102,7 +103,6 @@ SOURCES += \
     Components/RecentFiles.cpp \
     Editors/CodeEditor.cpp \
     Editors/ScriptEditor.cpp \
-    Models/ModelMapper.cpp \
     Components/QMenuView.cpp \
     Models/TreeSortFilterProxyModel.cpp
 
@@ -122,6 +122,7 @@ HEADERS += \
     Editors/RoomEditor.h \
     Editors/SettingsEditor.h \
     Models/DiagnosticModel.h \
+    Models/EditorMapper.h \
     Models/EditorModel.h \
     Widgets/AssetScrollArea.h \
     Widgets/AssetScrollAreaBackground.h \
@@ -147,7 +148,6 @@ HEADERS += \
     Dialogs/PreferencesKeys.h \
     Editors/CodeEditor.h \
     Editors/ScriptEditor.h \
-    Models/ModelMapper.h \
     Components/QMenuView.h \
     Components/QMenuView_p.h \
     Models/TreeSortFilterProxyModel.h

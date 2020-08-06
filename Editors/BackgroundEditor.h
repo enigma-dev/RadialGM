@@ -27,7 +27,6 @@ class BackgroundEditor : public BaseEditor {
 
  private:
   Ui::BackgroundEditor *_ui;
-  ProtoModel *_backgroundModel;
   BackgroundView *_renderer;
 };
 

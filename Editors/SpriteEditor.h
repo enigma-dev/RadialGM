@@ -39,7 +39,6 @@ class SpriteEditor : public BaseEditor {
 
  private:
   Ui::SpriteEditor* _ui;
-  ProtoModel* _spriteModel;
 };
 
 #endif  // SPRITEEDITOR_H
