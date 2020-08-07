@@ -33,9 +33,13 @@
 
 #include <functional>
 #include <unordered_map>
+#include <QFile>
+#include <sstream>
 
 #undef GetMessage
 
+QList<QString> MainWindow::EnigmaSearchPaths = {QDir::currentPath(), "./enigma-dev", "../enigma-dev", "../RadialGM/Submodules/enigma-dev"};
+QFileInfo MainWindow::EnigmaRoot = MainWindow::getEnigmaRoot();
 QList<buffers::SystemType> MainWindow::systemCache;
 MainWindow *MainWindow::_instance = nullptr;
 QScopedPointer<ResourceModelMap> MainWindow::resourceMap;
@@ -73,7 +77,7 @@ void diagnosticHandler(QtMsgType type, const QMessageLogContext &context, const 
 
   std::cerr << msgFormatted.toStdString() << std::endl;
 
-  if (diagnosticTextEdit) {
+  if (diagnosticTextEdit != nullptr) {
     diagnosticTextEdit->append(msgFormatted);
   } else {
     // this should never happen!
@@ -81,7 +85,36 @@ void diagnosticHandler(QtMsgType type, const QMessageLogContext &context, const 
   }
 }
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainWindow) {
+QFileInfo MainWindow::getEnigmaRoot() {
+  QFileInfo EnigmaRoot;
+  foreach (auto path, EnigmaSearchPaths) {
+    const QDir dir(path);
+    QDir::Filters filters = QDir::Filter::AllEntries;
+    auto entryList = dir.entryInfoList(QStringList({"ENIGMAsystem"}), filters, QDir::SortFlag::NoSort);
+    if (!entryList.empty()) {
+      EnigmaRoot = entryList.first();
+        break;
+    }
+  }
+  
+  return EnigmaRoot;
+}
+
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainWindow), _event_data(nullptr), egm(nullptr) {
+
+  if (!EnigmaRoot.filePath().isEmpty()) {
+    _event_data = std::make_unique<EventData>(ParseEventFile((EnigmaRoot.absolutePath() + "/events.ey").toStdString()));
+  } else {
+    qDebug() << "Error: Failed to locate ENIGMA sources. Loading internal events.ey.\n" << "Search Paths:\n" << MainWindow::EnigmaSearchPaths;
+    QFile internal_events(":/events.ey");
+    internal_events.open(QIODevice::ReadOnly | QFile::Text);
+    std::stringstream ss;
+    ss << internal_events.readAll().toStdString();
+    _event_data = std::make_unique<EventData>(ParseEventFile(ss));
+  }
+  
+  egm = egm::EGM(_event_data.get());
+  
   ArtManager::Init();
 
   _instance = this;
@@ -155,7 +188,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
   openNewProject();
 }
 
-MainWindow::~MainWindow() { delete _ui; }
+MainWindow::~MainWindow() { diagnosticTextEdit = nullptr; delete _ui; }
 
 void MainWindow::setCurrentConfig(const buffers::resources::Settings &settings) {
   emit _instance->CurrentConfigChanged(settings);
@@ -285,13 +318,15 @@ void MainWindow::openFile(QString fName) {
   QFileInfo fileInfo(fName);
   const QString suffix = fileInfo.suffix();
 
-  buffers::Project *loadedProject = nullptr;
-  if (suffix == "gm81" || suffix == "gmk" || suffix == "gm6" || suffix == "gmd") {
-    loadedProject = gmk::LoadGMK(fName.toStdString());
+  std::unique_ptr<buffers::Project> loadedProject = nullptr;
+  if (suffix == "egm") {
+    loadedProject = egm.LoadEGM(fName.toStdString());
+  } else if (suffix == "gm81" || suffix == "gmk" || suffix == "gm6" || suffix == "gmd") {
+    loadedProject = gmk::LoadGMK(fName.toStdString(), _event_data.get());
   } else if (suffix == "gmx") {
-    loadedProject = gmx::LoadGMX(fName.toStdString());
+    loadedProject = gmx::LoadGMX(fName.toStdString(), _event_data.get());
   } else if (suffix == "yyp") {
-    loadedProject = yyp::LoadYYP(fName.toStdString());
+    loadedProject = yyp::LoadYYP(fName.toStdString(), _event_data.get());
   }
 
   if (!loadedProject) {
@@ -302,7 +337,7 @@ void MainWindow::openFile(QString fName) {
 
   MainWindow::setWindowTitle(fileInfo.fileName() + " - ENIGMA");
   _recentFiles->prependFile(fName);
-  openProject(std::unique_ptr<buffers::Project>(loadedProject));
+  openProject(std::move(loadedProject));
 }
 
 void MainWindow::openNewProject() {
@@ -339,7 +374,7 @@ void MainWindow::on_actionNew_triggered() { openNewProject(); }
 void MainWindow::on_actionOpen_triggered() {
   const QString &fileName = QFileDialog::getOpenFileName(
       this, tr("Open Project"), "",
-      tr("All supported formats (*.yyp *.project.gmx *.gm81 *.gmk *.gm6 *.gmd);;GameMaker: Studio 2 Projects "
+      tr("All supported formats (*.egm *.yyp *.project.gmx *.gm81 *.gmk *.gm6 *.gmd);;GameMaker: Studio 2 Projects "
          "(*.yyp);;GameMaker: Studio Projects (*.project.gmx);;Classic "
          "GameMaker Files (*.gm81 *.gmk *.gm6 *.gmd);;All Files (*)"));
   if (!fileName.isEmpty()) openFile(fileName);

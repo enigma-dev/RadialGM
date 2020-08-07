@@ -1,4 +1,5 @@
 #include "ServerPlugin.h"
+#include "MainWindow.h"
 #include "Widgets/CodeWidget.h"
 
 #include <QFileDialog>
@@ -92,8 +93,8 @@ struct ResourceReader : public AsyncReadWorker<Resource> {
       type = KeywordType::FUNCTION;
       for (int i = 0; i < resource.overload_count(); ++i) {
         QString overload = QString::fromStdString(resource.parameters(i));
-        const QStringRef signature = QStringRef(&overload, overload.indexOf("(") + 1, overload.lastIndexOf(")"));
-        CodeWidget::addCalltip(name, signature.toString(), type);
+        const QString signature = overload.mid(overload.indexOf("(") + 1, overload.lastIndexOf(")"));
+        CodeWidget::addCalltip(name, signature, type);
       }
     } else {
       if (resource.is_global()) type = KeywordType::GLOBAL;
@@ -269,7 +270,6 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   #endif
 
   // look for an executable file that looks like emake in some common directories
-  QList<QString> searchPaths = {QDir::currentPath(), "./enigma-dev", "../enigma-dev", "../RadialGM/Submodules/enigma-dev"};
   #ifndef RGM_DEBUG
    QString emakeName = "emake"; 
   #else
@@ -277,7 +277,7 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   #endif
   
   QFileInfo emakeFileInfo;
-  foreach (auto path, searchPaths) {
+  foreach (auto path, MainWindow::EnigmaSearchPaths) {
     const QDir dir(path);
     QDir::Filters filters = QDir::Filter::Executable | QDir::Filter::Files;
     auto entryList = dir.entryInfoList(QStringList({emakeName, emakeName + ".exe"}), filters, QDir::SortFlag::NoSort);
@@ -288,29 +288,18 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   }
   
   if (emakeFileInfo.filePath().isEmpty()) {
-    qDebug() << "Error: Failed to locate emake. Compiling and syntax check will not work.\n" << "Search Paths:\n" << searchPaths;
+    qDebug() << "Error: Failed to locate emake. Compiling and syntax check will not work.\n" << "Search Paths:\n" << MainWindow::EnigmaSearchPaths;
     return;
   }
   
-  QFileInfo enigmaFileInfo;
-  foreach (auto path, searchPaths) {
-    const QDir dir(path);
-    QDir::Filters filters = QDir::Filter::AllEntries;
-    auto entryList = dir.entryInfoList(QStringList({"ENIGMAsystem"}), filters, QDir::SortFlag::NoSort);
-    if (!entryList.empty()) {
-      enigmaFileInfo = entryList.first();
-      break;
-    }
-  }
-  
-  if (enigmaFileInfo.filePath().isEmpty()) {
-    qDebug() << "Error: Failed to locate ENIGMA sources. Compiling and syntax check will not work.\n" << "Search Paths:\n" << searchPaths;
+  if (MainWindow::EnigmaRoot.filePath().isEmpty()) {
+    qDebug() << "Error: Failed to locate ENIGMA sources. Compiling and syntax check will not work.\n" << "Search Paths:\n" << MainWindow::EnigmaSearchPaths;
     return;
   }
 
   // use the closest matching emake file we found and launch it in a child process
   qDebug() << "Using emake exe at: " << emakeFileInfo.absolutePath();
-  qDebug() << "Using ENIGMA sources at: " << enigmaFileInfo.absolutePath();
+  qDebug() << "Using ENIGMA sources at: " << MainWindow::EnigmaRoot.absolutePath();
   process->setWorkingDirectory(emakeFileInfo.absolutePath());
   QString program = emakeFileInfo.fileName();
   QStringList arguments;
@@ -320,7 +309,7 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
             << "-r"
             << "--quiet"
             << "--enigma-root" 
-            << enigmaFileInfo.absolutePath();
+            << MainWindow::EnigmaRoot.absolutePath();
             
   qDebug() << "Running: " << program << " " << arguments;
 
