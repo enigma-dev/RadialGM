@@ -10,6 +10,7 @@ BaseEditor::BaseEditor(EditorModel* model, QWidget* parent)
   _model->setParent(this); // << take ownership
   _model->revert(); // << prepare initial backup
   _mapper = new EditorMapper(_model, this);
+  _mapper->mapName(this,"windowTitle");
 
   // the editor only becomes modified if it was edited
   // through its editor model because that is the only

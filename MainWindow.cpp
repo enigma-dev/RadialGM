@@ -252,7 +252,6 @@ void MainWindow::openEditor(const QModelIndex& protoIndex) {
     subWindow->connect(subWindow, &QObject::destroyed, [=]() { _editors.remove(protoIndex); });
 
     subWindow->setWindowIcon(subWindow->widget()->windowIcon());
-    editor->setWindowTitle(QString::fromStdString(item->name()));
   } else {
     subWindow = *swIt;
   }

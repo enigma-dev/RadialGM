@@ -23,19 +23,18 @@ BackgroundEditor::BackgroundEditor(EditorModel* model, QWidget* parent)
 
   connect(_ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
 
-  //_resMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
-  //TODO: FIXME
-  /*
-  _resMapper->addMapping(_ui->smoothCheckBox, Background::kSmoothEdgesFieldNumber);
-  _resMapper->addMapping(_ui->preloadCheckBox, Background::kPreloadFieldNumber);
-  _resMapper->addMapping(_ui->tilesetGroupBox, Background::kUseAsTilesetFieldNumber);
-  _resMapper->addMapping(_ui->tileWidthSpinBox, Background::kTileWidthFieldNumber);
-  _resMapper->addMapping(_ui->tileHeightSpinBox, Background::kTileHeightFieldNumber);
-  _resMapper->addMapping(_ui->horizontalOffsetSpinBox, Background::kHorizontalOffsetFieldNumber);
-  _resMapper->addMapping(_ui->verticalOffsetSpinBox, Background::kVerticalOffsetFieldNumber);
-  _resMapper->addMapping(_ui->horizontalSpacingSpinBox, Background::kHorizontalSpacingFieldNumber);
-  _resMapper->addMapping(_ui->verticalSpacingSpinBox, Background::kVerticalSpacingFieldNumber);
-  _resMapper->toFirst();*/
+  _mapper->mapName(_ui->nameEdit);
+  _mapper->pushResource();
+  _mapper->mapField(Background::kSmoothEdgesFieldNumber, _ui->smoothCheckBox);
+  _mapper->mapField(Background::kPreloadFieldNumber, _ui->preloadCheckBox);
+  _mapper->mapField(Background::kUseAsTilesetFieldNumber, _ui->tilesetGroupBox);
+  _mapper->mapField(Background::kTileWidthFieldNumber, _ui->tileWidthSpinBox);
+  _mapper->mapField(Background::kTileHeightFieldNumber, _ui->tileHeightSpinBox);
+  _mapper->mapField(Background::kHorizontalOffsetFieldNumber, _ui->horizontalOffsetSpinBox);
+  _mapper->mapField(Background::kVerticalOffsetFieldNumber, _ui->verticalOffsetSpinBox);
+  _mapper->mapField(Background::kHorizontalSpacingFieldNumber, _ui->horizontalSpacingSpinBox);
+  _mapper->mapField(Background::kVerticalSpacingFieldNumber, _ui->verticalSpacingSpinBox);
+  _mapper->load();
 }
 
 BackgroundEditor::~BackgroundEditor() { delete _ui; }
