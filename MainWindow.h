@@ -72,7 +72,7 @@ class MainWindow : public QMainWindow {
  public slots:
   void openFile(QString fName);
   void openNewProject();
-  void openEditor(const QPersistentModelIndex& protoIndex);
+  void openEditor(const QModelIndex& protoIndex);
   void CreateResource(TypeCase typeCase);
   static void setCurrentConfig(const buffers::resources::Settings &settings);
 

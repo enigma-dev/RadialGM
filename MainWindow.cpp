@@ -212,7 +212,7 @@ T *editorFactory(EditorModel *model, QWidget *parent) {
   return new T(model, parent);
 }
 
-void MainWindow::openEditor(const QPersistentModelIndex& protoIndex) {
+void MainWindow::openEditor(const QModelIndex& protoIndex) {
   using namespace google::protobuf;
 
   using TypeCase = buffers::TreeNode::TypeCase;

@@ -1,6 +1,6 @@
 #include "EditorModel.h"
 
-EditorModel::EditorModel(const QPersistentModelIndex &protoRoot, QObject *parent) :
+EditorModel::EditorModel(const QModelIndex &protoRoot, QObject *parent) :
   QIdentityProxyModel(parent), _backup(nullptr), _protoRoot(protoRoot) {}
 
 QModelIndex EditorModel::mapToSource(const QModelIndex &sourceIndex) const {

@@ -21,7 +21,7 @@ class EditorModel : public QIdentityProxyModel
   QScopedPointer<Message> _backup;
 
 public:
-  explicit EditorModel(const QPersistentModelIndex &protoRoot, QObject *parent);
+  explicit EditorModel(const QModelIndex &protoRoot, QObject *parent);
 
   // these two overrides are how we move the root of this model
   // without causing the identity proxy model to map the rest
@@ -29,7 +29,7 @@ public:
   virtual QModelIndex mapToSource(const QModelIndex &sourceIndex) const override;
   virtual QModelIndex mapFromSource(const QModelIndex &sourceIndex) const override;
 
-  const QPersistentModelIndex &_protoRoot;
+  const QPersistentModelIndex _protoRoot;
 
 public slots:
 
