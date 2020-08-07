@@ -1,7 +1,7 @@
 #ifndef EDITORMAPPER_H
 #define EDITORMAPPER_H
 
-#include "ImmediateMapper.h"
+#include <QObject>
 
 #include <google/protobuf/message.h>
 
@@ -9,17 +9,13 @@ class EditorModel;
 class BaseEditor;
 
 class EditorMapper : public QObject {
+  Q_OBJECT
+
  public:
   explicit EditorMapper(EditorModel* model, BaseEditor* parent);
 
-  // mapper
-  void addMapping(QWidget *widget, int section, QByteArray propName = "");
-  void clearMapping();
-  void toFirst();
-
  protected:
   EditorModel* _model;
-  ImmediateDataWidgetMapper *_mapper;
 };
 
 #endif  // EDITORMAPPER_H

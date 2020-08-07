@@ -4,7 +4,6 @@
 #include "MainWindow.h"
 #include "ui_RoomEditor.h"
 
-#include "Models/ImmediateMapper.h"
 #include "Models/ProtoModel.h"
 #include "Models/TreeSortFilterProxyModel.h"
 #include "Room.pb.h"
@@ -67,8 +66,9 @@ RoomEditor::RoomEditor(EditorModel* model, QWidget* parent) :
 
   connect(objMenu, &QMenu::triggered, this, &RoomEditor::SelectedObjectChanged);
 
-  connect(_ui->currentViewComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-          [=](int index) { _viewMapper->setCurrentIndex(index); });
+  //TODO: FIXME
+  //connect(_ui->currentViewComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+          //[=](int index) { _viewMapper->setCurrentIndex(index); });
 
   cursorPositionLabel = new QLabel();
   connect(_ui->roomPreviewBackground, &AssetScrollAreaBackground::MouseMoved, [=](int x, int y) {

@@ -13,8 +13,6 @@
 #include <QDesktopServices>
 #include <QPainter>
 
-#include "Models/ImmediateMapper.h"
-
 using buffers::resources::Background;
 
 BackgroundEditor::BackgroundEditor(EditorModel* model, QWidget* parent)
@@ -24,23 +22,6 @@ BackgroundEditor::BackgroundEditor(EditorModel* model, QWidget* parent)
   _ui->imagePreviewBackground->SetAssetView(_ui->backgroundView);
 
   connect(_ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
-
-  connect(model, &EditorModel::dataChanged, [](const QModelIndex& first,
-          const QModelIndex& last){
-    qDebug() << "motherfucker";
-  });
-
-  ImmediateDataWidgetMapper *mapper = new ImmediateDataWidgetMapper(this);
-  mapper->setOrientation(Qt::Vertical);
-  mapper->setModel(model);
-  mapper->addMapping(_ui->nameEdit, 13);//TreeNode::kNameFieldNumber);
-  mapper->setRootIndex(model->index(5, 0, model->_protoRoot));
-  mapper->addMapping(_ui->tilesetGroupBox, 3);
-  mapper->setRootIndex(QModelIndex());
-  mapper->toFirst();
-  mapper->revert();
-  qDebug() << mapper->mappedSection(_ui->nameEdit);
-  //mapper->revert();
 
   //_resMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
   //TODO: FIXME

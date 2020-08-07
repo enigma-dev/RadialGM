@@ -64,7 +64,6 @@ set(RGM_SOURCES
     Models/DiagnosticModel.cpp
     Models/EditorMapper.cpp
     Models/EditorModel.cpp
-    Models/ImmediateMapper.cpp
     Editors/ObjectEditor.cpp
     Editors/PathEditor.cpp
     Editors/CodeEditor.cpp
@@ -109,7 +108,6 @@ set(RGM_HEADERS
     Models/DiagnosticModel.h
     Models/EditorMapper.h
     Models/EditorModel.h
-    Models/ImmediateMapper.h
     Editors/FontEditor.h
     Editors/PathEditor.h
     Editors/SpriteEditor.h

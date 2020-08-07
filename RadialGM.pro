@@ -97,7 +97,6 @@ SOURCES += \
     Models/TreeModel.cpp \
     Components/ArtManager.cpp \
     Models/ProtoModel.cpp \
-    Models/ImmediateMapper.cpp \
     Components/Utility.cpp \
     Plugins/RGMPlugin.cpp \
     Components/RecentFiles.cpp \
@@ -137,7 +136,6 @@ HEADERS += \
     Components/Logger.h \
     Components/ArtManager.h \
     Models/ProtoModel.h \
-    Models/ImmediateMapper.h \
     Components/Utility.h \
     Plugins/RGMPlugin.h \
     Components/RecentFiles.h \
