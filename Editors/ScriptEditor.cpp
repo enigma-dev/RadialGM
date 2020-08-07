@@ -19,8 +19,12 @@ ScriptEditor::ScriptEditor(EditorModel* model, QWidget* parent)
 
   CodeWidget* codeWidget = _codeEditor->AddCodeWidget();
 
-  //_resMapper->addMapping(codeWidget, Script::kCodeFieldNumber);
-  //_resMapper->toFirst();
+  //TODO: _mapper->mapName(nameEdit);
+  _mapper->pushResource();
+
+  _mapper->mapField(Script::kCodeFieldNumber, codeWidget);
+
+  _mapper->load();
 
   _codeEditor->updateCursorPositionLabel();
   _codeEditor->updateLineCountLabel();

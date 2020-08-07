@@ -5,12 +5,13 @@
 
 #include "Components/ArtManager.h"
 #include "Components/Utility.h"
-#include "Models/ProtoModel.h"
 
 #include <QDebug>
 #include <QDesktopServices>
 #include <QSlider>
 #include <QTime>
+
+using Sound = buffers::resources::Sound;
 
 SoundEditor::SoundEditor(EditorModel* model, QWidget* parent)
     : BaseEditor(model, parent),
@@ -20,11 +21,12 @@ SoundEditor::SoundEditor(EditorModel* model, QWidget* parent)
       _userPaused(false) {
   _ui->setupUi(this);
 
-    //TODO: FIXME
-  /*
-  _resMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
-  _resMapper->addMapping(_ui->volumeSpinBox, Sound::kVolumeFieldNumber);
-  */
+  _mapper->mapName(_ui->nameEdit);
+  _mapper->pushResource();
+
+  _mapper->mapField(Sound::kVolumeFieldNumber, _ui->volumeSpinBox);
+
+  _mapper->load();
 
   _ui->volumeSlider->setValue(static_cast<int>(_ui->volumeSpinBox->value() * 100));
 

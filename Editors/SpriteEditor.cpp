@@ -3,6 +3,8 @@
 
 #include "ui_SpriteEditor.h"
 
+#include "Sprite.pb.h"
+
 #include <QCheckBox>
 #include <QClipboard>
 #include <QDesktopServices>
@@ -12,6 +14,8 @@
 #include <QItemSelection>
 #include <QMessageBox>
 #include <QUuid>
+
+using Sprite = buffers::resources::Sprite;
 
 SpriteEditor::SpriteEditor(EditorModel* model, QWidget* parent)
     : BaseEditor(model, parent), _ui(new Ui::SpriteEditor) {
@@ -33,16 +37,19 @@ SpriteEditor::SpriteEditor(EditorModel* model, QWidget* parent)
   _ui->mainToolBar->addWidget(showOrigin);
   connect(showOrigin, &QCheckBox::stateChanged, _ui->subimagePreview, &SpriteView::SetShowOrigin);
 
-    //TODO: FIXME
-  /*
-  _resMapper->addMapping(_ui->originXSpinBox, Sprite::kOriginXFieldNumber);
-  _resMapper->addMapping(_ui->originYSpinBox, Sprite::kOriginYFieldNumber);
-  _resMapper->addMapping(_ui->collisionShapeGroupBox, Sprite::kShapeFieldNumber, "currentIndex");
-  _resMapper->addMapping(_ui->bboxComboBox, Sprite::kBboxModeFieldNumber, "currentIndex");
-  _resMapper->addMapping(_ui->leftSpinBox, Sprite::kBboxLeftFieldNumber);
-  _resMapper->addMapping(_ui->rightSpinBox, Sprite::kBboxRightFieldNumber);
-  _resMapper->addMapping(_ui->topSpinBox, Sprite::kBboxTopFieldNumber);
-  _resMapper->addMapping(_ui->bottomSpinBox, Sprite::kBboxBottomFieldNumber);*/
+  _mapper->mapName(_ui->nameEdit);
+  _mapper->pushResource();
+
+  _mapper->mapField(Sprite::kOriginXFieldNumber, _ui->originXSpinBox);
+  _mapper->mapField(Sprite::kOriginYFieldNumber, _ui->originYSpinBox);
+  _mapper->mapField(Sprite::kShapeFieldNumber, _ui->collisionShapeGroupBox, "currentIndex");
+  _mapper->mapField(Sprite::kBboxModeFieldNumber, _ui->bboxComboBox, "currentIndex");
+  _mapper->mapField(Sprite::kBboxLeftFieldNumber, _ui->leftSpinBox);
+  _mapper->mapField(Sprite::kBboxRightFieldNumber, _ui->rightSpinBox);
+  _mapper->mapField(Sprite::kBboxTopFieldNumber, _ui->topSpinBox);
+  _mapper->mapField(Sprite::kBboxBottomFieldNumber, _ui->bottomSpinBox);
+
+  _mapper->load();
 }
 
 SpriteEditor::~SpriteEditor() { delete _ui; }

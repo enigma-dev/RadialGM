@@ -25,6 +25,7 @@ BackgroundEditor::BackgroundEditor(EditorModel* model, QWidget* parent)
 
   _mapper->mapName(_ui->nameEdit);
   _mapper->pushResource();
+
   _mapper->mapField(Background::kSmoothEdgesFieldNumber, _ui->smoothCheckBox);
   _mapper->mapField(Background::kPreloadFieldNumber, _ui->preloadCheckBox);
   _mapper->mapField(Background::kUseAsTilesetFieldNumber, _ui->tilesetGroupBox);
@@ -34,6 +35,7 @@ BackgroundEditor::BackgroundEditor(EditorModel* model, QWidget* parent)
   _mapper->mapField(Background::kVerticalOffsetFieldNumber, _ui->verticalOffsetSpinBox);
   _mapper->mapField(Background::kHorizontalSpacingFieldNumber, _ui->horizontalSpacingSpinBox);
   _mapper->mapField(Background::kVerticalSpacingFieldNumber, _ui->verticalSpacingSpinBox);
+
   _mapper->load();
 }
 

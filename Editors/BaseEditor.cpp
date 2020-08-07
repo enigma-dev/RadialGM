@@ -38,8 +38,7 @@ void BaseEditor::closeEvent(QCloseEvent* event) {
       event->ignore();
       return;
     } else if (reply == QMessageBox::No) {
-      //TODO: FIXME
-      //_mapper->clearMapping(); // << mapper does not give a FUCK about changes
+      _mapper->clear(); // << mapper does not give a FUCK about changes
       // This should never happen but here incase someone decides to incorrectly null the backup
       R_ASSESS(_model->submit()) << "Failed to revert editor changes:"
                                  << this->windowTitle();
