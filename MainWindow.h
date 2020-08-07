@@ -16,6 +16,7 @@ class MainWindow;
 #include <QMdiSubWindow>
 #include <QPointer>
 #include <QProcess>
+#include <QEvent>
 
 namespace Ui {
 class MainWindow;
@@ -24,19 +25,49 @@ class MainWindow;
 class MainWindow : public QMainWindow {
   Q_OBJECT
 
+  bool _gameModified; // << don't touch; see property below
+
  public:
   static QScopedPointer<ProtoModel> protoModel;
   static QScopedPointer<TreeModel> treeModel;
   static QScopedPointer<DiagnosticModel> diagModel;
   static QList<buffers::SystemType> systemCache;
 
+  // this property tracks when the game is edited somewhere
+  // it is read only since only the main window sets or clears it
+  // when the super model changes and when the game is saved
+  // it also marks the main window as modified to inform the user
+  // e.g, with an asterisk on Windows or changing the close button on Mac
+  // a signal is provided but you should not connect to it willy nilly
+  // as it will tell you about all updates to the game even superfluous ones
+  Q_PROPERTY(bool gameModified READ IsGameModified WRITE SetGameModified NOTIFY GameWasModified)
+  bool IsGameModified() {
+    return _gameModified;
+  }
+
   explicit MainWindow(QWidget *parent);
   ~MainWindow();
   void openProject(std::unique_ptr<buffers::Project> openedProject);
   buffers::Game *Game() const { return this->_project->mutable_game(); }
 
+  bool event(QEvent* ev) override {
+    if (ev->type() == QEvent::ModifiedChange) {
+      // this fixes a bug? in QMdiSubWindow destructor where it
+      // indiscriminately clears the ancestor window modified
+      // https://bugreports.qt.io/browse/QTBUG-85924
+      // for now we workaround by resetting it to our gameModified property
+      if (isWindowModified() != IsGameModified())
+        setWindowModified(IsGameModified());
+    }
+    return QWidget::event(ev);
+  }
+
  signals:
+  // when the user selects a different config in the main toolbar combo
   void CurrentConfigChanged(const buffers::resources::Settings &settings);
+  // sent when the game is edited globally
+  // (don't abuse as it can be superfluous most of the time)
+  void GameWasModified();
 
  public slots:
   void openFile(QString fName);
@@ -97,6 +128,13 @@ class MainWindow : public QMainWindow {
 
   void on_treeView_doubleClicked(const QModelIndex &index);
   void on_treeView_customContextMenuRequested(const QPoint &pos);
+
+  // for only the main window to set or clear the modified
+  // status of the game globally after editing and saving
+  void SetGameModified(bool mod) {
+    _gameModified = mod;
+    setWindowModified(mod);
+  }
 
  private:
   void closeEvent(QCloseEvent *event) override;

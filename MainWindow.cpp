@@ -84,7 +84,8 @@ void diagnosticHandler(QtMsgType type, const QMessageLogContext &context, const 
   }
 }
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainWindow) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _gameModified(false),
+    _ui(new Ui::MainWindow) {
   ArtManager::Init();
 
   _instance = this;
@@ -332,9 +333,9 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   protoModel.reset(new ProtoModel(nullptr, _project.get()));
   // anybody who fucks with the super model also
   // fucks with the main window so let them know
-  setWindowModified(false);
+  SetGameModified(false);
   auto markDirty = [this]() {
-    this->setWindowModified(true);
+    SetGameModified(true);
   };
   // handle fields being changed
   connect(protoModel.get(), &ProtoModel::dataChanged, markDirty);
