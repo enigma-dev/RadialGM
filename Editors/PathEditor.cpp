@@ -10,6 +10,8 @@
 #include <QSpinBox>
 #include <QToolButton>
 
+using buffers::resources::Path;
+
 PathEditor::PathEditor(EditorModel* model, QWidget* parent) :
     BaseEditor(model, parent), _ui(new Ui::PathEditor) {
   _ui->setupUi(this);

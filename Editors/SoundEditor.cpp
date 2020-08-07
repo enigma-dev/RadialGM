@@ -11,7 +11,7 @@
 #include <QSlider>
 #include <QTime>
 
-using Sound = buffers::resources::Sound;
+using buffers::resources::Sound;
 
 SoundEditor::SoundEditor(EditorModel* model, QWidget* parent)
     : BaseEditor(model, parent),

@@ -13,7 +13,8 @@
 
 #include <algorithm>
 
-using View = buffers::resources::Room::View;
+using buffers::resources::Room;
+using View = Room::View;
 
 RoomEditor::RoomEditor(EditorModel* model, QWidget* parent) :
     BaseEditor(model, parent), _ui(new Ui::RoomEditor) {

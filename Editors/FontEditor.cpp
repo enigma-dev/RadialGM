@@ -4,7 +4,7 @@
 
 #include "Font.pb.h"
 
-using Font = buffers::resources::Font;
+using buffers::resources::Font;
 
 FontEditor::FontEditor(EditorModel *model, QWidget *parent) :
     BaseEditor(model, parent), _ui(new Ui::FontEditor) {

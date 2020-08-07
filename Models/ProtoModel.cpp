@@ -9,6 +9,8 @@
 
 #include <QDebug>
 
+using CppType = FieldDescriptor::CppType;
+
 IconMap ProtoModel::iconMap;
 
 ProtoModel::ProtoModel(QObject *parent, Message *protobuf) : QAbstractItemModel(parent), _protobuf(protobuf) {

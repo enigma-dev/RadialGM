@@ -15,7 +15,7 @@
 #include <QMessageBox>
 #include <QUuid>
 
-using Sprite = buffers::resources::Sprite;
+using buffers::resources::Sprite;
 
 SpriteEditor::SpriteEditor(EditorModel* model, QWidget* parent)
     : BaseEditor(model, parent), _ui(new Ui::SpriteEditor) {
