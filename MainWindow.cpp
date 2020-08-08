@@ -20,6 +20,7 @@
 
 #include "Components/ArtManager.h"
 #include "Components/Logger.h"
+#include "Components/EditorServices.h"
 
 #include "Plugins/RGMPlugin.h"
 
@@ -284,6 +285,17 @@ void MainWindow::openEditor(const QModelIndex& protoIndex) {
     model->setSourceModel(protoModel.get());
     // ths base editor will now take over ownership of the proxy model
     BaseEditor *editor = factoryFunction->second(model, this);
+    // register the editor with some external editing services
+    connect(editor, &BaseEditor::OpenExternally,
+            [editor,model](const QModelIndex& editorIndex) {
+      auto protoIndex = model->mapToSource(editorIndex);
+      EditorServices::OpenExternally(protoIndex);
+    });
+    connect(editor, &BaseEditor::EditExternally,
+            [editor,model](const QModelIndex& editorIndex) {
+      auto protoIndex = model->mapToSource(editorIndex);
+      EditorServices::EditExternally(protoIndex);
+    });
 
     subWindow = _editors[protoIndex] = _ui->mdiArea->addSubWindow(editor);
     subWindow->resize(subWindow->frameSize().expandedTo(editor->size()));

@@ -7,7 +7,6 @@
 
 #include <QCheckBox>
 #include <QClipboard>
-#include <QDesktopServices>
 #include <QDir>
 #include <QImage>
 #include <QImageReader>
@@ -116,7 +115,10 @@ void SpriteEditor::on_actionZoomIn_triggered() { _ui->scrollAreaWidget->ZoomIn()
 void SpriteEditor::on_actionZoomOut_triggered() { _ui->scrollAreaWidget->ZoomOut(); }
 
 void SpriteEditor::on_actionEditSubimages_triggered() {
-
+  auto subimagesIndex = _model->index(Sprite::kSubimagesFieldNumber, 0, QModelIndex());
+  for (QModelIndex idx : _ui->subImageList->selectionModel()->selectedIndexes()) {
+    EditExternally(_model->index(idx.row(), 0, subimagesIndex));
+  }
 }
 
 void SpriteEditor::on_centerOriginButton_clicked() {

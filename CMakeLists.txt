@@ -58,6 +58,7 @@ set(RGM_SOURCES
     Components/Utility.cpp
     Components/QMenuView.cpp
     Components/RecentFiles.cpp
+    Components/EditorServices.cpp
     Models/TreeSortFilterProxyModel.cpp
     Models/ProtoModel.cpp
     Models/TreeModel.cpp
@@ -102,6 +103,7 @@ set(RGM_HEADERS
     Components/ArtManager.h
     Components/QMenuView_p.h
     Components/Utility.h
+    Components/EditorServices.h
     Models/TreeModel.h
     Models/TreeSortFilterProxyModel.h
     Models/ProtoModel.h

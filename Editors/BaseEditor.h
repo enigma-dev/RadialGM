@@ -13,6 +13,14 @@ class BaseEditor : public QWidget {
  public:
   explicit BaseEditor(EditorModel *model, QWidget *parent);
 
+ signals:
+  // tells the outside world we want edited or opened by editor services
+  // for a specific field at an index in our editor model
+  // if the index is invalid/the root of editor model then it means the
+  // entire resource wants to be edited externally
+  void OpenExternally(const QModelIndex &index=QModelIndex());
+  void EditExternally(const QModelIndex &index=QModelIndex());
+
  public slots:
   void OnSave();
 

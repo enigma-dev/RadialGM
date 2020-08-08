@@ -10,7 +10,6 @@
 #include "gmx.h"
 
 #include <QDebug>
-#include <QDesktopServices>
 #include <QPainter>
 
 using buffers::resources::Background;
@@ -76,5 +75,5 @@ void BackgroundEditor::on_actionSaveImage_triggered() {
 }
 
 void BackgroundEditor::on_actionEditImage_triggered() {
-
+  EditExternally(_model->index(Background::kImageFieldNumber, 0, QModelIndex()));
 }
