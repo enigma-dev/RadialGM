@@ -95,6 +95,9 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
   auto desc = message->GetDescriptor();
   auto refl = message->GetReflection();
   auto field = desc->field(index.row());
+  R_EXPECT(field != nullptr, QVariant()) << "Reading non-existant field index" << index.row()
+                                         << "for message" << message << "with type"
+                                         << QString::fromStdString(message->GetTypeName());
 
   if (field->is_repeated()) return QVariant("REPEATED"); // TODO: need another switch
 
@@ -128,13 +131,43 @@ bool ProtoModel::setData(const QModelIndex &index, const QVariant &value, int ro
   R_EXPECT(index.isValid(), false) << "Supplied index was invalid:" << index;
   if (role == Qt::UserRole) return true; // << was an editable test for flags
   if (role != Qt::EditRole) return false;
+  if (IsMessage(index)) { // << TODO: SetAllocatedMessage or something
+    //TODO: why the fuck am i handling tree node bullshit here?
+    auto message = GetMessage(index);
+    if (message->GetTypeName() == "buffers.TreeNode") {
+      auto treeNode = static_cast<TreeNode*>(message);
+      treeNode->set_name(value.toString().toStdString());
+      return true;
+    }
+    return false;
+  }
+  auto message = GetMessage(index);
+  auto desc = message->GetDescriptor();
+  auto refl = message->GetReflection();
+  auto field = desc->field(index.row());
+  R_EXPECT(field != nullptr, false) << "Writing non-existant field index" << index.row()
+                                    << "for message" << message << "with type"
+                                    << QString::fromStdString(message->GetTypeName());
 
-  buffers::TreeNode *item = static_cast<buffers::TreeNode *>(GetMessage(index));
-  const QString oldName = QString::fromStdString(item->name());
-  const QString newName = value.toString();
-  if (oldName == newName) return true;
-  item->set_name(newName.toStdString());
-  emit ResourceRenamed(item->type_case(), oldName, value.toString());
+  switch (field->cpp_type()) {
+    case CppType::CPPTYPE_MESSAGE: break; //TODO: SetAllocatedMessage or something?
+    case CppType::CPPTYPE_INT32: refl->SetInt32(message, field, value.toInt()); break;
+    case CppType::CPPTYPE_INT64: refl->SetInt64(message, field, value.toLongLong()); break;
+    case CppType::CPPTYPE_UINT32: refl->SetUInt32(message, field, value.toUInt()); break;
+    case CppType::CPPTYPE_UINT64: refl->SetUInt64(message, field, value.toULongLong()); break;
+    case CppType::CPPTYPE_DOUBLE: refl->SetDouble(message, field, value.toDouble()); break;
+    case CppType::CPPTYPE_FLOAT: refl->SetFloat(message, field, value.toFloat()); break;
+    case CppType::CPPTYPE_BOOL: refl->SetBool(message, field, value.toBool()); break;
+    case CppType::CPPTYPE_ENUM:
+      refl->SetEnum(message, field, field->enum_type()->FindValueByNumber(value.toInt()));
+      break;
+    case CppType::CPPTYPE_STRING:
+      refl->SetString(message, field, value.toString().toStdString());
+      break;
+  }
+
+  //TODO: FIXME
+  //emit ResourceRenamed(item->type_case(), oldName, value.toString());
   emit dataChanged(index, index);
   return true;
 }
