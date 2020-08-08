@@ -27,10 +27,6 @@ EditorMapper::EditorMapper(EditorModel *model, BaseEditor *parent) : QObject(par
   connect(_model, &EditorModel::dataChanged, this, &EditorMapper::modelChanged);
   connect(this, &EditorMapper::modelChanged, this, [this](
           const QModelIndex& topLeft, const QModelIndex& bottomRight){
-    // block our signal for the object being changed
-    // while we reload its value from the model
-    QSignalBlocker(this);
-
     this->load(topLeft, false);
   });
   connect(this, &EditorMapper::objectChanged, this,
@@ -140,6 +136,11 @@ void EditorMapper::popRoot() {
 
 void EditorMapper::load(const MapGroup& group, bool recursive) {
   pushResource(); // << back to the resource automatically
+  // block our signal for the object being changed
+  // while we reload its value from the model
+  // NOTE: for some reason QSignalBlocker doesn't work recursively
+  // that's why it's not used here
+  const bool wasBlocked = blockSignals(true);
 
   auto it = _mappings.find(group);
   if (it != _mappings.end()) {
@@ -158,6 +159,8 @@ void EditorMapper::load(const MapGroup& group, bool recursive) {
       load(_model->index(i,0,group), recursive);
     }
   }
+
+  blockSignals(wasBlocked);
 }
 
 void EditorMapper::objectPropertyChanged() {

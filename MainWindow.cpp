@@ -287,7 +287,10 @@ void MainWindow::openEditor(const QModelIndex& protoIndex) {
     subWindow->resize(subWindow->frameSize().expandedTo(editor->size()));
     editor->setParent(subWindow);
 
-    subWindow->connect(subWindow, &QObject::destroyed, [=]() { _editors.remove(protoIndex); });
+    QPersistentModelIndex persistent = protoIndex;
+    subWindow->connect(subWindow, &QObject::destroyed, [=]() {
+      _editors.remove(persistent);
+    });
 
     subWindow->setWindowIcon(subWindow->widget()->windowIcon());
   } else {
