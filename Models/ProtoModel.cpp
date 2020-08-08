@@ -98,7 +98,7 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
                                          << "for message" << message << "with type"
                                          << QString::fromStdString(message->GetTypeName());
 
-  if (field->is_repeated()) return QVariant("REPEATED"); // TODO: need another switch
+  if (field->is_repeated()) return QString::fromStdString(field->name());
 
   switch (field->cpp_type()) {
     case CppType::CPPTYPE_MESSAGE:
