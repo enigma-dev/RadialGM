@@ -26,10 +26,8 @@ void EditorModel::revert() {
   auto msg = static_cast<Message*>(ptr);
   // we edit the super source model directly so
   // we only need to make a fresh backup
-  if (_backup)
-    _backup->CopyFrom(*msg);
-  else
-    _backup.reset(msg->New());
+  if (!_backup) _backup.reset(msg->New());
+  _backup->CopyFrom(*msg);
 }
 
 // push our backup to the super model
