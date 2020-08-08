@@ -413,7 +413,32 @@ QMimeData *ProtoModel::mimeData(const QModelIndexList &indexes) const {
 
 bool ProtoModel::canDropMimeData(const QMimeData *data, Qt::DropAction action, int row,
                                  int column, const QModelIndex &parent) const {
-  return false; // << TODO: FINISH/Check if field or message supports MIME
+  if (action != Qt::MoveAction && action != Qt::CopyAction) return false;
+  const bool supportsProto = data->hasFormat("RadialGM/ProtoModel");
+  qDebug() << row << parent;
+
+  if (IsMessage(parent)) {
+    // messages do not support dropping "between" their fields
+    // you can only drop on to a message index or on to and
+    // into one of their fields
+    if (row != -1) return false;
+    if (!supportsProto) return false;
+    // now peek at the proto index being dropped and check compatibility
+
+    return true;
+  }
+  // this is a field so look up its parent message
+  auto message = GetMessage(parent);
+  auto desc = message->GetDescriptor();
+  auto field = desc->field(parent.row());
+  // you can only drop on to a non-repeated field not
+  // into one, this only occurs with non-repeated
+  // message fields which have a single child, the message
+  if (row != -1 && !field->is_repeated()) return false;
+
+  //TODO: finish
+
+  return true;
 }
 
 bool ProtoModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, int row, int /*column*/,
