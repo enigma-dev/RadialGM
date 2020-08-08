@@ -16,7 +16,8 @@ BaseEditor::BaseEditor(EditorModel* model, QWidget* parent)
   // through its editor model because that is the only
   // case in which it is able to restore from a backup
   auto markDirty = [this]() {
-    if (QObject::sender() != _model) return; // << ignore all else/super model
+    //TODO: FIXME
+    //if (QObject::sender() != _model) return; // << ignore all else/super model
     this->setWindowModified(true);
   };
   // handle fields being changed
@@ -51,5 +52,6 @@ void BaseEditor::closeEvent(QCloseEvent* event) {
 void BaseEditor::OnSave() {
   // our editor model already mutated the super model so we
   // don't actually have to do anything and can just close
+  setWindowModified(false);
   this->parentWidget()->close();
 }

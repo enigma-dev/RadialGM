@@ -161,6 +161,8 @@ class MainWindow : public QMainWindow {
   void readSettings();
   void writeSettings();
   void setTabbedMode(bool enabled);
+  bool showSaveConfirmation();
+  void closeSubWindows();
   static QFileInfo getEnigmaRoot();
 };
 

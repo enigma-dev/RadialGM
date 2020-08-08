@@ -107,7 +107,6 @@ QFileInfo MainWindow::getEnigmaRoot() {
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _gameModified(false),
   _ui(new Ui::MainWindow), _event_data(nullptr), egm(nullptr) {
   auto eventsPath = (EnigmaRoot.absolutePath() + "/events.ey");
-  qDebug() << eventsPath;
   QFile eventsFile(eventsPath);
   if (eventsFile.exists()) {
     _event_data = std::make_unique<EventData>(ParseEventFile(eventsPath.toStdString()));
@@ -225,21 +224,11 @@ void MainWindow::writeSettings() {
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
-  if (isWindowModified()) {
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, tr("Project Changed"),
-                                  tr("Do you want to save the changes?"),
-                                  QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-
-    if (reply == QMessageBox::Cancel) {
-      event->ignore();
-      return;
-    } else if (reply == QMessageBox::Yes) {
-      //TODO: show EGM save dialog saveProject here
-    }
+  if (!showSaveConfirmation()) {
+    event->ignore();
+    return;
   }
 
-  _ui->mdiArea->closeAllSubWindows();
   this->writeSettings();
   event->accept();
 }
@@ -334,6 +323,8 @@ void MainWindow::updateWindowMenu() {
 }
 
 void MainWindow::openFile(QString fName) {
+  if (!showSaveConfirmation()) return;
+
   QFileInfo fileInfo(fName);
   const QString suffix = fileInfo.suffix();
 
@@ -360,6 +351,8 @@ void MainWindow::openFile(QString fName) {
 }
 
 void MainWindow::openNewProject() {
+  if (!showSaveConfirmation()) return;
+
   setWindowTitle(tr("<new game>[*] - ENIGMA"));
   auto newProject = std::unique_ptr<buffers::Project>(new buffers::Project());
   auto *root = newProject->mutable_game()->mutable_root();
@@ -375,7 +368,6 @@ void MainWindow::openNewProject() {
 }
 
 void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
-  this->_ui->mdiArea->closeAllSubWindows();
   ArtManager::clearCache();
 
   _project = std::move(openedProject);
@@ -439,6 +431,34 @@ void MainWindow::setTabbedMode(bool enabled) {
   }
 }
 
+bool MainWindow::showSaveConfirmation() {
+  if (isWindowModified()) {
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, tr("Project Changed"),
+                                  tr("Do you want to save the changes?"),
+                                  QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+
+    if (reply == QMessageBox::Cancel) {
+      return false;
+    } else if (reply == QMessageBox::Yes) {
+      //TODO: show EGM save dialog saveProject here
+    }
+  }
+
+  this->closeSubWindows();
+  return true;
+}
+
+void MainWindow::closeSubWindows() {
+  // closes subwindows ignoring their window modified
+  auto mdiArea = _ui->mdiArea;
+  auto subwindows = mdiArea->subWindowList();
+  foreach(auto subwindow, subwindows) {
+    subwindow->widget()->setWindowModified(false);
+  }
+  _ui->mdiArea->closeAllSubWindows();
+}
+
 void MainWindow::on_actionCascade_triggered() {
   this->setTabbedMode(false);
   _ui->mdiArea->cascadeSubWindows();
@@ -449,7 +469,7 @@ void MainWindow::on_actionTile_triggered() {
   _ui->mdiArea->tileSubWindows();
 }
 
-void MainWindow::on_actionCloseAll_triggered() { _ui->mdiArea->closeAllSubWindows(); }
+void MainWindow::on_actionCloseAll_triggered() { this->closeSubWindows(); }
 
 void MainWindow::on_actionCloseOthers_triggered() {
   foreach (QMdiSubWindow *subWindow, _ui->mdiArea->subWindowList()) {

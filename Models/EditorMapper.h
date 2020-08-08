@@ -40,6 +40,7 @@ class EditorMapper : public QObject {
   const Descriptor* _rootDesc; // << root descriptor
   QModelIndex _index; // << current mapping index
   QHash<QPersistentModelIndex,QSet<ObjectProperty>> _mappings; // << existing mappings
+  QHash<ObjectProperty,QSet<QPersistentModelIndex>> _mappings2; // << existing mappings
 
  public:
   explicit EditorMapper(EditorModel* model, BaseEditor* parent);
@@ -111,6 +112,13 @@ class EditorMapper : public QObject {
    */
   void popRoot();
   void load(const MapGroup& group = QModelIndex(), bool recursive = true);
+
+ signals:
+  // these two signals allow us to write to the model or object
+  // without the updates becoming cyclic so we can block the
+  // update from propagating by blocking our own signals
+  modelChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
+  objectChanged(ObjectProperty property, const QVariant& value);
 
  private slots:
   void objectPropertyChanged();

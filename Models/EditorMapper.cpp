@@ -24,9 +24,25 @@ EditorMapper::EditorMapper(EditorModel *model, BaseEditor *parent) : QObject(par
   _rootDesc = msg->GetDescriptor();
 
   //TODO: Handle row remove and stuff
-  connect(_model, &EditorModel::dataChanged, this, [this](
+  connect(_model, &EditorModel::dataChanged, this, &EditorMapper::modelChanged);
+  connect(this, &EditorMapper::modelChanged, this, [this](
           const QModelIndex& topLeft, const QModelIndex& bottomRight){
+    // block our signal for the object being changed
+    // while we reload its value from the model
+    QSignalBlocker(this);
+
     this->load(topLeft, false);
+  });
+  connect(this, &EditorMapper::objectChanged, this,
+          [this](ObjectProperty property, const QVariant& value) {
+    // block our signal for the model being changed
+    // while we reload its value from the object
+    QSignalBlocker(this);
+
+    auto indexes = this->_mappings2[property];
+    foreach (auto index, indexes) {
+      this->_model->setData(index, value, Qt::EditRole);
+    }
   });
 }
 
@@ -49,16 +65,19 @@ void EditorMapper::mapField(int fieldNumber, QObject *object, const QByteArray& 
                                      << "is not valid on object" << object;
 
   auto notifySignal = metaProperty.notifySignalIndex();
-  auto mapping = _mappings[index];
+  auto objectProperty = ObjectProperty(object,metaProperty.propertyIndex());
+  auto &mapping = _mappings[index];
+  auto &mapping2 = _mappings2[objectProperty];
 
-  R_ASSESS(!mapping.contains(ObjectProperty(object,metaProperty.propertyIndex())))
+  R_ASSESS(!mapping.contains(objectProperty))
     << "Object" << object
     << "property" << metaProperty.name()
     << "mapped again to the same model index!";
 
   QMetaObject::connect(object, notifySignal, this,
     this->metaObject()->indexOfSlot("objectPropertyChanged()"));
-  mapping.insert(ObjectProperty(object,metaProperty.propertyIndex()));
+  mapping.insert(objectProperty);
+  mapping2.insert(index);
 }
 
 void EditorMapper::mapName(QObject *object, const QByteArray& property) {
@@ -75,7 +94,7 @@ void EditorMapper::clear() {
       auto metaProperty = metaObject->property(propIndex);
       auto notifySignal = metaProperty.notifySignalIndex();
       QMetaObject::disconnect(object, notifySignal, this,
-                              this->metaObject()->indexOfSlot("objectPropertyChanged()"));
+                              this->metaObject()->indexOfSignal("objectChanged()"));
     }
   }
   _mappings.clear();
@@ -122,10 +141,8 @@ void EditorMapper::popRoot() {
 void EditorMapper::load(const MapGroup& group, bool recursive) {
   pushResource(); // << back to the resource automatically
 
-  qDebug() << "byte" << group;
   auto it = _mappings.find(group);
   if (it != _mappings.end()) {
-    qDebug() << "hello";
     auto& index = it.key();
     auto& props = it.value();
     for (auto& prop : props) {
@@ -137,13 +154,16 @@ void EditorMapper::load(const MapGroup& group, bool recursive) {
     }
   }
   if (recursive) {
-
+    for (int i = 0; i < _model->rowCount(group); ++i) {
+      load(_model->index(i,0,group), recursive);
+    }
   }
 }
 
 void EditorMapper::objectPropertyChanged() {
   auto object = QObject::sender();
-  auto signal = QObject::senderSignalIndex();
-
-  //_model->setData(index, metaProperty.read(object), Qt::EditRole);
+  auto prop = object->metaObject()->userProperty();
+  auto index = prop.propertyIndex();
+  auto value = prop.read(object);
+  emit objectChanged(ObjectProperty(object,index),value);
 }
