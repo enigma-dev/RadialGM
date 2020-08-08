@@ -121,13 +121,6 @@ class ProtoModel : public QAbstractItemModel {
   virtual bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
 
  signals:
-  // QAbstractItemModel has a datachanged signal but it doesn't store the old values
-  // We use old values in some places to revert invalid changes.
-  // All model changes are then hooked into a resourceMap::DataChanged signal that can be accessed anywhere
-  // for events where the models arent directly nested and need updates.
-  // (ie If you changed a sprite you would want to redraw the object in the room)
-  void DataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVariant &oldValue = QVariant(0),
-                   const QVector<int> &roles = QVector<int>());
   void ResourceRenamed(TypeCase type, const QString &oldName, const QString &newName);
 
  protected:
