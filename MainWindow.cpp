@@ -556,7 +556,7 @@ void MainWindow::CreateResource(TypeCase typeCase) {
     // allocate and set the child's resource field
     auto desc = child->GetDescriptor();
     auto refl = child->GetReflection();
-    auto fieldNum = ResTypeFields[typeCase];
+    auto fieldNum = typeCase;
     auto field = desc->FindFieldByNumber(fieldNum);
     refl->MutableMessage(child, field);
   }
