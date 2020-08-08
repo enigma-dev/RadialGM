@@ -17,8 +17,6 @@ using buffers::resources::Background;
 BackgroundEditor::BackgroundEditor(EditorModel* model, QWidget* parent)
     : BaseEditor(model, parent), _ui(new Ui::BackgroundEditor) {
   _ui->setupUi(this);
-  //TODO: WTF
-  _ui->imagePreviewBackground->SetAssetView(_ui->backgroundView);
 
   connect(_ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
 
@@ -34,6 +32,7 @@ BackgroundEditor::BackgroundEditor(EditorModel* model, QWidget* parent)
   _mapper->mapField(Background::kVerticalOffsetFieldNumber, _ui->verticalOffsetSpinBox);
   _mapper->mapField(Background::kHorizontalSpacingFieldNumber, _ui->horizontalSpacingSpinBox);
   _mapper->mapField(Background::kVerticalSpacingFieldNumber, _ui->verticalSpacingSpinBox);
+  _mapper->mapField(Background::kImageFieldNumber, _ui->backgroundView);
 
   _mapper->load();
 }

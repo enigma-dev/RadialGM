@@ -47,6 +47,9 @@ SpriteEditor::SpriteEditor(EditorModel* model, QWidget* parent)
   _mapper->mapField(Sprite::kBboxRightFieldNumber, _ui->rightSpinBox);
   _mapper->mapField(Sprite::kBboxTopFieldNumber, _ui->topSpinBox);
   _mapper->mapField(Sprite::kBboxBottomFieldNumber, _ui->bottomSpinBox);
+  //TODO: Finish the master detail mapper API
+  //_mapper->pushField(Sprite::kSubimagesFieldNumber);
+  //_mapper->mapField(0,_ui->subimagePreview);
 
   _mapper->load();
 }
@@ -73,6 +76,7 @@ void SpriteEditor::RemoveSelectedIndexes() {
 }
 
 void SpriteEditor::SelectionChanged(const QItemSelection& selected, const QItemSelection& /*deselected*/) {
+  //TODO: This be part of master detail EditorMapper API
   if (!selected.empty()) {
     _ui->subimagePreview->SetSubimage(selected.indexes().back().row());
   }

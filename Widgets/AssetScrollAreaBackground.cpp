@@ -198,9 +198,9 @@ void AssetScrollAreaBackground::paintEvent(QPaintEvent* /* event */) {
         PaintGrid(painter, g.horSpacing * _currentZoom, g.vertSpacing * _currentZoom, _totalDrawOffset.x(),
                   _totalDrawOffset.y());
     }
-  }
 
-  _assetView->PaintTop(painter);
+    _assetView->PaintTop(painter);
+  }
 }
 
 bool AssetScrollAreaBackground::eventFilter(QObject* obj, QEvent* event) {

@@ -8,6 +8,9 @@
 
 class SpriteView : public AssetView {
   Q_OBJECT
+
+  Q_PROPERTY(QPixmap Image MEMBER _pixmap NOTIFY ImageChanged USER true)
+
  public:
   SpriteView(AssetScrollAreaBackground *parent);
   QSize sizeHint() const override;
@@ -16,6 +19,9 @@ class SpriteView : public AssetView {
   QRectF AutomaticBBoxRect();
   QPixmap &GetPixmap();
   QRectF BBoxRect();
+
+ signals:
+  void ImageChanged(const QPixmap &newImage);
 
  public slots:
   void SetSubimage(int index);

@@ -28,6 +28,15 @@ class MainWindow;
 class MainWindow : public QMainWindow {
   Q_OBJECT
 
+  // this property tracks when the game is edited somewhere
+  // it is read only since only the main window sets or clears it
+  // when the super model changes and when the game is saved
+  // it also marks the main window as modified to inform the user
+  // e.g, with an asterisk on Windows or changing the close button on Mac
+  // a signal is provided but you should not connect to it willy nilly
+  // as it will tell you about all updates to the game even superfluous ones
+  Q_PROPERTY(bool GameModified READ IsGameModified WRITE SetGameModified NOTIFY GameWasModified)
+
   bool _gameModified; // << don't touch; see property below
 
  public:
@@ -36,14 +45,6 @@ class MainWindow : public QMainWindow {
   static QScopedPointer<DiagnosticModel> diagModel;
   static QList<buffers::SystemType> systemCache;
 
-  // this property tracks when the game is edited somewhere
-  // it is read only since only the main window sets or clears it
-  // when the super model changes and when the game is saved
-  // it also marks the main window as modified to inform the user
-  // e.g, with an asterisk on Windows or changing the close button on Mac
-  // a signal is provided but you should not connect to it willy nilly
-  // as it will tell you about all updates to the game even superfluous ones
-  Q_PROPERTY(bool gameModified READ IsGameModified WRITE SetGameModified NOTIFY GameWasModified)
   bool IsGameModified() {
     return _gameModified;
   }
@@ -52,7 +53,7 @@ class MainWindow : public QMainWindow {
   ~MainWindow();
   void openProject(std::unique_ptr<buffers::Project> openedProject);
   buffers::Game *Game() const { return this->_project->mutable_game(); }
-  
+
   static QList<QString> EnigmaSearchPaths;
   static QFileInfo EnigmaRoot;
 
@@ -153,7 +154,7 @@ class MainWindow : public QMainWindow {
 
   std::unique_ptr<buffers::Project> _project;
   QPointer<RecentFiles> _recentFiles;
-  
+
   std::unique_ptr<EventData> _event_data;
   egm::EGM egm;
 
