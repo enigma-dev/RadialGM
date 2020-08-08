@@ -1,8 +1,6 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
-#include "Models/DiagnosticModel.h"
-
 #include "Dialogs/PreferencesDialog.h"
 #include "Dialogs/PreferencesKeys.h"
 
@@ -36,7 +34,6 @@
 
 #include <functional>
 #include <unordered_map>
-#include <QFile>
 #include <sstream>
 
 #undef GetMessage
