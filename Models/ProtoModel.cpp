@@ -58,7 +58,6 @@ void ProtoModel::setupMimes(const Descriptor* desc, QSet<QString>& uniqueMimes,
 }
 
 QVariant ProtoModel::data(const QModelIndex &index, int role) const {
-  R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
   if (role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::DecorationRole &&
       role != Qt::UserRole+1) return QVariant();
   auto message = GetMessage(index);
@@ -128,7 +127,6 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
 }
 
 bool ProtoModel::setData(const QModelIndex &index, const QVariant &value, int role) {
-  R_EXPECT(index.isValid(), false) << "Supplied index was invalid:" << index;
   if (role == Qt::UserRole) return true; // << was an editable test for flags
   if (role != Qt::EditRole) return false;
   if (IsMessage(index)) { // << TODO: SetAllocatedMessage or something
