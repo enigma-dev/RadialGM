@@ -1,6 +1,6 @@
 #include "CodeWidget.h"
 #include "Components/ArtManager.h"
-#include "Models/TreeModel.h"
+#include "Models/ProtoModel.h"
 
 #include <Qsci/qsciapis.h>
 #include <Qsci/qscilexercpp.h>
@@ -67,7 +67,7 @@ CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), _font(QFont("Courier"
   codeEdit->registerImage(KeywordType::GLOBAL, QPixmap(":/actions/right-arrow-green.png"));
   codeEdit->registerImage(KeywordType::FUNCTION, QPixmap(":/actions/function.png"));
 
-  for (auto type : TreeModel::iconMap) {
+  for (auto type : ProtoModel::iconMap) {
     codeEdit->registerImage(KeywordType::MAX + type.first, type.second.pixmap(18, 18));
   }
 

@@ -40,6 +40,8 @@ class ProtoModel : public QAbstractItemModel {
                            const QModelIndex& parent) const;
 
  public:
+  static IconMap iconMap;
+
   explicit ProtoModel(QObject *parent, Message *protobuf);
 
   inline Message* GetMessage(const QModelIndex& index) const {
@@ -124,7 +126,6 @@ class ProtoModel : public QAbstractItemModel {
   void ResourceRenamed(TypeCase type, const QString &oldName, const QString &newName);
 
  protected:
-  static IconMap iconMap;
   inline QString treeNodeMime() const { return QStringLiteral("RadialGM/buffers.TreeNode"); }
 
   Message *_protobuf;
