@@ -2,12 +2,16 @@
 
 #include "Components/ArtManager.h"
 
+#include "options.pb.h"
+
 #include <google/protobuf/reflection.h>
 
 #include <QDataStream>
 #include <QCoreApplication>
 
 #include <QDebug>
+
+using namespace buffers;
 
 using CppType = FieldDescriptor::CppType;
 
@@ -90,7 +94,8 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
     return QVariant();
   }
 
-  if (role != Qt::DisplayRole && role != Qt::EditRole) return QVariant();
+  if (role != Qt::DisplayRole && role != Qt::EditRole &&
+      role != Qt::DecorationRole) return QVariant();
   auto desc = message->GetDescriptor();
   auto refl = message->GetReflection();
   auto field = desc->field(index.row());
@@ -99,6 +104,18 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
                                          << QString::fromStdString(message->GetTypeName());
 
   if (field->is_repeated()) return QString::fromStdString(field->name());
+
+  if (role == Qt::DecorationRole) {
+    auto options = field->options();
+    if (options.HasExtension(buffers::file_kind)) {
+      auto filekind = options.GetExtension(buffers::file_kind);
+      if (filekind == buffers::FileKind::IMAGE) {
+        auto filepath = refl->GetString(*message, field);
+        return QPixmap(QString::fromStdString(filepath));
+      }
+    }
+    return QVariant();
+  }
 
   switch (field->cpp_type()) {
     case CppType::CPPTYPE_MESSAGE:
