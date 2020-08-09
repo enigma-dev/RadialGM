@@ -25,7 +25,7 @@ class TreeModel : public QSortFilterProxyModel {
   virtual QModelIndex index(int row, int column,
                             const QModelIndex &parent = QModelIndex()) const override;
   virtual QModelIndex parent(const QModelIndex &index) const override;
-  virtual QModelIndex mapToSource(const QModelIndex &sourceIndex) const override;
+  virtual QModelIndex mapToSource(const QModelIndex &proxyIndex) const override;
   virtual QModelIndex mapFromSource(const QModelIndex &sourceIndex) const override;
   virtual bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const override;
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
