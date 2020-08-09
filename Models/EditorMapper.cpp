@@ -26,7 +26,7 @@ EditorMapper::EditorMapper(EditorModel *model, BaseEditor *parent) : QObject(par
   //TODO: Handle row remove and stuff
   connect(_model, &EditorModel::dataChanged, this, &EditorMapper::modelChanged);
   connect(this, &EditorMapper::modelChanged, this, [this](
-          const QModelIndex& topLeft, const QModelIndex& bottomRight){
+          const QModelIndex& topLeft, const QModelIndex&){
     this->load(topLeft, false);
   });
   connect(this, &EditorMapper::objectChanged, this,

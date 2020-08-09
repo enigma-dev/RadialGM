@@ -208,7 +208,7 @@ int ProtoModel::rowCount(const QModelIndex &parent) const {
   return 0;
 }
 
-int ProtoModel::columnCount(const QModelIndex &parent) const {
+int ProtoModel::columnCount(const QModelIndex&) const {
   return 1;
 }
 
@@ -427,7 +427,7 @@ QMimeData *ProtoModel::mimeData(const QModelIndexList &indexes) const {
 }
 
 bool ProtoModel::canDropMimeData(const QMimeData *data, Qt::DropAction action, int row,
-                                 int column, const QModelIndex &parent) const {
+                                 int, const QModelIndex &parent) const {
   if (action != Qt::MoveAction && action != Qt::CopyAction) return false;
   const bool supportsProto = data->hasFormat("RadialGM/ProtoModel");
   qDebug() << row << parent;
