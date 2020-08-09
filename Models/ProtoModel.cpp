@@ -103,7 +103,8 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
                                          << "for message" << message << "with type"
                                          << QString::fromStdString(message->GetTypeName());
 
-  if (field->is_repeated()) return QString::fromStdString(field->name());
+  if (field->is_repeated() && role != Qt::DecorationRole)
+    return QString::fromStdString(field->name());
 
   if (role == Qt::DecorationRole) {
     auto options = field->options();
