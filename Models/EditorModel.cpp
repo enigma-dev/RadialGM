@@ -1,14 +1,14 @@
 #include "EditorModel.h"
 
 EditorModel::EditorModel(const QModelIndex &protoRoot, QObject *parent) :
-  QIdentityProxyModel(parent), _backup(nullptr), _protoRoot(protoRoot) {}
+  QSortFilterProxyModel(parent), _backup(nullptr), _protoRoot(protoRoot) {}
 
-QModelIndex EditorModel::mapToSource(const QModelIndex &sourceIndex) const {
+QModelIndex EditorModel::mapToSource(const QModelIndex &proxyIndex) const {
   // our root is a tree node
-  if (!sourceIndex.isValid())
+  if (!proxyIndex.isValid())
     return _protoRoot;
 
-  return QIdentityProxyModel::mapToSource(sourceIndex);
+  return QSortFilterProxyModel::mapToSource(proxyIndex);
 }
 
 QModelIndex EditorModel::mapFromSource(const QModelIndex &sourceIndex) const {
@@ -16,7 +16,7 @@ QModelIndex EditorModel::mapFromSource(const QModelIndex &sourceIndex) const {
   if (sourceIndex == _protoRoot)
     return QModelIndex();
 
-  return QIdentityProxyModel::mapFromSource(sourceIndex);
+  return QSortFilterProxyModel::mapFromSource(sourceIndex);
 }
 
 // revert our backup to the super model

@@ -1,7 +1,7 @@
 #ifndef EDITORMODEL_H
 #define EDITORMODEL_H
 
-#include <QIdentityProxyModel>
+#include <QSortFilterProxyModel>
 #include <QScopedPointer>
 
 #include <google/protobuf/message.h>
@@ -16,7 +16,7 @@ using namespace google::protobuf;
  * preclude the editor from obtaining a super model index elsewhere and
  * editing other resources.
  */
-class EditorModel : public QIdentityProxyModel
+class EditorModel : public QSortFilterProxyModel
 {
   QScopedPointer<Message> _backup;
 
@@ -24,9 +24,10 @@ public:
   explicit EditorModel(const QModelIndex &protoRoot, QObject *parent);
 
   // these two overrides are how we move the root of this model
-  // without causing the identity proxy model to map the rest
+  // without causing the filter proxy model to map the rest
   // of the super model which it will never be editing anyway
-  virtual QModelIndex mapToSource(const QModelIndex &sourceIndex) const override;
+  // then we only get data changed for indexes at or below our source root
+  virtual QModelIndex mapToSource(const QModelIndex &proxyIndex) const override;
   virtual QModelIndex mapFromSource(const QModelIndex &sourceIndex) const override;
 
   const QPersistentModelIndex _protoRoot;
