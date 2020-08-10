@@ -117,8 +117,8 @@ class EditorMapper : public QObject {
   // these two signals allow us to write to the model or object
   // without the updates becoming cyclic so we can block the
   // update from propagating by blocking our own signals
-  modelChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
-  objectChanged(ObjectProperty property, const QVariant& value);
+  void modelChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
+  void objectChanged(ObjectProperty property, const QVariant& value);
 
  private slots:
   void objectPropertyChanged();
