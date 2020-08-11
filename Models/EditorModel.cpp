@@ -22,8 +22,8 @@ QModelIndex EditorModel::mapFromSource(const QModelIndex &sourceIndex) const {
 // revert our backup to the super model
 void EditorModel::revert() {
   // ask the source for a message pointer
-  auto ptr = data(QModelIndex(),Qt::UserRole+1).value<void*>();
-  auto msg = static_cast<Message*>(ptr);
+  auto ptr = data(QModelIndex(),Qt::UserRole+1).value<quintptr>();
+  auto msg = reinterpret_cast<Message*>(ptr);
   // we edit the super source model directly so
   // we only need to make a fresh backup
   if (!_backup) _backup.reset(msg->New());
@@ -35,8 +35,8 @@ bool EditorModel::submit() {
   if (!_backup) return false;
 
   // ask the source for a message pointer
-  auto ptr = data(QModelIndex(),Qt::UserRole+1).value<void*>();
-  auto msg = static_cast<Message*>(ptr);
+  auto ptr = data(QModelIndex(),Qt::UserRole+1).value<quintptr>();
+  auto msg = reinterpret_cast<Message*>(ptr);
   // restore the super model to what the user had before editing
   beginResetModel();
   msg->CopyFrom(*_backup);

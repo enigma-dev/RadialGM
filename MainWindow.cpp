@@ -260,8 +260,8 @@ void MainWindow::openEditor(const QModelIndex& protoIndex) {
   auto swIt = _editors.find(protoIndex);
   QMdiSubWindow *subWindow;
   if (swIt == _editors.end() || !*swIt) {
-    auto ptr = protoModel->data(protoIndex,Qt::UserRole+1).value<void*>();
-    auto item = static_cast<TreeNode*>(ptr);
+    auto ptr = protoModel->data(protoIndex,Qt::UserRole+1).value<quintptr>();
+    auto item = reinterpret_cast<TreeNode*>(ptr);
     auto factoryFunction = factoryMap.find(item->type_case());
     if (factoryFunction == factoryMap.end()) return;  // no registered editor
 
@@ -544,6 +544,8 @@ void MainWindow::on_actionShowDiagnosticInspector_triggered() {
   inspectorTable->setModel(filterModel);
   inspectorTable->setDragEnabled(true);
   inspectorTable->setAcceptDrops(true);
+  inspectorTable->setDefaultDropAction(Qt::MoveAction);
+  inspectorTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
   //inspectorTable->header()->setCascadingSectionResizes(true);
   inspectorTable->header()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
   inspectorTable->header()->setSectionResizeMode(1,QHeaderView::Stretch);
@@ -580,8 +582,8 @@ void MainWindow::CreateResource(TypeCase typeCase) {
   // insert us into the proto model through tree proxy
   auto index = treeModel->addNode(_ui->treeView->currentIndex());
   return;
-  auto ptr = treeModel->data(index,Qt::UserRole+1).value<void*>();
-  auto child = static_cast<TreeNode*>(ptr);
+  auto ptr = treeModel->data(index,Qt::UserRole+1).value<quintptr>();
+  auto child = reinterpret_cast<TreeNode*>(ptr);
 
   bool is_folder = (typeCase == TypeCase::kFolder);
   if (is_folder) {

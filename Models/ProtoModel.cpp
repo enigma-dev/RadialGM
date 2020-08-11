@@ -9,8 +9,6 @@
 #include <QDataStream>
 #include <QCoreApplication>
 
-#include <QDebug>
-
 using namespace buffers;
 
 using CppType = FieldDescriptor::CppType;
@@ -61,6 +59,20 @@ void ProtoModel::setupMimes(const Descriptor* desc, QSet<QString>& uniqueMimes,
   }
 }
 
+QMap<int, QVariant> ProtoModel::itemData(const QModelIndex &index) const {
+  QMap<int, QVariant> roles;
+  if (IsMessage(index)) {
+    // grab a pointer for messages
+    QVariant variantData = data(index, Qt::UserRole+1);
+    if (variantData.isValid())
+        roles.insert(Qt::UserRole+1, variantData);
+  } else {
+    QAbstractItemModel::itemData(index);
+  }
+
+  return roles;
+}
+
 QVariant ProtoModel::data(const QModelIndex &index, int role) const {
   if (role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::DecorationRole &&
       role != Qt::UserRole+1) return QVariant();
@@ -68,7 +80,7 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
 
   if (IsMessage(index)) {
     // mutable pointer to the message requested for editing
-    if (role == Qt::UserRole+1) return QVariant::fromValue<void*>(message);
+    if (role == Qt::UserRole+1) return QVariant::fromValue((quintptr)message);
 
     // let's be nice and automagically handle tree nodes
     // for some simple convenience
@@ -146,16 +158,23 @@ QVariant ProtoModel::data(const QModelIndex &index, int role) const {
 
 bool ProtoModel::setData(const QModelIndex &index, const QVariant &value, int role) {
   if (role == Qt::UserRole) return true; // << was an editable test for flags
-  if (role != Qt::EditRole) return false;
-  if (IsMessage(index)) { // << TODO: SetAllocatedMessage or something
+  if (role != Qt::EditRole && role != Qt::UserRole+1) return false;
+  if (IsMessage(index)) {
     //TODO: why the fuck am i handling tree node bullshit here?
     auto message = GetMessage(index);
-    if (message->GetTypeName() == "buffers.TreeNode") {
+    if (role == Qt::EditRole && message->GetTypeName() == "buffers.TreeNode") {
       auto treeNode = static_cast<TreeNode*>(message);
       treeNode->set_name(value.toString().toStdString());
+      emit dataChanged(index, index);
       return true;
     }
-    return false;
+    //TODO: Add Qt::UserRole+2 for IPC serialization
+    //TODO: Add enum for all these user roles
+    if (role != Qt::UserRole+1) return false;
+    auto submessage = reinterpret_cast<Message*>(value.value<quintptr>());
+    message->CopyFrom(*submessage);
+    emit dataChanged(index, index);
+    return true;
   }
   auto message = GetMessage(index);
   auto desc = message->GetDescriptor();
@@ -166,7 +185,12 @@ bool ProtoModel::setData(const QModelIndex &index, const QVariant &value, int ro
                                     << QString::fromStdString(message->GetTypeName());
 
   switch (field->cpp_type()) {
-    case CppType::CPPTYPE_MESSAGE: break; //TODO: SetAllocatedMessage or something?
+    case CppType::CPPTYPE_MESSAGE: {
+      if (role != Qt::UserRole+1) return false;
+      auto submessage = reinterpret_cast<Message*>(value.value<quintptr>());
+      refl->SetAllocatedMessage(message, submessage, field);
+      break;
+    }
     case CppType::CPPTYPE_INT32: refl->SetInt32(message, field, value.toInt()); break;
     case CppType::CPPTYPE_INT64: refl->SetInt64(message, field, value.toLongLong()); break;
     case CppType::CPPTYPE_UINT32: refl->SetUInt32(message, field, value.toUInt()); break;
@@ -394,45 +418,7 @@ Qt::ItemFlags ProtoModel::flags(const QModelIndex &index) const {
 
 Qt::DropActions ProtoModel::supportedDropActions() const { return Qt::MoveAction | Qt::CopyAction; }
 
-QStringList ProtoModel::mimeTypes() const { return _mimes; }
-
-QMimeData *ProtoModel::mimeData(const QModelIndexList &indexes) const {
-  QMimeData *mimeData = new QMimeData();
-
-  QList<QModelIndex> nodes;
-  for (const QModelIndex &index : indexes) {
-    if (!index.isValid() || nodes.contains(index)) continue;
-    nodes << index;
-  }
-
-  // rows are moved starting with the lowest so we can create
-  // unique names in the order of insertion
-  std::sort(nodes.begin(), nodes.end(), std::less<QModelIndex>());
-
-  //TODO: Handle non-message mimes here like string & int
-  //ideally pass index to data() and check type of returned
-  //variant to get the correct mime type
-  QHash<QString,QList<QModelIndex>> indexesByMime;
-  for (const QModelIndex &index : nodes) {
-    Message *msg = static_cast<Message *>(index.internalPointer());
-    std::string typeName = msg->GetTypeName();
-    QString mime = "RadialGM/" + QString::fromStdString(typeName);
-    indexesByMime[mime].append(index);
-  }
-
-  for (auto it = indexesByMime.begin(); it != indexesByMime.end(); ++it) {
-    QByteArray data;
-    QDataStream stream(&data, QIODevice::WriteOnly);
-    stream << QCoreApplication::applicationPid();
-    stream << nodes.count();
-    for (const QModelIndex &index : it.value()) {
-      stream << reinterpret_cast<qlonglong>(index.internalPointer()) << index.row();
-    }
-    mimeData->setData(it.key(), data);
-  }
-
-  return mimeData;
-}
+QStringList ProtoModel::mimeTypes() const { return {"RadialGM/ProtoModel"}; }
 
 bool ProtoModel::canDropMimeData(const QMimeData *data, Qt::DropAction action, int row,
                                  int, const QModelIndex &parent) const {
@@ -463,52 +449,3 @@ bool ProtoModel::canDropMimeData(const QMimeData *data, Qt::DropAction action, i
 
   return true;
 }
-
-bool ProtoModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, int row, int /*column*/,
-                             const QModelIndex &parent) {
-  if (action != Qt::MoveAction && action != Qt::CopyAction) return false;
-  // TODO: Handle other mimes than TreeNode!
-  // ensure the data is in the format we expect
-  if (!mimeData->hasFormat(treeNodeMime())) return false;
-  QByteArray data = mimeData->data(treeNodeMime());
-  QDataStream stream(&data, QIODevice::ReadOnly);
-
-  qint64 senderPid;
-  stream >> senderPid;
-  // ensure the data is coming from the same process since mime is pointer based
-  if (senderPid != QCoreApplication::applicationPid()) return false;
-
-  int count;
-  stream >> count;
-  if (count <= 0) return false;
-  if (row == -1) row = rowCount(parent);
-  QHash<QModelIndex, unsigned> removedCount;
-
-  for (int i = 0; i < count; ++i) {
-    qlonglong ptr;
-    stream >> ptr;
-    int itemRow;
-    stream >> itemRow;
-    void *iptr = reinterpret_cast<void *>(ptr);
-
-    if (action == Qt::MoveAction) {
-      auto index = this->createIndex(itemRow, 0, iptr);
-      R_ASSESS_C(index.isValid()); // << no moving the root
-      auto oldParent = index.parent();
-
-      // offset the row we are removing by the number of
-      // rows already removed from the same parent
-      if (parent != oldParent || row > itemRow) {
-        itemRow -= removedCount[oldParent];
-      }
-
-      moveRow(oldParent, itemRow, parent, row);
-      ++row;
-    } else {
-      //TODO: need copyRows or something
-    }
-  }
-
-  return true;
-}
-

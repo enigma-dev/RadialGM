@@ -101,6 +101,7 @@ class ProtoModel : public QAbstractItemModel {
     return const_cast<ProtoModel*>(this)->setData(index,QVariant(),Qt::UserRole);
   }
   virtual QVariant data(const QModelIndex &index, int role) const override;
+  virtual QMap<int, QVariant> itemData(const QModelIndex &index) const override;
   //virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
   virtual QModelIndex index(int row, int column,
                             const QModelIndex &parent = QModelIndex()) const override;
@@ -109,11 +110,8 @@ class ProtoModel : public QAbstractItemModel {
   // this is all the generic drag and drop stuff
   virtual Qt::DropActions supportedDropActions() const override;
   virtual QStringList mimeTypes() const override;
-  virtual QMimeData *mimeData(const QModelIndexList &indexes) const override;
   virtual bool canDropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
                                const QModelIndex &parent) const override;
-  virtual bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
-                    const QModelIndex &parent) override;
 
   // part of the abstract item model API for rearranging the rows
   // used by the generic drag and drop to move stuff around

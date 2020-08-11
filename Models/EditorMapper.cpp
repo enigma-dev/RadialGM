@@ -18,8 +18,8 @@ using MapGroup = EditorMapper::MapGroup;
 EditorMapper::EditorMapper(EditorModel *model, BaseEditor *parent) : QObject(parent),
   _model(model), _index(QModelIndex()) {
   // ask the source for a message pointer
-  auto ptr = _model->data(QModelIndex(),Qt::UserRole+1).value<void*>();
-  auto msg = static_cast<Message*>(ptr);
+  auto ptr = _model->data(QModelIndex(),Qt::UserRole+1).value<quintptr>();
+  auto msg = reinterpret_cast<Message*>(ptr);
   // cache the descriptor only
   _rootDesc = msg->GetDescriptor();
 
@@ -102,8 +102,8 @@ MapGroup EditorMapper::pushField(int fieldNumber, int index) {
   auto group = _model->index(field->index(),0,_index); // << move to field
   _index = _model->index(index,0,group); // << move to first message
   // ask the source for a message pointer
-  auto ptr = _model->data(_index,Qt::UserRole+1).value<void*>();
-  auto msg = static_cast<Message*>(ptr);
+  auto ptr = _model->data(_index,Qt::UserRole+1).value<quintptr>();
+  auto msg = reinterpret_cast<Message*>(ptr);
   desc = msg->GetDescriptor();
   _desc.push(desc); // << we're now mapping fields of the message
   return group;
@@ -112,8 +112,8 @@ MapGroup EditorMapper::pushField(int fieldNumber, int index) {
 void EditorMapper::pushResource() {
   popRoot(); // << just in case
   // ask the source for a message pointer
-  auto ptr = _model->data(QModelIndex(),Qt::UserRole+1).value<void*>();
-  auto msg = static_cast<TreeNode*>(ptr);
+  auto ptr = _model->data(QModelIndex(),Qt::UserRole+1).value<quintptr>();
+  auto msg = reinterpret_cast<TreeNode*>(ptr);
   auto type = msg->type_case();
   R_EXPECT_V(type != TreeNode::TYPE_NOT_SET)
     << "Pushing resource field without a set type!";
