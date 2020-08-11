@@ -6,9 +6,6 @@
 
 #include <google/protobuf/reflection.h>
 
-#include <QDataStream>
-#include <QCoreApplication>
-
 using namespace buffers;
 
 using CppType = FieldDescriptor::CppType;

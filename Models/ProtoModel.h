@@ -7,7 +7,6 @@
 #include <QAbstractItemModel>
 #include <QMimeData>
 #include <QHash>
-#include <QList>
 
 using namespace google::protobuf;
 
