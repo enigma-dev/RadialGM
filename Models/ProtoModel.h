@@ -124,13 +124,8 @@ class ProtoModel : public QAbstractItemModel {
   void ResourceRenamed(TypeCase type, const QString &oldName, const QString &newName);
 
  protected:
-  inline QString treeNodeMime() const { return QStringLiteral("RadialGM/buffers.TreeNode"); }
-
   Message *_protobuf;
-  QStringList _mimes;
   QHash<QPersistentModelIndex,QPersistentModelIndex> parents;
-
-  void setupMimes(const Descriptor* desc, QSet<QString>& uniqueMimes, QSet<const Descriptor*>& visitedDesc);
 };
 
 #endif // PROTOMODEL_H

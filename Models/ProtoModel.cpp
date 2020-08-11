@@ -17,10 +17,6 @@ IconMap ProtoModel::iconMap;
 
 ProtoModel::ProtoModel(QObject *parent, Message *protobuf) : QAbstractItemModel(parent), _protobuf(protobuf) {
   const Descriptor *desc = _protobuf->GetDescriptor();
-  QSet<QString> uniqueMimes;
-  QSet<const Descriptor*> visitedDesc;
-  setupMimes(desc, uniqueMimes, visitedDesc);
-  _mimes = uniqueMimes.values();
 
   iconMap = {{TypeCase::kFolder, ArtManager::GetIcon("group")},
              {TypeCase::kSprite, ArtManager::GetIcon("sprite")},
@@ -34,29 +30,6 @@ ProtoModel::ProtoModel(QObject *parent, Message *protobuf) : QAbstractItemModel(
              {TypeCase::kObject, ArtManager::GetIcon("object")},
              {TypeCase::kRoom, ArtManager::GetIcon("room")},
              {TypeCase::kSettings, ArtManager::GetIcon("settings")}};
-}
-
-void ProtoModel::setupMimes(const Descriptor* desc, QSet<QString>& uniqueMimes,
-                            QSet<const Descriptor*>& visitedDesc) {
-  if (!desc) return;
-  visitedDesc.insert(desc);
-  for (int i = 0; i < desc->field_count(); ++i) {
-    const FieldDescriptor *field = desc->field(i);
-    if (!field) continue;
-    if (field->is_repeated()) {
-      std::string typeName = "";
-      if (field->type() == FieldDescriptor::TYPE_MESSAGE)
-        typeName = field->message_type()->full_name();
-      else
-        typeName = field->type_name();
-      //TODO: Add switch here to use real cross-application cross-process
-      //mime type like e.g, application/string for the native field types
-      uniqueMimes.insert(QString("RadialGM/") + QString::fromStdString(typeName));
-    }
-    if (field->type() == FieldDescriptor::TYPE_MESSAGE &&
-        !visitedDesc.contains(field->message_type())) // << no infinite recursion
-      setupMimes(field->message_type(), uniqueMimes, visitedDesc);
-  }
 }
 
 QMap<int, QVariant> ProtoModel::itemData(const QModelIndex &index) const {
