@@ -542,6 +542,8 @@ void MainWindow::on_actionShowDiagnosticInspector_triggered() {
   // since it's for diagnostics only
   inspectorTable->setSortingEnabled(false);
   inspectorTable->setModel(filterModel);
+  inspectorTable->setDragEnabled(true);
+  inspectorTable->setAcceptDrops(true);
   //inspectorTable->header()->setCascadingSectionResizes(true);
   inspectorTable->header()->setSectionResizeMode(0,QHeaderView::ResizeToContents);
   inspectorTable->header()->setSectionResizeMode(1,QHeaderView::Stretch);
