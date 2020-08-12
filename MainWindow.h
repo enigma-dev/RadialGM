@@ -66,7 +66,7 @@ class MainWindow : public QMainWindow {
       if (isWindowModified() != IsGameModified())
         setWindowModified(IsGameModified());
     }
-    return QWidget::event(ev);
+    return QMainWindow::event(ev);
   }
 
  signals:
