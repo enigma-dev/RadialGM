@@ -581,7 +581,6 @@ void MainWindow::on_actionClearRecentMenu_triggered() { _recentFiles->clear(); }
 void MainWindow::CreateResource(TypeCase typeCase) {
   // insert us into the proto model through tree proxy
   auto index = treeModel->addNode(_ui->treeView->currentIndex());
-  return;
   auto ptr = treeModel->data(index,Qt::UserRole+1).value<quintptr>();
   auto child = reinterpret_cast<TreeNode*>(ptr);
 
