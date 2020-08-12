@@ -225,12 +225,8 @@ QModelIndex ProtoModel::index(int row, int column, const QModelIndex &parent) co
   }
 
   auto index = createIndex(row, column, parentItem);
-  auto& mutableParents = const_cast<ProtoModel*>(this)->parents;
-  if (index == parent) {
-    TreeNode *msg = nullptr;
-    msg->name();
-  }
   R_EXPECT(index != parent, QModelIndex()) << "Model index equal to parent: " << index;
+  auto& mutableParents = const_cast<ProtoModel*>(this)->parents;
   mutableParents[index] = parent;
   return index;
 }
