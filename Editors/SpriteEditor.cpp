@@ -34,14 +34,22 @@ SpriteEditor::SpriteEditor(MessageModel* model, QWidget* parent)
   _ui->mainToolBar->addWidget(showOrigin);
   connect(showOrigin, &QCheckBox::stateChanged, _ui->subimagePreview, &SpriteView::SetShowOrigin);
 
-  _resMapper->addMapping(_ui->originXSpinBox, Sprite::kOriginXFieldNumber);
-  _resMapper->addMapping(_ui->originYSpinBox, Sprite::kOriginYFieldNumber);
-  _resMapper->addMapping(_ui->collisionShapeGroupBox, Sprite::kShapeFieldNumber, "currentIndex");
-  _resMapper->addMapping(_ui->bboxComboBox, Sprite::kBboxModeFieldNumber, "currentIndex");
-  _resMapper->addMapping(_ui->leftSpinBox, Sprite::kBboxLeftFieldNumber);
-  _resMapper->addMapping(_ui->rightSpinBox, Sprite::kBboxRightFieldNumber);
-  _resMapper->addMapping(_ui->topSpinBox, Sprite::kBboxTopFieldNumber);
-  _resMapper->addMapping(_ui->bottomSpinBox, Sprite::kBboxBottomFieldNumber);
+  //TODO: _mapper->mapName(_ui->nameEdit);
+  _mapper->pushResource();
+
+  _mapper->mapField(Sprite::kOriginXFieldNumber, _ui->originXSpinBox);
+  _mapper->mapField(Sprite::kOriginYFieldNumber, _ui->originYSpinBox);
+  _mapper->mapField(Sprite::kShapeFieldNumber, _ui->collisionShapeGroupBox, "currentIndex");
+  _mapper->mapField(Sprite::kBboxModeFieldNumber, _ui->bboxComboBox, "currentIndex");
+  _mapper->mapField(Sprite::kBboxLeftFieldNumber, _ui->leftSpinBox);
+  _mapper->mapField(Sprite::kBboxRightFieldNumber, _ui->rightSpinBox);
+  _mapper->mapField(Sprite::kBboxTopFieldNumber, _ui->topSpinBox);
+  _mapper->mapField(Sprite::kBboxBottomFieldNumber, _ui->bottomSpinBox);
+  //TODO: Finish the master detail mapper API
+  //_mapper->pushField(Sprite::kSubimagesFieldNumber);
+  //_mapper->mapField(0,_ui->subimagePreview);
+
+  _mapper->load();
 
   RebindSubModels();
 }

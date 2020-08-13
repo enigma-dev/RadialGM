@@ -2,7 +2,6 @@
 #define BASEEDTIOR_H
 
 #include "Models/MessageModel.h"
-#include "Models/ModelMapper.h"
 #include "Models/EditorMapper.h"
 
 #include <QObject>
@@ -39,8 +38,7 @@ class BaseEditor : public QWidget {
  protected:
   virtual void closeEvent(QCloseEvent *event) override;
 
-  ModelMapper *_nodeMapper;
-  ModelMapper *_resMapper;
+  EditorMapper *_mapper;
   MessageModel *_model;
   bool _hasFocus = false;
 };

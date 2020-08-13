@@ -24,38 +24,39 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
 
   _ui->roomPreviewBackground->SetAssetView(_ui->roomView);
 
-  _nodeMapper->addMapping(_ui->roomName, TreeNode::kNameFieldNumber);
-  _nodeMapper->toFirst();
+  _mapper->mapName(_ui->roomName);
+  _mapper->pushResource();
 
-  _resMapper->addMapping(_ui->speedSpinBox, Room::kSpeedFieldNumber);
-  _resMapper->addMapping(_ui->widthSpinBox, Room::kWidthFieldNumber);
-  _resMapper->addMapping(_ui->heightSpinBox, Room::kHeightFieldNumber);
-  _resMapper->addMapping(_ui->clearCheckBox, Room::kClearDisplayBufferFieldNumber);
-  _resMapper->addMapping(_ui->persistentCheckBox, Room::kPersistentFieldNumber);
-  _resMapper->addMapping(_ui->captionLineEdit, Room::kCaptionFieldNumber);
+  _mapper->mapField(Room::kSpeedFieldNumber, _ui->speedSpinBox);
+  _mapper->mapField(Room::kWidthFieldNumber, _ui->widthSpinBox);
+  _mapper->mapField(Room::kHeightFieldNumber, _ui->heightSpinBox);
+  _mapper->mapField(Room::kClearDisplayBufferFieldNumber, _ui->clearCheckBox);
+  _mapper->mapField(Room::kPersistentFieldNumber, _ui->persistentCheckBox);
+  _mapper->mapField(Room::kCaptionFieldNumber, _ui->captionLineEdit);
 
-  _resMapper->addMapping(_ui->enableViewsCheckBox, Room::kEnableViewsFieldNumber);
-  _resMapper->addMapping(_ui->clearViewportCheckBox, Room::kClearViewBackgroundFieldNumber);
-  _resMapper->toFirst();
+  _mapper->mapField(Room::kEnableViewsFieldNumber, _ui->enableViewsCheckBox);
+  _mapper->mapField(Room::kClearViewBackgroundFieldNumber, _ui->clearViewportCheckBox);
 
-  _viewMapper = new ImmediateDataWidgetMapper(this);
-  _viewMapper->addMapping(_ui->viewVisibleCheckBox, View::kVisibleFieldNumber);
+  //TODO: FIX GROUP
+  _mapper->mapField(View::kVisibleFieldNumber, _ui->viewVisibleCheckBox);
 
-  _viewMapper->addMapping(_ui->cameraXSpinBox, View::kXviewFieldNumber);
-  _viewMapper->addMapping(_ui->cameraYSpinBox, View::kYviewFieldNumber);
-  _viewMapper->addMapping(_ui->cameraWidthSpinBox, View::kWviewFieldNumber);
-  _viewMapper->addMapping(_ui->cameraHeightSpinBox, View::kHviewFieldNumber);
+  _mapper->mapField(View::kXviewFieldNumber, _ui->cameraXSpinBox);
+  _mapper->mapField(View::kYviewFieldNumber, _ui->cameraYSpinBox);
+  _mapper->mapField(View::kWviewFieldNumber, _ui->cameraWidthSpinBox);
+  _mapper->mapField(View::kHviewFieldNumber, _ui->cameraHeightSpinBox);
 
-  _viewMapper->addMapping(_ui->viewportXSpinBox, View::kXportFieldNumber);
-  _viewMapper->addMapping(_ui->viewportYSpinBox, View::kYportFieldNumber);
-  _viewMapper->addMapping(_ui->viewportWidthSpinBox, View::kWportFieldNumber);
-  _viewMapper->addMapping(_ui->viewportHeightSpinBox, View::kHportFieldNumber);
+  _mapper->mapField(View::kXportFieldNumber, _ui->viewportXSpinBox);
+  _mapper->mapField(View::kYportFieldNumber, _ui->viewportYSpinBox);
+  _mapper->mapField(View::kWportFieldNumber, _ui->viewportWidthSpinBox);
+  _mapper->mapField(View::kHportFieldNumber, _ui->viewportHeightSpinBox);
 
-  _viewMapper->addMapping(_ui->followingHBorderSpinBox, View::kHborderFieldNumber);
-  _viewMapper->addMapping(_ui->followingVBorderSpinBox, View::kVborderFieldNumber);
-  _viewMapper->addMapping(_ui->followingHSpeedSpinBox, View::kHspeedFieldNumber);
-  _viewMapper->addMapping(_ui->followingVSpeedSpinBox, View::kVspeedFieldNumber);
-  _viewMapper->toFirst();
+  _mapper->mapField(View::kHborderFieldNumber, _ui->followingHBorderSpinBox);
+  _mapper->mapField(View::kVborderFieldNumber, _ui->followingVBorderSpinBox);
+  _mapper->mapField(View::kHspeedFieldNumber, _ui->followingHSpeedSpinBox);
+  _mapper->mapField(View::kVspeedFieldNumber, _ui->followingVSpeedSpinBox);
+  //_mapper->popField();
+
+  _mapper->load();
 
   QMenuView* objMenu = new QMenuView(this);
   TreeSortFilterProxyModel* treeProxy = new TreeSortFilterProxyModel(this);

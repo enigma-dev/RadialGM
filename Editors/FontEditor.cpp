@@ -18,11 +18,15 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ\n\
 ~!@#$%^&*()_+{}|:\"<>?`-=[];\',./\n\
 The quick brown fox jumps over the lazy dog.");
 
-  _nodeMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
-  _resMapper->addMapping(_ui->fontComboBox, Font::kFontNameFieldNumber);
-  _resMapper->addMapping(_ui->sizeSpinBox, Font::kSizeFieldNumber);
-  _resMapper->addMapping(_ui->boldCheckBox, Font::kBoldFieldNumber);
-  _resMapper->addMapping(_ui->italicCheckBox, Font::kItalicFieldNumber);
+  _mapper->mapName(_ui->nameEdit);
+  _mapper->pushResource();
+
+  _mapper->mapField(Font::kFontNameFieldNumber, _ui->fontComboBox);
+  _mapper->mapField(Font::kSizeFieldNumber, _ui->sizeSpinBox);
+  _mapper->mapField(Font::kBoldFieldNumber, _ui->boldCheckBox);
+  _mapper->mapField(Font::kItalicFieldNumber, _ui->italicCheckBox);
+
+  _mapper->load();
 
   RebindSubModels();
 }
