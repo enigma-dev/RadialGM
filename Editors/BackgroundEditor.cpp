@@ -51,7 +51,7 @@ void BackgroundEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex
 void BackgroundEditor::RebindSubModels() {
   _backgroundModel = _model->GetSubModel<MessageModel*>(TreeNode::kBackgroundFieldNumber);
   _ui->imagePreviewBackground->SetAssetView(_ui->backgroundView);
-  //TODO:_ui->backgroundView->SetResourceModel(_resMapper->GetModel());
+  _ui->backgroundView->SetResourceModel(_backgroundModel);
   BaseEditor::RebindSubModels();
 }
 
