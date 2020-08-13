@@ -23,6 +23,9 @@ TimelineEditor::TimelineEditor(MessageModel* model, QWidget* parent)
   _mapper->mapName(_ui->nameEdit);
   _mapper->pushResource();
 
+  _mapper->pushView(Timeline::kMomentsFieldNumber, _ui->momentsList);
+  _ui->momentsList->setModelColumn(Timeline::Moment::kStepFieldNumber);
+
   _mapper->load();
 
   connect(_ui->saveButton, &QAbstractButton::pressed, this, &BaseEditor::OnSave);

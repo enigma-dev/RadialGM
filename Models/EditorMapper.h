@@ -8,6 +8,7 @@
 #include <QHash>
 #include <QModelIndex>
 #include <QPersistentModelIndex>
+#include <QAbstractItemView>
 
 #include <google/protobuf/message.h>
 #include <google/protobuf/descriptor.h>
@@ -96,6 +97,7 @@ class EditorMapper : public QObject {
    * popResource, because you can just call this instead!
    */
   void pushResource();
+  void pushView(int fieldNumber, QAbstractItemView *view);
   /**
    * @brief popField Moves current index back to the previous parent.
    */
