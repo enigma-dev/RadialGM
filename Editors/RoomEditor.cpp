@@ -25,7 +25,7 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   _ui->roomPreviewBackground->SetAssetView(_ui->roomView);
 
   _mapper->mapName(_ui->roomName);
-  _mapper->pushResource();
+  _mapper->pushAsset();
 
   _mapper->mapField(Room::kSpeedFieldNumber, _ui->speedSpinBox);
   _mapper->mapField(Room::kWidthFieldNumber, _ui->widthSpinBox);

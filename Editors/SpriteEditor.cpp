@@ -35,7 +35,7 @@ SpriteEditor::SpriteEditor(MessageModel* model, QWidget* parent)
   connect(showOrigin, &QCheckBox::stateChanged, _ui->subimagePreview, &SpriteView::SetShowOrigin);
 
   //TODO: _mapper->mapName(_ui->nameEdit);
-  _mapper->pushResource();
+  _mapper->pushAsset();
 
   _mapper->mapField(Sprite::kOriginXFieldNumber, _ui->originXSpinBox);
   _mapper->mapField(Sprite::kOriginYFieldNumber, _ui->originYSpinBox);

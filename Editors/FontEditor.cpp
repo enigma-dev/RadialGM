@@ -19,7 +19,7 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZ\n\
 The quick brown fox jumps over the lazy dog.");
 
   _mapper->mapName(_ui->nameEdit);
-  _mapper->pushResource();
+  _mapper->pushAsset();
 
   _mapper->mapField(Font::kFontNameFieldNumber, _ui->fontComboBox);
   _mapper->mapField(Font::kSizeFieldNumber, _ui->sizeSpinBox);

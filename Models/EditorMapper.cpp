@@ -34,7 +34,7 @@ EditorMapper::MapGroup EditorMapper::pushField(int fieldNumber, int index) {
   return submapper;
 }
 
-void EditorMapper::pushResource() {
+void EditorMapper::pushAsset() {
   popRoot(); // << just in case
   // ask the source for a message pointer
   buffers::TreeNode* n = static_cast<buffers::TreeNode*>(_rootModel->GetBuffer());

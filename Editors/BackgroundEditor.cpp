@@ -22,7 +22,7 @@ BackgroundEditor::BackgroundEditor(MessageModel* model, QWidget* parent)
   connect(_ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
 
   //TODO: _mapper->mapName(_ui->nameEdit);
-  _mapper->pushResource();
+  _mapper->pushAsset();
 
   _mapper->mapField(Background::kSmoothEdgesFieldNumber, _ui->smoothCheckBox);
   _mapper->mapField(Background::kPreloadFieldNumber, _ui->preloadCheckBox);

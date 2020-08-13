@@ -21,7 +21,7 @@ TimelineEditor::TimelineEditor(MessageModel* model, QWidget* parent)
   _ui->setupUi(momentWidget);
 
   _mapper->mapName(_ui->nameEdit);
-  _mapper->pushResource();
+  _mapper->pushAsset();
 
   _mapper->pushView(Timeline::kMomentsFieldNumber, _ui->momentsList);
   _ui->momentsList->setModelColumn(Timeline::Moment::kStepFieldNumber);

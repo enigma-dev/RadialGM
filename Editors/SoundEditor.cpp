@@ -21,7 +21,7 @@ SoundEditor::SoundEditor(MessageModel* model, QWidget* parent)
   _ui->setupUi(this);
 
   _mapper->mapName(_ui->nameEdit);
-  _mapper->pushResource();
+  _mapper->pushAsset();
 
   _mapper->mapField(Sound::kVolumeFieldNumber, _ui->volumeSpinBox);
 

@@ -20,7 +20,7 @@ ScriptEditor::ScriptEditor(MessageModel* model, QWidget* parent)
   CodeWidget* codeWidget = _codeEditor->AddCodeWidget();
 
   //TODO: _mapper->mapName(nameEdit);
-  _mapper->pushResource();
+  _mapper->pushAsset();
 
   _mapper->mapField(Script::kCodeFieldNumber, codeWidget);
 

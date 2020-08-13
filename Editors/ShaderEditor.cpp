@@ -33,7 +33,7 @@ ShaderEditor::ShaderEditor(MessageModel* model, QWidget* parent)
   CodeWidget* fragWidget = _codeEditor->AddCodeWidget();
 
   //TODO: _mapper->mapName(nameEdit);
-  _mapper->pushResource();
+  _mapper->pushAsset();
 
   _mapper->mapField(Shader::kFragmentCodeFieldNumber, fragWidget);
   _mapper->mapField(Shader::kVertexCodeFieldNumber, vertexWidget);

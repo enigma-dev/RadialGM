@@ -88,7 +88,7 @@ PathEditor::PathEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   connect(this, &BaseEditor::FocusLost, [this]() { _ui->pathPreviewBackground->SetParentHasFocus(false); });
 
   _mapper->mapName(_ui->nameEdit);
-  _mapper->pushResource();
+  _mapper->pushAsset();
 
   _mapper->mapField(Path::kSmoothFieldNumber, _ui->smoothCheckBox);
   _mapper->mapField(Path::kClosedFieldNumber, _ui->closedCheckBox);

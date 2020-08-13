@@ -96,7 +96,7 @@ class EditorMapper : public QObject {
    * currently set resource of the tree node. That's why there is no
    * popResource, because you can just call this instead!
    */
-  void pushResource();
+  void pushAsset();
   void pushView(int fieldNumber, QAbstractItemView *view);
   /**
    * @brief popField Moves current index back to the previous parent.
