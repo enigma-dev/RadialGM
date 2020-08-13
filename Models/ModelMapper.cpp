@@ -21,8 +21,17 @@ void ModelMapper::clearMapping() { _mapper->clearMapping(); }
 
 void ModelMapper::toFirst() { _mapper->toFirst(); }
 
+void ModelMapper::setOrientation(Qt::Orientation aOrientation) {
+  _mapper->setOrientation(aOrientation);
+}
+
 void ModelMapper::setCurrentIndex(int index) {
   _mapper->setCurrentIndex(index);
+}
+
+void ModelMapper::setModel(MessageModel *model) {
+  _mapper->setModel(model);
+  _model = model;
 }
 
 void ModelMapper::revert() {

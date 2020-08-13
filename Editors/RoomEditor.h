@@ -35,7 +35,6 @@ class RoomEditor : public BaseEditor {
   Ui::RoomEditor* _ui;
   QLabel *cursorPositionLabel, *_assetNameLabel;
   MessageModel* _roomModel;
-  ImmediateDataWidgetMapper* _viewMapper;
 };
 
 #endif  // ROOMEDITOR_H

@@ -24,7 +24,9 @@ class ModelMapper : public QObject {
   bool IsDirty();
 
  public slots:
+  void setModel(MessageModel *model);
   void toFirst();
+  void setOrientation(Qt::Orientation aOrientation);
   void setCurrentIndex(int index); // toFirst(), toLast(), etc.
   void revert();
 

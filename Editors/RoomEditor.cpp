@@ -37,7 +37,7 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   _mapper->mapField(Room::kEnableViewsFieldNumber, _ui->enableViewsCheckBox);
   _mapper->mapField(Room::kClearViewBackgroundFieldNumber, _ui->clearViewportCheckBox);
 
-  //TODO: FIX GROUP
+  _mapper->pushView(Room::kViewsFieldNumber, _ui->currentViewComboBox->view());
   _mapper->mapField(View::kVisibleFieldNumber, _ui->viewVisibleCheckBox);
 
   _mapper->mapField(View::kXviewFieldNumber, _ui->cameraXSpinBox);
@@ -54,7 +54,7 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   _mapper->mapField(View::kVborderFieldNumber, _ui->followingVBorderSpinBox);
   _mapper->mapField(View::kHspeedFieldNumber, _ui->followingHSpeedSpinBox);
   _mapper->mapField(View::kVspeedFieldNumber, _ui->followingVSpeedSpinBox);
-  //_mapper->popField();
+  _mapper->popField();
 
   _mapper->load();
 
@@ -66,9 +66,6 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   _ui->objectSelectButton->setMenu(objMenu);
 
   connect(objMenu, &QMenu::triggered, this, &RoomEditor::SelectedObjectChanged);
-
-  connect(_ui->currentViewComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-          [=](int index) { _viewMapper->setCurrentIndex(index); });
 
   cursorPositionLabel = new QLabel();
   connect(_ui->roomPreviewBackground, &AssetScrollAreaBackground::MouseMoved, [=](int x, int y) {
@@ -126,9 +123,6 @@ void RoomEditor::RebindSubModels() {
   }
 
   _ui->tilesListView->header()->swapSections(Room::Tile::kNameFieldNumber, Room::Tile::kBackgroundNameFieldNumber);
-
-  RepeatedMessageModel* vm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kViewsFieldNumber);
-  _viewMapper->setModel(vm);
 
   connect(_ui->instancesListView->selectionModel(), &QItemSelectionModel::selectionChanged,
           [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
