@@ -3,6 +3,7 @@
 
 #include "Models/MessageModel.h"
 #include "Models/ModelMapper.h"
+#include "Models/EditorMapper.h"
 
 #include <QObject>
 #include <QWidget>

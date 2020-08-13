@@ -87,13 +87,17 @@ PathEditor::PathEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   connect(this, &BaseEditor::FocusGained, [this]() { _ui->pathPreviewBackground->SetParentHasFocus(true); });
   connect(this, &BaseEditor::FocusLost, [this]() { _ui->pathPreviewBackground->SetParentHasFocus(false); });
 
-  _nodeMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
+  EditorMapper *_mapper = new EditorMapper(model, this);
+  _mapper->mapName(_ui->nameEdit);
+  _mapper->pushResource();
 
-  _resMapper->addMapping(_ui->smoothCheckBox, Path::kSmoothFieldNumber);
-  _resMapper->addMapping(_ui->closedCheckBox, Path::kClosedFieldNumber);
-  _resMapper->addMapping(_ui->precisionSpinBox, Path::kPrecisionFieldNumber);
-  _resMapper->addMapping(xSnap, Path::kHsnapFieldNumber);
-  _resMapper->addMapping(ySnap, Path::kVsnapFieldNumber);
+  _mapper->mapField(Path::kSmoothFieldNumber, _ui->smoothCheckBox);
+  _mapper->mapField(Path::kClosedFieldNumber, _ui->closedCheckBox);
+  _mapper->mapField(Path::kPrecisionFieldNumber, _ui->precisionSpinBox);
+  _mapper->mapField(Path::kHsnapFieldNumber, xSnap);
+  _mapper->mapField(Path::kVsnapFieldNumber, ySnap);
+
+  _mapper->load();
 
   RebindSubModels();
 }

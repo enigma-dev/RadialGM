@@ -15,7 +15,6 @@ class ModelMapper : public QObject {
   // mapper
   void addMapping(QWidget *widget, int section, QByteArray propName = "");
   void clearMapping();
-  void toFirst();
 
   // model
   MessageModel *GetModel();
@@ -23,6 +22,11 @@ class ModelMapper : public QObject {
   bool RestoreBackup();
   void SetDirty(bool dirty);
   bool IsDirty();
+
+ public slots:
+  void toFirst();
+  void setCurrentIndex(int index); // toFirst(), toLast(), etc.
+  void revert();
 
  protected:
   MessageModel *_model;

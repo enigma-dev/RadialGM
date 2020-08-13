@@ -21,6 +21,14 @@ void ModelMapper::clearMapping() { _mapper->clearMapping(); }
 
 void ModelMapper::toFirst() { _mapper->toFirst(); }
 
+void ModelMapper::setCurrentIndex(int index) {
+  _mapper->setCurrentIndex(index);
+}
+
+void ModelMapper::revert() {
+  _mapper->revert();
+}
+
 // model
 
 void ModelMapper::ReplaceBuffer(google::protobuf::Message *buffer) { _model->ReplaceBuffer(buffer); }

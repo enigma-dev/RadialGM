@@ -71,6 +71,7 @@ SOURCES += \
     Dialogs/TimelineChangeMoment.cpp \
     Editors/ShaderEditor.cpp \
     Editors/SpriteEditor.cpp \
+    Models/EditorMapper.cpp \
     Models/MessageModel.cpp \
     Models/RepeatedImageModel.cpp \
     Models/RepeatedMessageModel.cpp \
@@ -126,6 +127,7 @@ HEADERS += \
     Editors/TimelineEditor.h \
     Editors/RoomEditor.h \
     Editors/SettingsEditor.h \
+    Models/EditorMapper.h \
     Models/MessageModel.h \
     Models/RepeatedImageModel.h \
     Models/RepeatedMessageModel.h \
