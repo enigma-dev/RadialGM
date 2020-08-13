@@ -59,6 +59,11 @@ class EditorMapper : public QObject {
    */
   void mapName(QWidget *widget, const QByteArray& property="");
   /**
+   * @brief mapView Changes the model of the view to the current mapper's.
+   * @param view The view to map the model of.
+   */
+  void mapView(QAbstractItemView *view);
+  /**
    * @brief clear Removes all mappings and moves back to the root of the model.
    */
   void clear();

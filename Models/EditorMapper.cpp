@@ -20,6 +20,11 @@ void EditorMapper::mapName(QWidget *widget, const QByteArray& property) {
   mapField(TreeNode::kNameFieldNumber, widget, property);
 }
 
+void EditorMapper::mapView(QAbstractItemView *view) {
+  auto mapper = _mappers.isEmpty() ? _rootMapper : _mappers.top();
+  view->setModel(mapper->GetModel());
+}
+
 EditorMapper::MapGroup EditorMapper::pushField(int fieldNumber, int index) {
   auto mapper = _mappers.isEmpty() ? _rootMapper : _mappers.top();
   auto model = static_cast<MessageModel*>(mapper->GetModel());
@@ -50,8 +55,6 @@ void EditorMapper::pushView(int fieldNumber, QAbstractItemView *view) {
   //TODO: autodetect this from type of submodel?
   //That or we should make all models horizontal with fields always in columns.
   group->setOrientation(Qt::Horizontal);
-  //TODO: mapView?
-  //view->setModel(model);
   connect(view->selectionModel(), &QItemSelectionModel::currentRowChanged,
           group, [group](const QModelIndex &current, const QModelIndex &){
     group->setCurrentIndex(current.row());

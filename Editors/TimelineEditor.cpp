@@ -24,6 +24,7 @@ TimelineEditor::TimelineEditor(MessageModel* model, QWidget* parent)
   _mapper->pushAsset();
 
   _mapper->pushView(Timeline::kMomentsFieldNumber, _ui->momentsList);
+  _mapper->mapView(_ui->momentsList);
   _ui->momentsList->setModelColumn(Timeline::Moment::kStepFieldNumber);
 
   _mapper->load();
@@ -98,9 +99,6 @@ void TimelineEditor::RebindSubModels() {
   for (int moment = 0; moment < _momentsModel->rowCount(); ++moment) {
     BindMomentEditor(moment);
   }
-
-  _ui->momentsList->setModel(_momentsModel);
-  _ui->momentsList->setModelColumn(Timeline::Moment::kStepFieldNumber);
 
   if (_momentsModel->rowCount() == 0) _codeEditor->setDisabled(true);
 
