@@ -87,7 +87,6 @@ PathEditor::PathEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   connect(this, &BaseEditor::FocusGained, [this]() { _ui->pathPreviewBackground->SetParentHasFocus(true); });
   connect(this, &BaseEditor::FocusLost, [this]() { _ui->pathPreviewBackground->SetParentHasFocus(false); });
 
-  EditorMapper *_mapper = new EditorMapper(model, this);
   _mapper->mapName(_ui->nameEdit);
   _mapper->pushResource();
 
