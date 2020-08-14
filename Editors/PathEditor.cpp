@@ -87,11 +87,6 @@ PathEditor::PathEditor(EditorModel* model, QWidget* parent) :
   connect(ySnap, QOverload<int>::of(&QSpinBox::valueChanged), _ui->pathPreviewBackground,
           &AssetScrollAreaBackground::SetGridVSnap);
 
-  //TODO: FIXME use the QMdiSubwindow aboutToActivate signal
-  //https://doc.qt.io/qt-5/qmdisubwindow.html#aboutToActivate
-  //connect(this, &BaseEditor::FocusGained, [this]() { _ui->pathPreviewBackground->SetParentHasFocus(true); });
-  //connect(this, &BaseEditor::FocusLost, [this]() { _ui->pathPreviewBackground->SetParentHasFocus(false); });
-
   _mapper->mapName(_ui->nameEdit);
   _mapper->pushResource();
 
