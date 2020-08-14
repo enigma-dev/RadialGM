@@ -39,8 +39,6 @@ void BaseEditor::closeEvent(QCloseEvent* event) {
   event->accept();
 }
 
-bool BaseEditor::HasFocus() { return _hasFocus; }
-
 void BaseEditor::ReplaceBuffer(google::protobuf::Message* buffer) { _resMapper->ReplaceBuffer(buffer); }
 
 void BaseEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex& /*bottomRight*/, const QVariant& oldValue,
