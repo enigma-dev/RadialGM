@@ -36,7 +36,7 @@ class MainWindow : public QMainWindow {
   ~MainWindow();
   void openProject(std::unique_ptr<buffers::Project> openedProject);
   buffers::Game *Game() const { return this->_project->mutable_game(); }
-  
+
   static QList<QString> EnigmaSearchPaths;
   static QFileInfo EnigmaRoot;
 
@@ -50,8 +50,6 @@ class MainWindow : public QMainWindow {
   static void setCurrentConfig(const buffers::resources::Settings &settings);
 
  private slots:
-  void MDIWindowChanged(QMdiSubWindow *window);
-
   // file menu
   void on_actionNew_triggered();
   void on_actionOpen_triggered();
@@ -114,7 +112,7 @@ class MainWindow : public QMainWindow {
 
   std::unique_ptr<buffers::Project> _project;
   QPointer<RecentFiles> _recentFiles;
-  
+
   std::unique_ptr<EventData> _event_data;
   egm::EGM egm;
 

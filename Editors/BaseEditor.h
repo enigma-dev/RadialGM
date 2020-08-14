@@ -22,12 +22,9 @@ class BaseEditor : public QWidget {
   explicit BaseEditor(MessageModel *treeNodeModel, QWidget *parent);
 
   void ReplaceBuffer(google::protobuf::Message *buffer);
-  bool HasFocus();
 
  signals:
   void ResourceRenamed(TypeCase type, const QString &oldName, const QString &newName);
-  void FocusGained();
-  void FocusLost();
 
  public slots:
   virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
@@ -41,7 +38,6 @@ class BaseEditor : public QWidget {
   ModelMapper *_nodeMapper;
   ModelMapper *_resMapper;
   MessageModel *_model;
-  bool _hasFocus = false;
 };
 
 #endif  // BASEEDTIOR_H
