@@ -17,7 +17,6 @@ AssetScrollAreaBackground::AssetScrollAreaBackground(AssetScrollArea* parent)
       _maxZoom(3200),
       _minZoom(0.0625),
       _backgroundColor(Qt::GlobalColor::gray),
-      _parentHasFocus(false),
       _viewMoveSpeed(4) {
   installEventFilter(this);
   setMouseTracking(true);
@@ -89,8 +88,6 @@ void AssetScrollAreaBackground::SetGridVSnap(int vSnap) {
     _assetView->GetGrid().vertSpacing = vSnap;
   }
 }
-
-void AssetScrollAreaBackground::SetParentHasFocus(bool focus) { _parentHasFocus = focus; }
 
 void AssetScrollAreaBackground::PaintGrid(QPainter& painter, int gridHorSpacing, int gridVertSpacing, int gridHorOff,
                                           int gridVertOff) {
@@ -206,52 +203,42 @@ void AssetScrollAreaBackground::paintEvent(QPaintEvent* /* event */) {
 }
 
 bool AssetScrollAreaBackground::eventFilter(QObject* obj, QEvent* event) {
-  if (_parentHasFocus) {
-    switch (event->type()) {
-      case QEvent::MouseMove: {
-        QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
-        QPoint roomPos = mouseEvent->pos() - _totalDrawOffset;
-        roomPos /= _currentZoom;
-        emit MouseMoved(roomPos.x(), roomPos.y());
-        break;
-      }
-      case QEvent::MouseButtonPress: {
-        QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
-        emit MousePressed(mouseEvent->button());
-        break;
-      }
-      case QEvent::MouseButtonRelease: {
-        QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
-        emit MouseReleased(mouseEvent->button());
-        break;
-      }
-      case QEvent::Enter: {
-        setFocus();
-        break;
-      }
-      case QEvent::Leave: {
-        clearFocus();
-        break;
-      }
-      case QEvent::KeyPress: {
-        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-        _pressedKeys += keyEvent->key();
-        _userDrawOffset.setX(_userDrawOffset.x() +
-                             (_pressedKeys.contains(Qt::Key::Key_D) - _pressedKeys.contains(Qt::Key::Key_A)) *
-                                 _viewMoveSpeed);
-        _userDrawOffset.setY(_userDrawOffset.y() +
-                             (_pressedKeys.contains(Qt::Key::Key_W) - _pressedKeys.contains(Qt::Key::Key_S)) *
-                                 _viewMoveSpeed);
-        update();
-        break;
-      }
-      case QEvent::KeyRelease: {
-        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-        _pressedKeys -= keyEvent->key();
-        break;
-      }
-      default: break;
+  switch (event->type()) {
+    case QEvent::MouseMove: {
+      QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+      QPoint roomPos = mouseEvent->pos() - _totalDrawOffset;
+      roomPos /= _currentZoom;
+      emit MouseMoved(roomPos.x(), roomPos.y());
+      break;
     }
+    case QEvent::MouseButtonPress: {
+      QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+      emit MousePressed(mouseEvent->button());
+      break;
+    }
+    case QEvent::MouseButtonRelease: {
+      QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+      emit MouseReleased(mouseEvent->button());
+      break;
+    }
+    case QEvent::KeyPress: {
+      QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+      _pressedKeys += keyEvent->key();
+      _userDrawOffset.setX(_userDrawOffset.x() +
+                           (_pressedKeys.contains(Qt::Key::Key_A) - _pressedKeys.contains(Qt::Key::Key_D)) *
+                               _viewMoveSpeed);
+      _userDrawOffset.setY(_userDrawOffset.y() +
+                           (_pressedKeys.contains(Qt::Key::Key_W) - _pressedKeys.contains(Qt::Key::Key_S)) *
+                               _viewMoveSpeed);
+      update();
+      break;
+    }
+    case QEvent::KeyRelease: {
+      QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+      _pressedKeys -= keyEvent->key();
+      break;
+    }
+    default: break;
   }
   return QWidget::eventFilter(obj, event);
 }

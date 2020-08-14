@@ -14,9 +14,6 @@ BaseEditor::BaseEditor(MessageModel* treeNodeModel, QWidget* parent)
   _resMapper->GetModel()->BackupModel(this);
 
   connect(_model, &QAbstractItemModel::modelReset, [this]() { this->RebindSubModels(); });
-
-  connect(this, &BaseEditor::FocusGained, [=]() { _hasFocus = true; });
-  connect(this, &BaseEditor::FocusLost, [=]() { _hasFocus = false; });
 }
 
 void BaseEditor::closeEvent(QCloseEvent* event) {

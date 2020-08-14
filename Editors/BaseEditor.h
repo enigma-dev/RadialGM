@@ -26,8 +26,6 @@ class BaseEditor : public QWidget {
 
  signals:
   void ResourceRenamed(TypeCase type, const QString &oldName, const QString &newName);
-  void FocusGained();
-  void FocusLost();
 
  public slots:
   virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
