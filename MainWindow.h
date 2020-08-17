@@ -36,9 +36,10 @@ class MainWindow : public QMainWindow {
   ~MainWindow();
   void openProject(std::unique_ptr<buffers::Project> openedProject);
   buffers::Game *Game() const { return this->_project->mutable_game(); }
-  
+
   static QList<QString> EnigmaSearchPaths;
   static QFileInfo EnigmaRoot;
+  static EventData* GetEventData() { return _event_data.get(); }
 
  signals:
   void CurrentConfigChanged(const buffers::resources::Settings &settings);
@@ -114,8 +115,8 @@ class MainWindow : public QMainWindow {
 
   std::unique_ptr<buffers::Project> _project;
   QPointer<RecentFiles> _recentFiles;
-  
-  std::unique_ptr<EventData> _event_data;
+
+  static std::unique_ptr<EventData> _event_data;
   egm::EGM egm;
 
   void openSubWindow(buffers::TreeNode *item);

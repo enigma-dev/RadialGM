@@ -68,6 +68,7 @@ set(RGM_SOURCES
     Models/ImmediateMapper.cpp
     Models/ResourceModelMap.cpp
     Models/TreeModel.cpp
+    Models/EventsListModel.cpp
     Editors/ObjectEditor.cpp
     Editors/PathEditor.cpp
     Editors/CodeEditor.cpp
@@ -117,6 +118,7 @@ set(RGM_HEADERS
     Models/RepeatedMessageModel.h
     Models/ProtoModel.h
     Models/RepeatedModel.h
+    Models/EventsListModel.h
     Editors/FontEditor.h
     Editors/PathEditor.h
     Editors/SpriteEditor.h

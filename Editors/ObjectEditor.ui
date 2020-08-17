@@ -477,7 +477,7 @@
       </layout>
      </item>
      <item>
-      <widget class="QTreeWidget" name="eventsTree">
+      <widget class="QTreeView" name="eventsList">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -487,56 +487,6 @@
        <property name="alternatingRowColors">
         <bool>false</bool>
        </property>
-       <property name="rootIsDecorated">
-        <bool>true</bool>
-       </property>
-       <property name="allColumnsShowFocus">
-        <bool>false</bool>
-       </property>
-       <property name="headerHidden">
-        <bool>false</bool>
-       </property>
-       <attribute name="headerVisible">
-        <bool>true</bool>
-       </attribute>
-       <attribute name="headerCascadingSectionResizes">
-        <bool>false</bool>
-       </attribute>
-       <attribute name="headerHighlightSections">
-        <bool>false</bool>
-       </attribute>
-       <column>
-        <property name="text">
-         <string>Events</string>
-        </property>
-       </column>
-       <item>
-        <property name="text">
-         <string>Create</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../images.qrc">
-          <normaloff>:/events/create.png</normaloff>:/events/create.png</iconset>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Step</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../images.qrc">
-          <normaloff>:/events/step.png</normaloff>:/events/step.png</iconset>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Draw</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../images.qrc">
-          <normaloff>:/events/draw.png</normaloff>:/events/draw.png</iconset>
-        </property>
-       </item>
       </widget>
      </item>
     </layout>
