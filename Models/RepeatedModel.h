@@ -69,11 +69,11 @@ class RepeatedModel : public ProtoModel {
   }
 
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override {
-    if (section == 0 || role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal) return QVariant();
+    if (section < 1 || role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal) return QVariant();
     return QString::fromStdString(_field->message_type()->field(section - 1)->name());
   }
 
-  // Convience function for internal moves
+  // Convenience function for internal moves
   bool moveRows(int source, int count, int destination) {
     return moveRows(QModelIndex(), source, count, QModelIndex(), destination);
   }

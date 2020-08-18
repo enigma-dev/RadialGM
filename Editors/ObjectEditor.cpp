@@ -18,7 +18,7 @@ ObjectEditor::~ObjectEditor() { delete _ui; }
 void ObjectEditor::RebindSubModels() {
   _objectModel = _model->GetSubModel<MessageModel*>(TreeNode::kObjectFieldNumber);
   _eventsModel->setSourceModel(_objectModel->GetSubModel<RepeatedMessageModel*>(Object::kEgmEventsFieldNumber));
-  _eventsModel->sort(0, Qt::DescendingOrder);
+  //_eventsModel->sort(0, Qt::DescendingOrder);
   _ui->eventsList->setModel(_eventsModel);
 
   BaseEditor::RebindSubModels();
