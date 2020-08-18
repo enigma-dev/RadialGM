@@ -84,7 +84,8 @@ QVariant EventsListModel::data(const QModelIndex &index, int role) const {
       return QIcon(":/events/" + QString::fromStdString(event.bare_id()).toLower() + ".png");
     return QString::fromStdString(event.HumanName());
   } else { // << regular event node
-    auto sourceStart = index.internalId()-1+index.row();
+    auto parentRow = index.internalId()-1;
+    auto sourceStart = groupRowStart[parentRow]+index.row();
     Event event = GetEvent(createIndex(sourceStart,0));
     if (role == Qt::DecorationRole)
       return QIcon(":/events/" + QString::fromStdString(event.bare_id()).toLower() + ".png");
