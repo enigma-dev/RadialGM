@@ -71,24 +71,27 @@ QVariant EventsListModel::data(const QModelIndex &index, int role) const {
   if (role != Qt::DisplayRole && role != Qt::DecorationRole) return QVariant();
   if (!index.isValid()) return QVariant(); // << invisible root
 
+  size_t sourceStart = 0;
+  size_t rowCount = 0;
   if (IsEventGroup(index)) { // << group node
-    auto sourceStart = groupRowStart[index.row()];
-    Event event = GetEvent(createIndex(sourceStart,0));
-    auto rowCount = groupRowCount[index.row()];
-    if (rowCount > 1) {
-      if (role == Qt::DecorationRole)
-        return QIcon(":/events/" + QString::fromStdString(event.bare_id()).toLower() + "-folder.png");
-      return QString::fromStdString(event.bare_id());
-    }
-    if (role == Qt::DecorationRole)
-      return QIcon(":/events/" + QString::fromStdString(event.bare_id()).toLower() + ".png");
-    return QString::fromStdString(event.HumanName());
+    sourceStart = groupRowStart[index.row()];
+    rowCount = groupRowCount[index.row()];
   } else { // << regular event node
     auto parentRow = index.internalId()-1;
-    auto sourceStart = groupRowStart[parentRow]+index.row();
-    Event event = GetEvent(createIndex(sourceStart,0));
-    if (role == Qt::DecorationRole)
-      return QIcon(":/events/" + QString::fromStdString(event.bare_id()).toLower() + ".png");
+    sourceStart = groupRowStart[parentRow]+index.row();
+  }
+
+  Event event = GetEvent(createIndex(sourceStart,0));
+
+  if (role == Qt::DecorationRole) {
+    auto suffix = (rowCount > 1) ? "-folder.png" : ".png";
+    auto icon = QIcon(":/events/" + QString::fromStdString(event.bare_id()).toLower() + suffix);
+    if (!icon.availableSizes().empty()) return icon;
+    icon = QIcon(":/events/other.png");
+    if (!icon.availableSizes().empty()) return icon;
+    // shit out of luck... return invalid QVariant
+  } else {
+    if (rowCount > 1) return QString::fromStdString(event.bare_id());
     return QString::fromStdString(event.HumanName());
   }
 
