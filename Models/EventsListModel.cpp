@@ -4,6 +4,7 @@
 #include "RepeatedMessageModel.h"
 
 #include <QIcon>
+#include <iostream>
 
 static inline bool IsEventGroup(const QModelIndex &index) {
   if (!index.isValid()) return true; // << invisible root is a group
@@ -64,6 +65,13 @@ void EventsListModel::setSourceModel(QAbstractItemModel* model) {
     // Add the event to the group we found or added above
     modelEvents_[groupIndex].second.push_back(QString::fromStdString(event.HumanName()));
   }
+
+  for (const auto& group : modelEvents_) {
+    std::cout << "Group: " << group.first.toStdString() << std::endl;
+    for (const auto& event : group.second) {
+      std::cout << "  event: " << event.toStdString() << std::endl;
+    }
+  }
 }
 
 QVariant EventsListModel::headerData(int section, Qt::Orientation /*orientation*/, int role) const {
@@ -75,8 +83,13 @@ QVariant EventsListModel::data(const QModelIndex &index, int role) const {
   if (role != Qt::DisplayRole /*&& role != Qt::DecorationRole*/) return QVariant();
   if (!index.isValid()) return QVariant(); // << invisible root
 
-    qDebug() << index.row() << "," << index.column() << Qt::endl;
-  //return modelEvents_[index.row()].second[index.column()];
+  /*if (index.internalId() == -1)
+    return modelEvents_[index.row()].first;
+  else if (modelEvents_[index.internalId()].second.size() > 1)
+    return modelEvents_[index.internalId()].first;
+  else
+    return modelEvents_[index.internalId()].second[index.column()];*/
+  return "ugh";
 }
 
 QModelIndex EventsListModel::index(int row, int column, const QModelIndex &parent) const {
@@ -84,16 +97,23 @@ QModelIndex EventsListModel::index(int row, int column, const QModelIndex &paren
     return QModelIndex();
 
   //if (!parent.isValid()) // << group
-    //createIndex(row, column);
+    //createIndex(row, column, -1);
 
-  return createIndex(row, column);
+  return createIndex(row, column, parent.row());
 }
 
 QModelIndex EventsListModel::parent(const QModelIndex& index) const {
+  if (modelEvents_.size() > index.row() && modelEvents_[index.row()].second.size() > 1) {
+    return createIndex(index.row(), 0);
+  }
   return QModelIndex();
 }
 
 int EventsListModel::rowCount(const QModelIndex &parent) const {
+  //qDebug() << parent.internalId() << Qt::endl;
+  if (!parent.isValid()) {
+    return modelEvents_[parent.internalId()].second.size();
+  }
   return 0;
 }
 
