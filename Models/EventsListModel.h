@@ -10,10 +10,14 @@
 
 class EventsListModel : public QAbstractProxyModel {
  private:
-    EventData* eventData_;
+   EventData* eventData_;
 
-    QMap<size_t, size_t> groupRowStart;
-    QMap<size_t, size_t> groupRowCount;
+   // group name, vector<event names>
+   // In vector so we can access group & events by positions in vectors
+   QVector<QPair<QString, QVector<QString>>> modelEvents_;
+   // Store groups position in vector for fast look up
+   QMap<QString, int> groupIDs_;
+
 
  public:
   EventsListModel(EventData* eventData, QObject* parent = nullptr);

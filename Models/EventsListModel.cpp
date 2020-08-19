@@ -28,17 +28,7 @@ Event EventsListModel::GetEvent(const QModelIndex &index) const {
     arguments_vec.emplace_back(arguments->Data(i).toString().toStdString());
   }
 
-  Event eventDesc = eventData_->get_event(name, arguments_vec);
-
-  QString group = QString::fromStdString(eventDesc.bare_id());
-  QString fullname = QString::fromStdString(eventDesc.HumanName());
-  //if (eventGroups_.contains(group)) {
-    //Qt's const fuxing me
-    //eventGroups_[group] = QPair<int, QSet<QString>>(eventGroups_.size(), QSet<QString>());
-  //}
-  //eventGroups_[group].second.insert(fullname);
-
-  return eventDesc;
+  return eventData_->get_event(name, arguments_vec);
 }
 
 EventsListModel::EventsListModel(EventData* eventData, QObject* parent) :
@@ -47,19 +37,33 @@ EventsListModel::EventsListModel(EventData* eventData, QObject* parent) :
 
 void EventsListModel::setSourceModel(QAbstractItemModel* model) {
   QAbstractProxyModel::setSourceModel(model);
-  int group = 0;
-  auto lastEvent = GetEvent(createIndex(0,0));
-  groupRowStart[group] = 0;
-  groupRowCount[group]++;
-  for (int i = 1; i < sourceModel()->rowCount(QModelIndex()); ++i) {
-    auto event = GetEvent(createIndex(i,0));
-    if (event.bare_id() != lastEvent.bare_id()) {
-      lastEvent = event;
-      groupRowStart[++group] = i;
+
+  // For each event in source model
+  for (int i = 0; i < sourceModel()->rowCount(QModelIndex()); ++i) {
+    // Get the event info from the source model
+    const Event& event = GetEvent(createIndex(i, 0));
+    QString group = QString::fromStdString(event.bare_id());
+
+    // Look for a group matching the current event
+    int groupIndex = 0;
+    for (auto& idx : modelEvents_) {
+      if (idx.first == group) {
+        break;
+      }
+      groupIndex++;
     }
-    ++groupRowCount[group];
+
+    // If no matching group found add one
+    if (groupIndex >= modelEvents_.size()) {
+      groupIndex = modelEvents_.size();
+      modelEvents_.push_back({ group, {} });
+      // Store the position of the group in the vector in a map for quick lookups
+      groupIDs_[group] = groupIndex;
+    }
+
+    // Add the event to the group we found or added above
+    modelEvents_[groupIndex].second.push_back(QString::fromStdString(event.HumanName()));
   }
-  qDebug() << groupRowStart << groupRowCount;
 }
 
 QVariant EventsListModel::headerData(int section, Qt::Orientation /*orientation*/, int role) const {
@@ -68,65 +72,28 @@ QVariant EventsListModel::headerData(int section, Qt::Orientation /*orientation*
 }
 
 QVariant EventsListModel::data(const QModelIndex &index, int role) const {
-  if (role != Qt::DisplayRole && role != Qt::DecorationRole) return QVariant();
+  if (role != Qt::DisplayRole /*&& role != Qt::DecorationRole*/) return QVariant();
   if (!index.isValid()) return QVariant(); // << invisible root
 
-  size_t sourceStart = 0;
-  size_t rowCount = 0;
-  if (IsEventGroup(index)) { // << group node
-    sourceStart = groupRowStart[index.row()];
-    rowCount = groupRowCount[index.row()];
-  } else { // << regular event node
-    auto parentRow = index.internalId()-1;
-    sourceStart = groupRowStart[parentRow]+index.row();
-  }
-
-  Event event = GetEvent(createIndex(sourceStart,0));
-
-  if (role == Qt::DecorationRole) {
-    auto suffix = (rowCount > 1) ? "-folder.png" : ".png";
-    auto icon = QIcon(":/events/" + QString::fromStdString(event.bare_id()).toLower() + suffix);
-    if (!icon.availableSizes().empty()) return icon;
-    icon = QIcon(":/events/other.png");
-    if (!icon.availableSizes().empty()) return icon;
-    // shit out of luck... return invalid QVariant
-  } else {
-    if (rowCount > 1) return QString::fromStdString(event.bare_id());
-    return QString::fromStdString(event.HumanName());
-  }
-
-  return QVariant(); // << unknown
+    qDebug() << index.row() << "," << index.column() << Qt::endl;
+  //return modelEvents_[index.row()].second[index.column()];
 }
 
 QModelIndex EventsListModel::index(int row, int column, const QModelIndex &parent) const {
   if (!hasIndex(row, column, parent))
     return QModelIndex();
 
-  if (!parent.isValid()) // << group
-    createIndex(row, column);
+  //if (!parent.isValid()) // << group
+    //createIndex(row, column);
 
-  return createIndex(row, column, parent.row()+1);
+  return createIndex(row, column);
 }
 
 QModelIndex EventsListModel::parent(const QModelIndex& index) const {
-  //QString group = data(index, Qt::UserRole).toString();
-
-  if (index.internalId()) { // << regular event
-    auto parentRow = index.internalId()-1;
-    return createIndex(parentRow, 0);
-  }
-
   return QModelIndex();
 }
 
 int EventsListModel::rowCount(const QModelIndex &parent) const {
-  if (parent.column() > 0) return 0;
-
-  if (!parent.isValid()) return groupRowStart.size();
-  if (parent.parent().isValid()) return 0;
-
-  auto rows = groupRowCount[parent.row()];
-  if (rows > 1) return rows;
   return 0;
 }
 
