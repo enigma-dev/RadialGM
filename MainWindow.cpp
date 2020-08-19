@@ -575,12 +575,15 @@ void MainWindow::on_actionDelete_triggered() {
     selectedNames += (node == *selectedNodes.begin() ? "" : ", ") + QString::fromStdString(node->name());
   }
 
-  QMessageBox::StandardButton reply;
-  reply = QMessageBox::question(
-      this, tr("Delete Resources"),
-      tr("Do you want to delete the following resources from the project?\n%0").arg(selectedNames),
-      QMessageBox::Yes | QMessageBox::No);
-  if (reply != QMessageBox::Yes) return;
+  QMessageBox mb(
+    QMessageBox::Icon::Question,
+    tr("Delete Resources"),
+    tr("Do you want to delete the selected resources from the project?"),
+    QMessageBox::Yes | QMessageBox::No, this
+  );
+  mb.setDetailedText(selectedNames);
+  int ret = mb.exec();
+  if (ret != QMessageBox::Yes) return;
 
   // close subwindows
   for (auto node : selectedNodes) {
