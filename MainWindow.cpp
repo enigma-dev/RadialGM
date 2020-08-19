@@ -671,7 +671,7 @@ void MainWindow::on_actionDelete_triggered() {
   QMessageBox mb(
     QMessageBox::Icon::Question,
     tr("Delete Resources"),
-    tr("Do you want to delete the following resources from the project?"),
+    tr("Do you want to delete the selected resources from the project?"),
     QMessageBox::Yes | QMessageBox::No, this
   );
   mb.setDetailedText(selectedNames);
