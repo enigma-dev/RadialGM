@@ -83,37 +83,45 @@ QVariant EventsListModel::data(const QModelIndex &index, int role) const {
   if (role != Qt::DisplayRole /*&& role != Qt::DecorationRole*/) return QVariant();
   if (!index.isValid()) return QVariant(); // << invisible root
 
-  /*if (index.internalId() == -1)
+  if (index.internalId() == -1)
     return modelEvents_[index.row()].first;
   else if (modelEvents_[index.internalId()].second.size() > 1)
     return modelEvents_[index.internalId()].first;
   else
-    return modelEvents_[index.internalId()].second[index.column()];*/
-  return "ugh";
+    return modelEvents_[index.internalId()].second[index.column()];
 }
 
 QModelIndex EventsListModel::index(int row, int column, const QModelIndex &parent) const {
   if (!hasIndex(row, column, parent))
     return QModelIndex();
 
-  //if (!parent.isValid()) // << group
-    //createIndex(row, column, -1);
+  if (!parent.isValid()) // << group
+    createIndex(row, column, -1);
 
   return createIndex(row, column, parent.row());
 }
 
 QModelIndex EventsListModel::parent(const QModelIndex& index) const {
+  if (!index.isValid())
+    return QModelIndex();
+
   if (modelEvents_.size() > index.row() && modelEvents_[index.row()].second.size() > 1) {
-    return createIndex(index.row(), 0);
+    return createIndex(index.row(), 0, -1);
   }
+
   return QModelIndex();
 }
 
 int EventsListModel::rowCount(const QModelIndex &parent) const {
+  if (parent.column() > 0)
+    return 0;
+
   //qDebug() << parent.internalId() << Qt::endl;
-  if (!parent.isValid()) {
+  if (!parent.isValid())
+    return modelEvents_.size();
+
+  if (parent.internalId() != -1)
     return modelEvents_[parent.internalId()].second.size();
-  }
   return 0;
 }
 
