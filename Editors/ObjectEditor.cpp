@@ -50,7 +50,10 @@ ObjectEditor::ObjectEditor(MessageModel* model, QWidget* parent) : BaseEditor(mo
 
   EventTypesListModel* m = new EventTypesListModel(MainWindow::GetEventData(), this);
   QMenuView* eventsMenu = new QMenuView(this);
-  eventsMenu->setModel(m);
+  EventTypesListSortFilterProxyModel* mm = new EventTypesListSortFilterProxyModel(m);
+  mm->setSourceModel(m);
+  mm->sort(0);
+  eventsMenu->setModel(mm);
   _ui->addEventButton->setMenu(eventsMenu);
 
   RebindSubModels();
