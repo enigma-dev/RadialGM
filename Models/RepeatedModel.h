@@ -95,7 +95,8 @@ class RepeatedModel : public ProtoModel {
     return true;
   };
 
-  virtual bool removeRows(int position, int count, const QModelIndex & /*parent*/) override {
+  virtual bool removeRows(int position, int count, const QModelIndex& parent = QModelIndex()) override {
+    Q_UNUSED(parent);
     RowRemovalOperation remover(this);
     remover.RemoveRows(position, count);
     return true;

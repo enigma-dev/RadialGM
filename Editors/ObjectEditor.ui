@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>353</width>
+    <width>278</width>
     <height>473</height>
    </rect>
   </property>
@@ -124,6 +124,9 @@
              <iconset resource="../images.qrc">
               <normaloff>:/events/event.png</normaloff>:/events/event.png</iconset>
             </property>
+            <property name="popupMode">
+             <enum>QToolButton::MenuButtonPopup</enum>
+            </property>
            </widget>
           </item>
           <item>
@@ -152,26 +155,6 @@
             </property>
             <property name="arrowType">
              <enum>Qt::NoArrow</enum>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="undoButton">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="toolTip">
-             <string>Undo</string>
-            </property>
-            <property name="text">
-             <string>Undo</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../images.qrc">
-              <normaloff>:/actions/undo.png</normaloff>:/actions/undo.png</iconset>
             </property>
            </widget>
           </item>
