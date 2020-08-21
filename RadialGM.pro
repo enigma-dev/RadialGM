@@ -127,6 +127,7 @@ HEADERS += \
     Editors/TimelineEditor.h \
     Editors/RoomEditor.h \
     Editors/SettingsEditor.h \
+    Models/EventTypesListModel.h \
     Models/EventsListModel.h \
     Models/MessageModel.h \
     Models/RepeatedImageModel.h \

@@ -2,6 +2,8 @@
 #include "Models/RepeatedStringModel.h"
 #include "ObjectEditor.h"
 #include "MainWindow.h"
+#include "Components/QMenuView.h"
+#include "Models/EventTypesListModel.h"
 
 #include "ui_ObjectEditor.h"
 
@@ -45,6 +47,11 @@ ObjectEditor::ObjectEditor(MessageModel* model, QWidget* parent) : BaseEditor(mo
   connect(_ui->saveButton, &QAbstractButton::pressed, this, &BaseEditor::OnSave);
 
   _eventsModel = new EventsListModel(MainWindow::GetEventData(), this);
+
+  EventTypesListModel* m = new EventTypesListModel(MainWindow::GetEventData(), this);
+  QMenuView* eventsMenu = new QMenuView(this);
+  eventsMenu->setModel(m);
+  _ui->addEventButton->setMenu(eventsMenu);
 
   RebindSubModels();
 }
