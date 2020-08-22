@@ -352,6 +352,16 @@
          </layout>
         </widget>
        </item>
+       <item>
+        <spacer name="propertiesBottomSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Expanding</enum>
+         </property>
+        </spacer>
+       </item>
       </layout>
      </item>
      <item>
