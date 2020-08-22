@@ -39,10 +39,6 @@ ObjectEditor::ObjectEditor(MessageModel* model, QWidget* parent) : BaseEditor(mo
 
   // Tell frankensteined widget to resize to proper size
   resize(_codeEditor->geometry().width() + eventsWidget->geometry().width(), _codeEditor->geometry().height());
-  connect(_ui->eventsList, &QAbstractItemView::clicked, [=](const QModelIndex& index) {
-    SetCurrentEditor(index.row());
-    //_ui->stepBox->setValue(_momentsModel->Data(index.row(), Timeline::Moment::kStepFieldNumber).toInt());
-  });
 
   connect(_ui->saveButton, &QAbstractButton::pressed, this, &BaseEditor::OnSave);
 
@@ -69,6 +65,10 @@ void ObjectEditor::RebindSubModels() {
   sortedEvents->setSourceModel(_eventsModel);
   sortedEvents->sort(0);
   _ui->eventsList->setModel(sortedEvents);
+
+  connect(_ui->eventsList, &QAbstractItemView::clicked, [=](const QModelIndex& index) {
+    SetCurrentEditor(sortedEvents->mapFromSource(_eventsModel->index(index.row(), 0)).row());
+  });
 
   for (int event = 0; event < _eventsModel->rowCount(); ++event) {
     BindEventEditor(event);
