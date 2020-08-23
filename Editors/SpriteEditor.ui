@@ -17,7 +17,7 @@
    <iconset resource="../images.qrc">
     <normaloff>:/resources/sprite.png</normaloff>:/resources/sprite.png</iconset>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3">
+  <layout class="QVBoxLayout" name="mainLayout">
    <property name="spacing">
     <number>0</number>
    </property>
@@ -100,7 +100,7 @@
          <property name="title">
           <string>Collision Shape</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
+         <layout class="QVBoxLayout" name="collisionShapeLayout">
           <item>
            <widget class="QComboBox" name="collisionShapeComboBox">
             <item>
@@ -157,7 +157,7 @@
          <property name="title">
           <string>Origin</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,1,0,1">
+         <layout class="QGridLayout" name="originLayout" columnstretch="0,1,0,1">
           <item row="0" column="0">
            <widget class="QLabel" name="originXLabel">
             <property name="sizePolicy">
@@ -240,7 +240,7 @@
          <property name="checkable">
           <bool>false</bool>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout">
+         <layout class="QVBoxLayout" name="bboxLayout">
           <property name="leftMargin">
            <number>9</number>
           </property>
