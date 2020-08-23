@@ -21,6 +21,7 @@ BackgroundEditor::BackgroundEditor(MessageModel* model, QWidget* parent)
 
   connect(_ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
 
+  _nodeMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
   _resMapper->addMapping(_ui->smoothCheckBox, Background::kSmoothEdgesFieldNumber);
   _resMapper->addMapping(_ui->preloadCheckBox, Background::kPreloadFieldNumber);
   _resMapper->addMapping(_ui->tilesetGroupBox, Background::kUseAsTilesetFieldNumber);
