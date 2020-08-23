@@ -82,17 +82,11 @@ const QStringList& EventArgumentsDialog::GetArguments() const {
 
 void EventArgumentsDialog::done(int r) {
  for (const QWidget* w : widgets_) {
-   QString widgetType = w->metaObject()->className();
-   if (widgetType == "QSpinBox") {
-     arguments_.append(QString(reinterpret_cast<const QSpinBox*>(w)->value()));
-   } else if (widgetType == "QComboBox") {
-     arguments_.append(QString(reinterpret_cast<const QComboBox*>(w)->currentText()));
-   } else if (widgetType == "QLineEdit") {
-     arguments_.append(QString(reinterpret_cast<const QLineEdit*>(w)->text()));
-   } else {
-     qDebug() << "Unknown widget type: " << widgetType;
-     arguments_.append("");
-   }
+QVariant argument = w->metaObject()->userProperty()->read(w);
+QString argstr = "";
+if (argument.isValid() && argument.type() == QMetaType::QString)
+  argstr = argument.toString();
+arguments_.append(argstr);
  }
 
  qDebug() << "argumemts sixe: " << arguments_.size();
