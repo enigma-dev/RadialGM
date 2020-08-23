@@ -68,6 +68,7 @@ LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
         -lgrpc++
 
 SOURCES += \
+    Dialogs/EventArgumentsDialog.cpp \
     Dialogs/TimelineChangeMoment.cpp \
     Editors/ShaderEditor.cpp \
     Editors/SpriteEditor.cpp \
@@ -113,6 +114,7 @@ SOURCES += \
     Models/TreeSortFilterProxyModel.cpp
 
 HEADERS += \
+    Dialogs/EventArgumentsDialog.h \
     Dialogs/TimelineChangeMoment.h \
     Editors/ShaderEditor.h \
     Editors/SpriteEditor.h \

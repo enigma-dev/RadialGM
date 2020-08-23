@@ -40,6 +40,17 @@ class EventTypesListModel : public QAbstractListModel {
       case Qt::ToolTipRole: return QString::fromStdString(eventData_->events()[index.row()].HumanDescription());
       case Qt::UserRole: return eventData_->events()[index.row()].event->type() != 5; //FIXME: mark hidden events in ey
       case Qt::UserRole+1: return QString::fromStdString(eventData_->events()[index.row()].GroupName());
+      case Qt::UserRole+2: {
+        QStringList args;
+        for (const auto& str : eventData_->events()[index.row()].event->parameters()) {
+          args.append(QString::fromStdString(str));
+        }
+        return args;
+      }
+      case Qt::UserRole+3: {
+        return QString::fromStdString(eventData_->events()[index.row()].bare_id());
+      }
+
       default: return QVariant();
 
     }

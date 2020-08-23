@@ -1,9 +1,10 @@
 #include "Models/RepeatedMessageModel.h"
 #include "Models/RepeatedStringModel.h"
+#include "Models/EventTypesListModel.h"
+#include "Dialogs/EventArgumentsDialog.h"
 #include "ObjectEditor.h"
 #include "MainWindow.h"
 #include "Components/QMenuView.h"
-#include "Models/EventTypesListModel.h"
 
 #include "ui_ObjectEditor.h"
 
@@ -51,6 +52,32 @@ ObjectEditor::ObjectEditor(MessageModel* model, QWidget* parent) : BaseEditor(mo
   mm->sort(0);
   eventsMenu->setModel(mm);
   _ui->addEventButton->setMenu(eventsMenu);
+
+  connect(eventsMenu, &QMenuView::triggered, [=](const QModelIndex& index) {
+    QStringList args = mm->data(index, Qt::UserRole+2).toStringList();
+    EventArgumentsDialog* dialog;
+    if (args.size() > 0) {
+      dialog = new EventArgumentsDialog(this, args);
+      dialog->open();
+    }
+
+    qDebug() << dialog->result();
+
+    if (args.size() == 0 || dialog->result() == 0) {
+      qDebug() << "wut1";
+      Object::EgmEvent event;
+      event.set_id(mm->data(index, Qt::UserRole+3).toString().toStdString());
+      for (const QString& arg : dialog->GetArguments()) {
+        qDebug() << "wut2";
+        std::string* s = event.add_arguments();
+        s->assign(arg.toStdString());
+        qDebug() << QString::fromStdString(*s);
+      }
+
+      AddEvent(event);
+    }
+
+  });
 
   RebindSubModels();
 }
