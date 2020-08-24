@@ -260,7 +260,7 @@
           <item>
            <layout class="QGridLayout" name="bboxDimensionsLayout">
             <property name="spacing">
-             <number>4</number>
+             <number>0</number>
             </property>
             <item row="4" column="0">
              <widget class="QLabel" name="bottomLabel">
