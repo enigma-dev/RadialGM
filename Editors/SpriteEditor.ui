@@ -169,9 +169,6 @@
             <property name="text">
              <string>&amp;X</string>
             </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
             <property name="buddy">
              <cstring>originXSpinBox</cstring>
             </property>
@@ -201,9 +198,6 @@
            <widget class="QLabel" name="originYLabel">
             <property name="text">
              <string>&amp;Y</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
             </property>
             <property name="buddy">
              <cstring>originYSpinBox</cstring>
@@ -273,9 +267,6 @@
               <property name="text">
                <string>&amp;Bottom</string>
               </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
               <property name="buddy">
                <cstring>bottomSpinBox</cstring>
               </property>
@@ -286,9 +277,6 @@
               <property name="text">
                <string>&amp;Left</string>
               </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
               <property name="buddy">
                <cstring>leftSpinBox</cstring>
               </property>
@@ -298,9 +286,6 @@
              <widget class="QLabel" name="topLabel">
               <property name="text">
                <string>&amp;Top</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
               <property name="buddy">
                <cstring>topSpinBox</cstring>
@@ -317,9 +302,6 @@
              <widget class="QLabel" name="rightLabel">
               <property name="text">
                <string>&amp;Right</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
               <property name="buddy">
                <cstring>rightSpinBox</cstring>
