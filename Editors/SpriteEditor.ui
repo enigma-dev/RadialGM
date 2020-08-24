@@ -17,7 +17,7 @@
    <iconset resource="../images.qrc">
     <normaloff>:/resources/sprite.png</normaloff>:/resources/sprite.png</iconset>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3">
+  <layout class="QVBoxLayout" name="mainLayout">
    <property name="spacing">
     <number>0</number>
    </property>
@@ -70,12 +70,15 @@
       <number>4</number>
      </property>
      <item>
-      <layout class="QVBoxLayout" name="propertiesLayout">
-       <property name="spacing">
-        <number>4</number>
-       </property>
+      <layout class="QFormLayout" name="propertiesLayout">
        <property name="sizeConstraint">
         <enum>QLayout::SetDefaultConstraint</enum>
+       </property>
+       <property name="horizontalSpacing">
+        <number>4</number>
+       </property>
+       <property name="verticalSpacing">
+        <number>4</number>
        </property>
        <property name="leftMargin">
         <number>4</number>
@@ -86,14 +89,83 @@
        <property name="bottomMargin">
         <number>4</number>
        </property>
-       <item>
+       <item row="2" column="0" colspan="2">
+        <widget class="QGroupBox" name="collisionShapeGroupBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="title">
+          <string>Collision Shape</string>
+         </property>
+         <layout class="QVBoxLayout" name="collisionShapeLayout">
+          <item>
+           <widget class="QComboBox" name="collisionShapeComboBox">
+            <item>
+             <property name="text">
+              <string>Precise</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Rectangle</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Disk</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Diamond</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Polygon</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="nameLabel">
+         <property name="text">
+          <string>&amp;Name</string>
+         </property>
+         <property name="buddy">
+          <cstring>nameEdit</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="nameEdit"/>
+       </item>
+       <item row="1" column="0" colspan="2">
         <widget class="QGroupBox" name="originGroupBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
           <string>Origin</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_2">
+         <layout class="QGridLayout" name="originLayout" columnstretch="0,1,0,1">
           <item row="0" column="0">
            <widget class="QLabel" name="originXLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>&amp;X</string>
             </property>
@@ -148,53 +220,21 @@
          </layout>
         </widget>
        </item>
-       <item>
-        <widget class="QGroupBox" name="collisionShapeGroupBox">
-         <property name="title">
-          <string>Collision Shape</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
-          <item>
-           <widget class="QComboBox" name="collisionShapeComboBox">
-            <item>
-             <property name="text">
-              <string>Precise</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Rectangle</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Disk</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Diamond</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Polygon</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
+       <item row="3" column="0" colspan="2">
         <widget class="QGroupBox" name="boundingboxGroup">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
           <string>Bounding Box</string>
          </property>
          <property name="checkable">
           <bool>false</bool>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout">
+         <layout class="QVBoxLayout" name="bboxLayout">
           <property name="leftMargin">
            <number>9</number>
           </property>
@@ -222,63 +262,62 @@
             <property name="spacing">
              <number>0</number>
             </property>
-            <item row="3" column="1">
-             <widget class="QSpinBox" name="topSpinBox"/>
-            </item>
             <item row="4" column="0">
              <widget class="QLabel" name="bottomLabel">
               <property name="text">
-               <string>Bottom</string>
+               <string>&amp;Bottom</string>
               </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="topLabel">
-              <property name="text">
-               <string>Top</string>
+              <property name="buddy">
+               <cstring>bottomSpinBox</cstring>
               </property>
              </widget>
             </item>
             <item row="0" column="0">
              <widget class="QLabel" name="leftLabel">
               <property name="text">
-               <string>Left</string>
+               <string>&amp;Left</string>
+              </property>
+              <property name="buddy">
+               <cstring>leftSpinBox</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="topLabel">
+              <property name="text">
+               <string>&amp;Top</string>
+              </property>
+              <property name="buddy">
+               <cstring>topSpinBox</cstring>
               </property>
              </widget>
             </item>
             <item row="0" column="1">
              <widget class="QSpinBox" name="leftSpinBox"/>
             </item>
-            <item row="4" column="1">
-             <widget class="QSpinBox" name="bottomSpinBox"/>
+            <item row="2" column="1">
+             <widget class="QSpinBox" name="topSpinBox"/>
             </item>
-            <item row="2" column="0">
+            <item row="1" column="0">
              <widget class="QLabel" name="rightLabel">
               <property name="text">
-               <string>Right</string>
+               <string>&amp;Right</string>
+              </property>
+              <property name="buddy">
+               <cstring>rightSpinBox</cstring>
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
+            <item row="1" column="1">
              <widget class="QSpinBox" name="rightSpinBox"/>
+            </item>
+            <item row="4" column="1">
+             <widget class="QSpinBox" name="bottomSpinBox"/>
             </item>
            </layout>
           </item>
          </layout>
         </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
        </item>
       </layout>
      </item>
