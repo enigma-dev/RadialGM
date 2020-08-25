@@ -14,9 +14,6 @@ BaseEditor::BaseEditor(MessageModel* treeNodeModel, QWidget* parent)
   _resMapper->GetModel()->BackupModel(this);
 
   connect(_model, &QAbstractItemModel::modelReset, [this]() { this->RebindSubModels(); });
-
-  connect(this, &BaseEditor::FocusGained, [=]() { _hasFocus = true; });
-  connect(this, &BaseEditor::FocusLost, [=]() { _hasFocus = false; });
 }
 
 void BaseEditor::closeEvent(QCloseEvent* event) {
@@ -41,8 +38,6 @@ void BaseEditor::closeEvent(QCloseEvent* event) {
   _resMapper->SetDirty(false);
   event->accept();
 }
-
-bool BaseEditor::HasFocus() { return _hasFocus; }
 
 void BaseEditor::ReplaceBuffer(google::protobuf::Message* buffer) { _resMapper->ReplaceBuffer(buffer); }
 

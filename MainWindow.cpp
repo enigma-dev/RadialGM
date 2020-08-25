@@ -162,7 +162,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
   this->_recentFiles = new RecentFiles(this, this->_ui->menuRecent, this->_ui->actionClearRecentMenu);
 
   _ui->mdiArea->setBackground(QImage(":/banner.png"));
-  connect(_ui->mdiArea, &QMdiArea::subWindowActivated, this, &MainWindow::MDIWindowChanged);
   connect(_ui->menuWindow, &QMenu::aboutToShow, this, &MainWindow::updateWindowMenu);
 
   auto settingsButton = static_cast<QToolButton *>(_ui->mainToolBar->widgetForAction(_ui->actionSettings));
@@ -277,18 +276,6 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
 
   subWindow->show();
   _ui->mdiArea->setActiveSubWindow(subWindow);
-}
-
-void MainWindow::MDIWindowChanged(QMdiSubWindow *window) {
-  for (QMdiSubWindow *subWindow : _subWindows) {
-    if (subWindow == nullptr) continue;
-    BaseEditor *editor = static_cast<BaseEditor *>(subWindow->widget());
-    if (window == subWindow) {
-      emit editor->FocusGained();
-    } else if (editor->HasFocus()) {
-      emit editor->FocusLost();
-    }
-  }
 }
 
 void MainWindow::updateWindowMenu() {
@@ -589,12 +576,15 @@ void MainWindow::on_actionDelete_triggered() {
     selectedNames += (node == *selectedNodes.begin() ? "" : ", ") + QString::fromStdString(node->name());
   }
 
-  QMessageBox::StandardButton reply;
-  reply = QMessageBox::question(
-      this, tr("Delete Resources"),
-      tr("Do you want to delete the following resources from the project?\n%0").arg(selectedNames),
-      QMessageBox::Yes | QMessageBox::No);
-  if (reply != QMessageBox::Yes) return;
+  QMessageBox mb(
+    QMessageBox::Icon::Question,
+    tr("Delete Resources"),
+    tr("Do you want to delete the selected resources from the project?"),
+    QMessageBox::Yes | QMessageBox::No, this
+  );
+  mb.setDetailedText(selectedNames);
+  int ret = mb.exec();
+  if (ret != QMessageBox::Yes) return;
 
   // close subwindows
   for (auto node : selectedNodes) {

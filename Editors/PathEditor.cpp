@@ -84,9 +84,6 @@ PathEditor::PathEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   connect(ySnap, QOverload<int>::of(&QSpinBox::valueChanged), _ui->pathPreviewBackground,
           &AssetScrollAreaBackground::SetGridVSnap);
 
-  connect(this, &BaseEditor::FocusGained, [this]() { _ui->pathPreviewBackground->SetParentHasFocus(true); });
-  connect(this, &BaseEditor::FocusLost, [this]() { _ui->pathPreviewBackground->SetParentHasFocus(false); });
-
   _nodeMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
 
   _resMapper->addMapping(_ui->smoothCheckBox, Path::kSmoothFieldNumber);

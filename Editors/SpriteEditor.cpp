@@ -34,6 +34,7 @@ SpriteEditor::SpriteEditor(MessageModel* model, QWidget* parent)
   _ui->mainToolBar->addWidget(showOrigin);
   connect(showOrigin, &QCheckBox::stateChanged, _ui->subimagePreview, &SpriteView::SetShowOrigin);
 
+  _nodeMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
   _resMapper->addMapping(_ui->originXSpinBox, Sprite::kOriginXFieldNumber);
   _resMapper->addMapping(_ui->originYSpinBox, Sprite::kOriginYFieldNumber);
   _resMapper->addMapping(_ui->collisionShapeGroupBox, Sprite::kShapeFieldNumber, "currentIndex");

@@ -40,7 +40,6 @@ class AssetScrollAreaBackground : public QWidget {
   void SetGridVisible(bool visible);
   void SetGridHSnap(int hSnap);
   void SetGridVSnap(int vSnap);
-  void SetParentHasFocus(bool focus);
 
  signals:
   void MouseMoved(int x, int y);
@@ -66,7 +65,6 @@ class AssetScrollAreaBackground : public QWidget {
   QPoint _userDrawOffset;
   QSet<int> _pressedKeys;
   QColor _backgroundColor;
-  bool _parentHasFocus;
   int _viewMoveSpeed;
 };
 
