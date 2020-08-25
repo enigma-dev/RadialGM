@@ -10,6 +10,7 @@
 #include <QDialogButtonBox>
 #include <QToolButton>
 #include <QLineEdit>
+#include <QMetaProperty>
 
 EventArgumentsDialog::EventArgumentsDialog(QWidget* parent, const QStringList& arguments)
   : QDialog(parent) {
@@ -81,17 +82,17 @@ const QStringList& EventArgumentsDialog::GetArguments() const {
 }
 
 void EventArgumentsDialog::done(int r) {
- for (const QWidget* w : widgets_) {
-QVariant argument = w->metaObject()->userProperty()->read(w);
-QString argstr = "";
-if (argument.isValid() && argument.type() == QMetaType::QString)
-  argstr = argument.toString();
-arguments_.append(argstr);
- }
+  for (const QWidget* w : widgets_) {
+    QVariant argument = w->metaObject()->userProperty().read(w);
+    QString argstr = "";
+    if (argument.isValid() && (QMetaType::Type)argument.type() == QMetaType::QString)
+      argstr = argument.toString();
+    arguments_.append(argstr);
+  }
 
- qDebug() << "argumemts sixe: " << arguments_.size();
+  qDebug() << "argumemts sixe: " << arguments_.size();
 
- QDialog::done(r);
+  QDialog::done(r);
 }
 
 QSize EventArgumentsDialog::sizeHint() const {
