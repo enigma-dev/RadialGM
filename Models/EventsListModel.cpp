@@ -4,7 +4,6 @@
 #include "RepeatedMessageModel.h"
 
 #include <QIcon>
-#include <iostream>
 
 Event EventsListModel::GetEvent(const QModelIndex &index) const {
   auto sourceIndex = sourceModel()->index(index.row(), Object::EgmEvent::kIdFieldNumber);
@@ -27,7 +26,7 @@ Event EventsListModel::GetEvent(const QModelIndex &index) const {
 }
 
 EventsListModel::EventsListModel(EventData* eventData, QObject* parent) :
-  QAbstractProxyModel(parent), eventData_(eventData) {
+  QIdentityProxyModel(parent), eventData_(eventData) {
 }
 
 QVariant EventsListModel::headerData(int section, Qt::Orientation /*orientation*/, int role) const {
@@ -38,7 +37,7 @@ QVariant EventsListModel::headerData(int section, Qt::Orientation /*orientation*
 QVariant EventsListModel::data(const QModelIndex &index, int role) const {
   if (!index.isValid()) return QVariant(); // << invisible root
 
-  const Event event = GetEvent(index);
+  Event event = GetEvent(index);
 
   switch (role) {
     case Qt::DisplayRole: return QString::fromStdString(event.HumanName());
@@ -57,26 +56,6 @@ QVariant EventsListModel::data(const QModelIndex &index, int role) const {
   }
 }
 
-QModelIndex EventsListModel::index(int row, int column, const QModelIndex& /*parent*/) const {
-  return createIndex(row, column);
-}
-
-QModelIndex EventsListModel::parent(const QModelIndex& index) const {
-  return sourceModel()->parent(index);
-}
-
-int EventsListModel::rowCount(const QModelIndex &parent) const {
-  return sourceModel()->rowCount(parent);
-}
-
-int EventsListModel::columnCount(const QModelIndex &parent) const {
-  return (parent.isValid()) ? 0 : 1;
-}
-
-QModelIndex EventsListModel::mapFromSource(const QModelIndex &sourceIndex) const {
-  return index(sourceIndex.row(), sourceIndex.column());
-}
-
-QModelIndex EventsListModel::mapToSource(const QModelIndex &proxyIndex) const {
-  return sourceModel()->index(proxyIndex.row(), proxyIndex.column());
+int EventsListModel::columnCount(const QModelIndex &/*parent*/) const {
+  return 1;
 }
