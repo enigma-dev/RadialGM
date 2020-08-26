@@ -119,12 +119,18 @@
      <property name="text">
       <string>Remove file at end of game</string>
      </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
    <item row="6" column="0" colspan="2">
     <widget class="QCheckBox" name="freeMemoryCheckBox">
      <property name="text">
       <string>Free memory after export</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
@@ -171,6 +177,9 @@
         <property name="text">
          <string>Temporary directory</string>
         </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
         <attribute name="buttonGroup">
          <string notr="true">buttonGroup</string>
         </attribute>
@@ -180,6 +189,9 @@
        <widget class="QRadioButton" name="sameFolderButton">
         <property name="text">
          <string>Same folder as executable</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
         <attribute name="buttonGroup">
          <string notr="true">buttonGroup</string>
