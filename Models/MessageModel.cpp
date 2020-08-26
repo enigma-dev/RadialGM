@@ -179,7 +179,7 @@ QModelIndex MessageModel::index(int row, int column, const QModelIndex & /*paren
 }
 
 Qt::ItemFlags MessageModel::flags(const QModelIndex &index) const {
-  if (!index.isValid()) return nullptr;
+  if (!index.isValid()) return Qt::NoItemFlags;
   auto flags = QAbstractItemModel::flags(index);
   // Row 0 isn't a valid field in messages. We use it as header data
   if (index.row() > 0) flags |= Qt::ItemIsEditable;
