@@ -562,8 +562,8 @@ void MainWindow::on_actionShowDiagnosticInspector_triggered() {
 
 void MainWindow::on_actionAbout_triggered() {
   QMessageBox aboutBox(QMessageBox::Information, tr("About"),
-                       tr("ENIGMA is a free, open-source, and cross-platform game engine."), QMessageBox::Ok, this,
-                       nullptr);
+                       tr("ENIGMA is a free, open-source, and cross-platform game engine."),
+                       QMessageBox::Ok, this);
   QAbstractButton *aboutQtButton = aboutBox.addButton(tr("About Qt"), QMessageBox::HelpRole);
   aboutBox.exec();
 
