@@ -34,7 +34,7 @@ bool ProtoModel::IsDirty() { return _dirty; }
 QModelIndex ProtoModel::parent(const QModelIndex & /*index*/) const { return QModelIndex(); }
 
 Qt::ItemFlags ProtoModel::flags(const QModelIndex &index) const {
-  if (!index.isValid()) return nullptr;
+  if (!index.isValid()) return Qt::NoItemFlags;
   auto flags = QAbstractItemModel::flags(index);
   flags |= Qt::ItemIsEditable;
   return flags;
