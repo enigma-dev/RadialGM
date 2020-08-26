@@ -77,7 +77,6 @@ public:
           sourceModel()->data(source_right, Qt::DisplayRole).toString();
     }
 
-    //if (leftGroup.isEmpty() && !rightGroup.isEmpty()) return false;
     return leftGroup < rightGroup;
   }
 };

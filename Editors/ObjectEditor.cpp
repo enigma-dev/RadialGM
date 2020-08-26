@@ -51,32 +51,33 @@ ObjectEditor::ObjectEditor(MessageModel* model, QWidget* parent) : BaseEditor(mo
   mm->setSourceModel(m);
   mm->sort(0);
   eventsMenu->setModel(mm);
+  eventsMenu->setToolTipsVisible(true);
   _ui->addEventButton->setMenu(eventsMenu);
 
   connect(eventsMenu, &QMenuView::triggered, [=](const QModelIndex& index) {
     QStringList args = mm->data(index, Qt::UserRole+2).toStringList();
-    EventArgumentsDialog* dialog;
+    EventArgumentsDialog* dialog = nullptr;
     if (args.size() > 0) {
       dialog = new EventArgumentsDialog(this, args);
       dialog->open();
-    }
 
-    qDebug() << dialog->result();
+      connect(dialog, &QDialog::accepted, [=]() {
+        if (dialog->result() == QDialog::Accepted) {
+          Object::EgmEvent event;
+          event.set_id(mm->data(index, Qt::UserRole+3).toString().toStdString());
+          for (const QString& arg : dialog->GetArguments()) {
+            std::string* s = event.add_arguments();
+            s->assign(arg.toStdString());
+          }
 
-    if (args.size() == 0 || dialog->result() == 0) {
-      qDebug() << "wut1";
+          AddEvent(event);
+        }
+      });
+    } else {
       Object::EgmEvent event;
       event.set_id(mm->data(index, Qt::UserRole+3).toString().toStdString());
-      for (const QString& arg : dialog->GetArguments()) {
-        qDebug() << "wut2";
-        std::string* s = event.add_arguments();
-        s->assign(arg.toStdString());
-        qDebug() << QString::fromStdString(*s);
-      }
-
       AddEvent(event);
     }
-
   });
 
   RebindSubModels();
@@ -127,10 +128,14 @@ void ObjectEditor::ChangeEvent(int idx, Object::EgmEvent event) {
 
   size_t argc = 0;
   argsModel->removeRows(0, argsModel->rowCount()); // clear old arguments
-  argsModel->insertRows(argsModel->rowCount(), event.arguments_size());
-  for (const auto& arg : event.arguments()) {
-    argsModel->SetData(QString::fromStdString(arg), argc++);
+  if (event.arguments_size() > 0) {
+    argsModel->insertRows(argsModel->rowCount(), event.arguments_size());
+    for (const auto& arg : event.arguments()) {
+      argsModel->SetData(QString::fromStdString(arg), argc++);
+    }
   }
+
+  _ui->eventsList->sortByColumn(0, Qt::AscendingOrder);
 }
 
 void ObjectEditor::RemoveEvent(int idx) {

@@ -10,7 +10,7 @@ class EventArgumentsDialog : public QDialog
   Q_OBJECT
 public:
   EventArgumentsDialog(QWidget* parent, const QStringList& arguments);
-  QSize sizeHint() const override;
+  //QSize sizeHint() const override;
   const QStringList& GetArguments() const;
   void done(int r) override;
 

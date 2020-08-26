@@ -29,7 +29,7 @@ EventArgumentsDialog::EventArgumentsDialog(QWidget* parent, const QStringList& a
       value = integer;
       layout->addWidget(value, row, 1);
     } else if (arg == "object") {
-      QHBoxLayout* objLayout = new QHBoxLayout(this);
+      QHBoxLayout* objLayout = new QHBoxLayout();
       QToolButton* objButton = new QToolButton(this);
 
       QMenuView* objMenu = new QMenuView(this);
@@ -73,7 +73,6 @@ EventArgumentsDialog::EventArgumentsDialog(QWidget* parent, const QStringList& a
   connect(btn, SIGNAL(accepted()), this, SLOT(accept()));
   connect(btn, SIGNAL(rejected()), this, SLOT(reject()));
 
-  setLayout(layout);
   setWindowTitle(tr("Event arguments"));
 }
 
@@ -85,16 +84,14 @@ void EventArgumentsDialog::done(int r) {
   for (const QWidget* w : widgets_) {
     QVariant argument = w->metaObject()->userProperty().read(w);
     QString argstr = "";
-    if (argument.isValid() && (QMetaType::Type)argument.type() == QMetaType::QString)
-      argstr = argument.toString();
+    if (QString(w->metaObject()->className()) == "QSpinBox") {
+        argstr = QString::number(reinterpret_cast<const QSpinBox*>(w)->value());
+    } else {
+      if (argument.isValid() && (QMetaType::Type)argument.type() == QMetaType::QString)
+        argstr = argument.toString();
+    }
     arguments_.append(argstr);
   }
 
-  qDebug() << "argumemts sixe: " << arguments_.size();
-
   QDialog::done(r);
-}
-
-QSize EventArgumentsDialog::sizeHint() const {
-  return QSize(300,300);
 }
