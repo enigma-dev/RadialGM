@@ -261,51 +261,6 @@
     <string>Change background color</string>
    </property>
   </action>
-  <action name="actionAlignLeft">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="../images.qrc">
-     <normaloff>:/actions/text-left.png</normaloff>:/actions/text-left.png</iconset>
-   </property>
-   <property name="text">
-    <string>Align &amp;Left</string>
-   </property>
-   <property name="toolTip">
-    <string>Left align selected text</string>
-   </property>
-  </action>
-  <action name="actionAlignCenter">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="../images.qrc">
-     <normaloff>:/actions/text-center.png</normaloff>:/actions/text-center.png</iconset>
-   </property>
-   <property name="text">
-    <string>Align &amp;Center</string>
-   </property>
-   <property name="toolTip">
-    <string>Center align selected text</string>
-   </property>
-  </action>
-  <action name="actionAlignRight">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="../images.qrc">
-     <normaloff>:/actions/text-right.png</normaloff>:/actions/text-right.png</iconset>
-   </property>
-   <property name="text">
-    <string>Align &amp;Right</string>
-   </property>
-   <property name="toolTip">
-    <string>Right align selected text</string>
-   </property>
-  </action>
   <action name="actionBulletedList">
    <property name="checkable">
     <bool>true</bool>
@@ -321,6 +276,53 @@
     <string>Make bulleted list</string>
    </property>
   </action>
+  <actiongroup name="actionAlignGroup">
+   <action name="actionAlignLeft">
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+    <property name="icon">
+     <iconset resource="../images.qrc">
+      <normaloff>:/actions/text-left.png</normaloff>:/actions/text-left.png</iconset>
+    </property>
+    <property name="text">
+     <string>Align &amp;Left</string>
+    </property>
+    <property name="toolTip">
+     <string>Left align selected text</string>
+    </property>
+   </action>
+   <action name="actionAlignCenter">
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+    <property name="icon">
+     <iconset resource="../images.qrc">
+      <normaloff>:/actions/text-center.png</normaloff>:/actions/text-center.png</iconset>
+    </property>
+    <property name="text">
+     <string>Align &amp;Center</string>
+    </property>
+    <property name="toolTip">
+     <string>Center align selected text</string>
+    </property>
+   </action>
+   <action name="actionAlignRight">
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+    <property name="icon">
+     <iconset resource="../images.qrc">
+      <normaloff>:/actions/text-right.png</normaloff>:/actions/text-right.png</iconset>
+    </property>
+    <property name="text">
+     <string>Align &amp;Right</string>
+    </property>
+    <property name="toolTip">
+     <string>Right align selected text</string>
+    </property>
+   </action>
+  </actiongroup>
  </widget>
  <resources>
   <include location="../images.qrc"/>
