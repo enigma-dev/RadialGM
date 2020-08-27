@@ -184,6 +184,9 @@
    </property>
   </action>
   <action name="actionBold">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../images.qrc">
      <normaloff>:/actions/text-bold.png</normaloff>:/actions/text-bold.png</iconset>
@@ -199,6 +202,9 @@
    </property>
   </action>
   <action name="actionItalic">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../images.qrc">
      <normaloff>:/actions/text-italic.png</normaloff>:/actions/text-italic.png</iconset>
@@ -214,6 +220,9 @@
    </property>
   </action>
   <action name="actionUnderline">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../images.qrc">
      <normaloff>:/actions/text-underlined.png</normaloff>:/actions/text-underlined.png</iconset>
@@ -253,6 +262,9 @@
    </property>
   </action>
   <action name="actionAlignLeft">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../images.qrc">
      <normaloff>:/actions/text-left.png</normaloff>:/actions/text-left.png</iconset>
@@ -265,6 +277,9 @@
    </property>
   </action>
   <action name="actionAlignCenter">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../images.qrc">
      <normaloff>:/actions/text-center.png</normaloff>:/actions/text-center.png</iconset>
@@ -277,6 +292,9 @@
    </property>
   </action>
   <action name="actionAlignRight">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../images.qrc">
      <normaloff>:/actions/text-right.png</normaloff>:/actions/text-right.png</iconset>
@@ -289,6 +307,9 @@
    </property>
   </action>
   <action name="actionBulletedList">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../images.qrc">
      <normaloff>:/actions/cancel.png</normaloff>:/actions/cancel.png</iconset>
