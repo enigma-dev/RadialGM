@@ -77,6 +77,9 @@ PathEditor::PathEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
 
   _ui->statusBar->addWidget(_cursorPositionLabel);
 
+  // keep the vertical row heights only as big as necessary
+  _ui->pointsTableView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+  // evenly divide the width of the list view up for each column
   _ui->pointsTableView->installEventFilter(this);
 
   connect(xSnap, QOverload<int>::of(&QSpinBox::valueChanged), _ui->pathPreviewBackground,
