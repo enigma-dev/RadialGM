@@ -281,6 +281,9 @@
     <property name="checkable">
      <bool>true</bool>
     </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
     <property name="icon">
      <iconset resource="../images.qrc">
       <normaloff>:/actions/text-left.png</normaloff>:/actions/text-left.png</iconset>
