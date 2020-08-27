@@ -3,6 +3,8 @@
 
 #include <QFontComboBox>
 #include <QSpinBox>
+#include <QFontDialog>
+#include <QColorDialog>
 
 InformationEditor::InformationEditor(QWidget *parent) :
   QWidget(parent),
@@ -16,6 +18,20 @@ InformationEditor::InformationEditor(QWidget *parent) :
   ui->mainToolBar->insertWidget(ui->actionBold, fontSpinner);
   ui->mainToolBar->insertSeparator(ui->actionBold);
 
+  connect(ui->actionFont, &QAction::triggered, [&](){
+    bool ok = false;
+    QFont font = QFontDialog::getFont(&ok, ui->textEdit->currentFont(), this);
+    if (!ok) return;
+    ui->textEdit->setCurrentFont(font);
+  });
+  connect(ui->actionTextColor, &QAction::triggered, [&](){
+    QColor color = QColorDialog::getColor(ui->textEdit->textColor(), this);
+    if (!color.isValid()) return;
+    ui->textEdit->setTextColor(color);
+  });
+  connect(ui->actionPrint, &QAction::triggered, [&](){
+    //TODO: Finish me
+  });
   connect(ui->actionBold, &QAction::triggered, [&](bool checked){
     ui->textEdit->setFontWeight(checked ? QFont::Bold : QFont::Normal);
   });
