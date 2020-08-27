@@ -70,6 +70,7 @@ LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
 SOURCES += \
     Dialogs/TimelineChangeMoment.cpp \
     Editors/InformationEditor.cpp \
+    Editors/IncludeEditor.cpp \
     Editors/ShaderEditor.cpp \
     Editors/SpriteEditor.cpp \
     Models/MessageModel.cpp \
@@ -115,6 +116,7 @@ SOURCES += \
 HEADERS += \
     Dialogs/TimelineChangeMoment.h \
     Editors/InformationEditor.h \
+    Editors/IncludeEditor.h \
     Editors/ShaderEditor.h \
     Editors/SpriteEditor.h \
     MainWindow.h \
@@ -166,6 +168,7 @@ HEADERS += \
 FORMS += \
     Dialogs/TimelineChangeMoment.ui \
     Editors/InformationEditor.ui \
+    Editors/IncludeEditor.ui \
     Editors/TimelineEditor.ui \
     MainWindow.ui \
     Dialogs/PreferencesDialog.ui \
