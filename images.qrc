@@ -50,6 +50,12 @@
         <file alias="folder-new.png">Images/actions/folder-new.png</file>
         <file alias="log.png">Images/actions/log.png</file>
         <file alias="log-debug.png">Images/actions/log-debug.png</file>
+        <file alias="text-right.png">Images/actions/text-right.png</file>
+        <file alias="text-left.png">Images/actions/text-left.png</file>
+        <file alias="text-center.png">Images/actions/text-center.png</file>
+        <file alias="text-italic.png">Images/actions/text-italic.png</file>
+        <file alias="text-bold.png">Images/actions/text-bold.png</file>
+        <file alias="text-underlined.png">Images/actions/text-underlined.png</file>
     </qresource>
     <qresource prefix="/resources">
         <file alias="background.png">Images/resources/background.png</file>

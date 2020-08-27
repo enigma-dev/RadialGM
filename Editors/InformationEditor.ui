@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>InformationEditor</class>
+ <widget class="QWidget" name="InformationEditor">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>542</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>4</number>
+   </property>
+   <property name="leftMargin">
+    <number>1</number>
+   </property>
+   <property name="topMargin">
+    <number>1</number>
+   </property>
+   <property name="rightMargin">
+    <number>1</number>
+   </property>
+   <property name="bottomMargin">
+    <number>1</number>
+   </property>
+   <item>
+    <widget class="QMenuBar" name="menuBar">
+     <widget class="QMenu" name="menuFile">
+      <property name="title">
+       <string>&amp;File</string>
+      </property>
+      <addaction name="actionLoadFile"/>
+      <addaction name="actionSaveFile"/>
+      <addaction name="separator"/>
+      <addaction name="actionOptions"/>
+      <addaction name="actionPrint"/>
+      <addaction name="separator"/>
+      <addaction name="actionSave"/>
+      <addaction name="separator"/>
+     </widget>
+     <widget class="QMenu" name="menuEdit">
+      <property name="title">
+       <string>&amp;Edit</string>
+      </property>
+     </widget>
+     <widget class="QMenu" name="menuF_ormat">
+      <property name="title">
+       <string>F&amp;ormat</string>
+      </property>
+      <addaction name="actionFont"/>
+      <addaction name="separator"/>
+      <addaction name="actionBold"/>
+      <addaction name="actionItalic"/>
+      <addaction name="actionUnderline"/>
+      <addaction name="separator"/>
+      <addaction name="actionTextColor"/>
+      <addaction name="actionBackgroundColor"/>
+      <addaction name="separator"/>
+      <addaction name="actionAlignLeft"/>
+      <addaction name="actionAlignCenter"/>
+      <addaction name="actionAlignRight"/>
+      <addaction name="separator"/>
+      <addaction name="actionBulletedList"/>
+     </widget>
+     <addaction name="menuFile"/>
+     <addaction name="menuEdit"/>
+     <addaction name="menuF_ormat"/>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolBar" name="mainToolBar">
+     <addaction name="actionSave"/>
+     <addaction name="separator"/>
+     <addaction name="actionOptions"/>
+     <addaction name="separator"/>
+     <addaction name="actionPrint"/>
+     <addaction name="separator"/>
+     <addaction name="actionBold"/>
+     <addaction name="actionItalic"/>
+     <addaction name="actionUnderline"/>
+     <addaction name="separator"/>
+     <addaction name="actionTextColor"/>
+     <addaction name="actionBackgroundColor"/>
+     <addaction name="separator"/>
+     <addaction name="actionAlignLeft"/>
+     <addaction name="actionAlignCenter"/>
+     <addaction name="actionAlignRight"/>
+     <addaction name="separator"/>
+     <addaction name="actionBulletedList"/>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTextEdit" name="textEdit"/>
+   </item>
+  </layout>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/accept.png</normaloff>:/actions/accept.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Close saving changes</string>
+   </property>
+   <property name="toolTip">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionPrint">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/print.png</normaloff>:/actions/print.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Print</string>
+   </property>
+   <property name="toolTip">
+    <string>Print the document</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionOptions">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/preferences.png</normaloff>:/actions/preferences.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Options</string>
+   </property>
+   <property name="toolTip">
+    <string>Change dialog options</string>
+   </property>
+  </action>
+  <action name="actionLoadFile">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/open.png</normaloff>:/actions/open.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Load from a file</string>
+   </property>
+   <property name="toolTip">
+    <string>Load from a file</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSaveFile">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/save.png</normaloff>:/actions/save.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Save to a file</string>
+   </property>
+   <property name="toolTip">
+    <string>Save to a file</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionFont">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/resources/font.png</normaloff>:/resources/font.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Font</string>
+   </property>
+   <property name="toolTip">
+    <string>Choose selected text font</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionBold">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/text-bold.png</normaloff>:/actions/text-bold.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Bold</string>
+   </property>
+   <property name="toolTip">
+    <string>Make selected text bold</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+B</string>
+   </property>
+  </action>
+  <action name="actionItalic">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/text-italic.png</normaloff>:/actions/text-italic.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Italic</string>
+   </property>
+   <property name="toolTip">
+    <string>Make selected text italic</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
+  </action>
+  <action name="actionUnderline">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/text-underlined.png</normaloff>:/actions/text-underlined.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Underline</string>
+   </property>
+   <property name="toolTip">
+    <string>Make selected text underlined</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+U</string>
+   </property>
+  </action>
+  <action name="actionTextColor">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/resources/font.png</normaloff>:/resources/font.png</iconset>
+   </property>
+   <property name="text">
+    <string>Text C&amp;olor</string>
+   </property>
+   <property name="toolTip">
+    <string>Change selected text color</string>
+   </property>
+  </action>
+  <action name="actionBackgroundColor">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/colorize.png</normaloff>:/actions/colorize.png</iconset>
+   </property>
+   <property name="text">
+    <string>B&amp;ackground Color</string>
+   </property>
+   <property name="toolTip">
+    <string>Change background color</string>
+   </property>
+  </action>
+  <action name="actionAlignLeft">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/text-left.png</normaloff>:/actions/text-left.png</iconset>
+   </property>
+   <property name="text">
+    <string>Align &amp;Left</string>
+   </property>
+   <property name="toolTip">
+    <string>Left align selected text</string>
+   </property>
+  </action>
+  <action name="actionAlignCenter">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/text-center.png</normaloff>:/actions/text-center.png</iconset>
+   </property>
+   <property name="text">
+    <string>Align &amp;Center</string>
+   </property>
+   <property name="toolTip">
+    <string>Center align selected text</string>
+   </property>
+  </action>
+  <action name="actionAlignRight">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/text-right.png</normaloff>:/actions/text-right.png</iconset>
+   </property>
+   <property name="text">
+    <string>Align &amp;Right</string>
+   </property>
+   <property name="toolTip">
+    <string>Right align selected text</string>
+   </property>
+  </action>
+  <action name="actionBulletedList">
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/cancel.png</normaloff>:/actions/cancel.png</iconset>
+   </property>
+   <property name="text">
+    <string>Bull&amp;eted List</string>
+   </property>
+   <property name="toolTip">
+    <string>Make bulleted list</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="../images.qrc"/>
+ </resources>
+ <connections/>
+</ui>
