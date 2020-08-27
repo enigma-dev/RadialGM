@@ -12,11 +12,41 @@ InformationEditor::InformationEditor(QWidget *parent) :
 {
   ui->setupUi(this);
 
+  // give us a font drop down and size spinner
   auto fontCombo = new QFontComboBox();
   ui->mainToolBar->insertWidget(ui->actionBold, fontCombo);
   auto fontSpinner = new QSpinBox();
   ui->mainToolBar->insertWidget(ui->actionBold, fontSpinner);
   ui->mainToolBar->insertSeparator(ui->actionBold);
+
+  // synchronize the format actions when the selection changes
+  auto fontChanged = [=](const QFont &f) {
+    fontCombo->setCurrentFont(f);
+    fontSpinner->setValue(f.pointSize());
+    ui->actionBold->setChecked(f.bold());
+    ui->actionItalic->setChecked(f.italic());
+    ui->actionUnderline->setChecked(f.underline());
+  };
+  fontChanged(ui->textEdit->currentFont()); // << initial sync
+  connect(ui->textEdit, &QTextEdit::currentCharFormatChanged,
+          [fontChanged](const QTextCharFormat &format) {
+    fontChanged(format.font());
+  });
+  // synchronize the alignment group when the selection changes
+  auto alignmentChanged = [=](Qt::Alignment a) {
+    if (a & Qt::AlignLeft)
+        ui->actionAlignLeft->setChecked(true);
+    else if (a & Qt::AlignHCenter)
+        ui->actionAlignCenter->setChecked(true);
+    else if (a & Qt::AlignRight)
+        ui->actionAlignRight->setChecked(true);
+  };
+  alignmentChanged(ui->textEdit->alignment()); // << initial sync
+  connect(ui->textEdit, &QTextEdit::cursorPositionChanged,
+          [alignmentChanged,this]() {
+    alignmentChanged(ui->textEdit->alignment());
+    //TODO: bulleted list sync?
+  });
 
   connect(ui->actionPrint, &QAction::triggered, [&](){
     //TODO: Finish me
@@ -51,7 +81,7 @@ InformationEditor::InformationEditor(QWidget *parent) :
   });
 }
 
-InformationEditor::~InformationEditor()
-{
+InformationEditor::~InformationEditor() {
   delete ui;
 }
+
