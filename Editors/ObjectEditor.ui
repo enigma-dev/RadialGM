@@ -39,7 +39,7 @@
    <item>
     <widget class="QTabWidget" name="ObjectTabs">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="Events">
       <attribute name="title">
@@ -81,7 +81,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEdit"/>
+           <widget class="QLineEdit" name="eventLineEdit">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QToolButton" name="addEventButton">
@@ -113,7 +117,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="changeMomentButton">
+           <widget class="QToolButton" name="changeEventButton">
             <property name="toolTip">
              <string>Change Moment</string>
             </property>

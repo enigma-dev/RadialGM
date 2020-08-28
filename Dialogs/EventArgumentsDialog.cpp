@@ -1,50 +1,61 @@
 #include "EventArgumentsDialog.h"
-#include "MainWindow.h"
 #include "Components/QMenuView.h"
+#include "MainWindow.h"
 #include "Models/TreeSortFilterProxyModel.h"
 
-#include <QLabel>
 #include <QComboBox>
-#include <QSpinBox>
-#include <QGridLayout>
 #include <QDialogButtonBox>
-#include <QToolButton>
+#include <QGridLayout>
+#include <QLabel>
 #include <QLineEdit>
 #include <QMetaProperty>
+#include <QPushButton>
+#include <QSpinBox>
+#include <QToolButton>
 
-EventArgumentsDialog::EventArgumentsDialog(QWidget* parent, const QStringList& arguments)
-  : QDialog(parent) {
-  QGridLayout* layout = new QGridLayout(this);
+EventArgumentsDialog::EventArgumentsDialog(QWidget *parent, const QStringList &arguments) : QDialog(parent) {
+  QGridLayout *layout = new QGridLayout(this);
 
   int row = 0;
-  for (const auto& arg : arguments) {
-    QLabel* name = new QLabel(this);
+  for (const auto &arg : arguments) {
+    QLabel *name = new QLabel(this);
     name->setText(arg);
 
-    QWidget* value;
+    QWidget *value;
 
     if (arg == "integer") {
-      QSpinBox* integer = new QSpinBox(this);
+      QSpinBox *integer = new QSpinBox(this);
       integer->setMinimum(0);
       value = integer;
       layout->addWidget(value, row, 1);
+    } else if (arg == "string") {
+      QLineEdit *lineEdit = new QLineEdit(this);
+      lineEdit->setText(tr("MyCustomEvent"));
+      value = lineEdit;
+      layout->addWidget(value, row, 1);
     } else if (arg == "object") {
-      QHBoxLayout* objLayout = new QHBoxLayout();
-      QToolButton* objButton = new QToolButton(this);
+      QHBoxLayout *objLayout = new QHBoxLayout();
+      QToolButton *objButton = new QToolButton(this);
 
-      QMenuView* objMenu = new QMenuView(this);
-      TreeSortFilterProxyModel* treeProxy = new TreeSortFilterProxyModel(this);
+      QMenuView *objMenu = new QMenuView(this);
+      TreeSortFilterProxyModel *treeProxy = new TreeSortFilterProxyModel(this);
       treeProxy->SetFilterType(TreeNode::TypeCase::kObject);
       treeProxy->setSourceModel(MainWindow::treeModel.get());
       objMenu->setModel(treeProxy);
       objButton->setMenu(objMenu);
       objButton->setPopupMode(QToolButton::MenuButtonPopup);
-      objButton->setIcon(ArtManager::GetIcon(":/resources/object.png"));
 
-      QLineEdit* lineEdit = new QLineEdit(this);
-      lineEdit->setDisabled(true);
+      QLineEdit *lineEdit = new QLineEdit(this);
+      lineEdit->setReadOnly(true);
+      QModelIndex firstObjIdx = treeProxy
+                                    ->match(treeProxy->index(0, 0), TreeModel::UserRoles::TypeCaseRole,
+                                            TypeCase::kObject, 1, Qt::MatchRecursive)
+                                    .first();
+      QString firstObj = firstObjIdx.data(Qt::DisplayRole).toString();
+      objButton->setIcon(firstObjIdx.data(Qt::DecorationRole).value<QIcon>());
+      lineEdit->setText(firstObj);
 
-      connect(objMenu, &QMenuView::triggered, [=](const QModelIndex& index) {
+      connect(objMenu, &QMenuView::triggered, [=](const QModelIndex &index) {
         lineEdit->setText(treeProxy->data(index, Qt::DisplayRole).toString());
         objButton->setIcon(treeProxy->data(index, Qt::DecorationRole).value<QIcon>());
       });
@@ -56,8 +67,11 @@ EventArgumentsDialog::EventArgumentsDialog(QWidget* parent, const QStringList& a
 
       value = lineEdit;
     } else {
-      QComboBox* combo = new QComboBox(this);
-      //combo->setModel()
+      QComboBox *combo = new QComboBox(this);
+      auto argList = MainWindow::GetEventData()->value_names_for_type(name->text().toStdString());
+      for (auto a : argList) {
+        combo->addItem(QString::fromStdString(a.first));
+      }
       value = combo;
       layout->addWidget(value, row, 1);
     }
@@ -68,7 +82,7 @@ EventArgumentsDialog::EventArgumentsDialog(QWidget* parent, const QStringList& a
     row++;
   }
 
-  QDialogButtonBox* btn = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+  QDialogButtonBox *btn = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
   layout->addWidget(btn, row, 1);
   connect(btn, SIGNAL(accepted()), this, SLOT(accept()));
   connect(btn, SIGNAL(rejected()), this, SLOT(reject()));
@@ -76,19 +90,16 @@ EventArgumentsDialog::EventArgumentsDialog(QWidget* parent, const QStringList& a
   setWindowTitle(tr("Event arguments"));
 }
 
-const QStringList& EventArgumentsDialog::GetArguments() const {
-  return arguments_;
-}
+const QStringList &EventArgumentsDialog::GetArguments() const { return arguments_; }
 
 void EventArgumentsDialog::done(int r) {
-  for (const QWidget* w : widgets_) {
+  for (const QWidget *w : widgets_) {
     QVariant argument = w->metaObject()->userProperty().read(w);
     QString argstr = "";
     if (QString(w->metaObject()->className()) == "QSpinBox") {
-        argstr = QString::number(reinterpret_cast<const QSpinBox*>(w)->value());
+      argstr = QString::number(reinterpret_cast<const QSpinBox *>(w)->value());
     } else {
-      if (argument.isValid() && (QMetaType::Type)argument.type() == QMetaType::QString)
-        argstr = argument.toString();
+      if (argument.isValid() && (QMetaType::Type)argument.type() == QMetaType::QString) argstr = argument.toString();
     }
     arguments_.append(argstr);
   }
