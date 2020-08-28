@@ -31,7 +31,6 @@ class TimelineEditor : public BaseEditor {
   void BindMomentEditor(int modelIndex);
   void SetCurrentEditor(int modelIndex);
 
-  CodeEditor* _codeEditor;
   Ui::TimelineEditor* _ui;
   MessageModel* _timelineModel;
   RepeatedMessageModel* _momentsModel;
