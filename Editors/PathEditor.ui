@@ -521,6 +521,9 @@
             <attribute name="horizontalHeaderStretchLastSection">
              <bool>true</bool>
             </attribute>
+            <attribute name="verticalHeaderVisible">
+             <bool>false</bool>
+            </attribute>
            </widget>
           </item>
           <item>
@@ -606,7 +609,7 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>171</width>
+               <width>194</width>
                <height>508</height>
               </rect>
              </property>

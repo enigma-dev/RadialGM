@@ -9,25 +9,6 @@
 #include <QResizeEvent>
 #include <QSpinBox>
 #include <QToolButton>
-#include <QIdentityProxyModel>
-
-class PointsDisplayModel : public QIdentityProxyModel {
- public:
-  PointsDisplayModel(QObject *parent): QIdentityProxyModel(parent) {}
-
-  QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override {
-    if (orientation == Qt::Horizontal) {
-      if (role == Qt::DecorationRole) {
-        switch (section) {
-        case Path::Point::kXFieldNumber: return QIcon(":/actions/diamond-red.png");
-        case Path::Point::kYFieldNumber: return QIcon(":/actions/diamond-green.png");
-        case Path::Point::kSpeedFieldNumber: return QIcon(":/actions/motion.png");
-        }
-      }
-    }
-    return QIdentityProxyModel::headerData(section, orientation, role);
-  }
-};
 
 PathEditor::PathEditor(MessageModel* model, QWidget* parent) : BaseEditor(model, parent), _ui(new Ui::PathEditor) {
   _ui->setupUi(this);
@@ -124,9 +105,13 @@ void PathEditor::RebindSubModels() {
 
   _ui->roomView->SetPathModel(_pathModel);
   _pointsModel = _pathModel->GetSubModel<RepeatedMessageModel*>(Path::kPointsFieldNumber);
-  auto pointsDisplayModel = new PointsDisplayModel(this);
-  pointsDisplayModel->setSourceModel(_pointsModel);
-  _ui->pointsTableView->setModel(pointsDisplayModel);
+  _pointsModel->setHeaderData(Path::Point::kXFieldNumber, Qt::Horizontal,
+                              QIcon(":/actions/diamond-red.png"), Qt::DecorationRole);
+  _pointsModel->setHeaderData(Path::Point::kYFieldNumber, Qt::Horizontal,
+                              QIcon(":/actions/diamond-green.png"), Qt::DecorationRole);
+  _pointsModel->setHeaderData(Path::Point::kSpeedFieldNumber, Qt::Horizontal,
+                              QIcon(":/actions/motion.png"), Qt::DecorationRole);
+  _ui->pointsTableView->setModel(_pointsModel);
   _ui->pointsTableView->hideColumn(0);
 
   QString roomName = _pathModel->Data(Path::kBackgroundRoomNameFieldNumber).toString();
