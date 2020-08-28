@@ -21,7 +21,7 @@ class PointsDisplayModel : public QIdentityProxyModel {
         switch (section) {
         case Path::Point::kXFieldNumber: return QIcon(":/actions/diamond-red.png");
         case Path::Point::kYFieldNumber: return QIcon(":/actions/diamond-green.png");
-        case Path::Point::kSpeedFieldNumber: return QIcon(":/events/motion.png");
+        case Path::Point::kSpeedFieldNumber: return QIcon(":/actions/motion.png");
         }
       }
     }

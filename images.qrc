@@ -53,7 +53,7 @@
         <file alias="diamond-green.png">Images/actions/diamond-green.png</file>
         <file alias="diamond-red.png">Images/actions/diamond-red.png</file>
         <file alias="diamond-blue.png">Images/actions/diamond-blue.png</file>
-        <file>Images/actions/motion.png</file>
+        <file alias="motion.png">Images/actions/motion.png</file>
     </qresource>
     <qresource prefix="/resources">
         <file alias="background.png">Images/resources/background.png</file>
