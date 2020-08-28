@@ -50,6 +50,10 @@
         <file alias="folder-new.png">Images/actions/folder-new.png</file>
         <file alias="log.png">Images/actions/log.png</file>
         <file alias="log-debug.png">Images/actions/log-debug.png</file>
+        <file alias="diamond-green.png">Images/actions/diamond-green.png</file>
+        <file alias="diamond-red.png">Images/actions/diamond-red.png</file>
+        <file alias="diamond-blue.png">Images/actions/diamond-blue.png</file>
+        <file>Images/actions/motion.png</file>
     </qresource>
     <qresource prefix="/resources">
         <file alias="background.png">Images/resources/background.png</file>
