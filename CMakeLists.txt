@@ -82,6 +82,7 @@ set(RGM_SOURCES
     Editors/SpriteEditor.cpp
     Editors/BaseEditor.cpp
     Editors/RoomEditor.cpp
+    Editors/IncludeEditor.cpp
     Widgets/AssetView.cpp
     Widgets/CodeWidget.cpp
     Widgets/BackgroundView.cpp
@@ -132,6 +133,7 @@ set(RGM_HEADERS
     Editors/ScriptEditor.h
     Editors/CodeEditor.h
     Editors/ShaderEditor.h
+    Editors/IncludeEditor.h
     Widgets/AssetScrollArea.h
     Widgets/StackedCodeWidget.h
     Widgets/AssetScrollAreaBackground.h
@@ -162,6 +164,7 @@ set(RGM_UI
     Editors/FontEditor.ui
     Editors/TimelineEditor.ui
     Editors/ObjectEditor.ui
+    Editors/IncludeEditor.ui
 )
 
 set(RGM_RC
