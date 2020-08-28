@@ -21,31 +21,10 @@ void ObjectEditor::BindEventMenu(QToolButton* btn, bool add) {
 }
 
 ObjectEditor::ObjectEditor(MessageModel *model, QWidget *parent)
-    : BaseEditor(model, parent), _ui(new Ui::ObjectEditor), _codeEditor(new CodeEditor(this, true)) {
-  QLayout *layout = new QVBoxLayout(this);
-  QSplitter *splitter = new QSplitter(this);
-
-  QWidget *eventsWidget = new QWidget(this);
-  _ui->setupUi(eventsWidget);
+    : BaseEditor(model, parent), _ui(new Ui::ObjectEditor) {
+  _ui->setupUi(this);
 
   _nodeMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
-
-  connect(_ui->saveButton, &QAbstractButton::pressed, this, &BaseEditor::OnSave);
-
-  splitter->addWidget(eventsWidget);
-  splitter->addWidget(_codeEditor);
-
-  layout->addWidget(splitter);
-
-  layout->setMargin(0);
-  setLayout(layout);
-
-  // Prefer resizing the code editor over the moments editor
-  splitter->setStretchFactor(0, 0);
-  splitter->setStretchFactor(1, 1);
-
-  // Tell frankensteined widget to resize to proper size
-  resize(_codeEditor->geometry().width() + eventsWidget->geometry().width(), _codeEditor->geometry().height());
 
   connect(_ui->saveButton, &QAbstractButton::pressed, this, &BaseEditor::OnSave);
 
@@ -134,7 +113,7 @@ void ObjectEditor::CheckDisableButtons() {
   bool hasEvents = _sortedEvents->rowCount() > 0;
   _ui->changeEventButton->setDisabled(!hasEvents);
   _ui->deleteEventButton->setDisabled(!hasEvents);
-  _codeEditor->setDisabled(!hasEvents);
+  _ui->codeEditor->setDisabled(!hasEvents);
   if (!hasEvents) _ui->eventLineEdit->setText("");
 }
 
@@ -179,7 +158,7 @@ void ObjectEditor::ChangeEvent(int idx, Object::EgmEvent event, bool changeCode)
 void ObjectEditor::RemoveEvent(int idx) {
   RepeatedMessageModel *eventsModel = _objectModel->GetSubModel<RepeatedMessageModel *>(Object::kEgmEventsFieldNumber);
   eventsModel->removeRow(idx);
-  _codeEditor->RemoveCodeWidget(idx);
+  _ui->codeEditor->RemoveCodeWidget(idx);
   SetCurrentEditor(MapRowFrom(0));
   CheckDisableButtons();
 }
@@ -195,7 +174,7 @@ int ObjectEditor::IndexOf(Object::EgmEvent event) {
 
 void ObjectEditor::BindEventEditor(int idx) {
   RepeatedMessageModel *eventsModel = _objectModel->GetSubModel<RepeatedMessageModel *>(Object::kEgmEventsFieldNumber);
-  CodeWidget *codeWidget = _codeEditor->AddCodeWidget();
+  CodeWidget *codeWidget = _ui->codeEditor->AddCodeWidget();
   ModelMapper *mapper(new ModelMapper(eventsModel->GetSubModel<MessageModel *>(idx), this));
   mapper->addMapping(codeWidget, Object::EgmEvent::kCodeFieldNumber);
   mapper->toFirst();
@@ -203,7 +182,7 @@ void ObjectEditor::BindEventEditor(int idx) {
 
 void ObjectEditor::SetCurrentEditor(int idx) {
   if (idx < _sortedEvents->rowCount()) {
-    _codeEditor->SetCurrentIndex(idx);
+    _ui->codeEditor->SetCurrentIndex(idx);
     _ui->eventLineEdit->setText(_eventsModel->data(_eventsModel->index(idx, 0)).toString());
     _ui->eventsList->selectionModel()->select(_sortedEvents->index(MapRowFrom(idx), 0),
                                               QItemSelectionModel::QItemSelectionModel::ClearAndSelect);
