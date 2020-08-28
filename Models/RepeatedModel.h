@@ -69,7 +69,8 @@ class RepeatedModel : public ProtoModel {
   }
 
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override {
-    if (section == 0 || role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal) return QVariant();
+    if (section == 0 || role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal)
+      return ProtoModel::headerData(section, orientation, role);
     return QString::fromStdString(_field->message_type()->field(section - 1)->name());
   }
 
