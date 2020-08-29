@@ -57,6 +57,11 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   _viewMapper->addMapping(_ui->followingVSpeedSpinBox, View::kVspeedFieldNumber);
   _viewMapper->toFirst();
 
+  connect(_ui->addLayerButton, &QAbstractButton::clicked, [=]() {
+    auto layerModel = _ui->layersListView->model();
+    layerModel->insertRow(layerModel->rowCount());
+  });
+
   QMenuView* objMenu = new QMenuView(this);
   TreeSortFilterProxyModel* treeProxy = new TreeSortFilterProxyModel(this);
   treeProxy->SetFilterType(TreeNode::TypeCase::kObject);
