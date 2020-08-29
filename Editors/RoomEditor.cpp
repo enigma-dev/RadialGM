@@ -108,7 +108,18 @@ void RoomEditor::RebindSubModels() {
   _ui->roomView->SetResourceModel(_roomModel);
 
   RepeatedMessageModel* lm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kLayersFieldNumber);
+  lm->setHeaderData(Room::Layer::kVisibleFieldNumber, Qt::Horizontal,
+                    tr("Visible"), Qt::ToolTipRole);
+  lm->setHeaderData(Room::Layer::kVisibleFieldNumber, Qt::Horizontal,
+                    QIcon(":/actions/find.png"), Qt::DecorationRole);
   _ui->layersListView->setModel(lm);
+  int lcc = lm->columnCount();
+  for (int c = 0; c < lcc; ++c) {
+    if (c != Room::Layer::kNameFieldNumber &&
+        c != Room::Layer::kDepthFieldNumber &&
+        c != Room::Layer::kVisibleFieldNumber)
+      _ui->layersListView->hideColumn(c);
+  }
 
   RepeatedMessageModel* im = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
   QSortFilterProxyModel* imp = new QSortFilterProxyModel(this);
