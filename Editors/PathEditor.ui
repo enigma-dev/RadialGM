@@ -26,10 +26,10 @@
   <property name="Josh" stdset="0">
    <string>helloenigmasssss</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="mainLayout">
    <item>
-    <widget class="QWidget" name="widget" native="true">
-     <layout class="QVBoxLayout" name="verticalLayout_4">
+    <widget class="QWidget" name="contentWidget" native="true">
+     <layout class="QVBoxLayout" name="contentLayout">
       <property name="spacing">
        <number>0</number>
       </property>
@@ -46,7 +46,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QSplitter" name="splitter">
+       <widget class="QSplitter" name="contentSplitter">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -75,7 +75,7 @@
            <height>0</height>
           </size>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
+         <layout class="QVBoxLayout" name="pointsEditLayout">
           <property name="spacing">
            <number>2</number>
           </property>
@@ -96,7 +96,7 @@
           </property>
           <item>
            <widget class="QWidget" name="nameWidget" native="true">
-            <layout class="QHBoxLayout" name="horizontalLayout">
+            <layout class="QHBoxLayout" name="nameLayout">
              <property name="spacing">
               <number>0</number>
              </property>
@@ -127,7 +127,10 @@
                 </size>
                </property>
                <property name="text">
-                <string>Name</string>
+                <string>&amp;Name</string>
+               </property>
+               <property name="buddy">
+                <cstring>nameEdit</cstring>
                </property>
               </widget>
              </item>
@@ -139,7 +142,7 @@
           </item>
           <item>
            <widget class="QWidget" name="precisionWidget" native="true">
-            <layout class="QHBoxLayout" name="horizontalLayout_10">
+            <layout class="QHBoxLayout" name="precisionLayout">
              <property name="spacing">
               <number>0</number>
              </property>
@@ -170,7 +173,10 @@
                 </size>
                </property>
                <property name="text">
-                <string>Precision</string>
+                <string>P&amp;recision</string>
+               </property>
+               <property name="buddy">
+                <cstring>precisionSpinBox</cstring>
                </property>
               </widget>
              </item>
@@ -198,7 +204,7 @@
           </item>
           <item>
            <widget class="QWidget" name="linePropsWidget" native="true">
-            <layout class="QHBoxLayout" name="horizontalLayout_11">
+            <layout class="QHBoxLayout" name="linePropsLayout">
              <property name="leftMargin">
               <number>2</number>
              </property>
@@ -212,47 +218,29 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="QWidget" name="widget_3" native="true">
-               <layout class="QHBoxLayout" name="horizontalLayout_7">
-                <property name="spacing">
-                 <number>0</number>
-                </property>
-                <property name="leftMargin">
-                 <number>0</number>
-                </property>
-                <property name="topMargin">
-                 <number>2</number>
-                </property>
-                <property name="bottomMargin">
-                 <number>2</number>
-                </property>
-                <item>
-                 <widget class="QCheckBox" name="smoothCheckBox">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="text">
-                   <string>Smooth</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="closedCheckBox">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="text">
-                   <string>Closed</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+              <widget class="QCheckBox" name="smoothCheckBox">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Smooth</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="closedCheckBox">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Closed</string>
+               </property>
               </widget>
              </item>
             </layout>
@@ -260,7 +248,7 @@
           </item>
           <item>
            <widget class="QWidget" name="newPointWidget" native="true">
-            <layout class="QHBoxLayout" name="horizontalLayout_6">
+            <layout class="QHBoxLayout" name="newPointsLayout">
              <property name="spacing">
               <number>8</number>
              </property>
@@ -284,7 +272,7 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <layout class="QHBoxLayout" name="horizontalLayout_3">
+               <layout class="QHBoxLayout" name="xLayout">
                 <property name="spacing">
                  <number>6</number>
                 </property>
@@ -309,7 +297,10 @@
                    </sizepolicy>
                   </property>
                   <property name="text">
-                   <string>X</string>
+                   <string>&amp;X</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>xSpinBox</cstring>
                   </property>
                  </widget>
                 </item>
@@ -340,7 +331,7 @@
              </item>
              <item>
               <widget class="QWidget" name="yWidget" native="true">
-               <layout class="QHBoxLayout" name="horizontalLayout_4">
+               <layout class="QHBoxLayout" name="yLayout">
                 <property name="leftMargin">
                  <number>0</number>
                 </property>
@@ -362,12 +353,15 @@
                    </sizepolicy>
                   </property>
                   <property name="text">
-                   <string>Y</string>
+                   <string>&amp;Y</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>ySpinBox</cstring>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QSpinBox" name="yspinBox">
+                 <widget class="QSpinBox" name="ySpinBox">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                     <horstretch>0</horstretch>
@@ -399,7 +393,7 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <layout class="QHBoxLayout" name="horizontalLayout_5">
+               <layout class="QHBoxLayout" name="spdLayout">
                 <property name="leftMargin">
                  <number>0</number>
                 </property>
@@ -421,7 +415,10 @@
                    </sizepolicy>
                   </property>
                   <property name="text">
-                   <string>Speed</string>
+                   <string>S&amp;peed</string>
+                  </property>
+                  <property name="buddy">
+                   <cstring>speedSpinBox</cstring>
                   </property>
                  </widget>
                 </item>
@@ -458,7 +455,7 @@
           </item>
           <item>
            <widget class="QWidget" name="pointListButtons" native="true">
-            <layout class="QHBoxLayout" name="horizontalLayout_8">
+            <layout class="QHBoxLayout" name="pointListButtonsLayout">
              <property name="spacing">
               <number>8</number>
              </property>
@@ -541,12 +538,12 @@
         </widget>
         <widget class="QWidget" name="pointsPreviewWidget" native="true">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>1</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_2">
+         <layout class="QVBoxLayout" name="pointsPreviewLayout">
           <property name="spacing">
            <number>0</number>
           </property>
@@ -585,7 +582,6 @@
             <property name="floatable">
              <bool>false</bool>
             </property>
-            <addaction name="separator"/>
             <addaction name="actionShowGrid"/>
             <addaction name="actionSnaptoGrid"/>
            </widget>
@@ -609,14 +605,14 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>171</width>
+               <width>676</width>
                <height>508</height>
               </rect>
              </property>
              <property name="autoFillBackground">
               <bool>true</bool>
              </property>
-             <layout class="QGridLayout" name="gridLayout_3">
+             <layout class="QGridLayout" name="pathPreviewLayout">
               <property name="sizeConstraint">
                <enum>QLayout::SetDefaultConstraint</enum>
               </property>
