@@ -22,10 +22,8 @@ SpriteEditor::SpriteEditor(MessageModel* model, QWidget* parent)
 
   QCheckBox* showBBox = new QCheckBox(tr("Show BBox"),this);
   showBBox->setChecked(true);
-  showBBox->setLayoutDirection(Qt::RightToLeft);
   QCheckBox* showOrigin = new QCheckBox(tr("Show Origin"),this);
   showOrigin->setChecked(true);
-  showOrigin->setLayoutDirection(Qt::RightToLeft);
 
   _ui->mainToolBar->addWidget(showBBox);
   _ui->mainToolBar->addWidget(showOrigin);
