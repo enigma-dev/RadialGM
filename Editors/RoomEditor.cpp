@@ -59,7 +59,11 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
 
   connect(_ui->addLayerButton, &QAbstractButton::clicked, [=]() {
     auto layerModel = _ui->layersListView->model();
-    layerModel->insertRow(layerModel->rowCount());
+    int row = layerModel->rowCount();
+    layerModel->insertRow(row);
+    layerModel->setData(layerModel->index(row,Room::Layer::kNameFieldNumber),"Layer");
+    layerModel->setData(layerModel->index(row,Room::Layer::kDepthFieldNumber),0);
+    layerModel->setData(layerModel->index(row,Room::Layer::kVisibleFieldNumber),true);
   });
   connect(_ui->deleteLayerButton, &QAbstractButton::clicked, [=]() {
     auto layerModel = _ui->layersListView->model();
