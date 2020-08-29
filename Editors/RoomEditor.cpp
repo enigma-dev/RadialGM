@@ -82,7 +82,6 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   // This updates all the model views in the event of a sprite is changed
   connect(MainWindow::resourceMap.get(), &ResourceModelMap::DataChanged, this, [this]() {
     _ui->instancesListView->reset();
-    _ui->tilesListView->reset();
     _ui->layersPropertiesView->reset();
   });
 
@@ -114,17 +113,6 @@ void RoomEditor::RebindSubModels() {
   RepeatedMessageModel* tm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
   QSortFilterProxyModel* tmp = new QSortFilterProxyModel(this);
   tmp->setSourceModel(tm);
-  _ui->tilesListView->setModel(tmp);
-
-  for (int c = 0; c < tm->columnCount(); ++c) {
-    if (c != Room::Tile::kBackgroundNameFieldNumber && c != Room::Tile::kIdFieldNumber &&
-        c != Room::Tile::kDepthFieldNumber && c != Room::Tile::kNameFieldNumber)
-      _ui->tilesListView->hideColumn(c);
-    else
-      _ui->tilesListView->resizeColumnToContents(c);
-  }
-
-  _ui->tilesListView->header()->swapSections(Room::Tile::kNameFieldNumber, Room::Tile::kBackgroundNameFieldNumber);
 
   RepeatedMessageModel* vm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kViewsFieldNumber);
   _viewMapper->setModel(vm);
@@ -133,19 +121,8 @@ void RoomEditor::RebindSubModels() {
           [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
             if (selected.empty()) return;
             RepeatedMessageModel* im = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
-            _ui->tilesListView->clearSelection();
             auto selectedIndex = selected.indexes().first();
             auto currentInstanceModel = im->GetSubModel<MessageModel*>(selectedIndex.row());
-            _ui->layersPropertiesView->setModel(currentInstanceModel);
-          });
-
-  connect(_ui->tilesListView->selectionModel(), &QItemSelectionModel::selectionChanged,
-          [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
-            if (selected.empty()) return;
-            RepeatedMessageModel* tm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
-            _ui->instancesListView->clearSelection();
-            auto selectedIndex = selected.indexes().first();
-            auto currentInstanceModel = tm->GetSubModel<MessageModel*>(selectedIndex.row());
             _ui->layersPropertiesView->setModel(currentInstanceModel);
           });
 
