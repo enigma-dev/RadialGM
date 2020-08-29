@@ -20,8 +20,6 @@ PathEditor::PathEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   _ui->contentSplitter->setStretchFactor(0, 0);
   _ui->contentSplitter->setStretchFactor(1, 1);
 
-  _ui->mainToolBar->setStyleSheet("QToolBar{spacing:8px;}");
-
   QLabel* xSnapLabel(new QLabel(tr("X Snap"), this));
   _ui->mainToolBar->addWidget(xSnapLabel);
 
