@@ -1,6 +1,5 @@
 #include "TimelineEditor.h"
 
-#include "ui_CodeEditor.h"
 #include "ui_TimelineEditor.h"
 
 #include "CodeEditor.h"
