@@ -94,6 +94,9 @@ void RoomEditor::RebindSubModels() {
   _roomModel = _model->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
   _ui->roomView->SetResourceModel(_roomModel);
 
+  RepeatedMessageModel* lm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kLayersFieldNumber);
+  _ui->layersListView->setModel(lm);
+
   RepeatedMessageModel* im = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
   QSortFilterProxyModel* imp = new QSortFilterProxyModel(this);
   imp->setSourceModel(im);
