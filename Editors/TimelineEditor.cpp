@@ -6,11 +6,8 @@
 #include "CodeEditor.h"
 #include "Dialogs/TimelineChangeMoment.h"
 
-#include <QDebug>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QSizePolicy>
-#include <QSplitter>
 
 TimelineEditor::TimelineEditor(MessageModel* model, QWidget* parent)
     : BaseEditor(model, parent), _ui(new Ui::TimelineEditor) {

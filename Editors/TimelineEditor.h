@@ -2,13 +2,11 @@
 #define TIMELINEEDITOR_H
 
 #include "BaseEditor.h"
-#include "CodeEditor.h"
 
 #include "Models/RepeatedMessageModel.h"
 
 namespace Ui {
 class TimelineEditor;
-class CodeEditor;
 }  // namespace Ui
 
 class TimelineEditor : public BaseEditor {
