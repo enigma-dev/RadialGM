@@ -61,7 +61,6 @@
      <addaction name="actionZoom"/>
      <addaction name="actionZoomIn"/>
      <addaction name="actionZoomOut"/>
-     <addaction name="separator"/>
     </widget>
    </item>
    <item>
