@@ -13,6 +13,8 @@
 #include <QItemSelection>
 #include <QMessageBox>
 #include <QUuid>
+#include <QToolButton>
+#include <QMenu>
 
 SpriteEditor::SpriteEditor(MessageModel* model, QWidget* parent)
     : BaseEditor(model, parent), _ui(new Ui::SpriteEditor) {
@@ -20,6 +22,16 @@ SpriteEditor::SpriteEditor(MessageModel* model, QWidget* parent)
   connect(_ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
   _ui->scrollAreaWidget->SetAssetView(_ui->subimagePreview);
 
+  auto showButton = reinterpret_cast<QToolButton*>(_ui->mainToolBar->widgetForAction(_ui->actionShow));
+  showButton->setPopupMode(QToolButton::MenuButtonPopup);
+  QMenu *showMenu = new QMenu();
+  showMenu->addAction(_ui->actionShowBBox);
+  showMenu->addAction(_ui->actionShowOrigin);
+  _ui->actionShow->setMenu(showMenu);
+  connect(_ui->actionShow, &QAction::triggered, [=](){
+    _ui->actionShowBBox->setChecked(true);
+    _ui->actionShowOrigin->setChecked(true);
+  });
   connect(_ui->actionShowBBox, &QAction::toggled, _ui->subimagePreview, &SpriteView::SetShowBBox);
   connect(_ui->actionShowOrigin, &QAction::toggled, _ui->subimagePreview, &SpriteView::SetShowOrigin);
 

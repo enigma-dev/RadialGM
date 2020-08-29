@@ -55,8 +55,7 @@
      <addaction name="actionLoadSubimages"/>
      <addaction name="actionAddSubimages"/>
      <addaction name="separator"/>
-     <addaction name="actionShowBBox"/>
-     <addaction name="actionShowOrigin"/>
+     <addaction name="actionShow"/>
      <addaction name="separator"/>
      <addaction name="actionZoom"/>
      <addaction name="actionZoomIn"/>
@@ -689,6 +688,14 @@
    </property>
    <property name="toolTip">
     <string>Show Origin</string>
+   </property>
+  </action>
+  <action name="actionShow">
+   <property name="text">
+    <string>Show</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
    </property>
   </action>
  </widget>
