@@ -55,6 +55,9 @@
      <addaction name="actionLoadSubimages"/>
      <addaction name="actionAddSubimages"/>
      <addaction name="separator"/>
+     <addaction name="actionShowBBox"/>
+     <addaction name="actionShowOrigin"/>
+     <addaction name="separator"/>
      <addaction name="actionZoom"/>
      <addaction name="actionZoomIn"/>
      <addaction name="actionZoomOut"/>
@@ -353,7 +356,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>627</width>
+           <width>635</width>
            <height>312</height>
           </rect>
          </property>
@@ -659,6 +662,34 @@
    </property>
    <property name="toolTip">
     <string>Zoom Out</string>
+   </property>
+  </action>
+  <action name="actionShowBBox">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show BBox</string>
+   </property>
+   <property name="toolTip">
+    <string>Show Bounding Box</string>
+   </property>
+  </action>
+  <action name="actionShowOrigin">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Origin</string>
+   </property>
+   <property name="toolTip">
+    <string>Show Origin</string>
    </property>
   </action>
  </widget>
