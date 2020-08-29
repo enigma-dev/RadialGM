@@ -61,6 +61,10 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
     auto layerModel = _ui->layersListView->model();
     layerModel->insertRow(layerModel->rowCount());
   });
+  connect(_ui->deleteLayerButton, &QAbstractButton::clicked, [=]() {
+    auto layerModel = _ui->layersListView->model();
+    layerModel->removeRow(_ui->layersListView->currentIndex().row());
+  });
 
   QMenuView* objMenu = new QMenuView(this);
   TreeSortFilterProxyModel* treeProxy = new TreeSortFilterProxyModel(this);
