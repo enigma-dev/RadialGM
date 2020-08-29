@@ -108,6 +108,12 @@ void RoomEditor::RebindSubModels() {
   _ui->roomView->SetResourceModel(_roomModel);
 
   RepeatedMessageModel* lm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kLayersFieldNumber);
+  lm->setHeaderData(Room::Layer::kNameFieldNumber, Qt::Horizontal,
+                    tr("Name"), Qt::DisplayRole);
+  lm->setHeaderData(Room::Layer::kDepthFieldNumber, Qt::Horizontal,
+                    tr("Depth"), Qt::DisplayRole);
+  lm->setHeaderData(Room::Layer::kVisibleFieldNumber, Qt::Horizontal,
+                    tr(""), Qt::DisplayRole);
   lm->setHeaderData(Room::Layer::kVisibleFieldNumber, Qt::Horizontal,
                     tr("Visible"), Qt::ToolTipRole);
   lm->setHeaderData(Room::Layer::kVisibleFieldNumber, Qt::Horizontal,
