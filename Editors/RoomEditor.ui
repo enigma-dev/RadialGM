@@ -106,22 +106,79 @@
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
-          <widget class="QTreeView" name="layersListView">
-           <property name="editTriggers">
-            <set>QAbstractItemView::NoEditTriggers</set>
-           </property>
-           <property name="selectionMode">
-            <enum>QAbstractItemView::ExtendedSelection</enum>
-           </property>
-           <property name="itemsExpandable">
-            <bool>false</bool>
-           </property>
-           <property name="sortingEnabled">
-            <bool>true</bool>
-           </property>
-           <property name="expandsOnDoubleClick">
-            <bool>false</bool>
-           </property>
+          <widget class="QWidget" name="verticalLayoutWidget">
+           <layout class="QVBoxLayout" name="layersListLayout">
+            <property name="spacing">
+             <number>4</number>
+            </property>
+            <item>
+             <layout class="QHBoxLayout" name="layersListEditLayout">
+              <property name="spacing">
+               <number>4</number>
+              </property>
+              <item>
+               <widget class="QToolButton" name="addLayerButton">
+                <property name="toolTip">
+                 <string>Add Layer</string>
+                </property>
+                <property name="text">
+                 <string>Add Layer</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../images.qrc">
+                  <normaloff>:/actions/add-on-top.png</normaloff>:/actions/add-on-top.png</iconset>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="layerListEditSpacer">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QToolButton" name="deleteLayerButton">
+                <property name="toolTip">
+                 <string>Delete Layer</string>
+                </property>
+                <property name="text">
+                 <string>Delete Layer</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../images.qrc">
+                  <normaloff>:/actions/delete.png</normaloff>:/actions/delete.png</iconset>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QTreeView" name="layersListView">
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
+              </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::ExtendedSelection</enum>
+              </property>
+              <property name="itemsExpandable">
+               <bool>false</bool>
+              </property>
+              <property name="sortingEnabled">
+               <bool>true</bool>
+              </property>
+              <property name="expandsOnDoubleClick">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
           <widget class="QWidget" name="layoutWidget">
            <layout class="QVBoxLayout" name="layersAssetsLayout">
