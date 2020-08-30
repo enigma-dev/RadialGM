@@ -119,8 +119,7 @@ void RoomEditor::RebindSubModels() {
   lm->setHeaderData(Room::Layer::kVisibleFieldNumber, Qt::Horizontal,
                     QIcon(":/actions/find.png"), Qt::DecorationRole);
   _ui->layersListView->setModel(lm);
-  int lcc = lm->columnCount();
-  for (int c = 0; c < lcc; ++c) {
+  for (int c = 0; c < lm->columnCount(); ++c) {
     if (c != Room::Layer::kNameFieldNumber &&
         c != Room::Layer::kDepthFieldNumber &&
         c != Room::Layer::kVisibleFieldNumber)
