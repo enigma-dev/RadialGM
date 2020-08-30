@@ -17,6 +17,7 @@
 #include <algorithm>
 
 using View = buffers::resources::Room::View;
+using Layer = buffers::resources::Room::Layer;
 
 RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model, parent), _ui(new Ui::RoomEditor) {
   _ui->setupUi(this);
@@ -94,8 +95,8 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
 
   // This updates all the model views in the event of a sprite is changed
   connect(MainWindow::resourceMap.get(), &ResourceModelMap::DataChanged, this, [this]() {
-    _ui->instancesListView->reset();
-    _ui->layersPropertiesView->reset();
+    _ui->elementsListView->reset();
+    _ui->propertiesView->reset();
   });
 
   RebindSubModels();
@@ -126,36 +127,42 @@ void RoomEditor::RebindSubModels() {
       _ui->layersListView->hideColumn(c);
   }
 
-  RepeatedMessageModel* im = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
-  QSortFilterProxyModel* imp = new QSortFilterProxyModel(this);
-  imp->setSourceModel(im);
-  _ui->instancesListView->setModel(imp);
+  QSortFilterProxyModel* emp = new QSortFilterProxyModel(this);
+  _ui->elementsListView->setModel(emp);
 
-  for (int c = 0; c < im->columnCount(); ++c) {
-    if (c != Room::Instance::kNameFieldNumber && c != Room::Instance::kObjectTypeFieldNumber &&
-        c != Room::Instance::kIdFieldNumber)
-      _ui->instancesListView->hideColumn(c);
-    else
-      _ui->instancesListView->resizeColumnToContents(c);
-  }
+  connect(_ui->layersListView->selectionModel(), &QItemSelectionModel::selectionChanged,
+          [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
+            if (selected.empty()) return;
+            auto selectedIndex = selected.indexes().first();
+            auto currentLayerModel = lm->GetSubModel<MessageModel*>(selectedIndex.row());
+            _ui->propertiesView->setModel(currentLayerModel);
 
-  _ui->instancesListView->header()->swapSections(Room::Instance::kNameFieldNumber,
-                                                 Room::Instance::kObjectTypeFieldNumber);
+            RepeatedMessageModel* im = currentLayerModel->GetSubModel<RepeatedMessageModel*>(
+                  Layer::kInstancesFieldNumber);
+            emp->setSourceModel(im);
 
-  RepeatedMessageModel* tm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
-  QSortFilterProxyModel* tmp = new QSortFilterProxyModel(this);
-  tmp->setSourceModel(tm);
+            for (int c = 0; c < im->columnCount(); ++c) {
+              if (c != Room::Instance::kNameFieldNumber && c != Room::Instance::kObjectTypeFieldNumber &&
+                  c != Room::Instance::kIdFieldNumber)
+                _ui->elementsListView->hideColumn(c);
+              else
+                _ui->elementsListView->resizeColumnToContents(c);
+            }
+
+            _ui->elementsListView->header()->swapSections(Room::Instance::kNameFieldNumber,
+                                                           Room::Instance::kObjectTypeFieldNumber);
+          });
 
   RepeatedMessageModel* vm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kViewsFieldNumber);
   _viewMapper->setModel(vm);
 
-  connect(_ui->instancesListView->selectionModel(), &QItemSelectionModel::selectionChanged,
+  connect(_ui->elementsListView->selectionModel(), &QItemSelectionModel::selectionChanged,
           [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
             if (selected.empty()) return;
             RepeatedMessageModel* im = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
             auto selectedIndex = selected.indexes().first();
             auto currentInstanceModel = im->GetSubModel<MessageModel*>(selectedIndex.row());
-            _ui->layersPropertiesView->setModel(currentInstanceModel);
+            _ui->propertiesView->setModel(currentInstanceModel);
           });
 
   BaseEditor::RebindSubModels();
