@@ -64,11 +64,9 @@ static QVariant getHeaderData(const QHash<int,QHash<Qt::ItemDataRole,QVariant>>&
 
 QVariant ProtoModel::headerData(int section, Qt::Orientation orientation, int role) const {
   if (orientation == Qt::Horizontal) {
-    auto data = getHeaderData(_horizontalHeaderData, section, role);
-    if (data.isValid()) return data;
+    return getHeaderData(_horizontalHeaderData, section, role);
   } else if (orientation == Qt::Vertical) {
-    auto data = getHeaderData(_verticalHeaderData, section, role);
-    if (data.isValid()) return data;
+    return getHeaderData(_verticalHeaderData, section, role);
   }
-  return QAbstractItemModel::headerData(section, orientation, role);
+  return QVariant();
 }
