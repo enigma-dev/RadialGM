@@ -14,6 +14,9 @@ class EventTypesListModel : public QAbstractListModel {
   EventData* eventData_;
 
  public:
+  // define our application specific roles starting at Qt::UserRole
+  // https://doc.qt.io/qt-5/qt.html#ItemDataRole-enum
+  // NOTE: C++ enums increment the previous value by one automatically
   static enum UserRoles {
     EventTypeRole = Qt::UserRole,
     EventGroupRole,
