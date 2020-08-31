@@ -95,13 +95,8 @@ const QStringList &EventArgumentsDialog::GetArguments() const { return arguments
 void EventArgumentsDialog::done(int r) {
   for (const QWidget *w : widgets_) {
     QVariant argument = w->metaObject()->userProperty().read(w);
-    QString argstr = "";
-    if (QString(w->metaObject()->className()) == "QSpinBox") {
-      argstr = QString::number(reinterpret_cast<const QSpinBox *>(w)->value());
-    } else {
-      if (argument.isValid() && (QMetaType::Type)argument.type() == QMetaType::QString) argstr = argument.toString();
-    }
-    arguments_.append(argstr);
+    if (argument.isValid())
+      arguments_.append(argument.toString());
   }
 
   QDialog::done(r);
