@@ -39,7 +39,7 @@
    <item>
     <widget class="QTabWidget" name="ObjectTabs">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="Events">
       <attribute name="title">

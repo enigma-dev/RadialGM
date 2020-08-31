@@ -6,6 +6,7 @@
 #include "Object.pb.h"
 #include "Models/EventsListModel.h"
 #include "Models/EventTypesListModel.h"
+#include "Models/EventTypesListSortFilterProxyModel.h"
 
 #include <QSortFilterProxyModel>
 #include <QToolButton>
@@ -24,9 +25,6 @@ class ObjectEditor : public BaseEditor {
  public slots:
   void RebindSubModels() override;
 
-private slots:
-  void on_spriteButton_triggered(QAction *arg1);
-
 private:
   void BindEventMenu(QToolButton* btn, bool add);
   void AddChangeFromMenuEvent(const QModelIndex &index, bool add);
@@ -42,8 +40,8 @@ private:
   int MapRowFrom(int row);
 
   Ui::ObjectEditor* _ui;
-  MessageModel* _objectModel = nullptr;
-  EventsListModel* _eventsModel = nullptr;
+  MessageModel* _objectModel;
+  EventsListModel* _eventsModel;
   QSortFilterProxyModel* _sortedEvents;
   EventTypesListSortFilterProxyModel* _eventsTypesModel;
   CodeEditor* _codeEditor;

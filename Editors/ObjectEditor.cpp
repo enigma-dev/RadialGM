@@ -10,14 +10,12 @@
 
 #include <QSplitter>
 
-void ObjectEditor::BindEventMenu(QToolButton* btn, bool add) {
+void ObjectEditor::BindEventMenu(QToolButton *btn, bool add) {
   QMenuView *eventsMenu = new QMenuView(this);
   eventsMenu->setModel(_eventsTypesModel);
   eventsMenu->setToolTipsVisible(true);
   btn->setMenu(eventsMenu);
-  connect(eventsMenu, &QMenuView::triggered, [=](const QModelIndex &index) {
-    AddChangeFromMenuEvent(index, add);
-  });
+  connect(eventsMenu, &QMenuView::triggered, [=](const QModelIndex &index) { AddChangeFromMenuEvent(index, add); });
 }
 
 ObjectEditor::ObjectEditor(MessageModel *model, QWidget *parent)
@@ -64,7 +62,7 @@ ObjectEditor::ObjectEditor(MessageModel *model, QWidget *parent)
 
 ObjectEditor::~ObjectEditor() { delete _ui; }
 
-void ObjectEditor::AddChangeEventHelper(const Object::EgmEvent& event, bool add) {
+void ObjectEditor::AddChangeEventHelper(const Object::EgmEvent &event, bool add) {
   if (add) {
     AddEvent(event);
   } else {
@@ -72,12 +70,13 @@ void ObjectEditor::AddChangeEventHelper(const Object::EgmEvent& event, bool add)
     int selectedIdx = MapRowTo(_ui->eventsList->selectionModel()->currentIndex().row());
     if (existingIdx == -1 && selectedIdx != -1) {
       ChangeEvent(selectedIdx, event, false);
-    } else qDebug() << "Change event failed";
+    } else
+      qDebug() << "Change event failed";
   }
 }
 
 void ObjectEditor::AddChangeFromMenuEvent(const QModelIndex &index, bool add) {
-  QStringList args = _eventsTypesModel->data(index, Qt::UserRole + 2).toStringList();
+  QStringList args = _eventsTypesModel->data(index, EventTypesListModel::UserRoles::EventArgumentsRole).toStringList();
   EventArgumentsDialog *dialog = nullptr;
   if (args.size() > 0) {
     dialog = new EventArgumentsDialog(this, args);
@@ -86,7 +85,8 @@ void ObjectEditor::AddChangeFromMenuEvent(const QModelIndex &index, bool add) {
     connect(dialog, &QDialog::accepted, [=]() {
       if (dialog->result() == QDialog::Accepted) {
         Object::EgmEvent event;
-        event.set_id(_eventsTypesModel->data(index, Qt::UserRole + 3).toString().toStdString());
+        event.set_id(
+            _eventsTypesModel->data(index, EventTypesListModel::UserRoles::EventBareIDRole).toString().toStdString());
         for (const QString &arg : dialog->GetArguments()) {
           std::string *s = event.add_arguments();
           s->assign(arg.toStdString());
@@ -97,7 +97,8 @@ void ObjectEditor::AddChangeFromMenuEvent(const QModelIndex &index, bool add) {
     });
   } else {
     Object::EgmEvent event;
-    event.set_id(_eventsTypesModel->data(index, Qt::UserRole + 3).toString().toStdString());
+    event.set_id(
+        _eventsTypesModel->data(index, EventTypesListModel::UserRoles::EventBareIDRole).toString().toStdString());
     AddChangeEventHelper(event, add);
   }
 }
@@ -157,8 +158,7 @@ void ObjectEditor::ChangeEvent(int idx, Object::EgmEvent event, bool changeCode)
 
   eventsModel->SetData(QString::fromStdString(event.id()), idx, Object::EgmEvent::kIdFieldNumber);
 
-  if (changeCode)
-    eventsModel->SetData(QString::fromStdString(event.code()), idx, Object::EgmEvent::kCodeFieldNumber);
+  if (changeCode) eventsModel->SetData(QString::fromStdString(event.code()), idx, Object::EgmEvent::kCodeFieldNumber);
 
   RepeatedStringModel *argsModel = eventsModel->GetSubModel<MessageModel *>(idx)->GetSubModel<RepeatedStringModel *>(
       Object::EgmEvent::kArgumentsFieldNumber);
@@ -213,8 +213,3 @@ void ObjectEditor::SetCurrentEditor(int idx) {
 int ObjectEditor::MapRowTo(int row) { return _sortedEvents->mapToSource(_sortedEvents->index(row, 0)).row(); }
 
 int ObjectEditor::MapRowFrom(int row) { return _sortedEvents->mapFromSource(_eventsModel->index(row, 0)).row(); }
-
-void ObjectEditor::on_spriteButton_triggered(QAction *arg1)
-{
-    qDebug() << "why slots no work";
-}

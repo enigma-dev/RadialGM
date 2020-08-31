@@ -72,6 +72,8 @@ SOURCES += \
     Dialogs/TimelineChangeMoment.cpp \
     Editors/ShaderEditor.cpp \
     Editors/SpriteEditor.cpp \
+    Models/EventTypesListModel.cpp \
+    Models/EventTypesListSortFilterProxyModel.cpp \
     Models/EventsListModel.cpp \
     Models/MessageModel.cpp \
     Models/RepeatedImageModel.cpp \
@@ -130,6 +132,7 @@ HEADERS += \
     Editors/RoomEditor.h \
     Editors/SettingsEditor.h \
     Models/EventTypesListModel.h \
+    Models/EventTypesListSortFilterProxyModel.h \
     Models/EventsListModel.h \
     Models/MessageModel.h \
     Models/RepeatedImageModel.h \
@@ -184,3 +187,6 @@ FORMS += \
 
 RESOURCES += \
     images.qrc
+
+DISTFILES += \
+  CMakeLists.txt
