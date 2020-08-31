@@ -6,7 +6,7 @@ EventTypesListSortFilterProxyModel::EventTypesListSortFilterProxyModel(QObject* 
     : QSortFilterProxyModel(parent) {}
 
 bool EventTypesListSortFilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex& /*source_parent*/) const {
-  return sourceModel()->data(sourceModel()->index(source_row, 0), Qt::UserRole).toBool();
+  return sourceModel()->data(sourceModel()->index(source_row, 0), EventTypesListModel::UserRoles::EventTypeRole).toBool();
 }
 
 bool EventTypesListSortFilterProxyModel::lessThan(const QModelIndex& source_left,
