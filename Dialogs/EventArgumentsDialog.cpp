@@ -95,8 +95,10 @@ const QStringList &EventArgumentsDialog::GetArguments() const { return arguments
 void EventArgumentsDialog::done(int r) {
   for (const QWidget *w : widgets_) {
     QVariant argument = w->metaObject()->userProperty().read(w);
+    QString argstr = "";
     if (argument.isValid())
-      arguments_.append(argument.toString());
+      argstr = argument.toString();
+    arguments_.append(argstr);
   }
 
   QDialog::done(r);
