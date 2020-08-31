@@ -2,7 +2,6 @@
 #define OBJECTEDITOR_H
 
 #include "BaseEditor.h"
-#include "CodeEditor.h"
 #include "Object.pb.h"
 #include "Models/EventsListModel.h"
 #include "Models/EventTypesListModel.h"
@@ -44,7 +43,6 @@ private:
   EventsListModel* _eventsModel;
   QSortFilterProxyModel* _sortedEvents;
   EventTypesListSortFilterProxyModel* _eventsTypesModel;
-  CodeEditor* _codeEditor;
 };
 
 #endif  // OBJECTEDITOR_H

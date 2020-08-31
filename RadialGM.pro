@@ -70,6 +70,7 @@ LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
 SOURCES += \
     Dialogs/EventArgumentsDialog.cpp \
     Dialogs/TimelineChangeMoment.cpp \
+    Editors/IncludeEditor.cpp \
     Editors/ShaderEditor.cpp \
     Editors/SpriteEditor.cpp \
     Models/EventTypesListModel.cpp \
@@ -118,6 +119,7 @@ SOURCES += \
 HEADERS += \
     Dialogs/EventArgumentsDialog.h \
     Dialogs/TimelineChangeMoment.h \
+    Editors/IncludeEditor.h \
     Editors/ShaderEditor.h \
     Editors/SpriteEditor.h \
     MainWindow.h \
@@ -171,6 +173,7 @@ HEADERS += \
 
 FORMS += \
     Dialogs/TimelineChangeMoment.ui \
+    Editors/IncludeEditor.ui \
     Editors/TimelineEditor.ui \
     MainWindow.ui \
     Dialogs/PreferencesDialog.ui \

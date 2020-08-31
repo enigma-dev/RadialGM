@@ -34,8 +34,41 @@ bool ProtoModel::IsDirty() { return _dirty; }
 QModelIndex ProtoModel::parent(const QModelIndex & /*index*/) const { return QModelIndex(); }
 
 Qt::ItemFlags ProtoModel::flags(const QModelIndex &index) const {
-  if (!index.isValid()) return nullptr;
+  if (!index.isValid()) return Qt::NoItemFlags;
   auto flags = QAbstractItemModel::flags(index);
   flags |= Qt::ItemIsEditable;
   return flags;
+}
+
+bool ProtoModel::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role) {
+  if (orientation == Qt::Horizontal) {
+    _horizontalHeaderData[section][static_cast<Qt::ItemDataRole>(role)] = value;
+    emit headerDataChanged(Qt::Horizontal, section, section);
+    return true;
+  } else if (orientation == Qt::Vertical) {
+    _verticalHeaderData[section][static_cast<Qt::ItemDataRole>(role)] = value;
+    emit headerDataChanged(Qt::Vertical, section, section);
+    return true;
+  }
+  return QAbstractItemModel::setHeaderData(section, orientation, value, role);
+}
+
+static QVariant getHeaderData(const QHash<int,QHash<Qt::ItemDataRole,QVariant>>& map, int section, int role) {
+  auto sit = map.find(section);
+  if (sit == map.end()) return QVariant();
+  auto sectionMap = *sit;
+  auto it = sectionMap.find(static_cast<Qt::ItemDataRole>(role));
+  if (it == sectionMap.end()) return QVariant();
+  return *it;
+}
+
+QVariant ProtoModel::headerData(int section, Qt::Orientation orientation, int role) const {
+  if (orientation == Qt::Horizontal) {
+    auto data = getHeaderData(_horizontalHeaderData, section, role);
+    if (data.isValid()) return data;
+  } else if (orientation == Qt::Vertical) {
+    auto data = getHeaderData(_verticalHeaderData, section, role);
+    if (data.isValid()) return data;
+  }
+  return QAbstractItemModel::headerData(section, orientation, role);
 }
