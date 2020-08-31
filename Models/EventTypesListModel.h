@@ -16,9 +16,9 @@ class EventTypesListModel : public QAbstractListModel {
  public:
   static enum UserRoles {
     EventTypeRole = Qt::UserRole,
-    EventGroupRole = Qt::UserRole + 1,
-    EventArgumentsRole = Qt::UserRole + 2,
-    EventBareIDRole = Qt::UserRole + 3
+    EventGroupRole,
+    EventArgumentsRole,
+    EventBareIDRole
   } useroles;
 
   EventTypesListModel(EventData* eventData, QObject* parent = nullptr);
