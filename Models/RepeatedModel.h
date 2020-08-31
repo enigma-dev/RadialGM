@@ -164,8 +164,6 @@ class RepeatedModel : public ProtoModel {
         }
       }
 
-      emit _model.beginResetModel();
-
       // Basic dense range removal. Move "deleted" rows to the end of the array.
       int left = 0, right = 0;
       for (auto range : ranges) {
@@ -188,11 +186,11 @@ class RepeatedModel : public ProtoModel {
       // correct number of rows incrementally, or else various components in Qt
       // will bitch, piss, moan, wail, whine, and cry. Actually, they will anyway.
       for (Range range : ranges) {
+        emit _model.beginRemoveRows(QModelIndex(), range.first, range.last);
         _model.Resize(_field.size() - range.size());
         for (int j = range.first; j <= range.last; ++j) _field.RemoveLast();
+        emit _model.endRemoveRows();
       }
-
-      emit _model.endResetModel();
 
       _model.ParentDataChanged();
     }
