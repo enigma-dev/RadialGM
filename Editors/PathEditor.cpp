@@ -234,6 +234,7 @@ void PathEditor::on_insertPointButton_pressed() {
 
 void PathEditor::on_deletePointButton_pressed() {
   int deleteIndex = _ui->pointsTableView->selectionModel()->currentIndex().row();
+  // this operation is temporary and will self destruct immediately removing the rows
   RepeatedMessageModel::RowRemovalOperation(_pointsModel)
       .RemoveRows(_ui->pointsTableView->selectionModel()->selectedRows());
 
