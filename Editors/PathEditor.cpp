@@ -240,8 +240,10 @@ void PathEditor::on_deletePointButton_pressed() {
       .RemoveRows(_ui->pointsTableView->selectionModel()->selectedRows());
 
   if (_pointsModel->rowCount() > 0) {
-    QModelIndex newSelectIndex =
-        _pointsModel->index((deleteIndex == 0) ? 0 : deleteIndex - 1, Path::Point::kXFieldNumber);
+    auto rowCount = _ui->pointsTableView->model()->rowCount();
+    QModelIndex newSelectIndex = _pointsModel->index(
+          (deleteIndex >= rowCount) ? rowCount - 1 : deleteIndex,
+          Path::Point::kXFieldNumber);
     _ui->pointsTableView->setCurrentIndex(newSelectIndex);
   } else {
     _ui->deletePointButton->setDisabled(true);
