@@ -236,10 +236,8 @@ void PathEditor::on_insertPointButton_pressed() {
 
 void PathEditor::on_deletePointButton_pressed() {
   int deleteIndex = _ui->pointsTableView->selectionModel()->currentIndex().row();
-  {
-    RepeatedMessageModel::RowRemovalOperation remover(_pointsModel);
-    remover.RemoveRows(_ui->pointsTableView->selectionModel()->selectedRows());
-  }
+  RepeatedMessageModel::RowRemovalOperation(_pointsModel)
+      .RemoveRows(_ui->pointsTableView->selectionModel()->selectedRows());
 
   if (_pointsModel->rowCount() > 0) {
     QModelIndex newSelectIndex =
