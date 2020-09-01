@@ -52,6 +52,7 @@ set(RGM_SOURCES
     Plugins/RGMPlugin.cpp
     main.cpp
     MainWindow.cpp
+    Dialogs/EventArgumentsDialog.cpp
     Dialogs/PreferencesDialog.cpp
     Dialogs/TimelineChangeMoment.cpp
     Components/ArtManager.cpp
@@ -101,6 +102,7 @@ set(RGM_HEADERS
     Plugins/RGMPlugin.h
     MainWindow.h
     main.h
+    Dialogs/EventArgumentsDialog.h
     Dialogs/PreferencesDialog.h
     Dialogs/PreferencesKeys.h
     Dialogs/TimelineChangeMoment.h
