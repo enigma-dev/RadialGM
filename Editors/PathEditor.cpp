@@ -234,15 +234,15 @@ void PathEditor::on_deletePointButton_pressed() {
   int deleteIndex = _ui->pointsTableView->selectionModel()->currentIndex().row();
   {
     RepeatedMessageModel::RowRemovalOperation remover(_pointsModel);
-    remover.RemoveRow(deleteIndex);
+    remover.RemoveRows(_ui->pointsTableView->selectionModel()->selectedRows());
   }
 
   if (_pointsModel->rowCount() > 0) {
     QModelIndex newSelectIndex =
         _pointsModel->index((deleteIndex == 0) ? 0 : deleteIndex - 1, Path::Point::kXFieldNumber);
-    _ui->pointsTableView->setCurrentIndex(newSelectIndex);
     _ui->pointsTableView->selectionModel()->select(newSelectIndex,
                                                    QItemSelectionModel::QItemSelectionModel::ClearAndSelect);
+    _ui->pointsTableView->setCurrentIndex(newSelectIndex);
   } else {
     _ui->deletePointButton->setDisabled(true);
     _ui->pointsTableView->selectionModel()->clearSelection();
