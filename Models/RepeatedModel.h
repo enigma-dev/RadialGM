@@ -145,6 +145,10 @@ class RepeatedModel : public ProtoModel {
     void RemoveRows(int row, int count) {
       for (int i = row; i < row + count; ++i) _rows.insert(i);
     }
+    void RemoveRows(const QModelIndexList& indexes) {
+      foreach (auto index, indexes)
+        RemoveRow(index.row());
+    }
 
     ~RowRemovalOperation() {
       if (_rows.empty()) return;
