@@ -210,16 +210,17 @@ void PathEditor::MouseReleased(Qt::MouseButton button) {
   }
 }
 
-void PathEditor::UpdateSelection(const QItemSelection& selected, const QItemSelection& /*deselected*/) {
-  int selectIndex = -1;
-  // if new points were added to the selection, select them in the preview
-  if (!selected.indexes().empty()) selectIndex = selected.indexes()[0].row();
-  _ui->roomView->selectedPointIndex = selectIndex;
-  _ui->pathPreviewBackground->update();
+void PathEditor::UpdateSelection(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/) {
+  auto selectedPoints = _ui->pointsTableView->selectionModel()->selectedRows();
+  bool hasSelectedPoint = !selectedPoints.empty();
   // delete button should be enabled if the cumulative selection is not empty
   // and contains at least one selected row with every column selected
-  bool hasSelectedPoint = !_ui->pointsTableView->selectionModel()->selectedRows().empty();
   _ui->deletePointButton->setEnabled(hasSelectedPoint);
+  // keep most recently selected point selected in the preview
+  if (hasSelectedPoint)
+    _ui->roomView->selectedPointIndex = selectedPoints.last().row();
+  // update preview on point selection and deselection
+  _ui->pathPreviewBackground->update();
 }
 
 void PathEditor::on_addPointButton_pressed() {
