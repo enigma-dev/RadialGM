@@ -194,8 +194,6 @@ void PathEditor::MousePressed(Qt::MouseButton button) {
       QPoint pt = _ui->roomView->Point(i);
       if (pt == _ui->roomView->mousePos) {
         QModelIndex newSelectIndex = _pointsModel->index(i, Path::Point::kXFieldNumber);
-        _ui->pointsTableView->selectionModel()->select(newSelectIndex,
-                                                       QItemSelectionModel::QItemSelectionModel::ClearAndSelect);
         _ui->pointsTableView->setCurrentIndex(newSelectIndex);
         return;
       }
@@ -242,8 +240,6 @@ void PathEditor::on_deletePointButton_pressed() {
   if (_pointsModel->rowCount() > 0) {
     QModelIndex newSelectIndex =
         _pointsModel->index((deleteIndex == 0) ? 0 : deleteIndex - 1, Path::Point::kXFieldNumber);
-    _ui->pointsTableView->selectionModel()->select(newSelectIndex,
-                                                   QItemSelectionModel::QItemSelectionModel::ClearAndSelect);
     _ui->pointsTableView->setCurrentIndex(newSelectIndex);
   } else {
     _ui->deletePointButton->setDisabled(true);
