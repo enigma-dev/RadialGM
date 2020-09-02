@@ -52,6 +52,7 @@ set(RGM_SOURCES
     Plugins/RGMPlugin.cpp
     main.cpp
     MainWindow.cpp
+    Dialogs/EventArgumentsDialog.cpp
     Dialogs/PreferencesDialog.cpp
     Dialogs/TimelineChangeMoment.cpp
     Components/ArtManager.cpp
@@ -68,6 +69,9 @@ set(RGM_SOURCES
     Models/ImmediateMapper.cpp
     Models/ResourceModelMap.cpp
     Models/TreeModel.cpp
+    Models/EventsListModel.cpp
+    Models/EventTypesListModel.cpp
+    Models/EventTypesListSortFilterProxyModel.cpp
     Editors/ObjectEditor.cpp
     Editors/PathEditor.cpp
     Editors/CodeEditor.cpp
@@ -98,6 +102,7 @@ set(RGM_HEADERS
     Plugins/RGMPlugin.h
     MainWindow.h
     main.h
+    Dialogs/EventArgumentsDialog.h
     Dialogs/PreferencesDialog.h
     Dialogs/PreferencesKeys.h
     Dialogs/TimelineChangeMoment.h
@@ -118,6 +123,9 @@ set(RGM_HEADERS
     Models/RepeatedMessageModel.h
     Models/ProtoModel.h
     Models/RepeatedModel.h
+    Models/EventsListModel.h
+    Models/EventTypesListModel.h
+    Models/EventTypesListSortFilterProxyModel.h
     Editors/FontEditor.h
     Editors/PathEditor.h
     Editors/SpriteEditor.h
@@ -206,7 +214,7 @@ set(CompilerFlags
     CMAKE_CXX_FLAGS_RELEASE
     CMAKE_CXX_FLAGS_RELWITHDEBINFO
     )
-  
+
 foreach(CompilerFlag ${CompilerFlags})
   message(STATUS "  '${CompilerFlag}': ${${CompilerFlag}}")
 endforeach()
@@ -319,7 +327,7 @@ file(TO_CMAKE_PATH ${VCPKG_ROOT} VCPKG_ROOT)
     set(SEARCH_PATHS "${VCPKG_ROOT}/installed/x64-windows/bin/")
   endif()
 else()
-  set(LIBS "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}EGM${CMAKE_SHARED_LIBRARY_SUFFIX}" 
+  set(LIBS "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}EGM${CMAKE_SHARED_LIBRARY_SUFFIX}"
            "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}Protocols${CMAKE_SHARED_LIBRARY_SUFFIX}"
            "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}ENIGMAShared${CMAKE_SHARED_LIBRARY_SUFFIX}")
 endif()
