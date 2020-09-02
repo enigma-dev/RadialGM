@@ -70,10 +70,10 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
           [=](int index) { _viewMapper->setCurrentIndex(index); });
 
   cursorPositionLabel = new QLabel();
-  connect(_ui->roomPreviewBackground, &AssetScrollAreaBackground::MouseMoved, [=](int x, int y) {
-    const GridDimensions g = _ui->roomView->GetGrid();
-    cursorPositionLabel->setText(tr("X %0, Y %1").arg(RoundNum(x, g.horSpacing)).arg(RoundNum(y, g.vertSpacing)));
-  });
+  //connect(_ui->roomPreviewBackground, &AssetScrollAreaBackground::MouseMoved, [=](int x, int y) {
+   // const GridDimensions g = _ui->roomView->GetGrid();
+   // cursorPositionLabel->setText(tr("X %0, Y %1").arg(RoundNum(x, g.horSpacing)).arg(RoundNum(y, g.vertSpacing)));
+  //});
   _ui->statusBar->addWidget(cursorPositionLabel);
 
   _assetNameLabel = new QLabel("obj_xxx");
