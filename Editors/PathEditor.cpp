@@ -122,9 +122,6 @@ void PathEditor::RebindSubModels() {
   _roomLineEdit->setText(roomName);
 
   _ui->pathPreviewBackground->installEventFilter(this);
-  //connect(_ui->pathPreviewBackground, &AssetScrollAreaBackground::MouseMoved, this, &PathEditor::MouseMoved);
-  //connect(_ui->pathPreviewBackground, &AssetScrollAreaBackground::MousePressed, this, &PathEditor::MousePressed);
-  //connect(_ui->pathPreviewBackground, &AssetScrollAreaBackground::MouseReleased, this, &PathEditor::MouseReleased);
 
   connect(_ui->pointsTableView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
           &PathEditor::UpdateSelection);
