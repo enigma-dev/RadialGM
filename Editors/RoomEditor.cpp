@@ -77,8 +77,22 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   treeProxy->setSourceModel(MainWindow::treeModel.get());
   objMenu->setModel(treeProxy);
   _ui->objectSelectButton->setMenu(objMenu);
+  _ui->objectSelectButton->setPopupMode(QToolButton::MenuButtonPopup);
 
-  connect(objMenu, &QMenu::triggered, this, &RoomEditor::SelectedObjectChanged);
+  auto objects = treeProxy
+      ->match(treeProxy->index(0, 0), TreeModel::UserRoles::TypeCaseRole,
+              TypeCase::kObject, 1, Qt::MatchRecursive);
+  if (!objects.empty()) {
+    QModelIndex firstObjIdx = objects.first();
+    QString firstObj = firstObjIdx.data(Qt::DisplayRole).toString();
+    _ui->objectSelectButton->setIcon(firstObjIdx.data(Qt::DecorationRole).value<QIcon>());
+    _ui->currentObject->setText(firstObj);
+  }
+
+  connect(objMenu, &QMenuView::triggered, [=](const QModelIndex &index) {
+    _ui->currentObject->setText(treeProxy->data(index, Qt::DisplayRole).toString());
+    _ui->objectSelectButton->setIcon(treeProxy->data(index, Qt::DecorationRole).value<QIcon>());
+  });
 
   connect(_ui->currentViewComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
           [=](int index) { _viewMapper->setCurrentIndex(index); });
@@ -175,8 +189,6 @@ void RoomEditor::RebindSubModels() {
 
   BaseEditor::RebindSubModels();
 }
-
-void RoomEditor::SelectedObjectChanged(QAction* action) { _ui->currentObject->setText(action->text()); }
 
 void RoomEditor::updateCursorPositionLabel(const QPoint& pos) {
   this->cursorPositionLabel->setText(tr("X %0, Y %1").arg(pos.x()).arg(pos.y()));
