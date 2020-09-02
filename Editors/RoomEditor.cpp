@@ -132,14 +132,22 @@ void RoomEditor::RebindSubModels() {
 
   connect(_ui->layersListView->selectionModel(), &QItemSelectionModel::selectionChanged,
           [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
-            if (selected.empty()) return;
+            if (selected.empty()) {
+              _ui->propertiesView->setModel(nullptr);
+              _ui->propertiesView->setEnabled(false);
+              emp->setSourceModel(nullptr);
+              _ui->elementsListWidget->setEnabled(false);
+              return;
+            }
             auto selectedIndex = selected.indexes().first();
             auto currentLayerModel = lm->GetSubModel<MessageModel*>(selectedIndex.row());
             _ui->propertiesView->setModel(currentLayerModel);
+            _ui->propertiesView->setEnabled(true);
 
             RepeatedMessageModel* im = currentLayerModel->GetSubModel<RepeatedMessageModel*>(
                   Layer::kInstancesFieldNumber);
             emp->setSourceModel(im);
+            _ui->elementsListWidget->setEnabled(true);
 
             for (int c = 0; c < im->columnCount(); ++c) {
               if (c != Room::Instance::kNameFieldNumber && c != Room::Instance::kObjectTypeFieldNumber &&
