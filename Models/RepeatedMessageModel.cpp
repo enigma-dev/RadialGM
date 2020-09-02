@@ -59,3 +59,10 @@ QVariant RepeatedMessageModel::data(const QModelIndex &index, int role) const {
 
   return _subModels[index.row()]->data(_subModels[index.row()]->index(index.column()), role);
 }
+
+Qt::ItemFlags RepeatedMessageModel::flags(const QModelIndex &index) const {
+  R_EXPECT(index.row() >= 0 && index.row() < _subModels.size(), RepeatedModel::flags(index)) <<
+    "Supplied row was out of bounds:" << index.row();
+
+  return _subModels[index.row()]->flags(_subModels[index.row()]->index(index.column()));
+}
