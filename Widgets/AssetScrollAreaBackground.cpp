@@ -165,6 +165,10 @@ QPoint AssetScrollAreaBackground::GetCenterOffset() {
       (rect().height() < _assetView->rect().height()) ? 0 : rect().center().y() - _assetView->rect().center().y());
 }
 
+QPoint AssetScrollAreaBackground::MapToAsset(const QPoint &pos) const {
+  return (pos - _totalDrawOffset) / _currentZoom;
+}
+
 void AssetScrollAreaBackground::paintEvent(QPaintEvent* /* event */) {
   QPainter painter(this);
 
@@ -206,9 +210,8 @@ bool AssetScrollAreaBackground::eventFilter(QObject* obj, QEvent* event) {
   switch (event->type()) {
     case QEvent::MouseMove: {
       QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
-      QPoint roomPos = mouseEvent->pos() - _totalDrawOffset;
-      roomPos /= _currentZoom;
-      emit MouseMoved(roomPos.x(), roomPos.y());
+      QPoint assetPos = MapToAsset(mouseEvent->pos());
+      emit MouseMoved(assetPos.x(), assetPos.y());
       break;
     }
     case QEvent::MouseButtonPress: {
