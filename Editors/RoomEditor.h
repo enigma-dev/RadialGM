@@ -19,6 +19,7 @@ class RoomEditor : public BaseEditor {
   explicit RoomEditor(MessageModel* model, QWidget* parent);
   ~RoomEditor() override;
 
+  bool eventFilter(QObject* obj, QEvent* event) override;
   void setZoom(qreal zoom);
 
  public slots:
