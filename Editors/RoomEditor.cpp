@@ -159,7 +159,7 @@ bool RoomEditor::eventFilter(QObject* obj, QEvent* event) {
       cursorPositionLabel->setText(
             tr("X %0, Y %1")
             .arg(RoundNum(roomPos.x(),g.horSpacing))
-            .arg(RoundNum(roomPos.y(), g.vertSpacing)));
+            .arg(RoundNum(roomPos.y(),g.vertSpacing)));
       break;
     }
     default: break;
