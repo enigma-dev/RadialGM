@@ -87,6 +87,8 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
     return icon;
   } else if (role == Qt::EditRole || role == Qt::DisplayRole) {
     return QString::fromStdString(item->name());
+  } else if (role == TypeCaseRole) {
+    return item->type_case();
   }
 
   return QVariant();

@@ -18,6 +18,9 @@ class TreeModel : public QAbstractItemModel {
 
  public:
   static IconMap iconMap;
+  static enum UserRoles {
+    TypeCaseRole = Qt::UserRole
+  } useroles;
 
   explicit TreeModel(buffers::TreeNode *root, ResourceModelMap *resourceMap, QObject *parent);
 

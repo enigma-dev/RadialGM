@@ -71,12 +71,12 @@ class RepeatedModel : public ProtoModel {
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override {
     auto data = ProtoModel::headerData(section, orientation, role);
     if (data.isValid()) return data;
-    if (section == 0 || role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal)
-      return data;
+    if (section <= 0 || role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal)
+      return QModelIndex();
     return QString::fromStdString(_field->message_type()->field(section - 1)->name());
   }
 
-  // Convience function for internal moves
+  // Convenience function for internal moves
   bool moveRows(int source, int count, int destination) {
     return moveRows(QModelIndex(), source, count, QModelIndex(), destination);
   }
@@ -98,7 +98,8 @@ class RepeatedModel : public ProtoModel {
     return true;
   };
 
-  virtual bool removeRows(int position, int count, const QModelIndex & /*parent*/) override {
+  virtual bool removeRows(int position, int count, const QModelIndex& parent = QModelIndex()) override {
+    Q_UNUSED(parent);
     RowRemovalOperation remover(this);
     remover.RemoveRows(position, count);
     return true;
