@@ -72,7 +72,7 @@ class RepeatedModel : public ProtoModel {
     auto data = ProtoModel::headerData(section, orientation, role);
     if (data.isValid()) return data;
     if (section <= 0 || role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal)
-      return QModelIndex();
+      return QVariant(); // << invalid
     return QString::fromStdString(_field->message_type()->field(section - 1)->name());
   }
 
