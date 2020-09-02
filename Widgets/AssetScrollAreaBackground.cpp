@@ -165,7 +165,7 @@ QPoint AssetScrollAreaBackground::GetCenterOffset() {
       (rect().height() < _assetView->rect().height()) ? 0 : rect().center().y() - _assetView->rect().center().y());
 }
 
-QPoint AssetScrollAreaBackground::MapToRoom(const QPoint &pos) const {
+QPoint AssetScrollAreaBackground::MapToAsset(const QPoint &pos) const {
   return (pos - _totalDrawOffset) / _currentZoom;
 }
 

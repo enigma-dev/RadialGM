@@ -32,8 +32,8 @@ class AssetScrollAreaBackground : public QWidget {
   bool GetGridVisible();
   QPoint GetCenterOffset();
   // maps a point on the asset scroll area background (e.g, from mouse event)
-  // into the room with scaling by the zoom and translation
-  QPoint MapToRoom(const QPoint &pos) const;
+  // into the asset with scaling by the zoom and translation
+  QPoint MapToAsset(const QPoint &pos) const;
 
  public slots:
   void SetZoom(qreal _currentZoom);

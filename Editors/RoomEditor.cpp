@@ -154,7 +154,7 @@ bool RoomEditor::eventFilter(QObject* obj, QEvent* event) {
     switch (event->type()) {
     case QEvent::MouseMove: {
       QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
-      QPoint roomPos = _ui->roomPreviewBackground->MapToRoom(mouseEvent->pos());
+      QPoint roomPos = _ui->roomPreviewBackground->MapToAsset(mouseEvent->pos());
       const GridDimensions g = _ui->roomView->GetGrid();
       cursorPositionLabel->setText(
             tr("X %0, Y %1")

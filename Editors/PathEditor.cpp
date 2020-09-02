@@ -143,7 +143,7 @@ bool PathEditor::eventFilter(QObject* obj, QEvent* event) {
     switch (event->type()) {
     case QEvent::MouseMove: {
       QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
-      QPoint roomPos = _ui->pathPreviewBackground->MapToRoom(mouseEvent->pos());
+      QPoint roomPos = _ui->pathPreviewBackground->MapToAsset(mouseEvent->pos());
       MouseMoved(roomPos.x(), roomPos.y());
       break;
     }
