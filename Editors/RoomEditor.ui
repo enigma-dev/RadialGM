@@ -162,7 +162,7 @@
             <item>
              <widget class="QTreeView" name="layersListView">
               <property name="editTriggers">
-               <set>QAbstractItemView::NoEditTriggers</set>
+               <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
               </property>
               <property name="selectionMode">
                <enum>QAbstractItemView::SingleSelection</enum>
