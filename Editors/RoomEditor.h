@@ -28,7 +28,9 @@ class RoomEditor : public BaseEditor {
   void on_actionZoomIn_triggered();
   void on_actionZoomOut_triggered();
   void on_actionZoom_triggered();
-  void updateCursorPositionLabel(const QPoint& pos);
+  void MouseMoved(int x, int y);
+  void MousePressed(Qt::MouseButton button);
+  void MouseReleased(Qt::MouseButton button);
 
  private:
   Ui::RoomEditor* _ui;

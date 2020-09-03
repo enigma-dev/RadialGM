@@ -98,10 +98,6 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
           [=](int index) { _viewMapper->setCurrentIndex(index); });
 
   cursorPositionLabel = new QLabel();
-  connect(_ui->roomPreviewBackground, &AssetScrollAreaBackground::MouseMoved, [=](int x, int y) {
-    const GridDimensions g = _ui->roomView->GetGrid();
-    cursorPositionLabel->setText(tr("X %0, Y %1").arg(RoundNum(x, g.horSpacing)).arg(RoundNum(y, g.vertSpacing)));
-  });
   _ui->statusBar->addWidget(cursorPositionLabel);
 
   _assetNameLabel = new QLabel("obj_xxx");
@@ -121,6 +117,10 @@ RoomEditor::~RoomEditor() { delete _ui; }
 void RoomEditor::RebindSubModels() {
   _roomModel = _model->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
   _ui->roomView->SetResourceModel(_roomModel);
+
+  connect(_ui->roomPreviewBackground, &AssetScrollAreaBackground::MouseMoved, this, &RoomEditor::MouseMoved);
+  connect(_ui->roomPreviewBackground, &AssetScrollAreaBackground::MousePressed, this, &RoomEditor::MousePressed);
+  connect(_ui->roomPreviewBackground, &AssetScrollAreaBackground::MouseReleased, this, &RoomEditor::MouseReleased);
 
   RepeatedMessageModel* lm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kLayersFieldNumber);
   lm->setHeaderData(Room::Layer::kNameFieldNumber, Qt::Horizontal,
@@ -181,7 +181,9 @@ void RoomEditor::RebindSubModels() {
   connect(_ui->elementsListView->selectionModel(), &QItemSelectionModel::selectionChanged,
           [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
             if (selected.empty()) return;
-            RepeatedMessageModel* im = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
+            auto currentLayerModel = lm->GetSubModel<MessageModel*>(_ui->layersListView->currentIndex().row());
+            RepeatedMessageModel* im = currentLayerModel->GetSubModel<RepeatedMessageModel*>(
+                  Layer::kInstancesFieldNumber);
             auto selectedIndex = selected.indexes().first();
             auto currentInstanceModel = im->GetSubModel<MessageModel*>(selectedIndex.row());
             _ui->propertiesView->setModel(currentInstanceModel);
@@ -190,8 +192,25 @@ void RoomEditor::RebindSubModels() {
   BaseEditor::RebindSubModels();
 }
 
-void RoomEditor::updateCursorPositionLabel(const QPoint& pos) {
-  this->cursorPositionLabel->setText(tr("X %0, Y %1").arg(pos.x()).arg(pos.y()));
+void RoomEditor::MouseMoved(int x, int y) {
+  const GridDimensions g = _ui->roomView->GetGrid();
+  QPoint mousePos(x, y);
+  cursorPositionLabel->setText(tr("X %0, Y %1").arg(mousePos.x()).arg(mousePos.y()));
+}
+
+void RoomEditor::MousePressed(Qt::MouseButton button) {
+  auto elementsProxy = static_cast<QSortFilterProxyModel*>(_ui->elementsListView->model());
+  auto layerElements = static_cast<RepeatedMessageModel*>(elementsProxy->sourceModel());
+  if (layerElements == nullptr) return;
+  if (button == Qt::MouseButton::LeftButton) {
+    auto index = layerElements->rowCount();
+    layerElements->insertRow(index);
+    layerElements->SetData(_ui->currentObject->text(), index, Room::Instance::kObjectTypeFieldNumber);
+  }
+}
+
+void RoomEditor::MouseReleased(Qt::MouseButton button) {
+
 }
 
 void RoomEditor::on_actionZoomIn_triggered() { _ui->roomPreviewBackground->ZoomIn(); }
