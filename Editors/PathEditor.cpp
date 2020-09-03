@@ -198,7 +198,7 @@ void PathEditor::MousePressed(Qt::MouseButton button) {
     }
     // No point found. Add one and select it
     InsertPoint(_pointsModel->rowCount(), _ui->roomView->mousePos.x(), _ui->roomView->mousePos.y(),
-                _ui->speedSpinBox->value());
+                0);
   }
 }
 
@@ -222,13 +222,13 @@ void PathEditor::UpdateSelection(const QItemSelection& /*selected*/, const QItem
 }
 
 void PathEditor::on_addPointButton_pressed() {
-  InsertPoint(_pointsModel->rowCount(), _ui->xSpinBox->value(), _ui->ySpinBox->value(), _ui->speedSpinBox->value());
+  InsertPoint(_pointsModel->rowCount(), 0, 0, 100);
 }
 
 void PathEditor::on_insertPointButton_pressed() {
   int insertIndex = _ui->pointsTableView->selectionModel()->currentIndex().row();
   if (insertIndex < 0) insertIndex = 0;
-  InsertPoint(insertIndex, _ui->xSpinBox->value(), _ui->ySpinBox->value(), _ui->speedSpinBox->value());
+  InsertPoint(insertIndex, 0, 0, 100);
 }
 
 void PathEditor::on_deletePointButton_pressed() {
