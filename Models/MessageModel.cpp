@@ -73,7 +73,15 @@ bool MessageModel::setData(const QModelIndex &index, const QVariant &value, int 
     case CppType::CPPTYPE_UINT64: refl->SetUInt64(_protobuf, field, value.toULongLong()); break;
     case CppType::CPPTYPE_DOUBLE: refl->SetDouble(_protobuf, field, value.toDouble()); break;
     case CppType::CPPTYPE_FLOAT: refl->SetFloat(_protobuf, field, value.toFloat()); break;
-    case CppType::CPPTYPE_BOOL: refl->SetBool(_protobuf, field, value.toBool()); break;
+    case CppType::CPPTYPE_BOOL: {
+      if (role == Qt::CheckStateRole) {
+        auto checked = ((Qt::CheckState)value.toInt() == Qt::Checked);
+        refl->SetBool(_protobuf, field, checked ? true : false);
+      } else {
+        refl->SetBool(_protobuf, field, value.toBool());
+      }
+      break;
+    }
     case CppType::CPPTYPE_ENUM:
       refl->SetEnum(_protobuf, field, field->enum_type()->FindValueByNumber(value.toInt()));
       break;
@@ -94,7 +102,8 @@ QVariant MessageModel::Data(int row, int column) const {
 template<bool NO_DEFAULT>
 QVariant MessageModel::dataInternal(const QModelIndex &index, int role) const {
   R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
-  if (role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::DecorationRole) return QVariant();
+  if (role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::DecorationRole &&
+      role != Qt::CheckStateRole) return QVariant();
 
   const Descriptor *desc = _protobuf->GetDescriptor();
   const Reflection *refl = _protobuf->GetReflection();
@@ -132,9 +141,16 @@ QVariant MessageModel::dataInternal(const QModelIndex &index, int role) const {
   }
 
   // If the field has't been initialized return an invalid QVariant. (see QVariant.isValid())
-  if (NO_DEFAULT && !refl->HasField(*_protobuf, field)) return QVariant();
+  if (NO_DEFAULT && !field->is_repeated() && !refl->HasField(*_protobuf, field)) return QVariant();
 
-  switch (field->cpp_type()) {
+  auto cpp_type = field->cpp_type();
+  if (role == Qt::CheckStateRole) {
+    if (cpp_type != CppType::CPPTYPE_BOOL) return QVariant();
+    auto value = refl->GetBool(*_protobuf, field);
+    return value ? Qt::Checked : Qt::Unchecked;
+  }
+
+  switch (cpp_type) {
     case CppType::CPPTYPE_MESSAGE: R_EXPECT(false, QVariant()) << "The requested field " << index << " is a message";
     case CppType::CPPTYPE_INT32: return refl->GetInt32(*_protobuf, field);
     case CppType::CPPTYPE_INT64: return static_cast<long long>(refl->GetInt64(*_protobuf, field));
@@ -142,7 +158,7 @@ QVariant MessageModel::dataInternal(const QModelIndex &index, int role) const {
     case CppType::CPPTYPE_UINT64: return static_cast<unsigned long long>(refl->GetUInt64(*_protobuf, field));
     case CppType::CPPTYPE_DOUBLE: return refl->GetDouble(*_protobuf, field);
     case CppType::CPPTYPE_FLOAT: return refl->GetFloat(*_protobuf, field);
-    case CppType::CPPTYPE_BOOL: return refl->GetBool(*_protobuf, field);
+    case CppType::CPPTYPE_BOOL: return QVariant();
     case CppType::CPPTYPE_ENUM: return refl->GetEnumValue(*_protobuf, field);
     case CppType::CPPTYPE_STRING: return QString::fromStdString(refl->GetString(*_protobuf, field));
   }
@@ -182,7 +198,10 @@ Qt::ItemFlags MessageModel::flags(const QModelIndex &index) const {
   if (!index.isValid()) return Qt::NoItemFlags;
   auto flags = QAbstractItemModel::flags(index);
   // Row 0 isn't a valid field in messages. We use it as header data
-  if (index.row() > 0) flags |= Qt::ItemIsEditable;
+  if (index.row() > 0) {
+    auto datas = data(index, Qt::CheckStateRole);
+    flags |= (datas.isValid()) ? Qt::ItemIsUserCheckable : Qt::ItemIsEditable;
+  }
   return flags;
 }
 

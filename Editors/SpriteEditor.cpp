@@ -20,18 +20,14 @@ SpriteEditor::SpriteEditor(MessageModel* model, QWidget* parent)
   connect(_ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
   _ui->scrollAreaWidget->SetAssetView(_ui->subimagePreview);
 
-  QLabel* bboxLabel = new QLabel(tr("Show BBox "));
-  QCheckBox* showBBox = new QCheckBox(this);
+  QCheckBox* showBBox = new QCheckBox(tr("Show BBox"),this);
   showBBox->setChecked(true);
-  _ui->mainToolBar->addWidget(bboxLabel);
-  _ui->mainToolBar->addWidget(showBBox);
-  connect(showBBox, &QCheckBox::stateChanged, _ui->subimagePreview, &SpriteView::SetShowBBox);
-
-  QLabel* originLabel = new QLabel(tr("Show Origin "));
-  QCheckBox* showOrigin = new QCheckBox(this);
+  QCheckBox* showOrigin = new QCheckBox(tr("Show Origin"),this);
   showOrigin->setChecked(true);
-  _ui->mainToolBar->addWidget(originLabel);
+
+  _ui->mainToolBar->addWidget(showBBox);
   _ui->mainToolBar->addWidget(showOrigin);
+  connect(showBBox, &QCheckBox::stateChanged, _ui->subimagePreview, &SpriteView::SetShowBBox);
   connect(showOrigin, &QCheckBox::stateChanged, _ui->subimagePreview, &SpriteView::SetShowOrigin);
 
   _nodeMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);

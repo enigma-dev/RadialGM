@@ -69,12 +69,14 @@ class RepeatedModel : public ProtoModel {
   }
 
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override {
-    if (section == 0 || role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal)
-      return ProtoModel::headerData(section, orientation, role);
+    auto data = ProtoModel::headerData(section, orientation, role);
+    if (data.isValid()) return data;
+    if (section <= 0 || role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal)
+      return QVariant(); // << invalid
     return QString::fromStdString(_field->message_type()->field(section - 1)->name());
   }
 
-  // Convience function for internal moves
+  // Convenience function for internal moves
   bool moveRows(int source, int count, int destination) {
     return moveRows(QModelIndex(), source, count, QModelIndex(), destination);
   }
@@ -96,7 +98,8 @@ class RepeatedModel : public ProtoModel {
     return true;
   };
 
-  virtual bool removeRows(int position, int count, const QModelIndex & /*parent*/) override {
+  virtual bool removeRows(int position, int count, const QModelIndex& parent = QModelIndex()) override {
+    Q_UNUSED(parent);
     RowRemovalOperation remover(this);
     remover.RemoveRows(position, count);
     return true;
@@ -141,6 +144,10 @@ class RepeatedModel : public ProtoModel {
     void RemoveRow(int row) { _rows.insert(row); }
     void RemoveRows(int row, int count) {
       for (int i = row; i < row + count; ++i) _rows.insert(i);
+    }
+    void RemoveRows(const QModelIndexList& indexes) {
+      foreach (auto index, indexes)
+        RemoveRow(index.row());
     }
 
     ~RowRemovalOperation() {

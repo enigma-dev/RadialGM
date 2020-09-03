@@ -44,6 +44,7 @@ QList<buffers::SystemType> MainWindow::systemCache;
 MainWindow *MainWindow::_instance = nullptr;
 QScopedPointer<ResourceModelMap> MainWindow::resourceMap;
 QScopedPointer<TreeModel> MainWindow::treeModel;
+std::unique_ptr<EventData> MainWindow::_event_data;
 
 static QTextEdit *diagnosticTextEdit = nullptr;
 static QAction *toggleDiagnosticsAction = nullptr;
@@ -100,7 +101,7 @@ QFileInfo MainWindow::getEnigmaRoot() {
   return EnigmaRoot;
 }
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainWindow), _event_data(nullptr), egm(nullptr) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainWindow), egm(nullptr) {
 
   if (!EnigmaRoot.filePath().isEmpty()) {
     _event_data = std::make_unique<EventData>(ParseEventFile((EnigmaRoot.absolutePath() + "/events.ey").toStdString()));

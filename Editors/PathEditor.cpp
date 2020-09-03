@@ -193,8 +193,6 @@ void PathEditor::MousePressed(Qt::MouseButton button) {
       if (pt == _ui->roomView->mousePos) {
         QModelIndex newSelectIndex = _pointsModel->index(i, Path::Point::kXFieldNumber);
         _ui->pointsTableView->setCurrentIndex(newSelectIndex);
-        _ui->pointsTableView->selectionModel()->select(newSelectIndex,
-                                                       QItemSelectionModel::QItemSelectionModel::ClearAndSelect);
         return;
       }
     }
@@ -210,12 +208,17 @@ void PathEditor::MouseReleased(Qt::MouseButton button) {
   }
 }
 
-void PathEditor::UpdateSelection(const QItemSelection& selected, const QItemSelection& /*deselected*/) {
-  int selectIndex = -1;
-  if (!selected.indexes().empty()) selectIndex = selected.indexes()[0].row();
-  _ui->roomView->selectedPointIndex = selectIndex;
+void PathEditor::UpdateSelection(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/) {
+  auto selectedPoints = _ui->pointsTableView->selectionModel()->selectedRows();
+  bool hasSelectedPoint = !selectedPoints.empty();
+  // delete button should be enabled if the cumulative selection is not empty
+  // and contains at least one selected row with every column selected
+  _ui->deletePointButton->setEnabled(hasSelectedPoint);
+  // keep most recently selected point selected in the preview
+  if (hasSelectedPoint)
+    _ui->roomView->selectedPointIndex = selectedPoints.last().row();
+  // update preview on point selection and deselection
   _ui->pathPreviewBackground->update();
-  _ui->deletePointButton->setDisabled((selectIndex == -1));
 }
 
 void PathEditor::on_addPointButton_pressed() {
@@ -230,17 +233,16 @@ void PathEditor::on_insertPointButton_pressed() {
 
 void PathEditor::on_deletePointButton_pressed() {
   int deleteIndex = _ui->pointsTableView->selectionModel()->currentIndex().row();
-  {
-    RepeatedMessageModel::RowRemovalOperation remover(_pointsModel);
-    remover.RemoveRow(deleteIndex);
-  }
+  // this operation is temporary and will self destruct immediately removing the rows
+  RepeatedMessageModel::RowRemovalOperation(_pointsModel)
+      .RemoveRows(_ui->pointsTableView->selectionModel()->selectedRows());
 
   if (_pointsModel->rowCount() > 0) {
-    QModelIndex newSelectIndex =
-        _pointsModel->index((deleteIndex == 0) ? 0 : deleteIndex - 1, Path::Point::kXFieldNumber);
+    auto rowCount = _ui->pointsTableView->model()->rowCount();
+    QModelIndex newSelectIndex = _pointsModel->index(
+          (deleteIndex >= rowCount) ? rowCount - 1 : deleteIndex,
+          Path::Point::kXFieldNumber);
     _ui->pointsTableView->setCurrentIndex(newSelectIndex);
-    _ui->pointsTableView->selectionModel()->select(newSelectIndex,
-                                                   QItemSelectionModel::QItemSelectionModel::ClearAndSelect);
   } else {
     _ui->deletePointButton->setDisabled(true);
     _ui->pointsTableView->selectionModel()->clearSelection();
