@@ -67,10 +67,19 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
     layerModel->setData(layerModel->index(row,Room::Layer::kVisibleFieldNumber),true);
   });
   connect(_ui->deleteLayerButton, &QAbstractButton::clicked, [=]() {
-    auto layerModel = _ui->layersListView->model();
-    layerModel->removeRow(_ui->layersListView->currentIndex().row());
+    auto layerModel = static_cast<RepeatedMessageModel*>(_ui->layersListView->model());
+    // this operation is temporary and will self destruct immediately removing the rows
+    RepeatedMessageModel::RowRemovalOperation(layerModel)
+        .RemoveRows(_ui->layersListView->selectionModel()->selectedRows());
   });
 
+  connect(_ui->deleteElementButton, &QAbstractButton::clicked, [=]() {
+    auto elementsProxy = static_cast<QSortFilterProxyModel*>(_ui->elementsListView->model());
+    auto layerElements = static_cast<RepeatedMessageModel*>(elementsProxy->sourceModel());
+    // this operation is temporary and will self destruct immediately removing the rows
+    RepeatedMessageModel::RowRemovalOperation(layerElements)
+        .RemoveRows(_ui->elementsListView->selectionModel()->selectedRows());
+  });
   QMenuView* objMenu = new QMenuView(this);
   TreeSortFilterProxyModel* treeProxy = new TreeSortFilterProxyModel(this);
   treeProxy->SetFilterType(TreeNode::TypeCase::kObject);

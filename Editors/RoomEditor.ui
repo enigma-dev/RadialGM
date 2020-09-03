@@ -233,7 +233,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QToolButton" name="deleteAssetButton">
+               <widget class="QToolButton" name="deleteElementButton">
                 <property name="toolTip">
                  <string>Delete Assets</string>
                 </property>
