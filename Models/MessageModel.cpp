@@ -96,7 +96,7 @@ bool MessageModel::setData(const QModelIndex &index, const QVariant &value, int 
 }
 
 QVariant MessageModel::Data(int row, int column) const {
-  return data(this->index(row, column, QModelIndex()), Qt::DisplayRole);
+  return data(this->index(row, column, QModelIndex()), Qt::EditRole);
 }
 
 template<bool NO_DEFAULT>
@@ -158,7 +158,7 @@ QVariant MessageModel::dataInternal(const QModelIndex &index, int role) const {
     case CppType::CPPTYPE_UINT64: return static_cast<unsigned long long>(refl->GetUInt64(*_protobuf, field));
     case CppType::CPPTYPE_DOUBLE: return refl->GetDouble(*_protobuf, field);
     case CppType::CPPTYPE_FLOAT: return refl->GetFloat(*_protobuf, field);
-    case CppType::CPPTYPE_BOOL: return QVariant();
+    case CppType::CPPTYPE_BOOL: return (role == Qt::EditRole) ? refl->GetBool(*_protobuf, field) : QVariant();
     case CppType::CPPTYPE_ENUM: return refl->GetEnumValue(*_protobuf, field);
     case CppType::CPPTYPE_STRING: return QString::fromStdString(refl->GetString(*_protobuf, field));
   }
