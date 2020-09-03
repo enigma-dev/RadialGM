@@ -197,8 +197,7 @@ void PathEditor::MousePressed(Qt::MouseButton button) {
       }
     }
     // No point found. Add one and select it
-    InsertPoint(_pointsModel->rowCount(), _ui->roomView->mousePos.x(), _ui->roomView->mousePos.y(),
-                0);
+    InsertPoint(_pointsModel->rowCount(), _ui->roomView->mousePos.x(), _ui->roomView->mousePos.y(), 0);
   }
 }
 
