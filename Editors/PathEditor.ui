@@ -360,6 +360,9 @@
              <iconset resource="../images.qrc">
               <normaloff>:/actions/accept.png</normaloff>:/actions/accept.png</iconset>
             </property>
+            <property name="default">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
          </layout>
