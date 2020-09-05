@@ -24,6 +24,8 @@ The quick brown fox jumps over the lazy dog.");
 
   // build the initial font out of the mapped properties
   _font = _ui->fontComboBox->currentFont();
+  // QFontComboBox does not have a default USER property
+  // so we have to use its QComboBox one to actually get font
   _font.setFamily(_ui->fontComboBox->currentText());
   _font.setPointSize(_ui->sizeSpinBox->value());
   _font.setBold(_ui->boldCheckBox->isChecked());
