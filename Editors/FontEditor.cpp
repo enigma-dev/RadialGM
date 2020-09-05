@@ -7,10 +7,6 @@ FontEditor::FontEditor(MessageModel *model, QWidget *parent) : BaseEditor(model,
   _ui->setupUi(this);
   connect(_ui->saveButton, &QAbstractButton::pressed, this, &BaseEditor::OnSave);
 
-  _font = _ui->fontComboBox->currentFont();
-
-  _ui->fontPreviewText->setFont(_font);
-
   _ui->fontPreviewText->setText(
       "abcdefghijklmnopqrstuvwxyz\n\
 ABCDEFGHIJKLMNOPQRSTUVWXYZ\n\
@@ -25,6 +21,16 @@ The quick brown fox jumps over the lazy dog.");
   _resMapper->addMapping(_ui->italicCheckBox, Font::kItalicFieldNumber);
 
   RebindSubModels();
+
+  // build the initial font out of the mapped properties
+  _font = _ui->fontComboBox->currentFont();
+  _font.setFamily(_ui->fontComboBox->currentText());
+  _font.setPointSize(_ui->sizeSpinBox->value());
+  _font.setBold(_ui->boldCheckBox->isChecked());
+  _font.setItalic(_ui->italicCheckBox->isChecked());
+  // set the initial font on the preview area
+  _ui->fontPreviewText->setFont(_font);
+  _ui->rangePreviewText->setFont(_font);
 }
 
 FontEditor::~FontEditor() { delete _ui; }
