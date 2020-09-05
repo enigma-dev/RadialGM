@@ -104,6 +104,12 @@ void PathEditor::RebindSubModels() {
   _ui->roomView->SetPathModel(_pathModel);
   _pointsModel = _pathModel->GetSubModel<RepeatedMessageModel*>(Path::kPointsFieldNumber);
   _pointsModel->setHeaderData(Path::Point::kXFieldNumber, Qt::Horizontal,
+                              tr("X"), Qt::DisplayRole);
+  _pointsModel->setHeaderData(Path::Point::kYFieldNumber, Qt::Horizontal,
+                              tr("Y"), Qt::DisplayRole);
+  _pointsModel->setHeaderData(Path::Point::kSpeedFieldNumber, Qt::Horizontal,
+                              tr("Speed"), Qt::DisplayRole);
+  _pointsModel->setHeaderData(Path::Point::kXFieldNumber, Qt::Horizontal,
                               QIcon(":/actions/diamond-red.png"), Qt::DecorationRole);
   _pointsModel->setHeaderData(Path::Point::kYFieldNumber, Qt::Horizontal,
                               QIcon(":/actions/diamond-green.png"), Qt::DecorationRole);
