@@ -80,7 +80,7 @@ static QVariant getHeaderData(const QHash<K,QHash<Qt::ItemDataRole,QVariant>>& m
 
 QVariant ProtoModel::headerData(int section, Qt::Orientation orientation, int role) const {
   QVariant datas;
-  qDebug() << "FUCKING SHIT" << section;
+
   if (orientation == Qt::Horizontal) {
     datas = getHeaderData(_horizontalHeaderData, section, role);
   } else if (orientation == Qt::Vertical) {
@@ -88,17 +88,19 @@ QVariant ProtoModel::headerData(int section, Qt::Orientation orientation, int ro
   }
   // non static header data overrides any static header data
   if (datas.isValid()) return datas;
+
   // find the fully qualified name of this section's field
   const Descriptor *desc = this->GetDescriptor();
   const FieldDescriptor *field = desc->FindFieldByNumber(section);
   if (!field) return QVariant();
   QString full_name = QString::fromStdString(field->full_name());
-  qDebug() << full_name << section;
+
   // check if there's any static header data for the field at this section
   if (orientation == Qt::Horizontal) {
     return getHeaderData(_horizontalProtoHeaderData, full_name, role);
   } else if (orientation == Qt::Vertical) {
     return getHeaderData(_verticalProtoHeaderData, full_name, role);
   }
+
   return QVariant();
 }
