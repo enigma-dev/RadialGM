@@ -1,6 +1,7 @@
 #include "main.h"
 #include "MainWindow.h"
 
+#include "Editors/PathEditor.h"
 #include "Dialogs/PreferencesKeys.h"
 
 #include <QApplication>
@@ -20,6 +21,8 @@ int main(int argc, char *argv[]) {
   a.setApplicationName("RadialGM");
   a.setWindowIcon(QIcon(":/icon.ico"));
   a.setAttribute(Qt::AA_DisableWindowContextHelpButton);
+
+  initialize_static_path_header_data();
 
   defaultStyle = a.style()->objectName();
 

@@ -91,11 +91,16 @@ class ProtoModel : public QAbstractItemModel {
   virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override = 0;
   virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override = 0;
   virtual QVariant data(const QModelIndex &index, int role) const override = 0;
+  static bool SetHeaderData(std::string full_name, Qt::Orientation orientation, const QVariant &value,
+                            int role = Qt::EditRole);
   virtual bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value,
                              int role = Qt::EditRole) override;
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
   virtual QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override = 0;
   virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
+  virtual const Descriptor* GetDescriptor() const {
+    return _protobuf->GetDescriptor();
+  }
 
  signals:
   // QAbstractItemModel has a datachanged signal but it doesn't store the old values
@@ -110,6 +115,8 @@ class ProtoModel : public QAbstractItemModel {
   bool _dirty;
   Message *_protobuf;
   ProtoModel *_parentModel;
+  static QHash<QString,QHash<Qt::ItemDataRole,QVariant>> _horizontalProtoHeaderData;
+  static QHash<QString,QHash<Qt::ItemDataRole,QVariant>> _verticalProtoHeaderData;
   QHash<int,QHash<Qt::ItemDataRole,QVariant>> _horizontalHeaderData;
   QHash<int,QHash<Qt::ItemDataRole,QVariant>> _verticalHeaderData;
 };

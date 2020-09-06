@@ -10,6 +10,19 @@
 #include <QSpinBox>
 #include <QToolButton>
 
+void initialize_static_path_header_data() {
+  auto descriptor = Path::Point::GetDescriptor();
+  auto x_name = descriptor->FindFieldByNumber(Path::Point::kXFieldNumber)->full_name();
+  auto y_name = descriptor->FindFieldByNumber(Path::Point::kYFieldNumber)->full_name();
+  auto speed_name = descriptor->FindFieldByNumber(Path::Point::kSpeedFieldNumber)->full_name();
+  ProtoModel::SetHeaderData(x_name, Qt::Horizontal, PathEditor::tr("X"), Qt::DisplayRole);
+  ProtoModel::SetHeaderData(y_name, Qt::Horizontal, PathEditor::tr("Y"), Qt::DisplayRole);
+  ProtoModel::SetHeaderData(speed_name, Qt::Horizontal, PathEditor::tr("Speed"), Qt::DisplayRole);
+  ProtoModel::SetHeaderData(x_name, Qt::Horizontal, QIcon(":/actions/diamond-red.png"), Qt::DecorationRole);
+  ProtoModel::SetHeaderData(y_name, Qt::Horizontal, QIcon(":/actions/diamond-green.png"), Qt::DecorationRole);
+  ProtoModel::SetHeaderData(speed_name, Qt::Horizontal, QIcon(":/actions/motion.png"), Qt::DecorationRole);
+}
+
 PathEditor::PathEditor(MessageModel* model, QWidget* parent) : BaseEditor(model, parent), _ui(new Ui::PathEditor) {
   _ui->setupUi(this);
   connect(_ui->saveButton, &QAbstractButton::pressed, this, &BaseEditor::OnSave);
@@ -103,18 +116,6 @@ void PathEditor::RebindSubModels() {
 
   _ui->roomView->SetPathModel(_pathModel);
   _pointsModel = _pathModel->GetSubModel<RepeatedMessageModel*>(Path::kPointsFieldNumber);
-  _pointsModel->setHeaderData(Path::Point::kXFieldNumber, Qt::Horizontal,
-                              tr("X"), Qt::DisplayRole);
-  _pointsModel->setHeaderData(Path::Point::kYFieldNumber, Qt::Horizontal,
-                              tr("Y"), Qt::DisplayRole);
-  _pointsModel->setHeaderData(Path::Point::kSpeedFieldNumber, Qt::Horizontal,
-                              tr("Speed"), Qt::DisplayRole);
-  _pointsModel->setHeaderData(Path::Point::kXFieldNumber, Qt::Horizontal,
-                              QIcon(":/actions/diamond-red.png"), Qt::DecorationRole);
-  _pointsModel->setHeaderData(Path::Point::kYFieldNumber, Qt::Horizontal,
-                              QIcon(":/actions/diamond-green.png"), Qt::DecorationRole);
-  _pointsModel->setHeaderData(Path::Point::kSpeedFieldNumber, Qt::Horizontal,
-                              QIcon(":/actions/motion.png"), Qt::DecorationRole);
   _ui->pointsTableView->setModel(_pointsModel);
   _ui->pointsTableView->hideColumn(0);
 

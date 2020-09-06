@@ -31,6 +31,9 @@ class RepeatedMessageModel : public RepeatedModel<Message> {
   virtual QVariant data(const QModelIndex &index, int role) const override;
   virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
+  virtual const Descriptor* GetDescriptor() const override {
+    return _field->message_type();
+  }
 
   // TODO: implement dropping a message
   //virtual QMimeData *mimeData(const QModelIndexList &indexes) const override;

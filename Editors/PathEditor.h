@@ -9,6 +9,8 @@
 #include <QLabel>
 #include <QLineEdit>
 
+void initialize_static_path_header_data();
+
 namespace Ui {
 class PathEditor;
 }
