@@ -25,26 +25,22 @@
 #include "Plugins/ServerPlugin.h"
 #endif
 
-#include "gmk.h"
-#include "gmx.h"
-#include "yyp.h"
-
 #include <QtWidgets>
 
+#include <QFile>
 #include <functional>
 #include <unordered_map>
-#include <QFile>
-#include <sstream>
 
 #undef GetMessage
 
-QList<QString> MainWindow::EnigmaSearchPaths = {QDir::currentPath(), "./enigma-dev", "../enigma-dev", "../RadialGM/Submodules/enigma-dev"};
+QList<QString> MainWindow::EnigmaSearchPaths = {QDir::currentPath(), "./enigma-dev", "../enigma-dev",
+                                                "../RadialGM/Submodules/enigma-dev"};
 QFileInfo MainWindow::EnigmaRoot = MainWindow::getEnigmaRoot();
 QList<buffers::SystemType> MainWindow::systemCache;
 MainWindow *MainWindow::_instance = nullptr;
+EGMManager MainWindow::egmManager;
 QScopedPointer<ResourceModelMap> MainWindow::resourceMap;
 QScopedPointer<TreeModel> MainWindow::treeModel;
-std::unique_ptr<EventData> MainWindow::_event_data;
 
 static QTextEdit *diagnosticTextEdit = nullptr;
 static QAction *toggleDiagnosticsAction = nullptr;
@@ -94,27 +90,15 @@ QFileInfo MainWindow::getEnigmaRoot() {
     auto entryList = dir.entryInfoList(QStringList({"ENIGMAsystem"}), filters, QDir::SortFlag::NoSort);
     if (!entryList.empty()) {
       EnigmaRoot = entryList.first();
-        break;
+      break;
     }
   }
 
   return EnigmaRoot;
 }
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainWindow), egm(nullptr) {
-
-  if (!EnigmaRoot.filePath().isEmpty()) {
-    _event_data = std::make_unique<EventData>(ParseEventFile((EnigmaRoot.absolutePath() + "/events.ey").toStdString()));
-  } else {
-    qDebug() << "Error: Failed to locate ENIGMA sources. Loading internal events.ey.\n" << "Search Paths:\n" << MainWindow::EnigmaSearchPaths;
-    QFile internal_events(":/events.ey");
-    internal_events.open(QIODevice::ReadOnly | QFile::Text);
-    std::stringstream ss;
-    ss << internal_events.readAll().toStdString();
-    _event_data = std::make_unique<EventData>(ParseEventFile(ss));
-  }
-
-  egm = egm::EGM(_event_data.get());
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainWindow) {
+  egmManager.LoadEventData(EnigmaRoot.absolutePath() + "/events.ey");
 
   ArtManager::Init();
 
@@ -189,7 +173,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
   openNewProject();
 }
 
-MainWindow::~MainWindow() { diagnosticTextEdit = nullptr; delete _ui; }
+MainWindow::~MainWindow() {
+  diagnosticTextEdit = nullptr;
+  delete _ui;
+}
 
 void MainWindow::setCurrentConfig(const buffers::resources::Settings &settings) {
   emit _instance->CurrentConfigChanged(settings);
@@ -294,9 +281,9 @@ void MainWindow::updateWindowMenu() {
     numberString = numberString.insert(numberString.length() - 1, '&');
     QString text = tr("%1 %2").arg(numberString).arg(windowTitle);
 
-    QAction *action = _ui->menuWindow->addAction(
-        mdiSubWindow->windowIcon(), text, mdiSubWindow,
-          [this, mdiSubWindow]() { _ui->mdiArea->setActiveSubWindow(mdiSubWindow); });
+    QAction *action =
+        _ui->menuWindow->addAction(mdiSubWindow->windowIcon(), text, mdiSubWindow,
+                                   [this, mdiSubWindow]() { _ui->mdiArea->setActiveSubWindow(mdiSubWindow); });
     windowActions.append(action);
     action->setCheckable(true);
     action->setChecked(mdiSubWindow == _ui->mdiArea->activeSubWindow());
@@ -304,19 +291,7 @@ void MainWindow::updateWindowMenu() {
 }
 
 void MainWindow::openFile(QString fName) {
-  QFileInfo fileInfo(fName);
-  const QString suffix = fileInfo.suffix();
-
-  std::unique_ptr<buffers::Project> loadedProject = nullptr;
-  if (suffix == "egm") {
-    loadedProject = egm.LoadEGM(fName.toStdString());
-  } else if (suffix == "gm81" || suffix == "gmk" || suffix == "gm6" || suffix == "gmd") {
-    loadedProject = gmk::LoadGMK(fName.toStdString(), _event_data.get());
-  } else if (suffix == "gmx") {
-    loadedProject = gmx::LoadGMX(fName.toStdString(), _event_data.get());
-  } else if (suffix == "yyp") {
-    loadedProject = yyp::LoadYYP(fName.toStdString(), _event_data.get());
-  }
+  buffers::Project* loadedProject = egmManager.LoadProject(fName);
 
   if (!loadedProject) {
     QMessageBox::warning(this, tr("Failed To Open Project"), tr("There was a problem loading the project: ") + fName,
@@ -324,14 +299,14 @@ void MainWindow::openFile(QString fName) {
     return;
   }
 
-  MainWindow::setWindowTitle(fileInfo.fileName() + " - ENIGMA");
+  MainWindow::setWindowTitle(fName + " - ENIGMA");
   _recentFiles->prependFile(fName);
-  openProject(std::move(loadedProject));
+  openProject(loadedProject);
 }
 
 void MainWindow::openNewProject() {
   MainWindow::setWindowTitle(tr("<new game> - ENIGMA"));
-  auto newProject = std::unique_ptr<buffers::Project>(new buffers::Project());
+  auto newProject = egmManager.NewProject();
   auto *root = newProject->mutable_game()->mutable_root();
   QList<QString> defaultGroups = {tr("Sprites"), tr("Sounds"),  tr("Backgrounds"), tr("Paths"),
                                   tr("Scripts"), tr("Shaders"), tr("Fonts"),       tr("Timelines"),
@@ -341,17 +316,15 @@ void MainWindow::openNewProject() {
     groupNode->set_folder(true);
     groupNode->set_name(groupName.toStdString());
   }
-  openProject(std::move(newProject));
+  openProject(newProject);
 }
 
-void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
+void MainWindow::openProject(buffers::Project* openedProject) {
   this->_ui->mdiArea->closeAllSubWindows();
   ArtManager::clearCache();
 
-  _project = std::move(openedProject);
-
-  resourceMap.reset(new ResourceModelMap(_project->mutable_game()->mutable_root(), nullptr));
-  treeModel.reset(new TreeModel(_project->mutable_game()->mutable_root(), resourceMap.get(), nullptr));
+  resourceMap.reset(new ResourceModelMap(openedProject->mutable_game()->mutable_root(), nullptr));
+  treeModel.reset(new TreeModel(openedProject->mutable_game()->mutable_root(), resourceMap.get(), nullptr));
 
   _ui->treeView->setModel(treeModel.get());
   treeModel->connect(treeModel.get(), &TreeModel::ResourceRenamed, resourceMap.get(),
@@ -405,7 +378,9 @@ void MainWindow::on_actionCloseOthers_triggered() {
   }
 }
 
-void MainWindow::on_actionToggleTabbedView_triggered() { this->setTabbedMode(_ui->actionToggleTabbedView->isChecked()); }
+void MainWindow::on_actionToggleTabbedView_triggered() {
+  this->setTabbedMode(_ui->actionToggleTabbedView->isChecked());
+}
 
 void MainWindow::on_actionNext_triggered() { _ui->mdiArea->activateNextSubWindow(); }
 
@@ -435,8 +410,7 @@ void MainWindow::on_actionExploreENIGMA_triggered() { QDesktopServices::openUrl(
 
 void MainWindow::on_actionAbout_triggered() {
   QMessageBox aboutBox(QMessageBox::Information, tr("About"),
-                       tr("ENIGMA is a free, open-source, and cross-platform game engine."),
-                       QMessageBox::Ok, this);
+                       tr("ENIGMA is a free, open-source, and cross-platform game engine."), QMessageBox::Ok, this);
   QAbstractButton *aboutQtButton = aboutBox.addButton(tr("About Qt"), QMessageBox::HelpRole);
   aboutBox.exec();
 
@@ -577,12 +551,9 @@ void MainWindow::on_actionDelete_triggered() {
     selectedNames += (node == *selectedNodes.begin() ? "" : ", ") + QString::fromStdString(node->name());
   }
 
-  QMessageBox mb(
-    QMessageBox::Icon::Question,
-    tr("Delete Resources"),
-    tr("Do you want to delete the selected resources from the project?"),
-    QMessageBox::Yes | QMessageBox::No, this
-  );
+  QMessageBox mb(QMessageBox::Icon::Question, tr("Delete Resources"),
+                 tr("Do you want to delete the selected resources from the project?"),
+                 QMessageBox::Yes | QMessageBox::No, this);
   mb.setDetailedText(selectedNames);
   int ret = mb.exec();
   if (ret != QMessageBox::Yes) return;
