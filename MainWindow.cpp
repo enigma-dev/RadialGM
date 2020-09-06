@@ -126,6 +126,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
   setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
   _ui->setupUi(this);
+  this->tabifyDockWidget(_ui->outputDockWidget, _ui->gitDockWidget);
 
   QToolBar *outputTB = new QToolBar(this);
   outputTB->setIconSize(QSize(24, 24));
