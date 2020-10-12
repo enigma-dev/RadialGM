@@ -121,7 +121,7 @@ jobs:
     dependsOn: CreateReleaseCandidate
   pool:
     vmImage: 'windows-latest'
-  timeoutInMinutes: 250
+  timeoutInMinutes: 360
 
   steps:
     - checkout: ${{ parameters.repo }}
