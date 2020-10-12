@@ -1,3 +1,3 @@
 variables:
-  vcpkgGitRef: 7960648b4d922888e7a5c2a4c3ae9e153eab0374 # Update this git ref to update vcpkg
+  vcpkgGitRef: 16b68c2f35771c250b354248f11015f9def2a89b # Update this git ref to update vcpkg
   releasetag: 'RadialGM-$(Build.SourceVersion)'
