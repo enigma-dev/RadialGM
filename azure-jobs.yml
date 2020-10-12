@@ -59,17 +59,16 @@ jobs:
       displayName: Install MSYS2
     
     - script: |
-        set PATH=C:\tools\msys64\msys64\usr\bin
-        C:\tools\msys64\msys64\usr\bin\pacman --noconfirm -Syyuu
-        C:\tools\msys64\msys64\usr\bin\pacman --noconfirm --needed -S git base-devel mingw-w64-$(MINGW_ARCH)-toolchain mingw-w64-$(MINGW_ARCH)-cmake mingw-w64-$(MINGW_ARCH)-nsis mingw-w64-$(MINGW_ARCH)-protobuf mingw-w64-$(MINGW_ARCH)-grpc mingw-w64-$(MINGW_ARCH)-gflags mingw-w64-$(MINGW_ARCH)-yaml-cpp mingw-w64-$(MINGW_ARCH)-pugixml mingw-w64-$(MINGW_ARCH)-rapidjson mingw-w64-$(MINGW_ARCH)-boost mingw-w64-$(MINGW_ARCH)-qt5 mingw-w64-$(MINGW_ARCH)-qscintilla
-        C:\tools\msys64\msys64\usr\bin\pacman --noconfirm -Scc
+        set PATH=C:\tools\msys64\usr\bin
+        C:\tools\msys64\usr\bin\pacman --noconfirm -Syyuu
+        C:\tools\msys64\usr\bin\pacman --noconfirm --needed -S git base-devel mingw-w64-$(MINGW_ARCH)-toolchain mingw-w64-$(MINGW_ARCH)-cmake mingw-w64-$(MINGW_ARCH)-nsis mingw-w64-$(MINGW_ARCH)-protobuf mingw-w64-$(MINGW_ARCH)-grpc mingw-w64-$(MINGW_ARCH)-gflags mingw-w64-$(MINGW_ARCH)-yaml-cpp mingw-w64-$(MINGW_ARCH)-pugixml mingw-w64-$(MINGW_ARCH)-rapidjson mingw-w64-$(MINGW_ARCH)-boost mingw-w64-$(MINGW_ARCH)-qt5 mingw-w64-$(MINGW_ARCH)-qscintilla
+        C:\tools\msys64\usr\bin\pacman --noconfirm -Scc
       displayName: Install Toolchain
     
     - script: |
-        set PATH=C:\tools\msys64\msys64\usr\bin
-        C:\tools\msys64\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
+        set PATH=C:\tools\msys64\usr\bin
         cd $(Agent.BuildDirectory)/RadialGM/
-        C:\tools\msys64\msys64\usr\bin\bash -lc "bash ci-build.sh MinSizeRel $(PWD)/cmake-package"
+        C:\tools\msys64\usr\bin\bash -lc "bash ci-build.sh MinSizeRel $(PWD)/cmake-package"
       displayName: 'Release Build'
       env:
         MSYSTEM: $(MINGW_UPPER)
@@ -77,10 +76,9 @@ jobs:
         MINGW_INSTALLS: $(MINGW_LOWER)
     
     - script: |
-        set PATH=C:\tools\msys64\msys64\usr\bin
-        C:\tools\msys64\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
+        set PATH=C:\tools\msys64\usr\bin
         cd $(Agent.BuildDirectory)/RadialGM/
-        C:\tools\msys64\msys64\usr\bin\bash -lc "bash ci-build.sh Debug $(PWD)/cmake-package"
+        C:\tools\msys64\usr\bin\bash -lc "bash ci-build.sh Debug $(PWD)/cmake-package"
       displayName: 'Debug Build'
       env:
         MSYSTEM: $(MINGW_UPPER)
