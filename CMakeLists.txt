@@ -59,6 +59,9 @@ set(RGM_SOURCES
     Components/Utility.cpp
     Components/QMenuView.cpp
     Components/RecentFiles.cpp
+    Components/GitTreeItem.cpp
+    Components/GitTreeStyledDelegate.cpp
+    Components/EGMManager.cpp
     Models/TreeSortFilterProxyModel.cpp
     Models/MessageModel.cpp
     Models/RepeatedImageModel.cpp
@@ -72,6 +75,7 @@ set(RGM_SOURCES
     Models/EventsListModel.cpp
     Models/EventTypesListModel.cpp
     Models/EventTypesListSortFilterProxyModel.cpp
+    Models/GitHistoryModel.cpp
     Editors/ObjectEditor.cpp
     Editors/PathEditor.cpp
     Editors/CodeEditor.cpp
@@ -112,6 +116,9 @@ set(RGM_HEADERS
     Components/ArtManager.h
     Components/QMenuView_p.h
     Components/Utility.h
+    Components/GitTreeItem.h
+    Components/GitTreeStyledDelegate.h
+    Components/EGMManager.h
     Models/TreeModel.h
     Models/RepeatedStringModel.h
     Models/ResourceModelMap.h
@@ -126,6 +133,7 @@ set(RGM_HEADERS
     Models/EventsListModel.h
     Models/EventTypesListModel.h
     Models/EventTypesListSortFilterProxyModel.h
+    Models/GitHistoryModel.cpp
     Editors/FontEditor.h
     Editors/PathEditor.h
     Editors/SpriteEditor.h
@@ -275,6 +283,12 @@ target_link_libraries(${EXE} PRIVATE "EGM" "Protocols" "ENIGMAShared")
 find_package(Freetype REQUIRED)
 include_directories(${FREETYPE_INCLUDE_DIRS})
 target_link_libraries(${EXE} PRIVATE ${FREETYPE_LIBRARIES})
+
+# Find libgit2
+find_path(GIT2_INCLUDE_PATH NAMES git2.h)
+include_directories(${GIT2_INCLUDE_PATH})
+find_library(GIT2_LIBRARIES git2)
+target_link_libraries(${EXE} PRIVATE ${GIT2_LIBRARIES})
 
 # Find JPEG
 find_library(LIB_JPEG NAMES jpeg)

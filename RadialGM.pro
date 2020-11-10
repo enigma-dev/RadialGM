@@ -70,6 +70,8 @@ LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
 
 SOURCES += \
     Components/EGMManager.cpp \
+    Components/GitTreeItem.cpp \
+    Components/GitTreeStyledDelegate.cpp \
     Dialogs/EventArgumentsDialog.cpp \
     Dialogs/TimelineChangeMoment.cpp \
     Editors/IncludeEditor.cpp \
@@ -78,6 +80,7 @@ SOURCES += \
     Models/EventTypesListModel.cpp \
     Models/EventTypesListSortFilterProxyModel.cpp \
     Models/EventsListModel.cpp \
+    Models/GitHistoryModel.cpp \
     Models/MessageModel.cpp \
     Models/RepeatedImageModel.cpp \
     Models/RepeatedMessageModel.cpp \
@@ -120,6 +123,8 @@ SOURCES += \
 
 HEADERS += \
     Components/EGMManager.h \
+    Components/GitTreeItem.h \
+    Components/GitTreeStyledDelegate.h \
     Dialogs/EventArgumentsDialog.h \
     Dialogs/TimelineChangeMoment.h \
     Editors/IncludeEditor.h \
@@ -139,6 +144,7 @@ HEADERS += \
     Models/EventTypesListModel.h \
     Models/EventTypesListSortFilterProxyModel.h \
     Models/EventsListModel.h \
+    Models/GitHistoryModel.h \
     Models/MessageModel.h \
     Models/RepeatedImageModel.h \
     Models/RepeatedMessageModel.h \

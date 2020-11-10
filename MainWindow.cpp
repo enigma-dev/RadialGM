@@ -18,6 +18,9 @@
 
 #include "Components/ArtManager.h"
 #include "Components/Logger.h"
+#include "Components/GitTreeStyledDelegate.h"
+
+#include "Models/GitHistoryModel.h"
 
 #include "Plugins/RGMPlugin.h"
 
@@ -169,6 +172,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
   connect(_ui->actionDebug, &QAction::triggered, pluginServer, &RGMPlugin::Debug);
   connect(_ui->actionCreateExecutable, &QAction::triggered, pluginServer, &RGMPlugin::CreateExecutable);
 #endif
+
+  GitHistoryModel* ghm = new GitHistoryModel(this);
+  _ui->gitLogView->setModel(ghm);
+  _ui->gitLogView->setItemDelegate(new GitTreeStyledDelegate);
+  _ui->gitLogView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
   openNewProject();
 }

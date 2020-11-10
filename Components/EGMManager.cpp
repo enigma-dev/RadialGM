@@ -205,7 +205,9 @@ bool EGMManager::PushChanges() {
 
 }*/
 
-bool EGMManager::Save(const QString& fPath) {}
+bool EGMManager::Save(const QString& fPath) {
+  return false;
+}
 
 void EGMManager::GitError() {
   const git_error* e = git_error_last();
