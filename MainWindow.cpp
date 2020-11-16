@@ -178,6 +178,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
   _ui->gitLogView->setItemDelegate(new GitTreeStyledDelegate);
   _ui->gitLogView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
+  _ui->changesListView->setModel(&egmManager.GetResourceChangesModel());
+
   openNewProject();
 }
 
@@ -588,4 +590,8 @@ void MainWindow::on_actionSortByName_triggered() {
 
 void MainWindow::on_treeView_customContextMenuRequested(const QPoint &pos) {
   _ui->menuEdit->exec(_ui->treeView->mapToGlobal(pos));
+}
+
+void MainWindow::ResourceChanged(const QString &res, ResChange change) {
+  egmManager.ResourceChanged(res, change);
 }

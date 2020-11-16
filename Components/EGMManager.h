@@ -1,6 +1,8 @@
 #ifndef EGMMANAGER_H
 #define EGMMANAGER_H
 
+#include "Models/ResourceChangesModel.h"
+
 #include "event_reader/event_parser.h"
 #include "egm.h"
 
@@ -18,6 +20,8 @@ public:
   buffers::Project* NewProject();
   buffers::Project* LoadProject(const QString& fPath);
   buffers::Game *GetGame();
+  ResourceChangesModel& GetResourceChangesModel();
+  void ResourceChanged(const QString &res, ResChange change);
   bool LoadEventData(const QString& fPath);
   EventData* GetEventData();
   bool InitRepo();
@@ -47,6 +51,7 @@ public slots:
 protected:
   std::unique_ptr<buffers::Project> _project;
   egm::EGM _egm;
+  ResourceChangesModel _resChangeModel;
   QStringList _remoteURLs;
   std::unique_ptr<EventData> _event_data;
   QString _rootPath;

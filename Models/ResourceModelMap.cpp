@@ -26,11 +26,16 @@ void ResourceModelMap::AddResource(buffers::TreeNode* child) {
   if (model != nullptr) {
     connect(model, &ProtoModel::DataChanged, [this]() { emit DataChanged(); });
   }
+
+  if (!child->has_folder())
+    MainWindow::ResourceChanged(QString::fromStdString(child->name()), ResChange::Added);
 }
 
 void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
   if (!_resources.contains(type)) return;
   if (!_resources[type].contains(name)) return;
+
+  MainWindow::ResourceChanged(name, ResChange::Removed);
 
   // Delete all instances of this object type
   if (type == TypeCase::kObject) {
@@ -125,6 +130,8 @@ MessageModel* ResourceModelMap::GetResourceByName(int type, const std::string& n
 }
 
 void ResourceModelMap::ResourceRenamed(TypeCase type, const QString& oldName, const QString& newName) {
+  MainWindow::ResourceChanged(oldName, ResChange::Renamed);
+
   if (oldName == newName || !_resources[type].contains(oldName)) return;
   _resources[type][newName] = _resources[type][oldName];
 

@@ -1,5 +1,6 @@
 #include "BaseEditor.h"
 #include "Models/MessageModel.h"
+#include "MainWindow.h"
 
 #include <QCloseEvent>
 #include <QDebug>
@@ -27,6 +28,8 @@ void BaseEditor::closeEvent(QCloseEvent* event) {
       return;
     } else if (reply == QMessageBox::No) {
       _nodeMapper->clearMapping();
+      buffers::TreeNode* n = static_cast<buffers::TreeNode*>(_nodeMapper->GetModel()->GetBuffer());
+      MainWindow::ResourceChanged(QString::fromStdString(n->name()), ResChange::Reverted);
       if (!_resMapper->RestoreBackup()) {
         // This should never happen but here incase someone decides to incorrectly null the backup
         qDebug() << "Failed to revert editor changes";
@@ -49,6 +52,7 @@ void BaseEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex& /*bo
     emit ResourceRenamed(n->type_case(), oldValue.toString(), QString::fromStdString(n->name()));
   }
   _resMapper->SetDirty(true);
+  MainWindow::ResourceChanged(QString::fromStdString(n->name()), ResChange::Modified);
 }
 
 void BaseEditor::RebindSubModels() {

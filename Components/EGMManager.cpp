@@ -22,6 +22,8 @@ EGMManager::~EGMManager() {
 }
 
 buffers::Project* EGMManager::NewProject() {
+  _resChangeModel.ClearChanges();
+
   _project = std::make_unique<buffers::Project>();
   QTemporaryDir dir;
   dir.setAutoRemove(false);
@@ -31,6 +33,8 @@ buffers::Project* EGMManager::NewProject() {
 }
 
 buffers::Project* EGMManager::LoadProject(const QString& fPath) {
+  _resChangeModel.ClearChanges();
+
   QFileInfo fileInfo(fPath);
   const QString suffix = fileInfo.suffix();
 
@@ -48,6 +52,14 @@ buffers::Project* EGMManager::LoadProject(const QString& fPath) {
 }
 
 buffers::Game* EGMManager::GetGame() { return _project->mutable_game(); }
+
+ResourceChangesModel& EGMManager::GetResourceChangesModel() {
+  return _resChangeModel;
+}
+
+void EGMManager::ResourceChanged(const QString &res, ResChange change) {
+  _resChangeModel.ResourceChanged(res, change);
+}
 
 bool EGMManager::LoadEventData(const QString& fPath) {
   QFile f(fPath);

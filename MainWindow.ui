@@ -514,35 +514,7 @@
        <widget class="QWidget" name="">
         <layout class="QVBoxLayout" name="verticalLayout_7">
          <item>
-          <widget class="QListWidget" name="listWidget">
-           <item>
-            <property name="text">
-             <string>obj_playerchanged</string>
-            </property>
-            <property name="icon">
-             <iconset resource="images.qrc">
-              <normaloff>:/actions/edit.png</normaloff>:/actions/edit.png</iconset>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>spr_deleted</string>
-            </property>
-            <property name="icon">
-             <iconset resource="images.qrc">
-              <normaloff>:/actions/delete.png</normaloff>:/actions/delete.png</iconset>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>spr_added</string>
-            </property>
-            <property name="icon">
-             <iconset resource="images.qrc">
-              <normaloff>:/actions/add.png</normaloff>:/actions/add.png</iconset>
-            </property>
-           </item>
-          </widget>
+          <widget class="QListView" name="changesListView"/>
          </item>
          <item>
           <widget class="QProgressBar" name="progressBar">

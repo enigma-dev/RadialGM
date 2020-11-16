@@ -85,6 +85,7 @@ SOURCES += \
     Models/RepeatedImageModel.cpp \
     Models/RepeatedMessageModel.cpp \
     Models/RepeatedStringModel.cpp \
+    Models/ResourceChangesModel.cpp \
     Widgets/AssetScrollAreaBackground.cpp \
     Widgets/PathView.cpp \
     Widgets/SpriteSubimageListView.cpp \
@@ -150,6 +151,7 @@ HEADERS += \
     Models/RepeatedMessageModel.h \
     Models/RepeatedModel.h \
     Models/RepeatedStringModel.h \
+    Models/ResourceChangesModel.h \
     Widgets/AssetScrollArea.h \
     Widgets/AssetScrollAreaBackground.h \
     Widgets/BackgroundView.h \
