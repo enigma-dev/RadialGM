@@ -101,7 +101,7 @@ QFileInfo MainWindow::getEnigmaRoot() {
   return EnigmaRoot;
 }
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainWindow), egm(nullptr) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainWindow){
 
   if (!EnigmaRoot.filePath().isEmpty()) {
     _event_data = std::make_unique<EventData>(ParseEventFile((EnigmaRoot.absolutePath() + "/events.ey").toStdString()));
@@ -114,7 +114,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
     _event_data = std::make_unique<EventData>(ParseEventFile(ss));
   }
 
-  egm = egm::EGM(_event_data.get());
+  egm::LibEGMInit(_event_data.get());
 
   ArtManager::Init();
 
@@ -304,18 +304,8 @@ void MainWindow::updateWindowMenu() {
 
 void MainWindow::openFile(QString fName) {
   QFileInfo fileInfo(fName);
-  const QString suffix = fileInfo.suffix();
 
-  std::unique_ptr<buffers::Project> loadedProject = nullptr;
-  if (suffix == "egm") {
-    loadedProject = egm.LoadEGM(fName.toStdString());
-  } else if (suffix == "gm81" || suffix == "gmk" || suffix == "gm6" || suffix == "gmd") {
-    loadedProject = gmk::LoadGMK(fName.toStdString(), _event_data.get());
-  } else if (suffix == "gmx") {
-    loadedProject = gmx::LoadGMX(fName.toStdString(), _event_data.get());
-  } else if (suffix == "yyp") {
-    loadedProject = yyp::LoadYYP(fName.toStdString(), _event_data.get());
-  }
+  std::unique_ptr<buffers::Project> loadedProject = egm::LoadProject(fName.toStdString());
 
   if (!loadedProject) {
     QMessageBox::warning(this, tr("Failed To Open Project"), tr("There was a problem loading the project: ") + fName,
