@@ -114,11 +114,11 @@ void SoundEditor::on_loadButton_clicked() {
 
   if (dialog->exec() && dialog->selectedFiles().size() > 0) {
     QString fName = dialog->selectedFiles()[0];
-    if (fName.endsWith("Sound.gmx")) {
-      Sound* snd = gmx::LoadSound(fName.toStdString());
-      if (snd != nullptr) {
+    if (fName.endsWith("Sound.gmx") || fName.endsWith(".spr")) {
+      std::optional<Sound> snd = egm::LoadResource<Sound>(fName.toStdString());
+      if (snd.has_value()) {
         // QString lastData = GetModelData(Sound::kDataFieldNumber).toString();
-        ReplaceBuffer(snd);
+        ReplaceBuffer(&snd.value());
         // QString newData = GetModelData(Sound::kDataFieldNumber).toString();
         // TODO: Copy data into our egm and reset the path
         // SetModelData(Sound::kDataFieldNumber, lastData);

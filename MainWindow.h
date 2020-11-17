@@ -115,7 +115,6 @@ class MainWindow : public QMainWindow {
   QPointer<RecentFiles> _recentFiles;
 
   static std::unique_ptr<EventData> _event_data;
-  egm::EGM egm;
 
   void openSubWindow(buffers::TreeNode *item);
   void readSettings();
