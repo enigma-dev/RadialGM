@@ -51,7 +51,7 @@ class MainWindow : public QMainWindow {
   void openProject(buffers::Project* openedProject);
   buffers::Game *Game() const { return egmManager.GetGame(); }
   static EventData *GetEventData() { return egmManager.GetEventData(); }
-  static void ResourceChanged(const QString &res, ResChange change);
+  static void ResourceChanged(Resource &res, ResChange change, QString oldName = "");
 
   static QList<QString> EnigmaSearchPaths;
   static QFileInfo EnigmaRoot;

@@ -1,7 +1,9 @@
+#include "MainWindow.h"
 #include "EGMManager.h"
 #include "gmk.h"
 #include "gmx.h"
 #include "yyp.h"
+#include "filesystem.h"
 
 #include <QDebug>
 #include <QErrorMessage>
@@ -9,9 +11,11 @@
 #include <QFileInfo>
 #include <QTemporaryDir>
 
-EGMManager::EGMManager() : _egm(nullptr), _repo(nullptr) {
+EGMManager::EGMManager() : _repo(nullptr) {
+  LoadEventData(MainWindow::EnigmaRoot.absolutePath() + "/events.ey");
   qDebug() << "Intializing git library";
   git_libgit2_init();
+  connect(&_gitHistoryModel, &GitHistoryModel::GitError, this, &EGMManager::GitError);
 }
 
 EGMManager::~EGMManager() {
@@ -38,15 +42,7 @@ buffers::Project* EGMManager::LoadProject(const QString& fPath) {
   QFileInfo fileInfo(fPath);
   const QString suffix = fileInfo.suffix();
 
-  if (suffix == "egm") {
-    _project = _egm.LoadEGM(fPath.toStdString());
-  } else if (suffix == "gm81" || suffix == "gmk" || suffix == "gm6" || suffix == "gmd") {
-    _project = gmk::LoadGMK(fPath.toStdString(), GetEventData());
-  } else if (suffix == "gmx") {
-    _project = gmx::LoadGMX(fPath.toStdString(), GetEventData());
-  } else if (suffix == "yyp") {
-    _project = yyp::LoadYYP(fPath.toStdString(), GetEventData());
-  }
+  _project = egm::LoadProject(fPath.toStdString());
 
   return _project.get();
 }
@@ -57,8 +53,22 @@ ResourceChangesModel& EGMManager::GetResourceChangesModel() {
   return _resChangeModel;
 }
 
-void EGMManager::ResourceChanged(const QString &res, ResChange change) {
-  _resChangeModel.ResourceChanged(res, change);
+GitHistoryModel& EGMManager::GetGitHistoryModel() {
+  return _gitHistoryModel;
+}
+
+void EGMManager::ResourceChanged(Resource& res, ResChange change, const QString& oldName) {
+  _resChangeModel.ResourceChanged(res, change, oldName);
+
+  QString dir =_rootPath;// + "get the res path somehow???";
+
+  // Clear the existing folder I guess
+  //if (FolderExists(dir.toStdString())) RemoveDir(dir);
+
+  if (change != ResChange::Removed) {
+    egm::WriteResource(res.buffer, dir.toStdString());
+    //AddFile(res.name + ".ext"); ??
+  }
 }
 
 bool EGMManager::LoadEventData(const QString& fPath) {
@@ -74,7 +84,7 @@ bool EGMManager::LoadEventData(const QString& fPath) {
     _event_data = std::make_unique<EventData>(ParseEventFile(ss));
   }
 
-  _egm = egm::EGM(_event_data.get());
+  egm::LibEGMInit(_event_data.get());
 
   return _event_data->events().size() > 0;
 }
@@ -119,13 +129,16 @@ bool EGMManager::InitRepo() {
     GitError();
     return false;
   }
+
   error = git_commit_create_v(&_git_commit_id, _repo, "HEAD", _git_sig, _git_sig, NULL, "Initial commit", _git_tree, 0);
   if (error != 0) {
     GitError();
     return false;
   }
 
-  return CreateBranch("RadialGM") && Checkout("RadialGM");
+  _gitHistoryModel.LoadRepo(_repo);
+
+  return CreateBranch("RadialGM") && Checkout("refs/heads/RadialGM");
 }
 
 bool EGMManager::CreateBranch(const QString& branchName) {
@@ -164,8 +177,6 @@ bool EGMManager::AddFile(const QString& file) {
   return true;
 }
 
-bool EGMManager::MoveFile(const QString& file, const QString& newPath) { return false; }
-
 bool EGMManager::RemoveFile(const QString& file) {
   qDebug() << "Removing file from EGM: " << file;
   int error = git_index_remove_bypath(_git_index, file.toStdString().c_str());
@@ -178,6 +189,7 @@ bool EGMManager::RemoveFile(const QString& file) {
 
 bool EGMManager::RemoveDir(const QString& dir) {
   qDebug() << "Removing directory from EGM: " << dir;
+  DeleteFolder(dir.toStdString());
   int error = git_index_remove_directory(_git_index, dir.toStdString().c_str(), 0);
   if (error != 0) {
     GitError();
@@ -223,6 +235,5 @@ bool EGMManager::Save(const QString& fPath) {
 
 void EGMManager::GitError() {
   const git_error* e = git_error_last();
-  QErrorMessage errorDialog;
-  errorDialog.showMessage(QString("Git Error: ") + e->klass + "\n" + e->message);
+  qDebug() << QString("Git Error: ") + e->message;
 }

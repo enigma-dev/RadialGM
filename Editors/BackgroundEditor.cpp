@@ -76,11 +76,11 @@ void BackgroundEditor::on_actionLoadImage_triggered() {
 
   if (dialog->exec() && dialog->selectedFiles().size() > 0) {
     QString fName = dialog->selectedFiles()[0];
-    if (fName.endsWith("Background.gmx")) {
-      Background* bkg = gmx::LoadBackground(fName.toStdString());
-      if (bkg != nullptr) {
+    if (fName.endsWith("Background.gmx") || fName.endsWith(".bkg")) {
+      std::optional<Background> bkg = egm::LoadResource<Background>(fName.toStdString());
+      if (bkg.has_value()) {
         // QString lastData = GetModelData(Background::kImageFieldNumber).toString();
-        ReplaceBuffer(bkg);
+        ReplaceBuffer(&bkg.value());
         // QString newData = GetModelData(Background::kImageFieldNumber).toString();
         // TODO: Copy data into our egm and reset the path
         // SetModelData(Background::kImageFieldNumber, lastData);

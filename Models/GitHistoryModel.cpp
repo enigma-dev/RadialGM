@@ -1,15 +1,34 @@
 #include "GitHistoryModel.h"
 #include "Components/GitTreeItem.h"
 
-GitHistoryModel::GitHistoryModel(QObject* parent) : QAbstractTableModel(parent) {
-  int error;
-  git_repository *repo = NULL;
+#include <QDebug>
 
-  error = git_repository_open_ext(&repo, "/home/greg/enigma-dev/", 0, NULL);
+GitHistoryModel::GitHistoryModel(QObject* parent) : QAbstractTableModel(parent) {}
+
+GitHistoryModel::~GitHistoryModel() {
+  for (git_commit* c : _commits)
+    git_commit_free(c);
+}
+
+void GitHistoryModel::LoadRepo(git_repository *repo) {
+  beginResetModel();
+
+  for (git_commit* c : _commits)
+    git_commit_free(c);
+
+  _commits.clear();
 
   git_revwalk *walker;
-  error = git_revwalk_new(&walker, repo);
-  error = git_revwalk_push_range(walker, "HEAD~20..HEAD");
+
+  int error = git_revwalk_new(&walker, repo);
+  if (error != 0) emit GitError();
+
+  error = git_revwalk_push_head(walker);
+  if (error != 0) emit GitError();
+
+  error = git_revwalk_push_ref(walker, "HEAD");
+  if (error != 0) emit GitError();
+
   git_revwalk_sorting(walker, GIT_SORT_NONE);
 
   git_oid oid;
@@ -18,6 +37,10 @@ GitHistoryModel::GitHistoryModel(QObject* parent) : QAbstractTableModel(parent) 
     git_commit_lookup(&commit, repo, &oid);
     _commits.append(commit);
   }
+
+  git_revwalk_free(walker);
+
+  endResetModel();
 }
 
 int GitHistoryModel::rowCount(const QModelIndex &parent) const {

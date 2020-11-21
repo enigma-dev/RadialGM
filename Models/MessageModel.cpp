@@ -6,6 +6,8 @@
 #include "RepeatedMessageModel.h"
 #include "ResourceModelMap.h"
 
+#include <QDebug>
+
 MessageModel::MessageModel(ProtoModel *parent, Message *protobuf) : ProtoModel(parent, protobuf) { RebuildSubModels(); }
 
 MessageModel::MessageModel(QObject *parent, Message *protobuf) : ProtoModel(parent, protobuf) { RebuildSubModels(); }
@@ -85,7 +87,12 @@ bool MessageModel::setData(const QModelIndex &index, const QVariant &value, int 
     case CppType::CPPTYPE_ENUM:
       refl->SetEnum(_protobuf, field, field->enum_type()->FindValueByNumber(value.toInt()));
       break;
-    case CppType::CPPTYPE_STRING: refl->SetString(_protobuf, field, value.toString().toStdString()); break;
+    case CppType::CPPTYPE_STRING: {
+      if (field->full_name() == "buffers.TreeNode.name") {
+        if (!MainWindow::resourceMap->ValidResourceName(value.toString())) return false;
+      }
+      refl->SetString(_protobuf, field, value.toString().toStdString()); break;
+    }
   }
 
   SetDirty(true);

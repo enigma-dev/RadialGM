@@ -1,31 +1,39 @@
 #include "ResourceChangesModel.h"
 
 #include <QIcon>
+#include <QDebug>
 
 ResourceChangesModel::ResourceChangesModel(QObject *parent) : QAbstractListModel(parent) {}
 
-void ResourceChangesModel::ResourceChanged(const QString &res, ResChange change) {
+void ResourceChangesModel::ResourceChanged(Resource& res, ResChange change, const QString& oldName) {
+  if (res.name.isEmpty()) return;
+
   beginResetModel();
 
-  if (change == ResChange::Reverted) _changes.remove(res);
+  if (change == ResChange::Reverted) _changes.remove(res.name);
 
-  if (_changes.contains(res)) {
+  if (_changes.contains(res.name)) {
     // Add then remove shouldn't be on list
-    if (_changes[res] == ResChange::Added && change == ResChange::Removed) {
-      _changes.remove(res);
+    if (_changes[res.name] == ResChange::Added && change == ResChange::Removed) {
+      _changes.remove(res.name);
+      endResetModel();
       return;
     }
     // modified shouldnt overwrite added
-    if (_changes[res] == ResChange::Added && change == ResChange::Modified) return;
+    if (_changes[res.name] == ResChange::Added && change == ResChange::Modified) return;
     // modified shouldnt overwrite renamed
-    if (_changes[res] == ResChange::Renamed && change == ResChange::Modified) return;
+    if (_changes[res.name] == ResChange::Renamed && change == ResChange::Modified) return;
   }
 
-  // TODO: if renamed before commited change the added name
-  if (_changes[res] == ResChange::Added && change == ResChange::Renamed) {
+  // if renamed before commited change the added name
+  if (_changes[oldName] == ResChange::Added && change == ResChange::Renamed) {
+    _changes.remove(oldName);
+    _changes[res.name] = ResChange::Added;
+    endResetModel();
+    return;
   }
 
-  _changes[res] = change;
+  _changes[res.name] = change;
 
   endResetModel();
 }

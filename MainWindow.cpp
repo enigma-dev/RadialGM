@@ -20,8 +20,6 @@
 #include "Components/Logger.h"
 #include "Components/GitTreeStyledDelegate.h"
 
-#include "Models/GitHistoryModel.h"
-
 #include "Plugins/RGMPlugin.h"
 
 #ifdef RGM_SERVER_ENABLED
@@ -100,8 +98,7 @@ QFileInfo MainWindow::getEnigmaRoot() {
   return EnigmaRoot;
 }
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainWindow) {
-  egmManager.LoadEventData(EnigmaRoot.absolutePath() + "/events.ey");
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainWindow){
 
   ArtManager::Init();
 
@@ -173,8 +170,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
   connect(_ui->actionCreateExecutable, &QAction::triggered, pluginServer, &RGMPlugin::CreateExecutable);
 #endif
 
-  GitHistoryModel* ghm = new GitHistoryModel(this);
-  _ui->gitLogView->setModel(ghm);
+  _ui->gitLogView->setModel(&egmManager.GetGitHistoryModel());
   _ui->gitLogView->setItemDelegate(new GitTreeStyledDelegate);
   _ui->gitLogView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
@@ -592,6 +588,6 @@ void MainWindow::on_treeView_customContextMenuRequested(const QPoint &pos) {
   _ui->menuEdit->exec(_ui->treeView->mapToGlobal(pos));
 }
 
-void MainWindow::ResourceChanged(const QString &res, ResChange change) {
-  egmManager.ResourceChanged(res, change);
+void MainWindow::ResourceChanged(Resource &res, ResChange change, QString oldName) {
+  egmManager.ResourceChanged(res, change, oldName);
 }

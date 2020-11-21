@@ -2,6 +2,7 @@
 #define EGMMANAGER_H
 
 #include "Models/ResourceChangesModel.h"
+#include "Models/GitHistoryModel.h"
 
 #include "event_reader/event_parser.h"
 #include "egm.h"
@@ -21,7 +22,8 @@ public:
   buffers::Project* LoadProject(const QString& fPath);
   buffers::Game *GetGame();
   ResourceChangesModel& GetResourceChangesModel();
-  void ResourceChanged(const QString &res, ResChange change);
+  GitHistoryModel& GetGitHistoryModel();
+  void ResourceChanged(Resource &res, ResChange change, const QString &oldName);
   bool LoadEventData(const QString& fPath);
   EventData* GetEventData();
   bool InitRepo();
@@ -30,7 +32,6 @@ public:
   bool Checkout(const QString& ref);
   //bool CheckoutFile(const QString& ref, const QString& file);
   bool AddFile(const QString& file);
-  bool MoveFile(const QString& file, const QString& newPath);
   bool RemoveFile(const QString& file);
   bool RemoveDir(const QString& dir);
   bool CommitChanges(const QString& message);
@@ -50,8 +51,8 @@ public slots:
 
 protected:
   std::unique_ptr<buffers::Project> _project;
-  egm::EGM _egm;
   ResourceChangesModel _resChangeModel;
+  GitHistoryModel _gitHistoryModel;
   QStringList _remoteURLs;
   std::unique_ptr<EventData> _event_data;
   QString _rootPath;

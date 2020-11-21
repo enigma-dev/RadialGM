@@ -1,6 +1,8 @@
 #ifndef RESOURCECHANGESMODEL_H
 #define RESOURCECHANGESMODEL_H
 
+#include "ResourceModelMap.h"
+
 #include <QObject>
 #include <QAbstractListModel>
 #include <QMap>
@@ -20,7 +22,7 @@ public:
   ResourceChangesModel(QObject* parent = nullptr);
   virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   virtual QVariant data(const QModelIndex &index, int role) const override;
-  void ResourceChanged(const QString &res, ResChange change);
+  void ResourceChanged(Resource &res, ResChange change, const QString &oldName);
   void ClearChanges();
 
 protected:

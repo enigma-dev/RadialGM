@@ -54,35 +54,21 @@ jobs:
           git checkout --progress --force enigmaref
         displayName: Checkout ENIGMA Reference
       
-    - script: |
-        git clone https://github.com/msys2/msys2-ci-base.git %CD:~0,2%\msys64
-        %CD:~0,2%\msys64\usr\bin\rm -rf %CD:~0,2%\msys64\.git
+    - powershell: |
+        choco install msys2
       displayName: Install MSYS2
     
     - script: |
-        set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
-        %CD:~0,2%\msys64\usr\bin\curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz
-        %CD:~0,2%\msys64\usr\bin\curl -O http://repo.msys2.org/msys/x86_64/msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig
-        %CD:~0,2%\msys64\usr\bin\pacman-key --verify msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz.sig
-        %CD:~0,2%\msys64\usr\bin\pacman --overwrite='*' --noconfirm -U msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz
-        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Syyuu
-      displayName: Update MSYS2
-      
-    - script: taskkill /f /fi "MODULES eq msys-2.0.dll" || exit /b 0s
-      displayName: Reset MSYS2
-    
-    - script: |
-        set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
-        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Syyuu
-        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm --needed -S git base-devel mingw-w64-$(MINGW_ARCH)-toolchain mingw-w64-$(MINGW_ARCH)-cmake mingw-w64-$(MINGW_ARCH)-nsis mingw-w64-$(MINGW_ARCH)-protobuf mingw-w64-$(MINGW_ARCH)-grpc mingw-w64-$(MINGW_ARCH)-gflags mingw-w64-$(MINGW_ARCH)-yaml-cpp mingw-w64-$(MINGW_ARCH)-pugixml mingw-w64-$(MINGW_ARCH)-rapidjson mingw-w64-$(MINGW_ARCH)-boost mingw-w64-$(MINGW_ARCH)-qt5 mingw-w64-$(MINGW_ARCH)-qscintilla
-        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Scc
+        set PATH=C:\tools\msys64\usr\bin
+        C:\tools\msys64\usr\bin\pacman --noconfirm -Syyuu
+        C:\tools\msys64\usr\bin\pacman --noconfirm --needed -S git base-devel mingw-w64-$(MINGW_ARCH)-toolchain mingw-w64-$(MINGW_ARCH)-cmake mingw-w64-$(MINGW_ARCH)-nsis mingw-w64-$(MINGW_ARCH)-protobuf mingw-w64-$(MINGW_ARCH)-grpc mingw-w64-$(MINGW_ARCH)-gflags mingw-w64-$(MINGW_ARCH)-yaml-cpp mingw-w64-$(MINGW_ARCH)-pugixml mingw-w64-$(MINGW_ARCH)-rapidjson mingw-w64-$(MINGW_ARCH)-boost mingw-w64-$(MINGW_ARCH)-qt5 mingw-w64-$(MINGW_ARCH)-qscintilla
+        C:\tools\msys64\usr\bin\pacman --noconfirm -Scc
       displayName: Install Toolchain
     
     - script: |
-        set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
-        %CD:~0,2%\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
+        set PATH=C:\tools\msys64\usr\bin
         cd $(Agent.BuildDirectory)/RadialGM/
-        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build.sh MinSizeRel $(PWD)/cmake-package"
+        C:\tools\msys64\usr\bin\bash -lc "bash ci-build.sh MinSizeRel $(PWD)/cmake-package"
       displayName: 'Release Build'
       env:
         MSYSTEM: $(MINGW_UPPER)
@@ -90,10 +76,9 @@ jobs:
         MINGW_INSTALLS: $(MINGW_LOWER)
     
     - script: |
-        set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
-        %CD:~0,2%\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
+        set PATH=C:\tools\msys64\usr\bin
         cd $(Agent.BuildDirectory)/RadialGM/
-        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build.sh Debug $(PWD)/cmake-package"
+        C:\tools\msys64\usr\bin\bash -lc "bash ci-build.sh Debug $(PWD)/cmake-package"
       displayName: 'Debug Build'
       env:
         MSYSTEM: $(MINGW_UPPER)
@@ -136,7 +121,7 @@ jobs:
     dependsOn: CreateReleaseCandidate
   pool:
     vmImage: 'windows-latest'
-  timeoutInMinutes: 250
+  timeoutInMinutes: 360
 
   steps:
     - checkout: ${{ parameters.repo }}

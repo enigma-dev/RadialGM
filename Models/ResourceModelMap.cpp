@@ -27,15 +27,18 @@ void ResourceModelMap::AddResource(buffers::TreeNode* child) {
     connect(model, &ProtoModel::DataChanged, [this]() { emit DataChanged(); });
   }
 
-  if (!child->has_folder())
-    MainWindow::ResourceChanged(QString::fromStdString(child->name()), ResChange::Added);
+  if (!child->has_folder()) {
+    Resource res = {QString::fromStdString(child->name()), child, model};
+    MainWindow::ResourceChanged(res, ResChange::Added);
+  }
 }
 
 void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
   if (!_resources.contains(type)) return;
   if (!_resources[type].contains(name)) return;
 
-  MainWindow::ResourceChanged(name, ResChange::Removed);
+  Resource res = {name, _resources[type][name].first, _resources[type][name].second};
+  MainWindow::ResourceChanged(res, ResChange::Removed);
 
   // Delete all instances of this object type
   if (type == TypeCase::kObject) {
@@ -130,10 +133,11 @@ MessageModel* ResourceModelMap::GetResourceByName(int type, const std::string& n
 }
 
 void ResourceModelMap::ResourceRenamed(TypeCase type, const QString& oldName, const QString& newName) {
-  MainWindow::ResourceChanged(oldName, ResChange::Renamed);
-
   if (oldName == newName || !_resources[type].contains(oldName)) return;
   _resources[type][newName] = _resources[type][oldName];
+
+  Resource res = {newName, _resources[type][newName].first, _resources[type][newName].second};
+  MainWindow::ResourceChanged(res, ResChange::Renamed, oldName);
 
   for (auto res : _resources) {
     for (auto model : res) {
@@ -144,6 +148,19 @@ void ResourceModelMap::ResourceRenamed(TypeCase type, const QString& oldName, co
   _resources[type].remove(oldName);
 
   emit DataChanged();
+}
+
+bool ResourceModelMap::ValidResourceName(const QString& name) {
+  if (name.isEmpty()) return false;
+  for (auto res : _resources) {
+    if (res.contains(name)) return false;
+  }
+
+  for (const QChar& c : name) {
+    if (!c.isLetterOrNumber() && c != '_') return false;
+  }
+
+  return true;
 }
 
 MessageModel* GetObjectSprite(const std::string& objName) { return GetObjectSprite(QString::fromStdString(objName)); }
