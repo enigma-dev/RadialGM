@@ -33,6 +33,13 @@ class TreeModel : public QAbstractItemModel {
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
+  // Retrieves the parent of the given node, or else returns nullptr.
+  // This is required because the TreeModel uses raw TreeNode protos as its data
+  // storage format, which cannot point to one another cyclically.
+  buffers::TreeNode *Parent(buffers::TreeNode *node) const;
+  // Builds the relative path of the given resource.
+  QString MakeResourcePath(buffers::TreeNode *resource) const;
+
   Qt::DropActions supportedDropActions() const override;
   QStringList mimeTypes() const override;
   QMimeData *mimeData(const QModelIndexList &indexes) const override;
@@ -46,7 +53,10 @@ class TreeModel : public QAbstractItemModel {
   void sortByName(const QModelIndex &index);
 
  signals:
+  // Called when the name of a single TreeNode changes.
   void ResourceRenamed(TypeCase type, const QString &oldName, const QString &newName);
+  // Called when a resource (or group of resources) is moved.
+  void ResourceMoved(TreeNode *node, TreeNode *old_parent);
 
  private:
   buffers::TreeNode *root;

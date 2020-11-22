@@ -158,6 +158,18 @@ int TreeModel::rowCount(const QModelIndex &parent) const {
   return parentItem->child_size();
 }
 
+buffers::TreeNode *TreeModel::Parent(buffers::TreeNode *node) const {
+  auto p = parents.find(node);
+  return p == parents.end() ? nullptr : *p;
+}
+
+QString TreeModel::MakeResourcePath(buffers::TreeNode *resource) const {
+  QString res = QString::fromStdString(resource->name());
+  while ((resource = Parent(resource)))
+    res = QString::fromStdString(resource->name()) + "/" + res;
+  return res;
+}
+
 Qt::DropActions TreeModel::supportedDropActions() const { return Qt::MoveAction | Qt::CopyAction; }
 
 QStringList TreeModel::mimeTypes() const { return QStringList(treeNodeMime()); }
@@ -266,6 +278,8 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
       parents[node] = parentNode;
       endMoveRows();
       ++row;
+
+      emit ResourceMoved(node, oldParent);
     } else {
       if (node->folder()) continue;
       node = duplicateNode(*node);
