@@ -47,9 +47,10 @@ EventArgumentsDialog::EventArgumentsDialog(QWidget *parent, const QStringList &a
 
       QLineEdit *lineEdit = new QLineEdit(this);
       lineEdit->setReadOnly(true);
+      auto object_message_name = QString::fromStdString(buffers::resources::Object::descriptor()->full_name());
       QModelIndex firstObjIdx = treeProxy
-                                    ->match(treeProxy->index(0, 0), TreeModel::UserRoles::TypeCaseRole,
-                                            TypeCase::kObject, 1, Qt::MatchRecursive)
+                                    ->match(treeProxy->index(0, 0), TreeModel::UserRoles::MessageTypeRole,
+                                            object_message_name, 1, Qt::MatchRecursive)
                                     .first();
       QString firstObj = firstObjIdx.data(Qt::DisplayRole).toString();
       objButton->setIcon(firstObjIdx.data(Qt::DecorationRole).value<QIcon>());

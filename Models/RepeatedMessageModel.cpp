@@ -66,3 +66,13 @@ Qt::ItemFlags RepeatedMessageModel::flags(const QModelIndex &index) const {
 
   return _subModels[index.row()]->flags(_subModels[index.row()]->index(index.column()));
 }
+
+const std::string &RepeatedMessageModel::MessageName() const {
+  auto *msg = _field->message_type();
+  if (!msg) {
+    static const std::string kSentinel;
+    qDebug() << "Message type of RepeatedMessageField is null! This should never happen!";
+    return kSentinel;
+  }
+  return msg->full_name();
+}

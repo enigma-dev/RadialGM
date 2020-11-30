@@ -29,6 +29,7 @@ class MainWindow : public QMainWindow {
 
  public:
   static QScopedPointer<ResourceModelMap> resourceMap;
+  static QScopedPointer<MessageModel> resourceModel;
   static QScopedPointer<TreeModel> treeModel;
   static QList<buffers::SystemType> systemCache;
 
@@ -107,7 +108,7 @@ class MainWindow : public QMainWindow {
 
   static MainWindow *_instance;
 
-  QHash<buffers::TreeNode *, QMdiSubWindow *> _subWindows;
+  QHash<const buffers::TreeNode *, QMdiSubWindow *> _subWindows;
 
   Ui::MainWindow *_ui;
 

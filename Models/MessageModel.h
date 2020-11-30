@@ -40,18 +40,18 @@ class MessageModel : public ProtoModel {
   Message *GetBuffer();
   void ReplaceBuffer(Message *buffer);
 
-  virtual bool SetData(const QVariant &value, int row, int column = 0) override;
-  virtual QVariant Data(int row, int column = 0) const override;
+  bool SetData(const QVariant &value, int row, int column = 0) override;
+  QVariant Data(int row, int column = 0) const override;
 
-  virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override;
-  virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-  virtual QVariant dataOrDefault(const QModelIndex &index, int role = Qt::DisplayRole) const;
-  virtual QModelIndex parent(const QModelIndex &index) const override;
-  virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-  virtual QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override;
-  virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
+  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+  bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override;
+  QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+  QVariant dataOrDefault(const QModelIndex &index, int role = Qt::DisplayRole) const;
+  QModelIndex parent(const QModelIndex &index) const override;
+  QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+  QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override;
+  Qt::ItemFlags flags(const QModelIndex &index) const override;
 
  protected:
   MessageModel *_modelBackup;

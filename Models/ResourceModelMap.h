@@ -2,6 +2,7 @@
 #define MODELMAP_H
 
 #include "MessageModel.h"
+#include "TreeModel.h"
 
 #include <QHash>
 #include <QVector>
@@ -19,7 +20,7 @@ class ResourceModelMap : public QObject {
   QString CreateResourceName(int type, const QString& typeName);
 
  public slots:
-  void ResourceRenamed(TypeCase type, const QString& oldName, const QString& newName);
+  void ResourceRenamed(TreeModel::Node *node, const QString& oldName, const QString& newName);
 
  signals:
   void DataChanged();

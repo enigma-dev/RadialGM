@@ -8,12 +8,11 @@ ResourceModelMap::ResourceModelMap(buffers::TreeNode* root, QObject* parent) : Q
 }
 
 void ResourceModelMap::recursiveBindRes(buffers::TreeNode* node) {
-  for (int i = 0; i < node->child_size(); ++i) {
-    buffers::TreeNode* child = node->mutable_child(i);
-    if (child->folder()) {
+  for (int i = 0; i < node->folder().children_size(); ++i) {
+    buffers::TreeNode* child = node->mutable_folder()->mutable_children(i);
+    if (child->has_folder()) {
       recursiveBindRes(child);
     }
-
     this->AddResource(child);
   }
 }
@@ -99,7 +98,7 @@ QString ResourceModelMap::CreateResourceName(TreeNode* node) {
   auto fieldNum = ResTypeFields[node->type_case()];
   const Descriptor* desc = node->GetDescriptor();
   const FieldDescriptor* field = desc->FindFieldByNumber(fieldNum);
-  const QString fieldName = node->folder() ? "group" : QString::fromStdString(field->name());
+  const QString fieldName = node->has_folder() ? "group" : QString::fromStdString(field->name());
   return CreateResourceName(node->type_case(), fieldName);
 }
 
@@ -124,7 +123,30 @@ MessageModel* ResourceModelMap::GetResourceByName(int type, const std::string& n
   return GetResourceByName(type, QString::fromStdString(name));
 }
 
-void ResourceModelMap::ResourceRenamed(TypeCase type, const QString& oldName, const QString& newName) {
+template<typename Message> const std::string &FullName() { return Message::descriptor()->full_name(); }
+
+TypeCase Type(TreeModel::Node *node) {
+  static const std::unordered_map<std::string, TypeCase> kTypesByMessage {
+    {FullName<buffers::resources::Sprite>(), TypeCase::kSprite},
+    {FullName<buffers::resources::Sound>(), TypeCase::kSound},
+    {FullName<buffers::resources::Background>(), TypeCase::kBackground},
+    {FullName<buffers::resources::Path>(), TypeCase::kPath},
+    {FullName<buffers::resources::Font>(), TypeCase::kFont},
+    {FullName<buffers::resources::Script>(), TypeCase::kScript},
+    {FullName<buffers::resources::Shader>(), TypeCase::kShader},
+    {FullName<buffers::resources::Timeline>(), TypeCase::kTimeline},
+    {FullName<buffers::resources::Object>(), TypeCase::kObject},
+    {FullName<buffers::resources::Room>(), TypeCase::kRoom},
+    {FullName<buffers::resources::Settings>(), TypeCase::kSettings},
+  };
+
+  auto res = kTypesByMessage.find(node->GetMessageType());
+  if (res == kTypesByMessage.end()) return TypeCase::TYPE_NOT_SET;
+  return res->second;
+}
+
+void ResourceModelMap::ResourceRenamed(TreeModel::Node *node, const QString& oldName, const QString& newName) {
+  auto type = Type(node);
   if (oldName == newName || !_resources[type].contains(oldName)) return;
   _resources[type][newName] = _resources[type][oldName];
 

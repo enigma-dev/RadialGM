@@ -31,9 +31,10 @@ class ProtoModel : public QAbstractItemModel {
   explicit ProtoModel(ProtoModel *parent, Message *protobuf);
 
   // The parent model is the model that own's the current model
-  // For resource models like a Room this will be a nullptr
-  // For instances it would be a pointer to the room
-  // For *a* instance it would be a pointer to a room's instances field's model
+  // For the Project model (represented as the resource tree) this will be nullptr.
+  // For resource models like a Room, this will be the main Project model.
+  // For a room's `instances` list, it will be a pointer to the containing room.
+  // For a specific instance, it will be a pointer to a room's `instances` field's model.
   // FIXME: Sanity check this cast
   template <class T>
   T GetParentModel() const {
@@ -51,34 +52,35 @@ class ProtoModel : public QAbstractItemModel {
 
   // The layout of the data varies between the model types.
   // For a MessageModel a row is the name of the data field and the column should always be 0.
-  //  --------------------------------|
-  // | Sprite::kBboxLeftFieldNumber   |
-  // |--------------------------------|
-  // | Sprite::kBboxRightFieldNumber  |
-  // |--------------------------------|
-  // | Sprite::kBboxTopFieldNumber    |
-  // |--------------------------------|
-  // | Sprite::kBboxBottomFieldNumber |
-  // |--------------------------------|
+  // ╭────────────────────────────────╮
+  // │ Sprite::kBboxLeftFieldNumber   │
+  // ├────────────────────────────────┤
+  // │ Sprite::kBboxRightFieldNumber  │
+  // ├────────────────────────────────┤
+  // │ Sprite::kBboxTopFieldNumber    │
+  // ├────────────────────────────────┤
+  // │ Sprite::kBboxBottomFieldNumber │
+  // ╰────────────────────────────────╯
 
   //  For a RepeatedMessage the row is a index in a vector and the column is a data field/
-  //  ----------------------------------------------------------------------------------|
-  // | Room::Instance 0 | Room::Instance::kXFieldNumber | Room::Instance::kYFieldNumber |
-  // |------------------|-------------------------------|-------------------------------|
-  // | Room::Instance 1 | Room::Instance::kXFieldNumber | Room::Instance::kYFieldNumber |
-  // |------------------|-------------------------------|-------------------------------|
-  // | Room::Instance 2 | Room::Instance::kXFieldNumber | Room::Instance::kYFieldNumber |
-  // |------------------|-------------------------------|-------------------------------|
-  // | Room::Instance 3 | Room::Instance::kXFieldNumber | Room::Instance::kYFieldNumber |
-  // |------------------|-------------------------------|-------------------------------|
+  // ╭──────────────────┬───────────────────────────────┬───────────────────────────────╮
+  // │ Room::Instance 0 │ Room::Instance::kXFieldNumber │ Room::Instance::kYFieldNumber │
+  // ├──────────────────┼───────────────────────────────┼───────────────────────────────┤
+  // │ Room::Instance 1 │ Room::Instance::kXFieldNumber │ Room::Instance::kYFieldNumber │
+  // ├──────────────────┼───────────────────────────────┼───────────────────────────────┤
+  // │ Room::Instance 2 │ Room::Instance::kXFieldNumber │ Room::Instance::kYFieldNumber │
+  // ├──────────────────┼───────────────────────────────┼───────────────────────────────┤
+  // │ Room::Instance 3 │ Room::Instance::kXFieldNumber │ Room::Instance::kYFieldNumber │
+  // ╰──────────────────┴───────────────────────────────┴───────────────────────────────╯
 
   // For a RepeatedType like RepeatedString the row is the index and the column should always be 0
-  //  ---------------|
-  // | "spr_0/1.png" |
-  // |---------------|
-  // | "spr_0/2.png" |
-  // |---------------|
-  // | "spr_0/3.png" |
+  // ╭───────────────╮
+  // │ "spr_0/1.png" │
+  // ├───────────────┤
+  // │ "spr_0/2.png" │
+  // ├───────────────┤
+  // │ "spr_0/3.png" │
+  // ╰───────────────╯
 
   // These are convience functions for getting & setting model used almost everywhere in the codebase
   // because model->setData(model->index(row, col), value, role) is a PITA to type / remember.

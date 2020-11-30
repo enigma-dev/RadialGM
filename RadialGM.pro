@@ -80,6 +80,7 @@ SOURCES += \
     Models/RepeatedImageModel.cpp \
     Models/RepeatedMessageModel.cpp \
     Models/RepeatedStringModel.cpp \
+    Utils/FieldPath.cpp \
     Widgets/AssetScrollAreaBackground.cpp \
     Widgets/PathView.cpp \
     Widgets/SpriteSubimageListView.cpp \
@@ -141,6 +142,7 @@ HEADERS += \
     Models/RepeatedMessageModel.h \
     Models/RepeatedModel.h \
     Models/RepeatedStringModel.h \
+    Utils/FieldPath.h \
     Widgets/AssetScrollArea.h \
     Widgets/AssetScrollAreaBackground.h \
     Widgets/BackgroundView.h \
@@ -192,4 +194,28 @@ RESOURCES += \
     images.qrc
 
 DISTFILES += \
-  CMakeLists.txt
+  CMakeLists.txt \
+  Submodules/enigma-dev/shared/protos/Action.proto \
+  Submodules/enigma-dev/shared/protos/Background.proto \
+  Submodules/enigma-dev/shared/protos/Building.md \
+  Submodules/enigma-dev/shared/protos/CMakeLists.txt \
+  Submodules/enigma-dev/shared/protos/EventDescriptor.proto \
+  Submodules/enigma-dev/shared/protos/Font.proto \
+  Submodules/enigma-dev/shared/protos/GameInformation.proto \
+  Submodules/enigma-dev/shared/protos/Include.proto \
+  Submodules/enigma-dev/shared/protos/Makefile \
+  Submodules/enigma-dev/shared/protos/Object.proto \
+  Submodules/enigma-dev/shared/protos/Path.proto \
+  Submodules/enigma-dev/shared/protos/Room.proto \
+  Submodules/enigma-dev/shared/protos/Script.proto \
+  Submodules/enigma-dev/shared/protos/Settings.proto \
+  Submodules/enigma-dev/shared/protos/Shader.proto \
+  Submodules/enigma-dev/shared/protos/Sound.proto \
+  Submodules/enigma-dev/shared/protos/Sprite.proto \
+  Submodules/enigma-dev/shared/protos/Timeline.proto \
+  Submodules/enigma-dev/shared/protos/compiler.proto \
+  Submodules/enigma-dev/shared/protos/game.proto \
+  Submodules/enigma-dev/shared/protos/options.proto \
+  Submodules/enigma-dev/shared/protos/project.proto \
+  Submodules/enigma-dev/shared/protos/server.proto \
+  Submodules/enigma-dev/shared/protos/treenode.proto

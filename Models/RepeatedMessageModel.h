@@ -19,18 +19,20 @@ class RepeatedMessageModel : public RepeatedModel<Message> {
     return static_cast<T>(_subModels[index]);
   }
 
-  virtual void Swap(int /*left*/, int /*right*/) override;
-  virtual void AppendNew() override;
-  virtual void Resize(int /*newSize*/) override;
-  virtual void Clear() override;
+  void Swap(int /*left*/, int /*right*/) override;
+  void AppendNew() override;
+  void Resize(int /*newSize*/) override;
+  void Clear() override;
 
-  virtual QVariant Data(int row, int column) const override;
-  virtual bool SetData(const QVariant &value, int row, int column) override;
+  QVariant Data(int row, int column) const override;
+  bool SetData(const QVariant &value, int row, int column) override;
 
-  virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override;
-  virtual QVariant data(const QModelIndex &index, int role) const override;
-  virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
+  bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override;
+  QVariant data(const QModelIndex &index, int role) const override;
+  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+  Qt::ItemFlags flags(const QModelIndex &index) const override;
+
+  const std::string &MessageName() const;
 
   // TODO: implement dropping a message
   //virtual QMimeData *mimeData(const QModelIndexList &indexes) const override;

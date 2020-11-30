@@ -43,6 +43,7 @@ QFileInfo MainWindow::EnigmaRoot = MainWindow::getEnigmaRoot();
 QList<buffers::SystemType> MainWindow::systemCache;
 MainWindow *MainWindow::_instance = nullptr;
 QScopedPointer<ResourceModelMap> MainWindow::resourceMap;
+QScopedPointer<MessageModel> MainWindow::resourceModel;
 QScopedPointer<TreeModel> MainWindow::treeModel;
 std::unique_ptr<EventData> MainWindow::_event_data;
 
@@ -222,28 +223,12 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   event->accept();
 }
 
-template <typename T>
-T *EditorFactory(MessageModel *model, QWidget *parent) {
-  return new T(model, parent);
-}
-
 void MainWindow::openSubWindow(buffers::TreeNode *item) {
+  /*
   using namespace google::protobuf;
 
   using TypeCase = buffers::TreeNode::TypeCase;
   using FactoryMap = std::unordered_map<TypeCase, std::function<BaseEditor *(MessageModel * m, QWidget * p)>>;
-
-  static FactoryMap factoryMap({{TypeCase::kSprite, EditorFactory<SpriteEditor>},
-                                {TypeCase::kSound, EditorFactory<SoundEditor>},
-                                {TypeCase::kBackground, EditorFactory<BackgroundEditor>},
-                                {TypeCase::kPath, EditorFactory<PathEditor>},
-                                {TypeCase::kFont, EditorFactory<FontEditor>},
-                                {TypeCase::kScript, EditorFactory<ScriptEditor>},
-                                {TypeCase::kShader, EditorFactory<ShaderEditor>},
-                                {TypeCase::kTimeline, EditorFactory<TimelineEditor>},
-                                {TypeCase::kObject, EditorFactory<ObjectEditor>},
-                                {TypeCase::kRoom, EditorFactory<RoomEditor>},
-                                {TypeCase::kSettings, EditorFactory<SettingsEditor>}});
 
   auto swIt = _subWindows.find(item);
   QMdiSubWindow *subWindow;
@@ -254,11 +239,12 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
     MessageModel *res = resourceMap->GetResourceByName(item->type_case(), item->name());
     BaseEditor *editor = factoryFunction->second(res, this);
 
+    // TODO: move all these connections into the model wrapper
     connect(editor, &BaseEditor::ResourceRenamed, resourceMap.get(), &ResourceModelMap::ResourceRenamed);
     connect(editor, &BaseEditor::ResourceRenamed, [=]() { treeModel->dataChanged(QModelIndex(), QModelIndex()); });
-    connect(treeModel.get(), &TreeModel::ResourceRenamed, editor,
-            [res](TypeCase /*type*/, const QString & /*oldName*/, const QString & /*newName*/) {
-              const QModelIndex index = res->index(TreeNode::kNameFieldNumber);
+    connect(treeModel.get(), &TreeModel::ItemRenamed, editor,
+*///            [res](TreeModel::Node */*node*/, const QString & /*oldName*/, const QString & /*newName*/) {
+/*              const QModelIndex index = res->index(TreeNode::kNameFieldNumber);
               emit res->DataChanged(index, index);
             });
 
@@ -275,7 +261,7 @@ void MainWindow::openSubWindow(buffers::TreeNode *item) {
   }
 
   subWindow->show();
-  _ui->mdiArea->setActiveSubWindow(subWindow);
+  _ui->mdiArea->setActiveSubWindow(subWindow);*/
 }
 
 void MainWindow::updateWindowMenu() {
@@ -320,14 +306,14 @@ void MainWindow::openFile(QString fName) {
 
 void MainWindow::openNewProject() {
   MainWindow::setWindowTitle(tr("<new game> - ENIGMA"));
-  auto newProject = std::unique_ptr<buffers::Project>(new buffers::Project());
+  auto newProject = std::make_unique<buffers::Project>();
   auto *root = newProject->mutable_game()->mutable_root();
   QList<QString> defaultGroups = {tr("Sprites"), tr("Sounds"),  tr("Backgrounds"), tr("Paths"),
                                   tr("Scripts"), tr("Shaders"), tr("Fonts"),       tr("Timelines"),
                                   tr("Objects"), tr("Rooms"),   tr("Includes"),    tr("Configs")};
+  // We can edit the proto directly, here, since the model doesn't exist, yet.
   for (auto groupName : defaultGroups) {
-    auto *groupNode = root->add_child();
-    groupNode->set_folder(true);
+    auto *groupNode = root->mutable_folder()->add_children();
     groupNode->set_name(groupName.toStdString());
   }
   openProject(std::move(newProject));
@@ -340,10 +326,36 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   _project = std::move(openedProject);
 
   resourceMap.reset(new ResourceModelMap(_project->mutable_game()->mutable_root(), nullptr));
-  treeModel.reset(new TreeModel(_project->mutable_game()->mutable_root(), resourceMap.get(), nullptr));
+  resourceModel.reset(new MessageModel(this, _project->mutable_game()->mutable_root()));
+  treeModel.reset(new TreeModel(resourceModel.get(), nullptr));
+
+  treeModel->UseEditorWidget<buffers::resources::Sprite, SpriteEditor>(this);
+  treeModel->UseEditorWidget<buffers::resources::Sound, SoundEditor>(this);
+  treeModel->UseEditorWidget<buffers::resources::Background, BackgroundEditor>(this);
+  treeModel->UseEditorWidget<buffers::resources::Path, PathEditor>(this);
+  treeModel->UseEditorWidget<buffers::resources::Font, FontEditor>(this);
+  treeModel->UseEditorWidget<buffers::resources::Script, ScriptEditor>(this);
+  treeModel->UseEditorWidget<buffers::resources::Shader, ShaderEditor>(this);
+  treeModel->UseEditorWidget<buffers::resources::Timeline, TimelineEditor>(this);
+  treeModel->UseEditorWidget<buffers::resources::Object, ObjectEditor>(this);
+  treeModel->UseEditorWidget<buffers::resources::Room, RoomEditor>(this);
+  treeModel->UseEditorWidget<buffers::resources::Settings, SettingsEditor>(this);
+
+  treeModel->SetDefaultIcon<buffers::TreeNode::Folder>("group");
+  treeModel->SetDefaultIcon<buffers::resources::Sprite>("sprite");
+  treeModel->SetDefaultIcon<buffers::resources::Sound>("sound");
+  treeModel->SetDefaultIcon<buffers::resources::Background>("background");
+  treeModel->SetDefaultIcon<buffers::resources::Path>("path");
+  treeModel->SetDefaultIcon<buffers::resources::Script>("script");
+  treeModel->SetDefaultIcon<buffers::resources::Shader>("shader");
+  treeModel->SetDefaultIcon<buffers::resources::Font>("font");
+  treeModel->SetDefaultIcon<buffers::resources::Timeline>("timeline");
+  treeModel->SetDefaultIcon<buffers::resources::Object>("object");
+  treeModel->SetDefaultIcon<buffers::resources::Room>("room");
+  treeModel->SetDefaultIcon<buffers::resources::Settings>("settings");
 
   _ui->treeView->setModel(treeModel.get());
-  treeModel->connect(treeModel.get(), &TreeModel::ResourceRenamed, resourceMap.get(),
+  treeModel->connect(treeModel.get(), &TreeModel::ItemRenamed, resourceMap.get(),
                      &ResourceModelMap::ResourceRenamed);
 }
 
@@ -448,28 +460,20 @@ void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
 void MainWindow::on_actionClearRecentMenu_triggered() { _recentFiles->clear(); }
 
 void MainWindow::CreateResource(TypeCase typeCase) {
-  auto child = std::unique_ptr<TreeNode>(new TreeNode());
+  TreeNode child;
   auto fieldNum = ResTypeFields[typeCase];
-  const Descriptor *desc = child->GetDescriptor();
-  const Reflection *refl = child->GetReflection();
+  const Descriptor *desc = child.GetDescriptor();
+  const Reflection *refl = child.GetReflection();
   const FieldDescriptor *field = desc->FindFieldByNumber(fieldNum);
 
   // allocate and set the child's resource field
-  refl->MutableMessage(child.get(), field);
+  refl->MutableMessage(&child, field);
 
   // find a unique name for the new resource
-  const QString name = resourceMap->CreateResourceName(child.get());
-  child->set_name(name.toStdString());
-  // open the new resource for editing
-  this->resourceMap->AddResource(child.get());
-  openSubWindow(child.get());
+  child.set_name(resourceMap->CreateResourceName(&child).toStdString());
   // release ownership of the new child to its parent and the tree
-  auto index = this->treeModel->addNode(child.release(), _ui->treeView->currentIndex());
-
-  // select the new node so that it gets "revealed" and its parent is expanded
-  _ui->treeView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
-  // start editing the name of the resource in the tree for convenience
-  _ui->treeView->edit(index);
+  auto index = this->treeModel->addNode(child, _ui->treeView->currentIndex());
+  treeModel->triggerNodeEdit(index, _ui->treeView);
 }
 
 void MainWindow::on_actionCreateSprite_triggered() { CreateResource(TypeCase::kSprite); }
@@ -497,37 +501,21 @@ void MainWindow::on_actionCreateSettings_triggered() { CreateResource(TypeCase::
 void MainWindow::on_actionDuplicate_triggered() {
   if (!_ui->treeView->selectionModel()->hasSelection()) return;
   const auto index = _ui->treeView->selectionModel()->currentIndex();
-  const auto *node = static_cast<const buffers::TreeNode *>(index.internalPointer());
-  if (node->has_folder()) return;
-
-  // duplicate the node
-  auto *dup = treeModel->duplicateNode(*node);
-  // insert the duplicate into the tree
-  const auto dupIndex = treeModel->insert(index.parent(), index.row() + 1, dup);
-  // open an editor for the duplicate node
-  openSubWindow(dup);
-
-  // select the new node so that it gets "revealed" and its parent is expanded
-  _ui->treeView->selectionModel()->setCurrentIndex(dupIndex, QItemSelectionModel::ClearAndSelect);
-  // start editing the name of the resource in the tree for convenience
-  _ui->treeView->edit(dupIndex);
+  QModelIndex dupIndex = treeModel->duplicateNode(index);
+  // Triggers edit of either resource or name label.
+  // TODO: maybe confirm before duplicating an entire fucking group; we're all reasonable people
+  treeModel->triggerNodeEdit(dupIndex, _ui->treeView);
 }
 
 void MainWindow::on_actionCreateGroup_triggered() {
-  auto child = std::unique_ptr<TreeNode>(new TreeNode());
-  child->set_folder(true);
+  TreeNode child;
+  child.mutable_folder();  // Gives the node an empty folder.
 
   // find a unique name for the new group
   const QString name = resourceMap->CreateResourceName(TypeCase::kFolder, "group");
-  child->set_name(name.toStdString());
-  // release ownership of the new child to its parent and the tree
-  this->resourceMap->AddResource(child.get());
-  auto index = this->treeModel->addNode(child.release(), _ui->treeView->currentIndex());
+  child.set_name(name.toStdString());
 
-  // select the new node so that it gets "revealed" and its parent is expanded
-  _ui->treeView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
-  // start editing the name of the resource in the tree for convenience
-  _ui->treeView->edit(index);
+  this->treeModel->triggerNodeEdit(this->treeModel->addNode(child, _ui->treeView->currentIndex()), _ui->treeView);
 }
 
 void MainWindow::on_actionRename_triggered() {
@@ -544,10 +532,10 @@ void MainWindow::on_actionProperties_triggered() {
   }
 }
 
-static void CollectNodes(buffers::TreeNode *root, QSet<buffers::TreeNode *> &cache) {
+static void CollectNodes(const buffers::TreeNode *root, QSet<const buffers::TreeNode *> &cache) {
   cache.insert(root);
-  for (int i = 0; i < root->child_size(); ++i) {
-    auto *child = root->mutable_child(i);
+  for (int i = 0; i < root->folder().children_size(); ++i) {
+    auto *child = &root->folder().children(i);
     cache.insert(child);
     if (child->has_folder()) CollectNodes(child, cache);
   }
@@ -556,7 +544,7 @@ static void CollectNodes(buffers::TreeNode *root, QSet<buffers::TreeNode *> &cac
 void MainWindow::on_actionDelete_triggered() {
   if (!_ui->treeView->selectionModel()->hasSelection()) return;
   auto selected = _ui->treeView->selectionModel()->selectedIndexes();
-  QSet<buffers::TreeNode *> selectedNodes;
+  QSet<const buffers::TreeNode *> selectedNodes;
   for (auto index : selected) {
     auto *treeNode = static_cast<buffers::TreeNode *>(index.internalPointer());
     CollectNodes(treeNode, selectedNodes);

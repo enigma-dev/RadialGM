@@ -6,35 +6,11 @@
 #include "Models/ResourceModelMap.h"
 
 #include <QCoreApplication>
+#include <QItemSelectionModel>
 #include <QMimeData>
 
-IconMap TreeModel::iconMap;
-
-TreeModel::TreeModel(buffers::TreeNode *root, ResourceModelMap *resourceMap, QObject *parent)
-    : QAbstractItemModel(parent), root(root), resourceMap(resourceMap) {
-  iconMap = {{TypeCase::kFolder, ArtManager::GetIcon("group")},
-             {TypeCase::kSprite, ArtManager::GetIcon("sprite")},
-             {TypeCase::kSound, ArtManager::GetIcon("sound")},
-             {TypeCase::kBackground, ArtManager::GetIcon("background")},
-             {TypeCase::kPath, ArtManager::GetIcon("path")},
-             {TypeCase::kScript, ArtManager::GetIcon("script")},
-             {TypeCase::kShader, ArtManager::GetIcon("shader")},
-             {TypeCase::kFont, ArtManager::GetIcon("font")},
-             {TypeCase::kTimeline, ArtManager::GetIcon("timeline")},
-             {TypeCase::kObject, ArtManager::GetIcon("object")},
-             {TypeCase::kRoom, ArtManager::GetIcon("room")},
-             {TypeCase::kSettings, ArtManager::GetIcon("settings")}};
-
-  SetupParents(root);
-}
-
-void TreeModel::SetupParents(buffers::TreeNode *root) {
-  for (int i = 0; i < root->child_size(); ++i) {
-    auto child = root->mutable_child(i);
-    parents[child] = root;
-    SetupParents(child);
-  }
-}
+TreeModel::TreeModel(MessageModel *root, QObject *parent)
+    : QAbstractProxyModel(parent), root_(std::make_unique<Node>(root)) {}
 
 int TreeModel::columnCount(const QModelIndex & /*parent*/) const { return 1; }
 
@@ -42,12 +18,12 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
   R_EXPECT(index.isValid(), false) << "Supplied index was invalid:" << index;
   if (role != Qt::EditRole) return false;
 
-  buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
-  const QString oldName = QString::fromStdString(item->name());
+  Node *item = static_cast<Node *>(index.internalPointer());
+  const QString oldName = GetItemName(item);
   const QString newName = value.toString();
   if (oldName == newName) return true;
-  item->set_name(newName.toStdString());
-  emit ResourceRenamed(item->type_case(), oldName, value.toString());
+  if (!SetItemName(item, newName)) return false;
+  emit ItemRenamed(item, oldName, value.toString());
   emit dataChanged(index, index);
   return true;
 }
@@ -55,40 +31,11 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
 QVariant TreeModel::data(const QModelIndex &index, int role) const {
   R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
 
-  buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
+  Node *item = static_cast<Node *>(index.internalPointer());
   if (role == Qt::DecorationRole) {
-    auto it = iconMap.find(item->type_case());
-    if (it == iconMap.end()) return ArtManager::GetIcon("info");
-
-    if (item->type_case() == TypeCase::kSprite) {
-      if (item->sprite().subimages_size() <= 0) return QVariant();
-      QString spr = QString::fromStdString(item->sprite().subimages(0));
-      return spr.isEmpty() ? QVariant() : ArtManager::GetIcon(spr);
-    }
-
-    if (item->type_case() == TypeCase::kBackground) {
-      QString bkg = QString::fromStdString(item->background().image());
-      return bkg.isEmpty() ? QVariant() : ArtManager::GetIcon(bkg);
-    }
-
-    if (item->type_case() == TypeCase::kObject) {
-      MessageModel *sprModel = GetObjectSprite(item->name());
-      if (sprModel == nullptr) return QVariant();
-      if (!sprModel->GetSubModel<RepeatedImageModel *>(Sprite::kSubimagesFieldNumber)->Empty()) {
-        QString spr = sprModel->GetSubModel<RepeatedImageModel *>(Sprite::kSubimagesFieldNumber)->Data(0).toString();
-        return spr.isEmpty() ? QVariant() : ArtManager::GetIcon(spr);
-      }
-    }
-
-    const QIcon &icon = it->second;
-    if (item->type_case() == TypeCase::kFolder && item->child_size() <= 0) {
-      return QIcon(icon.pixmap(icon.availableSizes().first(), QIcon::Disabled));
-    }
-    return icon;
+    return GetItemIcon(item);
   } else if (role == Qt::EditRole || role == Qt::DisplayRole) {
-    return QString::fromStdString(item->name());
-  } else if (role == TypeCaseRole) {
-    return item->type_case();
+    return item->displayName;
   }
 
   return QVariant();
@@ -98,8 +45,8 @@ Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const {
   Qt::ItemFlags flags = QAbstractItemModel::flags(index);
 
   if (index.isValid()) {
-    auto *node = static_cast<TreeNode *>(index.internalPointer());
-    if (node->folder()) flags |= Qt::ItemIsDropEnabled;
+    auto *node = static_cast<Node *>(index.internalPointer());
+    if (node->repeated_model) flags |= Qt::ItemIsDropEnabled;
     return Qt::ItemIsDragEnabled | Qt::ItemIsEditable | flags;
   } else
     return Qt::ItemIsDropEnabled | flags;
@@ -113,14 +60,15 @@ QVariant TreeModel::headerData(int /*section*/, Qt::Orientation /*orientation*/,
 QModelIndex TreeModel::index(int row, int column, const QModelIndex &parent) const {
   if (!hasIndex(row, column, parent)) return QModelIndex();
 
-  buffers::TreeNode *parentItem;
+  Node *parentItem;
 
-  if (!parent.isValid())
-    parentItem = root;
-  else
-    parentItem = static_cast<buffers::TreeNode *>(parent.internalPointer());
+  if (parent.isValid()) {
+    parentItem = static_cast<Node *>(parent.internalPointer());
+  } else {
+    parentItem = root_.get();
+  }
 
-  buffers::TreeNode *childItem = parentItem->mutable_child(row);
+  Node *childItem = GetNthChild(parentItem, row);
   if (childItem)
     return createIndex(row, column, childItem);
   else
@@ -130,44 +78,24 @@ QModelIndex TreeModel::index(int row, int column, const QModelIndex &parent) con
 QModelIndex TreeModel::parent(const QModelIndex &index) const {
   if (!index.isValid()) return QModelIndex();
 
-  buffers::TreeNode *childItem = static_cast<buffers::TreeNode *>(index.internalPointer());
-  buffers::TreeNode *parentItem = parents[childItem];
+  Node *childItem = static_cast<Node *>(index.internalPointer());
+  Node *parentItem = childItem->parent;
 
-  if (parentItem == root || !parentItem) return QModelIndex();
+  if (!parentItem || parentItem == root_.get()) return QModelIndex();
+  return createIndex(parentItem->row_in_parent, 0, parentItem);
+}
 
-  buffers::TreeNode *parentParentItem = parents[parentItem];
-  if (!parentParentItem) parentParentItem = root;
-
-  // get the row number for the parent from its own parent
-  int pos = 0;
-  for (; pos < parentParentItem->child_size(); ++pos)
-    if (parentParentItem->mutable_child(pos) == parentItem) break;
-  if (pos == parentParentItem->child_size()) return QModelIndex();
-  return createIndex(pos, 0, parentItem);
+TreeModel::Node *TreeModel::IndexToNode(const QModelIndex &index) const {
+  if (index.isValid()) {
+    return static_cast<Node *>(index.internalPointer());
+  } else {
+    return root_.get();
+  }
 }
 
 int TreeModel::rowCount(const QModelIndex &parent) const {
-  buffers::TreeNode *parentItem;
   if (parent.column() > 0) return 0;
-
-  if (!parent.isValid())
-    parentItem = root;
-  else
-    parentItem = static_cast<buffers::TreeNode *>(parent.internalPointer());
-
-  return parentItem->child_size();
-}
-
-buffers::TreeNode *TreeModel::Parent(buffers::TreeNode *node) const {
-  auto p = parents.find(node);
-  return p == parents.end() ? nullptr : *p;
-}
-
-QString TreeModel::MakeResourcePath(buffers::TreeNode *resource) const {
-  QString res = QString::fromStdString(resource->name());
-  while ((resource = Parent(resource)))
-    res = QString::fromStdString(resource->name()) + "/" + res;
-  return res;
+  return GetChildCount(IndexToNode(parent));
 }
 
 Qt::DropActions TreeModel::supportedDropActions() const { return Qt::MoveAction | Qt::CopyAction; }
@@ -193,7 +121,7 @@ QMimeData *TreeModel::mimeData(const QModelIndexList &indexes) const {
   stream << QCoreApplication::applicationPid();
   stream << nodes.count();
   for (const QModelIndex &index : nodes) {
-    TreeNode *node = static_cast<TreeNode *>(index.internalPointer());
+    Node *node = static_cast<Node *>(index.internalPointer());
     stream << reinterpret_cast<qlonglong>(node) << index.row();
   }
   mimeData->setData(treeNodeMime(), data);
@@ -207,21 +135,36 @@ static void RepeatedFieldInsert(RepeatedPtrField<T> *field, T *newItem, int inde
     field->SwapElements(j, j - 1);
   }
 }
-
-QModelIndex TreeModel::insert(const QModelIndex &parent, int row, buffers::TreeNode *node) {
+/*
+QModelIndex TreeModel::insert(const QModelIndex &parent, int row, Message *message) {
   auto insertIndex = parent;
   if (!parent.isValid()) insertIndex = QModelIndex();
-  auto *parentNode = static_cast<buffers::TreeNode *>(insertIndex.internalPointer());
+  auto *parentNode = static_cast<Node *>(insertIndex.internalPointer());
   if (!parentNode) {
     insertIndex = QModelIndex();
-    parentNode = root;
+    parentNode = root_.get();
+  }
+  if (!parentNode->repeated_model
+      || parentNode->repeated_model->MessageName() != message->GetDescriptor()->full_name()) {
+    return QModelIndex();
   }
   beginInsertRows(insertIndex, row, row);
-  RepeatedFieldInsert<buffers::TreeNode>(parentNode->mutable_child(), node, row);
+  parentNode->repeated_model->insert(message, row);
   parents[node] = parentNode;
   endInsertRows();
 
   return this->index(row, 0, insertIndex);
+}*/
+
+QModelIndex TreeModel::mapFromSource(const QModelIndex &sourceIndex) const {
+  return {};
+}
+QModelIndex TreeModel::mapToSource(const QModelIndex &proxyIndex) const {
+  Node *n = IndexToNode(proxyIndex);
+  if (n->message_model) {
+    return n->message_model->index(n->NthChild(proxyIndex.row())->row_in_model);
+  }
+  if (n->)
 }
 
 bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, int row, int /*column*/,
@@ -237,23 +180,23 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
   // ensure the data is coming from the same process since mime is pointer based
   if (senderPid != QCoreApplication::applicationPid()) return false;
 
-  TreeNode *parentNode = static_cast<TreeNode *>(parent.internalPointer());
-  if (!parentNode) parentNode = root;
+  Node *parentNode = static_cast<Node *>(parent.internalPointer());
+  if (!parentNode) parentNode = root_.get();
   int count;
   stream >> count;
   if (count <= 0) return false;
   if (row == -1) row = rowCount(parent);
-  QHash<TreeNode *, unsigned> removedCount;
+  QHash<Node *, unsigned> removedCount;
 
   for (int i = 0; i < count; ++i) {
     qlonglong nodePtr;
     stream >> nodePtr;
     int itemRow;
     stream >> itemRow;
-    TreeNode *node = reinterpret_cast<TreeNode *>(nodePtr);
+    Node *node = reinterpret_cast<Node *>(nodePtr);
 
     if (action != Qt::CopyAction) {
-      auto *oldParent = parents[node];
+      auto *oldParent = node->parent;
 
       // offset the row we are removing by the number of
       // rows already removed from the same parent
@@ -271,10 +214,10 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
       // if moving the node within the same parent we need to adjust the row
       // since its own removal will affect the row we reinsert it at
       if (parentNode == oldParent && row > itemRow) --row;
-
+/*
       auto oldRepeated = oldParent->mutable_child();
       oldRepeated->ExtractSubrange(itemRow, 1, nullptr);
-      RepeatedFieldInsert<buffers::TreeNode>(parentNode->mutable_child(), node, row);
+      parentNode->model->insert(node->model, row);
       parents[node] = parentNode;
       endMoveRows();
       ++row;
@@ -283,23 +226,23 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
     } else {
       if (node->folder()) continue;
       node = duplicateNode(*node);
-      insert(parent, row++, node);
+      insert(parent, row++, node);*/
     }
   }
 
   return true;
 }
-
-QModelIndex TreeModel::addNode(buffers::TreeNode *child, const QModelIndex &parent) {
+/*
+QModelIndex TreeModel::addNode(Message *child, const QModelIndex &parent) {
   auto insertParent = parent;
   int pos = 0;
   if (parent.isValid()) {
-    buffers::TreeNode *parentNode = static_cast<buffers::TreeNode *>(parent.internalPointer());
+    Message *parentNode = static_cast<Message *>(parent.internalPointer());
     if (parentNode->has_folder()) {
       pos = parentNode->child_size();
     } else {
       insertParent = parent.parent();
-      parentNode = static_cast<buffers::TreeNode *>(insertParent.internalPointer());
+      parentNode = static_cast<Message *>(insertParent.internalPointer());
       if (!parentNode) {
         parentNode = root;
       }
@@ -313,7 +256,7 @@ QModelIndex TreeModel::addNode(buffers::TreeNode *child, const QModelIndex &pare
   return insert(insertParent, pos, child);
 }
 
-buffers::TreeNode *TreeModel::duplicateNode(const buffers::TreeNode &node) {
+Message *TreeModel::duplicateNode(const Message &node) {
   // duplicate the node
   auto *dup = node.New();
   dup->CopyFrom(node);
@@ -327,14 +270,14 @@ buffers::TreeNode *TreeModel::duplicateNode(const buffers::TreeNode &node) {
 
 void TreeModel::removeNode(const QModelIndex &index) {
   if (!index.isValid()) return;
-  auto *node = static_cast<buffers::TreeNode *>(index.internalPointer());
+  auto *node = static_cast<Message *>(index.internalPointer());
   if (!node) return;
   if (node->has_folder()) {
     for (int i = node->child_size(); i > 0; --i) {
       removeNode(this->index(i - 1, 0, index));
     }
   }
-  buffers::TreeNode *parent = parents[node];
+  Message *parent = parents[node];
   int pos = 0;
   for (; pos < parent->child_size(); ++pos)
     if (parent->mutable_child(pos) == node) break;
@@ -347,10 +290,27 @@ void TreeModel::removeNode(const QModelIndex &index) {
 
 void TreeModel::sortByName(const QModelIndex &index) {
   if (!index.isValid()) return;
-  auto *node = static_cast<buffers::TreeNode *>(index.internalPointer());
+  auto *node = static_cast<Message *>(index.internalPointer());
   if (!node) return;
   auto *child_field = node->mutable_child();
   std::sort(child_field->begin(), child_field->end(),
-            [](const buffers::TreeNode &a, const buffers::TreeNode &b) { return a.name() < b.name(); });
+            [](const Message &a, const Message &b) { return a.name() < b.name(); });
   emit dataChanged(this->index(0, 0, index), this->index(node->child_size(), 0, index));
+}
+*/
+
+void TreeModel::triggerNodeEdit(const QModelIndex &index, QAbstractItemView *view) {
+  if (!index.isValid() || !index.internalPointer()) return;
+  auto *node = IndexToNode(index);
+  auto meta = field_meta_.find(GetMessageType(node));
+  if (meta != field_meta_.end()) {
+    if (meta->custom_editor) {
+      meta->custom_editor(node->message_model);
+      return;
+    }
+  }
+  // select the new node so that it gets "revealed" and its parent is expanded
+  view->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
+  // start editing the name of the resource in the tree for convenience
+  view->edit(index);
 }
