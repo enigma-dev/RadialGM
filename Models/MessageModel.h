@@ -2,6 +2,7 @@
 #define MESSAGEMODEL_H
 
 #include "ProtoModel.h"
+#include "Utils/FieldPath.h"
 
 #include <QHash>
 
@@ -27,21 +28,24 @@ class MessageModel : public ProtoModel {
   MessageModel *BackupModel(QObject *parent);
   bool RestoreBackup();
 
-  // Protobuf's can contain nested messages.
-  // In message models these messages are held as submodels.
-  // These messages can be accessed by the protobuf field number (ie Room::kInstancesFieldNumber)
-  // FIXME: Sanity check this cast
-  template <class T>
-  T GetSubModel(int fieldNum) {
-    return static_cast<T>(_subModels[fieldNum]);
+  template<typename T, typename RType = typename std::remove_pointer<T>::type, EnabeIfCastable<RType> = true>
+  RType* GetSubModel(int fieldNum) const {
+    auto it = _subModels.find(fieldNum);
+    return it == _subModels.end() ? nullptr : (*it)->As<RType>();
   }
+
+  // Returns a mapping of row number to submodel.
+  // FIXME: row numbers should be dense.
+  const QHash<int, ProtoModel *> &SubModels() const { return _subModels; }
 
   // These are the same as the above but operate on the raw protobuf
   Message *GetBuffer();
   void ReplaceBuffer(Message *buffer);
+  const Descriptor *GetDescriptor() const { return _protobuf->GetDescriptor(); }
 
   bool SetData(const QVariant &value, int row, int column = 0) override;
   QVariant Data(int row, int column = 0) const override;
+  bool SetData(const FieldPath &field_path, const QVariant &value) override;
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -52,6 +56,9 @@ class MessageModel : public ProtoModel {
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
   QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override;
   Qt::ItemFlags flags(const QModelIndex &index) const override;
+
+  // Casting.
+  MessageModel *AsMessageModel() override { return this; }
 
  protected:
   MessageModel *_modelBackup;

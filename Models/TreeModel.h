@@ -22,7 +22,23 @@ class TreeModel : public QAbstractProxyModel {
   Q_OBJECT
 
  public:
+  using EditorFactory = std::function<QWidget*(MessageModel*)>;
+
+ private:
+  struct FieldMeta {
+    FieldPath label_field;
+    FieldPath icon_field;
+    QString icon_name;
+    EditorFactory custom_editor;
+    // When set, behaves like a whitelist. Only the fields listed here are used.
+    QSet<const FieldDescriptor*> child_fields;
+    // Fields listed here are ignored when enumerating children. Unused when child_fields are set.
+    QSet<const FieldDescriptor*> non_child_fields;
+  };
+
+ public:
   struct Node {
+    TreeModel *const backing_tree;
     /// When set, this node is a single message. Its children, if it has any, are its fields.
     MessageModel *const message_model = nullptr;
     /// When set, this node is a repeated field. Its children are messages within that field.
@@ -35,19 +51,25 @@ class TreeModel : public QAbstractProxyModel {
     /// Generally a cache of this node's position in its parent node's list of children.
     /// This may not correspond 1:1 with the field mapping in the model. Use `row_in_model` for that.
     int row_in_parent = 0;
-    /// The row number of this nodes's data in its model (e.g. containing_model).
+    /// The row number of this node's data in its model (e.g. containing_model or parent->message_model).
     /// This may not correspond 1:1 with the node's position in its parent. Use `row_in_parent` for that.
     int row_in_model = 0;
 
     /// A cache of the children of this node, giving the models and metadata corresponding to each.
-    QVector<QScopedPointer<Node>> children;
+    std::vector<std::unique_ptr<Node>> children;
 
-    bool SetName(const QString &name);
+    bool SetName(const QString &name, const FieldMeta *meta);
     Node *NthChild(int n) const;
-    const std::string &GetMessageType();
+    const std::string &GetMessageType() const;
+    QModelIndex mapFromSource(const QModelIndex &index) const;
+    QModelIndex index(int row) const;
 
     /// Builds the entire Node tree by copying the tree formed by the model.
-    Node(MessageModel *model);
+    Node(TreeModel *backing_tree, MessageModel *model);
+    /// Builds more Node tree by from each message in a repeated model.
+    Node(TreeModel *backing_tree, RepeatedMessageModel *model);
+    /// Constructs a leaf node.
+    Node(TreeModel *backing_tree, MessageModel *model, int row_number);
   };
   enum UserRoles {
     MessageTypeRole = Qt::UserRole
@@ -89,8 +111,6 @@ class TreeModel : public QAbstractProxyModel {
   }
 
   // These mirror the above, but are not compile-time safe.
-
-  using EditorFactory = std::function<QWidget*(MessageModel*)>;
   void SetDefaultIcon(const std::string &message, const QString &icon_name);
   void SetMessagePassthrough(const std::string &message);
   void SetMessageIconPathField(const std::string &message, int field_number);
@@ -122,7 +142,7 @@ class TreeModel : public QAbstractProxyModel {
   QModelIndex mapToSource(const QModelIndex &proxyIndex) const override;
 
   /// Inserts the given message as a child of the given parent index.
-  QModelIndex insert(const QModelIndex &parent, int row, Node *node);
+  QModelIndex insert(const QModelIndex &parent, int row, const Message &message);
   /// Inserts the given message as a child of the given parent index.
   QModelIndex addNode(const Message &child, const QModelIndex &parent);
   /// Duplicates the given node, placing it immediately after the original in sequence.
@@ -146,18 +166,6 @@ class TreeModel : public QAbstractProxyModel {
 
  private:
   std::unique_ptr<Node> root_;
-
-  struct FieldMeta {
-    FieldPath label_field;
-    FieldPath icon_field;
-    QString icon_name;
-    EditorFactory custom_editor;
-    // When set, behaves like a whitelist. Only the fields listed here are used.
-    QSet<const FieldDescriptor*> child_fields;
-    // Fields listed here are ignored when enumerating children. Unused when child_fields are set.
-    QSet<const FieldDescriptor*> non_child_fields;
-  };
-
   QMap<std::string, FieldMeta> field_meta_;
   QString GetItemName(const Node *item) const;
   bool SetItemName(Node *item, const QString &name);

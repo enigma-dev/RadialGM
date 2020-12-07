@@ -2,6 +2,8 @@
 #define RESOURCEMODEL_H
 
 #include "treenode.pb.h"
+#include "Utils/FieldPath.h"
+#include "Utils/SafeCasts.h"
 
 #include <QAbstractItemModel>
 #include <QDebug>
@@ -22,6 +24,18 @@ using Sprite = buffers::resources::Sprite;
 using Timeline = buffers::resources::Timeline;
 
 class ProtoModel;
+class MessageModel;
+class RepeatedMessageModel;
+class RepeatedStringModel;
+class RepeatedImageModel;
+
+namespace ProtoModel_private {
+RGM_BEGIN_SAFE_CAST(SafeCast, ProtoModel);
+RGM_DECLARE_SAFE_CAST(SafeCast, MessageModel);
+RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedMessageModel);
+RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedStringModel);
+RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedImageModel);
+} // namespace ProtoModel_private
 
 // This is a parent to all internal models
 class ProtoModel : public QAbstractItemModel {
@@ -86,6 +100,21 @@ class ProtoModel : public QAbstractItemModel {
   // because model->setData(model->index(row, col), value, role) is a PITA to type / remember.
   virtual QVariant Data(int row, int column = 0) const = 0;
   virtual bool SetData(const QVariant &value, int row, int column = 0) = 0;
+  virtual bool SetData(const FieldPath &field_path, const QVariant &value) = 0;
+
+  // Casting helpers.
+  virtual MessageModel *AsMessageModel() { return nullptr; }
+  virtual RepeatedMessageModel *AsRepeatedMessageModel() { return nullptr; }
+  virtual RepeatedStringModel *AsRepeatedStringModel() { return nullptr; }
+  virtual RepeatedImageModel *AsRepeatedImageModel() { return nullptr; }
+
+  /// Returns true if casting from ProtoModel* to T could ever work.
+  /// This is essentially std::is_base_of, but with safe casting in mind.
+  template<typename T>
+  using EnabeIfCastable = typename std::enable_if<ProtoModel_private::SafeCast<T>::kCastSupported, bool>::type;
+  /// Helper to cast this as some arbitrary choice of the above.
+  template<typename T, EnabeIfCastable<T> = true>
+  T* As() { return ProtoModel_private::SafeCast<T>::Cast(this); }
 
   // From here down marks QAbstractItemModel functions required to be implemented
   virtual QModelIndex parent(const QModelIndex &) const override;
@@ -115,5 +144,12 @@ class ProtoModel : public QAbstractItemModel {
   QHash<int,QHash<Qt::ItemDataRole,QVariant>> _horizontalHeaderData;
   QHash<int,QHash<Qt::ItemDataRole,QVariant>> _verticalHeaderData;
 };
+
+namespace ProtoModel_private {
+RGM_IMPLEMENT_SAFE_CAST(SafeCast, MessageModel);
+RGM_IMPLEMENT_SAFE_CAST(SafeCast, RepeatedMessageModel);
+RGM_IMPLEMENT_SAFE_CAST(SafeCast, RepeatedImageModel);
+RGM_IMPLEMENT_SAFE_CAST(SafeCast, RepeatedStringModel);
+} // namespace ProtoModel_private
 
 #endif

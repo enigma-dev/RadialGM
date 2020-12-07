@@ -143,6 +143,7 @@ HEADERS += \
     Models/RepeatedModel.h \
     Models/RepeatedStringModel.h \
     Utils/FieldPath.h \
+    Utils/SafeCasts.h \
     Widgets/AssetScrollArea.h \
     Widgets/AssetScrollAreaBackground.h \
     Widgets/BackgroundView.h \

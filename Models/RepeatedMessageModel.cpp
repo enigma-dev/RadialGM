@@ -4,7 +4,8 @@
 
 RepeatedMessageModel::RepeatedMessageModel(ProtoModel *parent, Message *message, const FieldDescriptor *field)
     : RepeatedModel<Message>(parent, message, field,
-                             message->GetReflection()->GetMutableRepeatedFieldRef<Message>(message, field)) {
+                             message->GetReflection()->GetMutableRepeatedFieldRef<Message>(message, field)),
+      _descriptor(field->message_type()) {
   const Reflection *refl = _protobuf->GetReflection();
   for (int j = 0; j < refl->FieldSize(*_protobuf, field); j++) {
     _subModels.append(new MessageModel(parent, refl->MutableRepeatedMessage(_protobuf, field, j)));
@@ -47,6 +48,15 @@ bool RepeatedMessageModel::setData(const QModelIndex &index, const QVariant &val
   R_EXPECT(index.row() >= 0 && index.row() < _subModels.size(), false) <<
     "Supplied row was out of bounds:" << index.row();
   return _subModels[index.row()]->setData(_subModels[index.row()]->index(index.column()), value, role);
+}
+
+QModelIndex RepeatedMessageModel::insert(const Message &message, int row) {
+  // TODO: write me
+  return index(row, 0);
+}
+
+QModelIndex RepeatedMessageModel::duplicate(const QModelIndex &message) {
+  return message;
 }
 
 QVariant RepeatedMessageModel::data(const QModelIndex &index, int role) const {

@@ -33,6 +33,13 @@ class FieldPath {
     }
     return FieldPath(std::move(fds));
   }
+
+  FieldPath SubPath(int index) const {
+    if (index >= fields.size()) return FieldPath();
+    return FieldPath({fields.begin() + index, fields.end()});
+  }
+
+  operator bool() const { return fields.size(); }
 };
 
 #endif // FIELDPATH_H

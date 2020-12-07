@@ -129,7 +129,7 @@ QVector<QPoint> PathView::RenderPoints(const QVector<QPoint> &user_points) const
 void PathView::Paint(QPainter &painter) {
   RoomView::Paint(painter);
 
-  RepeatedMessageModel *pointsModel = _pathModel->GetSubModel<RepeatedMessageModel *>(Path::kPointsFieldNumber);
+  RepeatedMessageModel *pointsModel = _pathModel->GetSubModel<RepeatedMessageModel>(Path::kPointsFieldNumber);
   if (!pointsModel->Empty()) {
     int size = pointsModel->rowCount();
 

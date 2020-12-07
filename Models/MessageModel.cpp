@@ -95,6 +95,16 @@ bool MessageModel::setData(const QModelIndex &index, const QVariant &value, int 
   return true;
 }
 
+bool MessageModel::SetData(const FieldPath &field_path, const QVariant &value) {
+  if (!field_path) return false;
+  if (field_path.fields.size() > 1) {
+    auto smit = _subModels.find(field_path.fields.front()->number());
+    if (smit == _subModels.end()) return false;
+    return smit.value()->SetData(field_path.SubPath(1), value);
+  }
+  return SetData(value, field_path.fields.front()->number());
+}
+
 QVariant MessageModel::Data(int row, int column) const {
   return data(this->index(row, column, QModelIndex()), Qt::DisplayRole);
 }
@@ -123,7 +133,7 @@ QVariant MessageModel::dataInternal(const QModelIndex &index, int role) const {
     if (refType == "object") {
       MessageModel *sprModel = GetObjectSprite(data(index, Qt::DisplayRole).toString());
       if (sprModel != nullptr) {
-        RepeatedImageModel *subImgs = sprModel->GetSubModel<RepeatedImageModel *>(Sprite::kSubimagesFieldNumber);
+        RepeatedImageModel *subImgs = sprModel->GetSubModel<RepeatedImageModel>(Sprite::kSubimagesFieldNumber);
         if (subImgs != nullptr && subImgs->rowCount() > 0) {
           return ArtManager::GetIcon(subImgs->Data(0).toString());
         }
@@ -132,7 +142,7 @@ QVariant MessageModel::dataInternal(const QModelIndex &index, int role) const {
       MessageModel *bkgModel =
           MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, data(index, Qt::DisplayRole).toString());
       if (bkgModel != nullptr) {
-        bkgModel = bkgModel->GetSubModel<MessageModel *>(TreeNode::kBackgroundFieldNumber);
+        bkgModel = bkgModel->GetSubModel<MessageModel>(TreeNode::kBackgroundFieldNumber);
         if (bkgModel != nullptr) return ArtManager::GetIcon(bkgModel->Data(Background::kImageFieldNumber).toString());
       }
     }
@@ -242,13 +252,13 @@ void UpdateReferences(MessageModel *model, const QString &type, const QString &o
     if (field != nullptr) {
       if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
         if (field->is_repeated()) {
-          RepeatedMessageModel *rm = model->GetSubModel<RepeatedMessageModel *>(row);
+          RepeatedMessageModel *rm = model->GetSubModel<RepeatedMessageModel>(row);
           int cols = rm->rowCount();
           for (int col = 0; col < cols; col++) {
-            UpdateReferences(rm->GetSubModel<MessageModel *>(col), type, oldName, newName);
+            UpdateReferences(rm->GetSubModel<MessageModel>(col), type, oldName, newName);
           }
         } else
-          UpdateReferences(model->GetSubModel<MessageModel *>(row), type, oldName, newName);
+          UpdateReferences(model->GetSubModel<MessageModel>(row), type, oldName, newName);
       } else if (field->cpp_type() == CppType::CPPTYPE_STRING && !field->is_repeated()) {
         const QString refType = QString::fromStdString(field->options().GetExtension(buffers::resource_ref));
         if (refType == type && model->Data(row).toString() == oldName) {
