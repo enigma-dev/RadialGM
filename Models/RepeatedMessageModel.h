@@ -35,6 +35,8 @@ class RepeatedMessageModel : public RepeatedModel<Message> {
   const std::string &MessageName() const;
   const google::protobuf::Descriptor *GetDescriptor() const { return _descriptor; }
 
+  RepeatedMessageModel *AsRepeatedMessageModel() override { return this; }
+
   /// Inserts the given message as a child at the given row.
   QModelIndex insert(const Message &message, int row);
   /// Duplicates the child at the given index. Returns the index of the new (duplicate) node.
@@ -46,7 +48,6 @@ class RepeatedMessageModel : public RepeatedModel<Message> {
 
  protected:
   QVector<MessageModel *> _subModels;
-  const google::protobuf::Descriptor *const _descriptor;
 };
 
 #endif

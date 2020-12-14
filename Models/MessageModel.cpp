@@ -6,13 +6,24 @@
 #include "RepeatedMessageModel.h"
 #include "ResourceModelMap.h"
 
-MessageModel::MessageModel(ProtoModel *parent, Message *protobuf) : ProtoModel(parent, protobuf) { RebuildSubModels(); }
+MessageModel::MessageModel(ProtoModel *parent, Message *protobuf)
+    : ProtoModel(parent, protobuf->GetDescriptor()->name()), _protobuf(protobuf), _descriptor(protobuf->GetDescriptor()) { RebuildSubModels(); }
 
-MessageModel::MessageModel(QObject *parent, Message *protobuf) : ProtoModel(parent, protobuf) { RebuildSubModels(); }
+MessageModel::MessageModel(QObject *parent, Message *protobuf)
+    : ProtoModel(parent, protobuf->GetDescriptor()->name()), _protobuf(protobuf), _descriptor(protobuf->GetDescriptor()) { RebuildSubModels(); }
+
+MessageModel::MessageModel(QObject *parent, const Descriptor *descriptor)
+    : ProtoModel(parent, descriptor->name()), _protobuf(nullptr), _descriptor(descriptor) {}
 
 void MessageModel::RebuildSubModels() {
+  if (!_protobuf) _subModels.clear();
   const Descriptor *desc = _protobuf->GetDescriptor();
   const Reflection *refl = _protobuf->GetReflection();
+  if (const FieldDescriptor *fd = desc->FindFieldByName("name")) {
+    // if (desc->full_name().substr(0, 23) != "buffers.resources.Room.")
+    // std::string name = refl->GetString(*_protobuf, fd);
+    // std::cerr << "Rebuilding submodels of " << _debug_path << std::endl;
+  }
   for (int i = 0; i < desc->field_count(); i++) {
     const FieldDescriptor *field = desc->field(i);
 
@@ -20,23 +31,25 @@ void MessageModel::RebuildSubModels() {
       if (field->is_repeated()) {
         _subModels[field->number()] = new RepeatedMessageModel(this, _protobuf, field);
       } else {
+        // Ignore all unset oneof fields if any is set
         const OneofDescriptor *oneof = field->containing_oneof();
-        if (oneof) {
-          if (refl->HasOneof(*_protobuf, oneof)) {
-            field = refl->GetOneofFieldDescriptor(*_protobuf, oneof);
-            if (field->cpp_type() != CppType::CPPTYPE_MESSAGE) continue;  // is prolly folder
-          } else {
-            continue;  // don't allocate if not set
-          }
+        if (oneof && refl->HasOneof(*_protobuf, oneof) && !refl->HasField(*_protobuf, field)) {
+          continue;
         }
-        _subModels[field->number()] = new MessageModel(this, refl->MutableMessage(_protobuf, field));
+        // Only recursively build fields if they're set
+        if (refl->HasField(*_protobuf, field)) {
+          _subModels[field->number()] = new MessageModel(this, refl->MutableMessage(_protobuf, field));
+        } else {
+          _subModels[field->number()] = new MessageModel(this, field->message_type());
+        }
       }
     } else if (field->cpp_type() == CppType::CPPTYPE_STRING && field->is_repeated()) {
       if (field->options().GetExtension(buffers::file_kind) == buffers::FileKind::IMAGE) {
         _subModels[field->number()] = new RepeatedImageModel(this, _protobuf, field);
         GetSubModel<RepeatedImageModel *>(field->number());
-      } else
+      } else {
         _subModels[field->number()] = new RepeatedStringModel(this, _protobuf, field);
+      }
     }
   }
 }
@@ -228,6 +241,7 @@ void MessageModel::ReplaceBuffer(Message *buffer) {
   beginResetModel();
   SetDirty(true);
   _protobuf->CopyFrom(*buffer);
+  qDebug() << "Buffer replaced; rebuilding submodels";
   RebuildSubModels();
   endResetModel();
 }

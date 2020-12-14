@@ -43,7 +43,6 @@ QFileInfo MainWindow::EnigmaRoot = MainWindow::getEnigmaRoot();
 QList<buffers::SystemType> MainWindow::systemCache;
 MainWindow *MainWindow::_instance = nullptr;
 QScopedPointer<ResourceModelMap> MainWindow::resourceMap;
-QScopedPointer<MessageModel> MainWindow::resourceModel;
 QScopedPointer<TreeModel> MainWindow::treeModel;
 std::unique_ptr<EventData> MainWindow::_event_data;
 
@@ -315,6 +314,7 @@ void MainWindow::openNewProject() {
   for (auto groupName : defaultGroups) {
     auto *groupNode = root->mutable_folder()->add_children();
     groupNode->set_name(groupName.toStdString());
+    groupNode->mutable_folder();
   }
   openProject(std::move(newProject));
 }
@@ -326,8 +326,7 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   _project = std::move(openedProject);
 
   resourceMap.reset(new ResourceModelMap(_project->mutable_game()->mutable_root(), nullptr));
-  resourceModel.reset(new MessageModel(this, _project->mutable_game()->mutable_root()));
-  treeModel.reset(new TreeModel(resourceModel.get(), nullptr));
+  treeModel.reset(new TreeModel(new MessageModel(this, _project->mutable_game()->mutable_root()), nullptr));
 
   treeModel->UseEditorWidget<buffers::resources::Sprite, SpriteEditor>(this);
   treeModel->UseEditorWidget<buffers::resources::Sound, SoundEditor>(this);
@@ -499,7 +498,7 @@ void MainWindow::on_actionCreateRoom_triggered() { CreateResource(TypeCase::kRoo
 void MainWindow::on_actionCreateSettings_triggered() { CreateResource(TypeCase::kSettings); }
 
 void MainWindow::on_actionDuplicate_triggered() {
-  if (!_ui->treeView->selectionModel()->hasSelection()) return;
+  // if (!_ui->treeView->selectionModel()->hasSelection()) return;
   const auto index = _ui->treeView->selectionModel()->currentIndex();
   QModelIndex dupIndex = treeModel->duplicateNode(index);
   // Triggers edit of either resource or name label.

@@ -18,7 +18,7 @@
 using TypeCase = buffers::TreeNode::TypeCase;
 using IconMap = std::unordered_map<TypeCase, QIcon>;
 
-class TreeModel : public QAbstractProxyModel {
+class TreeModel : public QAbstractItemModel {
   Q_OBJECT
 
  public:
@@ -39,15 +39,17 @@ class TreeModel : public QAbstractProxyModel {
  public:
   struct Node {
     TreeModel *const backing_tree;
+    Node *parent = nullptr;
     /// When set, this node is a single message. Its children, if it has any, are its fields.
     MessageModel *const message_model = nullptr;
     /// When set, this node is a repeated field. Its children are messages within that field.
     RepeatedMessageModel *const repeated_model = nullptr;
     /// When set, this node is a leaf. It exists to index within a model. Use row_in_model for model operations.
     MessageModel *const containing_model = nullptr;
+    /// Cache of the name field of the underlying proto.
     QString displayName;
+    /// Cache of the icon field or per-message display icon of the underlying proto.
     QIcon displayIcon;
-    Node *parent = nullptr;
     /// Generally a cache of this node's position in its parent node's list of children.
     /// This may not correspond 1:1 with the field mapping in the model. Use `row_in_model` for that.
     int row_in_parent = 0;
@@ -64,13 +66,20 @@ class TreeModel : public QAbstractProxyModel {
     QModelIndex mapFromSource(const QModelIndex &index) const;
     QModelIndex index(int row) const;
 
+    /// Debug print.
+    void Print(int indent = 0) const;
+
     /// Builds the entire Node tree by copying the tree formed by the model.
-    Node(TreeModel *backing_tree, MessageModel *model);
-    /// Builds more Node tree by from each message in a repeated model.
-    Node(TreeModel *backing_tree, RepeatedMessageModel *model);
-    /// Constructs a leaf node.
-    Node(TreeModel *backing_tree, MessageModel *model, int row_number);
+    Node(TreeModel *backing_tree, Node *parent, int row_in_parent, MessageModel *model);
+    /// Builds more Node tree from each message in a repeated model.
+    Node(TreeModel *backing_tree, Node *parent, int row_in_parent, RepeatedMessageModel *model);
+    /// Constructs as a leaf node. The specified field should not be a message.
+    Node(TreeModel *backing_tree, Node *parent, int row_in_parent, MessageModel *model, int row_in_model);
+
+   private:
+    void PushChild(ProtoModel *model, int source_row);
   };
+
   enum UserRoles {
     MessageTypeRole = Qt::UserRole
   };
@@ -122,7 +131,7 @@ class TreeModel : public QAbstractProxyModel {
   // == Data layer ====================================================================================================
   // ==================================================================================================================
 
-  bool setData(const QModelIndex &index, const QVariant &value, int role) override;
+  // bool setData(const QModelIndex &index, const QVariant &value, int role) override;
   QVariant data(const QModelIndex &index, int role) const override;
   Qt::ItemFlags flags(const QModelIndex &index) const override;
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -131,15 +140,8 @@ class TreeModel : public QAbstractProxyModel {
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
-  // XXX: Do these need to be overridden, since the underlying model is to support them?
-  Qt::DropActions supportedDropActions() const override;
-  QStringList mimeTypes() const override;
-  QMimeData *mimeData(const QModelIndexList &indexes) const override;
-  bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
-                    const QModelIndex &parent) override;
-
-  QModelIndex mapFromSource(const QModelIndex &sourceIndex) const override;
-  QModelIndex mapToSource(const QModelIndex &proxyIndex) const override;
+  // QModelIndex mapFromSource(const QModelIndex &sourceIndex) const override;
+  // QModelIndex mapToSource(const QModelIndex &proxyIndex) const override;
 
   /// Inserts the given message as a child of the given parent index.
   QModelIndex insert(const QModelIndex &parent, int row, const Message &message);
@@ -165,8 +167,11 @@ class TreeModel : public QAbstractProxyModel {
   void ItemMoved(Node *node, TreeNode *old_parent);
 
  private:
-  std::unique_ptr<Node> root_;
+  QHash<ProtoModel*, Node*> backing_nodes_;
   QMap<std::string, FieldMeta> field_meta_;
+  // Warning: this must be initialized *after* the above two maps.
+  std::unique_ptr<Node> root_;
+
   QString GetItemName(const Node *item) const;
   bool SetItemName(Node *item, const QString &name);
   QVariant GetItemIcon(const Node *item) const;
@@ -174,6 +179,10 @@ class TreeModel : public QAbstractProxyModel {
   int GetChildCount(Node *item) const;
   Node *IndexToNode(const QModelIndex &index) const;
   const std::string &GetMessageType(const Node *node);
+
+  // Some backing nodes are mapped to tree nodes; some are not (they're optimized out).
+  // All tree nodes are mapped to backing nodes.
+  void MapModel(ProtoModel *model, Node *node);
 
   void SetupParents(Message *root);
   inline QString treeNodeMime() const { return QStringLiteral("RadialGM/TreeNode"); }

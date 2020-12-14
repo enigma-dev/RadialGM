@@ -16,6 +16,7 @@ class MessageModel : public ProtoModel {
  public:
   MessageModel(ProtoModel *parent, Message *protobuf);
   MessageModel(QObject *parent, Message *protobuf);
+  MessageModel(QObject *parent, const Descriptor *descriptor);
 
   // On either intialization or restore of a model all
   // refrences to to the submodels it owns recursively must be updated
@@ -61,6 +62,8 @@ class MessageModel : public ProtoModel {
   MessageModel *AsMessageModel() override { return this; }
 
  protected:
+  google::protobuf::Message *_protobuf;
+  const google::protobuf::Descriptor *const _descriptor;
   MessageModel *_modelBackup;
   QScopedPointer<Message> _backupProtobuf;
   QHash<int, ProtoModel *> _subModels;

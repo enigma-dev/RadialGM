@@ -41,8 +41,8 @@ RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedImageModel);
 class ProtoModel : public QAbstractItemModel {
   Q_OBJECT
  public:
-  explicit ProtoModel(QObject *parent, Message *protobuf);
-  explicit ProtoModel(ProtoModel *parent, Message *protobuf);
+  explicit ProtoModel(QObject *parent, std::string name);
+  explicit ProtoModel(ProtoModel *parent, std::string name);
 
   // The parent model is the model that own's the current model
   // For the Project model (represented as the resource tree) this will be nullptr.
@@ -139,8 +139,8 @@ class ProtoModel : public QAbstractItemModel {
 
  protected:
   bool _dirty;
-  Message *_protobuf;
   ProtoModel *_parentModel;
+  const std::string _debug_path;
   QHash<int,QHash<Qt::ItemDataRole,QVariant>> _horizontalHeaderData;
   QHash<int,QHash<Qt::ItemDataRole,QVariant>> _verticalHeaderData;
 };

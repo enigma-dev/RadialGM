@@ -31,6 +31,10 @@ bool RepeatedStringModel::setData(const QModelIndex& index, const QVariant& valu
 
   return true;
 }
+bool RepeatedStringModel::SetData(const FieldPath &field_path, const QVariant &data) {
+  // TODO: write me
+  return false;
+}
 
 QVariant RepeatedStringModel::data(const QModelIndex& index, int /*role*/) const {
   if (index.column() != 0) {

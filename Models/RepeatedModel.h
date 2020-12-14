@@ -12,7 +12,8 @@ template <class T>
 class RepeatedModel : public ProtoModel {
  public:
   RepeatedModel(ProtoModel *parent, Message *message, const FieldDescriptor *field, MutableRepeatedFieldRef<T> fieldRef)
-      : ProtoModel(parent, message), _field(field), _fieldRef(fieldRef) {}
+      : ProtoModel(parent, message->GetDescriptor()->name()), _protobuf(message), _descriptor(message->GetDescriptor()),
+        _field(field), _fieldRef(fieldRef) {}
 
   // Need to implement this in all RepeatedModels
   virtual void AppendNew() = 0;
@@ -205,6 +206,9 @@ class RepeatedModel : public ProtoModel {
 
  protected:
   MutableRepeatedFieldRef<T> GetfieldRef() const { return _fieldRef; }
+
+  Message *_protobuf;
+  const Descriptor *_descriptor;
   const FieldDescriptor *_field;
   MutableRepeatedFieldRef<T> _fieldRef;
 };
