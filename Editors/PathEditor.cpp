@@ -125,9 +125,7 @@ void PathEditor::RebindSubModels() {
   }
   _roomLineEdit->setText(roomName);
 
-  connect(_ui->pathPreviewBackground, &AssetScrollAreaBackground::MouseMoved, this, &PathEditor::MouseMoved);
-  connect(_ui->pathPreviewBackground, &AssetScrollAreaBackground::MousePressed, this, &PathEditor::MousePressed);
-  connect(_ui->pathPreviewBackground, &AssetScrollAreaBackground::MouseReleased, this, &PathEditor::MouseReleased);
+  _ui->pathPreviewBackground->installEventFilter(this);
 
   connect(_ui->pointsTableView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
           &PathEditor::UpdateSelection);
@@ -138,14 +136,32 @@ void PathEditor::RebindSubModels() {
 }
 
 bool PathEditor::eventFilter(QObject* obj, QEvent* event) {
-  if (_pointsModel != nullptr) {
-    // Resize columns to view size
-    if (obj == _ui->pointsTableView && event->type() == QEvent::Resize) {
-      QResizeEvent* resizeEvent = static_cast<QResizeEvent*>(event);
-      int cc = _pointsModel->columnCount() - 1;
-      for (int c = 1; c < cc; ++c) {  // column 1 is hidden
-        _ui->pointsTableView->setColumnWidth(c, (resizeEvent->size().width()) / cc);
-      }
+  // Resize columns to view size
+  if (obj == _ui->pointsTableView && event->type() == QEvent::Resize && _pointsModel != nullptr) {
+    QResizeEvent* resizeEvent = static_cast<QResizeEvent*>(event);
+    int cc = _pointsModel->columnCount() - 1;
+    for (int c = 1; c < cc; ++c) {  // column 1 is hidden
+      _ui->pointsTableView->setColumnWidth(c, (resizeEvent->size().width()) / cc);
+    }
+  } else if (obj == _ui->pathPreviewBackground) {
+    switch (event->type()) {
+    case QEvent::MouseMove: {
+      QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+      QPoint roomPos = _ui->pathPreviewBackground->MapToAsset(mouseEvent->pos());
+      MouseMoved(roomPos.x(), roomPos.y());
+      break;
+    }
+    case QEvent::MouseButtonPress: {
+      QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+      MousePressed(mouseEvent->button());
+      break;
+    }
+    case QEvent::MouseButtonRelease: {
+      QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+      MouseReleased(mouseEvent->button());
+      break;
+    }
+    default: break;
     }
   }
   return QWidget::eventFilter(obj, event);

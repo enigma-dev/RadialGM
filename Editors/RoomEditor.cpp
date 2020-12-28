@@ -70,10 +70,7 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
           [=](int index) { _viewMapper->setCurrentIndex(index); });
 
   cursorPositionLabel = new QLabel();
-  connect(_ui->roomPreviewBackground, &AssetScrollAreaBackground::MouseMoved, [=](int x, int y) {
-    const GridDimensions g = _ui->roomView->GetGrid();
-    cursorPositionLabel->setText(tr("X %0, Y %1").arg(RoundNum(x, g.horSpacing)).arg(RoundNum(y, g.vertSpacing)));
-  });
+  _ui->roomPreviewBackground->installEventFilter(this);
   _ui->statusBar->addWidget(cursorPositionLabel);
 
   _assetNameLabel = new QLabel("obj_xxx");
@@ -150,6 +147,25 @@ void RoomEditor::RebindSubModels() {
           });
 
   BaseEditor::RebindSubModels();
+}
+
+bool RoomEditor::eventFilter(QObject* obj, QEvent* event) {
+  if (obj == _ui->roomPreviewBackground) {
+    switch (event->type()) {
+    case QEvent::MouseMove: {
+      QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+      QPoint roomPos = _ui->roomPreviewBackground->MapToAsset(mouseEvent->pos());
+      const GridDimensions g = _ui->roomView->GetGrid();
+      cursorPositionLabel->setText(
+            tr("X %0, Y %1")
+            .arg(RoundNum(roomPos.x(),g.horSpacing))
+            .arg(RoundNum(roomPos.y(),g.vertSpacing)));
+      break;
+    }
+    default: break;
+    }
+  }
+  return QWidget::eventFilter(obj, event);
 }
 
 void RoomEditor::SelectedObjectChanged(QAction* action) { _ui->currentObject->setText(action->text()); }

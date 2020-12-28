@@ -44,11 +44,6 @@ class AssetScrollAreaBackground : public QWidget {
   void SetGridHSnap(int hSnap);
   void SetGridVSnap(int vSnap);
 
- signals:
-  void MouseMoved(int x, int y);
-  void MousePressed(Qt::MouseButton button);
-  void MouseReleased(Qt::MouseButton button);
-
  protected:
   // Standard Grid
   void PaintGrid(QPainter& painter, int gridHorSpacing, int gridVertSpacing, int gridHorOff, int gridVertOff);
