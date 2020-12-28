@@ -188,7 +188,12 @@ QMimeData *TreeModel::mimeData(const QModelIndexList &indexes) const {
 
   // rows are moved starting with the lowest so we can create
   // unique names in the order of insertion
-  std::sort(nodes.begin(), nodes.end(), std::less<QModelIndex>());
+  using pathComparator = std::function<bool(const QModelIndex & a, const QModelIndex & b)>;
+  pathComparator compareIndexes =
+    [&compareIndexes](const QModelIndex & a, const QModelIndex & b) -> bool {
+      return a < b && compareIndexes(a.parent(),b.parent());
+    };
+  std::sort(nodes.begin(), nodes.end(), compareIndexes);
 
   stream << QCoreApplication::applicationPid();
   stream << nodes.count();
