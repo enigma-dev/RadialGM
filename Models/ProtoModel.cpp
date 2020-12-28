@@ -6,6 +6,9 @@
 
 #include "Components/Logger.h"
 
+QHash<QString,QHash<Qt::ItemDataRole,QVariant>> ProtoModel::_horizontalProtoHeaderData;
+QHash<QString,QHash<Qt::ItemDataRole,QVariant>> ProtoModel::_verticalProtoHeaderData;
+
 ProtoModel::ProtoModel(QObject *parent, Message *protobuf) : ProtoModel(static_cast<ProtoModel *>(nullptr), protobuf) {
   QObject::setParent(parent);
 }
@@ -40,6 +43,18 @@ Qt::ItemFlags ProtoModel::flags(const QModelIndex &index) const {
   return flags;
 }
 
+bool ProtoModel::SetHeaderData(std::string full_name, Qt::Orientation orientation, const QVariant &value, int role) {
+  QString qfull_name = QString::fromStdString(full_name);
+  if (orientation == Qt::Horizontal) {
+    _horizontalProtoHeaderData[qfull_name][static_cast<Qt::ItemDataRole>(role)] = value;
+    return true;
+  } else if (orientation == Qt::Vertical) {
+    _verticalProtoHeaderData[qfull_name][static_cast<Qt::ItemDataRole>(role)] = value;
+    return true;
+  }
+  return false;
+}
+
 bool ProtoModel::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role) {
   if (orientation == Qt::Horizontal) {
     _horizontalHeaderData[section][static_cast<Qt::ItemDataRole>(role)] = value;
@@ -53,7 +68,8 @@ bool ProtoModel::setHeaderData(int section, Qt::Orientation orientation, const Q
   return QAbstractItemModel::setHeaderData(section, orientation, value, role);
 }
 
-static QVariant getHeaderData(const QHash<int,QHash<Qt::ItemDataRole,QVariant>>& map, int section, int role) {
+template <typename K>
+static QVariant getHeaderData(const QHash<K,QHash<Qt::ItemDataRole,QVariant>>& map, K section, int role) {
   auto sit = map.find(section);
   if (sit == map.end()) return QVariant();
   auto sectionMap = *sit;
@@ -63,10 +79,28 @@ static QVariant getHeaderData(const QHash<int,QHash<Qt::ItemDataRole,QVariant>>&
 }
 
 QVariant ProtoModel::headerData(int section, Qt::Orientation orientation, int role) const {
+  QVariant datas;
+
   if (orientation == Qt::Horizontal) {
-    return getHeaderData(_horizontalHeaderData, section, role);
+    datas = getHeaderData(_horizontalHeaderData, section, role);
   } else if (orientation == Qt::Vertical) {
-    return getHeaderData(_verticalHeaderData, section, role);
+    datas = getHeaderData(_verticalHeaderData, section, role);
   }
+  // non static header data overrides any static header data
+  if (datas.isValid()) return datas;
+
+  // find the fully qualified name of this section's field
+  const Descriptor *desc = this->GetDescriptor();
+  const FieldDescriptor *field = desc->FindFieldByNumber(section);
+  if (!field) return QVariant();
+  QString full_name = QString::fromStdString(field->full_name());
+
+  // check if there's any static header data for the field at this section
+  if (orientation == Qt::Horizontal) {
+    return getHeaderData(_horizontalProtoHeaderData, full_name, role);
+  } else if (orientation == Qt::Vertical) {
+    return getHeaderData(_verticalProtoHeaderData, full_name, role);
+  }
+
   return QVariant();
 }
