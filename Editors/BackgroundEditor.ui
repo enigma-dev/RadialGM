@@ -150,7 +150,7 @@
            <enum>QFormLayout::ExpandingFieldsGrow</enum>
           </property>
           <property name="labelAlignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
           </property>
           <property name="horizontalSpacing">
            <number>4</number>
