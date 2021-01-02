@@ -79,8 +79,9 @@ SOURCES += \
     Models/MessageModel.cpp \
     Models/RepeatedImageModel.cpp \
     Models/RepeatedMessageModel.cpp \
-    Models/RepeatedStringModel.cpp \
+    Models/RepeatedModel.cpp \
     Utils/FieldPath.cpp \
+    Utils/ProtoManip.cpp \
     Widgets/AssetScrollAreaBackground.cpp \
     Widgets/PathView.cpp \
     Widgets/SpriteSubimageListView.cpp \
@@ -143,6 +144,7 @@ HEADERS += \
     Models/RepeatedModel.h \
     Models/RepeatedStringModel.h \
     Utils/FieldPath.h \
+    Utils/ProtoManip.h \
     Utils/SafeCasts.h \
     Widgets/AssetScrollArea.h \
     Widgets/AssetScrollAreaBackground.h \

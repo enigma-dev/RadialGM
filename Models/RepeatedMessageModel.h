@@ -3,28 +3,27 @@
 
 #include "RepeatedModel.h"
 
-class RepeatedMessageModel : public RepeatedModel<Message> {
+class RepeatedMessageModel : public BasicRepeatedModel<Message> {
   Q_OBJECT
  public:
   RepeatedMessageModel(ProtoModel *parent, Message *message, const FieldDescriptor *field);
 
   // RepeatedMessage models hold multiple MessageModels
-  // You can access a submodel by it's position within the data structure.
-  // (ie instancesModel->GetSubmodel(3))
-  // FIXME: Sanity check this cast
-  template<typename T, typename RType = typename std::remove_pointer<T>::type, EnabeIfCastable<RType> = true>
-  RType* GetSubModel(int index) const {
-    if (index < 0 || index > _subModels.size()) return nullptr;
-    return ((ProtoModel*) _subModels[index])->As<RType>();
+  // You can access a submodel by its position within the data structure.
+  // (e.g. instancesModel->GetSubmodel(3))
+  // XXX: Why would anyone try to access these as anything other than MessageModel...?
+  template<typename T> auto *GetSubModel(int index) const {
+    return (index < 0 || index > _subModels.size()) ? nullptr: ((ProtoModel*) _subModels[index])->As<T>();
   }
 
-  void Swap(int /*left*/, int /*right*/) override;
-  void AppendNew() override;
-  void Resize(int /*newSize*/) override;
-  void Clear() override;
+  void SwapWithoutSignal(int /*left*/, int /*right*/) override;
+  void AppendNewWithoutSignal() override;
+  void RemoveLastNRowsWithoutSignal(int /*newSize*/) override;
+  void ClearWithoutSignal() override;
 
-  QVariant Data(int row, int column) const override;
-  bool SetData(const QVariant &value, int row, int column) override;
+  QVariant Data(int row, int column = 0) const override;
+  QVariant Data(const FieldPath &field_path) const override;
+  bool SetData(const QVariant &value, int row, int column = 0) override;
   bool SetData(const FieldPath &field_path, const QVariant &value) override;
 
   bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override;
@@ -34,6 +33,11 @@ class RepeatedMessageModel : public RepeatedModel<Message> {
 
   const std::string &MessageName() const;
   const google::protobuf::Descriptor *GetDescriptor() const { return _descriptor; }
+
+  QString DebugName() const override {
+    return QString::fromStdString("RepeatedMessageModel<" + _field->full_name() + ">");
+  }
+  RepeatedMessageModel *TryCastAsRepeatedMessageModel() override { return this; }
 
   /// Inserts the given message as a child at the given row.
   QModelIndex insert(const Message &message, int row);
@@ -46,7 +50,6 @@ class RepeatedMessageModel : public RepeatedModel<Message> {
 
  protected:
   QVector<MessageModel *> _subModels;
-  const google::protobuf::Descriptor *const _descriptor;
 };
 
 #endif

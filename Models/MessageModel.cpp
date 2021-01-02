@@ -1,50 +1,83 @@
 #include "MessageModel.h"
 #include "Components/ArtManager.h"
 #include "Components/Logger.h"
-#include "MainWindow.h"
 #include "RepeatedImageModel.h"
 #include "RepeatedMessageModel.h"
 #include "ResourceModelMap.h"
 
-MessageModel::MessageModel(ProtoModel *parent, Message *protobuf) : ProtoModel(parent, protobuf) { RebuildSubModels(); }
+MessageModel::MessageModel(ProtoModel *parent, Message *protobuf)
+    : ProtoModel(parent, protobuf->GetDescriptor()->name()), _protobuf(protobuf),
+      descriptor_(protobuf->GetDescriptor()) { RebuildSubModels(); }
 
-MessageModel::MessageModel(QObject *parent, Message *protobuf) : ProtoModel(parent, protobuf) { RebuildSubModels(); }
+MessageModel::MessageModel(QObject *parent, Message *protobuf)
+    : ProtoModel(parent, protobuf->GetDescriptor()->name()), _protobuf(protobuf),
+      descriptor_(protobuf->GetDescriptor()) { RebuildSubModels(); }
+
+MessageModel::MessageModel(QObject *parent, const Descriptor *descriptor)
+    : ProtoModel(parent, descriptor->name()), _protobuf(nullptr), descriptor_(descriptor) {}
+
+const FieldDescriptor *MessageModel::GetRowDescriptor(int row) const {
+  if (row < 0 || row >= descriptor_->field_count()) {
+    qDebug() << "Requesting descriptor of invalid row " << row
+             << " of MessageModel " << descriptor_->full_name().c_str();
+    return nullptr;
+  }
+  return descriptor_->field(row);
+}
+
+bool IsCulledOneof_(const Reflection *refl, const Message &message, const FieldDescriptor *field) {
+  const OneofDescriptor *oneof = field->containing_oneof();
+  return (oneof && refl->HasOneof(message, oneof) && !refl->HasField(message, field));
+}
+
+bool MessageModel::IsCulledOneofRow(int row) const {
+  return IsCulledOneof_(_protobuf->GetReflection(), *_protobuf, descriptor_->field(row));
+}
 
 void MessageModel::RebuildSubModels() {
+  submodels_by_field_.clear();
+  submodels_by_row_.clear();
+  if (!_protobuf) {
+    qDebug() << "Whatever, man.";
+    return;
+  }
+
   const Descriptor *desc = _protobuf->GetDescriptor();
   const Reflection *refl = _protobuf->GetReflection();
+  submodels_by_row_.resize(desc->field_count());
+
   for (int i = 0; i < desc->field_count(); i++) {
     const FieldDescriptor *field = desc->field(i);
 
     if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
       if (field->is_repeated()) {
-        _subModels[field->number()] = new RepeatedMessageModel(this, _protobuf, field);
+        submodels_by_field_[field->number()] = submodels_by_row_[i] =
+            new RepeatedMessageModel(this, _protobuf, field);
       } else {
-        const OneofDescriptor *oneof = field->containing_oneof();
-        if (oneof) {
-          if (refl->HasOneof(*_protobuf, oneof)) {
-            field = refl->GetOneofFieldDescriptor(*_protobuf, oneof);
-            if (field->cpp_type() != CppType::CPPTYPE_MESSAGE) continue;  // is prolly folder
-          } else {
-            continue;  // don't allocate if not set
-          }
+        // Ignore all unset oneof fields if any is set
+        if (IsCulledOneof_(refl, *_protobuf, field)) continue;
+        // Only recursively build fields if they're set
+        if (refl->HasField(*_protobuf, field)) {
+          submodels_by_field_[field->number()] = submodels_by_row_[i] =
+              new MessageModel(this, refl->MutableMessage(_protobuf, field));
+        } else {
+          submodels_by_field_[field->number()] = submodels_by_row_[i] = new MessageModel(this, field->message_type());
         }
-        _subModels[field->number()] = new MessageModel(this, refl->MutableMessage(_protobuf, field));
       }
     } else if (field->cpp_type() == CppType::CPPTYPE_STRING && field->is_repeated()) {
       if (field->options().GetExtension(buffers::file_kind) == buffers::FileKind::IMAGE) {
-        _subModels[field->number()] = new RepeatedImageModel(this, _protobuf, field);
+        submodels_by_field_[field->number()] = submodels_by_row_[i] = new RepeatedImageModel(this, _protobuf, field);
         GetSubModel<RepeatedImageModel *>(field->number());
-      } else
-        _subModels[field->number()] = new RepeatedStringModel(this, _protobuf, field);
+      } else {
+        submodels_by_field_[field->number()] = submodels_by_row_[i] = new RepeatedStringModel(this, _protobuf, field);
+      }
     }
   }
 }
 
 int MessageModel::rowCount(const QModelIndex &parent) const {
   if (parent.isValid()) return 0;
-  const Descriptor *desc = _protobuf->GetDescriptor();
-  return desc->field_count();
+  return descriptor_->field_count();
 }
 
 int MessageModel::columnCount(const QModelIndex & /*parent*/) const { return 1; }
@@ -58,7 +91,7 @@ bool MessageModel::setData(const QModelIndex &index, const QVariant &value, int 
 
   const Descriptor *desc = _protobuf->GetDescriptor();
   const Reflection *refl = _protobuf->GetReflection();
-  const FieldDescriptor *field = desc->FindFieldByNumber(index.row());
+  const FieldDescriptor *field = desc->field(index.row() - 1);
   if (!field) return false;
 
   const QVariant oldValue = this->data(index, role);
@@ -96,13 +129,40 @@ bool MessageModel::setData(const QModelIndex &index, const QVariant &value, int 
 }
 
 bool MessageModel::SetData(const FieldPath &field_path, const QVariant &value) {
-  if (!field_path) return false;
+  if (!field_path) {
+    qDebug() << "Unimplemented: Attempting to assign QVariant to a message.";
+    return false;
+  }
   if (field_path.fields.size() > 1) {
-    auto smit = _subModels.find(field_path.fields.front()->number());
-    if (smit == _subModels.end()) return false;
+    auto smit = submodels_by_field_.find(field_path.front()->number());
+    if (smit == submodels_by_field_.end()) return false;
     return smit.value()->SetData(field_path.SubPath(1), value);
   }
-  return SetData(value, field_path.fields.front()->number());
+  return SetData(value, field_path.front()->number());
+}
+
+QVariant MessageModel::Data(const FieldPath &field_path) const {
+  if (!_protobuf) return {};
+  if (field_path.fields.empty()) {
+    return QVariant::fromValue(AbstractMessage(*_protobuf));
+  }
+  int row = field_path.front()->index();
+  if (field_path.size() == 1) {
+    if (field_path.front().repeated_field_index >= 0) {
+      return submodels_by_row_[row]->Data(field_path.front().repeated_field_index);
+    } else {
+      return Data(row);
+    }
+  }
+  if (field_path.front().repeated_field_index >= 0) {
+    const auto *rmm = submodels_by_row_[row]->As<RepeatedMessageModel>();
+    if (rmm) {
+      return rmm->GetSubModel<ProtoModel>(field_path.front().repeated_field_index)->Data(field_path.SubPath(1));
+    } else {
+      qDebug() << "Internal error: Intermediate field indicated by FieldPath is not a RepeatedMessageModel...";
+    }
+  }
+  return submodels_by_row_[row]->Data(field_path.SubPath(1));
 }
 
 QVariant MessageModel::Data(int row, int column) const {
@@ -111,47 +171,33 @@ QVariant MessageModel::Data(int row, int column) const {
 
 template<bool NO_DEFAULT>
 QVariant MessageModel::dataInternal(const QModelIndex &index, int role) const {
+  if (!_protobuf) return {};
   R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
   if (role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::DecorationRole &&
       role != Qt::CheckStateRole) return QVariant();
 
-  const Descriptor *desc = _protobuf->GetDescriptor();
+  const Descriptor *desc = descriptor_;
   const Reflection *refl = _protobuf->GetReflection();
-  const FieldDescriptor *field = desc->FindFieldByNumber(index.row());
 
-  if (!field) {
-    // Proto fields always start at one. So this bit of a hack for displaying data in a table
-    if (index.row() == 0 && role == Qt::DisplayRole) {
-      return tr("Value");
-    }
+  if (index.row() < 0 || index.row() >= desc->field_count()) {
+    qDebug() << "Accessing out-of-range proto row " << index.row() << " of " << desc->field_count();
     return QVariant();
   }
+  const FieldDescriptor *field = desc->field(index.row());
 
   // These are for icons in things like the room's instance list
   if (role == Qt::DecorationRole) {
-    const QString refType = QString::fromStdString(field->options().GetExtension(buffers::resource_ref));
-    if (refType == "object") {
-      MessageModel *sprModel = GetObjectSprite(data(index, Qt::DisplayRole).toString());
-      if (sprModel != nullptr) {
-        RepeatedImageModel *subImgs = sprModel->GetSubModel<RepeatedImageModel>(Sprite::kSubimagesFieldNumber);
-        if (subImgs != nullptr && subImgs->rowCount() > 0) {
-          return ArtManager::GetIcon(subImgs->Data(0).toString());
-        }
-      }
-    } else if (refType == "background") {
-      MessageModel *bkgModel =
-          MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, data(index, Qt::DisplayRole).toString());
-      if (bkgModel != nullptr) {
-        bkgModel = bkgModel->GetSubModel<MessageModel>(TreeNode::kBackgroundFieldNumber);
-        if (bkgModel != nullptr) return ArtManager::GetIcon(bkgModel->Data(Background::kImageFieldNumber).toString());
-      }
-    }
-
+    // TODO: Move the decoration attributes out of TreeModel::FieldMeta and into a base struct shared by ProtoModel.
     return QVariant();
   }
 
+  // The logic below will kill proto if the field is repeated. Abort now.
+  if (field->is_repeated()) {
+     qDebug() << "The requested field " << index.row() << " (" << field->name().c_str() << ") is repeated...";
+     return QVariant();
+  }
   // If the field has't been initialized return an invalid QVariant. (see QVariant.isValid())
-  if (NO_DEFAULT && !field->is_repeated() && !refl->HasField(*_protobuf, field)) return QVariant();
+  if (NO_DEFAULT && !refl->HasField(*_protobuf, field)) return QVariant();
 
   auto cpp_type = field->cpp_type();
   if (role == Qt::CheckStateRole) {
@@ -161,7 +207,8 @@ QVariant MessageModel::dataInternal(const QModelIndex &index, int role) const {
   }
 
   switch (cpp_type) {
-    case CppType::CPPTYPE_MESSAGE: R_EXPECT(false, QVariant()) << "The requested field " << index << " is a message";
+    case CppType::CPPTYPE_MESSAGE: R_EXPECT(false, QVariant())
+        << "The requested field " << field->full_name().c_str() << " is a message";
     case CppType::CPPTYPE_INT32: return refl->GetInt32(*_protobuf, field);
     case CppType::CPPTYPE_INT64: return static_cast<long long>(refl->GetInt64(*_protobuf, field));
     case CppType::CPPTYPE_UINT32: return refl->GetUInt32(*_protobuf, field);
@@ -189,11 +236,8 @@ QModelIndex MessageModel::parent(const QModelIndex & /*index*/) const { return Q
 QVariant MessageModel::headerData(int section, Qt::Orientation /*orientation*/, int role) const {
   if (role != Qt::DisplayRole) return QVariant();
 
-  // Proto fields always start at one. So this bit of a hack for displaying data in a table
-  if (section == 0) return tr("Property");
-
   const Descriptor *desc = _protobuf->GetDescriptor();
-  const FieldDescriptor *field = desc->FindFieldByNumber(section);
+  const FieldDescriptor *field = desc->field(section);
 
   if (field != nullptr) return QString::fromStdString(field->name());
 
@@ -216,6 +260,7 @@ Qt::ItemFlags MessageModel::flags(const QModelIndex &index) const {
 }
 
 MessageModel *MessageModel::BackupModel(QObject *parent) {
+  if (!_protobuf) return nullptr;
   _backupProtobuf.reset(_protobuf->New());
   _backupProtobuf->CopyFrom(*_protobuf);
   _modelBackup = new MessageModel(parent, _backupProtobuf.get());
@@ -228,6 +273,7 @@ void MessageModel::ReplaceBuffer(Message *buffer) {
   beginResetModel();
   SetDirty(true);
   _protobuf->CopyFrom(*buffer);
+  qDebug() << "Buffer replaced; rebuilding submodels";
   RebuildSubModels();
   endResetModel();
 }
@@ -248,7 +294,7 @@ void UpdateReferences(MessageModel *model, const QString &type, const QString &o
     Message *protobuf = model->GetBuffer();
 
     const Descriptor *desc = protobuf->GetDescriptor();
-    const FieldDescriptor *field = desc->FindFieldByNumber(row);
+    const FieldDescriptor *field = desc->field(row);
     if (field != nullptr) {
       if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
         if (field->is_repeated()) {
@@ -267,24 +313,4 @@ void UpdateReferences(MessageModel *model, const QString &type, const QString &o
       }
     }
   }
-}
-
-QString ResTypeAsString(TypeCase type) {
-  switch (type) {
-    case TypeCase::kFolder: return "treenode";
-    case TypeCase::kBackground: return "background";
-    case TypeCase::kFont: return "font";
-    case TypeCase::kObject: return "object";
-    case TypeCase::kPath: return "path";
-    case TypeCase::kRoom: return "room";
-    case TypeCase::kSound: return "sound";
-    case TypeCase::kSprite: return "sprite";
-    case TypeCase::kShader: return "shader";
-    case TypeCase::kScript: return "script";
-    case TypeCase::kSettings: return "settings";
-    case TypeCase::kInclude: return "include";
-    case TypeCase::kTimeline: return "timeline";
-    case TypeCase::TYPE_NOT_SET: return "unknown";
-  }
-  return "unknown";
 }

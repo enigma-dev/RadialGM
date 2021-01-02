@@ -35,9 +35,9 @@ class BaseEditor : public QWidget {
  protected:
   virtual void closeEvent(QCloseEvent *event) override;
 
+  MessageModel *_model;
   ModelMapper *_nodeMapper;
   ModelMapper *_resMapper;
-  MessageModel *_model;
 };
 
 #endif  // BASEEDTIOR_H

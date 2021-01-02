@@ -4,6 +4,7 @@
 #include "Models/ProtoModel.h"
 #include "Models/ResourceModelMap.h"
 #include "Models/TreeModel.h"
+#include "Editors/BaseEditor.h"
 
 class MainWindow;
 #include "Components/RecentFiles.h"
@@ -41,6 +42,9 @@ class MainWindow : public QMainWindow {
   static QList<QString> EnigmaSearchPaths;
   static QFileInfo EnigmaRoot;
   static EventData* GetEventData() { return _event_data.get(); }
+
+  typedef BaseEditor *EditorFactoryFunction(MessageModel *model, MainWindow *parent);
+  void openSubWindow(MessageModel *res, EditorFactoryFunction factory_function);
 
  signals:
   void CurrentConfigChanged(const buffers::resources::Settings &settings);
@@ -108,7 +112,7 @@ class MainWindow : public QMainWindow {
 
   static MainWindow *_instance;
 
-  QHash<const buffers::TreeNode *, QMdiSubWindow *> _subWindows;
+  QHash<const MessageModel *, QMdiSubWindow *> _subWindows;
 
   Ui::MainWindow *_ui;
 
@@ -117,7 +121,6 @@ class MainWindow : public QMainWindow {
 
   static std::unique_ptr<EventData> _event_data;
 
-  void openSubWindow(buffers::TreeNode *item);
   void readSettings();
   void writeSettings();
   void setTabbedMode(bool enabled);

@@ -25,35 +25,37 @@ using Timeline = buffers::resources::Timeline;
 
 class ProtoModel;
 class MessageModel;
+class RepeatedModel;
 class RepeatedMessageModel;
 class RepeatedStringModel;
 class RepeatedImageModel;
 
 namespace ProtoModel_private {
+
 RGM_BEGIN_SAFE_CAST(SafeCast, ProtoModel);
+
 RGM_DECLARE_SAFE_CAST(SafeCast, MessageModel);
+RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedModel);
 RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedMessageModel);
 RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedStringModel);
 RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedImageModel);
+
 } // namespace ProtoModel_private
 
 // This is a parent to all internal models
 class ProtoModel : public QAbstractItemModel {
   Q_OBJECT
  public:
-  explicit ProtoModel(QObject *parent, Message *protobuf);
-  explicit ProtoModel(ProtoModel *parent, Message *protobuf);
+  explicit ProtoModel(QObject *parent, std::string name);
+  explicit ProtoModel(ProtoModel *parent, std::string name);
 
-  // The parent model is the model that own's the current model
-  // For the Project model (represented as the resource tree) this will be nullptr.
+  // The parent model is the model that owns the current model.
+  // For the Project model (represented as the resource tree), this will be nullptr.
   // For resource models like a Room, this will be the main Project model.
   // For a room's `instances` list, it will be a pointer to the containing room.
   // For a specific instance, it will be a pointer to a room's `instances` field's model.
   // FIXME: Sanity check this cast
-  template <class T>
-  T GetParentModel() const {
-    return static_cast<T>(_parentModel);
-  };
+  template <class T> auto *GetParentModel() const { return _parentModel ? _parentModel->As<T>() : nullptr; };
 
   // If a submodel changed technically any model that owns it has also changed.
   // so we need to notify all parents when anything changes in their descendants.
@@ -99,22 +101,37 @@ class ProtoModel : public QAbstractItemModel {
   // These are convience functions for getting & setting model used almost everywhere in the codebase
   // because model->setData(model->index(row, col), value, role) is a PITA to type / remember.
   virtual QVariant Data(int row, int column = 0) const = 0;
+  virtual QVariant Data(const FieldPath &field_path) const = 0;
   virtual bool SetData(const QVariant &value, int row, int column = 0) = 0;
   virtual bool SetData(const FieldPath &field_path, const QVariant &value) = 0;
 
   // Casting helpers.
-  virtual MessageModel *AsMessageModel() { return nullptr; }
-  virtual RepeatedMessageModel *AsRepeatedMessageModel() { return nullptr; }
-  virtual RepeatedStringModel *AsRepeatedStringModel() { return nullptr; }
-  virtual RepeatedImageModel *AsRepeatedImageModel() { return nullptr; }
+  virtual QString DebugName() const = 0;
+
+  virtual MessageModel *TryCastAsMessageModel() { return nullptr; }
+  virtual RepeatedMessageModel *TryCastAsRepeatedMessageModel() { return nullptr; }
+  virtual RepeatedModel *TryCastAsRepeatedModel() { return nullptr; }
+  virtual RepeatedStringModel *TryCastAsRepeatedStringModel() { return nullptr; }
+  virtual RepeatedImageModel *TryCastAsRepeatedImageModel() { return nullptr; }
 
   /// Returns true if casting from ProtoModel* to T could ever work.
   /// This is essentially std::is_base_of, but with safe casting in mind.
   template<typename T>
-  using EnabeIfCastable = typename std::enable_if<ProtoModel_private::SafeCast<T>::kCastSupported, bool>::type;
+  using EnableIfCastable = typename std::enable_if<ProtoModel_private::SafeCast<T>::kCastSupported, bool>::type;
   /// Helper to cast this as some arbitrary choice of the above.
-  template<typename T, EnabeIfCastable<T> = true>
-  T* As() { return ProtoModel_private::SafeCast<T>::Cast(this); }
+  template<typename T, EnableIfCastable<T> = true> auto* As() {
+    auto *res = ProtoModel_private::SafeCast<T>::Cast(this);
+    if (!res) qDebug() << "Invalid cast from " << DebugName() << " to " << ProtoModel_private::SafeCast<T>::kName;
+    return res;
+  }
+  template<typename T, EnableIfCastable<T> = true>
+  auto* TryCast() { return ProtoModel_private::SafeCast<T>::Cast(this); }
+
+  // Returns the FieldDescriptor describing the given row.
+  // The trick is that all nested proto data has some field attached, whether it's primitive, repeated, whatever.
+  // Thas model itself may represent a repeated primitive, which has no *Message* Descriptor, but has one
+  // FieldDescriptor which applies to all rows in the model.
+  virtual const FieldDescriptor *GetRowDescriptor(int row) const = 0;
 
   // From here down marks QAbstractItemModel functions required to be implemented
   virtual QModelIndex parent(const QModelIndex &) const override;
@@ -139,14 +156,15 @@ class ProtoModel : public QAbstractItemModel {
 
  protected:
   bool _dirty;
-  Message *_protobuf;
   ProtoModel *_parentModel;
+  const std::string _debug_path;
   QHash<int,QHash<Qt::ItemDataRole,QVariant>> _horizontalHeaderData;
   QHash<int,QHash<Qt::ItemDataRole,QVariant>> _verticalHeaderData;
 };
 
 namespace ProtoModel_private {
 RGM_IMPLEMENT_SAFE_CAST(SafeCast, MessageModel);
+RGM_IMPLEMENT_SAFE_CAST(SafeCast, RepeatedModel);
 RGM_IMPLEMENT_SAFE_CAST(SafeCast, RepeatedMessageModel);
 RGM_IMPLEMENT_SAFE_CAST(SafeCast, RepeatedImageModel);
 RGM_IMPLEMENT_SAFE_CAST(SafeCast, RepeatedStringModel);

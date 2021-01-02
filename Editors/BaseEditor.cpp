@@ -5,10 +5,9 @@
 #include <QDebug>
 #include <QMessageBox>
 
-BaseEditor::BaseEditor(MessageModel* treeNodeModel, QWidget* parent)
-    : QWidget(parent), _nodeMapper(new ModelMapper(treeNodeModel, this)), _model(treeNodeModel) {
-  buffers::TreeNode* n = static_cast<buffers::TreeNode*>(treeNodeModel->GetBuffer());
-  _resMapper = new ModelMapper(treeNodeModel->GetSubModel<MessageModel*>(ResTypeFields[n->type_case()]), this);
+BaseEditor::BaseEditor(MessageModel* resource_model, QWidget* parent)
+    : QWidget(parent), _model(resource_model->GetParentModel<MessageModel>()), _nodeMapper(new ModelMapper(_model, this)) {
+  _resMapper = new ModelMapper(resource_model, this);
 
   // Backup should be deleted by Qt's garbage collector when this editor is closed
   _resMapper->GetModel()->BackupModel(this);

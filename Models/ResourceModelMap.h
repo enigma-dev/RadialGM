@@ -6,6 +6,7 @@
 
 #include <QHash>
 #include <QVector>
+#include <QIcon>
 #include <string>
 
 class ResourceModelMap : public QObject {
@@ -32,5 +33,8 @@ class ResourceModelMap : public QObject {
 
 MessageModel* GetObjectSprite(const std::string& objName);
 MessageModel* GetObjectSprite(const QString& objName);
+QIcon GetSpriteIconByName(const QString& sprite_name);
+/// Wraps GetSpriteIconByName, but expects the QVariant field content rather than a direct string.
+QIcon GetSpriteIconByNameField(const QVariant& sprite_name);
 
 #endif  // MODELMAP_H

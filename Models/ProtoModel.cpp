@@ -6,12 +6,13 @@
 
 #include "Components/Logger.h"
 
-ProtoModel::ProtoModel(QObject *parent, Message *protobuf) : ProtoModel(static_cast<ProtoModel *>(nullptr), protobuf) {
+ProtoModel::ProtoModel(QObject *parent, std::string name) : ProtoModel(static_cast<ProtoModel *>(nullptr), name) {
   QObject::setParent(parent);
 }
 
-ProtoModel::ProtoModel(ProtoModel *parent, Message *protobuf)
-    : QAbstractItemModel(parent), _dirty(false), _protobuf(protobuf), _parentModel(parent) {
+ProtoModel::ProtoModel(ProtoModel *parent, std::string name)
+    : QAbstractItemModel(parent), _dirty(false), _parentModel(parent),
+      _debug_path((parent ? parent->_debug_path + "." : "") + name) {
   connect(this, &ProtoModel::DataChanged, this,
           [this](const QModelIndex &topLeft, const QModelIndex &bottomRight,
                  const QVariant & /*oldValue*/ = QVariant(0), const QVector<int> &roles = QVector<int>()) {

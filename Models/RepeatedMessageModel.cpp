@@ -3,28 +3,30 @@
 #include "MessageModel.h"
 
 RepeatedMessageModel::RepeatedMessageModel(ProtoModel *parent, Message *message, const FieldDescriptor *field)
-    : RepeatedModel<Message>(parent, message, field,
-                             message->GetReflection()->GetMutableRepeatedFieldRef<Message>(message, field)),
-      _descriptor(field->message_type()) {
+    : BasicRepeatedModel<Message>(parent, message, field,
+                             message->GetReflection()->GetMutableRepeatedFieldRef<Message>(message, field)) {
   const Reflection *refl = _protobuf->GetReflection();
   for (int j = 0; j < refl->FieldSize(*_protobuf, field); j++) {
     _subModels.append(new MessageModel(parent, refl->MutableRepeatedMessage(_protobuf, field, j)));
   }
 }
 
-void RepeatedMessageModel::Swap(int left, int right) { std::swap(_subModels[left], _subModels[right]); }
-
-void RepeatedMessageModel::AppendNew() {
-  MessageModel *parent = GetParentModel<MessageModel *>();
-  Message *parentBuffer = parent->GetBuffer();
-  Message *m = parentBuffer->GetReflection()->AddMessage(parentBuffer, _field);
-  _subModels.append(new MessageModel(parent, m));
+void RepeatedMessageModel::SwapWithoutSignal(int left, int right) {
+  BasicRepeatedModel<Message>::SwapWithoutSignal(left, right);
+  std::swap(_subModels[left], _subModels[right]);
 }
 
-void RepeatedMessageModel::Resize(int newSize) { _subModels.resize(newSize); }
+void RepeatedMessageModel::AppendNewWithoutSignal() {
+  _subModels.append(new MessageModel(GetParentModel<MessageModel>(), field_ref_.NewMessage()));
+}
 
-void RepeatedMessageModel::Clear() {
-  _fieldRef.Clear();
+void RepeatedMessageModel::RemoveLastNRowsWithoutSignal(int n) {
+  BasicRepeatedModel<Message>::RemoveLastNRowsWithoutSignal(n);
+  _subModels.resize(_subModels.size() - n);
+}
+
+void RepeatedMessageModel::ClearWithoutSignal() {
+  field_ref_.Clear();
   _subModels.clear();
 }
 
@@ -56,7 +58,29 @@ QModelIndex RepeatedMessageModel::insert(const Message &message, int row) {
 }
 
 QModelIndex RepeatedMessageModel::duplicate(const QModelIndex &message) {
+  // TODO: write me
   return message;
+}
+
+bool RepeatedMessageModel::SetData(const FieldPath &field_path, const QVariant &value) {
+  Q_UNUSED(value);
+  if (field_path.fields.empty()) {
+    qDebug() << "Unimplemented: assigning a QVariant to a repeated message field.";
+    return false;
+  }
+  qDebug() << "Attempting to set a sub-field of repeated field `" << field_path.fields[0]->full_name().c_str() << "`";
+  return false;
+}
+
+QVariant RepeatedMessageModel::Data(const FieldPath &field_path) const {
+  QVector<QVariant> vec;
+  if (field_path.fields.empty()) {
+    for (int i = 0; i < rowCount(); ++i) vec.push_back(GetDirect(i));
+  } else {
+    FieldPath sub_field = field_path.SubPath(1);
+    for (const auto *sub_model : _subModels) vec.push_back(sub_model->Data(sub_field));
+  }
+  return QVariant::fromValue(vec);
 }
 
 QVariant RepeatedMessageModel::data(const QModelIndex &index, int role) const {

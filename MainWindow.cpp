@@ -38,12 +38,13 @@
 
 #undef GetMessage
 
-QList<QString> MainWindow::EnigmaSearchPaths = {QDir::currentPath(), "./enigma-dev", "../enigma-dev", "../RadialGM/Submodules/enigma-dev"};
+QList<QString> MainWindow::EnigmaSearchPaths = {
+  QDir::currentPath(), "./enigma-dev", "../enigma-dev", "../RadialGM/Submodules/enigma-dev"
+};
 QFileInfo MainWindow::EnigmaRoot = MainWindow::getEnigmaRoot();
 QList<buffers::SystemType> MainWindow::systemCache;
 MainWindow *MainWindow::_instance = nullptr;
 QScopedPointer<ResourceModelMap> MainWindow::resourceMap;
-QScopedPointer<MessageModel> MainWindow::resourceModel;
 QScopedPointer<TreeModel> MainWindow::treeModel;
 std::unique_ptr<EventData> MainWindow::_event_data;
 
@@ -107,7 +108,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
   if (!EnigmaRoot.filePath().isEmpty()) {
     _event_data = std::make_unique<EventData>(ParseEventFile((EnigmaRoot.absolutePath() + "/events.ey").toStdString()));
   } else {
-    qDebug() << "Error: Failed to locate ENIGMA sources. Loading internal events.ey.\n" << "Search Paths:\n" << MainWindow::EnigmaSearchPaths;
+    qDebug() << "Error: Failed to locate ENIGMA sources. Loading internal events.ey.\n" << "Search Paths:\n"
+             << MainWindow::EnigmaSearchPaths;
     QFile internal_events(":/events.ey");
     internal_events.open(QIODevice::ReadOnly | QFile::Text);
     std::stringstream ss;
@@ -223,45 +225,40 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   event->accept();
 }
 
-void MainWindow::openSubWindow(buffers::TreeNode *item) {
-  /*
+void MainWindow::openSubWindow(MessageModel* res, MainWindow::EditorFactoryFunction factory_function) {
   using namespace google::protobuf;
 
   using TypeCase = buffers::TreeNode::TypeCase;
   using FactoryMap = std::unordered_map<TypeCase, std::function<BaseEditor *(MessageModel * m, QWidget * p)>>;
 
-  auto swIt = _subWindows.find(item);
+  auto swIt = _subWindows.find(res);
   QMdiSubWindow *subWindow;
   if (swIt == _subWindows.end() || !*swIt) {
-    auto factoryFunction = factoryMap.find(item->type_case());
-    if (factoryFunction == factoryMap.end()) return;  // no registered editor
-
-    MessageModel *res = resourceMap->GetResourceByName(item->type_case(), item->name());
-    BaseEditor *editor = factoryFunction->second(res, this);
+    BaseEditor *editor = factory_function(res, this);
 
     // TODO: move all these connections into the model wrapper
-    connect(editor, &BaseEditor::ResourceRenamed, resourceMap.get(), &ResourceModelMap::ResourceRenamed);
-    connect(editor, &BaseEditor::ResourceRenamed, [=]() { treeModel->dataChanged(QModelIndex(), QModelIndex()); });
-    connect(treeModel.get(), &TreeModel::ItemRenamed, editor,
-*///            [res](TreeModel::Node */*node*/, const QString & /*oldName*/, const QString & /*newName*/) {
-/*              const QModelIndex index = res->index(TreeNode::kNameFieldNumber);
-              emit res->DataChanged(index, index);
-            });
+    // connect(editor, &BaseEditor::ResourceRenamed, resourceMap.get(), &ResourceModelMap::ResourceRenamed);
+    // connect(editor, &BaseEditor::ResourceRenamed, [=]() { treeModel->dataChanged(QModelIndex(), QModelIndex()); });
+    // connect(treeModel.get(), &TreeModel::ItemRenamed, editor,
+    //         [res](TreeModel::Node */*node*/, const QString & /*oldName*/, const QString & /*newName*/) {
+    //           const QModelIndex index = res->index(TreeNode::kNameFieldNumber);
+    //           emit res->DataChanged(index, index);
+    //         });
 
-    subWindow = _subWindows[item] = _ui->mdiArea->addSubWindow(editor);
+    subWindow = _subWindows[res] = _ui->mdiArea->addSubWindow(editor);
     subWindow->resize(subWindow->frameSize().expandedTo(editor->size()));
     editor->setParent(subWindow);
 
-    subWindow->connect(subWindow, &QObject::destroyed, [=]() { _subWindows.remove(item); });
+    subWindow->connect(subWindow, &QObject::destroyed, [=]() { _subWindows.remove(res); });
 
     subWindow->setWindowIcon(subWindow->widget()->windowIcon());
-    editor->setWindowTitle(QString::fromStdString(item->name()));
+    editor->setWindowTitle(res->Data(FieldPath::Of<TreeNode>(TreeNode::kNameFieldNumber)).toString());
   } else {
     subWindow = *swIt;
   }
 
   subWindow->show();
-  _ui->mdiArea->setActiveSubWindow(subWindow);*/
+  _ui->mdiArea->setActiveSubWindow(subWindow);
 }
 
 void MainWindow::updateWindowMenu() {
@@ -315,8 +312,20 @@ void MainWindow::openNewProject() {
   for (auto groupName : defaultGroups) {
     auto *groupNode = root->mutable_folder()->add_children();
     groupNode->set_name(groupName.toStdString());
+    groupNode->mutable_folder();
   }
   openProject(std::move(newProject));
+}
+
+template<typename Editor> TreeModel::EditorLauncher Launch(MainWindow *parent) {
+  struct EditorFactoryFactory {
+    static BaseEditor *Factory(MessageModel *model, MainWindow *parent) {
+      return new Editor(model, parent);
+    }
+  };
+  return [parent](MessageModel *model) {
+    parent->openSubWindow(model, EditorFactoryFactory::Factory);
+  };
 }
 
 void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
@@ -325,34 +334,46 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
 
   _project = std::move(openedProject);
 
+  TreeModel::DisplayConfig treeConf;
+  treeConf.UseEditorLauncher<buffers::resources::Sprite>(Launch<SpriteEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::Sound>(Launch<SoundEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::Background>(Launch<BackgroundEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::Path>(Launch<PathEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::Font>(Launch<FontEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::Script>(Launch<ScriptEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::Shader>(Launch<ShaderEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::Timeline>(Launch<TimelineEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::Object>(Launch<ObjectEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::Room>(Launch<RoomEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::Settings>(Launch<SettingsEditor>(this));
+
+  treeConf.SetDefaultIcon<buffers::TreeNode::Folder>("group");
+  treeConf.SetDefaultIcon<buffers::resources::Sprite>("sprite");
+  treeConf.SetDefaultIcon<buffers::resources::Sound>("sound");
+  treeConf.SetDefaultIcon<buffers::resources::Background>("background");
+  treeConf.SetDefaultIcon<buffers::resources::Path>("path");
+  treeConf.SetDefaultIcon<buffers::resources::Script>("script");
+  treeConf.SetDefaultIcon<buffers::resources::Shader>("shader");
+  treeConf.SetDefaultIcon<buffers::resources::Font>("font");
+  treeConf.SetDefaultIcon<buffers::resources::Timeline>("timeline");
+  treeConf.SetDefaultIcon<buffers::resources::Object>("object");
+  treeConf.SetDefaultIcon<buffers::resources::Room>("room");
+  treeConf.SetDefaultIcon<buffers::resources::Settings>("settings");
+
+  treeConf.SetMessageIconPathField<buffers::resources::Sprite>(
+        FieldPath::RepeatedOffset(buffers::resources::Sprite::kSubimagesFieldNumber, 0));
+  treeConf.SetMessageIconPathField<buffers::resources::Background>(buffers::resources::Background::kImageFieldNumber);
+  treeConf.SetMessageIconIdLookup<buffers::resources::Object>(GetSpriteIconByNameField,
+                                                              buffers::resources::Object::kSpriteNameFieldNumber);
+
+  treeConf.SetMessageLabelField<buffers::TreeNode>(buffers::TreeNode::kNameFieldNumber);
+
+  treeConf.SetMessagePassthrough<buffers::TreeNode>();
+  treeConf.SetMessagePassthrough<buffers::TreeNode::Folder>();
+  treeConf.DisableOneofReassignment<buffers::TreeNode>();
+
   resourceMap.reset(new ResourceModelMap(_project->mutable_game()->mutable_root(), nullptr));
-  resourceModel.reset(new MessageModel(this, _project->mutable_game()->mutable_root()));
-  treeModel.reset(new TreeModel(resourceModel.get(), nullptr));
-
-  treeModel->UseEditorWidget<buffers::resources::Sprite, SpriteEditor>(this);
-  treeModel->UseEditorWidget<buffers::resources::Sound, SoundEditor>(this);
-  treeModel->UseEditorWidget<buffers::resources::Background, BackgroundEditor>(this);
-  treeModel->UseEditorWidget<buffers::resources::Path, PathEditor>(this);
-  treeModel->UseEditorWidget<buffers::resources::Font, FontEditor>(this);
-  treeModel->UseEditorWidget<buffers::resources::Script, ScriptEditor>(this);
-  treeModel->UseEditorWidget<buffers::resources::Shader, ShaderEditor>(this);
-  treeModel->UseEditorWidget<buffers::resources::Timeline, TimelineEditor>(this);
-  treeModel->UseEditorWidget<buffers::resources::Object, ObjectEditor>(this);
-  treeModel->UseEditorWidget<buffers::resources::Room, RoomEditor>(this);
-  treeModel->UseEditorWidget<buffers::resources::Settings, SettingsEditor>(this);
-
-  treeModel->SetDefaultIcon<buffers::TreeNode::Folder>("group");
-  treeModel->SetDefaultIcon<buffers::resources::Sprite>("sprite");
-  treeModel->SetDefaultIcon<buffers::resources::Sound>("sound");
-  treeModel->SetDefaultIcon<buffers::resources::Background>("background");
-  treeModel->SetDefaultIcon<buffers::resources::Path>("path");
-  treeModel->SetDefaultIcon<buffers::resources::Script>("script");
-  treeModel->SetDefaultIcon<buffers::resources::Shader>("shader");
-  treeModel->SetDefaultIcon<buffers::resources::Font>("font");
-  treeModel->SetDefaultIcon<buffers::resources::Timeline>("timeline");
-  treeModel->SetDefaultIcon<buffers::resources::Object>("object");
-  treeModel->SetDefaultIcon<buffers::resources::Room>("room");
-  treeModel->SetDefaultIcon<buffers::resources::Settings>("settings");
+  treeModel.reset(new TreeModel(new MessageModel(this, _project->mutable_game()->mutable_root()), nullptr, treeConf));
 
   _ui->treeView->setModel(treeModel.get());
   treeModel->connect(treeModel.get(), &TreeModel::ItemRenamed, resourceMap.get(),
@@ -447,14 +468,11 @@ void MainWindow::on_actionAbout_triggered() {
 }
 
 void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
-  buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
-  const QString name = QString::fromStdString(item->name());
-
-  if (item->has_folder()) {
+  if (treeModel->rowCount(index)) {
+    // Allow node expansion to happen.
     return;
   }
-
-  openSubWindow(item);
+  treeModel->triggerNodeEdit(index, _ui->treeView);
 }
 
 void MainWindow::on_actionClearRecentMenu_triggered() { _recentFiles->clear(); }
@@ -499,7 +517,7 @@ void MainWindow::on_actionCreateRoom_triggered() { CreateResource(TypeCase::kRoo
 void MainWindow::on_actionCreateSettings_triggered() { CreateResource(TypeCase::kSettings); }
 
 void MainWindow::on_actionDuplicate_triggered() {
-  if (!_ui->treeView->selectionModel()->hasSelection()) return;
+  // if (!_ui->treeView->selectionModel()->hasSelection()) return;
   const auto index = _ui->treeView->selectionModel()->currentIndex();
   QModelIndex dupIndex = treeModel->duplicateNode(index);
   // Triggers edit of either resource or name label.
@@ -527,8 +545,7 @@ void MainWindow::on_actionProperties_triggered() {
   if (!_ui->treeView->selectionModel()->hasSelection()) return;
   auto selected = _ui->treeView->selectionModel()->selectedIndexes();
   for (auto index : selected) {
-    auto *treeNode = static_cast<buffers::TreeNode *>(index.internalPointer());
-    openSubWindow(treeNode);
+    treeModel->triggerNodeEdit(index, _ui->treeView);
   }
 }
 
@@ -541,10 +558,10 @@ static void CollectNodes(const buffers::TreeNode *root, QSet<const buffers::Tree
   }
 }
 
-void MainWindow::on_actionDelete_triggered() {
+void MainWindow::on_actionDelete_triggered() {/*
   if (!_ui->treeView->selectionModel()->hasSelection()) return;
   auto selected = _ui->treeView->selectionModel()->selectedIndexes();
-  QSet<const buffers::TreeNode *> selectedNodes;
+  QSet<MessageModel *> deleted_models;
   for (auto index : selected) {
     auto *treeNode = static_cast<buffers::TreeNode *>(index.internalPointer());
     CollectNodes(treeNode, selectedNodes);
@@ -573,7 +590,7 @@ void MainWindow::on_actionDelete_triggered() {
   for (auto index : selected) {
     this->treeModel->removeNode(index);
   }
-}
+*/}
 
 void MainWindow::on_actionExpand_triggered() { _ui->treeView->expandAll(); }
 

@@ -21,7 +21,10 @@ class RepeatedImageModel : public RepeatedStringModel {
   bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column,
                     const QModelIndex& parent) override;
 
-  virtual RepeatedImageModel *AsRepeatedImageModel() { return this; }
+  QString DebugName() const override {
+    return QString::fromStdString("RepeatedImageModel<" + _field->full_name() + ">");
+  }
+  RepeatedImageModel *TryCastAsRepeatedImageModel() override { return this; }
 
  signals:
   void MismatchedImageSize(QSize expectedSize, QSize actualSize);

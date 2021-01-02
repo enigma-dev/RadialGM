@@ -3,6 +3,26 @@
 #include "MainWindow.h"
 #include "Models/RepeatedMessageModel.h"
 
+static QString ResTypeAsString(TypeCase type) {
+  switch (type) {
+    case TypeCase::kFolder: return "treenode";
+    case TypeCase::kBackground: return "background";
+    case TypeCase::kFont: return "font";
+    case TypeCase::kObject: return "object";
+    case TypeCase::kPath: return "path";
+    case TypeCase::kRoom: return "room";
+    case TypeCase::kSound: return "sound";
+    case TypeCase::kSprite: return "sprite";
+    case TypeCase::kShader: return "shader";
+    case TypeCase::kScript: return "script";
+    case TypeCase::kSettings: return "settings";
+    case TypeCase::kInclude: return "include";
+    case TypeCase::kTimeline: return "timeline";
+    case TypeCase::TYPE_NOT_SET: return "unknown";
+  }
+  return "unknown";
+}
+
 ResourceModelMap::ResourceModelMap(buffers::TreeNode* root, QObject* parent) : QObject(parent) {
   recursiveBindRes(root);
 }
@@ -172,4 +192,19 @@ MessageModel* GetObjectSprite(const QString& objName) {
   MessageModel* spr = MainWindow::resourceMap->GetResourceByName(TreeNode::kSprite, spriteName);
   if (spr) return spr->GetSubModel<MessageModel*>(TreeNode::kSpriteFieldNumber);
   return nullptr;
+}
+
+QIcon GetSpriteIconByNameField(const QVariant& sprite_name) {
+  if (sprite_name.isNull()) return {};
+  return GetSpriteIconByName(sprite_name.toString());
+}
+
+QIcon GetSpriteIconByName(const QString& sprite_name) {
+  MessageModel* spr = MainWindow::resourceMap->GetResourceByName(TreeNode::kSprite, sprite_name);
+  if (!spr) return {};
+  QVariant path = spr->Data(FieldPath::Of<TreeNode>(
+                              TreeNode::kSpriteFieldNumber,
+                              FieldPath::RepeatedOffset(buffers::resources::Sprite::kSubimagesFieldNumber, 0)));
+  if (path.isNull()) return {};
+  return ArtManager::GetIcon(path.toString());
 }

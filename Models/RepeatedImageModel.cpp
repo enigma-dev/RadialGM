@@ -24,11 +24,17 @@ QSize RepeatedImageModel::GetIconSize() {
 QVariant RepeatedImageModel::data(const QModelIndex& index, int role) const {
   R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
 
+  if (index.row() < 0 || index.row() >= field_ref_.size()) {
+    qDebug() << "Accessing row " << index.row() << " of "
+             << field_ref_.size() << "-row repeated field `" << _field->name().c_str() << "`";
+    return QVariant();
+  }
+
   if (role == Qt::DecorationRole)
-    return QIcon(QString::fromStdString(_fieldRef.Get(index.row())));
+    return QIcon(QString::fromStdString(field_ref_.Get(index.row())));
   else if (role == Qt::SizeHintRole) {
     // Don't load image we just need size
-    QImageReader img(QString::fromStdString(_fieldRef.Get(index.row())));
+    QImageReader img(QString::fromStdString(field_ref_.Get(index.row())));
     QSize actualSize = img.size();
     float aspectRatio = static_cast<float>(qMin(actualSize.width(), actualSize.height())) /
                         qMax(actualSize.width(), actualSize.height());
@@ -44,7 +50,7 @@ QVariant RepeatedImageModel::data(const QModelIndex& index, int role) const {
     return QSize(qMax(_minIconSize.width(), width), qMax(_minIconSize.height(), height));
 
   } else if (role == Qt::UserRole) {
-    return QString::fromStdString(_fieldRef.Get(index.row()));
+    return QString::fromStdString(field_ref_.Get(index.row()));
   } else {
     return QVariant();
   }
