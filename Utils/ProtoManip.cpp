@@ -81,6 +81,22 @@ const std::string &GetField(const google::protobuf::Message &message, const goog
 // If these measures fail, no change is made and the method returns false. Returns true on success.
 bool SetField(google::protobuf::Message *message, const google::protobuf::FieldDescriptor *field, const QVariant &val);
 
+QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::int32> repeated_field, int row) {
+  return (qint32) repeated_field.Get(row);
+}
+
+QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::uint32> repeated_field, int row) {
+  return (quint32) repeated_field.Get(row);
+}
+
+QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::int64> repeated_field, int row) {
+  return (qint64) repeated_field.Get(row);
+}
+
+QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::uint64> repeated_field, int row) {
+  return (quint64) repeated_field.Get(row);
+}
+
 QVariant GetField(google::protobuf::MutableRepeatedFieldRef<std::string> repeated_field, int row) {
   return QString::fromStdString(repeated_field.Get(row));
 }
@@ -91,15 +107,14 @@ QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::Me
   return QVariant::fromValue(AbstractMessage(repeated_field.Get(row, scratch_space.get())));
 }
 
-bool SetField(google::protobuf::MutableRepeatedFieldRef<std::string> repeated_field, int row,
-                     const QVariant &value) {
+bool SetField(google::protobuf::MutableRepeatedFieldRef<std::string> repeated_field, int row, const QVariant &value) {
   if (!value.canConvert<QString>()) return false;
   repeated_field.Set(row, value.toString().toStdString());
   return true;
 }
 
 bool SetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::Message> repeated_field, int row,
-                     const QVariant &val) {
+              const QVariant &val) {
   if (auto msg = qvariant_cast<AbstractMessage>(val)) {
     repeated_field.Set(row, *msg);
     return true;

@@ -295,12 +295,35 @@ template <typename T>
 class RepeatedPrimitiveModel : public BasicRepeatedModel<T> {
  public:
   RepeatedPrimitiveModel(ProtoModel *parent, Message *message, const FieldDescriptor *field) : BasicRepeatedModel<T>(
-      parent, message, field, message->GetReflection()->GetMutableRepeatedFieldRef<std::string>(message, field)) {}
+      parent, message, field, message->GetReflection()->GetMutableRepeatedFieldRef<T>(message, field)) {}
 
   // Need to implement this in all RepeatedModels
   void AppendNewWithoutSignal() final {
     BasicRepeatedModel<T>::field_ref_.Add({});
   }
 };
+
+#define RGM_DECLARE_REPEATED_PRIMITIVE_MODEL(ModelName, model_type)                     \
+    class ModelName : public RepeatedPrimitiveModel<model_type> {                       \
+     public:                                                                            \
+      ModelName(ProtoModel *parent, Message *message, const FieldDescriptor *field)     \
+          : RepeatedPrimitiveModel<model_type>(parent, message, field) {}               \
+                                                                                        \
+      QString DebugName() const override {                                              \
+        return QString::fromStdString(#ModelName "<" + _field->full_name() + ">");      \
+      }                                                                                 \
+      ModelName *TryCastAs ## ModelName() override { return this; }                     \
+    }
+
+RGM_DECLARE_REPEATED_PRIMITIVE_MODEL(RepeatedStringModel, std::string);
+RGM_DECLARE_REPEATED_PRIMITIVE_MODEL(RepeatedBoolModel,   bool);
+RGM_DECLARE_REPEATED_PRIMITIVE_MODEL(RepeatedInt32Model,  google::protobuf::int32);
+RGM_DECLARE_REPEATED_PRIMITIVE_MODEL(RepeatedInt64Model,  google::protobuf::int64);
+RGM_DECLARE_REPEATED_PRIMITIVE_MODEL(RepeatedUInt32Model, google::protobuf::uint32);
+RGM_DECLARE_REPEATED_PRIMITIVE_MODEL(RepeatedUInt64Model, google::protobuf::uint64);
+RGM_DECLARE_REPEATED_PRIMITIVE_MODEL(RepeatedFloatModel,  float);
+RGM_DECLARE_REPEATED_PRIMITIVE_MODEL(RepeatedDoubleModel, double);
+
+#undef RGM_DECLARE_REPEATED_PRIMITIVE_MODEL
 
 #endif

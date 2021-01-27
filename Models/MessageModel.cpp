@@ -1,7 +1,7 @@
 #include "MessageModel.h"
 #include "Components/ArtManager.h"
 #include "Components/Logger.h"
-#include "RepeatedImageModel.h"
+#include "RepeatedModel.h"
 #include "RepeatedMessageModel.h"
 #include "ResourceModelMap.h"
 
@@ -49,27 +49,46 @@ void MessageModel::RebuildSubModels() {
   for (int i = 0; i < desc->field_count(); i++) {
     const FieldDescriptor *field = desc->field(i);
 
-    if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
-      if (field->is_repeated()) {
-        submodels_by_field_[field->number()] = submodels_by_row_[i] =
-            new RepeatedMessageModel(this, _protobuf, field);
-      } else {
-        // Ignore all unset oneof fields if any is set
-        if (IsCulledOneof_(refl, *_protobuf, field)) continue;
-        // Only recursively build fields if they're set
-        if (refl->HasField(*_protobuf, field)) {
-          submodels_by_field_[field->number()] = submodels_by_row_[i] =
-              new MessageModel(this, refl->MutableMessage(_protobuf, field));
-        } else {
-          submodels_by_field_[field->number()] = submodels_by_row_[i] = new MessageModel(this, field->message_type());
+    if (field->is_repeated()) {
+      switch (field->cpp_type()) {
+        case CppType::CPPTYPE_MESSAGE: {
+          submodels_by_field_[field->number()] = submodels_by_row_[i] = new RepeatedMessageModel(this, _protobuf, field);
+          break;
+        }
+        case CppType::CPPTYPE_BOOL: {
+          submodels_by_field_[field->number()] = submodels_by_row_[i] = new RepeatedBoolModel(this, _protobuf, field);
+          break;
+        }
+        case CppType::CPPTYPE_INT32: {
+          submodels_by_field_[field->number()] = submodels_by_row_[i] = new RepeatedInt32Model(this, _protobuf, field);
+          break;
+        }
+        case CppType::CPPTYPE_INT64: {
+          submodels_by_field_[field->number()] = submodels_by_row_[i] = new RepeatedInt64Model(this, _protobuf, field);
+          break;
+        }
+        case CppType::CPPTYPE_FLOAT: {
+          submodels_by_field_[field->number()] = submodels_by_row_[i] = new RepeatedFloatModel(this, _protobuf, field);
+          break;
+        }
+        case CppType::CPPTYPE_DOUBLE: {
+          submodels_by_field_[field->number()] = submodels_by_row_[i] = new RepeatedDoubleModel(this, _protobuf, field);
+          break;
+        }
+        case CppType::CPPTYPE_STRING: {
+          submodels_by_field_[field->number()] = submodels_by_row_[i] = new RepeatedStringModel(this, _protobuf, field);
+          break;
         }
       }
-    } else if (field->cpp_type() == CppType::CPPTYPE_STRING && field->is_repeated()) {
-      if (field->options().GetExtension(buffers::file_kind) == buffers::FileKind::IMAGE) {
-        submodels_by_field_[field->number()] = submodels_by_row_[i] = new RepeatedImageModel(this, _protobuf, field);
-        GetSubModel<RepeatedImageModel *>(field->number());
+    } else if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
+      // Ignore all unset oneof fields if any is set
+      if (IsCulledOneof_(refl, *_protobuf, field)) continue;
+      // Only recursively build fields if they're set
+      if (refl->HasField(*_protobuf, field)) {
+        submodels_by_field_[field->number()] = submodels_by_row_[i] =
+            new MessageModel(this, refl->MutableMessage(_protobuf, field));
       } else {
-        submodels_by_field_[field->number()] = submodels_by_row_[i] = new RepeatedStringModel(this, _protobuf, field);
+        submodels_by_field_[field->number()] = submodels_by_row_[i] = new MessageModel(this, field->message_type());
       }
     }
   }

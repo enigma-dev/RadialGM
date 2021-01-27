@@ -79,11 +79,15 @@ bool SetField(google::protobuf::Message *message, const google::protobuf::FieldD
 // == Repeated field access ============================================================================================
 // =====================================================================================================================
 
-template <typename T>
+template <typename T>  // Handles bool, double, and float.  QVariant is too picky about the rest.
 QVariant GetField(google::protobuf::MutableRepeatedFieldRef<T> repeated_field, int row) {
   return repeated_field.Get(row);
 }
 
+QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::int32> repeated_field, int row);
+QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::uint32> repeated_field, int row);
+QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::int64> repeated_field, int row);
+QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::uint64> repeated_field, int row);
 QVariant GetField(google::protobuf::MutableRepeatedFieldRef<std::string> repeated_field, int row);
 
 QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::Message> repeated_field, int row);
@@ -93,7 +97,7 @@ QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::Me
 // =====================================================================================================================
 
 template <typename T>
-QVariant SetField(google::protobuf::MutableRepeatedFieldRef<T> repeated_field, int row, QVariant value) {
+bool SetField(google::protobuf::MutableRepeatedFieldRef<T> repeated_field, int row, QVariant value) {
   if (!value.convert(QMetaType::fromType<T>().id())) return false;
   repeated_field.Set(row, value.value<T>());
   return true;

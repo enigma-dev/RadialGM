@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QHash>
 #include <QList>
+#include <QSize>
 
 using namespace google::protobuf;
 using CppType = FieldDescriptor::CppType;
@@ -27,8 +28,15 @@ class ProtoModel;
 class MessageModel;
 class RepeatedModel;
 class RepeatedMessageModel;
+
+class RepeatedBoolModel;
+class RepeatedInt32Model;
+class RepeatedInt64Model;
+class RepeatedUInt32Model;
+class RepeatedUInt64Model;
+class RepeatedFloatModel;
+class RepeatedDoubleModel;
 class RepeatedStringModel;
-class RepeatedImageModel;
 
 namespace ProtoModel_private {
 
@@ -37,12 +45,49 @@ RGM_BEGIN_SAFE_CAST(SafeCast, ProtoModel);
 RGM_DECLARE_SAFE_CAST(SafeCast, MessageModel);
 RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedModel);
 RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedMessageModel);
+
+RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedBoolModel);
+RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedInt32Model);
+RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedInt64Model);
+RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedUInt32Model);
+RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedUInt64Model);
+RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedFloatModel);
+RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedDoubleModel);
 RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedStringModel);
-RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedImageModel);
 
 } // namespace ProtoModel_private
 
-// This is a parent to all internal models
+// This is a parent to all internal models. The layout of the data varies between the model types.
+// For a MessageModel a row is the name of the data field and the column should always be 0.
+// ╭────────────────────────────────╮
+// │ Sprite::kBboxLeftFieldNumber   │
+// ├────────────────────────────────┤
+// │ Sprite::kBboxRightFieldNumber  │
+// ├────────────────────────────────┤
+// │ Sprite::kBboxTopFieldNumber    │
+// ├────────────────────────────────┤
+// │ Sprite::kBboxBottomFieldNumber │
+// ╰────────────────────────────────╯
+
+//  For a RepeatedMessage the row is a index in a vector and the column is a data field/
+// ╭──────────────────┬───────────────────────────────┬───────────────────────────────╮
+// │ Room::Instance 0 │ Room::Instance::kXFieldNumber │ Room::Instance::kYFieldNumber │
+// ├──────────────────┼───────────────────────────────┼───────────────────────────────┤
+// │ Room::Instance 1 │ Room::Instance::kXFieldNumber │ Room::Instance::kYFieldNumber │
+// ├──────────────────┼───────────────────────────────┼───────────────────────────────┤
+// │ Room::Instance 2 │ Room::Instance::kXFieldNumber │ Room::Instance::kYFieldNumber │
+// ├──────────────────┼───────────────────────────────┼───────────────────────────────┤
+// │ Room::Instance 3 │ Room::Instance::kXFieldNumber │ Room::Instance::kYFieldNumber │
+// ╰──────────────────┴───────────────────────────────┴───────────────────────────────╯
+
+// For a RepeatedType like RepeatedString the row is the index and the column should always be 0
+// ╭───────────────╮
+// │ "spr_0/1.png" │
+// ├───────────────┤
+// │ "spr_0/2.png" │
+// ├───────────────┤
+// │ "spr_0/3.png" │
+// ╰───────────────╯
 class ProtoModel : public QAbstractItemModel {
   Q_OBJECT
  public:
@@ -66,37 +111,28 @@ class ProtoModel : public QAbstractItemModel {
   void SetDirty(bool dirty);
   bool IsDirty();
 
-  // The layout of the data varies between the model types.
-  // For a MessageModel a row is the name of the data field and the column should always be 0.
-  // ╭────────────────────────────────╮
-  // │ Sprite::kBboxLeftFieldNumber   │
-  // ├────────────────────────────────┤
-  // │ Sprite::kBboxRightFieldNumber  │
-  // ├────────────────────────────────┤
-  // │ Sprite::kBboxTopFieldNumber    │
-  // ├────────────────────────────────┤
-  // │ Sprite::kBboxBottomFieldNumber │
-  // ╰────────────────────────────────╯
+  // Contains rendering information (or transformers to use to obtain such information) for particular fields.
+  // Stored in MessageModel mappings and in individual RepeatedModel instances.
+  struct FieldDisplayConfig {
+    /// Function that trades an icon ID field (e.g. its name, number, or name fragment) for its actual QIcon.
+    typedef std::function<QIcon(const QVariant &)> IconLookupFn;
+    /// When specified, this function accepts this field's value and returns the icon for it.
+    IconLookupFn icon_lookup_function;
 
-  //  For a RepeatedMessage the row is a index in a vector and the column is a data field/
-  // ╭──────────────────┬───────────────────────────────┬───────────────────────────────╮
-  // │ Room::Instance 0 │ Room::Instance::kXFieldNumber │ Room::Instance::kYFieldNumber │
-  // ├──────────────────┼───────────────────────────────┼───────────────────────────────┤
-  // │ Room::Instance 1 │ Room::Instance::kXFieldNumber │ Room::Instance::kYFieldNumber │
-  // ├──────────────────┼───────────────────────────────┼───────────────────────────────┤
-  // │ Room::Instance 2 │ Room::Instance::kXFieldNumber │ Room::Instance::kYFieldNumber │
-  // ├──────────────────┼───────────────────────────────┼───────────────────────────────┤
-  // │ Room::Instance 3 │ Room::Instance::kXFieldNumber │ Room::Instance::kYFieldNumber │
-  // ╰──────────────────┴───────────────────────────────┴───────────────────────────────╯
+    // Allows storing icon parameters at the field level so that generalized editors can be configured per-field.
+    // Note that these values are not passed to the icon loader and are not considered by the model itself.
+    std::optional<QSize> min_icon_size;
+    std::optional<QSize> max_icon_size;
+  };
 
-  // For a RepeatedType like RepeatedString the row is the index and the column should always be 0
-  // ╭───────────────╮
-  // │ "spr_0/1.png" │
-  // ├───────────────┤
-  // │ "spr_0/2.png" │
-  // ├───────────────┤
-  // │ "spr_0/3.png" │
-  // ╰───────────────╯
+  // Points to FieldDisplayConfigs within a message to use when rendering that message.
+  // Stored only in MessageModel/RepeatedMessageModel.
+  struct MessageDisplayConfig {
+    /// When specified, the value of the given field is used as the label for this entire enclosing message.
+    FieldPath label_field;
+    /// A name to use for this node's icon if the icon field is not applicable or not set.
+    QString icon_field;
+  };
 
   // These are convience functions for getting & setting model used almost everywhere in the codebase
   // because model->setData(model->index(row, col), value, role) is a PITA to type / remember.
@@ -108,11 +144,17 @@ class ProtoModel : public QAbstractItemModel {
   // Casting helpers.
   virtual QString DebugName() const = 0;
 
-  virtual MessageModel *TryCastAsMessageModel() { return nullptr; }
+  virtual MessageModel         *TryCastAsMessageModel()         { return nullptr; }
   virtual RepeatedMessageModel *TryCastAsRepeatedMessageModel() { return nullptr; }
-  virtual RepeatedModel *TryCastAsRepeatedModel() { return nullptr; }
-  virtual RepeatedStringModel *TryCastAsRepeatedStringModel() { return nullptr; }
-  virtual RepeatedImageModel *TryCastAsRepeatedImageModel() { return nullptr; }
+  virtual RepeatedModel        *TryCastAsRepeatedModel()        { return nullptr; }
+  virtual RepeatedBoolModel    *TryCastAsRepeatedBoolModel()    { return nullptr; }
+  virtual RepeatedInt32Model   *TryCastAsRepeatedInt32Model()   { return nullptr; }
+  virtual RepeatedInt64Model   *TryCastAsRepeatedInt64Model()   { return nullptr; }
+  virtual RepeatedUInt32Model  *TryCastAsRepeatedUInt32Model()  { return nullptr; }
+  virtual RepeatedUInt64Model  *TryCastAsRepeatedUInt64Model()  { return nullptr; }
+  virtual RepeatedFloatModel   *TryCastAsRepeatedFloatModel()   { return nullptr; }
+  virtual RepeatedDoubleModel  *TryCastAsRepeatedDoubleModel()  { return nullptr; }
+  virtual RepeatedStringModel  *TryCastAsRepeatedStringModel()  { return nullptr; }
 
   /// Returns true if casting from ProtoModel* to T could ever work.
   /// This is essentially std::is_base_of, but with safe casting in mind.
@@ -166,7 +208,14 @@ namespace ProtoModel_private {
 RGM_IMPLEMENT_SAFE_CAST(SafeCast, MessageModel);
 RGM_IMPLEMENT_SAFE_CAST(SafeCast, RepeatedModel);
 RGM_IMPLEMENT_SAFE_CAST(SafeCast, RepeatedMessageModel);
-RGM_IMPLEMENT_SAFE_CAST(SafeCast, RepeatedImageModel);
+
+RGM_IMPLEMENT_SAFE_CAST(SafeCast, RepeatedBoolModel);
+RGM_IMPLEMENT_SAFE_CAST(SafeCast, RepeatedInt32Model);
+RGM_IMPLEMENT_SAFE_CAST(SafeCast, RepeatedInt64Model);
+RGM_IMPLEMENT_SAFE_CAST(SafeCast, RepeatedUInt32Model);
+RGM_IMPLEMENT_SAFE_CAST(SafeCast, RepeatedUInt64Model);
+RGM_IMPLEMENT_SAFE_CAST(SafeCast, RepeatedFloatModel);
+RGM_IMPLEMENT_SAFE_CAST(SafeCast, RepeatedDoubleModel);
 RGM_IMPLEMENT_SAFE_CAST(SafeCast, RepeatedStringModel);
 } // namespace ProtoModel_private
 

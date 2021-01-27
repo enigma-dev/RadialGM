@@ -12,7 +12,7 @@ QSize SpriteView::sizeHint() const { return _pixmap.size(); }
 
 void SpriteView::SetResourceModel(MessageModel *model) {
   _model = model;
-  _subimgs = _model->GetSubModel<RepeatedImageModel *>(Sprite::kSubimagesFieldNumber);
+  _subimgs = _model->GetSubModel<RepeatedStringModel *>(Sprite::kSubimagesFieldNumber);
   if (_subimgs->rowCount() > 0) SetSubimage(0);
 }
 

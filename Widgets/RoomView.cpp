@@ -4,7 +4,7 @@
 #include "MainWindow.h"
 #include "Models/MessageModel.h"
 #include "Models/RepeatedMessageModel.h"
-#include "Models/RepeatedStringModel.h"
+#include "Models/RepeatedModel.h"
 
 #include <QDebug>
 #include <QPainter>

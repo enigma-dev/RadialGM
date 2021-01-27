@@ -47,7 +47,7 @@ SpriteEditor::~SpriteEditor() { delete _ui; }
 
 void SpriteEditor::RebindSubModels() {
   MessageModel* _spriteModel = _model->GetSubModel<MessageModel*>(TreeNode::kSpriteFieldNumber);
-  _subimagesModel = _spriteModel->GetSubModel<RepeatedImageModel*>(Sprite::kSubimagesFieldNumber);
+  _subimagesModel = _spriteModel->GetSubModel<RepeatedStringModel*>(Sprite::kSubimagesFieldNumber);
 
   _ui->subImageList->setModel(_subimagesModel);
   _ui->subImageList->setIconSize(_subimagesModel->GetIconSize());

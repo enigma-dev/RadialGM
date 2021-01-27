@@ -2,7 +2,6 @@
 
 #include "Components/ArtManager.h"
 #include "Components/Logger.h"
-#include "Models/RepeatedImageModel.h"
 #include "Models/ResourceModelMap.h"
 
 #include <QCoreApplication>

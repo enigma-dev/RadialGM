@@ -25,22 +25,13 @@ class TreeModel : public QAbstractItemModel {
   using EditorLauncher = std::function<void(MessageModel*)>;
 
  private:
-  struct FieldMeta {
-    FieldPath label_field;
-    FieldPath icon_id_field;
-    FieldPath icon_file_field;
+  struct TreeNodeDisplayMeta {
     // When true, removes this node from the tree if it only has one child.
     // The child node is displayed directly in its place.
     bool is_passthrough = false;
     // When true, culls oneof children that are not set when one of them actually is,
     // preventing user reassignment of the oneof type case (and destruction of oneof data).
     bool disable_oneof_reassignment = false;
-    // Function that trades an icon ID field (e.g. its name, number, or name fragment) for its actual QIcon.
-    typedef std::function<QIcon(const QVariant &)> IconLookupFn;
-    // When icon_field is set, this function accepts that field's value and returns the icon for it.
-    IconLookupFn icon_lookup_function;
-    // A name to use for this node's icon if the icon field is not applicable or not set.
-    QString icon_name;
     // Factory method to create an editor for this entity. When specified, no children will be populated.
     EditorLauncher custom_editor;
     // When set, behaves like a whitelist. Only the fields listed here are used.

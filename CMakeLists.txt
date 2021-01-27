@@ -61,7 +61,6 @@ set(RGM_SOURCES
     Components/RecentFiles.cpp
     Models/TreeSortFilterProxyModel.cpp
     Models/MessageModel.cpp
-    Models/RepeatedImageModel.cpp
     Models/RepeatedStringModel.cpp
     Models/ModelMapper.cpp
     Models/ProtoModel.cpp
@@ -117,7 +116,6 @@ set(RGM_HEADERS
     Models/ResourceModelMap.h
     Models/ModelMapper.h
     Models/TreeSortFilterProxyModel.h
-    Models/RepeatedImageModel.h
     Models/MessageModel.h
     Models/ImmediateMapper.h
     Models/RepeatedMessageModel.h

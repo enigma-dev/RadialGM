@@ -77,7 +77,6 @@ SOURCES += \
     Models/EventTypesListSortFilterProxyModel.cpp \
     Models/EventsListModel.cpp \
     Models/MessageModel.cpp \
-    Models/RepeatedImageModel.cpp \
     Models/RepeatedMessageModel.cpp \
     Models/RepeatedModel.cpp \
     Utils/FieldPath.cpp \
@@ -139,10 +138,8 @@ HEADERS += \
     Models/EventTypesListSortFilterProxyModel.h \
     Models/EventsListModel.h \
     Models/MessageModel.h \
-    Models/RepeatedImageModel.h \
     Models/RepeatedMessageModel.h \
     Models/RepeatedModel.h \
-    Models/RepeatedStringModel.h \
     Utils/FieldPath.h \
     Utils/ProtoManip.h \
     Utils/SafeCasts.h \
