@@ -32,7 +32,6 @@ class RepeatedMessageModel : public BasicRepeatedModel<Message> {
   Qt::ItemFlags flags(const QModelIndex &index) const override;
 
   const std::string &MessageName() const;
-  const google::protobuf::Descriptor *GetDescriptor() const { return _descriptor; }
 
   QString DebugName() const override {
     return QString::fromStdString("RepeatedMessageModel<" + _field->full_name() + ">");

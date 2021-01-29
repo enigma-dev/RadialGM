@@ -66,7 +66,6 @@ class MessageModel : public ProtoModel {
   // These are the same as the above but operate on the raw protobuf
   Message *GetBuffer();
   void ReplaceBuffer(Message *buffer);
-  const Descriptor *GetDescriptor() const { return descriptor_; }
 
   QVariant Data(int row, int column = 0) const override;
   QVariant Data(const FieldPath &field_path) const override;
@@ -89,7 +88,6 @@ class MessageModel : public ProtoModel {
 
  protected:
   google::protobuf::Message *_protobuf;
-  const google::protobuf::Descriptor *const descriptor_;
   MessageModel *_modelBackup;
   QScopedPointer<Message> _backupProtobuf;
   QVector<ProtoModel *> submodels_by_row_;

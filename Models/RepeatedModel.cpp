@@ -1,4 +1,4 @@
-#include "RepeatedStringModel.h"
+#include "RepeatedModel.h"
 
 #include <QDataStream>
 #include <QImageReader>

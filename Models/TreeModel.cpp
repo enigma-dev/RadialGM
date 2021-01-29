@@ -82,17 +82,18 @@ TreeModel::Node::Node(TreeModel *backing_tree, Node *parent, int row_in_parent,
     row_in_parent(row_in_parent), row_in_model(row_in_model) {
   backing_tree->MapModel(model, this);
   ComputeDisplayData(backing_tree);
-  const FieldMeta &meta = backing_tree->GetMetadata(model->GetDescriptor()->full_name());
-  if (meta.custom_editor) return;
+  const auto &tree_meta = backing_tree->GetTreeDisplay(model->GetDescriptor()->full_name());
+  const auto &msg_meta = BackingModel()->GetMessageDisplay(model->GetDescriptor()->full_name());
+  if (tree_meta.custom_editor) return;
   for (int row = 0; row < model->rowCount(); ++row) {
-    if (meta.disable_oneof_reassignment && model->IsCulledOneofRow(row)) continue;
+    if (tree_meta.disable_oneof_reassignment && model->IsCulledOneofRow(row)) continue;
     int field_num = model->RowToField(row);
-    if (Describes(meta.label_field, field_num)) continue;
+    if (Describes(msg_meta.label_field, field_num)) continue;
     // if (Describes(meta.icon_id_field, field_num)) continue;
     // if (Describes(meta.icon_file_field, field_num)) continue;
     PushChild(model->SubModelForRow(row), row);
   }
-  if (meta.is_passthrough && children.size() == 1) {
+  if (tree_meta.is_passthrough && children.size() == 1) {
     std::unique_ptr<Node> child = std::move(children[0]);
     children.clear();
     Absorb(*child);
@@ -239,10 +240,10 @@ const std::string &TreeModel::GetMessageType(const Node *node) { return node ? n
 // This can't live exclusively on Node because it requires some metadata about how this model displays fields.
 bool TreeModel::SetItemName(Node *item, const QString &name) {
   if (!item) return false;
-  return item->SetName(name, GetMetadata(item->GetMessageType()));
+  return item->SetName(name, item->BackingModel()->GetMessageDisplay(item->GetMessageType()));
 }
 
-bool TreeModel::Node::SetName(const QString &name, const FieldMeta &meta) {
+bool TreeModel::Node::SetName(const QString &name, const ProtoModel::MessageDisplayConfig &meta) {
   if (!meta.label_field) return false;
   if (message_model) {
     message_model->SetData(meta.label_field, name);
@@ -263,28 +264,14 @@ const std::string &TreeModel::Node::GetMessageType() const {
   return kEmptyString;
 }
 
-void TreeModel::DisplayConfig::SetDefaultIcon(const std::string &message, const QString &icon_name) {
-  field_meta_[message].icon_name = icon_name;
-}
 void TreeModel::DisplayConfig::SetMessagePassthrough(const std::string &message) {
-  field_meta_[message].is_passthrough = true;
+  tree_display_configs_[message].is_passthrough = true;
 }
 void TreeModel::DisplayConfig::DisableOneofReassignment(const std::string &message) {
-  field_meta_[message].disable_oneof_reassignment = true;
-}
-void TreeModel::DisplayConfig::SetMessageIconPathField(const std::string &message, const FieldPath &field_path) {
-  field_meta_[message].icon_file_field = field_path;
-}
-void TreeModel::DisplayConfig::SetMessageLabelField(const std::string &message, const FieldPath &field_path) {
-  field_meta_[message].label_field = field_path;
-}
-void TreeModel::DisplayConfig::SetMessageIconIdField(const std::string &message, const FieldPath &field_path,
-                                                     TreeModel::FieldMeta::IconLookupFn icon_lookup_function) {
-  field_meta_[message].icon_id_field = field_path;
-  field_meta_[message].icon_lookup_function = icon_lookup_function;
+  tree_display_configs_[message].disable_oneof_reassignment = true;
 }
 void TreeModel::DisplayConfig::UseEditorWidget(const std::string &message, EditorLauncher launcher) {
-  field_meta_[message].custom_editor = launcher;
+  tree_display_configs_[message].custom_editor = launcher;
 }
 
 void TreeModel::Node::ComputeDisplayData(const TreeModel *backing_model) {
@@ -298,10 +285,10 @@ void TreeModel::Node::ComputeDisplayData(const TreeModel *backing_model) {
       }
     }
     if (display_name.isEmpty()) display_name = QString::fromStdString(message_model->GetDescriptor()->name());
-    ComputeRemainingDisplayData(backing_model->GetMetadata(message_model->GetDescriptor()->full_name()));
+    ComputeRemainingDisplayData(message_model);
   } else if (repeated_message_model){
     display_name = QString::fromStdString(repeated_message_model->GetFieldDescriptor()->name());
-    ComputeRemainingDisplayData(backing_model->GetMetadata(repeated_message_model->GetDescriptor()->full_name()));
+    ComputeRemainingDisplayData(repeated_message_model);
   } else if (repeated_primitive_model){
     display_name = QString::fromStdString(repeated_primitive_model->GetFieldDescriptor()->name());
   } else if (containing_model) {
@@ -317,13 +304,16 @@ void TreeModel::Node::ComputeDisplayData(const TreeModel *backing_model) {
   }
 }
 
-void TreeModel::Node::ComputeRemainingDisplayData(const FieldMeta &field_meta) {
-  if (field_meta.label_field && message_model) {
-    display_name = message_model->Data(field_meta.label_field).toString();
-    name_field = field_meta.label_field;
+void TreeModel::Node::ComputeRemainingDisplayData(const ProtoModel *model) {
+  auto& msg_meta = model->GetMessageDisplay(model->GetDescriptor()->full_name());
+  auto& field_meta = model->GetFieldDisplay(model->GetDescriptor()->full_name());
+
+  if (msg_meta.label_field && message_model) {
+    display_name = message_model->Data(msg_meta.label_field).toString();
+    name_field = msg_meta.label_field;
   }
-  if (field_meta.icon_id_field && message_model) {
-    icon_id_field = field_meta.icon_id_field;
+  if (msg_meta.icon_field && message_model) {
+    icon_id_field = msg_meta.icon_field;
     icon_lookup_function = field_meta.icon_lookup_function;
     if (const QVariant value = message_model->Data(icon_id_field); !value.isNull()) {
       if (icon_lookup_function) {
@@ -458,7 +448,7 @@ void TreeModel::triggerNodeEdit(const QModelIndex &index, QAbstractItemView *vie
   if (!index.isValid() || !index.internalPointer()) return;
   Node *node = IndexToNode(index);
   if (node) {
-    const auto &meta = GetMetadata(GetMessageType(node));
+    const auto &meta = GetTreeDisplay(GetMessageType(node));
     if (meta.custom_editor) {
       if (ProtoModel *model = node->BackingModel()) {
         if (auto *mmodel = model->As<MessageModel>()) {
@@ -490,12 +480,12 @@ ProtoModel *TreeModel::Node::BackingModel() const {
   return nullptr;
 }
 
-const TreeModel::FieldMeta &TreeModel::DisplayConfig::GetMetadata(const std::string &message_qname) const {
-  static const FieldMeta sentinel;
-  if (auto it = field_meta_.find(message_qname); it != field_meta_.end()) return *it;
+const TreeModel::TreeNodeDisplayConfig &TreeModel::DisplayConfig::GetTreeDisplay(const std::string &message_qname) const {
+  static const TreeModel::TreeNodeDisplayConfig sentinel;
+  if (auto it = tree_display_configs_.find(message_qname); it != tree_display_configs_.end()) return *it;
   return sentinel;
 }
 
-const TreeModel::FieldMeta &TreeModel::GetMetadata(const std::string &message_qname) const {
-  return display_config_.GetMetadata(message_qname);
+const TreeModel::TreeNodeDisplayConfig &TreeModel::GetTreeDisplay(const std::string &message_qname) const {
+  return display_config_.GetTreeDisplay(message_qname);
 }

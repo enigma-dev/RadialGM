@@ -25,7 +25,7 @@ class TreeModel : public QAbstractItemModel {
   using EditorLauncher = std::function<void(MessageModel*)>;
 
  private:
-  struct TreeNodeDisplayMeta {
+  struct TreeNodeDisplayConfig {
     // When true, removes this node from the tree if it only has one child.
     // The child node is displayed directly in its place.
     bool is_passthrough = false;
@@ -71,7 +71,7 @@ class TreeModel : public QAbstractItemModel {
     FieldPath icon_id_field;
     /// When icon_id_field is specified, this is the mapper function to transform that field's value into a QIcon.
     /// When this function is not specified, the ArtManager is sent the field's content as a name string.
-    FieldMeta::IconLookupFn icon_lookup_function;
+    ProtoModel::FieldDisplayConfig::IconLookupFn icon_lookup_function;
     /// When specified, this field in the ProtoModel holds the external file path of the icon for this node.
     FieldPath icon_path_field;
     /// Generally a cache of this node's position in its parent node's list of children.
@@ -84,7 +84,7 @@ class TreeModel : public QAbstractItemModel {
     /// A cache of the children of this node, giving the models and metadata corresponding to each.
     std::vector<std::unique_ptr<Node>> children;
 
-    bool SetName(const QString &name, const FieldMeta &meta);
+    bool SetName(const QString &name, const ProtoModel::MessageDisplayConfig &meta);
     Node *NthChild(int n) const;
     const std::string &GetMessageType() const;
     QModelIndex mapFromSource(const QModelIndex &index) const;
@@ -113,7 +113,7 @@ class TreeModel : public QAbstractItemModel {
    private:
     void PushChild(ProtoModel *model, int source_row);
     void ComputeDisplayData(const TreeModel *backing_model);
-    void ComputeRemainingDisplayData(const FieldMeta &field_meta);
+    void ComputeRemainingDisplayData(const ProtoModel* model);
     void Absorb(Node &child);
   };
 
@@ -126,10 +126,6 @@ class TreeModel : public QAbstractItemModel {
   // ===================================================================================================================
 
   struct DisplayConfig {
-    /// Set the icon that will be used to display a given message node when no icon field is set on it.
-    template<typename T> void SetDefaultIcon(const QString &icon_name) {
-      SetDefaultIcon(T::descriptor()->full_name(), icon_name);
-    }
     /// Hides a node when it only has one child, displaying the child instead.
     /// If both parent and child have a name, the namae is composited with /. Otherwise, only one name is displyed.
     template<typename T> void SetMessagePassthrough() {
@@ -139,25 +135,6 @@ class TreeModel : public QAbstractItemModel {
     /// Effectively, this hides oneof values except for the one that is present.
     template<typename T> void DisableOneofReassignment() {
       DisableOneofReassignment(T::descriptor()->full_name());
-    }
-    /// Associates a string field with the label of a given message.
-    template<typename T, typename... Fields> void SetMessageLabelField(Fields... field_path) {
-      SetMessageLabelField(T::descriptor()->full_name(), FieldPath::Of<T>(field_path...));
-    }
-    /// Associates a string field with the icon of a given message. The field must contain a path to an image file.
-    template<typename T, typename... Fields> void SetMessageIconPathField(Fields... field_path) {
-      SetMessageIconPathField(T::descriptor()->full_name(), FieldPath::Of<T>(field_path...));
-    }
-    /// Associates a string field with the icon name of a given message.
-    /// The field must contain the icon name to be looked up in the ArtManager.
-    template<typename T, typename... Fields> void SetMessageIconIdField(Fields... field_path) {
-      SetMessageIconIdField(T::descriptor()->full_name(), FieldPath::Of<T>(field_path...));
-    }
-    /// Associates a string field with the icon name of a given message.
-    /// The field can contain any identifying information that can be mapped to an icon by the specified function.
-    template<typename T, typename... Fields>
-    void SetMessageIconIdLookup(FieldMeta::IconLookupFn icon_lookup_function, Fields... field_path) {
-      SetMessageIconIdField(T::descriptor()->full_name(), FieldPath::Of<T>(field_path...), icon_lookup_function);
     }
 
     /// Instead of editing each field in a given message, launch a special editor when trying to open it.
@@ -178,20 +155,15 @@ class TreeModel : public QAbstractItemModel {
     }
 
     // Fetch metadata (or the default instance) by its qualified message name.
-    const FieldMeta &GetMetadata(const std::string &message_qname) const;
+    const TreeNodeDisplayConfig &GetTreeDisplay(const std::string &message_qname) const;
 
    private:
     // These mirror the above, but are not compile-time safe.
-    void SetDefaultIcon(const std::string &message, const QString &icon_name);
     void SetMessagePassthrough(const std::string &message);
     void DisableOneofReassignment(const std::string &message);
-    void SetMessageIconPathField(const std::string &message, const FieldPath &field_path);
-    void SetMessageLabelField(const std::string &message, const FieldPath &field_path);
-    void SetMessageIconIdField(const std::string &message, const FieldPath &field_path,
-                               FieldMeta::IconLookupFn icon_lookup_function);
     void UseEditorWidget(const std::string &message, EditorLauncher launcher);
 
-    QMap<std::string, FieldMeta> field_meta_;
+    QMap<std::string, TreeNodeDisplayConfig> tree_display_configs_;
   };
 
   explicit TreeModel(MessageModel *root, QObject *parent, const DisplayConfig &config);
@@ -253,8 +225,8 @@ class TreeModel : public QAbstractItemModel {
   // All tree nodes are mapped to backing nodes.
   void MapModel(ProtoModel *model, Node *node);
 
-  // Retrieve field metadata for a field of the given message type. Returns a sentinel if not specified.
-  const FieldMeta &GetMetadata(const std::string &message_qname) const;
+  // Retrieve field metadata for a tree. Returns a sentinel if not specified.
+  const TreeNodeDisplayConfig &GetTreeDisplay(const std::string &message_qname) const;
 };
 
 #endif  // TREEMODEL_H

@@ -50,11 +50,11 @@ void SpriteEditor::RebindSubModels() {
   _subimagesModel = _spriteModel->GetSubModel<RepeatedStringModel*>(Sprite::kSubimagesFieldNumber);
 
   _ui->subImageList->setModel(_subimagesModel);
-  _ui->subImageList->setIconSize(_subimagesModel->GetIconSize());
-  _ui->subImageList->setGridSize(_subimagesModel->GetIconSize());
+  //_ui->subImageList->setIconSize(_subimagesModel->GetIconSize());
+  //_ui->subImageList->setGridSize(_subimagesModel->GetIconSize());
 
   _ui->subimagePreview->SetResourceModel(_spriteModel);
-  connect(_subimagesModel, &RepeatedImageModel::MismatchedImageSize, this, &SpriteEditor::LoadedMismatchedImage);
+  //connect(_subimagesModel, &RepeatedImageModel::MismatchedImageSize, this, &SpriteEditor::LoadedMismatchedImage);
 
   connect(_ui->subImageList->selectionModel(), &QItemSelectionModel::selectionChanged, this,
           &SpriteEditor::SelectionChanged);

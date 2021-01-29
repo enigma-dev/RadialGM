@@ -6,15 +6,15 @@
 #include "ResourceModelMap.h"
 
 MessageModel::MessageModel(ProtoModel *parent, Message *protobuf)
-    : ProtoModel(parent, protobuf->GetDescriptor()->name()), _protobuf(protobuf),
-      descriptor_(protobuf->GetDescriptor()) { RebuildSubModels(); }
+    : ProtoModel(parent, protobuf->GetDescriptor()->name(), protobuf->GetDescriptor()), _protobuf(protobuf)
+      { RebuildSubModels(); }
 
 MessageModel::MessageModel(QObject *parent, Message *protobuf)
-    : ProtoModel(parent, protobuf->GetDescriptor()->name()), _protobuf(protobuf),
-      descriptor_(protobuf->GetDescriptor()) { RebuildSubModels(); }
+    : ProtoModel(parent, protobuf->GetDescriptor()->name(), protobuf->GetDescriptor()), _protobuf(protobuf)
+      { RebuildSubModels(); }
 
 MessageModel::MessageModel(QObject *parent, const Descriptor *descriptor)
-    : ProtoModel(parent, descriptor->name()), _protobuf(nullptr), descriptor_(descriptor) {}
+    : ProtoModel(parent, descriptor->name(), descriptor), _protobuf(nullptr) {}
 
 const FieldDescriptor *MessageModel::GetRowDescriptor(int row) const {
   if (row < 0 || row >= descriptor_->field_count()) {

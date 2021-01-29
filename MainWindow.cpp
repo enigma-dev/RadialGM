@@ -347,33 +347,38 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   treeConf.UseEditorLauncher<buffers::resources::Room>(Launch<RoomEditor>(this));
   treeConf.UseEditorLauncher<buffers::resources::Settings>(Launch<SettingsEditor>(this));
 
-  treeConf.SetDefaultIcon<buffers::TreeNode::Folder>("group");
-  treeConf.SetDefaultIcon<buffers::resources::Sprite>("sprite");
-  treeConf.SetDefaultIcon<buffers::resources::Sound>("sound");
-  treeConf.SetDefaultIcon<buffers::resources::Background>("background");
-  treeConf.SetDefaultIcon<buffers::resources::Path>("path");
-  treeConf.SetDefaultIcon<buffers::resources::Script>("script");
-  treeConf.SetDefaultIcon<buffers::resources::Shader>("shader");
-  treeConf.SetDefaultIcon<buffers::resources::Font>("font");
-  treeConf.SetDefaultIcon<buffers::resources::Timeline>("timeline");
-  treeConf.SetDefaultIcon<buffers::resources::Object>("object");
-  treeConf.SetDefaultIcon<buffers::resources::Room>("room");
-  treeConf.SetDefaultIcon<buffers::resources::Settings>("settings");
+  ProtoModel::DisplayConfig msgConf;
+  msgConf.SetDefaultIcon<buffers::TreeNode::Folder>("group");
+  msgConf.SetDefaultIcon<buffers::resources::Sprite>("sprite");
+  msgConf.SetDefaultIcon<buffers::resources::Sound>("sound");
+  msgConf.SetDefaultIcon<buffers::resources::Background>("background");
+  msgConf.SetDefaultIcon<buffers::resources::Path>("path");
+  msgConf.SetDefaultIcon<buffers::resources::Script>("script");
+  msgConf.SetDefaultIcon<buffers::resources::Shader>("shader");
+  msgConf.SetDefaultIcon<buffers::resources::Font>("font");
+  msgConf.SetDefaultIcon<buffers::resources::Timeline>("timeline");
+  msgConf.SetDefaultIcon<buffers::resources::Object>("object");
+  msgConf.SetDefaultIcon<buffers::resources::Room>("room");
+  msgConf.SetDefaultIcon<buffers::resources::Settings>("settings");
 
-  treeConf.SetMessageIconPathField<buffers::resources::Sprite>(
+  msgConf.SetMessageIconPathField<buffers::resources::Sprite>(
         FieldPath::RepeatedOffset(buffers::resources::Sprite::kSubimagesFieldNumber, 0));
-  treeConf.SetMessageIconPathField<buffers::resources::Background>(buffers::resources::Background::kImageFieldNumber);
-  treeConf.SetMessageIconIdLookup<buffers::resources::Object>(GetSpriteIconByNameField,
+  msgConf.SetMessageIconPathField<buffers::resources::Background>(buffers::resources::Background::kImageFieldNumber);
+  msgConf.SetMessageIconIdLookup<buffers::resources::Object>(GetSpriteIconByNameField,
                                                               buffers::resources::Object::kSpriteNameFieldNumber);
 
-  treeConf.SetMessageLabelField<buffers::TreeNode>(buffers::TreeNode::kNameFieldNumber);
+  msgConf.SetMessageLabelField<buffers::TreeNode>(buffers::TreeNode::kNameFieldNumber);
 
   treeConf.SetMessagePassthrough<buffers::TreeNode>();
   treeConf.SetMessagePassthrough<buffers::TreeNode::Folder>();
   treeConf.DisableOneofReassignment<buffers::TreeNode>();
 
   resourceMap.reset(new ResourceModelMap(_project->mutable_game()->mutable_root(), nullptr));
-  treeModel.reset(new TreeModel(new MessageModel(this, _project->mutable_game()->mutable_root()), nullptr, treeConf));
+
+  auto pm = new MessageModel(this, _project->mutable_game()->mutable_root());
+  pm->SetDisplayConfig(msgConf);
+
+  treeModel.reset(new TreeModel(pm, nullptr, treeConf));
 
   _ui->treeView->setModel(treeModel.get());
   treeModel->connect(treeModel.get(), &TreeModel::ItemRenamed, resourceMap.get(),
