@@ -267,7 +267,7 @@ signals:
   const Descriptor *descriptor_;
 
  private:
-   DisplayConfig display_config_;
+   static DisplayConfig display_config_;
 };
 
 namespace ProtoModel_private {

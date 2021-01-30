@@ -5,6 +5,8 @@
 
 #include "Components/Logger.h"
 
+ProtoModel::DisplayConfig ProtoModel::display_config_;
+
 ProtoModel::ProtoModel(QObject *parent, std::string name, const Descriptor *descriptor) :
   ProtoModel(static_cast<ProtoModel *>(nullptr), name, descriptor) {
   QObject::setParent(parent);
