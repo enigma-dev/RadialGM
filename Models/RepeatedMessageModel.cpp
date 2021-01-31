@@ -48,6 +48,14 @@ QModelIndex RepeatedMessageModel::duplicate(const QModelIndex &message) {
 
 bool RepeatedMessageModel::SetData(const FieldPath &field_path, const QVariant &value) {
   Q_UNUSED(value);
+  if (field_path.repeated_field_index != -1) {
+    if (field_path.repeated_field_index < _subModels.size())
+      return _subModels[field_path.repeated_field_index]->SetData(field_path.SkipIndex(), value);
+    qDebug() << "Attempgint to access out-of-bounds repeated index " << field_path.repeated_field_index
+             << " of repeated field `" << field_path.fields[0]->full_name().c_str()
+             << "` of size " << _subModels.size();
+    return false;
+  }
   if (field_path.fields.empty()) {
     qDebug() << "Unimplemented: assigning a QVariant to a repeated message field.";
     return false;
@@ -59,7 +67,7 @@ bool RepeatedMessageModel::SetData(const FieldPath &field_path, const QVariant &
 QVariant RepeatedMessageModel::Data(const FieldPath &field_path) const {
   if (field_path.repeated_field_index != -1) {
     if (field_path.repeated_field_index < _subModels.size())
-      return _subModels[field_path.repeated_field_index]->Data(field_path.SubPath(1));
+      return _subModels[field_path.repeated_field_index]->Data(field_path.SkipIndex());
     qDebug() << "Attempgint to access out-of-bounds repeated index " << field_path.repeated_field_index
              << " of repeated field `" << field_path.fields[0]->full_name().c_str()
              << "` of size " << _subModels.size();

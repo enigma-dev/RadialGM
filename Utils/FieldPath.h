@@ -83,6 +83,10 @@ class FieldPath {
     return FieldPath({fields.begin() + index, fields.end()});
   }
 
+  FieldPath SkipIndex() const {
+    return FieldPath(-1, {fields.begin(), fields.end()});
+  }
+
   // Returns the concatenation of the two field paths, if the first field of the right-hand path is a
   // field of the last field of the left-hand path. Otherwise, the left-hand path is returned as-is.
   FieldPath operator+(const FieldPath &field_path) const;
