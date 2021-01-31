@@ -10,7 +10,7 @@
 
 TimelineEditor::TimelineEditor(MessageModel* model, QWidget* parent)
     : BaseEditor(model, parent), _ui(new Ui::TimelineEditor) {
-   _ui->setupUi(this);
+  _ui->setupUi(this);
 
   _nodeMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
 
@@ -18,7 +18,10 @@ TimelineEditor::TimelineEditor(MessageModel* model, QWidget* parent)
 
   connect(_ui->momentsList, &QAbstractItemView::clicked, [=](const QModelIndex& index) {
     SetCurrentEditor(index.row());
-    _ui->stepBox->setValue(_momentsModel->Data(index.row(), Timeline::Moment::kStepFieldNumber).toInt());
+    _ui->stepBox->setValue(_momentsModel
+                               ->Data(FieldPath::Of<Timeline::Moment>(
+                                   FieldPath::RepeatedOffset(Timeline::Moment::kStepFieldNumber, index.row())))
+                               .toInt());
   });
 
   connect(_ui->addMomentButton, &QPushButton::pressed, [=]() {
@@ -83,7 +86,10 @@ void TimelineEditor::RebindSubModels() {
 void TimelineEditor::AddMoment(int step) {
   int insertIndex = FindInsertIndex(step);
   _momentsModel->insertRow(insertIndex);
-  _momentsModel->SetData(step, insertIndex, Timeline::Moment::kStepFieldNumber);
+  _momentsModel->SetData(
+      FieldPath::Of<Timeline::Moment>(FieldPath::RepeatedOffset(Timeline::Moment::kStepFieldNumber, insertIndex)),
+      step);
+
   BindMomentEditor(insertIndex);
 }
 
@@ -94,7 +100,9 @@ void TimelineEditor::ChangeMoment(int oldIndex, int step) {
   } else {
     int newIndex = FindInsertIndex(step);
     _momentsModel->moveRows(oldIndex, 1, newIndex);
-    _momentsModel->SetData(step, (newIndex < oldIndex) ? newIndex : newIndex - 1, Timeline::Moment::kStepFieldNumber);
+    newIndex = (newIndex < oldIndex) ? newIndex : newIndex - 1;
+    _momentsModel->SetData(
+        FieldPath::Of<Timeline::Moment>(FieldPath::RepeatedOffset(Timeline::Moment::kStepFieldNumber, newIndex)), step);
   }
 }
 
@@ -107,7 +115,10 @@ void TimelineEditor::RemoveMoment(int modelIndex) {
 int TimelineEditor::FindInsertIndex(int step) {
   int index = 0;
   while (index < _momentsModel->rowCount() &&
-         step > _momentsModel->Data(index, Timeline::Moment::kStepFieldNumber).toInt()) {
+         step > _momentsModel
+                    ->Data(FieldPath::Of<Timeline::Moment>(
+                        FieldPath::RepeatedOffset(Timeline::Moment::kStepFieldNumber, index)))
+                    .toInt()) {
     ++index;
   }
 
@@ -116,7 +127,9 @@ int TimelineEditor::FindInsertIndex(int step) {
 
 int TimelineEditor::IndexOf(int step) {
   for (int r = 0; r < _momentsModel->rowCount(); ++r) {
-    if (_momentsModel->Data(r, Timeline::Moment::kStepFieldNumber).toInt() == step) {
+    if (_momentsModel
+            ->Data(FieldPath::Of<Timeline::Moment>(FieldPath::RepeatedOffset(Timeline::Moment::kStepFieldNumber, r)))
+            .toInt() == step) {
       return r;
     }
   }
@@ -139,7 +152,9 @@ void TimelineEditor::SetCurrentEditor(int modelIndex) {
 
 void TimelineEditor::CheckDisableButtons(int value) {
   for (int i = 0; i < _momentsModel->rowCount(); ++i) {
-    if (_momentsModel->Data(i, Timeline::Moment::kStepFieldNumber).toInt() == value) {
+    if (_momentsModel
+            ->Data(FieldPath::Of<Timeline::Moment>(FieldPath::RepeatedOffset(Timeline::Moment::kStepFieldNumber, i)))
+            .toInt() == value) {
       _ui->addMomentButton->setDisabled(true);
       _ui->changeMomentButton->setDisabled(false);
       _ui->deleteMomentButton->setDisabled(false);

@@ -89,7 +89,7 @@ void BackgroundEditor::on_actionLoadImage_triggered() {
       }
     } else {
       // TODO: Copy data into our egm
-      _backgroundModel->SetData(fName, Background::kImageFieldNumber);
+      _backgroundModel->SetData(FieldPath::Of<Background>(Background::kImageFieldNumber), fName);
     }
   }
 }
@@ -104,7 +104,7 @@ void BackgroundEditor::on_actionSaveImage_triggered() {
 }
 
 void BackgroundEditor::on_actionEditImage_triggered() {
-  QString fName = _backgroundModel->Data(Background::kImageFieldNumber).toString();
+  QString fName = _backgroundModel->Data(FieldPath::Of<Background>(Background::kImageFieldNumber)).toString();
   QDesktopServices::openUrl(QUrl::fromLocalFile(fName));
   // TODO: file watcher reload
   // TODO: editor settings

@@ -67,9 +67,7 @@ class MessageModel : public ProtoModel {
   Message *GetBuffer();
   void ReplaceBuffer(Message *buffer);
 
-  QVariant Data(int row, int column = 0) const override;
   QVariant Data(const FieldPath &field_path) const override;
-  bool SetData(const QVariant &value, int row, int column = 0) override;
   bool SetData(const FieldPath &field_path, const QVariant &value) override;
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;

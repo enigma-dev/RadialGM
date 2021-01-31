@@ -17,9 +17,7 @@ class RepeatedModel : public ProtoModel {
 
   bool Empty() { return rowCount() == 0; }
 
-  QVariant Data(int row, int column = 0) const override;
   QVariant Data(const FieldPath &field_path) const override;
-  bool SetData(const QVariant &value, int row, int column = 0) override;
   bool SetData(const FieldPath &field_path, const QVariant &value) override;
 
   QVariant data(const QModelIndex &index, int role) const override;

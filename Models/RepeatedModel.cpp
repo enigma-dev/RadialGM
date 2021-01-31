@@ -6,14 +6,6 @@
 
 #include <algorithm>
 
-QVariant RepeatedModel::Data(int row, int column) const {
-  return data(index(row, column, QModelIndex()), Qt::UserRole);
-}
-
-bool RepeatedModel::SetData(const QVariant& value, int row, int column) {
-  return setData(index(row, column, QModelIndex()), value);
-}
-
 bool RepeatedModel::setData(const QModelIndex& index, const QVariant& value, int /*role*/) {
   if (index.column() != 0) {
     qDebug() << "Invalid column index";

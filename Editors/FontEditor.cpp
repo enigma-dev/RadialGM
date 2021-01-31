@@ -41,14 +41,14 @@ void FontEditor::RebindSubModels() {
   connect(_ui->rangeTableView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
           &FontEditor::RangeSelectionChanged);
 
-  if (fontModel->Data(Font::kSizeFieldNumber).toInt() <= 0) {
+  if (fontModel->Data(FieldPath::Of<Font>(Font::kSizeFieldNumber)).toInt() <= 0) {
     _font.setPointSize(12);
-    fontModel->SetData(12, Font::kSizeFieldNumber);
+    fontModel->SetData(FieldPath::Of<Font>(Font::kSizeFieldNumber), 12);
   }
 
-  if (!fontModel->Data(Font::kFontNameFieldNumber).isValid()) {
+  if (!fontModel->Data(FieldPath::Of<Font>(Font::kFontNameFieldNumber)).isValid()) {
     QFontDatabase db;
-    fontModel->SetData(db.families().first(), Font::kFontNameFieldNumber);
+    fontModel->SetData(FieldPath::Of<Font>(Font::kFontNameFieldNumber), db.families().first());
   }
 
   BaseEditor::RebindSubModels();
@@ -56,15 +56,25 @@ void FontEditor::RebindSubModels() {
 
 void FontEditor::ValidateRangeChange(const QModelIndex &topLeft, const QModelIndex & /*bottomRight*/,
                                      const QVariant &oldValue) {
-  int min = _rangesModel->Data(topLeft.row(), Font::Range::kMinFieldNumber).toInt();
-  int max = _rangesModel->Data(topLeft.row(), Font::Range::kMaxFieldNumber).toInt();
+  int min =
+      _rangesModel
+          ->Data(FieldPath::Of<Font::Range>(FieldPath::RepeatedOffset(Font::Range::kMinFieldNumber, topLeft.row())))
+          .toInt();
+  int max =
+      _rangesModel
+          ->Data(FieldPath::Of<Font::Range>(FieldPath::RepeatedOffset(Font::Range::kMaxFieldNumber, topLeft.row())))
+          .toInt();
   if (min > max) {
-    _rangesModel->SetData(oldValue, topLeft.row(), topLeft.column());
+    _rangesModel->setData(topLeft, oldValue);
     return;
   } else if (min < 0 || min > 255) {
-    _rangesModel->SetData(std::min(std::max(0, min), 255), topLeft.row(), Font::Range::kMinFieldNumber);
+    _rangesModel->SetData(
+        FieldPath::Of<Font::Range>(FieldPath::RepeatedOffset(Font::Range::kMinFieldNumber, topLeft.row())),
+        std::min(std::max(0, min), 255));
   } else if (max < 0 || max > 255) {
-    _rangesModel->SetData(std::min(std::max(0, max), 255), topLeft.row(), Font::Range::kMaxFieldNumber);
+    _rangesModel->SetData(
+        FieldPath::Of<Font::Range>(FieldPath::RepeatedOffset(Font::Range::kMaxFieldNumber, topLeft.row())),
+        std::min(std::max(0, max), 255));
   }
 
   QModelIndexList selection = _ui->rangeTableView->selectionModel()->selectedRows();
@@ -75,8 +85,14 @@ void FontEditor::RangeSelectionChanged(const QItemSelection &selected, const QIt
   _ui->deleteRangeButton->setDisabled(selected.empty());
   if (!selected.empty()) {
     auto index = selected.indexes().first();
-    int min = _rangesModel->Data(index.row(), Font::Range::kMinFieldNumber).toInt();
-    int max = _rangesModel->Data(index.row(), Font::Range::kMaxFieldNumber).toInt();
+    int min =
+        _rangesModel
+            ->Data(FieldPath::Of<Font::Range>(FieldPath::RepeatedOffset(Font::Range::kMinFieldNumber, index.row())))
+            .toInt();
+    int max =
+        _rangesModel
+            ->Data(FieldPath::Of<Font::Range>(FieldPath::RepeatedOffset(Font::Range::kMaxFieldNumber, index.row())))
+            .toInt();
     UpdateRangeText(min, max);
   }
 }
@@ -107,8 +123,12 @@ void FontEditor::on_italicCheckBox_clicked(bool checked) {
 
 void FontEditor::on_addRangeButtom_pressed() {
   _rangesModel->insertRow(_rangesModel->rowCount());
-  _rangesModel->SetData(_ui->rangeEndBox->value(), _rangesModel->rowCount() - 1, Font::Range::kMaxFieldNumber);
-  _rangesModel->SetData(_ui->rangeBeginBox->value(), _rangesModel->rowCount() - 1, Font::Range::kMinFieldNumber);
+  _rangesModel->SetData(
+      FieldPath::Of<Font::Range>(FieldPath::RepeatedOffset(Font::Range::kMaxFieldNumber, _rangesModel->rowCount() - 1)),
+      _ui->rangeEndBox->value());
+  _rangesModel->SetData(
+      FieldPath::Of<Font::Range>(FieldPath::RepeatedOffset(Font::Range::kMinFieldNumber, _rangesModel->rowCount() - 1)),
+      _ui->rangeBeginBox->value());
   _ui->rangeTableView->selectionModel()->setCurrentIndex(_rangesModel->index(_rangesModel->rowCount() - 1, 0),
                                                          QItemSelectionModel::QItemSelectionModel::ClearAndSelect);
 }

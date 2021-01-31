@@ -20,9 +20,9 @@ SpriteEditor::SpriteEditor(MessageModel* model, QWidget* parent)
   connect(_ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
   _ui->scrollAreaWidget->SetAssetView(_ui->subimagePreview);
 
-  QCheckBox* showBBox = new QCheckBox(tr("Show BBox"),this);
+  QCheckBox* showBBox = new QCheckBox(tr("Show BBox"), this);
   showBBox->setChecked(true);
-  QCheckBox* showOrigin = new QCheckBox(tr("Show Origin"),this);
+  QCheckBox* showOrigin = new QCheckBox(tr("Show Origin"), this);
   showOrigin->setChecked(true);
 
   _ui->mainToolBar->addWidget(showBBox);
@@ -63,7 +63,7 @@ void SpriteEditor::RebindSubModels() {
 
   BaseEditor::RebindSubModels();
 
-  on_bboxComboBox_currentIndexChanged(_spriteModel->Data(Sprite::kBboxModeFieldNumber).toInt());
+  on_bboxComboBox_currentIndexChanged(_spriteModel->Data(FieldPath::Of<Sprite>(Sprite::kBboxModeFieldNumber)).toInt());
 }
 
 void SpriteEditor::LoadedMismatchedImage(QSize expectedSize, QSize actualSize) {
@@ -132,7 +132,9 @@ void SpriteEditor::on_actionNewSubimage_triggered() {
   QString fName(QDir::tempPath() + "/" + uid.mid(1, uid.length() - 2) + ".png");
   img.save(fName);
   _subimagesModel->insertRow(_subimagesModel->rowCount());
-  _subimagesModel->SetData(fName, _subimagesModel->rowCount() - 1);
+  _subimagesModel->SetData(
+      FieldPath::Of<Sprite>(FieldPath::RepeatedOffset(Sprite::kSubimagesFieldNumber, _subimagesModel->rowCount() - 1)),
+      fName);
 }
 
 void SpriteEditor::on_actionDeleteSubimages_triggered() { RemoveSelectedIndexes(); }
@@ -166,7 +168,9 @@ void SpriteEditor::on_actionLoadSubimages_triggered() {
         if (img.size() == newImg.size()) {
           _subimagesModel->insertRow(_subimagesModel->rowCount());
           // TODO: Internalize file
-          _subimagesModel->SetData(fName, _subimagesModel->rowCount() - 1);
+          _subimagesModel->SetData(FieldPath::Of<Sprite>(FieldPath::RepeatedOffset(Sprite::kSubimagesFieldNumber,
+                                                                                   _subimagesModel->rowCount() - 1)),
+                                   fName);
         } else {
           LoadedMismatchedImage(img.size(), newImg.size());
         }
@@ -177,6 +181,7 @@ void SpriteEditor::on_actionLoadSubimages_triggered() {
   }
 }
 
+// FIXME: this duplicated from above
 void SpriteEditor::on_actionAddSubimages_triggered() {
   FileDialog* dialog = new FileDialog(this, FileDialog_t::SpriteLoad, false);
   dialog->setFileMode(QFileDialog::ExistingFiles);
@@ -188,7 +193,9 @@ void SpriteEditor::on_actionAddSubimages_triggered() {
       if (imgSize == newImg.size()) {
         _subimagesModel->insertRow(_subimagesModel->rowCount());
         // TODO: Internalize file
-        _subimagesModel->SetData(fName, _subimagesModel->rowCount() - 1);
+        _subimagesModel->SetData(FieldPath::Of<Sprite>(FieldPath::RepeatedOffset(Sprite::kSubimagesFieldNumber,
+                                                                                 _subimagesModel->rowCount() - 1)),
+                                 fName);
       } else {
         LoadedMismatchedImage(imgSize, newImg.size());
       }
@@ -206,7 +213,10 @@ void SpriteEditor::on_actionZoomOut_triggered() { _ui->scrollAreaWidget->ZoomOut
 
 void SpriteEditor::on_actionEditSubimages_triggered() {
   for (QModelIndex idx : _ui->subImageList->selectionModel()->selectedIndexes()) {
-    QDesktopServices::openUrl(QUrl::fromLocalFile(_subimagesModel->Data(idx.row()).toString()));
+    QDesktopServices::openUrl(QUrl::fromLocalFile(
+        _subimagesModel
+            ->Data(FieldPath::Of<Sprite>(FieldPath::RepeatedOffset(Sprite::kSubimagesFieldNumber, idx.row())))
+            .toString()));
     // TODO: file watcher reload
     // TODO: editor settings
   }

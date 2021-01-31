@@ -30,22 +30,6 @@ void RepeatedMessageModel::ClearWithoutSignal() {
   _subModels.clear();
 }
 
-QVariant RepeatedMessageModel::Data(int row, int column) const {
-  R_EXPECT(row >= 0 && row < _subModels.size(), QVariant()) <<
-    "Supplied row was out of bounds:" << row;
-  return _subModels[row]->Data(column);
-}
-
-bool RepeatedMessageModel::SetData(const QVariant &value, int row, int column) {
-  R_EXPECT(row >= 0 && row < _subModels.size(), false) <<
-    "Supplied row was out of bounds:" << row;
-  return _subModels[row]->SetData(value, column);
-}
-
-int RepeatedMessageModel::columnCount(const QModelIndex & /*parent*/) const {
-  return _field->message_type()->field_count();
-}
-
 bool RepeatedMessageModel::setData(const QModelIndex &index, const QVariant &value, int role) {
   R_EXPECT(index.row() >= 0 && index.row() < _subModels.size(), false) <<
     "Supplied row was out of bounds:" << index.row();

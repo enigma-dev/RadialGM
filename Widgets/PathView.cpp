@@ -28,11 +28,11 @@ int PathView::Size() const {
   RepeatedMessageModel *pointsModel = _pathModel->GetSubModel<RepeatedMessageModel *>(Path::kPointsFieldNumber);
   return pointsModel->rowCount();
 }
-
-bool PathView::Closed() const { return _pathModel->Data(Path::kClosedFieldNumber).toBool(); }
-bool PathView::Smooth() const { return _pathModel->Data(Path::kSmoothFieldNumber).toBool(); }
+//>Data(FieldPath::Of<Background>(Background::kImageFieldNumber))
+bool PathView::Closed() const { return _pathModel->Data(FieldPath::Of<Path>(Path::kClosedFieldNumber)).toBool(); }
+bool PathView::Smooth() const { return _pathModel->Data(FieldPath::Of<Path>(Path::kSmoothFieldNumber)).toBool(); }
 int PathView::Precision() const {
-  QVariant prec = _pathModel->Data(Path::kPrecisionFieldNumber);
+  QVariant prec = _pathModel->Data(FieldPath::Of<Path>(Path::kPrecisionFieldNumber));
   if (!prec.isValid()) return 4;
   int res = prec.toInt();
   if (res < 1) return 1;
@@ -57,8 +57,9 @@ int PathView::EffectiveIndex(int n, int size, bool closed) const {
 QPoint PathView::EffectivePoint(int n, int size, bool closed) const { return Point(EffectiveIndex(n, size, closed)); }
 QPoint PathView::Point(int n) const {
   RepeatedMessageModel *pointsModel = _pathModel->GetSubModel<RepeatedMessageModel *>(Path::kPointsFieldNumber);
-  return QPoint(pointsModel->Data(n, Path::Point::kXFieldNumber).toInt(),
-                pointsModel->Data(n, Path::Point::kYFieldNumber).toInt());
+  return QPoint(
+      pointsModel->Data(FieldPath::Of<Path::Point>(FieldPath::RepeatedOffset(Path::Point::kXFieldNumber, n))).toInt(),
+      pointsModel->Data(FieldPath::Of<Path::Point>(FieldPath::RepeatedOffset(Path::Point::kYFieldNumber, n))).toInt());
 }
 
 namespace {

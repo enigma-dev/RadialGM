@@ -194,9 +194,7 @@ class ProtoModel : public QAbstractItemModel {
 
   // These are convience functions for getting & setting model used almost everywhere in the codebase
   // because model->setData(model->index(row, col), value, role) is a PITA to type / remember.
-  virtual QVariant Data(int row, int column = 0) const = 0;
   virtual QVariant Data(const FieldPath &field_path) const = 0;
-  virtual bool SetData(const QVariant &value, int row, int column = 0) = 0;
   virtual bool SetData(const FieldPath &field_path, const QVariant &value) = 0;
 
   const Descriptor *GetDescriptor() const { return descriptor_; }

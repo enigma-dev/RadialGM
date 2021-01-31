@@ -103,22 +103,19 @@ void PathEditor::RebindSubModels() {
 
   _ui->roomView->SetPathModel(_pathModel);
   _pointsModel = _pathModel->GetSubModel<RepeatedMessageModel*>(Path::kPointsFieldNumber);
-  _pointsModel->setHeaderData(Path::Point::kXFieldNumber, Qt::Horizontal,
-                              tr("X"), Qt::DisplayRole);
-  _pointsModel->setHeaderData(Path::Point::kYFieldNumber, Qt::Horizontal,
-                              tr("Y"), Qt::DisplayRole);
-  _pointsModel->setHeaderData(Path::Point::kSpeedFieldNumber, Qt::Horizontal,
-                              tr("Speed"), Qt::DisplayRole);
-  _pointsModel->setHeaderData(Path::Point::kXFieldNumber, Qt::Horizontal,
-                              QIcon(":/actions/diamond-red.png"), Qt::DecorationRole);
-  _pointsModel->setHeaderData(Path::Point::kYFieldNumber, Qt::Horizontal,
-                              QIcon(":/actions/diamond-green.png"), Qt::DecorationRole);
-  _pointsModel->setHeaderData(Path::Point::kSpeedFieldNumber, Qt::Horizontal,
-                              QIcon(":/actions/motion.png"), Qt::DecorationRole);
+  _pointsModel->setHeaderData(Path::Point::kXFieldNumber, Qt::Horizontal, tr("X"), Qt::DisplayRole);
+  _pointsModel->setHeaderData(Path::Point::kYFieldNumber, Qt::Horizontal, tr("Y"), Qt::DisplayRole);
+  _pointsModel->setHeaderData(Path::Point::kSpeedFieldNumber, Qt::Horizontal, tr("Speed"), Qt::DisplayRole);
+  _pointsModel->setHeaderData(Path::Point::kXFieldNumber, Qt::Horizontal, QIcon(":/actions/diamond-red.png"),
+                              Qt::DecorationRole);
+  _pointsModel->setHeaderData(Path::Point::kYFieldNumber, Qt::Horizontal, QIcon(":/actions/diamond-green.png"),
+                              Qt::DecorationRole);
+  _pointsModel->setHeaderData(Path::Point::kSpeedFieldNumber, Qt::Horizontal, QIcon(":/actions/motion.png"),
+                              Qt::DecorationRole);
   _ui->pointsTableView->setModel(_pointsModel);
   _ui->pointsTableView->hideColumn(0);
 
-  QString roomName = _pathModel->Data(Path::kBackgroundRoomNameFieldNumber).toString();
+  QString roomName = _pathModel->Data(FieldPath::Of<Path>(Path::kBackgroundRoomNameFieldNumber)).toString();
   if (roomName != "") {
     _ui->roomView->SetResourceModel(MainWindow::resourceMap->GetResourceByName(TypeCase::kRoom, roomName)
                                         ->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber));
@@ -153,9 +150,10 @@ bool PathEditor::eventFilter(QObject* obj, QEvent* event) {
 
 void PathEditor::InsertPoint(int index, int x, int y, int speed) {
   _pointsModel->insertRow(index);
-  _pointsModel->SetData(x, index, Path::Point::kXFieldNumber);
-  _pointsModel->SetData(y, index, Path::Point::kYFieldNumber);
-  _pointsModel->SetData(speed, index, Path::Point::kSpeedFieldNumber);
+  _pointsModel->SetData(FieldPath::Of<Path::Point>(FieldPath::RepeatedOffset(Path::Point::kXFieldNumber, index)), x);
+  _pointsModel->SetData(FieldPath::Of<Path::Point>(FieldPath::RepeatedOffset(Path::Point::kYFieldNumber, index)), y);
+  _pointsModel->SetData(FieldPath::Of<Path::Point>(FieldPath::RepeatedOffset(Path::Point::kSpeedFieldNumber, index)),
+                        speed);
   _ui->roomView->selectedPointIndex = index;
 }
 
@@ -166,14 +164,14 @@ void PathEditor::RoomMenuItemSelected(QAction* action) {
   _ui->roomView->SetResourceModel(MainWindow::resourceMap->GetResourceByName(TypeCase::kRoom, action->text())
                                       ->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber));
   _ui->pathPreviewBackground->SetZoom(1);
-  _pathModel->SetData(action->text(), Path::kBackgroundRoomNameFieldNumber, 0);
+  _pathModel->SetData(FieldPath::Of<Path>(Path::kBackgroundRoomNameFieldNumber), action->text());
 }
 
 void PathEditor::RoomMenuButtonPressed() {
   // Manually clear selected room because we cant use a mapping here
   _roomLineEdit->setText("");
   _ui->roomView->SetResourceModel(nullptr);
-  _pathModel->SetData("", Path::kBackgroundRoomNameFieldNumber, 0);
+  _pathModel->SetData(FieldPath::Of<Path>(Path::kBackgroundRoomNameFieldNumber), "");
 }
 
 void PathEditor::MouseMoved(int x, int y) {
@@ -183,8 +181,13 @@ void PathEditor::MouseMoved(int x, int y) {
   _ui->roomView->mousePos = mousePos;
   _cursorPositionLabel->setText(tr("X %0, Y %1").arg(mousePos.x()).arg(mousePos.y()));
   if (_draggingPoint) {
-    _pointsModel->SetData(_ui->roomView->mousePos.x(), _ui->roomView->selectedPointIndex, Path::Point::kXFieldNumber);
-    _pointsModel->SetData(_ui->roomView->mousePos.y(), _ui->roomView->selectedPointIndex, Path::Point::kYFieldNumber);
+    _pointsModel->SetData(FieldPath::Of<Path::Point>(
+                              FieldPath::RepeatedOffset(Path::Point::kXFieldNumber, _ui->roomView->selectedPointIndex)),
+                          _ui->roomView->mousePos.x());
+    _pointsModel->SetData(FieldPath::Of<Path::Point>(
+                              FieldPath::RepeatedOffset(Path::Point::kYFieldNumber, _ui->roomView->selectedPointIndex)),
+                          _ui->roomView->mousePos.y());
+    ;
   } else {
     _ui->pathPreviewBackground->update();  // manually call update to redraw cursor if no data changes
   }
@@ -220,15 +223,12 @@ void PathEditor::UpdateSelection(const QItemSelection& /*selected*/, const QItem
   // and contains at least one selected row with every column selected
   _ui->deletePointButton->setEnabled(hasSelectedPoint);
   // keep most recently selected point selected in the preview
-  if (hasSelectedPoint)
-    _ui->roomView->selectedPointIndex = selectedPoints.last().row();
+  if (hasSelectedPoint) _ui->roomView->selectedPointIndex = selectedPoints.last().row();
   // update preview on point selection and deselection
   _ui->pathPreviewBackground->update();
 }
 
-void PathEditor::on_addPointButton_pressed() {
-  InsertPoint(_pointsModel->rowCount(), 0, 0, 100);
-}
+void PathEditor::on_addPointButton_pressed() { InsertPoint(_pointsModel->rowCount(), 0, 0, 100); }
 
 void PathEditor::on_insertPointButton_pressed() {
   int insertIndex = _ui->pointsTableView->selectionModel()->currentIndex().row();
@@ -244,9 +244,8 @@ void PathEditor::on_deletePointButton_pressed() {
 
   if (_pointsModel->rowCount() > 0) {
     auto rowCount = _ui->pointsTableView->model()->rowCount();
-    QModelIndex newSelectIndex = _pointsModel->index(
-          (deleteIndex >= rowCount) ? rowCount - 1 : deleteIndex,
-          Path::Point::kXFieldNumber);
+    QModelIndex newSelectIndex =
+        _pointsModel->index((deleteIndex >= rowCount) ? rowCount - 1 : deleteIndex, Path::Point::kXFieldNumber);
     _ui->pointsTableView->setCurrentIndex(newSelectIndex);
   } else {
     _ui->deletePointButton->setDisabled(true);

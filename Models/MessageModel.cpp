@@ -101,10 +101,6 @@ int MessageModel::rowCount(const QModelIndex &parent) const {
 
 int MessageModel::columnCount(const QModelIndex & /*parent*/) const { return 1; }
 
-bool MessageModel::SetData(const QVariant &value, int row, int column) {
-  return setData(this->index(row, column, QModelIndex()), value);
-}
-
 bool MessageModel::setData(const QModelIndex &index, const QVariant &value, int role) {
   R_EXPECT(index.isValid(), false) << "Supplied index was invalid:" << index;
 
@@ -182,10 +178,6 @@ QVariant MessageModel::Data(const FieldPath &field_path) const {
     }
   }
   return submodels_by_row_[row]->Data(field_path.SubPath(1));
-}
-
-QVariant MessageModel::Data(int row, int column) const {
-  return data(this->index(row, column, QModelIndex()), Qt::DisplayRole);
 }
 
 template<bool NO_DEFAULT>

@@ -23,7 +23,9 @@ void SpriteView::SetSubimage(int index) {
     qDebug() << "Invalid subimage index specified";
     return;
   } else {
-    _pixmap = ArtManager::GetCachedPixmap(_subimgs->Data(index).toString());
+    _pixmap = ArtManager::GetCachedPixmap(
+        _subimgs->Data(FieldPath::Of<Sprite>(FieldPath::RepeatedOffset(Sprite::kSubimagesFieldNumber, index)))
+            .toString());
   }
 
   _parent->update();
@@ -47,10 +49,10 @@ QRectF SpriteView::AutomaticBBoxRect() {
 }
 
 QRectF SpriteView::BBoxRect() {
-  int x = _model->Data(Sprite::kBboxLeftFieldNumber).toInt();
-  int y = _model->Data(Sprite::kBboxTopFieldNumber).toInt();
-  int right = _model->Data(Sprite::kBboxRightFieldNumber).toInt();
-  int bottom = _model->Data(Sprite::kBboxBottomFieldNumber).toInt();
+  int x = _model->Data(FieldPath::Of<Sprite>(Sprite::kBboxLeftFieldNumber)).toInt();
+  int y = _model->Data(FieldPath::Of<Sprite>(Sprite::kBboxTopFieldNumber)).toInt();
+  int right = _model->Data(FieldPath::Of<Sprite>(Sprite::kBboxRightFieldNumber)).toInt();
+  int bottom = _model->Data(FieldPath::Of<Sprite>(Sprite::kBboxBottomFieldNumber)).toInt();
   return QRectF(x, y, right - x, bottom - y);
 }
 
@@ -75,8 +77,8 @@ void SpriteView::PaintTop(QPainter &painter) {
 
   if (_showOrigin) {
     painter.setBrush(QBrush(Qt::yellow));
-    painter.drawEllipse(QPoint(_model->Data(Sprite::kOriginXFieldNumber).toInt() * zoom,
-                               _model->Data(Sprite::kOriginYFieldNumber).toInt() * zoom),
+    painter.drawEllipse(QPoint(_model->Data(FieldPath::Of<Sprite>(Sprite::kOriginXFieldNumber)).toInt() * zoom,
+                               _model->Data(FieldPath::Of<Sprite>(Sprite::kOriginYFieldNumber)).toInt() * zoom),
                         2, 2);
   }
 

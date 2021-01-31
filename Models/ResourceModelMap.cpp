@@ -59,7 +59,7 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
       RepeatedMessageModel::RowRemovalOperation remover(instancesModel);
 
       for (int row = 0; row < instancesModel->rowCount(); ++row) {
-        if (instancesModel->Data(row, Room::Instance::kObjectTypeFieldNumber).toString() == name)
+        if (instancesModel->Data(FieldPath::Of<Room::Instance>(FieldPath::RepeatedOffset(Room::Instance::kObjectTypeFieldNumber, row))).toString() == name)
           remover.RemoveRow(row);
       }
 
@@ -71,7 +71,7 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
         RepeatedMessageModel::RowRemovalOperation removerBak(instancesModelBak);
 
         for (int row = 0; row < instancesModelBak->rowCount(); ++row) {
-          if (instancesModelBak->Data(row, Room::Instance::kObjectTypeFieldNumber).toString() == name)
+          if (instancesModelBak->Data(FieldPath::Of<Room::Instance>(FieldPath::RepeatedOffset(Room::Instance::kObjectTypeFieldNumber, row))).toString() == name)
             removerBak.RemoveRow(row);
         }
       }
@@ -86,7 +86,7 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
       RepeatedMessageModel::RowRemovalOperation remover(tilesModel);
 
       for (int row = 0; row < tilesModel->rowCount(); ++row) {
-        if (tilesModel->Data(row, Room::Instance::kObjectTypeFieldNumber).toString() == name) remover.RemoveRow(row);
+        if (tilesModel->Data(FieldPath::Of<Room::Instance>(FieldPath::RepeatedOffset(Room::Instance::kObjectTypeFieldNumber, row))).toString() == name) remover.RemoveRow(row);
       }
 
       // Only models in use in open editors should have backup models
@@ -96,7 +96,7 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
         RepeatedMessageModel::RowRemovalOperation removerBak(tilesModelBak);
 
         for (int row = 0; row < tilesModelBak->rowCount(); ++row) {
-          if (tilesModelBak->Data(row, Room::Tile::kBackgroundNameFieldNumber).toString() == name)
+          if (tilesModelBak->Data(FieldPath::Of<Room::Tile>(FieldPath::RepeatedOffset(Room::Tile::kBackgroundNameFieldNumber, row))).toString() == name)
             removerBak.RemoveRow(row);
         }
       }
@@ -188,7 +188,7 @@ MessageModel* GetObjectSprite(const QString& objName) {
   if (!obj) return nullptr;
   obj = obj->GetSubModel<MessageModel*>(TreeNode::kObjectFieldNumber);
   if (!obj) return nullptr;
-  const QString spriteName = obj->Data(Object::kSpriteNameFieldNumber).toString();
+  const QString spriteName = obj->Data(FieldPath::Of<Object>(Object::kSpriteNameFieldNumber)).toString();
   MessageModel* spr = MainWindow::resourceMap->GetResourceByName(TreeNode::kSprite, spriteName);
   if (spr) return spr->GetSubModel<MessageModel*>(TreeNode::kSpriteFieldNumber);
   return nullptr;
