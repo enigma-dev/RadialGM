@@ -106,7 +106,7 @@ bool MessageModel::setData(const QModelIndex &index, const QVariant &value, int 
 
   const Descriptor *desc = _protobuf->GetDescriptor();
   const Reflection *refl = _protobuf->GetReflection();
-  const FieldDescriptor *field = desc->field(index.row() - 1);
+  const FieldDescriptor *field = desc->field(index.row());
   if (!field) return false;
 
   const QVariant oldValue = this->data(index, role);
