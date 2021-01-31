@@ -58,8 +58,8 @@ QPoint PathView::EffectivePoint(int n, int size, bool closed) const { return Poi
 QPoint PathView::Point(int n) const {
   RepeatedMessageModel *pointsModel = _pathModel->GetSubModel<RepeatedMessageModel *>(Path::kPointsFieldNumber);
   return QPoint(
-      pointsModel->Data(FieldPath::Of<Path::Point>(FieldPath::RepeatedOffset(Path::Point::kXFieldNumber, n))).toInt(),
-      pointsModel->Data(FieldPath::Of<Path::Point>(FieldPath::RepeatedOffset(Path::Point::kYFieldNumber, n))).toInt());
+      pointsModel->Data(FieldPath::Of<Path::Point>(FieldPath::StartingAt(n), Path::Point::kXFieldNumber)).toInt(),
+      pointsModel->Data(FieldPath::Of<Path::Point>(FieldPath::StartingAt(n), Path::Point::kYFieldNumber)).toInt());
 }
 
 namespace {

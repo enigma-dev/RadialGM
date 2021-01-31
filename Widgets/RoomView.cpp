@@ -121,15 +121,18 @@ void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
   for (int row = 0; row < backgrounds->rowCount(); row++) {
     bool visible = backgrounds
                        ->Data(FieldPath::Of<Room::Background>(
-                           FieldPath::RepeatedOffset(Room::Background::kVisibleFieldNumber, row)))
+                           FieldPath::StartingAt(row),
+                           Room::Background::kVisibleFieldNumber))
                        .toBool();
     bool foreground = backgrounds
                           ->Data(FieldPath::Of<Room::Background>(
-                              FieldPath::RepeatedOffset(Room::Background::kForegroundFieldNumber, row)))
+                              FieldPath::StartingAt(row),
+                              Room::Background::kForegroundFieldNumber))
                           .toBool();
     QString bkgName = backgrounds
                           ->Data(FieldPath::Of<Room::Background>(
-                              FieldPath::RepeatedOffset(Room::Background::kBackgroundNameFieldNumber, row)))
+                              FieldPath::StartingAt(row),
+                              Room::Background::kBackgroundNameFieldNumber))
                           .toString();
 
     if (!visible || foreground != foregrounds) continue;
@@ -156,7 +159,7 @@ void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
 
     bool stretch = backgrounds
                        ->Data(FieldPath::Of<Room::Background>(
-                           FieldPath::RepeatedOffset(Room::Background::kStretchFieldNumber, row)))
+                           FieldPath::StartingAt(row), Room::Background::kStretchFieldNumber))
                        .toBool();
     int room_w = _model->Data(FieldPath::Of<Room>(Room::kWidthFieldNumber)).toInt();
     int room_h = _model->Data(FieldPath::Of<Room>(Room::kHeightFieldNumber)).toInt();
@@ -168,11 +171,11 @@ void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
 
     bool hTiled = backgrounds
                       ->Data(FieldPath::Of<Room::Background>(
-                          FieldPath::RepeatedOffset(Room::Background::kHtiledFieldNumber, row)))
+                          FieldPath::StartingAt(row), Room::Background::kHtiledFieldNumber))
                       .toBool();
     bool vTiled = backgrounds
                       ->Data(FieldPath::Of<Room::Background>(
-                          FieldPath::RepeatedOffset(Room::Background::kVtiledFieldNumber, row)))
+                          FieldPath::StartingAt(row), Room::Background::kVtiledFieldNumber))
                       .toBool();
 
     if (hTiled) {

@@ -144,6 +144,10 @@ bool MessageModel::setData(const QModelIndex &index, const QVariant &value, int 
 }
 
 bool MessageModel::SetData(const FieldPath &field_path, const QVariant &value) {
+  if (field_path.repeated_field_index != -1) {
+    qDebug() << "Attempting to assign repeated index " << field_path.repeated_field_index << " of a non-repeated field";
+    return false;
+  }
   if (!field_path) {
     qDebug() << "Unimplemented: Attempting to assign QVariant to a message.";
     return false;
@@ -158,7 +162,11 @@ bool MessageModel::SetData(const FieldPath &field_path, const QVariant &value) {
 
 QVariant MessageModel::Data(const FieldPath &field_path) const {
   if (!_protobuf) return {};
-  if (field_path.fields.empty()) {
+  if (field_path.repeated_field_index != -1) {
+    qDebug() << "Attempting to assign repeated index " << field_path.repeated_field_index << " of a non-repeated field";
+    return false;
+  }
+  if (!field_path) {
     return QVariant::fromValue(AbstractMessage(*_protobuf));
   }
   int row = field_path.front()->index();

@@ -36,23 +36,40 @@ QVariant RepeatedModel::data(const QModelIndex& index, int /*role*/) const {
 
 bool RepeatedModel::SetData(const FieldPath &field_path, const QVariant &value) {
   Q_UNUSED(value);
-  if (field_path.fields.empty()) {
-    qDebug() << "Unimplemented: assigning a QVariant to a repeated field.";
+  if (!field_path.fields.empty()) {
+    qDebug() << "Attempting to set a sub-field of repeated field `" << field_path.fields[0]->full_name().c_str() << "`";
     return false;
   }
-  qDebug() << "Attempting to set a sub-field of repeated field `" << field_path.fields[0]->full_name().c_str() << "`";
+  if (field_path.repeated_field_index != -1) {
+    if (field_path.repeated_field_index < rowCount()) {
+      return SetDirect(field_path.repeated_field_index, value);
+    }
+    // XXX: Allow append when *just* out of bounds?
+    qDebug() << "Attempting to assign out-of-bounds index " << field_path.repeated_field_index << " of field `"
+             << field_path.fields[0]->full_name().c_str() << "`";
+    return false;
+  }
+  qDebug() << "Unimplemented: assigning a QVariant to a repeated field.";
   return false;
 }
 
 QVariant RepeatedModel::Data(const FieldPath &field_path) const {
-  QVector<QVariant> vec;
-  if (field_path.fields.empty()) {
-    for (int i = 0; i < rowCount(); ++i) vec.push_back(GetDirect(i));
-  } else {
+  if (!field_path.fields.empty()) {
     // FieldPath sub = field_path.SubPath(1);
     // for (int i = 0; i < rowCount(); ++i) vec.push_back(Data(sub));
     qDebug() << "Attempting to access a sub-field of a repeated field...";
+    return QVariant();
   }
+  if (field_path.repeated_field_index) {
+    if (field_path.repeated_field_index < rowCount()) {
+      return GetDirect(field_path.repeated_field_index);
+    }
+    qDebug() << "Attempting to retrieve out-of-bounds index " << field_path.repeated_field_index << " of field `"
+             << field_path.fields[0]->full_name().c_str() << "`";
+    return QVariant();
+  }
+  QVector<QVariant> vec;
+  for (int i = 0; i < rowCount(); ++i) vec.push_back(GetDirect(i));
   return QVariant::fromValue(vec);
 }
 

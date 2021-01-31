@@ -57,6 +57,14 @@ bool RepeatedMessageModel::SetData(const FieldPath &field_path, const QVariant &
 }
 
 QVariant RepeatedMessageModel::Data(const FieldPath &field_path) const {
+  if (field_path.repeated_field_index != -1) {
+    if (field_path.repeated_field_index < _subModels.size())
+      return _subModels[field_path.repeated_field_index]->Data(field_path.SubPath(1));
+    qDebug() << "Attempgint to access out-of-bounds repeated index " << field_path.repeated_field_index
+             << " of repeated field `" << field_path.fields[0]->full_name().c_str()
+             << "` of size " << _subModels.size();
+    return QVariant();
+  }
   QVector<QVariant> vec;
   if (field_path.fields.empty()) {
     for (int i = 0; i < rowCount(); ++i) vec.push_back(GetDirect(i));

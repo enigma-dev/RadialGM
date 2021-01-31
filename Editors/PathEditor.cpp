@@ -150,9 +150,9 @@ bool PathEditor::eventFilter(QObject* obj, QEvent* event) {
 
 void PathEditor::InsertPoint(int index, int x, int y, int speed) {
   _pointsModel->insertRow(index);
-  _pointsModel->SetData(FieldPath::Of<Path::Point>(FieldPath::RepeatedOffset(Path::Point::kXFieldNumber, index)), x);
-  _pointsModel->SetData(FieldPath::Of<Path::Point>(FieldPath::RepeatedOffset(Path::Point::kYFieldNumber, index)), y);
-  _pointsModel->SetData(FieldPath::Of<Path::Point>(FieldPath::RepeatedOffset(Path::Point::kSpeedFieldNumber, index)),
+  _pointsModel->SetData(FieldPath::Of<Path::Point>(FieldPath::StartingAt(index), Path::Point::kXFieldNumber), x);
+  _pointsModel->SetData(FieldPath::Of<Path::Point>(FieldPath::StartingAt(index), Path::Point::kYFieldNumber), y);
+  _pointsModel->SetData(FieldPath::Of<Path::Point>(FieldPath::StartingAt(index), Path::Point::kSpeedFieldNumber),
                         speed);
   _ui->roomView->selectedPointIndex = index;
 }
@@ -181,11 +181,11 @@ void PathEditor::MouseMoved(int x, int y) {
   _ui->roomView->mousePos = mousePos;
   _cursorPositionLabel->setText(tr("X %0, Y %1").arg(mousePos.x()).arg(mousePos.y()));
   if (_draggingPoint) {
-    _pointsModel->SetData(FieldPath::Of<Path::Point>(
-                              FieldPath::RepeatedOffset(Path::Point::kXFieldNumber, _ui->roomView->selectedPointIndex)),
+    _pointsModel->SetData(FieldPath::Of<Path::Point>(FieldPath::StartingAt(_ui->roomView->selectedPointIndex),
+                                                     Path::Point::kXFieldNumber),
                           _ui->roomView->mousePos.x());
-    _pointsModel->SetData(FieldPath::Of<Path::Point>(
-                              FieldPath::RepeatedOffset(Path::Point::kYFieldNumber, _ui->roomView->selectedPointIndex)),
+    _pointsModel->SetData(FieldPath::Of<Path::Point>(FieldPath::StartingAt(_ui->roomView->selectedPointIndex),
+                                                     Path::Point::kYFieldNumber),
                           _ui->roomView->mousePos.y());
     ;
   } else {

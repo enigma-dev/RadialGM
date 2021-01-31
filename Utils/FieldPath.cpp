@@ -7,7 +7,7 @@ FieldPath::FieldPath(const FieldDescriptor *fd) {
     qDebug() << "Constructed FieldPath with null FieldDescriptor!";
   }
 }
-FieldPath::FieldPath(std::vector<FieldComponent> fields_in) {
+FieldPath::FieldPath(int start_index, std::vector<FieldComponent> fields_in): repeated_field_index(start_index) {
   for (const FieldComponent &field : fields_in) {
     if (field.field) {
       fields.emplace_back(field);
