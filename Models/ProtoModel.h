@@ -197,6 +197,12 @@ class ProtoModel : public QAbstractItemModel {
   virtual QVariant Data(const FieldPath &field_path) const = 0;
   virtual bool SetData(const FieldPath &field_path, const QVariant &value) = 0;
 
+  QVariant DataAtRow(int row, int col = 0) const { return data(index(row, col, QModelIndex())); }
+  bool SetDataAtRow(int row, const QVariant &value) { return SetDataAtRow(row, 0, value); }
+  bool SetDataAtRow(int row, int col, const QVariant &value) {
+    return setData(index(row, col, QModelIndex()), value);
+  }
+
   const Descriptor *GetDescriptor() const { return descriptor_; }
 
   // Casting helpers.
@@ -238,7 +244,7 @@ class ProtoModel : public QAbstractItemModel {
   virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override = 0;
   virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override = 0;
   virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override = 0;
-  virtual QVariant data(const QModelIndex &index, int role) const override = 0;
+  virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override = 0;
   virtual bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value,
                              int role = Qt::EditRole) override;
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;

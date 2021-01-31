@@ -298,7 +298,7 @@ void TreeModel::Node::ComputeDisplayData(const TreeModel *backing_model) {
     } else {
       qDebug() << "Row " << row_in_model << " doesn't exist in model, yet model was constructed for it.";
     }
-    if (const QVariant value = containing_model->Data(row_in_model); !value.isNull()) {
+    if (const QVariant value = containing_model->DataAtRow(row_in_model); !value.isNull()) {
       display_name += " = " + value.toString();
     }
   }

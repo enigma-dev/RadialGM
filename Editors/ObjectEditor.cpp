@@ -135,8 +135,8 @@ void ObjectEditor::AddEvent(Object::EgmEvent event) {
 void ObjectEditor::ChangeEvent(int idx, Object::EgmEvent event, bool changeCode) {
   RepeatedMessageModel *eventsModel = _objectModel->GetSubModel<RepeatedMessageModel *>(Object::kEgmEventsFieldNumber);
 
-  eventsModel->SetData(FieldPath::Of<Object::EgmEvent>(FieldPath::Of<Object::EgmEvent>(
-                           FieldPath::RepeatedOffset(Object::EgmEvent::kIdFieldNumber, idx))),
+  eventsModel->SetData(FieldPath::Of<Object::EgmEvent>(
+                           FieldPath::RepeatedOffset(Object::EgmEvent::kIdFieldNumber, idx)),
                        QString::fromStdString(event.id()));
 
   if (changeCode)

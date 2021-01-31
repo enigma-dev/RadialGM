@@ -153,7 +153,7 @@ bool MessageModel::SetData(const FieldPath &field_path, const QVariant &value) {
     if (smit == submodels_by_field_.end()) return false;
     return smit.value()->SetData(field_path.SubPath(1), value);
   }
-  return SetData(value, field_path.front()->number());
+  return SetDataAtRow(field_path.front()->index(), value);
 }
 
 QVariant MessageModel::Data(const FieldPath &field_path) const {
@@ -164,9 +164,9 @@ QVariant MessageModel::Data(const FieldPath &field_path) const {
   int row = field_path.front()->index();
   if (field_path.size() == 1) {
     if (field_path.front().repeated_field_index >= 0) {
-      return submodels_by_row_[row]->Data(field_path.front().repeated_field_index);
+      return submodels_by_row_[row]->data(this->index(field_path.front().repeated_field_index, 0, QModelIndex()));
     } else {
-      return Data(row);
+      return DataAtRow(row);
     }
   }
   if (field_path.front().repeated_field_index >= 0) {
@@ -318,8 +318,8 @@ void UpdateReferences(MessageModel *model, const QString &type, const QString &o
           UpdateReferences(model->GetSubModel<MessageModel>(row), type, oldName, newName);
       } else if (field->cpp_type() == CppType::CPPTYPE_STRING && !field->is_repeated()) {
         const QString refType = QString::fromStdString(field->options().GetExtension(buffers::resource_ref));
-        if (refType == type && model->Data(row).toString() == oldName) {
-          model->SetData(newName, row);
+        if (refType == type && model->DataAtRow(row).toString() == oldName) {
+          model->SetDataAtRow(row, newName);
         }
       }
     }

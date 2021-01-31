@@ -19,7 +19,7 @@ Event EventsListModel::GetEvent(const QModelIndex &index) const {
         Object::EgmEvent::kArgumentsFieldNumber);
 
   for (int i = 0; i < arguments->rowCount(); ++i) {
-    arguments_vec.emplace_back(arguments->Data()  .toString().toStdString());
+    arguments_vec.emplace_back(arguments->PrimitiveData(i));
   }
 
   return eventData_->get_event(name, arguments_vec);

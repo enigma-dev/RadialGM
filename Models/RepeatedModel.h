@@ -20,7 +20,7 @@ class RepeatedModel : public ProtoModel {
   QVariant Data(const FieldPath &field_path) const override;
   bool SetData(const FieldPath &field_path, const QVariant &value) override;
 
-  QVariant data(const QModelIndex &index, int role) const override;
+  QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
   bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override;
 
   QString DebugName() const override {
@@ -293,6 +293,8 @@ class RepeatedPrimitiveModel : public BasicRepeatedModel<T> {
  public:
   RepeatedPrimitiveModel(ProtoModel *parent, Message *message, const FieldDescriptor *field) : BasicRepeatedModel<T>(
       parent, message, field, message->GetReflection()->GetMutableRepeatedFieldRef<T>(message, field)) {}
+
+  const T &PrimitiveData(int row) const { return BasicRepeatedModel<T>::field_ref_.Get(row); }
 
   // Need to implement this in all RepeatedModels
   void AppendNewWithoutSignal() final {
