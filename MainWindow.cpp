@@ -252,7 +252,8 @@ void MainWindow::openSubWindow(MessageModel* res, MainWindow::EditorFactoryFunct
     subWindow->connect(subWindow, &QObject::destroyed, [=]() { _subWindows.remove(res); });
 
     subWindow->setWindowIcon(subWindow->widget()->windowIcon());
-    editor->setWindowTitle(res->Data(FieldPath::Of<TreeNode>(TreeNode::kNameFieldNumber)).toString());
+    editor->setWindowTitle(
+        res->GetParentModel<MessageModel>()->Data(FieldPath::Of<TreeNode>(TreeNode::kNameFieldNumber)).toString());
   } else {
     subWindow = *swIt;
   }
