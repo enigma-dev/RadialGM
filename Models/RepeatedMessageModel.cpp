@@ -17,7 +17,9 @@ void RepeatedMessageModel::SwapWithoutSignal(int left, int right) {
 }
 
 void RepeatedMessageModel::AppendNewWithoutSignal() {
-  _subModels.append(new MessageModel(GetParentModel<MessageModel>(), field_ref_.NewMessage()));
+  auto m = field_ref_.NewMessage();
+  field_ref_.Add(*m);
+  _subModels.append(new MessageModel(GetParentModel<MessageModel>(), m));
 }
 
 void RepeatedMessageModel::RemoveLastNRowsWithoutSignal(int n) {
@@ -51,7 +53,7 @@ bool RepeatedMessageModel::SetData(const FieldPath &field_path, const QVariant &
   if (field_path.repeated_field_index != -1) {
     if (field_path.repeated_field_index < _subModels.size())
       return _subModels[field_path.repeated_field_index]->SetData(field_path.SkipIndex(), value);
-    qDebug() << "Attempgint to access out-of-bounds repeated index " << field_path.repeated_field_index
+    qDebug() << "Attempting to access out-of-bounds repeated index " << field_path.repeated_field_index
              << " of repeated field `" << field_path.fields[0]->full_name().c_str()
              << "` of size " << _subModels.size();
     return false;

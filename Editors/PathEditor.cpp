@@ -187,10 +187,8 @@ void PathEditor::MouseMoved(int x, int y) {
     _pointsModel->SetData(FieldPath::Of<Path::Point>(FieldPath::StartingAt(_ui->roomView->selectedPointIndex),
                                                      Path::Point::kYFieldNumber),
                           _ui->roomView->mousePos.y());
-    ;
-  } else {
-    _ui->pathPreviewBackground->update();  // manually call update to redraw cursor if no data changes
   }
+  _ui->pathPreviewBackground->update();  // manually call update to redraw cursor
 }
 
 void PathEditor::MousePressed(Qt::MouseButton button) {
@@ -200,7 +198,7 @@ void PathEditor::MousePressed(Qt::MouseButton button) {
     for (int i = _pointsModel->rowCount() - 1; i >= 0; i--) {
       QPoint pt = _ui->roomView->Point(i);
       if (pt == _ui->roomView->mousePos) {
-        QModelIndex newSelectIndex = _pointsModel->index(i, -1);
+        QModelIndex newSelectIndex = _pointsModel->index(i, 0);
         _ui->pointsTableView->setCurrentIndex(newSelectIndex);
         return;
       }
