@@ -59,7 +59,10 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
       RepeatedMessageModel::RowRemovalOperation remover(instancesModel);
 
       for (int row = 0; row < instancesModel->rowCount(); ++row) {
-        if (instancesModel->Data(FieldPath::Of<Room::Instance>(FieldPath::RepeatedOffset(Room::Instance::kObjectTypeFieldNumber, row))).toString() == name)
+        if (instancesModel
+                ->Data(
+                    FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kObjectTypeFieldNumber))
+                .toString() == name)
           remover.RemoveRow(row);
       }
 
@@ -71,7 +74,10 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
         RepeatedMessageModel::RowRemovalOperation removerBak(instancesModelBak);
 
         for (int row = 0; row < instancesModelBak->rowCount(); ++row) {
-          if (instancesModelBak->Data(FieldPath::Of<Room::Instance>(FieldPath::RepeatedOffset(Room::Instance::kObjectTypeFieldNumber, row))).toString() == name)
+          if (instancesModelBak
+                  ->Data(
+                      FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kObjectTypeFieldNumber))
+                  .toString() == name)
             removerBak.RemoveRow(row);
         }
       }
@@ -86,7 +92,11 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
       RepeatedMessageModel::RowRemovalOperation remover(tilesModel);
 
       for (int row = 0; row < tilesModel->rowCount(); ++row) {
-        if (tilesModel->Data(FieldPath::Of<Room::Instance>(FieldPath::RepeatedOffset(Room::Instance::kObjectTypeFieldNumber, row))).toString() == name) remover.RemoveRow(row);
+        if (tilesModel
+                ->Data(
+                    FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kObjectTypeFieldNumber))
+                .toString() == name)
+          remover.RemoveRow(row);
       }
 
       // Only models in use in open editors should have backup models
@@ -96,7 +106,9 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
         RepeatedMessageModel::RowRemovalOperation removerBak(tilesModelBak);
 
         for (int row = 0; row < tilesModelBak->rowCount(); ++row) {
-          if (tilesModelBak->Data(FieldPath::Of<Room::Tile>(FieldPath::RepeatedOffset(Room::Tile::kBackgroundNameFieldNumber, row))).toString() == name)
+          if (tilesModelBak
+                  ->Data(FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kBackgroundNameFieldNumber))
+                  .toString() == name)
             removerBak.RemoveRow(row);
         }
       }
@@ -143,21 +155,24 @@ MessageModel* ResourceModelMap::GetResourceByName(int type, const std::string& n
   return GetResourceByName(type, QString::fromStdString(name));
 }
 
-template<typename Message> const std::string &FullName() { return Message::descriptor()->full_name(); }
+template <typename Message>
+const std::string& FullName() {
+  return Message::descriptor()->full_name();
+}
 
-TypeCase Type(TreeModel::Node *node) {
-  static const std::unordered_map<std::string, TypeCase> kTypesByMessage {
-    {FullName<buffers::resources::Sprite>(), TypeCase::kSprite},
-    {FullName<buffers::resources::Sound>(), TypeCase::kSound},
-    {FullName<buffers::resources::Background>(), TypeCase::kBackground},
-    {FullName<buffers::resources::Path>(), TypeCase::kPath},
-    {FullName<buffers::resources::Font>(), TypeCase::kFont},
-    {FullName<buffers::resources::Script>(), TypeCase::kScript},
-    {FullName<buffers::resources::Shader>(), TypeCase::kShader},
-    {FullName<buffers::resources::Timeline>(), TypeCase::kTimeline},
-    {FullName<buffers::resources::Object>(), TypeCase::kObject},
-    {FullName<buffers::resources::Room>(), TypeCase::kRoom},
-    {FullName<buffers::resources::Settings>(), TypeCase::kSettings},
+TypeCase Type(TreeModel::Node* node) {
+  static const std::unordered_map<std::string, TypeCase> kTypesByMessage{
+      {FullName<buffers::resources::Sprite>(), TypeCase::kSprite},
+      {FullName<buffers::resources::Sound>(), TypeCase::kSound},
+      {FullName<buffers::resources::Background>(), TypeCase::kBackground},
+      {FullName<buffers::resources::Path>(), TypeCase::kPath},
+      {FullName<buffers::resources::Font>(), TypeCase::kFont},
+      {FullName<buffers::resources::Script>(), TypeCase::kScript},
+      {FullName<buffers::resources::Shader>(), TypeCase::kShader},
+      {FullName<buffers::resources::Timeline>(), TypeCase::kTimeline},
+      {FullName<buffers::resources::Object>(), TypeCase::kObject},
+      {FullName<buffers::resources::Room>(), TypeCase::kRoom},
+      {FullName<buffers::resources::Settings>(), TypeCase::kSettings},
   };
 
   auto res = kTypesByMessage.find(node->GetMessageType());
@@ -165,7 +180,7 @@ TypeCase Type(TreeModel::Node *node) {
   return res->second;
 }
 
-void ResourceModelMap::ResourceRenamed(TreeModel::Node *node, const QString& oldName, const QString& newName) {
+void ResourceModelMap::ResourceRenamed(TreeModel::Node* node, const QString& oldName, const QString& newName) {
   auto type = Type(node);
   if (oldName == newName || !_resources[type].contains(oldName)) return;
   _resources[type][newName] = _resources[type][oldName];
@@ -202,9 +217,8 @@ QIcon GetSpriteIconByNameField(const QVariant& sprite_name) {
 QIcon GetSpriteIconByName(const QString& sprite_name) {
   MessageModel* spr = MainWindow::resourceMap->GetResourceByName(TreeNode::kSprite, sprite_name);
   if (!spr) return {};
-  QVariant path = spr->Data(FieldPath::Of<TreeNode>(
-                              TreeNode::kSpriteFieldNumber,
-                              FieldPath::RepeatedOffset(buffers::resources::Sprite::kSubimagesFieldNumber, 0)));
+  QVariant path = spr->Data(FieldPath::Of<TreeNode>(TreeNode::kSpriteFieldNumber,
+                                                    FieldPath::RepeatedOffset(Sprite::kSubimagesFieldNumber, 0)));
   if (path.isNull()) return {};
   return ArtManager::GetIcon(path.toString());
 }

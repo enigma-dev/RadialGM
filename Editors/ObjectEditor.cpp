@@ -135,13 +135,12 @@ void ObjectEditor::AddEvent(Object::EgmEvent event) {
 void ObjectEditor::ChangeEvent(int idx, Object::EgmEvent event, bool changeCode) {
   RepeatedMessageModel *eventsModel = _objectModel->GetSubModel<RepeatedMessageModel *>(Object::kEgmEventsFieldNumber);
 
-  eventsModel->SetData(FieldPath::Of<Object::EgmEvent>(
-                           FieldPath::RepeatedOffset(Object::EgmEvent::kIdFieldNumber, idx)),
+  eventsModel->SetData(FieldPath::Of<Object::EgmEvent>(FieldPath::StartingAt(idx), Object::EgmEvent::kIdFieldNumber),
                        QString::fromStdString(event.id()));
 
   if (changeCode)
     eventsModel->SetData(
-        FieldPath::Of<Object::EgmEvent>(FieldPath::RepeatedOffset(Object::EgmEvent::kCodeFieldNumber, idx)),
+        FieldPath::Of<Object::EgmEvent>(FieldPath::StartingAt(idx), Object::EgmEvent::kCodeFieldNumber),
         QString::fromStdString(event.code()));
 
   RepeatedStringModel *argsModel = eventsModel->GetSubModel<MessageModel *>(idx)->GetSubModel<RepeatedStringModel *>(
@@ -153,7 +152,7 @@ void ObjectEditor::ChangeEvent(int idx, Object::EgmEvent event, bool changeCode)
     argsModel->insertRows(argsModel->rowCount(), event.arguments_size());
     for (const auto &arg : event.arguments()) {
       argsModel->SetData(
-          FieldPath::Of<Object::EgmEvent>(FieldPath::RepeatedOffset(Object::EgmEvent::kArgumentsFieldNumber, argc)),
+          FieldPath::Of<Object::EgmEvent>(FieldPath::StartingAt(argc), Object::EgmEvent::kArgumentsFieldNumber),
           QString::fromStdString(arg));
       argc++;
     }

@@ -19,8 +19,8 @@ TimelineEditor::TimelineEditor(MessageModel* model, QWidget* parent)
   connect(_ui->momentsList, &QAbstractItemView::clicked, [=](const QModelIndex& index) {
     SetCurrentEditor(index.row());
     _ui->stepBox->setValue(_momentsModel
-                               ->Data(FieldPath::Of<Timeline::Moment>(
-                                   FieldPath::RepeatedOffset(Timeline::Moment::kStepFieldNumber, index.row())))
+                               ->Data(FieldPath::Of<Timeline::Moment>(FieldPath::StartingAt(index.row()),
+                                                                      Timeline::Moment::kStepFieldNumber))
                                .toInt());
   });
 
@@ -87,8 +87,7 @@ void TimelineEditor::AddMoment(int step) {
   int insertIndex = FindInsertIndex(step);
   _momentsModel->insertRow(insertIndex);
   _momentsModel->SetData(
-      FieldPath::Of<Timeline::Moment>(FieldPath::RepeatedOffset(Timeline::Moment::kStepFieldNumber, insertIndex)),
-      step);
+      FieldPath::Of<Timeline::Moment>(FieldPath::StartingAt(insertIndex), Timeline::Moment::kStepFieldNumber), step);
 
   BindMomentEditor(insertIndex);
 }
@@ -102,7 +101,7 @@ void TimelineEditor::ChangeMoment(int oldIndex, int step) {
     _momentsModel->moveRows(oldIndex, 1, newIndex);
     newIndex = (newIndex < oldIndex) ? newIndex : newIndex - 1;
     _momentsModel->SetData(
-        FieldPath::Of<Timeline::Moment>(FieldPath::RepeatedOffset(Timeline::Moment::kStepFieldNumber, newIndex)), step);
+        FieldPath::Of<Timeline::Moment>(FieldPath::StartingAt(newIndex), Timeline::Moment::kStepFieldNumber), step);
   }
 }
 
@@ -116,8 +115,8 @@ int TimelineEditor::FindInsertIndex(int step) {
   int index = 0;
   while (index < _momentsModel->rowCount() &&
          step > _momentsModel
-                    ->Data(FieldPath::Of<Timeline::Moment>(
-                        FieldPath::RepeatedOffset(Timeline::Moment::kStepFieldNumber, index)))
+                    ->Data(FieldPath::Of<Timeline::Moment>(FieldPath::StartingAt(index),
+                                                           Timeline::Moment::kStepFieldNumber))
                     .toInt()) {
     ++index;
   }
@@ -128,7 +127,7 @@ int TimelineEditor::FindInsertIndex(int step) {
 int TimelineEditor::IndexOf(int step) {
   for (int r = 0; r < _momentsModel->rowCount(); ++r) {
     if (_momentsModel
-            ->Data(FieldPath::Of<Timeline::Moment>(FieldPath::RepeatedOffset(Timeline::Moment::kStepFieldNumber, r)))
+            ->Data(FieldPath::Of<Timeline::Moment>(FieldPath::StartingAt(r), Timeline::Moment::kStepFieldNumber))
             .toInt() == step) {
       return r;
     }
@@ -153,7 +152,7 @@ void TimelineEditor::SetCurrentEditor(int modelIndex) {
 void TimelineEditor::CheckDisableButtons(int value) {
   for (int i = 0; i < _momentsModel->rowCount(); ++i) {
     if (_momentsModel
-            ->Data(FieldPath::Of<Timeline::Moment>(FieldPath::RepeatedOffset(Timeline::Moment::kStepFieldNumber, i)))
+            ->Data(FieldPath::Of<Timeline::Moment>(FieldPath::StartingAt(i), Timeline::Moment::kStepFieldNumber))
             .toInt() == value) {
       _ui->addMomentButton->setDisabled(true);
       _ui->changeMomentButton->setDisabled(false);

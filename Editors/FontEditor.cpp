@@ -57,23 +57,21 @@ void FontEditor::RebindSubModels() {
 void FontEditor::ValidateRangeChange(const QModelIndex &topLeft, const QModelIndex & /*bottomRight*/,
                                      const QVariant &oldValue) {
   int min =
-      _rangesModel
-          ->Data(FieldPath::Of<Font::Range>(FieldPath::RepeatedOffset(Font::Range::kMinFieldNumber, topLeft.row())))
+      _rangesModel->Data(FieldPath::Of<Font::Range>(FieldPath::StartingAt(topLeft.row()), Font::Range::kMinFieldNumber))
           .toInt();
   int max =
-      _rangesModel
-          ->Data(FieldPath::Of<Font::Range>(FieldPath::RepeatedOffset(Font::Range::kMaxFieldNumber, topLeft.row())))
+      _rangesModel->Data(FieldPath::Of<Font::Range>(FieldPath::StartingAt(topLeft.row()), Font::Range::kMaxFieldNumber))
           .toInt();
   if (min > max) {
     _rangesModel->setData(topLeft, oldValue);
     return;
   } else if (min < 0 || min > 255) {
     _rangesModel->SetData(
-        FieldPath::Of<Font::Range>(FieldPath::RepeatedOffset(Font::Range::kMinFieldNumber, topLeft.row())),
+        FieldPath::Of<Font::Range>(FieldPath::StartingAt(topLeft.row()), Font::Range::kMinFieldNumber),
         std::min(std::max(0, min), 255));
   } else if (max < 0 || max > 255) {
     _rangesModel->SetData(
-        FieldPath::Of<Font::Range>(FieldPath::RepeatedOffset(Font::Range::kMaxFieldNumber, topLeft.row())),
+        FieldPath::Of<Font::Range>(FieldPath::StartingAt(topLeft.row()), Font::Range::kMaxFieldNumber),
         std::min(std::max(0, max), 255));
   }
 
@@ -86,12 +84,10 @@ void FontEditor::RangeSelectionChanged(const QItemSelection &selected, const QIt
   if (!selected.empty()) {
     auto index = selected.indexes().first();
     int min =
-        _rangesModel
-            ->Data(FieldPath::Of<Font::Range>(FieldPath::RepeatedOffset(Font::Range::kMinFieldNumber, index.row())))
+        _rangesModel->Data(FieldPath::Of<Font::Range>(FieldPath::StartingAt(index.row()), Font::Range::kMinFieldNumber))
             .toInt();
     int max =
-        _rangesModel
-            ->Data(FieldPath::Of<Font::Range>(FieldPath::RepeatedOffset(Font::Range::kMaxFieldNumber, index.row())))
+        _rangesModel->Data(FieldPath::Of<Font::Range>(FieldPath::StartingAt(index.row()), Font::Range::kMaxFieldNumber))
             .toInt();
     UpdateRangeText(min, max);
   }
@@ -124,10 +120,10 @@ void FontEditor::on_italicCheckBox_clicked(bool checked) {
 void FontEditor::on_addRangeButtom_pressed() {
   _rangesModel->insertRow(_rangesModel->rowCount());
   _rangesModel->SetData(
-      FieldPath::Of<Font::Range>(FieldPath::RepeatedOffset(Font::Range::kMaxFieldNumber, _rangesModel->rowCount() - 1)),
+      FieldPath::Of<Font::Range>(FieldPath::StartingAt(_rangesModel->rowCount() - 1), Font::Range::kMaxFieldNumber),
       _ui->rangeEndBox->value());
   _rangesModel->SetData(
-      FieldPath::Of<Font::Range>(FieldPath::RepeatedOffset(Font::Range::kMinFieldNumber, _rangesModel->rowCount() - 1)),
+      FieldPath::Of<Font::Range>(FieldPath::StartingAt(_rangesModel->rowCount() - 1), Font::Range::kMinFieldNumber),
       _ui->rangeBeginBox->value());
   _ui->rangeTableView->selectionModel()->setCurrentIndex(_rangesModel->index(_rangesModel->rowCount() - 1, 0),
                                                          QItemSelectionModel::QItemSelectionModel::ClearAndSelect);

@@ -23,9 +23,7 @@ void SpriteView::SetSubimage(int index) {
     qDebug() << "Invalid subimage index specified";
     return;
   } else {
-    _pixmap = ArtManager::GetCachedPixmap(
-        _subimgs->Data(FieldPath::Of<Sprite>(FieldPath::RepeatedOffset(Sprite::kSubimagesFieldNumber, index)))
-            .toString());
+    _pixmap = ArtManager::GetCachedPixmap(_subimgs->DataAtRow(0).toString());
   }
 
   _parent->update();

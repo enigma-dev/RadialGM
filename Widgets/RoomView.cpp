@@ -142,10 +142,10 @@ void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
     if (!bkgRes) continue;
 
     int x = backgrounds
-                ->Data(FieldPath::Of<Room::Background>(FieldPath::RepeatedOffset(Room::Background::kXFieldNumber, row)))
+                ->Data(FieldPath::Of<Room::Background>(FieldPath::StartingAt(row), Room::Background::kXFieldNumber))
                 .toInt();
     int y = backgrounds
-                ->Data(FieldPath::Of<Room::Background>(FieldPath::RepeatedOffset(Room::Background::kYFieldNumber, row)))
+                ->Data(FieldPath::Of<Room::Background>(FieldPath::StartingAt(row), Room::Background::kYFieldNumber))
                 .toInt();
     int w = bkgRes->Data(FieldPath::Of<Background>(Background::kWidthFieldNumber)).toInt();
     int h = bkgRes->Data(FieldPath::Of<Background>(Background::kHeightFieldNumber)).toInt();

@@ -133,7 +133,7 @@ void SpriteEditor::on_actionNewSubimage_triggered() {
   img.save(fName);
   _subimagesModel->insertRow(_subimagesModel->rowCount());
   _subimagesModel->SetData(
-      FieldPath::Of<Sprite>(FieldPath::RepeatedOffset(Sprite::kSubimagesFieldNumber, _subimagesModel->rowCount() - 1)),
+      FieldPath::Of<Sprite>(FieldPath::StartingAt(_subimagesModel->rowCount() - 1), Sprite::kSubimagesFieldNumber),
       fName);
 }
 
@@ -168,8 +168,8 @@ void SpriteEditor::on_actionLoadSubimages_triggered() {
         if (img.size() == newImg.size()) {
           _subimagesModel->insertRow(_subimagesModel->rowCount());
           // TODO: Internalize file
-          _subimagesModel->SetData(FieldPath::Of<Sprite>(FieldPath::RepeatedOffset(Sprite::kSubimagesFieldNumber,
-                                                                                   _subimagesModel->rowCount() - 1)),
+          _subimagesModel->SetData(FieldPath::Of<Sprite>(FieldPath::StartingAt(_subimagesModel->rowCount() - 1),
+                                                         Sprite::kSubimagesFieldNumber),
                                    fName);
         } else {
           LoadedMismatchedImage(img.size(), newImg.size());
@@ -193,8 +193,8 @@ void SpriteEditor::on_actionAddSubimages_triggered() {
       if (imgSize == newImg.size()) {
         _subimagesModel->insertRow(_subimagesModel->rowCount());
         // TODO: Internalize file
-        _subimagesModel->SetData(FieldPath::Of<Sprite>(FieldPath::RepeatedOffset(Sprite::kSubimagesFieldNumber,
-                                                                                 _subimagesModel->rowCount() - 1)),
+        _subimagesModel->SetData(FieldPath::Of<Sprite>(FieldPath::StartingAt(_subimagesModel->rowCount() - 1),
+                                                       Sprite::kSubimagesFieldNumber),
                                  fName);
       } else {
         LoadedMismatchedImage(imgSize, newImg.size());
@@ -214,8 +214,7 @@ void SpriteEditor::on_actionZoomOut_triggered() { _ui->scrollAreaWidget->ZoomOut
 void SpriteEditor::on_actionEditSubimages_triggered() {
   for (QModelIndex idx : _ui->subImageList->selectionModel()->selectedIndexes()) {
     QDesktopServices::openUrl(QUrl::fromLocalFile(
-        _subimagesModel
-            ->Data(FieldPath::Of<Sprite>(FieldPath::RepeatedOffset(Sprite::kSubimagesFieldNumber, idx.row())))
+        _subimagesModel->Data(FieldPath::Of<Sprite>(FieldPath::StartingAt(idx.row()), Sprite::kSubimagesFieldNumber))
             .toString()));
     // TODO: file watcher reload
     // TODO: editor settings
