@@ -13,7 +13,7 @@ class RepeatedModel : public ProtoModel {
  public:
   RepeatedModel(ProtoModel *parent, Message *message, const FieldDescriptor *field)
       : ProtoModel(parent, message->GetDescriptor()->name(), message->GetDescriptor()), _protobuf(message),
-       _field(field) {}
+       field_(field) {}
 
   bool Empty() { return rowCount() == 0; }
 
@@ -24,13 +24,13 @@ class RepeatedModel : public ProtoModel {
   bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override;
 
   QString DebugName() const override {
-    return QString::fromStdString("RepeatedModel<" + _field->full_name() + ">");
+    return QString::fromStdString("RepeatedModel<" + field_->full_name() + ">");
   }
   RepeatedModel *TryCastAsRepeatedModel() override { return this; }
 
   const FieldDescriptor *GetRowDescriptor(int row) const override {
     Q_UNUSED(row);  // All rows of a repeated field have the same descriptor.
-    return _field;
+    return field_;
   }
 
   void Clear() {
@@ -40,7 +40,7 @@ class RepeatedModel : public ProtoModel {
     ParentDataChanged();
   }
 
-  const google::protobuf::FieldDescriptor *GetFieldDescriptor() const { return _field; }
+  const google::protobuf::FieldDescriptor *GetFieldDescriptor() const { return field_; }
 
   // ===================================================================================================================
   // == Virtual data mutators. =========================================================================================
@@ -84,70 +84,21 @@ class RepeatedModel : public ProtoModel {
   bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
                     const QModelIndex &parent) override;
 
-  virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override = 0;
-
-  virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override {
-    if (parent.isValid()) return 0;
-    return 1;
-  }
-
-  virtual QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override {
-    Q_UNUSED(parent);
-    return this->createIndex(row, column);
-  }
-
-  virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override {
-    auto data = ProtoModel::headerData(section, orientation, role);
-    if (data.isValid()) return data;
-    if (section <= 0 || role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal)
-      return QVariant(); // << invalid
-    return QString::fromStdString(_field->message_type()->field(section - 1)->name());
-  }
+  int rowCount(const QModelIndex &parent = QModelIndex()) const override = 0;
+  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+  QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
+  QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
   // Convenience function for internal moves
-  bool moveRows(int source, int count, int destination) {
-    return moveRows(QModelIndex(), source, count, QModelIndex(), destination);
-  }
-
-  virtual bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override {
-    if (row > rowCount()) return false;
-
-    beginInsertRows(parent, row, row + count - 1);
-
-    int p = rowCount();
-
-    // Append `count` new rows to the list, then move them backward to where they were supposed to be inserted.
-    for (int i = 0; i < count; ++i) AppendNewWithoutSignal();
-    SwapBackWithoutSignal(row, p, rowCount());
-    ParentDataChanged();
-
-    endInsertRows();
-
-    return true;
-  };
-
-  virtual bool removeRows(int position, int count, const QModelIndex& parent = QModelIndex()) override {
-    Q_UNUSED(parent);
-    RowRemovalOperation remover(this);
-    remover.RemoveRows(position, count);
-    return true;
-  }
+  bool moveRows(int source, int count, int destination);
+  bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+  bool removeRows(int position, int count, const QModelIndex& parent = QModelIndex()) override;
 
   // Mimedata stuff required for Drag & Drop and clipboard functions
-  virtual Qt::DropActions supportedDropActions() const override { return Qt::MoveAction | Qt::CopyAction; }
+  virtual Qt::DropActions supportedDropActions() const override;
+  QStringList mimeTypes() const override;
 
-  virtual QStringList mimeTypes() const override {
-    return QStringList("RadialGM/" + QString::fromStdString(_field->DebugString()));
-  }
-
-  virtual Qt::ItemFlags flags(const QModelIndex &index) const override {
-    Qt::ItemFlags defaultFlags = QAbstractItemModel::flags(index);
-
-    if (index.isValid())
-      return Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | defaultFlags;
-    else
-      return Qt::ItemIsDropEnabled | defaultFlags;
-  }
+  Qt::ItemFlags flags(const QModelIndex &index) const override;
 
   class RowRemovalOperation {
    public:
@@ -217,7 +168,7 @@ class RepeatedModel : public ProtoModel {
 
  protected:
   Message *_protobuf;
-  const FieldDescriptor *_field;
+  const FieldDescriptor *field_;
 };
 
 // Model representing a repeated field. Do not instantiate an object of this class directly
@@ -246,41 +197,12 @@ class BasicRepeatedModel : public RepeatedModel {
   virtual bool SetDirect(int row, const QVariant &value) override { return SetField(field_ref_, row, value); }
   virtual QVariant GetDirect(int row) const override { return GetField(field_ref_, row); }
 
-  virtual QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override {
-    Q_UNUSED(parent);
-    return this->createIndex(row, column);
-  }
-
-  virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override {
-    auto data = ProtoModel::headerData(section, orientation, role);
-    if (data.isValid()) return data;
-    if (section <= 0 || role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal)
-      return QVariant(); // << invalid
-    return QString::fromStdString(_field->message_type()->field(section - 1)->name());
-  }
-
   void SwapWithoutSignal(int left, int right) override {
     field_ref_.SwapElements(left, right);
   }
 
   void RemoveLastNRowsWithoutSignal(int n) override {
     for (int j = 0; j <= n; ++j) field_ref_.RemoveLast();
-  }
-
-  // Mimedata stuff required for Drag & Drop and clipboard functions
-  virtual Qt::DropActions supportedDropActions() const override { return Qt::MoveAction | Qt::CopyAction; }
-
-  virtual QStringList mimeTypes() const override {
-    return QStringList("RadialGM/" + QString::fromStdString(_field->DebugString()));
-  }
-
-  virtual Qt::ItemFlags flags(const QModelIndex &index) const override {
-    Qt::ItemFlags defaultFlags = QAbstractItemModel::flags(index);
-
-    if (index.isValid())
-      return Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | defaultFlags;
-    else
-      return Qt::ItemIsDropEnabled | defaultFlags;
   }
 
  protected:
@@ -294,7 +216,9 @@ class RepeatedPrimitiveModel : public BasicRepeatedModel<T> {
   RepeatedPrimitiveModel(ProtoModel *parent, Message *message, const FieldDescriptor *field) : BasicRepeatedModel<T>(
       parent, message, field, message->GetReflection()->GetMutableRepeatedFieldRef<T>(message, field)) {}
 
-  const T &PrimitiveData(int row) const { return BasicRepeatedModel<T>::field_ref_.Get(row); }
+  const T &PrimitiveData(int row) const {
+    return BasicRepeatedModel<T>::field_ref_.Get(row);
+  }
 
   // Need to implement this in all RepeatedModels
   void AppendNewWithoutSignal() final {
@@ -309,7 +233,7 @@ class RepeatedPrimitiveModel : public BasicRepeatedModel<T> {
           : RepeatedPrimitiveModel<model_type>(parent, message, field) {}               \
                                                                                         \
       QString DebugName() const override {                                              \
-        return QString::fromStdString(#ModelName "<" + _field->full_name() + ">");      \
+        return QString::fromStdString(#ModelName "<" + field_->full_name() + ">");      \
       }                                                                                 \
       ModelName *TryCastAs ## ModelName() override { return this; }                     \
     }

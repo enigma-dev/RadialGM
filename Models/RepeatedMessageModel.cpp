@@ -60,7 +60,8 @@ bool RepeatedMessageModel::SetData(const FieldPath &field_path, const QVariant &
     qDebug() << "Unimplemented: assigning a QVariant to a repeated message field.";
     return false;
   }
-  qDebug() << "Attempting to set a sub-field of repeated field `" << field_path.fields[0]->full_name().c_str() << "`";
+  qDebug() << "Attempting to set sub-field `" << field_path.front()->full_name().c_str()
+           << "` of repeated field `" << field_->full_name().c_str() << "` without an index";
   return false;
 }
 
@@ -87,15 +88,11 @@ QVariant RepeatedMessageModel::data(const QModelIndex &index, int role) const {
   R_EXPECT(index.row() >= 0 && index.row() < _subModels.size(), QVariant()) <<
     "Supplied row was out of bounds:" << index.row();
 
-  // protobuf field number with 0 is impossible, use as sentinel to get model itself
-  if (index.column() == 0)
-    return QVariant::fromValue(_subModels[index.row()]);
-
   return _subModels[index.row()]->data(_subModels[index.row()]->index(index.column()), role);
 }
 
 int RepeatedMessageModel::columnCount(const QModelIndex & /*parent*/) const {
-  return _field->message_type()->field_count();
+  return field_->message_type()->field_count();
 }
 
 Qt::ItemFlags RepeatedMessageModel::flags(const QModelIndex &index) const {
@@ -106,7 +103,7 @@ Qt::ItemFlags RepeatedMessageModel::flags(const QModelIndex &index) const {
 }
 
 const std::string &RepeatedMessageModel::MessageName() const {
-  auto *msg = _field->message_type();
+  auto *msg = field_->message_type();
   if (!msg) {
     static const std::string kSentinel;
     qDebug() << "Message type of RepeatedMessageField is null! This should never happen!";

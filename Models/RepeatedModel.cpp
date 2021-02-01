@@ -37,7 +37,8 @@ QVariant RepeatedModel::data(const QModelIndex& index, int /*role*/) const {
 bool RepeatedModel::SetData(const FieldPath &field_path, const QVariant &value) {
   Q_UNUSED(value);
   if (!field_path.fields.empty()) {
-    qDebug() << "Attempting to set a sub-field of repeated field `" << field_path.fields[0]->full_name().c_str() << "`";
+    qDebug() << "Attempting to set sub-field `" << field_path.front()->full_name().c_str()
+             << "` of scalar repeated field `" << field_->full_name().c_str() << "`";
     return false;
   }
   if (field_path.repeated_field_index != -1) {
@@ -93,6 +94,69 @@ bool RepeatedModel::moveRows(const QModelIndex &sourceParent, int source, int co
   ParentDataChanged();
 
   return true;
+}
+
+int RepeatedModel::columnCount(const QModelIndex &parent) const {
+  if (parent.isValid()) return 0;
+  return 1;
+}
+
+QModelIndex RepeatedModel::index(int row, int column, const QModelIndex &parent) const {
+  Q_UNUSED(parent);
+  return this->createIndex(row, column);
+}
+
+QVariant RepeatedModel::headerData(int section, Qt::Orientation orientation, int role) const {
+  auto data = ProtoModel::headerData(section, orientation, role);
+  if (data.isValid()) return data;
+  if (role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal) return QVariant();
+  if (section < 0 || section >= field_->message_type()->field_count()) return QVariant();
+  return QString::fromStdString(field_->message_type()->field(section)->name());
+}
+
+// Convenience function for internal moves
+bool RepeatedModel::moveRows(int source, int count, int destination) {
+  return moveRows(QModelIndex(), source, count, QModelIndex(), destination);
+}
+
+bool RepeatedModel::insertRows(int row, int count, const QModelIndex &parent) {
+  if (row > rowCount()) return false;
+
+  beginInsertRows(parent, row, row + count - 1);
+
+  int p = rowCount();
+
+  // Append `count` new rows to the list, then move them backward to where they were supposed to be inserted.
+  for (int i = 0; i < count; ++i) AppendNewWithoutSignal();
+  SwapBackWithoutSignal(row, p, rowCount());
+  ParentDataChanged();
+
+  endInsertRows();
+
+  return true;
+};
+
+bool RepeatedModel::removeRows(int position, int count, const QModelIndex& parent) {
+  Q_UNUSED(parent);
+  RowRemovalOperation remover(this);
+  remover.RemoveRows(position, count);
+  return true;
+}
+
+// Mimedata stuff required for Drag & Drop and clipboard functions
+Qt::DropActions RepeatedModel::supportedDropActions() const { return Qt::MoveAction | Qt::CopyAction; }
+
+QStringList RepeatedModel::mimeTypes() const {
+  return QStringList("RadialGM/" + QString::fromStdString(field_->DebugString()));
+}
+
+Qt::ItemFlags RepeatedModel::flags(const QModelIndex &index) const {
+  Qt::ItemFlags defaultFlags = QAbstractItemModel::flags(index);
+
+  if (index.isValid())
+    return Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | defaultFlags;
+  else
+    return Qt::ItemIsDropEnabled | defaultFlags;
 }
 
 QMimeData* RepeatedModel::mimeData(const QModelIndexList& indexes) const {

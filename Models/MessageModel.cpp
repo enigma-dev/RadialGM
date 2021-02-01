@@ -67,6 +67,14 @@ void MessageModel::RebuildSubModels() {
           submodels_by_field_[field->number()] = submodels_by_row_[i] = new RepeatedInt64Model(this, _protobuf, field);
           break;
         }
+        case CppType::CPPTYPE_UINT32: {
+          submodels_by_field_[field->number()] = submodels_by_row_[i] = new RepeatedUInt32Model(this, _protobuf, field);
+          break;
+        }
+        case CppType::CPPTYPE_UINT64: {
+          submodels_by_field_[field->number()] = submodels_by_row_[i] = new RepeatedUInt64Model(this, _protobuf, field);
+          break;
+        }
         case CppType::CPPTYPE_FLOAT: {
           submodels_by_field_[field->number()] = submodels_by_row_[i] = new RepeatedFloatModel(this, _protobuf, field);
           break;

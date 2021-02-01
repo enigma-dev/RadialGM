@@ -103,17 +103,17 @@ void PathEditor::RebindSubModels() {
 
   _ui->roomView->SetPathModel(_pathModel);
   _pointsModel = _pathModel->GetSubModel<RepeatedMessageModel*>(Path::kPointsFieldNumber);
-  _pointsModel->setHeaderData(Path::Point::kXFieldNumber, Qt::Horizontal, tr("X"), Qt::DisplayRole);
-  _pointsModel->setHeaderData(Path::Point::kYFieldNumber, Qt::Horizontal, tr("Y"), Qt::DisplayRole);
-  _pointsModel->setHeaderData(Path::Point::kSpeedFieldNumber, Qt::Horizontal, tr("Speed"), Qt::DisplayRole);
-  _pointsModel->setHeaderData(Path::Point::kXFieldNumber, Qt::Horizontal, QIcon(":/actions/diamond-red.png"),
-                              Qt::DecorationRole);
-  _pointsModel->setHeaderData(Path::Point::kYFieldNumber, Qt::Horizontal, QIcon(":/actions/diamond-green.png"),
-                              Qt::DecorationRole);
-  _pointsModel->setHeaderData(Path::Point::kSpeedFieldNumber, Qt::Horizontal, QIcon(":/actions/motion.png"),
-                              Qt::DecorationRole);
+  // _pointsModel->setHeaderData(0, Qt::Horizontal, tr("X"), Qt::DisplayRole);
+  // _pointsModel->setHeaderData(1, Qt::Horizontal, tr("Y"), Qt::DisplayRole);
+  // _pointsModel->setHeaderData(2, Qt::Horizontal, tr("Speed"), Qt::DisplayRole);
+  // _pointsModel->setHeaderData(0, Qt::Horizontal, QIcon(":/actions/diamond-red.png"),
+  //                             Qt::DecorationRole);
+  // _pointsModel->setHeaderData(1, Qt::Horizontal, QIcon(":/actions/diamond-green.png"),
+  //                             Qt::DecorationRole);
+  // _pointsModel->setHeaderData(2, Qt::Horizontal, QIcon(":/actions/motion.png"),
+  //                             Qt::DecorationRole);
   _ui->pointsTableView->setModel(_pointsModel);
-  _ui->pointsTableView->hideColumn(0);
+  // _ui->pointsTableView->hideColumn(0);
 
   QString roomName = _pathModel->Data(FieldPath::Of<Path>(Path::kBackgroundRoomNameFieldNumber)).toString();
   if (roomName != "") {
@@ -200,7 +200,7 @@ void PathEditor::MousePressed(Qt::MouseButton button) {
     for (int i = _pointsModel->rowCount() - 1; i >= 0; i--) {
       QPoint pt = _ui->roomView->Point(i);
       if (pt == _ui->roomView->mousePos) {
-        QModelIndex newSelectIndex = _pointsModel->index(i, Path::Point::kXFieldNumber);
+        QModelIndex newSelectIndex = _pointsModel->index(i, -1);
         _ui->pointsTableView->setCurrentIndex(newSelectIndex);
         return;
       }

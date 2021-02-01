@@ -32,7 +32,7 @@ class RepeatedMessageModel : public BasicRepeatedModel<Message> {
   const std::string &MessageName() const;
 
   QString DebugName() const override {
-    return QString::fromStdString("RepeatedMessageModel<" + _field->full_name() + ">");
+    return QString::fromStdString("RepeatedMessageModel<" + field_->full_name() + ">");
   }
   RepeatedMessageModel *TryCastAsRepeatedMessageModel() override { return this; }
 
