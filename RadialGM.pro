@@ -138,6 +138,7 @@ HEADERS += \
     Models/EventTypesListSortFilterProxyModel.h \
     Models/EventsListModel.h \
     Models/MessageModel.h \
+    Models/PrimitiveModel.h \
     Models/RepeatedMessageModel.h \
     Models/RepeatedModel.h \
     Utils/FieldPath.h \

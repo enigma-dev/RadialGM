@@ -4,6 +4,7 @@
 #include "Components/ArtManager.h"
 #include "Models/MessageModel.h"
 #include "Models/RepeatedMessageModel.h"
+#include "Models/PrimitiveModel.h"
 #include "Utils/FieldPath.h"
 #include "treenode.pb.h"
 
@@ -47,37 +48,26 @@ class TreeModel : public QAbstractItemModel {
 
    private:
     /// When set, this node is a single message. Its children, if it has any, are its fields.
-    MessageModel *message_model = nullptr;
+    // MessageModel *message_model = nullptr;
     /// When set, this node is a repeated message field. Its children are messages within that field.
-    RepeatedMessageModel *repeated_message_model = nullptr;
+    // RepeatedMessageModel *repeated_message_model = nullptr;
     /// When set, this node is a repeated primitive field. Its children are values of that field.
-    RepeatedModel *repeated_primitive_model = nullptr;
+    // RepeatedModel *repeated_primitive_model = nullptr;
     /// When set, this node is a leaf. It exists to index within a model. Use row_in_model for model operations.
     /// In general, this model will either be a MessageModel whose row_in_model is a primitive field,
     /// or a Primitive RepeatedModel (that is, a RepeatedModel that is not a RepeatedMessageModel).
-    ProtoModel *containing_model = nullptr;
+    // ProtoModel *containing_model = nullptr;
+    ProtoModel *backing_model;
 
    public:
     /// Cache of the name (or value) field of the underlying proto.
     QString display_name;
-    /// When specified, this field in the ProtoModel is the display label of this node.
-    FieldPath name_field;
-    /// When specified, this field in the ProtoModel is the displayed value of this node.
-    /// This means the node can be edited in the tree by updating that value.
-    FieldPath value_field;
     /// Cache of the icon field or per-message display icon of the underlying proto.
     QIcon display_icon;
-    /// When specified, this field in the ProtoModel holds the internal name of the display icon of this node.
-    FieldPath icon_id_field;
-    /// When icon_id_field is specified, this is the mapper function to transform that field's value into a QIcon.
-    /// When this function is not specified, the ArtManager is sent the field's content as a name string.
-    ProtoModel::FieldDisplayConfig::IconLookupFn icon_lookup_function;
-    /// When specified, this field in the ProtoModel holds the external file path of the icon for this node.
-    FieldPath icon_path_field;
-    /// Generally a cache of this node's position in its parent node's list of children.
+    /// Generally a cache of this node's position in its parent Node's list of children (parent->children).
     /// This may not correspond 1:1 with the field mapping in the model. Use `row_in_model` for that.
     int row_in_parent = 0;
-    /// The row number of this node's data in its model (e.g. containing_model or parent->message_model).
+    /// The row number of this node's data in its model (i.e. parent->backing_model).
     /// This may not correspond 1:1 with the node's position in its parent. Use `row_in_parent` for that.
     int row_in_model = 0;
 
@@ -98,9 +88,6 @@ class TreeModel : public QAbstractItemModel {
     /// Debug print.
     void Print(int indent = 0) const;
 
-    // Type tag to make constructing leaf fields type-safe.
-    struct LeafData { ProtoModel *model; int row; };
-
     /// Builds the entire Node tree by copying the tree formed by the model.
     Node(TreeModel *backing_tree, Node *parent, int row_in_parent, MessageModel *model, int row_in_model);
     /// Builds more Node tree from each message in a repeated model.
@@ -108,12 +95,11 @@ class TreeModel : public QAbstractItemModel {
     /// Builds more Node tree from each item in a repeated model.
     Node(TreeModel *backing_tree, Node *parent, int row_in_parent, RepeatedModel *model, int row_in_model);
     /// Constructs as a leaf node. The specified field should not be a message.
-    Node(TreeModel *backing_tree, Node *parent, int row_in_parent, LeafData model_row);
+    Node(TreeModel *backing_tree, Node *parent, int row_in_parent, PrimitiveModel *model_row, int row_in_model);
 
    private:
     void PushChild(ProtoModel *model, int source_row);
-    void ComputeDisplayData(const TreeModel *backing_model);
-    void ComputeRemainingDisplayData(const ProtoModel* model);
+    void ComputeDisplayData();
     void Absorb(Node &child);
   };
 

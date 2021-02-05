@@ -2,6 +2,7 @@
 #define REPEATEDMODEL_H
 
 #include "ProtoModel.h"
+#include "PrimitiveModel.h"
 #include "Utils/ProtoManip.h"
 
 #include <google/protobuf/message.h>
@@ -22,6 +23,9 @@ class RepeatedModel : public ProtoModel {
 
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
   bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override;
+
+  // Return the submodel serving as the view of the node at the given index.
+  virtual ProtoModel *GetSubModel(int index) const = 0;
 
   QString DebugName() const override {
     return QString::fromStdString("RepeatedModel<" + field_->full_name() + ">");
@@ -214,9 +218,11 @@ template <typename T>
 class RepeatedPrimitiveModel : public BasicRepeatedModel<T> {
  public:
   RepeatedPrimitiveModel(ProtoModel *parent, Message *message, const FieldDescriptor *field) : BasicRepeatedModel<T>(
-      parent, message, field, message->GetReflection()->GetMutableRepeatedFieldRef<T>(message, field)) {}
+      parent, message, field, message->GetReflection()->GetMutableRepeatedFieldRef<T>(message, field)) {
+    RebuildSubModels();
+  }
 
-  const T &PrimitiveData(int row) const {
+  T PrimitiveData(int row) const {
     return BasicRepeatedModel<T>::field_ref_.Get(row);
   }
 
@@ -224,6 +230,21 @@ class RepeatedPrimitiveModel : public BasicRepeatedModel<T> {
   void AppendNewWithoutSignal() final {
     BasicRepeatedModel<T>::field_ref_.Add({});
   }
+
+  void RebuildSubModels() {
+    submodels_.clear();
+    submodels_.reserve(BasicRepeatedModel<T>::field_ref_.size());
+    for (int i = 0; i < BasicRepeatedModel<T>::field_ref_.size(); ++i) {
+      submodels_.push_back(new PrimitiveModel(this, i));
+    }
+  }
+
+  ProtoModel *GetSubModel(int index) const final {
+    return submodels_[index];
+  }
+
+ private:
+  QVector<PrimitiveModel*> submodels_;
 };
 
 #define RGM_DECLARE_REPEATED_PRIMITIVE_MODEL(ModelName, model_type)                     \

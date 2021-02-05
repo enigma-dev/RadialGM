@@ -5,6 +5,8 @@
 
 #include "Components/Logger.h"
 
+#include <QIcon>
+
 ProtoModel::DisplayConfig ProtoModel::display_config_;
 
 ProtoModel::ProtoModel(QObject *parent, std::string name, const Descriptor *descriptor) :
@@ -111,4 +113,12 @@ QVariant ProtoModel::headerData(int section, Qt::Orientation orientation, int ro
     return getHeaderData(_verticalHeaderData, section, role);
   }
   return QVariant();
+}
+
+QString ProtoModel::GetDisplayName() const {
+  return "boobs";
+}
+
+QIcon ProtoModel::GetDisplayIcon() const {
+  return {};
 }

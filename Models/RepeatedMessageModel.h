@@ -16,6 +16,10 @@ class RepeatedMessageModel : public BasicRepeatedModel<Message> {
     return (index < 0 || index > _subModels.size()) ? nullptr: ((ProtoModel*) _subModels[index])->As<T>();
   }
 
+  ProtoModel *GetSubModel(int index) const override {
+    return (index < 0 || index > _subModels.size()) ? nullptr : (ProtoModel*) _subModels[index];
+  }
+
   void SwapWithoutSignal(int /*left*/, int /*right*/) override;
   void AppendNewWithoutSignal() override;
   void RemoveLastNRowsWithoutSignal(int /*newSize*/) override;

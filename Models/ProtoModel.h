@@ -28,6 +28,7 @@ class ProtoModel;
 class MessageModel;
 class RepeatedModel;
 class RepeatedMessageModel;
+class PrimitiveModel;
 
 class RepeatedBoolModel;
 class RepeatedInt32Model;
@@ -45,6 +46,7 @@ RGM_BEGIN_SAFE_CAST(SafeCast, ProtoModel);
 RGM_DECLARE_SAFE_CAST(SafeCast, MessageModel);
 RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedModel);
 RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedMessageModel);
+RGM_DECLARE_SAFE_CAST(SafeCast, PrimitiveModel);
 
 RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedBoolModel);
 RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedInt32Model);
@@ -186,6 +188,18 @@ class ProtoModel : public QAbstractItemModel {
     QMap<std::string, FieldDisplayConfig> field_display_configs_;
   };
 
+  /// Retrieve the custom display name for this field from the display metadata.
+  /// If no custom name is set, the name of this model's field in its parent model is returned.
+  /// If this is a MessageModel with no custom display name and no parent model, the message name is returned.
+  QString GetDisplayName() const;
+
+  /// Retrieve the custom display icon for this field from the display metadata.
+  /// If an icon lookup function is specified, it will be called with the appropriate argument.
+  /// Otherwise, if an icon name field is set, the icon will be looked up by the value of that field.
+  /// If neither of these produces a valid icon, the metadata-specified default icon for this model is returned.
+  /// If none of these are specified, a null icon is returned.
+  QIcon GetDisplayIcon() const;
+
   // Retrieve field metadata for a field of the given message type. Returns a sentinel if not specified.
   const MessageDisplayConfig &GetMessageDisplay(const std::string &message_qname) const;
 
@@ -211,6 +225,7 @@ class ProtoModel : public QAbstractItemModel {
   virtual MessageModel         *TryCastAsMessageModel()         { return nullptr; }
   virtual RepeatedMessageModel *TryCastAsRepeatedMessageModel() { return nullptr; }
   virtual RepeatedModel        *TryCastAsRepeatedModel()        { return nullptr; }
+  virtual PrimitiveModel       *TryCastAsPrimitiveModel()       { return nullptr; }
   virtual RepeatedBoolModel    *TryCastAsRepeatedBoolModel()    { return nullptr; }
   virtual RepeatedInt32Model   *TryCastAsRepeatedInt32Model()   { return nullptr; }
   virtual RepeatedInt64Model   *TryCastAsRepeatedInt64Model()   { return nullptr; }
@@ -278,6 +293,7 @@ namespace ProtoModel_private {
 RGM_IMPLEMENT_SAFE_CAST(SafeCast, MessageModel);
 RGM_IMPLEMENT_SAFE_CAST(SafeCast, RepeatedModel);
 RGM_IMPLEMENT_SAFE_CAST(SafeCast, RepeatedMessageModel);
+RGM_IMPLEMENT_SAFE_CAST(SafeCast, PrimitiveModel);
 
 RGM_IMPLEMENT_SAFE_CAST(SafeCast, RepeatedBoolModel);
 RGM_IMPLEMENT_SAFE_CAST(SafeCast, RepeatedInt32Model);
