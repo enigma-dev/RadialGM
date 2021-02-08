@@ -98,6 +98,8 @@ void MessageModel::RebuildSubModels() {
       } else {
         submodels_by_field_[field->number()] = submodels_by_row_[i] = new MessageModel(this, field->message_type());
       }
+    } else {
+      submodels_by_field_[field->number()] = submodels_by_row_[i] = new PrimitiveModel(this, field);
     }
   }
 }
