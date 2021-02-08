@@ -245,11 +245,11 @@ void TreeModel::DisplayConfig::UseEditorWidget(const std::string &message, Edito
 
 void TreeModel::Node::ComputeDisplayData() {
   display_name = backing_model->GetDisplayName();
-  if (auto *primitive_model = backing_model->TryCastAsPrimitiveModel()) {
+  /*if (auto *primitive_model = backing_model->TryCastAsPrimitiveModel()) {
     if (const QVariant value = primitive_model->GetDirect(); !value.isNull()) {
       display_name += " = " + value.toString();
     }
-  }
+  }*/
   display_icon = backing_model->GetDisplayIcon();
 }
 
@@ -285,7 +285,7 @@ void TreeModel::Node::Absorb(TreeModel::Node &child) {
   //     Collapse(display_icon, icon_id_field, icon_path_field,
   //              child.display_icon, child.icon_id_field, child.icon_path_field);
   // value_field = child.value_field;
-  if (!child.display_name.isEmpty()) display_name = child.display_name;
+  //if (!child.display_name.isEmpty()) display_name = child.display_name;
   if (!child.display_icon.isNull()) display_icon = child.display_icon;
   children.swap(child.children);
 

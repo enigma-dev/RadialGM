@@ -52,7 +52,7 @@ void ProtoModel::DisplayConfig::SetMessageIconIdField(const std::string &message
 }
 
 const ProtoModel::FieldDisplayConfig &ProtoModel::DisplayConfig::GetFieldDisplay(const std::string &message_qname) const {
-  static const ProtoModel::FieldDisplayConfig sentinel;
+  static const ProtoModel::FieldDisplayConfig sentinel(false);
   if (auto it = field_display_configs_.find(message_qname); it != field_display_configs_.end()) return *it;
   return sentinel;
 }
@@ -62,7 +62,7 @@ const ProtoModel::FieldDisplayConfig & ProtoModel::GetFieldDisplay(const std::st
 }
 
 const ProtoModel::MessageDisplayConfig &ProtoModel::DisplayConfig::GetMessageDisplay(const std::string &message_qname) const {
-  static const ProtoModel::MessageDisplayConfig sentinel;
+  static const ProtoModel::MessageDisplayConfig sentinel(false);
   if (auto it = message_display_configs_.find(message_qname); it != message_display_configs_.end()) return *it;
   return sentinel;
 }
@@ -116,7 +116,9 @@ QVariant ProtoModel::headerData(int section, Qt::Orientation orientation, int ro
 }
 
 QString ProtoModel::GetDisplayName() const {
-  return "boobs";
+  QString name = GetFieldDisplay(GetDescriptor()->full_name()).name;
+  if (name.isEmpty()) name = QString::fromStdString(GetDescriptor()->name());
+  return name;
 }
 
 QIcon ProtoModel::GetDisplayIcon() const {

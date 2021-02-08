@@ -35,6 +35,9 @@ class MessageModel : public ProtoModel {
     return it == submodels_by_field_.end() ? nullptr : (*it)->As<T>();
   }
 
+  QString GetDisplayName() const override;
+  QIcon GetDisplayIcon() const override;
+
   const FieldDescriptor *GetRowDescriptor(int row) const override;
 
   // Returns true iff the specified row is an unset oneof field whose containing oneof has a different value specified.

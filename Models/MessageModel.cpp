@@ -16,6 +16,23 @@ MessageModel::MessageModel(QObject *parent, Message *protobuf)
 MessageModel::MessageModel(QObject *parent, const Descriptor *descriptor)
     : ProtoModel(parent, descriptor->name(), descriptor), _protobuf(nullptr) {}
 
+QString MessageModel::GetDisplayName() const {
+  auto& display = GetMessageDisplay(GetDescriptor()->full_name());
+  if (display.isValid) return Data(display.label_field).toString();
+  else return QString::fromStdString(GetDescriptor()->name());
+}
+
+QIcon MessageModel::GetDisplayIcon() const {
+  auto& display = GetMessageDisplay(GetDescriptor()->full_name());
+  if (display.isValid) {
+    auto& fdisplay = GetFieldDisplay("display.icon_field.front().field->full_name()");
+    if (fdisplay.isValid) {
+      qDebug() << "wut";
+    }
+    return {};
+  } else return {};
+}
+
 const FieldDescriptor *MessageModel::GetRowDescriptor(int row) const {
   if (row < 0 || row >= descriptor_->field_count()) {
     qDebug() << "Requesting descriptor of invalid row " << row

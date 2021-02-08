@@ -116,6 +116,9 @@ class ProtoModel : public QAbstractItemModel {
   // Contains rendering information (or transformers to use to obtain such information) for particular fields.
   // Stored in MessageModel mappings and in individual RepeatedModel instances.
   struct FieldDisplayConfig {
+    FieldDisplayConfig(bool valid = true) : isValid(valid) {}
+    bool isValid;
+
     /// Function that trades an icon ID field (e.g. its name, number, or name fragment) for its actual QIcon.
     typedef std::function<QIcon(const QVariant &)> IconLookupFn;
     /// When specified, this function accepts this field's value and returns the icon for it.
@@ -126,6 +129,9 @@ class ProtoModel : public QAbstractItemModel {
     /// Default icon
     QString icon_name;
 
+    /// Alternative name for field
+    QString name;
+
     // Allows storing icon parameters at the field level so that generalized editors can be configured per-field.
     // Note that these values are not passed to the icon loader and are not considered by the model itself.
     std::optional<QSize> min_icon_size;
@@ -135,6 +141,9 @@ class ProtoModel : public QAbstractItemModel {
   // Points to FieldDisplayConfigs within a message to use when rendering that message.
   // Stored only in MessageModel/RepeatedMessageModel.
   struct MessageDisplayConfig {
+    MessageDisplayConfig(bool valid = true) : isValid(valid) {}
+    bool isValid;
+
     /// When specified, the value of the given field is used as the label for this entire enclosing message.
     FieldPath label_field;
     /// A name to use for this node's icon if the icon field is not applicable or not set.
@@ -191,14 +200,14 @@ class ProtoModel : public QAbstractItemModel {
   /// Retrieve the custom display name for this field from the display metadata.
   /// If no custom name is set, the name of this model's field in its parent model is returned.
   /// If this is a MessageModel with no custom display name and no parent model, the message name is returned.
-  QString GetDisplayName() const;
+  virtual QString GetDisplayName() const;
 
   /// Retrieve the custom display icon for this field from the display metadata.
   /// If an icon lookup function is specified, it will be called with the appropriate argument.
   /// Otherwise, if an icon name field is set, the icon will be looked up by the value of that field.
   /// If neither of these produces a valid icon, the metadata-specified default icon for this model is returned.
   /// If none of these are specified, a null icon is returned.
-  QIcon GetDisplayIcon() const;
+  virtual QIcon GetDisplayIcon() const;
 
   // Retrieve field metadata for a field of the given message type. Returns a sentinel if not specified.
   const MessageDisplayConfig &GetMessageDisplay(const std::string &message_qname) const;
