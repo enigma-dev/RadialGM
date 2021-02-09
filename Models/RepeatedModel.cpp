@@ -34,44 +34,42 @@ QVariant RepeatedModel::data(const QModelIndex& index, int /*role*/) const {
   return GetDirect(index.row());
 }
 
-bool RepeatedModel::SetData(const FieldPath &field_path, const QVariant &value) {
-  Q_UNUSED(value);
+const ProtoModel *RepeatedModel::GetSubModel(const FieldPath &field_path) const {
   if (!field_path.fields.empty()) {
-    qDebug() << "Attempting to set sub-field `" << field_path.front()->full_name().c_str()
+    qDebug() << "Attempting to access sub-field `" << field_path.front()->full_name().c_str()
              << "` of scalar repeated field `" << field_->full_name().c_str() << "`";
-    return false;
+    return nullptr;
   }
   if (field_path.repeated_field_index != -1) {
     if (field_path.repeated_field_index < rowCount()) {
-      return SetDirect(field_path.repeated_field_index, value);
+      return GetSubModel(field_path.repeated_field_index);
     }
-    // XXX: Allow append when *just* out of bounds?
-    qDebug() << "Attempting to assign out-of-bounds index " << field_path.repeated_field_index << " of field `"
+    qDebug() << "Attempting to access out-of-bounds index " << field_path.repeated_field_index << " of field `"
              << field_path.fields[0]->full_name().c_str() << "`";
-    return false;
+    return nullptr;
   }
+  return this;
+}
+
+bool SetData(const QVariant &value) {
   qDebug() << "Unimplemented: assigning a QVariant to a repeated field.";
+  Q_UNUSED(value);
   return false;
 }
 
-QVariant RepeatedModel::Data(const FieldPath &field_path) const {
-  if (!field_path.fields.empty()) {
-    // FieldPath sub = field_path.SubPath(1);
-    // for (int i = 0; i < rowCount(); ++i) vec.push_back(Data(sub));
-    qDebug() << "Attempting to access a sub-field of a repeated field...";
-    return QVariant();
-  }
-  if (field_path.repeated_field_index) {
-    if (field_path.repeated_field_index < rowCount()) {
-      return GetDirect(field_path.repeated_field_index);
-    }
-    qDebug() << "Attempting to retrieve out-of-bounds index " << field_path.repeated_field_index << " of field `"
-             << field_path.fields[0]->full_name().c_str() << "`";
-    return QVariant();
-  }
+QVariant RepeatedModel::Data() const {
   QVector<QVariant> vec;
   for (int i = 0; i < rowCount(); ++i) vec.push_back(GetDirect(i));
   return QVariant::fromValue(vec);
+}
+
+bool RepeatedModel::SetData(const QVariant &value) {
+  if (!value.canConvert<QVector<QVariant>>()) return false;
+  auto vec = value.value<QVector<QVariant>>();
+  bool res = false;
+  qDebug() << "Unimplemented: Assigning QVariant to " << DebugName();
+  // TODO: Begin reset model; ClearWithoutSignal; for (const QVariant &v : vec) push v as new model element; end reset.
+  return res;
 }
 
 bool RepeatedModel::moveRows(const QModelIndex &sourceParent, int source, int count,

@@ -123,6 +123,7 @@ void MessageModel::RebuildSubModels() {
 
 int MessageModel::rowCount(const QModelIndex &parent) const {
   if (parent.isValid()) return 0;
+  if (!_protobuf) return 0;
   return descriptor_->field_count();
 }
 
@@ -170,49 +171,28 @@ bool MessageModel::setData(const QModelIndex &index, const QVariant &value, int 
   return true;
 }
 
-bool MessageModel::SetData(const FieldPath &field_path, const QVariant &value) {
+const ProtoModel *MessageModel::GetSubModel(const FieldPath &field_path) const {
   if (field_path.repeated_field_index != -1) {
     qDebug() << "Attempting to assign repeated index " << field_path.repeated_field_index << " of a non-repeated field";
-    return false;
+    return nullptr;
   }
-  if (!field_path) {
-    qDebug() << "Unimplemented: Attempting to assign QVariant to a message.";
-    return false;
-  }
-  if (field_path.fields.size() > 1) {
-    auto smit = submodels_by_field_.find(field_path.front()->number());
-    if (smit == submodels_by_field_.end()) return false;
-    return smit.value()->SetData(field_path.SubPath(1), value);
-  }
-  return SetDataAtRow(field_path.front()->index(), value);
+  if (!field_path) return this;
+  auto smit = submodels_by_field_.find(field_path.front()->number());
+  if (smit == submodels_by_field_.end()) return nullptr;
+  return smit.value()->GetSubModel(field_path.SkipField());
 }
 
-QVariant MessageModel::Data(const FieldPath &field_path) const {
+QVariant MessageModel::Data() const {
   if (!_protobuf) return {};
-  if (field_path.repeated_field_index != -1) {
-    qDebug() << "Attempting to assign repeated index " << field_path.repeated_field_index << " of a non-repeated field";
-    return false;
-  }
-  if (!field_path) {
-    return QVariant::fromValue(AbstractMessage(*_protobuf));
-  }
-  int row = field_path.front()->index();
-  if (field_path.size() == 1) {
-    if (field_path.front().repeated_field_index >= 0) {
-      return submodels_by_row_[row]->data(this->index(field_path.front().repeated_field_index, 0, QModelIndex()));
-    } else {
-      return DataAtRow(row);
-    }
-  }
-  if (field_path.front().repeated_field_index >= 0) {
-    const auto *rmm = submodels_by_row_[row]->As<RepeatedMessageModel>();
-    if (rmm) {
-      return rmm->GetSubModel<ProtoModel>(field_path.front().repeated_field_index)->Data(field_path.SubPath(1));
-    } else {
-      qDebug() << "Internal error: Intermediate field indicated by FieldPath is not a RepeatedMessageModel...";
-    }
-  }
-  return submodels_by_row_[row]->Data(field_path.SubPath(1));
+  return QVariant::fromValue(AbstractMessage(*_protobuf));
+}
+
+bool MessageModel::SetData(const QVariant &value) {
+  if (!value.canConvert<AbstractMessage>()) return false;
+  AbstractMessage msg = value.value<AbstractMessage>();
+  if (!msg) qDebug() << "Error: assigning null message to MessageModel";
+  qDebug() << "Unimplemented: Assigning QVariant to MessageModel: " << msg->DebugString().c_str();
+  return false;
 }
 
 template<bool NO_DEFAULT>

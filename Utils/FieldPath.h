@@ -78,9 +78,9 @@ class FieldPath {
     return FieldPath(start_index, std::move(fields));
   }
 
-  FieldPath SubPath(size_t index) const {
-    if (index >= fields.size()) return FieldPath();
-    return FieldPath({fields.begin() + index, fields.end()});
+  FieldPath SkipField() const {
+    if (fields.empty()) return FieldPath();
+    return FieldPath(fields.front().repeated_field_index, {fields.begin() + 1, fields.end()});
   }
 
   FieldPath SkipIndex() const {

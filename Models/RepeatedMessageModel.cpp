@@ -48,41 +48,31 @@ QModelIndex RepeatedMessageModel::duplicate(const QModelIndex &message) {
   return message;
 }
 
-bool RepeatedMessageModel::SetData(const FieldPath &field_path, const QVariant &value) {
-  Q_UNUSED(value);
+const ProtoModel *RepeatedMessageModel::GetSubModel(const FieldPath &field_path) const {
   if (field_path.repeated_field_index != -1) {
     if (field_path.repeated_field_index < _subModels.size())
-      return _subModels[field_path.repeated_field_index]->SetData(field_path.SkipIndex(), value);
+      return _subModels[field_path.repeated_field_index]->GetSubModel(field_path.SkipIndex());
     qDebug() << "Attempting to access out-of-bounds repeated index " << field_path.repeated_field_index
              << " of repeated field `" << field_path.fields[0]->full_name().c_str()
              << "` of size " << _subModels.size();
-    return false;
+    return nullptr;
   }
-  if (field_path.fields.empty()) {
-    qDebug() << "Unimplemented: assigning a QVariant to a repeated message field.";
-    return false;
+  if (field_path) {
+    qDebug() << "Attempting to access sub-field `" << field_path.front()->full_name().c_str()
+             << "` of repeated field `" << field_->full_name().c_str() << "` without an index";
+    return nullptr;
   }
-  qDebug() << "Attempting to set sub-field `" << field_path.front()->full_name().c_str()
-           << "` of repeated field `" << field_->full_name().c_str() << "` without an index";
+  return this;
+}
+
+bool RepeatedMessageModel::SetData(const QVariant &) {
+  qDebug() << "Unimplemented: assigning a QVariant to a repeated message field.";
   return false;
 }
 
-QVariant RepeatedMessageModel::Data(const FieldPath &field_path) const {
-  if (field_path.repeated_field_index != -1) {
-    if (field_path.repeated_field_index < _subModels.size())
-      return _subModels[field_path.repeated_field_index]->Data(field_path.SkipIndex());
-    qDebug() << "Attempgint to access out-of-bounds repeated index " << field_path.repeated_field_index
-             << " of repeated field `" << field_path.fields[0]->full_name().c_str()
-             << "` of size " << _subModels.size();
-    return QVariant();
-  }
+QVariant RepeatedMessageModel::Data() const {
   QVector<QVariant> vec;
-  if (field_path.fields.empty()) {
-    for (int i = 0; i < rowCount(); ++i) vec.push_back(GetDirect(i));
-  } else {
-    FieldPath sub_field = field_path.SubPath(1);
-    for (const auto *sub_model : _subModels) vec.push_back(sub_model->Data(sub_field));
-  }
+  for (const auto *sub_model : _subModels) vec.push_back(sub_model->Data());
   return QVariant::fromValue(vec);
 }
 

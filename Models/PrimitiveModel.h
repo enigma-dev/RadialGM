@@ -21,13 +21,20 @@ class PrimitiveModel : public ProtoModel {
 
   bool Empty() { return rowCount() == 0; }
 
-  QVariant Data(const FieldPath &field_path) const override {
-    if (field_path) qDebug() << "Trying to access a field within a primitive field...";
+  using ProtoModel::Data;
+  using ProtoModel::SetData;
+  QVariant Data() const override {
     return GetDirect();
   }
-  bool SetData(const FieldPath &field_path, const QVariant &value) override {
-    if (field_path) qDebug() << "Trying to set a field within a primitive field...";
+  bool SetData(const QVariant &value) override {
     return SetDirect(value);
+  }
+  const ProtoModel *GetSubModel(const FieldPath &field_path) const override {
+    if (field_path) {
+      qDebug() << "Trying to access a field within a primitive field...";
+      return nullptr;
+    }
+    return this;
   }
 
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override {
@@ -39,7 +46,6 @@ class PrimitiveModel : public ProtoModel {
     return SetDirect(value);
   }
 
-  // Just exposed for convenience.
   QVariant GetDirect() const {
     return _parentModel->DataAtRow(row_in_parent_);
   }

@@ -217,8 +217,21 @@ class ProtoModel : public QAbstractItemModel {
 
   // These are convience functions for getting & setting model used almost everywhere in the codebase
   // because model->setData(model->index(row, col), value, role) is a PITA to type / remember.
-  virtual QVariant Data(const FieldPath &field_path) const = 0;
-  virtual bool SetData(const FieldPath &field_path, const QVariant &value) = 0;
+  QVariant Data(const FieldPath &field_path) const {
+    if (const ProtoModel *sub = GetSubModel(field_path)) return sub->Data();
+    return QVariant();
+  }
+  bool SetData(const FieldPath &field_path, const QVariant &value) {
+    if (ProtoModel *sub = GetSubModel(field_path)) sub->SetData(value);
+    return false;
+  }
+  ProtoModel *GetSubModel(const FieldPath &field_path) {
+    return const_cast<ProtoModel*>(const_cast<const ProtoModel*>(this)->GetSubModel(field_path));
+  }
+
+  virtual QVariant Data() const = 0;
+  virtual bool SetData(const QVariant &value) = 0;
+  virtual const ProtoModel *GetSubModel(const FieldPath &field_path) const = 0;
 
   QVariant DataAtRow(int row, int col = 0) const { return data(index(row, col, QModelIndex())); }
   bool SetDataAtRow(int row, const QVariant &value) { return SetDataAtRow(row, 0, value); }

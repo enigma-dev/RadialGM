@@ -25,8 +25,11 @@ class RepeatedMessageModel : public BasicRepeatedModel<Message> {
   void RemoveLastNRowsWithoutSignal(int /*newSize*/) override;
   void ClearWithoutSignal() override;
 
-  QVariant Data(const FieldPath &field_path) const override;
-  bool SetData(const FieldPath &field_path, const QVariant &value) override;
+  using ProtoModel::Data;
+  using ProtoModel::SetData;
+  QVariant Data() const override;
+  bool SetData(const QVariant &value) override;
+  const ProtoModel *GetSubModel(const FieldPath &field_path) const override;
 
   bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override;
   QVariant data(const QModelIndex &index, int role) const override;
