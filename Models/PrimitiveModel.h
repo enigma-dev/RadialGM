@@ -29,13 +29,7 @@ class PrimitiveModel : public ProtoModel {
   bool SetData(const QVariant &value) override {
     return SetDirect(value);
   }
-  const ProtoModel *GetSubModel(const FieldPath &field_path) const override {
-    if (field_path) {
-      qDebug() << "Trying to access a field within a primitive field...";
-      return nullptr;
-    }
-    return this;
-  }
+  const ProtoModel *GetSubModel(const FieldPath &field_path) const override;
 
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override {
     if (index.column() || index.row() || role != Qt::DisplayRole) return QVariant();
@@ -59,11 +53,9 @@ class PrimitiveModel : public ProtoModel {
   }
   PrimitiveModel *TryCastAsPrimitiveModel() override { return this; }
 
-  const FieldDescriptor *GetRowDescriptor(int row) const override {
-    Q_UNUSED(row);  // All rows of a repeated field have the same descriptor.
-    if (field_or_null_) return field_or_null_;
-    return _parentModel->GetRowDescriptor(row_in_parent_);
-  }
+  const FieldDescriptor *GetRowDescriptor(int row) const override;
+
+  QIcon GetDisplayIcon() const override;
 
   // ===================================================================================================================
   // == Moves / deletion / addition - Qt implementations for primitive fields. =========================================

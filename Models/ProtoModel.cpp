@@ -5,6 +5,7 @@
 
 #include "Components/Logger.h"
 
+#include <Components/ArtManager.h>
 #include <QIcon>
 
 ProtoModel::DisplayConfig ProtoModel::display_config_;
@@ -36,19 +37,27 @@ void ProtoModel::SetDirty(bool dirty) { _dirty = dirty; }
 
 bool ProtoModel::IsDirty() { return _dirty; }
 
+QIcon LookUpIconByName(const QVariant &name) {
+  return ArtManager::GetIcon(name.toString());
+}
+
 void ProtoModel::DisplayConfig::SetDefaultIcon(const std::string &message, const QString &icon_name) {
   field_display_configs_[message].icon_name = icon_name;
 }
 void ProtoModel::DisplayConfig::SetMessageIconPathField(const std::string &message, const FieldPath &field_path) {
-  message_display_configs_[message].icon_field = field_path;
+  SetMessageIconIdField(message, field_path, LookUpIconByName);
 }
 void ProtoModel::DisplayConfig::SetMessageLabelField(const std::string &message, const FieldPath &field_path) {
   message_display_configs_[message].label_field = field_path;
 }
 void ProtoModel::DisplayConfig::SetMessageIconIdField(const std::string &message, const FieldPath &field_path,
-                                                     FieldDisplayConfig::IconLookupFn icon_lookup_function) {
-  field_display_configs_[message].icon_file_field = field_path;
-  field_display_configs_[message].icon_lookup_function = icon_lookup_function;
+                                                      FieldDisplayConfig::IconLookupFn icon_lookup_function) {
+  std::string field = message;
+  message_display_configs_[message].icon_field = field_path;
+  for (const auto &fcomp : field_path.fields) field += "." + fcomp->name();
+  if (field_path.size() != 1)
+    qDebug() << "Warning: Nested icon fields not currently implemented; `" << field.c_str() << "` won't work properly";
+  field_display_configs_[field].icon_lookup_function = icon_lookup_function;
 }
 
 const ProtoModel::FieldDisplayConfig &ProtoModel::DisplayConfig::GetFieldDisplay(const std::string &message_qname) const {

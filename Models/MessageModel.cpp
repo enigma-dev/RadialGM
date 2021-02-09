@@ -25,12 +25,12 @@ QString MessageModel::GetDisplayName() const {
 QIcon MessageModel::GetDisplayIcon() const {
   auto& display = GetMessageDisplay(GetDescriptor()->full_name());
   if (display.isValid) {
-    auto& fdisplay = GetFieldDisplay("display.icon_field.front().field->full_name()");
-    if (fdisplay.isValid) {
-      qDebug() << "wut";
+    if (display.icon_field) {
+      if (const ProtoModel *icon_field = GetSubModel(display.icon_field)) return icon_field->GetDisplayIcon();
+
     }
-    return {};
-  } else return {};
+  }
+  return {};
 }
 
 const FieldDescriptor *MessageModel::GetRowDescriptor(int row) const {

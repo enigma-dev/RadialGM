@@ -124,8 +124,6 @@ class ProtoModel : public QAbstractItemModel {
     /// When specified, this function accepts this field's value and returns the icon for it.
     IconLookupFn icon_lookup_function;
 
-    /// filename on disk
-    FieldPath icon_file_field;
     /// Default icon
     QString icon_name;
 

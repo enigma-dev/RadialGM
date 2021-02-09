@@ -77,6 +77,7 @@ SOURCES += \
     Models/EventTypesListSortFilterProxyModel.cpp \
     Models/EventsListModel.cpp \
     Models/MessageModel.cpp \
+    Models/PrimitiveModel.cpp \
     Models/RepeatedMessageModel.cpp \
     Models/RepeatedModel.cpp \
     Utils/FieldPath.cpp \
