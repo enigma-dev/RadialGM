@@ -84,7 +84,7 @@ void ObjectEditor::AddChangeFromMenuEvent(const QModelIndex &index, bool add) {
 
 void ObjectEditor::RebindSubModels() {
   _objectModel = _model->GetSubModel<MessageModel *>(TreeNode::kObjectFieldNumber);
-  _eventsModel->setSourceModel(_objectModel->GetSubModel<RepeatedMessageModel *>(Object::kEgmEventsFieldNumber));
+  _eventsModel->SetSourceModel(_objectModel->GetSubModel<RepeatedMessageModel *>(Object::kEgmEventsFieldNumber));
 
   _sortedEvents = new QSortFilterProxyModel(_eventsModel);
   _sortedEvents->setSourceModel(_eventsModel);
@@ -151,9 +151,7 @@ void ObjectEditor::ChangeEvent(int idx, Object::EgmEvent event, bool changeCode)
   if (event.arguments_size() > 0) {
     argsModel->insertRows(argsModel->rowCount(), event.arguments_size());
     for (const auto &arg : event.arguments()) {
-      argsModel->SetData(
-          FieldPath::Of<Object::EgmEvent>(FieldPath::StartingAt(argc), Object::EgmEvent::kArgumentsFieldNumber),
-          QString::fromStdString(arg));
+      argsModel->SetDirect(argc, QString::fromStdString(arg));
       argc++;
     }
   }

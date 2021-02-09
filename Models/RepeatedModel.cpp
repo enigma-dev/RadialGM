@@ -126,7 +126,7 @@ bool RepeatedModel::insertRows(int row, int count, const QModelIndex &parent) {
 
   // Append `count` new rows to the list, then move them backward to where they were supposed to be inserted.
   for (int i = 0; i < count; ++i) AppendNewWithoutSignal();
-  //SwapBackWithoutSignal(row, p, rowCount());
+  SwapBackWithoutSignal(row, p, rowCount());
   ParentDataChanged();
 
   endInsertRows();
