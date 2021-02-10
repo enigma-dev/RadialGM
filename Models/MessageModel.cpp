@@ -26,9 +26,11 @@ QIcon MessageModel::GetDisplayIcon() const {
   auto& display = GetMessageDisplay(GetDescriptor()->full_name());
   if (display.isValid) {
     if (display.icon_field) {
-      if (const ProtoModel *icon_field = GetSubModel(display.icon_field)) return icon_field->GetDisplayIcon();
-
+      if (const ProtoModel *icon_field = GetSubModel(display.icon_field))
+        return icon_field->GetDisplayIcon();
     }
+    if (display.icon_lookup_function) return display.icon_lookup_function(this);
+    if (!display.default_icon_name.isEmpty()) return ArtManager::GetIcon(display.default_icon_name);
   }
   return {};
 }
@@ -213,8 +215,7 @@ QVariant MessageModel::dataInternal(const QModelIndex &index, int role) const {
 
   // These are for icons in things like the room's instance list
   if (role == Qt::DecorationRole) {
-    // TODO: Move the decoration attributes out of TreeModel::FieldMeta and into a base struct shared by ProtoModel.
-    return QVariant();
+    return GetDisplayIcon();
   }
 
   // The logic below will kill proto if the field is repeated. Abort now.

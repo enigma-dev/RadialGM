@@ -8,6 +8,7 @@
 #include <QAbstractItemModel>
 #include <QDebug>
 #include <QHash>
+#include <QIcon>
 #include <QList>
 #include <QSize>
 
@@ -124,8 +125,8 @@ class ProtoModel : public QAbstractItemModel {
     /// When specified, this function accepts this field's value and returns the icon for it.
     IconLookupFn icon_lookup_function;
 
-    /// Default icon
-    QString icon_name;
+    /// When icon_lookup_functopm offers no icon, this is the default icon to use for this field.
+    QString default_icon_name;
 
     /// Alternative name for field
     QString name;
@@ -146,6 +147,14 @@ class ProtoModel : public QAbstractItemModel {
     FieldPath label_field;
     /// A name to use for this node's icon if the icon field is not applicable or not set.
     FieldPath icon_field;
+
+    /// Function that trades an icon ID field (e.g. its name, number, or name fragment) for its actual QIcon.
+    typedef std::function<QIcon(const MessageModel *)> IconLookupFn;
+    /// When specified, this function accepts an entire model to compute an icon for it.
+    IconLookupFn icon_lookup_function;
+
+    /// When icon_field and icon_lookup_function offer no icon, this is the default icon to use for this message.
+    QString default_icon_name;
   };
 
   // ===================================================================================================================

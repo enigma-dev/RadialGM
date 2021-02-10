@@ -42,7 +42,7 @@ QIcon LookUpIconByName(const QVariant &name) {
 }
 
 void ProtoModel::DisplayConfig::SetDefaultIcon(const std::string &message, const QString &icon_name) {
-  field_display_configs_[message].icon_name = icon_name;
+  message_display_configs_[message].default_icon_name = icon_name;
 }
 void ProtoModel::DisplayConfig::SetMessageIconPathField(const std::string &message, const FieldPath &field_path) {
   SetMessageIconIdField(message, field_path, LookUpIconByName);

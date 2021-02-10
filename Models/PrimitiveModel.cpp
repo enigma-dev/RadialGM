@@ -21,6 +21,6 @@ QIcon PrimitiveModel::GetDisplayIcon() const {
   const FieldDescriptor *field = GetRowDescriptor(0);
   auto &display = GetFieldDisplay(field->full_name());
   if (display.icon_lookup_function) return display.icon_lookup_function(GetDirect());
-  if (!display.icon_name.isEmpty()) return ArtManager::GetIcon(display.icon_name);
+  if (!display.default_icon_name.isEmpty()) return ArtManager::GetIcon(display.default_icon_name);
   return {};
 }

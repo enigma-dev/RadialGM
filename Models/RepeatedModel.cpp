@@ -1,4 +1,5 @@
 #include "RepeatedModel.h"
+#include "Components/Logger.h"
 
 #include <QDataStream>
 #include <QImageReader>
@@ -20,18 +21,16 @@ bool RepeatedModel::setData(const QModelIndex& index, const QVariant& value, int
   return SetDirect(index.row(), value);
 }
 
-QVariant RepeatedModel::data(const QModelIndex& index, int /*role*/) const {
-  if (index.column() != 0) {
-    qDebug() << "Invalid column index";
-    return QVariant();
-  }
+QVariant RepeatedModel::data(const QModelIndex& index, int role) const {
+  R_EXPECT(index.column() == 0, QVariant()) << "Invalid column index " << index.column() << " to " << DebugName();
+  R_EXPECT(index.row() >= 0 && index.row() < rowCount(), QVariant())
+      << "Row index " << index.row() << " is out of bounds (" << rowCount() << " rows total)";
 
-  if (index.row() < 0 || index.row() >= rowCount()) {
-    qDebug() << "Invalid row index";
-    return QVariant();
+  switch (role) {
+    case Qt::DisplayRole: return GetDirect(index.row());
+    case Qt::DecorationRole: return GetSubModel(index.row())->GetDisplayIcon();
+    default: return QVariant();
   }
-
-  return GetDirect(index.row());
 }
 
 const ProtoModel *RepeatedModel::GetSubModel(const FieldPath &field_path) const {

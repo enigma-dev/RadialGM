@@ -144,6 +144,7 @@ HEADERS += \
     Models/RepeatedModel.h \
     Utils/FieldPath.h \
     Utils/ProtoManip.h \
+    Utils/QBoilerplate.h \
     Utils/SafeCasts.h \
     Widgets/AssetScrollArea.h \
     Widgets/AssetScrollAreaBackground.h \

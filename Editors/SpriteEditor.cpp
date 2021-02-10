@@ -1,8 +1,9 @@
-#include "SpriteEditor.h"
-#include "Components/Utility.h"
-#include "Models/MessageModel.h"
-
 #include "ui_SpriteEditor.h"
+
+#include "Components/Utility.h"
+#include "SpriteEditor.h"
+#include "Models/MessageModel.h"
+#include "Utils/QBoilerplate.h"
 
 #include <QCheckBox>
 #include <QClipboard>
@@ -24,6 +25,7 @@ SpriteEditor::SpriteEditor(MessageModel* model, QWidget* parent)
   showBBox->setChecked(true);
   QCheckBox* showOrigin = new QCheckBox(tr("Show Origin"), this);
   showOrigin->setChecked(true);
+  _ui->subImageList->setItemDelegate(new qboilerplate::RemoveDisplayRole);
 
   _ui->mainToolBar->addWidget(showBBox);
   _ui->mainToolBar->addWidget(showOrigin);
