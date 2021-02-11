@@ -101,15 +101,16 @@ void RoomEditor::RebindSubModels() {
   _ui->instancesListView->setModel(imp);
 
   for (int c = 0; c < im->columnCount(); ++c) {
-    if (c != Room::Instance::kNameFieldNumber && c != Room::Instance::kObjectTypeFieldNumber &&
-        c != Room::Instance::kIdFieldNumber)
+    if (c != im->FieldToColumn(Room::Instance::kNameFieldNumber) &&
+        c != im->FieldToColumn(Room::Instance::kObjectTypeFieldNumber) &&
+        c != im->FieldToColumn(Room::Instance::kIdFieldNumber))
       _ui->instancesListView->hideColumn(c);
     else
       _ui->instancesListView->resizeColumnToContents(c);
   }
 
-  _ui->instancesListView->header()->swapSections(Room::Instance::kNameFieldNumber,
-                                                 Room::Instance::kObjectTypeFieldNumber);
+  _ui->instancesListView->header()->swapSections(im->FieldToColumn(Room::Instance::kNameFieldNumber),
+                                                 im->FieldToColumn(Room::Instance::kObjectTypeFieldNumber));
 
   RepeatedMessageModel* tm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
   QSortFilterProxyModel* tmp = new QSortFilterProxyModel(this);
@@ -117,14 +118,16 @@ void RoomEditor::RebindSubModels() {
   _ui->tilesListView->setModel(tmp);
 
   for (int c = 0; c < tm->columnCount(); ++c) {
-    if (c != Room::Tile::kBackgroundNameFieldNumber && c != Room::Tile::kIdFieldNumber &&
-        c != Room::Tile::kDepthFieldNumber && c != Room::Tile::kNameFieldNumber)
+    if (c != tm->FieldToColumn(Room::Tile::kBackgroundNameFieldNumber) &&
+        c != tm->FieldToColumn(Room::Tile::kIdFieldNumber) && c != tm->FieldToColumn(Room::Tile::kDepthFieldNumber) &&
+        c != tm->FieldToColumn(Room::Tile::kNameFieldNumber))
       _ui->tilesListView->hideColumn(c);
     else
       _ui->tilesListView->resizeColumnToContents(c);
   }
 
-  _ui->tilesListView->header()->swapSections(Room::Tile::kNameFieldNumber, Room::Tile::kBackgroundNameFieldNumber);
+  _ui->tilesListView->header()->swapSections(tm->FieldToColumn(Room::Tile::kNameFieldNumber),
+                                             tm->FieldToColumn(Room::Tile::kBackgroundNameFieldNumber));
 
   RepeatedMessageModel* vm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kViewsFieldNumber);
   _viewMapper->setModel(vm);

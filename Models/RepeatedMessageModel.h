@@ -20,6 +20,15 @@ class RepeatedMessageModel : public BasicRepeatedModel<Message> {
     return (index < 0 || index > _subModels.size()) ? nullptr : (ProtoModel*) _subModels[index];
   }
 
+  // Translates an underlying Protocol Buffer tag (field number) to the column number from this model.
+  int FieldToColumn(int field_number) const {
+    const FieldDescriptor *field = field_->message_type()->FindFieldByNumber(field_number);
+    if (field) return field->index();
+    qDebug() << "Looking up bad field number " << field_number
+             << " in RepeatedMessageModel " << GetDescriptor()->full_name().c_str();
+    return -1;
+  }
+
   void SwapWithoutSignal(int /*left*/, int /*right*/) override;
   void AppendNewWithoutSignal() override;
   void RemoveLastNRowsWithoutSignal(int /*newSize*/) override;

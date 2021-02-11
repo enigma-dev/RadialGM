@@ -209,12 +209,7 @@ class BasicRepeatedModel : public RepeatedModel {
   }
 
   void RemoveLastNRowsWithoutSignal(int n) override {
-    if (n > field_ref_.size()) {
-      qDebug() << "Attempt to remove last " << n << " rows of a field with " << field_ref_.size() << " rows";
-      field_ref_.Clear();
-      return;
-    }
-    for (int j = 0; j < n; ++j) field_ref_.RemoveLast();
+    for (int j = 0; j <= n; ++j) field_ref_.RemoveLast();
   }
 
  protected:
