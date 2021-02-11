@@ -85,6 +85,8 @@ QVariant RepeatedMessageModel::data(const QModelIndex &index, int role) const {
       return _subModels[index.row()]->data(_subModels[index.row()]->index(index.column()), role);
     case Qt::DecorationRole:
       return _subModels[index.row()]->GetDisplayIcon();
+    default:
+      return {};
   }
 }
 
