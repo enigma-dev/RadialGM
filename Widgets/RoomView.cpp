@@ -9,7 +9,7 @@
 #include <QDebug>
 #include <QPainter>
 
-bool InstanceSortFilterProxyModel::lessThan(const QModelIndex& left, const QModelIndex& right) const {
+/*bool InstanceSortFilterProxyModel::lessThan(const QModelIndex& left, const QModelIndex& right) const {
   QVariant leftData = sourceModel()->data(left);
   QVariant rightData = sourceModel()->data(right);
 
@@ -25,22 +25,22 @@ bool InstanceSortFilterProxyModel::lessThan(const QModelIndex& left, const QMode
 
   return objA->Data(FieldPath::Of<Object>(Object::kDepthFieldNumber)).toInt() <
          objB->Data(FieldPath::Of<Object>(Object::kDepthFieldNumber)).toInt();
-}
+}*/
 
 RoomView::RoomView(AssetScrollAreaBackground* parent) : AssetView(parent), _model(nullptr) {
   setFixedSize(sizeHint());
-  this->_sortedInstances = new InstanceSortFilterProxyModel(this);
-  this->_sortedTiles = new QSortFilterProxyModel(this);
+  _sortedInstances = new RepeatedSortFilterProxyModel(this);
+  _sortedTiles = new RepeatedSortFilterProxyModel(this);
 }
 
 void RoomView::SetResourceModel(MessageModel* model) {
-  this->_model = model;
+  _model = model;
 
   if (model != nullptr) {
-    this->_sortedInstances->setSourceModel(model->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber));
-    this->_sortedInstances->sort(Room::Instance::kObjectTypeFieldNumber);
-    this->_sortedTiles->setSourceModel(model->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber));
-    this->_sortedTiles->sort(Room::Tile::kDepthFieldNumber);
+    _sortedInstances->SetSourceModel(model->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber));
+    _sortedInstances->sort(Room::Instance::kObjectTypeFieldNumber);
+    _sortedTiles->SetSourceModel(model->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber));
+    _sortedTiles->sort(Room::Tile::kDepthFieldNumber);
   }
   setFixedSize(sizeHint());
   repaint();
@@ -76,32 +76,40 @@ void RoomView::Paint(QPainter& painter) {
       QRectF(0, 0, roomWidth.isValid() ? roomWidth.toUInt() : 640, roomWidth.isValid() ? roomHeight.toUInt() : 480),
       QBrush(roomColor));
 
-  this->paintBackgrounds(painter, false);
-  this->paintTiles(painter);
-  this->paintInstances(painter);
-  this->paintBackgrounds(painter, true);
+  paintBackgrounds(painter, false);
+  paintTiles(painter);
+  paintInstances(painter);
+  paintBackgrounds(painter, true);
 }
 
 void RoomView::paintTiles(QPainter& painter) {
-  //FIXME: data() -> Data()
   for (int row = 0; row < _sortedTiles->rowCount(); row++) {
-    QVariant bkgName = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kBackgroundNameFieldNumber));
+    QVariant bkgName = _sortedTiles->Data(
+        FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kBackgroundNameFieldNumber));
     MessageModel* bkg = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, bkgName.toString());
     if (!bkg) continue;
     bkg = bkg->GetSubModel<MessageModel*>(TreeNode::kBackgroundFieldNumber);
     if (!bkg) continue;
 
-    MessageModel* tile = _sortedTiles->data(_sortedTiles->index(row, 0)).value<MessageModel*>();
-    R_ASSESS_C(tile);
-    int x = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kXFieldNumber)).toInt();
-    int y = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kYFieldNumber)).toInt();
-    int xOff = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kXoffsetFieldNumber)).toInt();
-    int yOff = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kYoffsetFieldNumber)).toInt();
-    int w = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kWidthFieldNumber)).toInt();
-    int h = _sortedTiles->data(_sortedTiles->index(row, Room::Tile::kHeightFieldNumber)).toInt();
+    int x =
+        _sortedTiles->Data(FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kXFieldNumber)).toInt();
+    int y =
+        _sortedTiles->Data(FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kYFieldNumber)).toInt();
+    int xOff =
+        _sortedTiles->Data(FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kXoffsetFieldNumber))
+            .toInt();
+    int yOff =
+        _sortedTiles->Data(FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kYoffsetFieldNumber))
+            .toInt();
+    int w = _sortedTiles->Data(FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kWidthFieldNumber))
+                .toInt();
+    int h = _sortedTiles->Data(FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kHeightFieldNumber))
+                .toInt();
 
-    QVariant xScale = tile->dataOrDefault(tile->index(Room::Tile::kXscaleFieldNumber));
-    QVariant yScale = tile->dataOrDefault(tile->index(Room::Tile::kYscaleFieldNumber));
+    QVariant xScale = _sortedTiles->DataOrDefault(
+        FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kXscaleFieldNumber));
+    QVariant yScale = _sortedTiles->DataOrDefault(
+        FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kYscaleFieldNumber));
 
     QString imgFile = bkg->Data(FieldPath::Of<Background>(Background::kImageFieldNumber)).toString();
     QPixmap pixmap = ArtManager::GetCachedPixmap(imgFile);
@@ -119,20 +127,17 @@ void RoomView::paintTiles(QPainter& painter) {
 void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
   RepeatedMessageModel* backgrounds = _model->GetSubModel<RepeatedMessageModel*>(Room::kBackgroundsFieldNumber);
   for (int row = 0; row < backgrounds->rowCount(); row++) {
-    bool visible = backgrounds
-                       ->Data(FieldPath::Of<Room::Background>(
-                           FieldPath::StartingAt(row),
-                           Room::Background::kVisibleFieldNumber))
-                       .toBool();
+    bool visible =
+        backgrounds
+            ->Data(FieldPath::Of<Room::Background>(FieldPath::StartingAt(row), Room::Background::kVisibleFieldNumber))
+            .toBool();
     bool foreground = backgrounds
-                          ->Data(FieldPath::Of<Room::Background>(
-                              FieldPath::StartingAt(row),
-                              Room::Background::kForegroundFieldNumber))
+                          ->Data(FieldPath::Of<Room::Background>(FieldPath::StartingAt(row),
+                                                                 Room::Background::kForegroundFieldNumber))
                           .toBool();
     QString bkgName = backgrounds
-                          ->Data(FieldPath::Of<Room::Background>(
-                              FieldPath::StartingAt(row),
-                              Room::Background::kBackgroundNameFieldNumber))
+                          ->Data(FieldPath::Of<Room::Background>(FieldPath::StartingAt(row),
+                                                                 Room::Background::kBackgroundNameFieldNumber))
                           .toString();
 
     if (!visible || foreground != foregrounds) continue;
@@ -141,12 +146,12 @@ void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
     bkgRes = bkgRes->GetSubModel<MessageModel*>(TreeNode::kBackgroundFieldNumber);
     if (!bkgRes) continue;
 
-    int x = backgrounds
-                ->Data(FieldPath::Of<Room::Background>(FieldPath::StartingAt(row), Room::Background::kXFieldNumber))
-                .toInt();
-    int y = backgrounds
-                ->Data(FieldPath::Of<Room::Background>(FieldPath::StartingAt(row), Room::Background::kYFieldNumber))
-                .toInt();
+    int x =
+        backgrounds->Data(FieldPath::Of<Room::Background>(FieldPath::StartingAt(row), Room::Background::kXFieldNumber))
+            .toInt();
+    int y =
+        backgrounds->Data(FieldPath::Of<Room::Background>(FieldPath::StartingAt(row), Room::Background::kYFieldNumber))
+            .toInt();
     int w = bkgRes->Data(FieldPath::Of<Background>(Background::kWidthFieldNumber)).toInt();
     int h = bkgRes->Data(FieldPath::Of<Background>(Background::kHeightFieldNumber)).toInt();
 
@@ -157,10 +162,10 @@ void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
     QRectF dest(x, y, w, h);
     QRectF src(0, 0, w, h);
 
-    bool stretch = backgrounds
-                       ->Data(FieldPath::Of<Room::Background>(
-                           FieldPath::StartingAt(row), Room::Background::kStretchFieldNumber))
-                       .toBool();
+    bool stretch =
+        backgrounds
+            ->Data(FieldPath::Of<Room::Background>(FieldPath::StartingAt(row), Room::Background::kStretchFieldNumber))
+            .toBool();
     int room_w = _model->Data(FieldPath::Of<Room>(Room::kWidthFieldNumber)).toInt();
     int room_h = _model->Data(FieldPath::Of<Room>(Room::kHeightFieldNumber)).toInt();
 
@@ -169,14 +174,14 @@ void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
       painter.scale(room_w / qreal(w), room_h / qreal(h));
     }
 
-    bool hTiled = backgrounds
-                      ->Data(FieldPath::Of<Room::Background>(
-                          FieldPath::StartingAt(row), Room::Background::kHtiledFieldNumber))
-                      .toBool();
-    bool vTiled = backgrounds
-                      ->Data(FieldPath::Of<Room::Background>(
-                          FieldPath::StartingAt(row), Room::Background::kVtiledFieldNumber))
-                      .toBool();
+    bool hTiled =
+        backgrounds
+            ->Data(FieldPath::Of<Room::Background>(FieldPath::StartingAt(row), Room::Background::kHtiledFieldNumber))
+            .toBool();
+    bool vTiled =
+        backgrounds
+            ->Data(FieldPath::Of<Room::Background>(FieldPath::StartingAt(row), Room::Background::kVtiledFieldNumber))
+            .toBool();
 
     if (hTiled) {
       dest.setX(0);
@@ -203,7 +208,8 @@ void RoomView::paintInstances(QPainter& painter) {
     int xoff = 0;
     int yoff = 0;
 
-    QVariant sprName = _sortedInstances->data(_sortedInstances->index(row, Room::Instance::kObjectTypeFieldNumber));
+    QVariant sprName = _sortedInstances->Data(
+        FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kObjectTypeFieldNumber));
 
     MessageModel* spr = GetObjectSprite(sprName.toString());
     if (spr == nullptr || spr->GetSubModel<RepeatedStringModel*>(Sprite::kSubimagesFieldNumber)->Empty()) {
@@ -220,14 +226,16 @@ void RoomView::paintInstances(QPainter& painter) {
     QPixmap pixmap = ArtManager::GetCachedPixmap(imgFile);
     if (pixmap.isNull()) continue;
 
-    MessageModel* inst = _sortedInstances->data(_sortedInstances->index(row, 0)).value<MessageModel*>();
-    R_ASSESS_C(inst);
-    //FIXME: change these to use Data()
-    QVariant x = _sortedInstances->data(_sortedInstances->index(row, Room::Instance::kXFieldNumber));
-    QVariant y = _sortedInstances->data(_sortedInstances->index(row, Room::Instance::kYFieldNumber));
-    QVariant xScale = inst->dataOrDefault(inst->index(Room::Instance::kXscaleFieldNumber));
-    QVariant yScale = inst->dataOrDefault(inst->index(Room::Instance::kYscaleFieldNumber));
-    QVariant rot = inst->dataOrDefault(inst->index(Room::Instance::kRotationFieldNumber));
+    QVariant x = _sortedInstances->Data(
+        FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kXFieldNumber));
+    QVariant y = _sortedInstances->Data(
+        FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kYFieldNumber));
+    QVariant xScale = _sortedInstances->DataOrDefault(
+        FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kXscaleFieldNumber));
+    QVariant yScale = _sortedInstances->DataOrDefault(
+        FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kYscaleFieldNumber));
+    QVariant rot = _sortedInstances->DataOrDefault(
+        FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kRotationFieldNumber));
 
     QRectF dest(0, 0, w, h);
     QRectF src(0, 0, w, h);
