@@ -12,7 +12,7 @@ class RepeatedSortFilterProxyModel : public QSortFilterProxyModel {
   RepeatedSortFilterProxyModel(QObject *parent);
   void SetSourceModel(RepeatedModel *sourceModel);
   QVariant Data(FieldPath field_path) const;
-  QVariant DataOrDefault(FieldPath field_path) const;
+  QVariant DataOrDefault(FieldPath field_path, const QVariant def = QVariant()) const;
   void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
 
 protected:

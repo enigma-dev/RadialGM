@@ -1,4 +1,5 @@
 #include "RepeatedSortFilterProxyModel.h"
+#include "Components/Logger.h"
 
 RepeatedSortFilterProxyModel::RepeatedSortFilterProxyModel(QObject *parent) : QSortFilterProxyModel(parent) {}
 
@@ -7,29 +8,23 @@ void RepeatedSortFilterProxyModel::SetSourceModel(RepeatedModel *sourceModel) {
   QSortFilterProxyModel::setSourceModel(model_);
 }
 
-QVariant RepeatedSortFilterProxyModel::Data(FieldPath field_path) const {
-  if (!model_) {
-    qDebug() << "null model";
-    return QVariant();
-  }
-  auto idx = index(field_path.repeated_field_index, 0);
-  if (field_path.repeated_field_index == -1 || !idx.isValid() || !idx.internalPointer()) {
-    qDebug() << "invalid index";
-    return QVariant();
-  }
-  int source_row = mapToSource(idx).row();
-  return model_->Data(FieldPath{source_row, field_path.fields});
-}
+QVariant RepeatedSortFilterProxyModel::Data(FieldPath field_path) const { return DataOrDefault(field_path); }
 
-QVariant RepeatedSortFilterProxyModel::DataOrDefault(FieldPath field_path) const {
-  return 1;
+QVariant RepeatedSortFilterProxyModel::DataOrDefault(FieldPath field_path, const QVariant def) const {
+  R_EXPECT(model_, QVariant()) << "Internal model null";
+
+  auto idx = index(field_path.repeated_field_index, 0);
+
+  R_EXPECT(field_path.repeated_field_index != -1 && idx.isValid() && idx.internalPointer(), QVariant())
+      << "Invalid index" << idx;
+
+  int source_row = mapToSource(idx).row();
+  return model_->DataOrDefault(FieldPath{source_row, field_path.fields}, def);
 }
 
 void RepeatedSortFilterProxyModel::sort(int column, Qt::SortOrder order) {
-  if (!model_) {
-    qDebug() << "null model";
-    return;
-  }
+  R_EXPECT_V(model_) << "Internal model null";
+
   if (auto *const repeated_message_model = model_->TryCastAsRepeatedMessageModel()) {
     QSortFilterProxyModel::sort(repeated_message_model->FieldToColumn(column), order);
   } else

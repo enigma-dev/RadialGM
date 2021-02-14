@@ -48,10 +48,8 @@ void RoomView::SetResourceModel(MessageModel* model) {
 
 QSize RoomView::sizeHint() const {
   if (!_model) return QSize(640, 480);
-  QVariant roomWidth = _model->Data(FieldPath::Of<Room>(Room::kWidthFieldNumber)),
-           roomHeight = _model->Data(FieldPath::Of<Room>(Room::kHeightFieldNumber));
-  // TODO: add model defaults (enigma-dev/enigma-dev#1872)
-  if (!roomWidth.isValid() || !roomHeight.isValid()) return QSize(640, 480);
+  QVariant roomWidth = _model->DataOrDefault(FieldPath::Of<Room>(Room::kWidthFieldNumber), 640),
+           roomHeight = _model->DataOrDefault(FieldPath::Of<Room>(Room::kHeightFieldNumber), 480);
   return QSize(roomWidth.toUInt(), roomHeight.toUInt());
 }
 
@@ -231,11 +229,11 @@ void RoomView::paintInstances(QPainter& painter) {
     QVariant y = _sortedInstances->Data(
         FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kYFieldNumber));
     QVariant xScale = _sortedInstances->DataOrDefault(
-        FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kXscaleFieldNumber));
+        FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kXscaleFieldNumber), 1);
     QVariant yScale = _sortedInstances->DataOrDefault(
-        FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kYscaleFieldNumber));
+        FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kYscaleFieldNumber), 1);
     QVariant rot = _sortedInstances->DataOrDefault(
-        FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kRotationFieldNumber));
+        FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kRotationFieldNumber), 0);
 
     QRectF dest(0, 0, w, h);
     QRectF src(0, 0, w, h);

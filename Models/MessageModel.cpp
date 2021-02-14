@@ -254,10 +254,6 @@ QVariant MessageModel::data(const QModelIndex &index, int role) const {
   return dataInternal<true>(index, role);
 }
 
-QVariant MessageModel::dataOrDefault(const QModelIndex &index, int role) const {
-  return dataInternal<false>(index, role);
-}
-
 QModelIndex MessageModel::parent(const QModelIndex & /*index*/) const { return QModelIndex(); }
 
 QVariant MessageModel::headerData(int section, Qt::Orientation /*orientation*/, int role) const {
