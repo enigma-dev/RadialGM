@@ -60,14 +60,19 @@ void ProtoModel::DisplayConfig::SetMessageIconIdField(const std::string &message
   field_display_configs_[field].icon_lookup_function = icon_lookup_function;
 }
 
-const ProtoModel::FieldDisplayConfig &ProtoModel::DisplayConfig::GetFieldDisplay(const std::string &message_qname) const {
+void ProtoModel::DisplayConfig::SetFieldIconLookup(const FieldDescriptor *field,
+                                                   FieldDisplayConfig::IconLookupFn icon_lookup_function) {
+  field_display_configs_[field->full_name()].icon_lookup_function = icon_lookup_function;
+}
+
+const ProtoModel::FieldDisplayConfig &ProtoModel::DisplayConfig::GetFieldDisplay(const std::string &field_qname) const {
   static const ProtoModel::FieldDisplayConfig sentinel(false);
-  if (auto it = field_display_configs_.find(message_qname); it != field_display_configs_.end()) return *it;
+  if (auto it = field_display_configs_.find(field_qname); it != field_display_configs_.end()) return *it;
   return sentinel;
 }
 
-const ProtoModel::FieldDisplayConfig & ProtoModel::GetFieldDisplay(const std::string &message_qname) const {
-  return display_config_.GetFieldDisplay(message_qname);
+const ProtoModel::FieldDisplayConfig & ProtoModel::GetFieldDisplay(const std::string &field_qname) const {
+  return display_config_.GetFieldDisplay(field_qname);
 }
 
 const ProtoModel::MessageDisplayConfig &ProtoModel::DisplayConfig::GetMessageDisplay(const std::string &message_qname) const {

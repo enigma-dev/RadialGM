@@ -216,10 +216,7 @@ QVariant MessageModel::dataInternal(const QModelIndex &index, int role) const {
 
   // These are for icons in things like the room's instance list
   if (role == Qt::DecorationRole) {
-    //const QString refType = QString::fromStdString(field->options().GetExtension(buffers::resource_ref));
-    for (int i = 0; i < field->options().GetDescriptor()->field_count(); ++i)
-      qDebug() << QString::fromStdString(field->options().GetDescriptor()->field(i)->full_name());
-    return GetDisplayIcon();
+    return submodels_by_row_[index.row()]->GetDisplayIcon();
   }
 
   // The logic below will kill proto if the field is repeated. Abort now.

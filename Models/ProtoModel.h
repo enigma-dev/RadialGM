@@ -186,11 +186,15 @@ class ProtoModel : public QAbstractItemModel {
       SetMessageIconIdField(T::descriptor()->full_name(), FieldPath::Of<T>(field_path...), icon_lookup_function);
     }
 
+    /// Associates a field with a lambda to fetch an icon from its value.
+    /// The field can contain any identifying information that can be mapped to an icon by the specified function.
+    void SetFieldIconLookup(const FieldDescriptor *field, FieldDisplayConfig::IconLookupFn icon_lookup_function);
+
     // Fetch metadata (or the default instance) by its qualified message name.
     const MessageDisplayConfig &GetMessageDisplay(const std::string &message_qname) const;
 
     // Ditto for fields
-    const FieldDisplayConfig &GetFieldDisplay(const std::string &message_qname) const;
+    const FieldDisplayConfig &GetFieldDisplay(const std::string &field_qname) const;
 
    private:
     // These mirror the above, but are not compile-time safe.
@@ -220,7 +224,7 @@ class ProtoModel : public QAbstractItemModel {
   const MessageDisplayConfig &GetMessageDisplay(const std::string &message_qname) const;
 
   // Retrieve field metadata for a field of the given message type. Returns a sentinel if not specified.
-  const FieldDisplayConfig &GetFieldDisplay(const std::string &message_qname) const;
+  const FieldDisplayConfig &GetFieldDisplay(const std::string &field_qname) const;
 
   // These are convience functions for getting & setting model used almost everywhere in the codebase
   // because model->setData(model->index(row, col), value, role) is a PITA to type / remember.

@@ -326,6 +326,29 @@ template<typename Editor> TreeModel::EditorLauncher Launch(MainWindow *parent) {
   };
 }
 
+void ConfigureIconFields(ProtoModel::DisplayConfig *conf, const Descriptor *desc, std::set<const Descriptor*> *visited) {
+  for (int i = 0; i < desc->field_count(); ++i) {
+    const FieldDescriptor *field = desc->field(i);
+    if (field->options().HasExtension(buffers::resource_ref)) {
+      std::string resource_type = field->options().GetExtension(buffers::resource_ref);
+      if (resource_type == "object") {
+        conf->SetFieldIconLookup(field, GetObjectSpriteByNameField);
+      } else {
+        qDebug() << "Unknown resource ref type: " << resource_type.c_str();
+      }
+    }
+    if (const Descriptor *submsg = field->message_type()) {
+      if (visited->insert(submsg).second) ConfigureIconFields(conf, submsg, visited);
+    }
+  }
+}
+
+void ConfigureIconFields(ProtoModel::DisplayConfig *conf, const Descriptor *desc) {
+  std::set<const Descriptor*> visited{desc};
+  return ConfigureIconFields(conf, desc, &visited);
+}
+
+
 void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   this->_ui->mdiArea->closeAllSubWindows();
   ArtManager::clearCache();
@@ -358,6 +381,8 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   msgConf.SetDefaultIcon<buffers::resources::Object>("object");
   msgConf.SetDefaultIcon<buffers::resources::Room>("room");
   msgConf.SetDefaultIcon<buffers::resources::Settings>("settings");
+
+  ConfigureIconFields(&msgConf, TreeNode::GetDescriptor());
 
   msgConf.SetMessageIconPathField<buffers::resources::Sprite>(
         FieldPath::RepeatedOffset(buffers::resources::Sprite::kSubimagesFieldNumber, 0));

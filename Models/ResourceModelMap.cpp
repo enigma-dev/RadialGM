@@ -196,10 +196,12 @@ void ResourceModelMap::ResourceRenamed(TreeModel::Node* node, const QString& old
   emit DataChanged();
 }
 
-MessageModel* GetObjectSprite(const std::string& objName) { return GetObjectSprite(QString::fromStdString(objName)); }
+MessageModel* GetObjectSprite(const std::string& object_name) {
+  return GetObjectSprite(QString::fromStdString(object_name));
+}
 
-MessageModel* GetObjectSprite(const QString& objName) {
-  MessageModel* obj = MainWindow::resourceMap->GetResourceByName(TreeNode::kObject, objName);
+MessageModel* GetObjectSprite(const QString& object_name) {
+  MessageModel* obj = MainWindow::resourceMap->GetResourceByName(TreeNode::kObject, object_name);
   if (!obj) return nullptr;
   obj = obj->GetSubModel<MessageModel*>(TreeNode::kObjectFieldNumber);
   if (!obj) return nullptr;
@@ -221,4 +223,13 @@ QIcon GetSpriteIconByName(const QString& sprite_name) {
                                                     FieldPath::RepeatedOffset(Sprite::kSubimagesFieldNumber, 0)));
   if (path.isNull()) return {};
   return ArtManager::GetIcon(path.toString());
+}
+
+QIcon GetObjectSpriteByNameField(const QVariant& object_name) {
+  std::string object_name_str = object_name.toString().toStdString();
+  MessageModel* obj = MainWindow::resourceMap->GetResourceByName(TreeNode::kObject, object_name_str);
+  if (!obj) return QIcon();
+  obj = obj->GetSubModel<MessageModel*>(TreeNode::kObjectFieldNumber);
+  if (!obj) return QIcon();
+  return GetSpriteIconByNameField(obj->Data(FieldPath::Of<Object>(Object::kSpriteNameFieldNumber)));
 }

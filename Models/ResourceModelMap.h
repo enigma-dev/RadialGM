@@ -31,10 +31,13 @@ class ResourceModelMap : public QObject {
   QHash<int, QHash<QString, QPair<buffers::TreeNode*, MessageModel*>>> _resources;
 };
 
-MessageModel* GetObjectSprite(const std::string& objName);
-MessageModel* GetObjectSprite(const QString& objName);
+MessageModel* GetObjectSprite(const std::string& object_name);
+MessageModel* GetObjectSprite(const QString& object_name);
+
 QIcon GetSpriteIconByName(const QString& sprite_name);
 /// Wraps GetSpriteIconByName, but expects the QVariant field content rather than a direct string.
 QIcon GetSpriteIconByNameField(const QVariant& sprite_name);
+/// Retrieves the icon for the sprite assigned to the object with the given name.
+QIcon GetObjectSpriteByNameField(const QVariant& object_name);
 
 #endif  // MODELMAP_H
