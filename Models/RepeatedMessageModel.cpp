@@ -81,15 +81,7 @@ QVariant RepeatedMessageModel::Data() const {
 QVariant RepeatedMessageModel::data(const QModelIndex &index, int role) const {
   R_EXPECT(index.row() >= 0 && index.row() < rowCount(), QVariant())
       << "Row index " << index.row() << " is out of bounds (" << rowCount() << " rows total)";
-
-  switch (role) {
-    case Qt::DisplayRole:
-      return _subModels[index.row()]->data(_subModels[index.row()]->index(index.column()), role);
-    case Qt::DecorationRole:
-      return _subModels[index.row()]->GetDisplayIcon();
-    default:
-      return {};
-  }
+  return _subModels[index.row()]->data(_subModels[index.row()]->index(index.column()), role);
 }
 
 int RepeatedMessageModel::columnCount(const QModelIndex & /*parent*/) const {
