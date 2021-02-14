@@ -41,9 +41,9 @@ class RepeatedModel : public ProtoModel {
   }
 
   void Clear() {
-    emit beginResetModel();
+    beginResetModel();
     ClearWithoutSignal();
-    emit endResetModel();
+    endResetModel();
     ParentDataChanged();
   }
 
@@ -138,7 +138,7 @@ class RepeatedModel : public ProtoModel {
         }
       }
 
-      emit model_.beginResetModel();
+      model_.beginResetModel();
 
       // Basic dense range removal. Move "deleted" rows to the end of the array.
       int left = 0, right = 0;
@@ -163,7 +163,7 @@ class RepeatedModel : public ProtoModel {
         model_.RemoveLastNRowsWithoutSignal(range.size());
       }
 
-      emit model_.endResetModel();
+      model_.endResetModel();
 
       model_.ParentDataChanged();
     }

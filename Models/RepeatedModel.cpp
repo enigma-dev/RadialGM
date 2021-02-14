@@ -64,7 +64,7 @@ QVariant RepeatedModel::Data() const {
 
 bool RepeatedModel::SetData(const QVariant &value) {
   if (!value.canConvert<QVector<QVariant>>()) return false;
-  auto vec = value.value<QVector<QVariant>>();
+  //auto vec = value.value<QVector<QVariant>>();
   bool res = false;
   qDebug() << "Unimplemented: Assigning QVariant to " << DebugName();
   // TODO: Begin reset model; ClearWithoutSignal; for (const QVariant &v : vec) push v as new model element; end reset.
@@ -173,7 +173,7 @@ QMimeData* RepeatedModel::mimeData(const QModelIndexList& indexes) const {
     }
   }
 
-  mimeData->setData(mimeTypes()[0], encodedData);
+  mimeData->setData(mimeTypes().at(0), encodedData);
 
   return mimeData;
 }
@@ -182,7 +182,7 @@ bool RepeatedModel::dropMimeData(const QMimeData* data, Qt::DropAction action, i
                                  const QModelIndex& parent) {
   if (row < 0) return false;
   if (action == Qt::IgnoreAction) return true;
-  if (!data->hasFormat(mimeTypes()[0])) return false;
+  if (!data->hasFormat(mimeTypes().at(0))) return false;
   if (column > 0) return false;
 
   int beginRow;
@@ -193,7 +193,7 @@ bool RepeatedModel::dropMimeData(const QMimeData* data, Qt::DropAction action, i
   else
     beginRow = rowCount(QModelIndex());
 
-  QByteArray encodedData = data->data(mimeTypes()[0]);
+  QByteArray encodedData = data->data(mimeTypes().at(0));
   QDataStream stream(&encodedData, QIODevice::ReadOnly);
   QStringList newItems;
   int rows = 0;

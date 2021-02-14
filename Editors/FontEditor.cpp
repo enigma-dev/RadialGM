@@ -24,7 +24,7 @@ The quick brown fox jumps over the lazy dog.");
   _resMapper->addMapping(_ui->boldCheckBox, Font::kBoldFieldNumber);
   _resMapper->addMapping(_ui->italicCheckBox, Font::kItalicFieldNumber);
 
-  RebindSubModels();
+  FontEditor::RebindSubModels();
 }
 
 FontEditor::~FontEditor() { delete _ui; }
@@ -48,7 +48,9 @@ void FontEditor::RebindSubModels() {
 
   if (!fontModel->Data(FieldPath::Of<Font>(Font::kFontNameFieldNumber)).isValid()) {
     QFontDatabase db;
-    fontModel->SetData(FieldPath::Of<Font>(Font::kFontNameFieldNumber), db.families().first());
+    QString name = tr("Unknown Font");
+    if (db.families().size() > 0) name = db.families().at(0);
+    fontModel->SetData(FieldPath::Of<Font>(Font::kFontNameFieldNumber), name);
   }
 
   BaseEditor::RebindSubModels();

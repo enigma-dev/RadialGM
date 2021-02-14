@@ -58,7 +58,7 @@ SoundEditor::SoundEditor(MessageModel* model, QWidget* parent)
 
   _mediaPlayer->setPlaylist(_playlist);
 
-  RebindSubModels();
+  SoundEditor::RebindSubModels();
 }
 
 SoundEditor::~SoundEditor() { delete _ui; }
@@ -114,7 +114,7 @@ void SoundEditor::on_loadButton_clicked() {
   FileDialog* dialog = new FileDialog(this, FileDialog_t::SoundLoad, false);
 
   if (dialog->exec() && dialog->selectedFiles().size() > 0) {
-    QString fName = dialog->selectedFiles()[0];
+    QString fName = dialog->selectedFiles().at(0);
     if (fName.endsWith("Sound.gmx") || fName.endsWith(".spr")) {
       std::optional<Sound> snd = egm::LoadResource<Sound>(fName.toStdString());
       if (snd.has_value()) {

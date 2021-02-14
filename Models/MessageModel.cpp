@@ -56,10 +56,7 @@ bool MessageModel::IsCulledOneofRow(int row) const {
 void MessageModel::RebuildSubModels() {
   submodels_by_field_.clear();
   submodels_by_row_.clear();
-  if (!_protobuf) {
-    qDebug() << "Whatever, man.";
-    return;
-  }
+  R_EXPECT_V(_protobuf) << "Internal protobuf null";
 
   const Descriptor *desc = _protobuf->GetDescriptor();
   const Reflection *refl = _protobuf->GetReflection();
@@ -70,6 +67,10 @@ void MessageModel::RebuildSubModels() {
 
     if (field->is_repeated()) {
       switch (field->cpp_type()) {
+        case CppType::CPPTYPE_ENUM: {
+          qDebug() << "ENUMs not yet handled";
+          break;
+        }
         case CppType::CPPTYPE_MESSAGE: {
           submodels_by_field_[field->number()] = submodels_by_row_[i] = new RepeatedMessageModel(this, _protobuf, field);
           break;

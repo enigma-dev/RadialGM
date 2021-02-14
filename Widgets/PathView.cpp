@@ -151,7 +151,7 @@ void PathView::Paint(QPainter &painter) {
     painter.setPen(QPen(Qt::black, 1));
 
     painter.setBrush(QBrush(Qt::blue));
-    for (const QPoint &point : user_points) {
+    for (const QPoint &point : qAsConst(user_points)) {
       painter.drawEllipse(point, 4, 4);
     }
 

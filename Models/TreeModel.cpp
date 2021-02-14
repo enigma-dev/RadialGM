@@ -253,9 +253,6 @@ void TreeModel::Node::ComputeDisplayData() {
   display_icon = backing_model->GetDisplayIcon();
 }
 
-static bool IsUnset(const QIcon &icon) { return icon.isNull(); }
-static bool IsUnset(const QString &string) { return string.isEmpty(); }
-
 // template <typename T>
 // std::pair<T, FieldPath> Collapse(T my_value, const FieldPath &my_field, T child_value, const FieldPath &child_field) {
 //   if (my_field) return {my_value, my_field};
@@ -324,7 +321,7 @@ QModelIndex TreeModel::addNode(const Message &child, const QModelIndex &parent) 
   return insert(insertParent, pos, child);
 }
 
-QModelIndex TreeModel::duplicateNode(const QModelIndex &index) {
+QModelIndex TreeModel::duplicateNode(const QModelIndex &/*index*/) {
   /*Node *node = IndexToNode(index);
   if (node->repeated_model) {
     return node->mapFromSource(node->repeated_model->duplicate(mapToSource(index)));
@@ -333,7 +330,7 @@ QModelIndex TreeModel::duplicateNode(const QModelIndex &index) {
   return QModelIndex();
 }
 
-void TreeModel::removeNode(const QModelIndex &index) {/*
+void TreeModel::removeNode(const QModelIndex &/*index*/) {/*
   if (!index.isValid()) return;
   auto *node = static_cast<Message *>(index.internalPointer());
   if (!node) return;
@@ -353,7 +350,7 @@ void TreeModel::removeNode(const QModelIndex &index) {/*
   emit endRemoveRows();*/
 }
 
-void TreeModel::sortByName(const QModelIndex &index) {/*
+void TreeModel::sortByName(const QModelIndex &/*index*/) {/*
   if (!index.isValid()) return;
   auto *node = static_cast<Message *>(index.internalPointer());
   if (!node) return;

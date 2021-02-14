@@ -28,7 +28,7 @@ bool InstanceSortFilterProxyModel::lessThan(const QModelIndex& left, const QMode
 }
 
 RoomView::RoomView(AssetScrollAreaBackground* parent) : AssetView(parent), _model(nullptr) {
-  setFixedSize(sizeHint());
+  setFixedSize(RoomView::sizeHint());
   _sortedInstances = new InstanceSortFilterProxyModel(this);
   _sortedTiles = new RepeatedSortFilterProxyModel(this);
 }

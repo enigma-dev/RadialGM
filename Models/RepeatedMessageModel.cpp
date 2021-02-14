@@ -38,13 +38,15 @@ bool RepeatedMessageModel::setData(const QModelIndex &index, const QVariant &val
   return _subModels[index.row()]->setData(_subModels[index.row()]->index(index.column()), value, role);
 }
 
-QModelIndex RepeatedMessageModel::insert(const Message &message, int row) {
+QModelIndex RepeatedMessageModel::insert(const Message &/*message*/, int row) {
   // TODO: write me
+  qDebug() << "Unimplemented";
   return index(row, 0);
 }
 
 QModelIndex RepeatedMessageModel::duplicate(const QModelIndex &message) {
   // TODO: write me
+  qDebug() << "Unimplemented";
   return message;
 }
 

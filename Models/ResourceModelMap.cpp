@@ -53,7 +53,7 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
 
   // Delete all instances of this object type
   if (type == TypeCase::kObject) {
-    for (auto room : _resources[TypeCase::kRoom]) {
+    for (auto room : qAsConst(_resources[TypeCase::kRoom])) {
       MessageModel* roomModel = room.second->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
       RepeatedMessageModel* instancesModel = roomModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
       RepeatedMessageModel::RowRemovalOperation remover(instancesModel);
@@ -86,7 +86,7 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
 
   // Delete all tiles using this background
   if (type == TypeCase::kBackground) {
-    for (auto room : _resources[TypeCase::kRoom]) {
+    for (auto room : qAsConst(_resources[TypeCase::kRoom])) {
       MessageModel* roomModel = room.second->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
       RepeatedMessageModel* tilesModel = roomModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
       RepeatedMessageModel::RowRemovalOperation remover(tilesModel);
@@ -116,8 +116,8 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
   }
 
   // Remove an references to this resource
-  for (auto res : _resources) {
-    for (auto model : res) {
+  for (auto& res : qAsConst(_resources)) {
+    for (auto& model : res) {
       UpdateReferences(model.second, ResTypeAsString(type), name, "");
     }
   }
@@ -185,8 +185,8 @@ void ResourceModelMap::ResourceRenamed(TreeModel::Node* node, const QString& old
   if (oldName == newName || !_resources[type].contains(oldName)) return;
   _resources[type][newName] = _resources[type][oldName];
 
-  for (auto res : _resources) {
-    for (auto model : res) {
+  for (auto& res : qAsConst(_resources)) {
+    for (auto& model : res) {
       UpdateReferences(model.second, ResTypeAsString(type), oldName, newName);
     }
   }

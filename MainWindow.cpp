@@ -228,9 +228,6 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 void MainWindow::openSubWindow(MessageModel* res, MainWindow::EditorFactoryFunction factory_function) {
   using namespace google::protobuf;
 
-  using TypeCase = buffers::TreeNode::TypeCase;
-  using FactoryMap = std::unordered_map<TypeCase, std::function<BaseEditor *(MessageModel * m, QWidget * p)>>;
-
   auto swIt = _subWindows.find(res);
   QMdiSubWindow *subWindow;
   if (swIt == _subWindows.end() || !*swIt) {
@@ -275,7 +272,7 @@ void MainWindow::updateWindowMenu() {
     const auto windowTitle = mdiSubWindow->windowTitle();
     QString numberString = QString::number(i + 1);
     numberString = numberString.insert(numberString.length() - 1, '&');
-    QString text = tr("%1 %2").arg(numberString).arg(windowTitle);
+    QString text = tr("%1 %2").arg(numberString, windowTitle);
 
     QAction *action = _ui->menuWindow->addAction(
         mdiSubWindow->windowIcon(), text, mdiSubWindow,
@@ -310,7 +307,7 @@ void MainWindow::openNewProject() {
                                   tr("Scripts"), tr("Shaders"), tr("Fonts"),       tr("Timelines"),
                                   tr("Objects"), tr("Rooms"),   tr("Includes"),    tr("Configs")};
   // We can edit the proto directly, here, since the model doesn't exist, yet.
-  for (auto groupName : defaultGroups) {
+  for (const auto& groupName : defaultGroups) {
     auto *groupNode = root->mutable_folder()->add_children();
     groupNode->set_name(groupName.toStdString());
     groupNode->mutable_folder();
@@ -555,14 +552,14 @@ void MainWindow::on_actionProperties_triggered() {
   }
 }
 
-static void CollectNodes(const buffers::TreeNode *root, QSet<const buffers::TreeNode *> &cache) {
+/*static void CollectNodes(const buffers::TreeNode *root, QSet<const buffers::TreeNode *> &cache) {
   cache.insert(root);
   for (int i = 0; i < root->folder().children_size(); ++i) {
     auto *child = &root->folder().children(i);
     cache.insert(child);
     if (child->has_folder()) CollectNodes(child, cache);
   }
-}
+}*/
 
 void MainWindow::on_actionDelete_triggered() {/*
   if (!_ui->treeView->selectionModel()->hasSelection()) return;

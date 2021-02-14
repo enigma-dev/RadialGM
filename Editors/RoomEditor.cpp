@@ -86,7 +86,7 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
     _ui->layersPropertiesView->reset();
   });
 
-  RebindSubModels();
+  RoomEditor::RebindSubModels();
 }
 
 RoomEditor::~RoomEditor() { delete _ui; }

@@ -1,5 +1,6 @@
 #include "AssetScrollAreaBackground.h"
 #include "Components/ArtManager.h"
+#include "Components/Logger.h"
 #include "MainWindow.h"
 #include "Widgets/RoomView.h"
 
@@ -203,6 +204,7 @@ void AssetScrollAreaBackground::paintEvent(QPaintEvent* /* event */) {
     }
   }
 
+  R_EXPECT_V(_assetView) << "Asset view is null";
   _assetView->PaintTop(painter);
 }
 

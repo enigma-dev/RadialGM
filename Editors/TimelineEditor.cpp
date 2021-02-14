@@ -58,7 +58,7 @@ TimelineEditor::TimelineEditor(MessageModel* model, QWidget* parent)
     CheckDisableButtons(_ui->stepBox->value());
   });
 
-  RebindSubModels();
+  TimelineEditor::RebindSubModels();
 }
 
 TimelineEditor::~TimelineEditor() { delete _ui; }

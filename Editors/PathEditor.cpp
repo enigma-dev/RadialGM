@@ -93,7 +93,7 @@ PathEditor::PathEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   _resMapper->addMapping(xSnap, Path::kHsnapFieldNumber);
   _resMapper->addMapping(ySnap, Path::kVsnapFieldNumber);
 
-  RebindSubModels();
+  PathEditor::RebindSubModels();
 }
 
 PathEditor::~PathEditor() { delete _ui; }

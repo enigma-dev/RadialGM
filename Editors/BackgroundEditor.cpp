@@ -33,7 +33,7 @@ BackgroundEditor::BackgroundEditor(MessageModel* model, QWidget* parent)
   _resMapper->addMapping(_ui->verticalSpacingSpinBox, Background::kVerticalSpacingFieldNumber);
   _resMapper->toFirst();
 
-  RebindSubModels();
+  BackgroundEditor::RebindSubModels();
 }
 
 BackgroundEditor::~BackgroundEditor() { delete _ui; }
@@ -75,7 +75,7 @@ void BackgroundEditor::on_actionLoadImage_triggered() {
   FileDialog* dialog = new FileDialog(this, FileDialog_t::BackgroundLoad, false);
 
   if (dialog->exec() && dialog->selectedFiles().size() > 0) {
-    QString fName = dialog->selectedFiles()[0];
+    QString fName = dialog->selectedFiles().at(0);
     if (fName.endsWith("Background.gmx") || fName.endsWith(".bkg")) {
       std::optional<Background> bkg = egm::LoadResource<Background>(fName.toStdString());
       if (bkg.has_value()) {
@@ -98,7 +98,7 @@ void BackgroundEditor::on_actionSaveImage_triggered() {
   FileDialog* dialog = new FileDialog(this, FileDialog_t::BackgroundSave, true);
 
   if (dialog->exec() && dialog->selectedFiles().size() > 0) {
-    QString fName = dialog->selectedFiles()[0];
+    QString fName = dialog->selectedFiles().at(0);
     _ui->backgroundView->WriteImage(fName, dialog->selectedMimeTypeFilter());
   }
 }

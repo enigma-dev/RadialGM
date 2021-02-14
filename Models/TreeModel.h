@@ -189,9 +189,9 @@ class TreeModel : public QAbstractItemModel {
 
  signals:
   // Called when the name of a single TreeNode changes.
-  void ItemRenamed(Node *node, const QString &oldName, const QString &newName);
+  void ItemRenamed(TreeModel::Node *node, const QString &oldName, const QString &newName);
   // Called when a resource (or group of resources) is moved.
-  void ItemMoved(Node *node, TreeNode *old_parent);
+  void ItemMoved(TreeModel::Node *node, TreeNode *old_parent);
 
  private:
   QHash<ProtoModel*, Node*> backing_nodes_;

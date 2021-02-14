@@ -36,7 +36,7 @@ ObjectEditor::ObjectEditor(MessageModel *model, QWidget *parent)
   BindEventMenu(_ui->addEventButton, true);
   BindEventMenu(_ui->changeEventButton, false);
 
-  RebindSubModels();
+  ObjectEditor::RebindSubModels();
 }
 
 ObjectEditor::~ObjectEditor() { delete _ui; }

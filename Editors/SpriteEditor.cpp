@@ -42,7 +42,7 @@ SpriteEditor::SpriteEditor(MessageModel* model, QWidget* parent)
   _resMapper->addMapping(_ui->topSpinBox, Sprite::kBboxTopFieldNumber);
   _resMapper->addMapping(_ui->bottomSpinBox, Sprite::kBboxBottomFieldNumber);
 
-  RebindSubModels();
+  SpriteEditor::RebindSubModels();
 }
 
 SpriteEditor::~SpriteEditor() { delete _ui; }
@@ -75,7 +75,7 @@ void SpriteEditor::LoadedMismatchedImage(QSize expectedSize, QSize actualSize) {
   QString actual = tr("Actual: ") + QString::number(actualSize.width()) + " x " + QString::number(actualSize.height());
 
   QMessageBox::critical(this, tr("Failed to load image"),
-                        QString(tr("Error mismatched image sizes\n%1\n%2")).arg(expected).arg(actual), QMessageBox::Ok);
+                        QString(tr("Error mismatched image sizes\n%1\n%2")).arg(expected, actual), QMessageBox::Ok);
   // TODO: Add some remedies to this such as streching, croping or scaling the background
 }
 
@@ -85,7 +85,8 @@ void SpriteEditor::SubImagesRemoved() {
 
 void SpriteEditor::RemoveSelectedIndexes() {
   RepeatedStringModel::RowRemovalOperation remover(_subimagesModel);
-  for (QModelIndex idx : _ui->subImageList->selectionModel()->selectedIndexes()) {
+  auto const idxs = _ui->subImageList->selectionModel()->selectedIndexes();
+  for (QModelIndex idx : idxs) {
     remover.RemoveRow(idx.row());
   }
 }
@@ -162,10 +163,11 @@ void SpriteEditor::on_actionLoadSubimages_triggered() {
   dialog->setFileMode(QFileDialog::ExistingFiles);
 
   if (dialog->exec() && dialog->selectedFiles().size() > 0) {
-    QImageReader img(dialog->selectedFiles()[0]);
+    QImageReader img(dialog->selectedFiles().at(0));
     if (img.size().width() > 0 && img.size().height() > 0) {
       _subimagesModel->Clear();
-      for (QString fName : dialog->selectedFiles()) {
+      auto const selected = dialog->selectedFiles();
+      for (const QString& fName : selected) {
         QImageReader newImg(fName);
         if (img.size() == newImg.size()) {
           _subimagesModel->insertRow(_subimagesModel->rowCount());
@@ -178,7 +180,7 @@ void SpriteEditor::on_actionLoadSubimages_triggered() {
         }
       }
     } else {
-      qDebug() << " Failed to load image: " << dialog->selectedFiles()[0];
+      qDebug() << " Failed to load image: " << dialog->selectedFiles().at(0);
     }
   }
 }
@@ -190,7 +192,8 @@ void SpriteEditor::on_actionAddSubimages_triggered() {
 
   if (dialog->exec() && dialog->selectedFiles().size() > 0) {
     QSize imgSize = _ui->subimagePreview->GetPixmap().size();
-    for (QString fName : dialog->selectedFiles()) {
+    auto const files = dialog->selectedFiles();
+    for (const QString& fName : files) {
       QImageReader newImg(fName);
       if (imgSize == newImg.size()) {
         _subimagesModel->insertRow(_subimagesModel->rowCount());
@@ -203,7 +206,7 @@ void SpriteEditor::on_actionAddSubimages_triggered() {
       }
     }
   } else {
-    qDebug() << " Failed to load image: " << dialog->selectedFiles()[0];
+    qDebug() << " Failed to load image: " << dialog->selectedFiles().at(0);
   }
 }
 
@@ -214,7 +217,8 @@ void SpriteEditor::on_actionZoomIn_triggered() { _ui->scrollAreaWidget->ZoomIn()
 void SpriteEditor::on_actionZoomOut_triggered() { _ui->scrollAreaWidget->ZoomOut(); }
 
 void SpriteEditor::on_actionEditSubimages_triggered() {
-  for (QModelIndex idx : _ui->subImageList->selectionModel()->selectedIndexes()) {
+  auto const selected = _ui->subImageList->selectionModel()->selectedIndexes();
+  for (const QModelIndex& idx : selected) {
     QDesktopServices::openUrl(QUrl::fromLocalFile(
         _subimagesModel->Data(FieldPath::Of<Sprite>(FieldPath::StartingAt(idx.row()), Sprite::kSubimagesFieldNumber))
             .toString()));
