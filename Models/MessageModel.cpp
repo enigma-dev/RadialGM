@@ -242,7 +242,7 @@ QVariant MessageModel::dataInternal(const QModelIndex &index, int role) const {
     case CppType::CPPTYPE_UINT64: return static_cast<unsigned long long>(refl->GetUInt64(*_protobuf, field));
     case CppType::CPPTYPE_DOUBLE: return refl->GetDouble(*_protobuf, field);
     case CppType::CPPTYPE_FLOAT: return refl->GetFloat(*_protobuf, field);
-    case CppType::CPPTYPE_BOOL: return QVariant();
+    case CppType::CPPTYPE_BOOL: return refl->GetBool(*_protobuf, field);
     case CppType::CPPTYPE_ENUM: return refl->GetEnumValue(*_protobuf, field);
     case CppType::CPPTYPE_STRING: return QString::fromStdString(refl->GetString(*_protobuf, field));
   }

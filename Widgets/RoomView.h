@@ -5,6 +5,12 @@
 #include "Models/MessageModel.h"
 #include "Models/RepeatedSortFilterProxyModel.h"
 
+class InstanceSortFilterProxyModel : public RepeatedSortFilterProxyModel {
+ public:
+  InstanceSortFilterProxyModel(QObject *parent) : RepeatedSortFilterProxyModel(parent) {}
+  bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
+};
+
 class RoomView : public AssetView {
   Q_OBJECT
 
@@ -16,7 +22,7 @@ class RoomView : public AssetView {
 
  protected:
   MessageModel *_model;
-  RepeatedSortFilterProxyModel *_sortedInstances;
+  InstanceSortFilterProxyModel *_sortedInstances;
   RepeatedSortFilterProxyModel *_sortedTiles;
   QPixmap _transparentPixmap;
 

@@ -9,7 +9,7 @@
 #include <QDebug>
 #include <QPainter>
 
-/*bool InstanceSortFilterProxyModel::lessThan(const QModelIndex& left, const QModelIndex& right) const {
+bool InstanceSortFilterProxyModel::lessThan(const QModelIndex& left, const QModelIndex& right) const {
   QVariant leftData = sourceModel()->data(left);
   QVariant rightData = sourceModel()->data(right);
 
@@ -25,11 +25,11 @@
 
   return objA->Data(FieldPath::Of<Object>(Object::kDepthFieldNumber)).toInt() <
          objB->Data(FieldPath::Of<Object>(Object::kDepthFieldNumber)).toInt();
-}*/
+}
 
 RoomView::RoomView(AssetScrollAreaBackground* parent) : AssetView(parent), _model(nullptr) {
   setFixedSize(sizeHint());
-  _sortedInstances = new RepeatedSortFilterProxyModel(this);
+  _sortedInstances = new InstanceSortFilterProxyModel(this);
   _sortedTiles = new RepeatedSortFilterProxyModel(this);
 }
 
