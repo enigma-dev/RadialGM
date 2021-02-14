@@ -11,7 +11,7 @@ class EventsListModel : public QIdentityProxyModel {
  private:
   EventData* eventData_;
   RepeatedMessageModel* model_;
-  void setSourceModel(QAbstractItemModel */*newSourceModel*/) override {};
+  void setSourceModel(QAbstractItemModel* /*newSourceModel*/) override {};
 
  public:
   EventsListModel(EventData* eventData, QObject* parent = nullptr);
