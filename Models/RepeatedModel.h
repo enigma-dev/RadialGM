@@ -209,7 +209,7 @@ class BasicRepeatedModel : public RepeatedModel {
   }
 
   void RemoveLastNRowsWithoutSignal(int n) override {
-    for (int j = 0; j <= n; ++j) field_ref_.RemoveLast();
+    for (int j = 0; j < n; ++j) field_ref_.RemoveLast();
   }
 
  protected:

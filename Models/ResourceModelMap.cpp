@@ -217,10 +217,12 @@ QIcon GetSpriteIconByNameField(const QVariant& sprite_name) {
 }
 
 QIcon GetSpriteIconByName(const QString& sprite_name) {
-  MessageModel* spr = MainWindow::resourceMap->GetResourceByName(TreeNode::kSprite, sprite_name);
+  ProtoModel* spr = MainWindow::resourceMap->GetResourceByName(TreeNode::kSprite, sprite_name);
   if (!spr) return {};
-  QVariant path = spr->Data(FieldPath::Of<TreeNode>(TreeNode::kSpriteFieldNumber,
-                                                    FieldPath::RepeatedOffset(Sprite::kSubimagesFieldNumber, 0)));
+  spr = spr->GetSubModel(FieldPath::Of<TreeNode>(TreeNode::kSpriteFieldNumber));
+  auto subimgs = spr->GetSubModel(FieldPath::Of<Sprite>(Sprite::kSubimagesFieldNumber));
+  if (subimgs->rowCount() == 0) return {};
+  QVariant path = subimgs->DataAtRow(0);
   if (path.isNull()) return {};
   return ArtManager::GetIcon(path.toString());
 }
