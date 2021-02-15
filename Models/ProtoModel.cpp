@@ -65,6 +65,10 @@ void ProtoModel::DisplayConfig::SetFieldIconLookup(const FieldDescriptor *field,
   field_display_configs_[field->full_name()].icon_lookup_function = icon_lookup_function;
 }
 
+void ProtoModel::DisplayConfig::SetFieldDefaultIcon(const FieldDescriptor *field, const QString &icon_name) {
+  field_display_configs_[field->full_name()].default_icon_name = icon_name;
+}
+
 const ProtoModel::FieldDisplayConfig &ProtoModel::DisplayConfig::GetFieldDisplay(const std::string &field_qname) const {
   static const ProtoModel::FieldDisplayConfig sentinel(false);
   if (auto it = field_display_configs_.find(field_qname); it != field_display_configs_.end()) return *it;

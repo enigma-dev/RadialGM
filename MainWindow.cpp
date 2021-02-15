@@ -333,6 +333,7 @@ void ConfigureIconFields(ProtoModel::DisplayConfig *conf, const Descriptor *desc
       std::string resource_type = field->options().GetExtension(buffers::resource_ref);
       if (resource_type == "object") {
         conf->SetFieldIconLookup(field, GetObjectSpriteByNameField);
+        conf->SetFieldDefaultIcon(field, "object");
       } else if (resource_type == "sprite") {
         conf->SetFieldIconLookup(field, GetSpriteIconByNameField);
       } else if (resource_type == "background") {

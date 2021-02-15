@@ -190,6 +190,9 @@ class ProtoModel : public QAbstractItemModel {
     /// The field can contain any identifying information that can be mapped to an icon by the specified function.
     void SetFieldIconLookup(const FieldDescriptor *field, FieldDisplayConfig::IconLookupFn icon_lookup_function);
 
+    /// Set the icon that will be used to display a given field node when no icon field is set on it.
+    void SetFieldDefaultIcon(const FieldDescriptor *field, const QString &icon_name);
+
     // Fetch metadata (or the default instance) by its qualified message name.
     const MessageDisplayConfig &GetMessageDisplay(const std::string &message_qname) const;
 

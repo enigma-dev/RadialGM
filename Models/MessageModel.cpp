@@ -24,12 +24,16 @@ QString MessageModel::GetDisplayName() const {
 
 QIcon MessageModel::GetDisplayIcon() const {
   auto& display = GetMessageDisplay(GetDescriptor()->full_name());
+  QIcon ret;
   if (display.isValid) {
     if (display.icon_field) {
-      if (const ProtoModel *icon_field = GetSubModel(display.icon_field))
-        return icon_field->GetDisplayIcon();
+      if (const ProtoModel *icon_field = GetSubModel(display.icon_field)) {
+        ret = icon_field->GetDisplayIcon();
+        if (!ret.isNull()) return ret;
+      }
     }
-    if (display.icon_lookup_function) return display.icon_lookup_function(this);
+    if (display.icon_lookup_function) ret = display.icon_lookup_function(this);
+    if (!ret.isNull()) return ret;
     if (!display.default_icon_name.isEmpty()) return ArtManager::GetIcon(display.default_icon_name);
   }
   return {};
