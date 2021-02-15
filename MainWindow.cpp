@@ -333,8 +333,19 @@ void ConfigureIconFields(ProtoModel::DisplayConfig *conf, const Descriptor *desc
       std::string resource_type = field->options().GetExtension(buffers::resource_ref);
       if (resource_type == "object") {
         conf->SetFieldIconLookup(field, GetObjectSpriteByNameField);
+      } else if (resource_type == "sprite") {
+        conf->SetFieldIconLookup(field, GetSpriteIconByNameField);
+      } else if (resource_type == "background") {
+        conf->SetFieldIconLookup(field, GetBackgroundIconByNameField);
+      } else if (resource_type == "room") {
+        // no preview for rooms yet
       } else {
         qDebug() << "Unknown resource ref type: " << resource_type.c_str();
+      }
+    }
+    if (field->options().HasExtension(buffers::file_kind)) {
+      if (field->options().GetExtension(buffers::file_kind) == buffers::FileKind::IMAGE) {
+        conf->SetFieldIconLookup(field, GetFileIcon);
       }
     }
     if (const Descriptor *submsg = field->message_type()) {

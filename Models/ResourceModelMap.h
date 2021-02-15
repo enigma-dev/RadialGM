@@ -39,5 +39,9 @@ QIcon GetSpriteIconByName(const QString& sprite_name);
 QIcon GetSpriteIconByNameField(const QVariant& sprite_name);
 /// Retrieves the icon for the sprite assigned to the object with the given name.
 QIcon GetObjectSpriteByNameField(const QVariant& object_name);
+/// Retrieves the icon for the given background.
+QIcon GetBackgroundIconByNameField(const QVariant& bkg_name);
+/// Retrieves the icon for the given file.
+QIcon GetFileIcon(const QVariant& fname);
 
 #endif  // MODELMAP_H

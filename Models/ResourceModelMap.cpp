@@ -233,3 +233,16 @@ QIcon GetObjectSpriteByNameField(const QVariant& object_name) {
   if (!obj) return QIcon();
   return GetSpriteIconByNameField(obj->Data(FieldPath::Of<Object>(Object::kSpriteNameFieldNumber)));
 }
+
+QIcon GetBackgroundIconByNameField(const QVariant& bkg_name) {
+  std::string bkg_name_str = bkg_name.toString().toStdString();
+  MessageModel* bkg = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, bkg_name_str);
+  if (!bkg) return QIcon();
+  bkg = bkg->GetSubModel<MessageModel*>(TreeNode::kBackgroundFieldNumber);
+  if (!bkg) return QIcon();
+  return ArtManager::GetIcon(bkg->Data(FieldPath::Of<Background>(Background::kImageFieldNumber)).toString());
+}
+
+QIcon GetFileIcon(const QVariant& fname) {
+  return ArtManager::GetIcon(fname.toString());
+}
