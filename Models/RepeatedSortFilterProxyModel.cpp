@@ -22,11 +22,8 @@ QVariant RepeatedSortFilterProxyModel::DataOrDefault(FieldPath field_path, const
   return model_->DataOrDefault(FieldPath{source_row, field_path.fields}, def);
 }
 
-void RepeatedSortFilterProxyModel::sort(int column, Qt::SortOrder order) {
-  R_EXPECT_V(model_) << "Internal model null";
-
-  if (auto *const repeated_message_model = model_->TryCastAsRepeatedMessageModel()) {
-    QSortFilterProxyModel::sort(repeated_message_model->FieldToColumn(column), order);
-  } else
-    QSortFilterProxyModel::sort(column, order);
+ProtoModel* RepeatedSortFilterProxyModel::GetSubModel(int fieldNum) const {
+  R_EXPECT(model_, nullptr) << "Internal model null";
+  int source_row = mapToSource(index(fieldNum, 0)).row();
+  return model_->GetSubModel(source_row);
 }

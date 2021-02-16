@@ -8,6 +8,8 @@
 #include "Models/MessageModel.h"
 #include "Models/RepeatedMessageModel.h"
 #include "Models/TreeSortFilterProxyModel.h"
+#include "Models/RepeatedSortFilterProxyModel.h"
+
 #include "Room.pb.h"
 
 #include <QGraphicsPixmapItem>
@@ -96,8 +98,8 @@ void RoomEditor::RebindSubModels() {
   _ui->roomView->SetResourceModel(_roomModel);
 
   RepeatedMessageModel* im = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
-  QSortFilterProxyModel* imp = new QSortFilterProxyModel(this);
-  imp->setSourceModel(im);
+  RepeatedSortFilterProxyModel* imp = new RepeatedSortFilterProxyModel(this);
+  imp->SetSourceModel(im);
   _ui->instancesListView->setModel(imp);
 
   for (int c = 0; c < im->columnCount(); ++c) {
@@ -113,8 +115,8 @@ void RoomEditor::RebindSubModels() {
                                                  im->FieldToColumn(Room::Instance::kObjectTypeFieldNumber));
 
   RepeatedMessageModel* tm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
-  QSortFilterProxyModel* tmp = new QSortFilterProxyModel(this);
-  tmp->setSourceModel(tm);
+  RepeatedSortFilterProxyModel* tmp = new RepeatedSortFilterProxyModel(this);
+  tmp->SetSourceModel(tm);
   _ui->tilesListView->setModel(tmp);
 
   for (int c = 0; c < tm->columnCount(); ++c) {
@@ -135,20 +137,18 @@ void RoomEditor::RebindSubModels() {
   connect(_ui->instancesListView->selectionModel(), &QItemSelectionModel::selectionChanged,
           [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
             if (selected.empty()) return;
-            RepeatedMessageModel* im = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
             _ui->tilesListView->clearSelection();
             auto selectedIndex = selected.indexes().first();
-            auto currentInstanceModel = im->GetSubModel<MessageModel*>(selectedIndex.row());
+            auto currentInstanceModel = imp->GetSubModel(selectedIndex.row());
             _ui->layersPropertiesView->setModel(currentInstanceModel);
           });
 
   connect(_ui->tilesListView->selectionModel(), &QItemSelectionModel::selectionChanged,
           [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
             if (selected.empty()) return;
-            RepeatedMessageModel* tm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
             _ui->instancesListView->clearSelection();
             auto selectedIndex = selected.indexes().first();
-            auto currentInstanceModel = tm->GetSubModel<MessageModel*>(selectedIndex.row());
+            auto currentInstanceModel = tmp->GetSubModel(selectedIndex.row());
             _ui->layersPropertiesView->setModel(currentInstanceModel);
           });
 
