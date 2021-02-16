@@ -100,6 +100,7 @@ PathEditor::~PathEditor() { delete _ui; }
 
 void PathEditor::RebindSubModels() {
   _pathModel = _model->GetSubModel<MessageModel*>(TreeNode::kPathFieldNumber);
+  connect(_pathModel, &ProtoModel::DataChanged, [this]() { _ui->roomView->update(); });
 
   _ui->roomView->SetPathModel(_pathModel);
   _pointsModel = _pathModel->GetSubModel<RepeatedMessageModel*>(Path::kPointsFieldNumber);
@@ -139,8 +140,8 @@ bool PathEditor::eventFilter(QObject* obj, QEvent* event) {
     // Resize columns to view size
     if (obj == _ui->pointsTableView && event->type() == QEvent::Resize) {
       QResizeEvent* resizeEvent = static_cast<QResizeEvent*>(event);
-      int cc = _pointsModel->columnCount() - 1;
-      for (int c = 1; c < cc; ++c) {  // column 1 is hidden
+      int cc = _pointsModel->columnCount();
+      for (int c = 0; c < cc; ++c) {
         _ui->pointsTableView->setColumnWidth(c, (resizeEvent->size().width()) / cc);
       }
     }

@@ -128,6 +128,7 @@ QVector<QPoint> PathView::RenderPoints(const QVector<QPoint> &user_points) const
 }
 
 void PathView::Paint(QPainter &painter) {
+  parentWidget()->update();
   RoomView::Paint(painter);
 
   RepeatedMessageModel *pointsModel = _pathModel->GetSubModel<RepeatedMessageModel>(Path::kPointsFieldNumber);
@@ -139,7 +140,7 @@ void PathView::Paint(QPainter &painter) {
     for (int i = 0; i < size; ++i) user_points[i] = Point(i);
 
     QVector<QPoint> rendered_points = RenderPoints(user_points);
-    path.moveTo(rendered_points[0]);
+    if (rendered_points.size() > 0) path.moveTo(rendered_points[0]);
     for (int i = 0; i < rendered_points.size(); ++i) {
       path.lineTo(rendered_points[i]);
     }
