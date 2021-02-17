@@ -90,6 +90,7 @@ void BackgroundEditor::on_actionLoadImage_triggered() {
     } else {
       // TODO: Copy data into our egm
       _backgroundModel->SetData(FieldPath::Of<Background>(Background::kImageFieldNumber), fName);
+      _ui->backgroundView->SetImage(fName);
     }
   }
 }

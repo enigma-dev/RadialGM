@@ -243,9 +243,10 @@ class ProtoModel : public QAbstractItemModel {
   }
 
   bool SetData(const FieldPath &field_path, const QVariant &value) {
-    if (ProtoModel *sub = GetSubModel(field_path)) sub->SetData(value);
+    if (ProtoModel *sub = GetSubModel(field_path)) return sub->SetData(value);
     return false;
   }
+
   ProtoModel *GetSubModel(const FieldPath &field_path) {
     return const_cast<ProtoModel*>(const_cast<const ProtoModel*>(this)->GetSubModel(field_path));
   }

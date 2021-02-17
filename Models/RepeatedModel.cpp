@@ -28,7 +28,11 @@ QVariant RepeatedModel::data(const QModelIndex& index, int role) const {
 
   switch (role) {
     case Qt::DisplayRole: return GetDirect(index.row());
-    case Qt::DecorationRole: return GetSubModel(index.row())->GetDisplayIcon();
+    case Qt::DecorationRole: {
+      auto* model = GetSubModel(index.row());
+      if (model) return model->GetDisplayIcon();
+      else return {};
+    }
     default: return QVariant();
   }
 }

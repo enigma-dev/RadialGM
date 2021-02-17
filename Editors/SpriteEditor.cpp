@@ -135,9 +135,7 @@ void SpriteEditor::on_actionNewSubimage_triggered() {
   QString fName(QDir::tempPath() + "/" + uid.mid(1, uid.length() - 2) + ".png");
   img.save(fName);
   _subimagesModel->insertRow(_subimagesModel->rowCount());
-  _subimagesModel->SetData(
-      FieldPath::Of<Sprite>(FieldPath::StartingAt(_subimagesModel->rowCount() - 1), Sprite::kSubimagesFieldNumber),
-      fName);
+  _subimagesModel->SetDataAtRow(_subimagesModel->rowCount() - 1, fName);
 }
 
 void SpriteEditor::on_actionDeleteSubimages_triggered() { RemoveSelectedIndexes(); }
@@ -172,9 +170,7 @@ void SpriteEditor::on_actionLoadSubimages_triggered() {
         if (img.size() == newImg.size()) {
           _subimagesModel->insertRow(_subimagesModel->rowCount());
           // TODO: Internalize file
-          _subimagesModel->SetData(FieldPath::Of<Sprite>(FieldPath::StartingAt(_subimagesModel->rowCount() - 1),
-                                                         Sprite::kSubimagesFieldNumber),
-                                   fName);
+          _subimagesModel->SetDataAtRow(_subimagesModel->rowCount() - 1, fName);
         } else {
           LoadedMismatchedImage(img.size(), newImg.size());
         }

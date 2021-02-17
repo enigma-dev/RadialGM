@@ -4,6 +4,7 @@
 #include "ProtoModel.h"
 #include "PrimitiveModel.h"
 #include "Utils/ProtoManip.h"
+#include "Components/Logger.h"
 
 #include <google/protobuf/message.h>
 #include <google/protobuf/reflection.h>
@@ -232,6 +233,7 @@ class RepeatedPrimitiveModel : public BasicRepeatedModel<T> {
   // Need to implement this in all RepeatedModels
   void AppendNewWithoutSignal() final {
     BasicRepeatedModel<T>::field_ref_.Add({});
+    submodels_.push_back(new PrimitiveModel(this, BasicRepeatedModel<T>::field_ref_.size() - 1));
   }
 
   void RebuildSubModels() {
@@ -243,6 +245,7 @@ class RepeatedPrimitiveModel : public BasicRepeatedModel<T> {
   }
 
   ProtoModel *GetSubModel(int index) const final {
+    R_EXPECT(index < submodels_.size(), nullptr) << "Requested subModel index: " << index << "is out of range";
     return submodels_[index];
   }
 
