@@ -48,12 +48,11 @@ SpriteEditor::SpriteEditor(MessageModel* model, QWidget* parent)
 SpriteEditor::~SpriteEditor() { delete _ui; }
 
 void SpriteEditor::RebindSubModels() {
-  MessageModel* _spriteModel = _model->GetSubModel<MessageModel*>(TreeNode::kSpriteFieldNumber);
+  _spriteModel = _model->GetSubModel<MessageModel*>(TreeNode::kSpriteFieldNumber);
   _subimagesModel = _spriteModel->GetSubModel<RepeatedStringModel*>(Sprite::kSubimagesFieldNumber);
+  connect(_spriteModel, &ProtoModel::DataChanged, [this]() { _ui->subimagePreview->update(); });
 
   _ui->subImageList->setModel(_subimagesModel);
-  //_ui->subImageList->setIconSize(_subimagesModel->GetIconSize());
-  //_ui->subImageList->setGridSize(_subimagesModel->GetIconSize());
 
   _ui->subimagePreview->SetResourceModel(_spriteModel);
   //connect(_subimagesModel, &RepeatedImageModel::MismatchedImageSize, this, &SpriteEditor::LoadedMismatchedImage);
@@ -171,6 +170,10 @@ void SpriteEditor::on_actionLoadSubimages_triggered() {
           _subimagesModel->insertRow(_subimagesModel->rowCount());
           // TODO: Internalize file
           _subimagesModel->SetDataAtRow(_subimagesModel->rowCount() - 1, fName);
+          _ui->subimagePreview->SetSubimage(0);
+          // Redo BBox
+          on_bboxComboBox_currentIndexChanged(
+              _spriteModel->Data(FieldPath::Of<Sprite>(Sprite::kBboxModeFieldNumber)).toInt());
         } else {
           LoadedMismatchedImage(img.size(), newImg.size());
         }
@@ -216,8 +219,7 @@ void SpriteEditor::on_actionEditSubimages_triggered() {
   auto const selected = _ui->subImageList->selectionModel()->selectedIndexes();
   for (const QModelIndex& idx : selected) {
     QDesktopServices::openUrl(QUrl::fromLocalFile(
-        _subimagesModel->Data(FieldPath::Of<Sprite>(FieldPath::StartingAt(idx.row()), Sprite::kSubimagesFieldNumber))
-            .toString()));
+        _subimagesModel->DataAtRow(idx.row()).toString()));
     // TODO: file watcher reload
     // TODO: editor settings
   }

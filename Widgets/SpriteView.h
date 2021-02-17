@@ -28,6 +28,7 @@ class SpriteView : public AssetView {
  private:
   MessageModel *_model;
   QPixmap _pixmap;
+  QSize _lastSize;
   RepeatedStringModel *_subimgs;
   bool _showBBox;
   bool _showOrigin;

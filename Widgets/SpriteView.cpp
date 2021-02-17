@@ -23,7 +23,13 @@ void SpriteView::SetSubimage(int index) {
     qDebug() << "Invalid subimage index specified";
     return;
   } else {
-    _pixmap = ArtManager::GetCachedPixmap(_subimgs->DataAtRow(0).toString());
+    _pixmap = ArtManager::GetCachedPixmap(_subimgs->DataAtRow(index).toString());
+  }
+
+  if (_lastSize != _pixmap.size()) {
+    _lastSize = _pixmap.size();
+    _parent->ResetZoom();
+    setFixedSize(_pixmap.size());
   }
 
   _parent->update();
@@ -54,7 +60,11 @@ QRectF SpriteView::BBoxRect() {
   return QRectF(x, y, right - x, bottom - y);
 }
 
-void SpriteView::Paint(QPainter &painter) { painter.drawPixmap(0, 0, _pixmap); }
+void SpriteView::Paint(QPainter &painter) {
+  parentWidget()->update();
+  painter.drawPixmap(0, 0, _pixmap);
+}
+
 
 void SpriteView::PaintTop(QPainter &painter) {
   qreal zoom = _parent->GetZoom();

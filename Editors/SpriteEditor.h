@@ -41,7 +41,7 @@ class SpriteEditor : public BaseEditor {
 
  private:
   Ui::SpriteEditor* _ui;
-  ProtoModel* _spriteModel;
+  MessageModel* _spriteModel;
   RepeatedStringModel* _subimagesModel;
 };
 
