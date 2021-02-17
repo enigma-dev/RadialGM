@@ -245,7 +245,7 @@ class RepeatedPrimitiveModel : public BasicRepeatedModel<T> {
   }
 
   ProtoModel *GetSubModel(int index) const final {
-    R_EXPECT(index < submodels_.size(), nullptr) << "Requested subModel index: " << index << "is out of range";
+    R_EXPECT(index < submodels_.size(), nullptr) << "Requested submodel index: " << index << "is out of range";
     return submodels_[index];
   }
 
