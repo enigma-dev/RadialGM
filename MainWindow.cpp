@@ -382,6 +382,7 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
 
   ProtoModel::DisplayConfig msgConf;
   msgConf.SetDefaultIcon<buffers::TreeNode::Folder>("group");
+  msgConf.SetDefaultIcon<buffers::TreeNode::UnknownResource>("info");
   msgConf.SetDefaultIcon<buffers::resources::Sprite>("sprite");
   msgConf.SetDefaultIcon<buffers::resources::Sound>("sound");
   msgConf.SetDefaultIcon<buffers::resources::Background>("background");
