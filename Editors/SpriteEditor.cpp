@@ -50,7 +50,7 @@ SpriteEditor::~SpriteEditor() { delete _ui; }
 void SpriteEditor::RebindSubModels() {
   _spriteModel = _model->GetSubModel<MessageModel*>(TreeNode::kSpriteFieldNumber);
   _subimagesModel = _spriteModel->GetSubModel<RepeatedStringModel*>(Sprite::kSubimagesFieldNumber);
-  connect(_spriteModel, &ProtoModel::DataChanged, [this]() { _ui->subimagePreview->update(); });
+  connect(_spriteModel, &ProtoModel::DataChanged, this, [this]() { _ui->subimagePreview->update(); });
 
   _ui->subImageList->setModel(_subimagesModel);
 

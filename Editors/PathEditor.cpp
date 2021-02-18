@@ -100,7 +100,7 @@ PathEditor::~PathEditor() { delete _ui; }
 
 void PathEditor::RebindSubModels() {
   _pathModel = _model->GetSubModel<MessageModel*>(TreeNode::kPathFieldNumber);
-  connect(_pathModel, &ProtoModel::DataChanged, [this]() { _ui->roomView->update(); });
+  connect(_pathModel, &ProtoModel::DataChanged, this, [this]() { _ui->roomView->update(); });
 
   _ui->roomView->SetPathModel(_pathModel);
   _pointsModel = _pathModel->GetSubModel<RepeatedMessageModel*>(Path::kPointsFieldNumber);
