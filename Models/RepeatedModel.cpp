@@ -1,5 +1,6 @@
 #include "RepeatedModel.h"
 #include "Components/Logger.h"
+#include "Components/ArtManager.h"
 
 #include <QDataStream>
 #include <QImageReader>
@@ -107,12 +108,18 @@ QModelIndex RepeatedModel::index(int row, int column, const QModelIndex &parent)
   return this->createIndex(row, column);
 }
 
-QVariant RepeatedModel::headerData(int section, Qt::Orientation orientation, int role) const {
-  auto data = ProtoModel::headerData(section, orientation, role);
-  if (data.isValid()) return data;
-  if (role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal) return QVariant();
+QVariant RepeatedModel::headerData(int section, Qt::Orientation /*orientation*/, int role) const {
   if (section < 0 || section >= field_->message_type()->field_count()) return QVariant();
-  return QString::fromStdString(field_->message_type()->field(section)->name());
+
+  switch (role) {
+    case Qt::DisplayRole: return QString::fromStdString(field_->message_type()->field(section)->name());
+    case Qt::DecorationRole: {
+      const auto& fd = GetFieldDisplay(field_->message_type()->field(section)->full_name());
+      if (!fd.header_icon.isEmpty()) return ArtManager::GetIcon(fd.header_icon);
+      else return {};
+    }
+    default: return {};
+  }
 }
 
 // Convenience function for internal moves

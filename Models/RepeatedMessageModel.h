@@ -13,11 +13,11 @@ class RepeatedMessageModel : public BasicRepeatedModel<Message> {
   // (e.g. instancesModel->GetSubmodel(3))
   // XXX: Why would anyone try to access these as anything other than MessageModel...?
   template<typename T> auto *GetSubModel(int index) const {
-    return (index < 0 || index > _subModels.size()) ? nullptr: ((ProtoModel*) _subModels[index])->As<T>();
+    return (index < 0 || index >= _subModels.size()) ? nullptr: ((ProtoModel*) _subModels[index])->As<T>();
   }
 
   ProtoModel *GetSubModel(int index) const override {
-    return (index < 0 || index > _subModels.size()) ? nullptr : (ProtoModel*) _subModels[index];
+    return (index < 0 || index >= _subModels.size()) ? nullptr : (ProtoModel*) _subModels[index];
   }
 
   // Translates an underlying Protocol Buffer tag (field number) to the column number from this model.

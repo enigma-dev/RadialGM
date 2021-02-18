@@ -405,6 +405,13 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
 
   msgConf.SetMessageLabelField<buffers::TreeNode>(buffers::TreeNode::kNameFieldNumber);
 
+  msgConf.SetFieldHeaderIcon<buffers::resources::Path::Point>(":/actions/diamond-red.png",
+                                                              buffers::resources::Path::Point::kXFieldNumber);
+  msgConf.SetFieldHeaderIcon<buffers::resources::Path::Point>(":/actions/diamond-green.png",
+                                                              buffers::resources::Path::Point::kYFieldNumber);
+  msgConf.SetFieldHeaderIcon<buffers::resources::Path::Point>(":/actions/diamond-blue.png",
+                                                              buffers::resources::Path::Point::kSpeedFieldNumber);
+
   treeConf.SetMessagePassthrough<buffers::TreeNode>();
   treeConf.SetMessagePassthrough<buffers::TreeNode::Folder>();
   treeConf.DisableOneofReassignment<buffers::TreeNode>();

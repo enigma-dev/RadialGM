@@ -131,6 +131,9 @@ class ProtoModel : public QAbstractItemModel {
     /// Alternative name for field
     QString name;
 
+    /// Alternative header icon for field
+    QString header_icon;
+
     // Allows storing icon parameters at the field level so that generalized editors can be configured per-field.
     // Note that these values are not passed to the icon loader and are not considered by the model itself.
     std::optional<QSize> min_icon_size;
@@ -186,6 +189,12 @@ class ProtoModel : public QAbstractItemModel {
       SetMessageIconIdField(T::descriptor()->full_name(), FieldPath::Of<T>(field_path...), icon_lookup_function);
     }
 
+    /// Set the icon to be used for field's header data.
+    template<typename T, typename... Fields>
+    void SetFieldHeaderIcon(const QString &icon_name, Fields... field_path) {
+      SetFieldHeaderIcon(T::descriptor()->full_name(), FieldPath::Of<T>(field_path...), icon_name);
+    }
+
     /// Associates a field with a lambda to fetch an icon from its value.
     /// The field can contain any identifying information that can be mapped to an icon by the specified function.
     void SetFieldIconLookup(const FieldDescriptor *field, FieldDisplayConfig::IconLookupFn icon_lookup_function);
@@ -206,6 +215,7 @@ class ProtoModel : public QAbstractItemModel {
     void SetMessageLabelField(const std::string &message, const FieldPath &field_path);
     void SetMessageIconIdField(const std::string &message, const FieldPath &field_path,
                                FieldDisplayConfig::IconLookupFn icon_lookup_function);
+    void SetFieldHeaderIcon(const std::string &message, const FieldPath &field_path, const QString &icon_name);
 
     QMap<std::string, MessageDisplayConfig> message_display_configs_;
     QMap<std::string, FieldDisplayConfig> field_display_configs_;
@@ -222,6 +232,9 @@ class ProtoModel : public QAbstractItemModel {
   /// If neither of these produces a valid icon, the metadata-specified default icon for this model is returned.
   /// If none of these are specified, a null icon is returned.
   virtual QIcon GetDisplayIcon() const;
+
+  /// Retrieve the custom display icon for this field as a header (if set) from the display metadata.
+  virtual QIcon GetHeaderIcon() const;
 
   // Retrieve field metadata for a field of the given message type. Returns a sentinel if not specified.
   const MessageDisplayConfig &GetMessageDisplay(const std::string &message_qname) const;
@@ -304,8 +317,6 @@ class ProtoModel : public QAbstractItemModel {
   virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override = 0;
   virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override = 0;
   virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override = 0;
-  virtual bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value,
-                             int role = Qt::EditRole) override;
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
   virtual QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override = 0;
   virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
@@ -325,8 +336,6 @@ signals:
   bool _dirty;
   ProtoModel *_parentModel;
   const std::string _debug_path;
-  QHash<int,QHash<Qt::ItemDataRole,QVariant>> _horizontalHeaderData;
-  QHash<int,QHash<Qt::ItemDataRole,QVariant>> _verticalHeaderData;
   const Descriptor *descriptor_;
 
  private:

@@ -10,14 +10,17 @@
 
 ProtoModel::DisplayConfig ProtoModel::display_config_;
 
-ProtoModel::ProtoModel(QObject *parent, std::string name, const Descriptor *descriptor) :
-  ProtoModel(static_cast<ProtoModel *>(nullptr), name, descriptor) {
+ProtoModel::ProtoModel(QObject *parent, std::string name, const Descriptor *descriptor)
+    : ProtoModel(static_cast<ProtoModel *>(nullptr), name, descriptor) {
   QObject::setParent(parent);
 }
 
 ProtoModel::ProtoModel(ProtoModel *parent, std::string name, const Descriptor *descriptor)
-    : QAbstractItemModel(parent), _dirty(false), _parentModel(parent),
-      _debug_path((parent ? parent->_debug_path + "." : "") + name), descriptor_(descriptor) {
+    : QAbstractItemModel(parent),
+      _dirty(false),
+      _parentModel(parent),
+      _debug_path((parent ? parent->_debug_path + "." : "") + name),
+      descriptor_(descriptor) {
   connect(this, &ProtoModel::DataChanged, this,
           [this](const QModelIndex &topLeft, const QModelIndex &bottomRight,
                  const QVariant & /*oldValue*/ = QVariant(0), const QVector<int> &roles = QVector<int>()) {
@@ -37,9 +40,7 @@ void ProtoModel::SetDirty(bool dirty) { _dirty = dirty; }
 
 bool ProtoModel::IsDirty() { return _dirty; }
 
-QIcon LookUpIconByName(const QVariant &name) {
-  return ArtManager::GetIcon(name.toString());
-}
+QIcon LookUpIconByName(const QVariant &name) { return ArtManager::GetIcon(name.toString()); }
 
 void ProtoModel::DisplayConfig::SetDefaultIcon(const std::string &message, const QString &icon_name) {
   message_display_configs_[message].default_icon_name = icon_name;
@@ -69,23 +70,34 @@ void ProtoModel::DisplayConfig::SetFieldDefaultIcon(const FieldDescriptor *field
   field_display_configs_[field->full_name()].default_icon_name = icon_name;
 }
 
+void ProtoModel::DisplayConfig::SetFieldHeaderIcon(const std::string &message, const FieldPath &field_path,
+                                                   const QString &icon_name) {
+  std::string field = message;
+  message_display_configs_[message].icon_field = field_path;
+  for (const auto &fcomp : field_path.fields) field += "." + fcomp->name();
+  if (field_path.size() != 1)
+    qDebug() << "Warning: Nested icon fields not currently implemented; `" << field.c_str() << "` won't work properly";
+  field_display_configs_[field].header_icon = icon_name;
+}
+
 const ProtoModel::FieldDisplayConfig &ProtoModel::DisplayConfig::GetFieldDisplay(const std::string &field_qname) const {
   static const ProtoModel::FieldDisplayConfig sentinel(false);
   if (auto it = field_display_configs_.find(field_qname); it != field_display_configs_.end()) return *it;
   return sentinel;
 }
 
-const ProtoModel::FieldDisplayConfig & ProtoModel::GetFieldDisplay(const std::string &field_qname) const {
+const ProtoModel::FieldDisplayConfig &ProtoModel::GetFieldDisplay(const std::string &field_qname) const {
   return display_config_.GetFieldDisplay(field_qname);
 }
 
-const ProtoModel::MessageDisplayConfig &ProtoModel::DisplayConfig::GetMessageDisplay(const std::string &message_qname) const {
+const ProtoModel::MessageDisplayConfig &ProtoModel::DisplayConfig::GetMessageDisplay(
+    const std::string &message_qname) const {
   static const ProtoModel::MessageDisplayConfig sentinel(false);
   if (auto it = message_display_configs_.find(message_qname); it != message_display_configs_.end()) return *it;
   return sentinel;
 }
 
-const ProtoModel::MessageDisplayConfig & ProtoModel::GetMessageDisplay(const std::string &message_qname) const {
+const ProtoModel::MessageDisplayConfig &ProtoModel::GetMessageDisplay(const std::string &message_qname) const {
   return display_config_.GetMessageDisplay(message_qname);
 }
 
@@ -98,40 +110,9 @@ Qt::ItemFlags ProtoModel::flags(const QModelIndex &index) const {
   return flags;
 }
 
-void ProtoModel::SetDisplayConfig(const DisplayConfig &display_config) {
-  display_config_ = display_config;
-}
+void ProtoModel::SetDisplayConfig(const DisplayConfig &display_config) { display_config_ = display_config; }
 
-bool ProtoModel::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role) {
-  if (orientation == Qt::Horizontal) {
-    _horizontalHeaderData[section][static_cast<Qt::ItemDataRole>(role)] = value;
-    emit headerDataChanged(Qt::Horizontal, section, section);
-    return true;
-  } else if (orientation == Qt::Vertical) {
-    _verticalHeaderData[section][static_cast<Qt::ItemDataRole>(role)] = value;
-    emit headerDataChanged(Qt::Vertical, section, section);
-    return true;
-  }
-  return QAbstractItemModel::setHeaderData(section, orientation, value, role);
-}
-
-static QVariant getHeaderData(const QHash<int,QHash<Qt::ItemDataRole,QVariant>>& map, int section, int role) {
-  auto sit = map.find(section);
-  if (sit == map.end()) return QVariant();
-  auto sectionMap = *sit;
-  auto it = sectionMap.find(static_cast<Qt::ItemDataRole>(role));
-  if (it == sectionMap.end()) return QVariant();
-  return *it;
-}
-
-QVariant ProtoModel::headerData(int section, Qt::Orientation orientation, int role) const {
-  if (orientation == Qt::Horizontal) {
-    return getHeaderData(_horizontalHeaderData, section, role);
-  } else if (orientation == Qt::Vertical) {
-    return getHeaderData(_verticalHeaderData, section, role);
-  }
-  return QVariant();
-}
+QVariant ProtoModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int /*role*/) const { return {}; }
 
 QString ProtoModel::GetDisplayName() const {
   QString name = GetFieldDisplay(GetDescriptor()->full_name()).name;
@@ -139,6 +120,6 @@ QString ProtoModel::GetDisplayName() const {
   return name;
 }
 
-QIcon ProtoModel::GetDisplayIcon() const {
-  return {};
-}
+QIcon ProtoModel::GetDisplayIcon() const { return {}; }
+
+QIcon ProtoModel::GetHeaderIcon() const { return {}; }
