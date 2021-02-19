@@ -5,6 +5,8 @@
 #include "RepeatedMessageModel.h"
 #include "ResourceModelMap.h"
 
+static constexpr int CCP_TYPE_ROLE = Qt::UserRole + 1;
+
 MessageModel::MessageModel(ProtoModel *parent, Message *protobuf)
     : ProtoModel(parent, protobuf->GetDescriptor()->name(), protobuf->GetDescriptor()), _protobuf(protobuf)
       { RebuildSubModels(); }
@@ -207,7 +209,7 @@ QVariant MessageModel::dataInternal(const QModelIndex &index, int role) const {
   if (!_protobuf) return {};
   R_EXPECT(index.isValid(), QVariant()) << "Supplied index was invalid:" << index;
   if (role != Qt::DisplayRole && role != Qt::EditRole && role != Qt::DecorationRole &&
-      role != Qt::CheckStateRole) return QVariant();
+      role != Qt::CheckStateRole && role != CCP_TYPE_ROLE) return QVariant();
 
   const Descriptor *desc = descriptor_;
   const Reflection *refl = _protobuf->GetReflection();
@@ -217,6 +219,9 @@ QVariant MessageModel::dataInternal(const QModelIndex &index, int role) const {
     return QVariant();
   }
   const FieldDescriptor *field = desc->field(index.row());
+
+  auto cpp_type = field->cpp_type();
+  if (role == CCP_TYPE_ROLE) return cpp_type;
 
   // These are for icons in things like the room's instance list
   if (role == Qt::DecorationRole) {
@@ -231,7 +236,6 @@ QVariant MessageModel::dataInternal(const QModelIndex &index, int role) const {
   // If the field has't been initialized return an invalid QVariant. (see QVariant.isValid())
   if (NO_DEFAULT && !refl->HasField(*_protobuf, field)) return QVariant();
 
-  auto cpp_type = field->cpp_type();
   if (role == Qt::CheckStateRole) {
     if (cpp_type != CppType::CPPTYPE_BOOL) return QVariant();
     auto value = refl->GetBool(*_protobuf, field);
@@ -239,8 +243,7 @@ QVariant MessageModel::dataInternal(const QModelIndex &index, int role) const {
   }
 
   switch (cpp_type) {
-    case CppType::CPPTYPE_MESSAGE: R_EXPECT(false, QVariant())
-        << "The requested field " << field->full_name().c_str() << " is a message";
+    case CppType::CPPTYPE_MESSAGE: return tr("Uneditable message model");
     case CppType::CPPTYPE_INT32: return refl->GetInt32(*_protobuf, field);
     case CppType::CPPTYPE_INT64: return static_cast<long long>(refl->GetInt64(*_protobuf, field));
     case CppType::CPPTYPE_UINT32: return refl->GetUInt32(*_protobuf, field);
@@ -279,6 +282,7 @@ QModelIndex MessageModel::index(int row, int column, const QModelIndex & /*paren
 Qt::ItemFlags MessageModel::flags(const QModelIndex &index) const {
   if (!index.isValid()) return Qt::NoItemFlags;
   auto flags = QAbstractItemModel::flags(index);
+  if (data(index, CCP_TYPE_ROLE).toInt() == CppType::CPPTYPE_MESSAGE) flags &= ~Qt::ItemIsEnabled;
   auto datas = data(index, Qt::CheckStateRole);
   flags |= (datas.isValid()) ? Qt::ItemIsUserCheckable : Qt::ItemIsEditable;
   return flags;
