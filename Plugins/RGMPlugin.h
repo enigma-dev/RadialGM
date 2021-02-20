@@ -7,6 +7,7 @@
 #include "server.pb.h"
 
 #include <QApplication>
+#include <QTextCharFormat>
 
 class RGMPlugin : public QObject {
   Q_OBJECT
@@ -15,7 +16,7 @@ class RGMPlugin : public QObject {
   ~RGMPlugin();
 
  signals:
-  void LogOutput(const QString &output);
+  void LogOutput(const QString &output, const QTextCharFormat &format);
   void CompileStatusChanged(bool finished = false);
 
  public slots:

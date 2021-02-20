@@ -55,6 +55,7 @@ set(RGM_SOURCES
     Dialogs/EventArgumentsDialog.cpp
     Dialogs/PreferencesDialog.cpp
     Dialogs/TimelineChangeMoment.cpp
+    Components/ANSIescapeCodeHandler.cpp
     Components/ArtManager.cpp
     Components/Utility.cpp
     Components/QMenuView.cpp
@@ -106,6 +107,7 @@ set(RGM_HEADERS
     Dialogs/PreferencesDialog.h
     Dialogs/PreferencesKeys.h
     Dialogs/TimelineChangeMoment.h
+    Components/ANSIescapeCodeHandler.h
     Components/Logger.h
     Components/RecentFiles.h
     Components/QMenuView.h

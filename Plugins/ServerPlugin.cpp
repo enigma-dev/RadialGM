@@ -1,6 +1,7 @@
 #include "ServerPlugin.h"
 #include "MainWindow.h"
 #include "Widgets/CodeWidget.h"
+#include "Components/ANSIescapeCodeHandler.h"
 
 #include <QFileDialog>
 #include <QList>
@@ -116,9 +117,13 @@ struct SystemReader : public AsyncReadWorker<SystemType> {
 
 struct CompileReader : public AsyncReadWorker<CompileReply> {
   virtual ~CompileReader() {}
+  Utils::AnsiEscapeCodeHandler ansiHandler;
   virtual void process(const CompileReply& reply) final {
     for (auto log : reply.message()) {
-      emit LogOutput(log.message().c_str());
+	  QList<Utils::FormattedText> txts = ansiHandler.parseText(QString::fromStdString(log.message() + "\n"));
+	  for (auto& str : txts) {
+	    emit LogOutput(str.text, str.format);
+	  }
     }
   }
   virtual void finished() final { emit CompileStatusChanged(true); }

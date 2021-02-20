@@ -172,7 +172,34 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
 #ifdef RGM_SERVER_ENABLED
   RGMPlugin *pluginServer = new ServerPlugin(*this);
   auto outputTextBrowser = this->_ui->outputTextBrowser;
-  connect(pluginServer, &RGMPlugin::LogOutput, outputTextBrowser, &QTextBrowser::append);
+  connect(pluginServer, &RGMPlugin::LogOutput, [=](const QString& text, const QTextCharFormat &format) {
+    int startPos = 0;
+    int crPos = -1;
+    auto cursor = outputTextBrowser->textCursor();
+    auto vbar = outputTextBrowser->verticalScrollBar();
+    const bool atBottom = outputTextBrowser->isReadOnly() ?
+                vbar->value() >= vbar->maximum() : cursor.atEnd();
+
+    if (!cursor.atEnd())
+        cursor.movePosition(QTextCursor::End);
+
+    while ((crPos = text.indexOf('\r', startPos)) >= 0)  {
+        if (text.size() > crPos + 1 && text.at(crPos + 1) == '\n') {
+            cursor.insertText(text.mid(startPos, crPos - startPos) + '\n', format);
+            startPos = crPos + 2;
+            continue;
+        }
+        cursor.insertText(text.mid(startPos, crPos - startPos), format);
+        cursor.clearSelection();
+        cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::KeepAnchor);
+        startPos = crPos + 1;
+    }
+    if (startPos < text.count())
+        cursor.insertText(text.mid(startPos), format);
+
+    if (atBottom) vbar->setValue(vbar->maximum());
+  });
+  
   connect(pluginServer, &RGMPlugin::CompileStatusChanged, [=](bool finished) {
     _ui->outputDockWidget->show();
     _ui->actionRun->setEnabled(finished);
