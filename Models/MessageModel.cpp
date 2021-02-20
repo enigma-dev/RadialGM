@@ -302,7 +302,7 @@ void MessageModel::ReplaceBuffer(Message *buffer) {
   beginResetModel();
   SetDirty(true);
   _protobuf->CopyFrom(*buffer);
-  qDebug() << "Buffer replaced; rebuilding submodels";
+  //qDebug() << "Buffer replaced; rebuilding submodels";
   RebuildSubModels();
   endResetModel();
 }
