@@ -18,7 +18,8 @@ static QString ResTypeAsString(TypeCase type) {
     case TypeCase::kSettings: return "settings";
     case TypeCase::kInclude: return "include";
     case TypeCase::kTimeline: return "timeline";
-    case TypeCase::TYPE_NOT_SET: return "unknown";
+    case TypeCase::TYPE_NOT_SET: case TypeCase::kUnknown:
+      return "unknown";
   }
   return "unknown";
 }

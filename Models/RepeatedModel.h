@@ -36,6 +36,9 @@ class RepeatedModel : public ProtoModel {
   }
   RepeatedModel *TryCastAsRepeatedModel() override { return this; }
 
+  /// Represents data in this model as a string. Caution: can be enormous.
+  QString DataDebugString() const;
+
   const FieldDescriptor *GetRowDescriptor(int row) const override {
     Q_UNUSED(row);  // All rows of a repeated field have the same descriptor.
     return field_;
@@ -88,9 +91,6 @@ class RepeatedModel : public ProtoModel {
 
   bool moveRows(const QModelIndex &sourceParent, int source, int count,
                 const QModelIndex &destinationParent, int destination) override;
-  QMimeData *mimeData(const QModelIndexList &indexes) const override;
-  bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
-                    const QModelIndex &parent) override;
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const override = 0;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -101,12 +101,14 @@ class RepeatedModel : public ProtoModel {
   bool moveRows(int source, int count, int destination);
   bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
   bool removeRows(int position, int count, const QModelIndex& parent = QModelIndex()) override;
+  QMimeData *mimeData(const QModelIndexList &indexes) const override;
+  bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
+                    const QModelIndex &parent) override;
 
   // Mimedata stuff required for Drag & Drop and clipboard functions
-  virtual Qt::DropActions supportedDropActions() const override;
-  QStringList mimeTypes() const override;
-
   Qt::ItemFlags flags(const QModelIndex &index) const override;
+  Qt::DropActions supportedDropActions() const override;
+  QStringList mimeTypes() const override;
 
   class RowRemovalOperation {
    public:

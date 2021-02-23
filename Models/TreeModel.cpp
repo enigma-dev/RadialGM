@@ -6,9 +6,11 @@
 
 #include <QCoreApplication>
 #include <QItemSelectionModel>
+#include <QMimeData>
 
 TreeModel::TreeModel(MessageModel *root, QObject *parent, const DisplayConfig &config)
-    : QAbstractItemModel(parent), display_config_(config), root_(std::make_unique<Node>(this, nullptr, -1, root, -1)) {}
+    : QAbstractItemModel(parent), mime_types_(GetMimeTypes(root->GetDescriptor())),
+      display_config_(config), root_(std::make_unique<Node>(this, nullptr, -1, root, -1)) {}
 
 // =====================================================================================================================
 // == Tree Querying ====================================================================================================
@@ -34,8 +36,44 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
 }
 
 Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const {
-  if (!index.isValid()) return Qt::NoItemFlags;
-  return QAbstractItemModel::flags(index);
+  Qt::ItemFlags flags = QAbstractItemModel::flags(index);
+  if (index.isValid()) flags |= Qt::ItemIsDragEnabled;
+  flags |= Qt::ItemIsDropEnabled;
+  return flags;
+}
+
+Qt::DropActions TreeModel::supportedDropActions() const {
+  return Qt::MoveAction | Qt::CopyAction;
+}
+
+QStringList TreeModel::mimeTypes() const {
+  return mime_types_;
+}
+
+QMimeData *TreeModel::mimeData(const QModelIndexList &indexes) const {
+  QModelIndexList sortedIndexes = indexes;
+  std::sort(sortedIndexes.begin(), sortedIndexes.end(),
+            [](QModelIndex& a, QModelIndex& b) { return a.row() < b.row(); });
+
+  QMimeData* mimeData = new QMimeData();
+  QByteArray encodedData;
+  QDataStream stream(&encodedData, QIODevice::WriteOnly);
+
+  foreach (const QModelIndex& index, sortedIndexes) {
+    if (index.isValid()) {
+      QString text = data(index, Qt::UserRole).toString();
+      stream << text;
+      stream << index.row();
+    }
+  }
+
+  mimeData->setData(mimeTypes()[0], encodedData);
+  return mimeData;
+}
+
+bool TreeModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
+                             const QModelIndex &parent) {
+  return false;
 }
 
 QVariant TreeModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int role) const {
