@@ -155,16 +155,14 @@ bool RepeatedModel::removeRows(int position, int count, const QModelIndex& paren
 Qt::DropActions RepeatedModel::supportedDropActions() const { return Qt::MoveAction | Qt::CopyAction; }
 
 QStringList RepeatedModel::mimeTypes() const {
-  return QStringList("RadialGM/" + QString::fromStdString(field_->DebugString()));
+  return QStringList(GetMimeType(field_));
 }
 
 Qt::ItemFlags RepeatedModel::flags(const QModelIndex &index) const {
-  Qt::ItemFlags defaultFlags = QAbstractItemModel::flags(index);
-
-  if (index.isValid())
-    return Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | defaultFlags;
-  else
-    return Qt::ItemIsDropEnabled | defaultFlags;
+  Qt::ItemFlags flags = QAbstractItemModel::flags(index);
+  if (index.isValid()) flags |= Qt::ItemIsDragEnabled;
+  flags |= Qt::ItemIsDropEnabled;
+  return flags;
 }
 
 QMimeData* RepeatedModel::mimeData(const QModelIndexList& indexes) const {
@@ -178,22 +176,30 @@ QMimeData* RepeatedModel::mimeData(const QModelIndexList& indexes) const {
 
   foreach (const QModelIndex& index, sortedIndexes) {
     if (index.isValid()) {
-      QString text = data(index, Qt::UserRole).toString();
-      stream << text;
-      stream << index.row();
+      stream << data(index, Qt::DisplayRole).toString();
     }
   }
 
-  mimeData->setData(mimeTypes().at(0), encodedData);
+  const QString mime = GetMimeType(field_);
+  qDebug() << "Dragging " << mime;
+  mimeData->setData(mime, encodedData);
 
   return mimeData;
+}
+
+QString RepeatedModel::DataDebugString() const {
+  QString res = DebugName() + " {";
+  for (int i = 0; i < rowCount(); ++i) res += "\n", res += GetDirect(i).toString(), res += ",";
+  res += "\n}";
+  return res;
 }
 
 bool RepeatedModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column,
                                  const QModelIndex& parent) {
   if (row < 0) return false;
   if (action == Qt::IgnoreAction) return true;
-  if (!data->hasFormat(mimeTypes().at(0))) return false;
+  const auto mime = GetMimeType(field_);
+  if (!data->hasFormat(mime)) return false;
   if (column > 0) return false;
 
   int beginRow;
@@ -204,26 +210,23 @@ bool RepeatedModel::dropMimeData(const QMimeData* data, Qt::DropAction action, i
   else
     beginRow = rowCount(QModelIndex());
 
-  QByteArray encodedData = data->data(mimeTypes().at(0));
+  QByteArray encodedData = data->data(mime);
   QDataStream stream(&encodedData, QIODevice::ReadOnly);
   QStringList newItems;
-  int rows = 0;
 
   while (!stream.atEnd()) {
     QString text;
     stream >> text;
-    int index;
-    stream >> index;
     newItems << text;
-    ++rows;
   }
 
-  insertRows(beginRow, rows, QModelIndex());
+  qDebug() << "State before insert: " << DataDebugString();
+  insertRows(beginRow, newItems.size(), QModelIndex());
+  qDebug() << "State after insert, before overwrite: " << DataDebugString();
   foreach (const QString& text, newItems) {
-    QModelIndex idx = index(beginRow, 0, QModelIndex());
-    setData(idx, text, Qt::UserRole);
-    beginRow++;
+    SetDirect(beginRow++, text);
   }
+  qDebug() << "State after overwrite: " << DataDebugString();
 
   return true;
 }

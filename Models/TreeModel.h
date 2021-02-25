@@ -187,6 +187,13 @@ class TreeModel : public QAbstractItemModel {
   /// Sorts the data in the specified node alphabetically. Fires the appropriate events on the backing model.
   void sortByName(const QModelIndex &index);
 
+  // Mimedata stuff required for Drag & Drop and clipboard functions
+  Qt::DropActions supportedDropActions() const override;
+  QStringList mimeTypes() const override;
+  QMimeData *mimeData(const QModelIndexList &indexes) const override;
+  bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
+                    const QModelIndex &parent) override;
+
  signals:
   // Called when the name of a single TreeNode changes.
   void ItemRenamed(TreeModel::Node *node, const QString &oldName, const QString &newName);
@@ -195,6 +202,7 @@ class TreeModel : public QAbstractItemModel {
 
  private:
   QHash<ProtoModel*, Node*> backing_nodes_;
+  QStringList mime_types_;
   DisplayConfig display_config_;
   // Warning: this must be initialized *after* the above two maps.
   std::unique_ptr<Node> root_;
