@@ -5,7 +5,7 @@ parameters:
   default: 'self'
   
 jobs:
-- ${{ if eq(parameters.repo, 'self') }}:
+- ${{ if and(eq(parameters.repo, 'self'), eq(variables['Build.SourceBranch'], 'refs/heads/master')) }}:
   - job: CreateReleaseCandidate
     displayName: 'Create Release Candidate'
     timeoutInMinutes: 15
@@ -23,7 +23,7 @@ jobs:
     
 - job: MINGW
   timeoutInMinutes: 360
-  ${{ if eq(parameters.repo, 'self') }}:
+  ${{ if and(eq(parameters.repo, 'self'), eq(variables['Build.SourceBranch'], 'refs/heads/master')) }}:
     dependsOn: CreateReleaseCandidate
   pool:
     vmImage: windows-latest
@@ -117,7 +117,7 @@ jobs:
          
 - job: MSVC_64
   displayName: 'MSVC x86_64'
-  ${{ if eq(parameters.repo, 'self') }}:
+  ${{ if and(eq(parameters.repo, 'self'), eq(variables['Build.SourceBranch'], 'refs/heads/master')) }}:
     dependsOn: CreateReleaseCandidate
   pool:
     vmImage: 'windows-latest'
@@ -191,7 +191,7 @@ jobs:
         pathtoPublish: '$(Agent.BuildDirectory)/RadialGM-MSVC-x86_64.exe'
         artifactName: RadialGM-MSVC-x86_64
     
-    - ${{ if eq(parameters.repo, 'self') }}:
+    - ${{ if and(eq(parameters.repo, 'self'), eq(variables['Build.SourceBranch'], 'refs/heads/master')) }}:
       - task: GithubRelease@0 
         displayName: 'Add MSVC to GitHub Release'
         inputs:
@@ -315,7 +315,7 @@ jobs:
         EOF
       displayName: 'Debug Build'
       
-- ${{ if eq(parameters.repo, 'self') }}:
+- ${{ if and(eq(parameters.repo, 'self'), eq(variables['Build.SourceBranch'], 'refs/heads/master')) }}:
   - job: PublishRelease
     displayName: 'Publish Release'
     timeoutInMinutes: 15

@@ -35,7 +35,7 @@ SpriteEditor::SpriteEditor(MessageModel* model, QWidget* parent)
   _nodeMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
   _resMapper->addMapping(_ui->originXSpinBox, Sprite::kOriginXFieldNumber);
   _resMapper->addMapping(_ui->originYSpinBox, Sprite::kOriginYFieldNumber);
-  _resMapper->addMapping(_ui->collisionShapeGroupBox, Sprite::kShapeFieldNumber, "currentIndex");
+  _resMapper->addMapping(_ui->shapeComboBox, Sprite::kShapeFieldNumber, "currentIndex");
   _resMapper->addMapping(_ui->bboxComboBox, Sprite::kBboxModeFieldNumber, "currentIndex");
   _resMapper->addMapping(_ui->leftSpinBox, Sprite::kBboxLeftFieldNumber);
   _resMapper->addMapping(_ui->rightSpinBox, Sprite::kBboxRightFieldNumber);
