@@ -81,6 +81,22 @@ const std::string &GetField(const google::protobuf::Message &message, const goog
 // If these measures fail, no change is made and the method returns false. Returns true on success.
 bool SetField(google::protobuf::Message *message, const google::protobuf::FieldDescriptor *field, const QVariant &val);
 
+QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::int32> repeated_field, int row) {
+  return (qint32) repeated_field.Get(row);
+}
+
+QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::uint32> repeated_field, int row) {
+  return (quint32) repeated_field.Get(row);
+}
+
+QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::int64> repeated_field, int row) {
+  return (qint64) repeated_field.Get(row);
+}
+
+QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::uint64> repeated_field, int row) {
+  return (quint64) repeated_field.Get(row);
+}
+
 QVariant GetField(google::protobuf::MutableRepeatedFieldRef<std::string> repeated_field, int row) {
   return QString::fromStdString(repeated_field.Get(row));
 }
@@ -91,18 +107,58 @@ QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::Me
   return QVariant::fromValue(AbstractMessage(repeated_field.Get(row, scratch_space.get())));
 }
 
-bool SetField(google::protobuf::MutableRepeatedFieldRef<std::string> repeated_field, int row,
-                     const QVariant &value) {
+bool SetField(google::protobuf::MutableRepeatedFieldRef<std::string> repeated_field, int row, const QVariant &value) {
   if (!value.canConvert<QString>()) return false;
   repeated_field.Set(row, value.toString().toStdString());
   return true;
 }
 
 bool SetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::Message> repeated_field, int row,
-                     const QVariant &val) {
+              const QVariant &val) {
   if (auto msg = qvariant_cast<AbstractMessage>(val)) {
     repeated_field.Set(row, *msg);
     return true;
   }
   return false;
+}
+
+static QString MessageMimeType(const google::protobuf::Descriptor *desc) {
+  return QString::fromStdString("application/x-protobuf; messageType=\"" + desc->full_name() + "\"");
+}
+
+QString GetMimeType(const google::protobuf::FieldDescriptor *desc) {
+  switch (desc->cpp_type()) {
+    case google::protobuf::FieldDescriptor::CPPTYPE_BOOL:
+    case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
+    case google::protobuf::FieldDescriptor::CPPTYPE_INT64:
+    case google::protobuf::FieldDescriptor::CPPTYPE_UINT32:
+    case google::protobuf::FieldDescriptor::CPPTYPE_UINT64:
+    case google::protobuf::FieldDescriptor::CPPTYPE_FLOAT:
+    case google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
+    case google::protobuf::FieldDescriptor::CPPTYPE_STRING:
+      return "text/plain";
+    case google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE:
+      return MessageMimeType(desc->message_type());
+    case google::protobuf::FieldDescriptor::CPPTYPE_ENUM:
+      return "text/plain";
+  }
+}
+
+static void GetMimeTypes(const google::protobuf::Descriptor *desc, std::set<QString> &res) {
+  for (int i = 0; i < desc->field_count(); ++i) {
+    const auto *field = desc->field(i);
+    if (res.insert(GetMimeType(field)).second) {
+      if (const auto *subm = field->message_type())
+        GetMimeTypes(subm, res);
+    }
+  }
+}
+
+/// Returns ALL mime types acceptable to a given message or fields within that message. Useful for models that display
+/// all fields within a given message (namely, TreeModel).
+QStringList GetMimeTypes(const google::protobuf::Descriptor *desc) {
+  std::set<QString> res;
+  res.insert(MessageMimeType(desc));
+  GetMimeTypes(desc, res);
+  return {res.begin(), res.end()};
 }

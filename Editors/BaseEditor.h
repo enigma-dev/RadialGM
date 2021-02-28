@@ -20,7 +20,7 @@ class BaseEditor : public QWidget {
 
  public:
   explicit BaseEditor(MessageModel *treeNodeModel, QWidget *parent);
-
+  ~BaseEditor();
   void ReplaceBuffer(google::protobuf::Message *buffer);
 
  signals:
@@ -35,6 +35,7 @@ class BaseEditor : public QWidget {
  protected:
   virtual void closeEvent(QCloseEvent *event) override;
 
+  bool _reset_model_on_close = false;
   MessageModel *_model;
   ModelMapper *_nodeMapper;
   ModelMapper *_resMapper;

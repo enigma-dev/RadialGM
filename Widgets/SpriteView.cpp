@@ -12,7 +12,7 @@ QSize SpriteView::sizeHint() const { return _pixmap.size(); }
 
 void SpriteView::SetResourceModel(MessageModel *model) {
   _model = model;
-  _subimgs = _model->GetSubModel<RepeatedImageModel *>(Sprite::kSubimagesFieldNumber);
+  _subimgs = _model->GetSubModel<RepeatedStringModel *>(Sprite::kSubimagesFieldNumber);
   if (_subimgs->rowCount() > 0) SetSubimage(0);
 }
 
@@ -23,7 +23,13 @@ void SpriteView::SetSubimage(int index) {
     qDebug() << "Invalid subimage index specified";
     return;
   } else {
-    _pixmap = ArtManager::GetCachedPixmap(_subimgs->Data(index).toString());
+    _pixmap = ArtManager::GetCachedPixmap(_subimgs->DataAtRow(index).toString());
+  }
+
+  if (_lastSize != _pixmap.size()) {
+    _lastSize = _pixmap.size();
+    _parent->ResetZoom();
+    setFixedSize(_pixmap.size());
   }
 
   _parent->update();
@@ -47,14 +53,18 @@ QRectF SpriteView::AutomaticBBoxRect() {
 }
 
 QRectF SpriteView::BBoxRect() {
-  int x = _model->Data(Sprite::kBboxLeftFieldNumber).toInt();
-  int y = _model->Data(Sprite::kBboxTopFieldNumber).toInt();
-  int right = _model->Data(Sprite::kBboxRightFieldNumber).toInt();
-  int bottom = _model->Data(Sprite::kBboxBottomFieldNumber).toInt();
+  int x = _model->Data(FieldPath::Of<Sprite>(Sprite::kBboxLeftFieldNumber)).toInt();
+  int y = _model->Data(FieldPath::Of<Sprite>(Sprite::kBboxTopFieldNumber)).toInt();
+  int right = _model->Data(FieldPath::Of<Sprite>(Sprite::kBboxRightFieldNumber)).toInt();
+  int bottom = _model->Data(FieldPath::Of<Sprite>(Sprite::kBboxBottomFieldNumber)).toInt();
   return QRectF(x, y, right - x, bottom - y);
 }
 
-void SpriteView::Paint(QPainter &painter) { painter.drawPixmap(0, 0, _pixmap); }
+void SpriteView::Paint(QPainter &painter) {
+  parentWidget()->update();
+  painter.drawPixmap(0, 0, _pixmap);
+}
+
 
 void SpriteView::PaintTop(QPainter &painter) {
   qreal zoom = _parent->GetZoom();
@@ -75,8 +85,8 @@ void SpriteView::PaintTop(QPainter &painter) {
 
   if (_showOrigin) {
     painter.setBrush(QBrush(Qt::yellow));
-    painter.drawEllipse(QPoint(_model->Data(Sprite::kOriginXFieldNumber).toInt() * zoom,
-                               _model->Data(Sprite::kOriginYFieldNumber).toInt() * zoom),
+    painter.drawEllipse(QPoint(_model->Data(FieldPath::Of<Sprite>(Sprite::kOriginXFieldNumber)).toInt() * zoom,
+                               _model->Data(FieldPath::Of<Sprite>(Sprite::kOriginYFieldNumber)).toInt() * zoom),
                         2, 2);
   }
 

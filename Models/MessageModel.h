@@ -35,6 +35,9 @@ class MessageModel : public ProtoModel {
     return it == submodels_by_field_.end() ? nullptr : (*it)->As<T>();
   }
 
+  QString GetDisplayName() const override;
+  QIcon GetDisplayIcon() const override;
+
   const FieldDescriptor *GetRowDescriptor(int row) const override;
 
   // Returns true iff the specified row is an unset oneof field whose containing oneof has a different value specified.
@@ -66,18 +69,17 @@ class MessageModel : public ProtoModel {
   // These are the same as the above but operate on the raw protobuf
   Message *GetBuffer();
   void ReplaceBuffer(Message *buffer);
-  const Descriptor *GetDescriptor() const { return descriptor_; }
 
-  QVariant Data(int row, int column = 0) const override;
-  QVariant Data(const FieldPath &field_path) const override;
-  bool SetData(const QVariant &value, int row, int column = 0) override;
-  bool SetData(const FieldPath &field_path, const QVariant &value) override;
+  using ProtoModel::Data;
+  using ProtoModel::SetData;
+  QVariant Data() const override;
+  bool SetData(const QVariant &value) override;
+  const ProtoModel *GetSubModel(const FieldPath &field_path) const override;
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override;
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-  QVariant dataOrDefault(const QModelIndex &index, int role = Qt::DisplayRole) const;
   QModelIndex parent(const QModelIndex &index) const override;
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
   QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override;
@@ -89,7 +91,6 @@ class MessageModel : public ProtoModel {
 
  protected:
   google::protobuf::Message *_protobuf;
-  const google::protobuf::Descriptor *const descriptor_;
   MessageModel *_modelBackup;
   QScopedPointer<Message> _backupProtobuf;
   QVector<ProtoModel *> submodels_by_row_;

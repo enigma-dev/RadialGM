@@ -77,9 +77,10 @@ SOURCES += \
     Models/EventTypesListSortFilterProxyModel.cpp \
     Models/EventsListModel.cpp \
     Models/MessageModel.cpp \
-    Models/RepeatedImageModel.cpp \
+    Models/PrimitiveModel.cpp \
     Models/RepeatedMessageModel.cpp \
     Models/RepeatedModel.cpp \
+    Models/RepeatedSortFilterProxyModel.cpp \
     Utils/FieldPath.cpp \
     Utils/ProtoManip.cpp \
     Widgets/AssetScrollAreaBackground.cpp \
@@ -139,12 +140,13 @@ HEADERS += \
     Models/EventTypesListSortFilterProxyModel.h \
     Models/EventsListModel.h \
     Models/MessageModel.h \
-    Models/RepeatedImageModel.h \
+    Models/PrimitiveModel.h \
     Models/RepeatedMessageModel.h \
     Models/RepeatedModel.h \
-    Models/RepeatedStringModel.h \
+    Models/RepeatedSortFilterProxyModel.h \
     Utils/FieldPath.h \
     Utils/ProtoManip.h \
+    Utils/QBoilerplate.h \
     Utils/SafeCasts.h \
     Widgets/AssetScrollArea.h \
     Widgets/AssetScrollAreaBackground.h \

@@ -13,7 +13,20 @@ class RepeatedMessageModel : public BasicRepeatedModel<Message> {
   // (e.g. instancesModel->GetSubmodel(3))
   // XXX: Why would anyone try to access these as anything other than MessageModel...?
   template<typename T> auto *GetSubModel(int index) const {
-    return (index < 0 || index > _subModels.size()) ? nullptr: ((ProtoModel*) _subModels[index])->As<T>();
+    return (index < 0 || index >= _subModels.size()) ? nullptr: ((ProtoModel*) _subModels[index])->As<T>();
+  }
+
+  ProtoModel *GetSubModel(int index) const override {
+    return (index < 0 || index >= _subModels.size()) ? nullptr : (ProtoModel*) _subModels[index];
+  }
+
+  // Translates an underlying Protocol Buffer tag (field number) to the column number from this model.
+  int FieldToColumn(int field_number) const {
+    const FieldDescriptor *field = field_->message_type()->FindFieldByNumber(field_number);
+    if (field) return field->index();
+    qDebug() << "Looking up bad field number " << field_number
+             << " in RepeatedMessageModel " << GetDescriptor()->full_name().c_str();
+    return -1;
   }
 
   void SwapWithoutSignal(int /*left*/, int /*right*/) override;
@@ -21,10 +34,11 @@ class RepeatedMessageModel : public BasicRepeatedModel<Message> {
   void RemoveLastNRowsWithoutSignal(int /*newSize*/) override;
   void ClearWithoutSignal() override;
 
-  QVariant Data(int row, int column = 0) const override;
-  QVariant Data(const FieldPath &field_path) const override;
-  bool SetData(const QVariant &value, int row, int column = 0) override;
-  bool SetData(const FieldPath &field_path, const QVariant &value) override;
+  using ProtoModel::Data;
+  using ProtoModel::SetData;
+  QVariant Data() const override;
+  bool SetData(const QVariant &value) override;
+  const ProtoModel *GetSubModel(const FieldPath &field_path) const override;
 
   bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override;
   QVariant data(const QModelIndex &index, int role) const override;
@@ -32,10 +46,9 @@ class RepeatedMessageModel : public BasicRepeatedModel<Message> {
   Qt::ItemFlags flags(const QModelIndex &index) const override;
 
   const std::string &MessageName() const;
-  const google::protobuf::Descriptor *GetDescriptor() const { return _descriptor; }
 
   QString DebugName() const override {
-    return QString::fromStdString("RepeatedMessageModel<" + _field->full_name() + ">");
+    return QString::fromStdString("RepeatedMessageModel<" + field_->full_name() + ">");
   }
   RepeatedMessageModel *TryCastAsRepeatedMessageModel() override { return this; }
 

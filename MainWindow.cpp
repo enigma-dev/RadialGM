@@ -228,9 +228,6 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 void MainWindow::openSubWindow(MessageModel* res, MainWindow::EditorFactoryFunction factory_function) {
   using namespace google::protobuf;
 
-  using TypeCase = buffers::TreeNode::TypeCase;
-  using FactoryMap = std::unordered_map<TypeCase, std::function<BaseEditor *(MessageModel * m, QWidget * p)>>;
-
   auto swIt = _subWindows.find(res);
   QMdiSubWindow *subWindow;
   if (swIt == _subWindows.end() || !*swIt) {
@@ -252,7 +249,8 @@ void MainWindow::openSubWindow(MessageModel* res, MainWindow::EditorFactoryFunct
     subWindow->connect(subWindow, &QObject::destroyed, [=]() { _subWindows.remove(res); });
 
     subWindow->setWindowIcon(subWindow->widget()->windowIcon());
-    editor->setWindowTitle(res->Data(FieldPath::Of<TreeNode>(TreeNode::kNameFieldNumber)).toString());
+    editor->setWindowTitle(
+        res->GetParentModel<MessageModel>()->Data(FieldPath::Of<TreeNode>(TreeNode::kNameFieldNumber)).toString());
   } else {
     subWindow = *swIt;
   }
@@ -274,7 +272,7 @@ void MainWindow::updateWindowMenu() {
     const auto windowTitle = mdiSubWindow->windowTitle();
     QString numberString = QString::number(i + 1);
     numberString = numberString.insert(numberString.length() - 1, '&');
-    QString text = tr("%1 %2").arg(numberString).arg(windowTitle);
+    QString text = tr("%1 %2").arg(numberString, windowTitle);
 
     QAction *action = _ui->menuWindow->addAction(
         mdiSubWindow->windowIcon(), text, mdiSubWindow,
@@ -309,7 +307,7 @@ void MainWindow::openNewProject() {
                                   tr("Scripts"), tr("Shaders"), tr("Fonts"),       tr("Timelines"),
                                   tr("Objects"), tr("Rooms"),   tr("Includes"),    tr("Configs")};
   // We can edit the proto directly, here, since the model doesn't exist, yet.
-  for (auto groupName : defaultGroups) {
+  for (const auto& groupName : defaultGroups) {
     auto *groupNode = root->mutable_folder()->add_children();
     groupNode->set_name(groupName.toStdString());
     groupNode->mutable_folder();
@@ -327,6 +325,41 @@ template<typename Editor> TreeModel::EditorLauncher Launch(MainWindow *parent) {
     parent->openSubWindow(model, EditorFactoryFactory::Factory);
   };
 }
+
+void ConfigureIconFields(ProtoModel::DisplayConfig *conf, const Descriptor *desc, std::set<const Descriptor*> *visited) {
+  for (int i = 0; i < desc->field_count(); ++i) {
+    const FieldDescriptor *field = desc->field(i);
+    if (field->options().HasExtension(buffers::resource_ref)) {
+      std::string resource_type = field->options().GetExtension(buffers::resource_ref);
+      if (resource_type == "object") {
+        conf->SetFieldIconLookup(field, GetObjectSpriteByNameField);
+        conf->SetFieldDefaultIcon(field, "object");
+      } else if (resource_type == "sprite") {
+        conf->SetFieldIconLookup(field, GetSpriteIconByNameField);
+      } else if (resource_type == "background") {
+        conf->SetFieldIconLookup(field, GetBackgroundIconByNameField);
+      } else if (resource_type == "room") {
+        // no preview for rooms yet
+      } else {
+        qDebug() << "Unknown resource ref type: " << resource_type.c_str();
+      }
+    }
+    if (field->options().HasExtension(buffers::file_kind)) {
+      if (field->options().GetExtension(buffers::file_kind) == buffers::FileKind::IMAGE) {
+        conf->SetFieldIconLookup(field, GetFileIcon);
+      }
+    }
+    if (const Descriptor *submsg = field->message_type()) {
+      if (visited->insert(submsg).second) ConfigureIconFields(conf, submsg, visited);
+    }
+  }
+}
+
+void ConfigureIconFields(ProtoModel::DisplayConfig *conf, const Descriptor *desc) {
+  std::set<const Descriptor*> visited{desc};
+  return ConfigureIconFields(conf, desc, &visited);
+}
+
 
 void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   this->_ui->mdiArea->closeAllSubWindows();
@@ -347,33 +380,48 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   treeConf.UseEditorLauncher<buffers::resources::Room>(Launch<RoomEditor>(this));
   treeConf.UseEditorLauncher<buffers::resources::Settings>(Launch<SettingsEditor>(this));
 
-  treeConf.SetDefaultIcon<buffers::TreeNode::Folder>("group");
-  treeConf.SetDefaultIcon<buffers::resources::Sprite>("sprite");
-  treeConf.SetDefaultIcon<buffers::resources::Sound>("sound");
-  treeConf.SetDefaultIcon<buffers::resources::Background>("background");
-  treeConf.SetDefaultIcon<buffers::resources::Path>("path");
-  treeConf.SetDefaultIcon<buffers::resources::Script>("script");
-  treeConf.SetDefaultIcon<buffers::resources::Shader>("shader");
-  treeConf.SetDefaultIcon<buffers::resources::Font>("font");
-  treeConf.SetDefaultIcon<buffers::resources::Timeline>("timeline");
-  treeConf.SetDefaultIcon<buffers::resources::Object>("object");
-  treeConf.SetDefaultIcon<buffers::resources::Room>("room");
-  treeConf.SetDefaultIcon<buffers::resources::Settings>("settings");
+  ProtoModel::DisplayConfig msgConf;
+  msgConf.SetDefaultIcon<buffers::TreeNode::Folder>("group");
+  msgConf.SetDefaultIcon<buffers::TreeNode::UnknownResource>("info");
+  msgConf.SetDefaultIcon<buffers::resources::Sprite>("sprite");
+  msgConf.SetDefaultIcon<buffers::resources::Sound>("sound");
+  msgConf.SetDefaultIcon<buffers::resources::Background>("background");
+  msgConf.SetDefaultIcon<buffers::resources::Path>("path");
+  msgConf.SetDefaultIcon<buffers::resources::Script>("script");
+  msgConf.SetDefaultIcon<buffers::resources::Shader>("shader");
+  msgConf.SetDefaultIcon<buffers::resources::Font>("font");
+  msgConf.SetDefaultIcon<buffers::resources::Timeline>("timeline");
+  msgConf.SetDefaultIcon<buffers::resources::Object>("object");
+  msgConf.SetDefaultIcon<buffers::resources::Room>("room");
+  msgConf.SetDefaultIcon<buffers::resources::Settings>("settings");
 
-  treeConf.SetMessageIconPathField<buffers::resources::Sprite>(
+  ConfigureIconFields(&msgConf, TreeNode::GetDescriptor());
+
+  msgConf.SetMessageIconPathField<buffers::resources::Sprite>(
         FieldPath::RepeatedOffset(buffers::resources::Sprite::kSubimagesFieldNumber, 0));
-  treeConf.SetMessageIconPathField<buffers::resources::Background>(buffers::resources::Background::kImageFieldNumber);
-  treeConf.SetMessageIconIdLookup<buffers::resources::Object>(GetSpriteIconByNameField,
+  msgConf.SetMessageIconPathField<buffers::resources::Background>(buffers::resources::Background::kImageFieldNumber);
+  msgConf.SetMessageIconIdLookup<buffers::resources::Object>(GetSpriteIconByNameField,
                                                               buffers::resources::Object::kSpriteNameFieldNumber);
 
-  treeConf.SetMessageLabelField<buffers::TreeNode>(buffers::TreeNode::kNameFieldNumber);
+  msgConf.SetMessageLabelField<buffers::TreeNode>(buffers::TreeNode::kNameFieldNumber);
+
+  msgConf.SetFieldHeaderIcon<buffers::resources::Path::Point>(":/actions/diamond-red.png",
+                                                              buffers::resources::Path::Point::kXFieldNumber);
+  msgConf.SetFieldHeaderIcon<buffers::resources::Path::Point>(":/actions/diamond-green.png",
+                                                              buffers::resources::Path::Point::kYFieldNumber);
+  msgConf.SetFieldHeaderIcon<buffers::resources::Path::Point>(":/actions/diamond-blue.png",
+                                                              buffers::resources::Path::Point::kSpeedFieldNumber);
 
   treeConf.SetMessagePassthrough<buffers::TreeNode>();
   treeConf.SetMessagePassthrough<buffers::TreeNode::Folder>();
   treeConf.DisableOneofReassignment<buffers::TreeNode>();
 
   resourceMap.reset(new ResourceModelMap(_project->mutable_game()->mutable_root(), nullptr));
-  treeModel.reset(new TreeModel(new MessageModel(this, _project->mutable_game()->mutable_root()), nullptr, treeConf));
+
+  auto pm = new MessageModel(this, _project->mutable_game()->mutable_root());
+  pm->SetDisplayConfig(msgConf);
+
+  treeModel.reset(new TreeModel(pm, nullptr, treeConf));
 
   _ui->treeView->setModel(treeModel.get());
   treeModel->connect(treeModel.get(), &TreeModel::ItemRenamed, resourceMap.get(),
@@ -549,14 +597,14 @@ void MainWindow::on_actionProperties_triggered() {
   }
 }
 
-static void CollectNodes(const buffers::TreeNode *root, QSet<const buffers::TreeNode *> &cache) {
+/*static void CollectNodes(const buffers::TreeNode *root, QSet<const buffers::TreeNode *> &cache) {
   cache.insert(root);
   for (int i = 0; i < root->folder().children_size(); ++i) {
     auto *child = &root->folder().children(i);
     cache.insert(child);
     if (child->has_folder()) CollectNodes(child, cache);
   }
-}
+}*/
 
 void MainWindow::on_actionDelete_triggered() {/*
   if (!_ui->treeView->selectionModel()->hasSelection()) return;

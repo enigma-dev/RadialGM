@@ -14,7 +14,7 @@ class FieldPath {
  public:
   struct FieldComponent {
     const google::protobuf::FieldDescriptor *field;
-    int repeated_field_index = -1;  // Repeated field index, only if field->is_repeated(). Otherwise, -1.
+    int repeated_field_index = -1;  ///< Repeated field index, only if field->is_repeated(). Otherwise, -1.
 
     // Convenience method to access field data.
     const google::protobuf::FieldDescriptor *operator->() const { return field; }
@@ -23,11 +23,13 @@ class FieldPath {
         field(field), repeated_field_index(index) {}
   };
   std::vector<FieldComponent> fields;
+  int repeated_field_index = -1;  ///< Repeated field index, only when accessing a repeated model. Otherwise, -1.
   QString GetFrom(Message *source);
 
   FieldPath() = default;
   explicit FieldPath(const FieldDescriptor *fd);
-  explicit FieldPath(std::vector<FieldComponent> fields);
+  explicit FieldPath(std::vector<FieldComponent> fields): FieldPath(-1, fields) {}
+  explicit FieldPath(int start_position, std::vector<FieldComponent> fields);
 
   FieldComponent front() const { return fields.front(); }
   size_t size() const { return fields.size(); }
@@ -40,13 +42,26 @@ class FieldPath {
     constexpr FCTag(int f, int idx): field_number(f), repeated_field_index(idx) {}
   };
 
+  /// May appear as the first element in a FieldPath to specify that the path itself starts at the Nth element of a
+  /// repeated model. All other repeated field index operations use RepeatedOffset(), which specifies a field number.
+  static constexpr FCTag StartingAt(int index) { return {0, index}; }
+  /// Used to access a particular index of a repeated field.
   static constexpr FCTag RepeatedOffset(int field_num, int index) { return {field_num, index}; }
 
   template<typename T, typename ... Fields> static FieldPath Of(Fields... field_components) {
     std::vector<FieldComponent> fields;
     const Descriptor *md = T::GetDescriptor();
+    bool first_element = true;
+    int start_index = -1;
     for (FCTag fct : std::initializer_list<FCTag>{field_components...}) {
       if (!md) break;
+      if (first_element) {
+        first_element = false;
+        if (!fct.field_number) {
+          start_index = fct.repeated_field_index;
+          continue;
+        }
+      }
       const FieldDescriptor *fd = md->FindFieldByNumber(fct.field_number);
       if (!fd) {
         qDebug() << "Could not locate field " << fct.field_number << " in message " << md->full_name().c_str() << "!";
@@ -60,12 +75,16 @@ class FieldPath {
       fields.emplace_back(fd, fct.repeated_field_index);
       md = fd->message_type();
     }
-    return FieldPath(std::move(fields));
+    return FieldPath(start_index, std::move(fields));
   }
 
-  FieldPath SubPath(size_t index) const {
-    if (index >= fields.size()) return FieldPath();
-    return FieldPath({fields.begin() + index, fields.end()});
+  FieldPath SkipField() const {
+    if (fields.empty()) return FieldPath();
+    return FieldPath(fields.front().repeated_field_index, {fields.begin() + 1, fields.end()});
+  }
+
+  FieldPath SkipIndex() const {
+    return FieldPath(-1, {fields.begin(), fields.end()});
   }
 
   // Returns the concatenation of the two field paths, if the first field of the right-hand path is a

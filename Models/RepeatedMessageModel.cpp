@@ -17,7 +17,9 @@ void RepeatedMessageModel::SwapWithoutSignal(int left, int right) {
 }
 
 void RepeatedMessageModel::AppendNewWithoutSignal() {
-  _subModels.append(new MessageModel(GetParentModel<MessageModel>(), field_ref_.NewMessage()));
+  auto m = field_ref_.NewMessage();
+  field_ref_.Add(*m);
+  _subModels.append(new MessageModel(GetParentModel<MessageModel>(), m));
 }
 
 void RepeatedMessageModel::RemoveLastNRowsWithoutSignal(int n) {
@@ -30,68 +32,60 @@ void RepeatedMessageModel::ClearWithoutSignal() {
   _subModels.clear();
 }
 
-QVariant RepeatedMessageModel::Data(int row, int column) const {
-  R_EXPECT(row >= 0 && row < _subModels.size(), QVariant()) <<
-    "Supplied row was out of bounds:" << row;
-  return _subModels[row]->Data(column);
-}
-
-bool RepeatedMessageModel::SetData(const QVariant &value, int row, int column) {
-  R_EXPECT(row >= 0 && row < _subModels.size(), false) <<
-    "Supplied row was out of bounds:" << row;
-  return _subModels[row]->SetData(value, column);
-}
-
-int RepeatedMessageModel::columnCount(const QModelIndex & /*parent*/) const {
-  return _field->message_type()->field_count();
-}
-
 bool RepeatedMessageModel::setData(const QModelIndex &index, const QVariant &value, int role) {
   R_EXPECT(index.row() >= 0 && index.row() < _subModels.size(), false) <<
     "Supplied row was out of bounds:" << index.row();
   return _subModels[index.row()]->setData(_subModels[index.row()]->index(index.column()), value, role);
 }
 
-QModelIndex RepeatedMessageModel::insert(const Message &message, int row) {
+QModelIndex RepeatedMessageModel::insert(const Message &/*message*/, int row) {
   // TODO: write me
+  qDebug() << "Unimplemented";
   return index(row, 0);
 }
 
 QModelIndex RepeatedMessageModel::duplicate(const QModelIndex &message) {
   // TODO: write me
+  qDebug() << "Unimplemented";
   return message;
 }
 
-bool RepeatedMessageModel::SetData(const FieldPath &field_path, const QVariant &value) {
-  Q_UNUSED(value);
-  if (field_path.fields.empty()) {
-    qDebug() << "Unimplemented: assigning a QVariant to a repeated message field.";
-    return false;
+const ProtoModel *RepeatedMessageModel::GetSubModel(const FieldPath &field_path) const {
+  if (field_path.repeated_field_index != -1) {
+    if (field_path.repeated_field_index < _subModels.size())
+      return _subModels[field_path.repeated_field_index]->GetSubModel(field_path.SkipIndex());
+    qDebug() << "Attempting to access out-of-bounds repeated index " << field_path.repeated_field_index
+             << " of repeated field `" << field_path.fields[0]->full_name().c_str()
+             << "` of size " << _subModels.size();
+    return nullptr;
   }
-  qDebug() << "Attempting to set a sub-field of repeated field `" << field_path.fields[0]->full_name().c_str() << "`";
+  if (field_path) {
+    qDebug() << "Attempting to access sub-field `" << field_path.front()->full_name().c_str()
+             << "` of repeated field `" << field_->full_name().c_str() << "` without an index";
+    return nullptr;
+  }
+  return this;
+}
+
+bool RepeatedMessageModel::SetData(const QVariant &) {
+  qDebug() << "Unimplemented: assigning a QVariant to a repeated message field.";
   return false;
 }
 
-QVariant RepeatedMessageModel::Data(const FieldPath &field_path) const {
+QVariant RepeatedMessageModel::Data() const {
   QVector<QVariant> vec;
-  if (field_path.fields.empty()) {
-    for (int i = 0; i < rowCount(); ++i) vec.push_back(GetDirect(i));
-  } else {
-    FieldPath sub_field = field_path.SubPath(1);
-    for (const auto *sub_model : _subModels) vec.push_back(sub_model->Data(sub_field));
-  }
+  for (const auto *sub_model : _subModels) vec.push_back(sub_model->Data());
   return QVariant::fromValue(vec);
 }
 
 QVariant RepeatedMessageModel::data(const QModelIndex &index, int role) const {
-  R_EXPECT(index.row() >= 0 && index.row() < _subModels.size(), QVariant()) <<
-    "Supplied row was out of bounds:" << index.row();
-
-  // protobuf field number with 0 is impossible, use as sentinel to get model itself
-  if (index.column() == 0)
-    return QVariant::fromValue(_subModels[index.row()]);
-
+  R_EXPECT(index.row() >= 0 && index.row() < rowCount(), QVariant())
+      << "Row index " << index.row() << " is out of bounds (" << rowCount() << " rows total)";
   return _subModels[index.row()]->data(_subModels[index.row()]->index(index.column()), role);
+}
+
+int RepeatedMessageModel::columnCount(const QModelIndex & /*parent*/) const {
+  return field_->message_type()->field_count();
 }
 
 Qt::ItemFlags RepeatedMessageModel::flags(const QModelIndex &index) const {
@@ -102,7 +96,7 @@ Qt::ItemFlags RepeatedMessageModel::flags(const QModelIndex &index) const {
 }
 
 const std::string &RepeatedMessageModel::MessageName() const {
-  auto *msg = _field->message_type();
+  auto *msg = field_->message_type();
   if (!msg) {
     static const std::string kSentinel;
     qDebug() << "Message type of RepeatedMessageField is null! This should never happen!";

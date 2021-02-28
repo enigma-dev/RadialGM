@@ -1,18 +1,12 @@
-#include "RepeatedStringModel.h"
+#include "RepeatedModel.h"
+#include "Components/Logger.h"
+#include "Components/ArtManager.h"
 
 #include <QDataStream>
 #include <QImageReader>
 #include <QMimeData>
 
 #include <algorithm>
-
-QVariant RepeatedModel::Data(int row, int column) const {
-  return data(index(row, column, QModelIndex()), Qt::UserRole);
-}
-
-bool RepeatedModel::SetData(const QVariant& value, int row, int column) {
-  return setData(index(row, column, QModelIndex()), value);
-}
 
 bool RepeatedModel::setData(const QModelIndex& index, const QVariant& value, int /*role*/) {
   if (index.column() != 0) {
@@ -28,40 +22,58 @@ bool RepeatedModel::setData(const QModelIndex& index, const QVariant& value, int
   return SetDirect(index.row(), value);
 }
 
-QVariant RepeatedModel::data(const QModelIndex& index, int /*role*/) const {
-  if (index.column() != 0) {
-    qDebug() << "Invalid column index";
-    return QVariant();
-  }
+QVariant RepeatedModel::data(const QModelIndex& index, int role) const {
+  R_EXPECT(index.column() == 0, QVariant()) << "Invalid column index " << index.column() << " to " << DebugName();
+  R_EXPECT(index.row() >= 0 && index.row() < rowCount(), QVariant())
+      << "Row index " << index.row() << " is out of bounds (" << rowCount() << " rows total)";
 
-  if (index.row() < 0 || index.row() >= rowCount()) {
-    qDebug() << "Invalid row index";
-    return QVariant();
+  switch (role) {
+    case Qt::DisplayRole: return GetDirect(index.row());
+    case Qt::DecorationRole: {
+      auto* model = GetSubModel(index.row());
+      if (model) return model->GetDisplayIcon();
+      else return {};
+    }
+    default: return QVariant();
   }
-
-  return GetDirect(index.row());
 }
 
-bool RepeatedModel::SetData(const FieldPath &field_path, const QVariant &value) {
-  Q_UNUSED(value);
-  if (field_path.fields.empty()) {
-    qDebug() << "Unimplemented: assigning a QVariant to a repeated field.";
-    return false;
+const ProtoModel *RepeatedModel::GetSubModel(const FieldPath &field_path) const {
+  if (!field_path.fields.empty()) {
+    qDebug() << "Attempting to access sub-field `" << field_path.front()->full_name().c_str()
+             << "` of scalar repeated field `" << field_->full_name().c_str() << "`";
+    return nullptr;
   }
-  qDebug() << "Attempting to set a sub-field of repeated field `" << field_path.fields[0]->full_name().c_str() << "`";
+  if (field_path.repeated_field_index != -1) {
+    if (field_path.repeated_field_index < rowCount()) {
+      return GetSubModel(field_path.repeated_field_index);
+    }
+    qDebug() << "Attempting to access out-of-bounds index " << field_path.repeated_field_index << " of field `"
+             << field_path.fields[0]->full_name().c_str() << "`";
+    return nullptr;
+  }
+  return this;
+}
+
+bool SetData(const QVariant &value) {
+  qDebug() << "Unimplemented: assigning a QVariant to a repeated field.";
+  Q_UNUSED(value);
   return false;
 }
 
-QVariant RepeatedModel::Data(const FieldPath &field_path) const {
+QVariant RepeatedModel::Data() const {
   QVector<QVariant> vec;
-  if (field_path.fields.empty()) {
-    for (int i = 0; i < rowCount(); ++i) vec.push_back(GetDirect(i));
-  } else {
-    // FieldPath sub = field_path.SubPath(1);
-    // for (int i = 0; i < rowCount(); ++i) vec.push_back(Data(sub));
-    qDebug() << "Attempting to access a sub-field of a repeated field...";
-  }
+  for (int i = 0; i < rowCount(); ++i) vec.push_back(GetDirect(i));
   return QVariant::fromValue(vec);
+}
+
+bool RepeatedModel::SetData(const QVariant &value) {
+  if (!value.canConvert<QVector<QVariant>>()) return false;
+  //auto vec = value.value<QVector<QVariant>>();
+  bool res = false;
+  qDebug() << "Unimplemented: Assigning QVariant to " << DebugName();
+  // TODO: Begin reset model; ClearWithoutSignal; for (const QVariant &v : vec) push v as new model element; end reset.
+  return res;
 }
 
 bool RepeatedModel::moveRows(const QModelIndex &sourceParent, int source, int count,
@@ -86,6 +98,73 @@ bool RepeatedModel::moveRows(const QModelIndex &sourceParent, int source, int co
   return true;
 }
 
+int RepeatedModel::columnCount(const QModelIndex &parent) const {
+  if (parent.isValid()) return 0;
+  return 1;
+}
+
+QModelIndex RepeatedModel::index(int row, int column, const QModelIndex &parent) const {
+  Q_UNUSED(parent);
+  return this->createIndex(row, column);
+}
+
+QVariant RepeatedModel::headerData(int section, Qt::Orientation /*orientation*/, int role) const {
+  if (section < 0 || section >= field_->message_type()->field_count()) return QVariant();
+
+  switch (role) {
+    case Qt::DisplayRole: return QString::fromStdString(field_->message_type()->field(section)->name());
+    case Qt::DecorationRole: {
+      const auto& fd = GetFieldDisplay(field_->message_type()->field(section)->full_name());
+      if (!fd.header_icon.isEmpty()) return ArtManager::GetIcon(fd.header_icon);
+      else return {};
+    }
+    default: return {};
+  }
+}
+
+// Convenience function for internal moves
+bool RepeatedModel::moveRows(int source, int count, int destination) {
+  return moveRows(QModelIndex(), source, count, QModelIndex(), destination);
+}
+
+bool RepeatedModel::insertRows(int row, int count, const QModelIndex &parent) {
+  if (row > rowCount()) return false;
+
+  beginInsertRows(parent, row, row + count - 1);
+
+  int p = rowCount();
+
+  // Append `count` new rows to the list, then move them backward to where they were supposed to be inserted.
+  for (int i = 0; i < count; ++i) AppendNewWithoutSignal();
+  SwapBackWithoutSignal(row, p, rowCount());
+  ParentDataChanged();
+
+  endInsertRows();
+
+  return true;
+};
+
+bool RepeatedModel::removeRows(int position, int count, const QModelIndex& parent) {
+  Q_UNUSED(parent);
+  RowRemovalOperation remover(this);
+  remover.RemoveRows(position, count);
+  return true;
+}
+
+// Mimedata stuff required for Drag & Drop and clipboard functions
+Qt::DropActions RepeatedModel::supportedDropActions() const { return Qt::MoveAction | Qt::CopyAction; }
+
+QStringList RepeatedModel::mimeTypes() const {
+  return QStringList(GetMimeType(field_));
+}
+
+Qt::ItemFlags RepeatedModel::flags(const QModelIndex &index) const {
+  Qt::ItemFlags flags = QAbstractItemModel::flags(index);
+  if (index.isValid()) flags |= Qt::ItemIsDragEnabled;
+  flags |= Qt::ItemIsDropEnabled;
+  return flags;
+}
+
 QMimeData* RepeatedModel::mimeData(const QModelIndexList& indexes) const {
   QModelIndexList sortedIndexes = indexes;
   std::sort(sortedIndexes.begin(), sortedIndexes.end(),
@@ -97,22 +176,30 @@ QMimeData* RepeatedModel::mimeData(const QModelIndexList& indexes) const {
 
   foreach (const QModelIndex& index, sortedIndexes) {
     if (index.isValid()) {
-      QString text = data(index, Qt::UserRole).toString();
-      stream << text;
-      stream << index.row();
+      stream << data(index, Qt::DisplayRole).toString();
     }
   }
 
-  mimeData->setData(mimeTypes()[0], encodedData);
+  const QString mime = GetMimeType(field_);
+  qDebug() << "Dragging " << mime;
+  mimeData->setData(mime, encodedData);
 
   return mimeData;
+}
+
+QString RepeatedModel::DataDebugString() const {
+  QString res = DebugName() + " {";
+  for (int i = 0; i < rowCount(); ++i) res += "\n", res += GetDirect(i).toString(), res += ",";
+  res += "\n}";
+  return res;
 }
 
 bool RepeatedModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column,
                                  const QModelIndex& parent) {
   if (row < 0) return false;
   if (action == Qt::IgnoreAction) return true;
-  if (!data->hasFormat(mimeTypes()[0])) return false;
+  const auto mime = GetMimeType(field_);
+  if (!data->hasFormat(mime)) return false;
   if (column > 0) return false;
 
   int beginRow;
@@ -123,26 +210,23 @@ bool RepeatedModel::dropMimeData(const QMimeData* data, Qt::DropAction action, i
   else
     beginRow = rowCount(QModelIndex());
 
-  QByteArray encodedData = data->data(mimeTypes()[0]);
+  QByteArray encodedData = data->data(mime);
   QDataStream stream(&encodedData, QIODevice::ReadOnly);
   QStringList newItems;
-  int rows = 0;
 
   while (!stream.atEnd()) {
     QString text;
     stream >> text;
-    int index;
-    stream >> index;
     newItems << text;
-    ++rows;
   }
 
-  insertRows(beginRow, rows, QModelIndex());
+  qDebug() << "State before insert: " << DataDebugString();
+  insertRows(beginRow, newItems.size(), QModelIndex());
+  qDebug() << "State after insert, before overwrite: " << DataDebugString();
   foreach (const QString& text, newItems) {
-    QModelIndex idx = index(beginRow, 0, QModelIndex());
-    setData(idx, text, Qt::UserRole);
-    beginRow++;
+    SetDirect(beginRow++, text);
   }
+  qDebug() << "State after overwrite: " << DataDebugString();
 
   return true;
 }

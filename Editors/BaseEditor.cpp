@@ -15,6 +15,17 @@ BaseEditor::BaseEditor(MessageModel* resource_model, QWidget* parent)
   connect(_model, &QAbstractItemModel::modelReset, [this]() { this->RebindSubModels(); });
 }
 
+BaseEditor::~BaseEditor() {
+  if (_reset_model_on_close) {
+    _nodeMapper->clearMapping();
+    if (!_resMapper->RestoreBackup()) {
+      // This should never happen but here incase someone decides to incorrectly null the backup
+      qDebug() << "Failed to revert editor changes";
+    }
+    _resMapper->clearMapping();
+  }
+}
+
 void BaseEditor::closeEvent(QCloseEvent* event) {
   if (_resMapper->IsDirty()) {
     QMessageBox::StandardButton reply;
@@ -25,12 +36,7 @@ void BaseEditor::closeEvent(QCloseEvent* event) {
       event->ignore();
       return;
     } else if (reply == QMessageBox::No) {
-      _nodeMapper->clearMapping();
-      if (!_resMapper->RestoreBackup()) {
-        // This should never happen but here incase someone decides to incorrectly null the backup
-        qDebug() << "Failed to revert editor changes";
-      }
-      _resMapper->clearMapping();
+      _reset_model_on_close = true;
     }
   }
 

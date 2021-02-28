@@ -89,50 +89,6 @@
        <property name="bottomMargin">
         <number>4</number>
        </property>
-       <item row="2" column="0" colspan="2">
-        <widget class="QGroupBox" name="collisionShapeGroupBox">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="title">
-          <string>Collision Shape</string>
-         </property>
-         <layout class="QVBoxLayout" name="collisionShapeLayout">
-          <item>
-           <widget class="QComboBox" name="collisionShapeComboBox">
-            <item>
-             <property name="text">
-              <string>Precise</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Rectangle</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Disk</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Diamond</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Polygon</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
        <item row="0" column="0">
         <widget class="QLabel" name="nameLabel">
          <property name="text">
@@ -177,20 +133,32 @@
           <item row="0" column="1">
            <widget class="QSpinBox" name="originXSpinBox">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="minimum">
+             <number>-999999999</number>
+            </property>
+            <property name="maximum">
+             <number>999999999</number>
             </property>
            </widget>
           </item>
           <item row="0" column="3">
            <widget class="QSpinBox" name="originYSpinBox">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="minimum">
+             <number>-999999999</number>
+            </property>
+            <property name="maximum">
+             <number>999999999</number>
             </property>
            </widget>
           </item>
@@ -220,7 +188,7 @@
          </layout>
         </widget>
        </item>
-       <item row="3" column="0" colspan="2">
+       <item row="2" column="0" colspan="2">
         <widget class="QGroupBox" name="boundingboxGroup">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -229,16 +197,23 @@
           </sizepolicy>
          </property>
          <property name="title">
-          <string>Bounding Box</string>
+          <string>Collision Mask</string>
          </property>
          <property name="checkable">
           <bool>false</bool>
          </property>
-         <layout class="QVBoxLayout" name="bboxLayout">
+         <layout class="QFormLayout" name="formLayout">
           <property name="leftMargin">
            <number>9</number>
           </property>
-          <item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="bboxLabel">
+            <property name="text">
+             <string>Mode</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
            <widget class="QComboBox" name="bboxComboBox">
             <item>
              <property name="text">
@@ -257,9 +232,76 @@
             </item>
            </widget>
           </item>
-          <item>
-           <layout class="QGridLayout" name="bboxDimensionsLayout">
-            <property name="spacing">
+          <item row="1" column="0">
+           <widget class="QLabel" name="shapeLabel">
+            <property name="text">
+             <string>Type</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="shapeComboBox">
+            <item>
+             <property name="text">
+              <string>Precise</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Rectangle</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Disk</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Diamond</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Polygon</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="2">
+           <widget class="QLabel" name="alphaLabel">
+            <property name="text">
+             <string>Alpha Tolerance</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" colspan="2">
+           <layout class="QHBoxLayout" name="alphaControlLayout">
+            <item>
+             <widget class="QSlider" name="alphaSlider">
+              <property name="maximum">
+               <number>255</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="alphaSpinBox">
+              <property name="maximum">
+               <number>255</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="4" column="0" colspan="2">
+           <layout class="QGridLayout" name="bboxDimensionsLayout" columnstretch="0,1">
+            <property name="horizontalSpacing">
+             <number>4</number>
+            </property>
+            <property name="verticalSpacing">
              <number>0</number>
             </property>
             <item row="4" column="0">
@@ -293,10 +335,24 @@
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QSpinBox" name="leftSpinBox"/>
+             <widget class="QSpinBox" name="leftSpinBox">
+              <property name="minimum">
+               <number>-999999999</number>
+              </property>
+              <property name="maximum">
+               <number>999999999</number>
+              </property>
+             </widget>
             </item>
             <item row="2" column="1">
-             <widget class="QSpinBox" name="topSpinBox"/>
+             <widget class="QSpinBox" name="topSpinBox">
+              <property name="minimum">
+               <number>-999999999</number>
+              </property>
+              <property name="maximum">
+               <number>999999999</number>
+              </property>
+             </widget>
             </item>
             <item row="1" column="0">
              <widget class="QLabel" name="rightLabel">
@@ -309,10 +365,24 @@
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QSpinBox" name="rightSpinBox"/>
+             <widget class="QSpinBox" name="rightSpinBox">
+              <property name="minimum">
+               <number>-999999999</number>
+              </property>
+              <property name="maximum">
+               <number>999999999</number>
+              </property>
+             </widget>
             </item>
             <item row="4" column="1">
-             <widget class="QSpinBox" name="bottomSpinBox"/>
+             <widget class="QSpinBox" name="bottomSpinBox">
+              <property name="minimum">
+               <number>-999999999</number>
+              </property>
+              <property name="maximum">
+               <number>999999999</number>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -331,6 +401,9 @@
        </property>
        <property name="orientation">
         <enum>Qt::Vertical</enum>
+       </property>
+       <property name="opaqueResize">
+        <bool>true</bool>
        </property>
        <widget class="AssetScrollArea" name="imagePreview">
         <property name="sizePolicy">
@@ -353,7 +426,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>627</width>
+           <width>527</width>
            <height>312</height>
           </rect>
          </property>

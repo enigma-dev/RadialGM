@@ -79,11 +79,15 @@ bool SetField(google::protobuf::Message *message, const google::protobuf::FieldD
 // == Repeated field access ============================================================================================
 // =====================================================================================================================
 
-template <typename T>
+template <typename T>  // Handles bool, double, and float.  QVariant is too picky about the rest.
 QVariant GetField(google::protobuf::MutableRepeatedFieldRef<T> repeated_field, int row) {
   return repeated_field.Get(row);
 }
 
+QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::int32> repeated_field, int row);
+QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::uint32> repeated_field, int row);
+QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::int64> repeated_field, int row);
+QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::uint64> repeated_field, int row);
 QVariant GetField(google::protobuf::MutableRepeatedFieldRef<std::string> repeated_field, int row);
 
 QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::Message> repeated_field, int row);
@@ -93,7 +97,7 @@ QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::Me
 // =====================================================================================================================
 
 template <typename T>
-QVariant SetField(google::protobuf::MutableRepeatedFieldRef<T> repeated_field, int row, QVariant value) {
+bool SetField(google::protobuf::MutableRepeatedFieldRef<T> repeated_field, int row, QVariant value) {
   if (!value.convert(QMetaType::fromType<T>().id())) return false;
   repeated_field.Set(row, value.value<T>());
   return true;
@@ -103,5 +107,17 @@ bool SetField(google::protobuf::MutableRepeatedFieldRef<std::string> repeated_fi
 
 bool SetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::Message> repeated_field, int row,
               const QVariant &val);
+
+// =====================================================================================================================
+// == MIME Types =======================================================================================================
+// =====================================================================================================================
+
+/// Returns a standardized name for the mime type accepted by the given field, whether string, integer, or message.
+/// For message fields, only accepts exactly that message type.
+QString GetMimeType(const google::protobuf::FieldDescriptor *desc);
+
+/// Returns ALL mime types acceptable to a given message or fields within that message. Useful for models that display
+/// all fields within a given message (namely, TreeModel).
+QStringList GetMimeTypes(const google::protobuf::Descriptor *desc);
 
 #endif // PROTOMANIP_H
