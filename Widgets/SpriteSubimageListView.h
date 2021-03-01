@@ -15,7 +15,6 @@ class SpriteSubimageListView : public QListView {
   int GetDropIndex(QDropEvent* e);
   // Clean's up moved items from source mode
   void RemoveMimeIndexes(QMimeData* mimeData, SpriteSubimageListView* source);
-  ;
 };
 
 #endif  // SPRITESUBIMAGELISTVIEW_H
