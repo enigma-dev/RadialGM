@@ -52,6 +52,9 @@ void SpriteEditor::RebindSubModels() {
   _subimagesModel = _spriteModel->GetSubModel<RepeatedStringModel*>(Sprite::kSubimagesFieldNumber);
   connect(_spriteModel, &ProtoModel::DataChanged, this, [this]() { _ui->subimagePreview->update(); });
 
+  _ui->subImageList->setIconSize(QSize(64, 64));
+  _ui->subImageList->setGridSize(QSize(64, 64));
+
   _ui->subImageList->setModel(_subimagesModel);
 
   _ui->subimagePreview->SetResourceModel(_spriteModel);
