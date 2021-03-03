@@ -68,7 +68,7 @@ class MessageModel : public ProtoModel {
 
   // These are the same as the above but operate on the raw protobuf
   Message *GetBuffer();
-  void ReplaceBuffer(Message *buffer);
+  void ReplaceBuffer(const Message *buffer);
 
   using ProtoModel::Data;
   using ProtoModel::SetData;
