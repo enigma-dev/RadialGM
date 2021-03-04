@@ -202,7 +202,7 @@ void TreeModel::Node::Print(int indent) const {
 // =====================================================================================================================
 
 QModelIndex TreeModel::Node::mapFromSource(const QModelIndex &index) const {
-  if (!index.internalPointer()) return {};
+  R_EXPECT(index.internalPointer(), QModelIndex()) << "Requested index " << index << " internal pointer is null";
   // For messages, translate field index() to child offset in children vector.
   if (auto *message_model = backing_model->TryCastAsMessageModel(); index.internalPointer() == message_model) {
     for (auto &child : children) {
@@ -211,8 +211,9 @@ QModelIndex TreeModel::Node::mapFromSource(const QModelIndex &index) const {
     return {};
   }
   // All other index values should be 1:1.
-  if (index.row() > 0 && size_t(index.row()) < children.size()) return this->index(index.row());
-  return {};
+  R_EXPECT(index.row() >= 0 && size_t(index.row()) < children.size(), QModelIndex())
+      << "Requested index " << index << " is out of range.";
+  return this->index(index.row());
 }
 
 #if false
@@ -400,7 +401,7 @@ void TreeModel::sortByName(const QModelIndex &/*index*/) {/*
 
 
 void TreeModel::triggerNodeEdit(const QModelIndex &index, QAbstractItemView *view) {
-  if (!index.isValid() || !index.internalPointer()) return;
+  R_EXPECT_V(index.isValid() && index.internalPointer()) << "Invalid edit node selected";
   Node *node = IndexToNode(index);
   if (node) {
     const auto &meta = GetTreeDisplay(GetMessageType(node));

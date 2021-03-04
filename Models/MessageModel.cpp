@@ -298,11 +298,11 @@ MessageModel *MessageModel::BackupModel(QObject *parent) {
 
 MessageModel *MessageModel::GetBackupModel() { return _modelBackup; }
 
-void MessageModel::ReplaceBuffer(Message *buffer) {
+void MessageModel::ReplaceBuffer(const Message *buffer) {
   beginResetModel();
   SetDirty(true);
   _protobuf->CopyFrom(*buffer);
-  //qDebug() << "Buffer replaced; rebuilding submodels";
+  qDebug() << "Buffer replaced; rebuilding submodels";
   RebuildSubModels();
   endResetModel();
 }
