@@ -42,7 +42,10 @@ class TreeModel : public QAbstractItemModel {
   };
 
  public:
-  struct Node {
+  struct Node : public QObject {
+    Q_OBJECT
+
+   public:
     TreeModel *const backing_tree;
     Node *parent = nullptr;
 
@@ -90,14 +93,23 @@ class TreeModel : public QAbstractItemModel {
 
     /// Builds the entire Node tree by copying the tree formed by the model.
     Node(TreeModel *backing_tree, Node *parent, int row_in_parent, MessageModel *model, int row_in_model);
-    /// Builds more Node tree from each message in a repeated model.
-    Node(TreeModel *backing_tree, Node *parent, int row_in_parent, RepeatedMessageModel *model, int row_in_model);
     /// Builds more Node tree from each item in a repeated model.
     Node(TreeModel *backing_tree, Node *parent, int row_in_parent, RepeatedModel *model, int row_in_model);
+    /// Builds more Node tree from each message in a repeated model.
+    Node(TreeModel *backing_tree, Node *parent, int row_in_parent, RepeatedMessageModel *model, int row_in_model);
     /// Constructs as a leaf node. The specified field should not be a message.
     Node(TreeModel *backing_tree, Node *parent, int row_in_parent, PrimitiveModel *model_row, int row_in_model);
 
    private:
+    void RebuildFromModel(MessageModel *model);
+    void RebuildFromModel(RepeatedModel *model);
+    void RebuildFromModel(RepeatedMessageModel *model);
+    void RebuildFromModel(PrimitiveModel *model);
+
+    // Bloated-ass Qt shit you need to accept even if you don't want any goddamn arguments. Calls the above four.
+    template <typename AnyModel>
+    void QtShitFuckery(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles);
+
     void PushChild(ProtoModel *model, int source_row);
     void ComputeDisplayData();
     void Absorb(Node &child);
@@ -201,7 +213,6 @@ class TreeModel : public QAbstractItemModel {
   void ItemMoved(TreeModel::Node *node, TreeNode *old_parent);
 
  private:
-  QHash<ProtoModel*, Node*> backing_nodes_;
   QStringList mime_types_;
   DisplayConfig display_config_;
   // Warning: this must be initialized *after* the above two maps.
@@ -214,10 +225,6 @@ class TreeModel : public QAbstractItemModel {
   int GetChildCount(Node *item) const;
   Node *IndexToNode(const QModelIndex &index) const;
   const std::string &GetMessageType(const Node *node);
-
-  // Some backing nodes are mapped to tree nodes; some are not (they're optimized out).
-  // All tree nodes are mapped to backing nodes.
-  void MapModel(ProtoModel *model, Node *node);
 
   // Retrieve field metadata for a tree. Returns a sentinel if not specified.
   const TreeNodeDisplayConfig &GetTreeDisplay(const std::string &message_qname) const;
