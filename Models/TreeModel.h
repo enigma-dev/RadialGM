@@ -43,8 +43,6 @@ class TreeModel : public QAbstractItemModel {
 
  public:
   struct Node : public QObject {
-    Q_OBJECT
-
    public:
     TreeModel *const backing_tree;
     Node *parent = nullptr;

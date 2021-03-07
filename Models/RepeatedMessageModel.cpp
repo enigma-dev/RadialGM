@@ -39,7 +39,7 @@ bool RepeatedMessageModel::setData(const QModelIndex &index, const QVariant &val
 }
 
 QModelIndex RepeatedMessageModel::insert(const Message &message, int row) {
-  R_EXPECT(insertRows(row, row + 1), QModelIndex()) <<  "Insert message failed";
+  R_EXPECT(insertRows(row, 1), QModelIndex()) <<  "Insert message failed";
   auto m = GetSubModel(row);
   R_EXPECT(m, QModelIndex()) << "Requested submodel is null";
   MessageModel* mm = m->TryCastAsMessageModel();

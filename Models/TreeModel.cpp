@@ -124,7 +124,7 @@ TreeModel::Node::Node(TreeModel *backing_tree, Node *parent, int row_in_parent,
     backing_tree(backing_tree), parent(parent), backing_model(model),
     row_in_parent(row_in_parent), row_in_model(row_in_model) {
   RebuildFromModel(model);
-  connect(model, &MessageModel::dataChanged, this, &Node::QtShitFuckery<MessageModel>);
+  connect(model, &MessageModel::dataChanged, this, &Node::QtShitFuckery<RepeatedMessageModel>);
 }
 
 void TreeModel::Node::RebuildFromModel(MessageModel *model) {
