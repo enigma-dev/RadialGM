@@ -61,7 +61,7 @@ QMimeData *TreeModel::mimeData(const QModelIndexList &indexes) const {
 
   foreach (const QModelIndex& index, sortedIndexes) {
     if (index.isValid()) {
-      QString text = data(index, Qt::UserRole).toString();
+      QString text = data(index, Qt::DisplayRole).toString();
       stream << text;
       stream << index.row();
     }
@@ -71,9 +71,26 @@ QMimeData *TreeModel::mimeData(const QModelIndexList &indexes) const {
   return mimeData;
 }
 
-bool TreeModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
+bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, int row, int column,
                              const QModelIndex &parent) {
-  return false;
+  if (action != Qt::MoveAction && action != Qt::CopyAction) return false;
+  // ensure the data is in the format we expect
+  if (!mimeData->hasFormat(mimeTypes()[0])) return false;
+  QByteArray data = mimeData->data(mimeTypes()[0]);
+  QDataStream stream(&data, QIODevice::ReadOnly);
+
+  TreeNode *parentNode = static_cast<TreeNode *>(parent.internalPointer());
+  //if (!parentNode) parentNode = root_.get();
+
+  while (!stream.atEnd()) {
+    QString name;
+    int row;
+    stream >> name;
+    stream >> row;
+    qDebug() << name << row;
+  }
+
+  return true;
 }
 
 QVariant TreeModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int role) const {
