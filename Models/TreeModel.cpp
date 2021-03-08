@@ -7,6 +7,7 @@
 #include <QCoreApplication>
 #include <QItemSelectionModel>
 #include <QMimeData>
+#include <QStack>
 
 TreeModel::TreeModel(MessageModel *root, QObject *parent, const DisplayConfig &config)
     : QAbstractItemModel(parent), mime_types_(GetMimeTypes(root->GetDescriptor())),
@@ -52,6 +53,7 @@ QStringList TreeModel::mimeTypes() const {
 
 QMimeData *TreeModel::mimeData(const QModelIndexList &indexes) const {
   QModelIndexList sortedIndexes = indexes;
+  // Serialize the indexes in ascending order so we can make assumptions
   std::sort(sortedIndexes.begin(), sortedIndexes.end(),
             [](QModelIndex& a, QModelIndex& b) { return a.row() < b.row(); });
 
@@ -60,11 +62,23 @@ QMimeData *TreeModel::mimeData(const QModelIndexList &indexes) const {
   QDataStream stream(&encodedData, QIODevice::WriteOnly);
 
   foreach (const QModelIndex& index, sortedIndexes) {
-    if (index.isValid()) {
-      QString text = data(index, Qt::DisplayRole).toString();
-      stream << text;
-      stream << index.row();
+    if (!index.isValid()) continue;
+
+    // Build the path bottom-up to put it into normal form
+    QStack<int> path;
+    path.push(index.row());
+    QModelIndex parent = index.parent();
+    while (parent.isValid()) {
+      path.push(parent.row());
+      parent = parent.parent();
     }
+
+    // Serialize the path on the stack
+    stream << path.pop();
+    while (!path.isEmpty()) {
+      stream << QString("/") << path.pop();
+    }
+    stream << QString(";");
   }
 
   mimeData->setData(mimeTypes()[0], encodedData);
@@ -81,13 +95,54 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
 
   TreeNode *parentNode = static_cast<TreeNode *>(parent.internalPointer());
   //if (!parentNode) parentNode = root_.get();
+  if (row == -1) row = rowCount(parent);
+  QHash<QModelIndex, unsigned> removedCount;
 
   while (!stream.atEnd()) {
-    QString name;
-    int row;
-    stream >> name;
-    stream >> row;
-    qDebug() << name << row;
+    int itemRow = 0;
+    stream >> itemRow;
+    QModelIndex index = this->index(itemRow, 0, QModelIndex());
+    QString delimiter = "";
+    stream >> delimiter;
+    while (delimiter != ";") {
+      stream >> itemRow;
+      index = this->index(itemRow, 0, index);
+      stream >> delimiter;
+    }
+
+    qDebug() << index << delimiter;
+    if (action != Qt::CopyAction) {
+      auto oldParent = index.parent();
+
+      // offset the row we are removing by the number of
+      // rows already removed from the same parent
+      if (parent != oldParent || row > itemRow) {
+        itemRow -= removedCount[oldParent];
+      }
+
+      bool canDo = beginMoveRows(index.parent(), itemRow, itemRow, parent, row);
+      if (!canDo) continue;
+
+      // count this row as having been moved from this parent
+      if (parent != oldParent || row > itemRow) removedCount[oldParent]++;
+
+      // if moving the node within the same parent we need to adjust the row
+      // since its own removal will affect the row we reinsert it at
+      if (parent == oldParent && row > itemRow) --row;
+
+      //auto oldRepeated = oldParent->mutable_child();
+      //oldRepeated->ExtractSubrange(itemRow, 1, nullptr);
+      //RepeatedFieldInsert<buffers::TreeNode>(parentNode->mutable_child(), node, row);
+      //parents[node] = parentNode;
+      endMoveRows();
+      ++row;
+
+      //emit ResourceMoved(node, oldParent);
+    } else {
+      //if (node->folder()) continue;
+      //node = duplicateNode(*node);
+      //insert(parent, row++, node);
+    }
   }
 
   return true;
