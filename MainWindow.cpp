@@ -227,6 +227,10 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 
 void MainWindow::openSubWindow(MessageModel* res, MainWindow::EditorFactoryFunction factory_function) {
   using namespace google::protobuf;
+  if (!res) {
+    qDebug() << "Attempt to edit null resource...";
+    return;
+  }
 
   auto swIt = _subWindows.find(res);
   QMdiSubWindow *subWindow;

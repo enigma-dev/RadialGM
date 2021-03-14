@@ -11,7 +11,31 @@
 
 TreeModel::TreeModel(MessageModel *root, QObject *parent, const DisplayConfig &config)
     : QAbstractItemModel(parent), mime_types_(GetMimeTypes(root->GetDescriptor())),
-      display_config_(config), root_(std::make_unique<Node>(this, nullptr, -1, root, -1)) {}
+      display_config_(config), root_(std::make_unique<Node>(this, nullptr, -1, root, -1)), root_model_(root) {
+  RebuildModelMapping();
+  connect(root, &MessageModel::dataChanged, this, &TreeModel::SomeDataSomewhereChanged);
+}
+
+void TreeModel::SomeDataSomewhereChanged(const QModelIndex&, const QModelIndex&, const QVector<int>&) {
+  root_ = std::make_unique<Node>(this, nullptr, -1, root_model_, -1);
+  RebuildModelMapping();
+}
+
+void TreeModel::RebuildModelMapping() {
+  // Drop references to orphans.
+  QHash<ProtoModel*, std::shared_ptr<Node>> temp;
+  temp.swap(backing_nodes_);
+  backing_nodes_.insert(root_model_, root_);
+  root_->AddChildrenToMap();
+}
+
+void TreeModel::Node::AddChildrenToMap() {
+  backing_tree->live_nodes.insert(this);
+  for (const auto &child : children) {
+    backing_tree->backing_nodes_.insert(backing_model, child);
+    child->AddChildrenToMap();
+  }
+}
 
 // =====================================================================================================================
 // == Tree Querying ====================================================================================================
@@ -21,13 +45,16 @@ int TreeModel::columnCount(const QModelIndex &) const { return 1; }
 
 int TreeModel::rowCount(const QModelIndex &parent) const {
   if (parent.column() > 0) return 0;
-  return IndexToNode(parent)->children.size();
+  if (Node *node = IndexToNode(parent)) return node->children.size();
+  qDebug() << "Getting row count of bad Node.";
+  return 0;
 }
 
 QVariant TreeModel::data(const QModelIndex &index, int role) const {
   if (!index.isValid()) return {};
   if (!IndexToNode(index)) {
     qDebug() << "WTF?";
+    return {};
   }
   switch (role) {
     case Qt::DisplayRole: return IndexToNode(index)->display_name;
@@ -93,8 +120,8 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
   QByteArray data = mimeData->data(mimeTypes()[0]);
   QDataStream stream(&data, QIODevice::ReadOnly);
 
-  TreeNode *parentNode = static_cast<TreeNode *>(parent.internalPointer());
-  //if (!parentNode) parentNode = root_.get();
+  Node *parentNode = IndexToNode(parent);
+  if (!parentNode) parentNode = root_.get();
   if (row == -1) row = rowCount(parent);
   QHash<QModelIndex, unsigned> removedCount;
 
@@ -177,6 +204,10 @@ QModelIndex TreeModel::Node::index(int row) const {
 TreeModel::Node *TreeModel::IndexToNode(const QModelIndex &index) const {
   if (index.isValid() && index.internalPointer()) {
     Node *parent = static_cast<Node *>(index.internalPointer());
+    if (live_nodes.find(parent) == live_nodes.end()) {
+      qDebug() << "Dangling internal pointer to tree Node: " << parent;
+      return nullptr;
+    }
     return parent->NthChild(index.row());
   } else {
     return root_.get();
@@ -196,11 +227,16 @@ TreeModel::Node::Node(TreeModel *backing_tree, Node *parent, int row_in_parent,
     backing_tree(backing_tree), parent(parent), backing_model(model),
     row_in_parent(row_in_parent), row_in_model(row_in_model) {
   RebuildFromModel(model);
-  connect(model, &MessageModel::dataChanged, this, &Node::QtShitFuckery<RepeatedMessageModel>);
+  // connect(model, &MessageModel::dataChanged, this, &Node::QtShitFuckery<RepeatedMessageModel>);
 }
 
 void TreeModel::Node::RebuildFromModel(MessageModel *model) {
+  children.clear();
   ComputeDisplayData();
+  if (passthrough_model) {
+    backing_model = model = passthrough_model;
+    passthrough_model = nullptr;
+  }
   const auto &tree_meta = backing_tree->GetTreeDisplay(model->GetDescriptor()->full_name());
   const auto &msg_meta = BackingModel()->GetMessageDisplay(model->GetDescriptor()->full_name());
   if (tree_meta.custom_editor) return;
@@ -213,7 +249,8 @@ void TreeModel::Node::RebuildFromModel(MessageModel *model) {
     PushChild(model->SubModelForRow(row), row);
   }
   if (tree_meta.is_passthrough && children.size() == 1) {
-    std::unique_ptr<Node> child = std::move(children[0]);
+    passthrough_model = model;
+    std::shared_ptr<Node> child = children[0];
     children.clear();
     Absorb(*child);
   }
@@ -225,10 +262,11 @@ TreeModel::Node::Node(TreeModel *backing_tree, Node *parent, int row_in_parent,
     backing_tree(backing_tree), parent(parent), backing_model(model),
     row_in_parent(row_in_parent), row_in_model(row_in_model) {
   RebuildFromModel(model);
-  connect(model, &RepeatedMessageModel::dataChanged, this, &Node::QtShitFuckery<RepeatedMessageModel>);
+  // connect(model, &RepeatedMessageModel::dataChanged, this, &Node::QtShitFuckery<RepeatedMessageModel>);
 }
 
 void TreeModel::Node::RebuildFromModel(RepeatedMessageModel *model) {
+  children.clear();
   ComputeDisplayData();
   for (int row = 0; row < backing_model->rowCount(); ++row) {
     PushChild(model->GetSubModel<ProtoModel>(row), row);
@@ -241,10 +279,11 @@ TreeModel::Node::Node(TreeModel *backing_tree, Node *parent, int row_in_parent,
     backing_tree(backing_tree), parent(parent), backing_model(model),
     row_in_parent(row_in_parent), row_in_model(row_in_model) {
   RebuildFromModel(model);
-  connect(model, &RepeatedModel::dataChanged, this, &Node::QtShitFuckery<RepeatedModel>);
+  // connect(model, &RepeatedModel::dataChanged, this, &Node::QtShitFuckery<RepeatedModel>);
 }
 
 void TreeModel::Node::RebuildFromModel(RepeatedModel *model) {
+  children.clear();
   ComputeDisplayData();
   for (int row = 0; row < model->rowCount(); ++row) {
     PushChild(model->GetSubModel(row), row);
@@ -257,11 +296,12 @@ TreeModel::Node::Node(TreeModel *backing_tree, Node *parent, int row_in_parent,
     backing_tree(backing_tree), parent(parent), backing_model(model),
     row_in_parent(row_in_parent), row_in_model(row_in_model) {
   RebuildFromModel(model);
-  connect(model, &PrimitiveModel::dataChanged, this, &Node::QtShitFuckery<PrimitiveModel>);
+  // connect(model, &PrimitiveModel::dataChanged, this, &Node::QtShitFuckery<PrimitiveModel>);
 }
 
 void TreeModel::Node::RebuildFromModel(PrimitiveModel *model) {
   Q_UNUSED(model);
+  children.clear();
   ComputeDisplayData();
 }
 
@@ -270,15 +310,29 @@ void TreeModel::Node::PushChild(ProtoModel *model, int source_row) {
     qDebug() << "Null model passed to TreeNode::PushChild()...";
     return;
   }
-  if (auto *sub_message = model->TryCastAsMessageModel()) {
-    children.push_back(std::make_unique<Node>(backing_tree, this, children.size(), sub_message, source_row));
-  } else if (auto *repeated_message = model->TryCastAsRepeatedMessageModel()) {
-    children.push_back(std::make_unique<Node>(backing_tree, this, children.size(), repeated_message, source_row));
-  } else if (auto *repeated_message = model->TryCastAsRepeatedModel()) {
-    children.push_back(std::make_unique<Node>(backing_tree, this, children.size(), repeated_message, source_row));
-  } else if (auto *primitive_message = model->TryCastAsPrimitiveModel()) {
-    children.push_back(std::make_unique<Node>(backing_tree, this, children.size(), primitive_message, source_row));
+  std::shared_ptr<Node> node;
+  if (auto it = backing_tree->backing_nodes_.find(model); it != backing_tree->backing_nodes_.end()) {
+    node = *it;
+    children.push_back(node);
+    return;
   }
+  if (auto *sub_message = model->TryCastAsMessageModel()) {
+    if (node) node->RebuildFromModel(sub_message);
+    else node = std::make_unique<Node>(backing_tree, this, children.size(), sub_message, source_row);
+  } else if (auto *repeated_message = model->TryCastAsRepeatedMessageModel()) {
+    if (node) node->RebuildFromModel(repeated_message);
+    else node = std::make_unique<Node>(backing_tree, this, children.size(), repeated_message, source_row);
+  } else if (auto *repeated_message = model->TryCastAsRepeatedModel()) {
+    if (node) node->RebuildFromModel(repeated_message);
+    else node = std::make_unique<Node>(backing_tree, this, children.size(), repeated_message, source_row);
+  } else if (auto *primitive_message = model->TryCastAsPrimitiveModel()) {
+    if (node) node->RebuildFromModel(primitive_message);
+    else node = std::make_unique<Node>(backing_tree, this, children.size(), primitive_message, source_row);
+  } else {
+    qDebug() << "Node has unknown type...";
+    return;
+  }
+  children.push_back(node);
 }
 
 void TreeModel::Node::Print(int indent) const {
@@ -287,11 +341,56 @@ void TreeModel::Node::Print(int indent) const {
   for (auto &nn : children) nn->Print(indent + 2);
 }
 
+TreeModel::Node::~Node() {
+  if (auto it = backing_tree->live_nodes.find(this); it != backing_tree->live_nodes.end())
+    backing_tree->live_nodes.erase(it);
+}
+
+// =====================================================================================================================
+// == Node Mapping =====================================================================================================
+// =====================================================================================================================
+
+QModelIndex TreeModel::Node::mapFromSource(const QModelIndex &index) const {
+  R_EXPECT(index.internalPointer(), QModelIndex())
+      << "Requested index " << index << " internal pointer is null";
+  if (index.internalPointer() != backing_model) {
+    return backing_tree->mapFromSource(index);
+  }
+  // For messages, translate field index() to child offset in children vector.
+  if (auto *message_model = backing_model->TryCastAsMessageModel()) {
+    for (auto &child : children) {
+      if (child->row_in_model == index.row()) return this->index(child->row_in_parent);
+    }
+    return {};
+  }
+  // All other index values should be 1:1.
+  R_EXPECT(index.row() >= 0 && size_t(index.row()) < children.size(), QModelIndex())
+      << "Requested index " << index << " is out of range.";
+  return this->index(index.row());
+}
+
+QModelIndex TreeModel::mapFromSource(const QModelIndex &source_index) const {
+  auto *const model = static_cast<ProtoModel *>(source_index.internalPointer());
+  auto mapping = backing_nodes_.find(model);
+  if (mapping == backing_nodes_.end()) return {};
+  return (*mapping)->mapFromSource(source_index);
+}
+
+QModelIndex TreeModel::mapToSource(const QModelIndex &proxyIndex) const {
+  if (!proxyIndex.isValid()) return {};
+  if (Node *n = IndexToNode(proxyIndex)) {
+    if (n->parent) return n->parent->index(n->row_in_parent);
+  }
+  return {};
+}
+
+#if false
 template<typename AnyModel> void TreeModel::Node::QtShitFuckery(
     const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles) {
   (void) topLeft, (void) bottomRight, (void) roles;
   if (auto *pm = backing_model ? backing_model->As<AnyModel>() : nullptr) return RebuildFromModel(pm);
 }
+#endif
 
 // =====================================================================================================================
 // == Display Configuration ============================================================================================
@@ -449,7 +548,8 @@ void TreeModel::sortByName(const QModelIndex &/*index*/) {/*
 
 
 void TreeModel::triggerNodeEdit(const QModelIndex &index, QAbstractItemView *view) {
-  R_EXPECT_V(index.isValid() && index.internalPointer()) << "Invalid edit node selected";
+  R_EXPECT_V(index.isValid()) << "Invalid edit node selected";
+  R_EXPECT_V(index.internalPointer()) << "Junk edit node selected";
   Node *node = IndexToNode(index);
   if (node) {
     const auto &meta = GetTreeDisplay(GetMessageType(node));
@@ -469,10 +569,8 @@ void TreeModel::triggerNodeEdit(const QModelIndex &index, QAbstractItemView *vie
 }
 
 QModelIndex TreeModel::Node::insert(const Message &message, int row) {
-  if (auto *const repeated_message_model = backing_model->TryCastAsRepeatedMessageModel()) {
-    if (repeated_message_model->insert(message, row).isValid()) return index(row);
-    return QModelIndex();
-  }
+  if (auto *const repeated_message_model = backing_model->TryCastAsRepeatedMessageModel())
+    return backing_tree->mapFromSource(repeated_message_model->insert(message, row));
   return QModelIndex();
 }
 bool TreeModel::Node::IsRepeated() const {

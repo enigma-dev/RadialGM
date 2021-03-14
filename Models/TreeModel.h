@@ -42,23 +42,14 @@ class TreeModel : public QAbstractItemModel {
   };
 
  public:
-  struct Node : public QObject {
-   public:
+  struct Node {
     TreeModel *const backing_tree;
     Node *parent = nullptr;
 
    private:
-    /// When set, this node is a single message. Its children, if it has any, are its fields.
-    // MessageModel *message_model = nullptr;
-    /// When set, this node is a repeated message field. Its children are messages within that field.
-    // RepeatedMessageModel *repeated_message_model = nullptr;
-    /// When set, this node is a repeated primitive field. Its children are values of that field.
-    // RepeatedModel *repeated_primitive_model = nullptr;
-    /// When set, this node is a leaf. It exists to index within a model. Use row_in_model for model operations.
-    /// In general, this model will either be a MessageModel whose row_in_model is a primitive field,
-    /// or a Primitive RepeatedModel (that is, a RepeatedModel that is not a RepeatedMessageModel).
-    // ProtoModel *containing_model = nullptr;
     ProtoModel *backing_model;
+    /// For MessageModels that have been pruned so that their only child takes their place, this is the original model.
+    MessageModel *passthrough_model = nullptr;
 
    public:
     /// Cache of the name (or value) field of the underlying proto.
@@ -73,7 +64,7 @@ class TreeModel : public QAbstractItemModel {
     int row_in_model = 0;
 
     /// A cache of the children of this node, giving the models and metadata corresponding to each.
-    std::vector<std::unique_ptr<Node>> children;
+    std::vector<std::shared_ptr<Node>> children;
 
     bool SetName(const QString &name, const ProtoModel::MessageDisplayConfig &meta);
     Node *NthChild(int n) const;
@@ -97,16 +88,23 @@ class TreeModel : public QAbstractItemModel {
     Node(TreeModel *backing_tree, Node *parent, int row_in_parent, RepeatedMessageModel *model, int row_in_model);
     /// Constructs as a leaf node. The specified field should not be a message.
     Node(TreeModel *backing_tree, Node *parent, int row_in_parent, PrimitiveModel *model_row, int row_in_model);
+    /// Removes self from the live set.
+    ~Node();
 
-   private:
     void RebuildFromModel(MessageModel *model);
     void RebuildFromModel(RepeatedModel *model);
     void RebuildFromModel(RepeatedMessageModel *model);
     void RebuildFromModel(PrimitiveModel *model);
 
+    /// Adds this node to the containing tree's model map.
+    void AddChildrenToMap();
+
+   private:
     // Bloated-ass Qt shit you need to accept even if you don't want any goddamn arguments. Calls the above four.
-    template <typename AnyModel>
-    void QtShitFuckery(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles);
+    // Removed because these signals aren't just bloated; they're undisciplined. Everyone gets called when data changes.
+    // We need signals specific to when data in a particular message has changed.
+    // template <typename AnyModel>
+    // void QtShitFuckery(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles);
 
     void PushChild(ProtoModel *model, int source_row);
     void ComputeDisplayData();
@@ -177,8 +175,8 @@ class TreeModel : public QAbstractItemModel {
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
-  // QModelIndex mapFromSource(const QModelIndex &sourceIndex) const override;
-  // QModelIndex mapToSource(const QModelIndex &proxyIndex) const override;
+  QModelIndex mapFromSource(const QModelIndex &sourceIndex) const;
+  QModelIndex mapToSource(const QModelIndex &proxyIndex) const;
 
   /// Inserts the given message as a child of the given parent index.
   QModelIndex insert(const QModelIndex &parent, int row, const Message &message);
@@ -204,6 +202,9 @@ class TreeModel : public QAbstractItemModel {
   bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
                     const QModelIndex &parent) override;
 
+  // Slots
+  void SomeDataSomewhereChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles);
+
  signals:
   // Called when the name of a single TreeNode changes.
   void ItemRenamed(TreeModel::Node *node, const QString &oldName, const QString &newName);
@@ -211,10 +212,18 @@ class TreeModel : public QAbstractItemModel {
   void ItemMoved(TreeModel::Node *node, TreeNode *old_parent);
 
  private:
+  /// Set of all living nodes belonging to this tree.
+  std::set<Node*> live_nodes;
+  /// Map from backing model to the node representing it.
+  QHash<ProtoModel*, std::shared_ptr<Node>> backing_nodes_;
+
+  /// Cache of supported mime types.
   QStringList mime_types_;
+  /// Display metadata for messages in this tree.
   DisplayConfig display_config_;
   // Warning: this must be initialized *after* the above two maps.
-  std::unique_ptr<Node> root_;
+  std::shared_ptr<Node> root_;
+  MessageModel *root_model_;
 
   QString GetItemName(const Node *item) const;
   bool SetItemName(Node *item, const QString &name);
@@ -223,6 +232,8 @@ class TreeModel : public QAbstractItemModel {
   int GetChildCount(Node *item) const;
   Node *IndexToNode(const QModelIndex &index) const;
   const std::string &GetMessageType(const Node *node);
+
+  void RebuildModelMapping();
 
   // Retrieve field metadata for a tree. Returns a sentinel if not specified.
   const TreeNodeDisplayConfig &GetTreeDisplay(const std::string &message_qname) const;

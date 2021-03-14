@@ -48,8 +48,8 @@ const ProtoModel *RepeatedModel::GetSubModel(const FieldPath &field_path) const 
     if (field_path.repeated_field_index < rowCount()) {
       return GetSubModel(field_path.repeated_field_index);
     }
-    qDebug() << "Attempting to access out-of-bounds index " << field_path.repeated_field_index << " of field `"
-             << field_path.fields[0]->full_name().c_str() << "`";
+    qDebug() << "Attempting to access out-of-bounds index " << field_path.repeated_field_index
+             << " of field `" << field_->full_name().c_str() << "`";
     return nullptr;
   }
   return this;
