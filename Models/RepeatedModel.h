@@ -14,8 +14,8 @@
 class RepeatedModel : public ProtoModel {
  public:
   RepeatedModel(ProtoModel *parent, Message *message, const FieldDescriptor *field)
-      : ProtoModel(parent, message->GetDescriptor()->name(), message->GetDescriptor()), _protobuf(message),
-       field_(field) {}
+      : ProtoModel(parent, message->GetDescriptor()->name(), message->GetDescriptor(), field->index()),
+        _protobuf(message), field_(field) {}
 
   bool Empty() { return rowCount() == 0; }
 

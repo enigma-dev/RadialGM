@@ -39,7 +39,8 @@ void ResourceModelMap::recursiveBindRes(buffers::TreeNode* node) {
 }
 
 void ResourceModelMap::AddResource(buffers::TreeNode* child) {
-  MessageModel* model = child->has_folder() ? nullptr : new MessageModel(this, child);
+  // TODO: What the fuck? Why is this "model map" thing just randomly allocating a new message model for it to own?
+  MessageModel* model = child->has_folder() ? nullptr : new MessageModel(ProtoModel::NonProtoParent{this}, child);
   _resources[child->type_case()][QString::fromStdString(child->name())] =
       QPair<buffers::TreeNode*, MessageModel*>(child, model);
 

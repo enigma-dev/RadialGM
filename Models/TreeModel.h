@@ -204,6 +204,7 @@ class TreeModel : public QAbstractItemModel {
 
   // Slots
   void SomeDataSomewhereChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles);
+  void DataBlownAway();
 
  signals:
   // Called when the name of a single TreeNode changes.

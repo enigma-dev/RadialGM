@@ -94,8 +94,9 @@ RGM_DECLARE_SAFE_CAST(SafeCast, RepeatedStringModel);
 class ProtoModel : public QAbstractItemModel {
   Q_OBJECT
  public:
-  explicit ProtoModel(QObject *parent, std::string name, const Descriptor *descriptor);
-  explicit ProtoModel(ProtoModel *parent, std::string name, const Descriptor *descriptor);
+  struct NonProtoParent { QObject *parent; };
+  explicit ProtoModel(NonProtoParent parent, std::string name, const Descriptor *descriptor);
+  explicit ProtoModel(ProtoModel *parent, std::string name, const Descriptor *descriptor, int row_in_parent);
 
   // The parent model is the model that owns the current model.
   // For the Project model (represented as the resource tree), this will be nullptr.
@@ -335,6 +336,7 @@ signals:
  protected:
   bool _dirty;
   ProtoModel *_parentModel;
+  const int row_in_parent_;
   const std::string _debug_path;
   const Descriptor *descriptor_;
 

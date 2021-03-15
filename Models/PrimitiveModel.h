@@ -13,11 +13,11 @@ class PrimitiveModel : public ProtoModel {
  public:
   // Construct a repeated field index.
   PrimitiveModel(ProtoModel *parent, int row_in_parent)
-      : ProtoModel(parent, parent->GetDescriptor()->name(), parent->GetDescriptor()),
-        row_in_parent_(row_in_parent), field_or_null_(nullptr) {}
+      : ProtoModel(parent, parent->GetDescriptor()->name(), parent->GetDescriptor(), row_in_parent),
+        field_or_null_(nullptr) {}
   PrimitiveModel(ProtoModel *parent, const FieldDescriptor *field)
-      : ProtoModel(parent, parent->GetDescriptor()->name(), parent->GetDescriptor()),
-        row_in_parent_(field->index()), field_or_null_(field) {}
+      : ProtoModel(parent, parent->GetDescriptor()->name(), parent->GetDescriptor(), field->index()),
+        field_or_null_(field) {}
 
   bool Empty() { return rowCount() == 0; }
 
@@ -55,6 +55,7 @@ class PrimitiveModel : public ProtoModel {
 
   const FieldDescriptor *GetRowDescriptor(int row) const override;
 
+  QString GetDisplayName() const override;
   QIcon GetDisplayIcon() const override;
 
   // ===================================================================================================================
@@ -66,12 +67,10 @@ class PrimitiveModel : public ProtoModel {
   QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override {
     Q_UNUSED(parent);
     if (row || column) return QModelIndex();
-    return createIndex(0, 0);
+    return createIndex(0, 0, (void*) this);
   }
 
  protected:
-  // TODO: Move me to ProtoModel; everyone with a parent should know index in parent
-  const int row_in_parent_;
   const FieldDescriptor *const field_or_null_;
 };
 

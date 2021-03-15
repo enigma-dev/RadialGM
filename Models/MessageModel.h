@@ -14,9 +14,9 @@ class MessageModel : public ProtoModel {
   QVariant dataInternal(const QModelIndex &index, int role) const;
 
  public:
-  MessageModel(ProtoModel *parent, Message *protobuf);
-  MessageModel(QObject *parent, Message *protobuf);
-  MessageModel(QObject *parent, const Descriptor *descriptor);
+  MessageModel(ProtoModel *parent, Message *protobuf, int row_in_parent);
+  MessageModel(ProtoModel *parent, const Descriptor *descriptor, int row_in_parent);
+  MessageModel(NonProtoParent parent, Message *protobuf);
 
   // On either intialization or restore of a model all
   // refrences to to the submodels it owns recursively must be updated

@@ -13,12 +13,29 @@ TreeModel::TreeModel(MessageModel *root, QObject *parent, const DisplayConfig &c
     : QAbstractItemModel(parent), mime_types_(GetMimeTypes(root->GetDescriptor())),
       display_config_(config), root_(std::make_unique<Node>(this, nullptr, -1, root, -1)), root_model_(root) {
   RebuildModelMapping();
+  qDebug() << "Before:";
+  // root_->Print();
+  root_->RebuildFromModel(root_model_);
+  RebuildModelMapping();
+  qDebug() << "After:";
+  // root_->Print();
   connect(root, &MessageModel::dataChanged, this, &TreeModel::SomeDataSomewhereChanged);
+  connect(root, &MessageModel::modelReset, this, &TreeModel::DataBlownAway);
 }
 
 void TreeModel::SomeDataSomewhereChanged(const QModelIndex&, const QModelIndex&, const QVector<int>&) {
-  root_ = std::make_unique<Node>(this, nullptr, -1, root_model_, -1);
+  // TODO: probanly don't blow away the entire fucking tree when someone adds a subimage to a sprite
+  beginResetModel();
+  root_->RebuildFromModel(root_model_);
   RebuildModelMapping();
+  endResetModel();
+}
+
+void TreeModel::DataBlownAway() {
+  beginResetModel();
+  root_->RebuildFromModel(root_model_);
+  RebuildModelMapping();
+  endResetModel();
 }
 
 void TreeModel::RebuildModelMapping() {
@@ -32,7 +49,7 @@ void TreeModel::RebuildModelMapping() {
 void TreeModel::Node::AddChildrenToMap() {
   backing_tree->live_nodes.insert(this);
   for (const auto &child : children) {
-    backing_tree->backing_nodes_.insert(backing_model, child);
+    backing_tree->backing_nodes_.insert(child->backing_model, child);
     child->AddChildrenToMap();
   }
 }
@@ -233,7 +250,7 @@ TreeModel::Node::Node(TreeModel *backing_tree, Node *parent, int row_in_parent,
 void TreeModel::Node::RebuildFromModel(MessageModel *model) {
   children.clear();
   ComputeDisplayData();
-  if (passthrough_model) {
+  if (false) {
     backing_model = model = passthrough_model;
     passthrough_model = nullptr;
   }
@@ -313,8 +330,6 @@ void TreeModel::Node::PushChild(ProtoModel *model, int source_row) {
   std::shared_ptr<Node> node;
   if (auto it = backing_tree->backing_nodes_.find(model); it != backing_tree->backing_nodes_.end()) {
     node = *it;
-    children.push_back(node);
-    return;
   }
   if (auto *sub_message = model->TryCastAsMessageModel()) {
     if (node) node->RebuildFromModel(sub_message);
@@ -353,8 +368,11 @@ TreeModel::Node::~Node() {
 QModelIndex TreeModel::Node::mapFromSource(const QModelIndex &index) const {
   R_EXPECT(index.internalPointer(), QModelIndex())
       << "Requested index " << index << " internal pointer is null";
+  if (parent && index.internalPointer() == parent->backing_model)
+    return parent->mapFromSource(index);
   if (index.internalPointer() != backing_model) {
-    return backing_tree->mapFromSource(index);
+    qDebug() << "Asked to map an unowned model index...";
+    return {};
   }
   // For messages, translate field index() to child offset in children vector.
   if (auto *message_model = backing_model->TryCastAsMessageModel()) {
@@ -370,6 +388,11 @@ QModelIndex TreeModel::Node::mapFromSource(const QModelIndex &index) const {
 }
 
 QModelIndex TreeModel::mapFromSource(const QModelIndex &source_index) const {
+  if (!source_index.isValid()) return {};
+  if (!source_index.internalPointer()) {
+    qDebug() << "Attempting to map a ProtoModel index with no internal pointer...";
+    return {};
+  }
   auto *const model = static_cast<ProtoModel *>(source_index.internalPointer());
   auto mapping = backing_nodes_.find(model);
   if (mapping == backing_nodes_.end()) return {};
@@ -432,11 +455,11 @@ void TreeModel::DisplayConfig::UseEditorWidget(const std::string &message, Edito
 
 void TreeModel::Node::ComputeDisplayData() {
   display_name = backing_model->GetDisplayName();
-  /*if (auto *primitive_model = backing_model->TryCastAsPrimitiveModel()) {
+  if (auto *primitive_model = backing_model->TryCastAsPrimitiveModel()) {
     if (const QVariant value = primitive_model->GetDirect(); !value.isNull()) {
       display_name += " = " + value.toString();
     }
-  }*/
+  }
   display_icon = backing_model->GetDisplayIcon();
 }
 
@@ -569,8 +592,10 @@ void TreeModel::triggerNodeEdit(const QModelIndex &index, QAbstractItemView *vie
 }
 
 QModelIndex TreeModel::Node::insert(const Message &message, int row) {
-  if (auto *const repeated_message_model = backing_model->TryCastAsRepeatedMessageModel())
+  if (auto *const repeated_message_model = backing_model->TryCastAsRepeatedMessageModel()) {
+    qDebug() << "Insert " << message.DebugString().c_str();
     return backing_tree->mapFromSource(repeated_message_model->insert(message, row));
+  }
   return QModelIndex();
 }
 bool TreeModel::Node::IsRepeated() const {

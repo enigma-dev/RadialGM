@@ -7,21 +7,25 @@
 
 static constexpr int CCP_TYPE_ROLE = Qt::UserRole + 1;
 
-MessageModel::MessageModel(ProtoModel *parent, Message *protobuf)
-    : ProtoModel(parent, protobuf->GetDescriptor()->name(), protobuf->GetDescriptor()), _protobuf(protobuf)
-      { RebuildSubModels(); }
+MessageModel::MessageModel(ProtoModel *parent, Message *protobuf, int row_in_parent)
+    : ProtoModel(parent, protobuf->GetDescriptor()->name(), protobuf->GetDescriptor(), row_in_parent),
+      _protobuf(protobuf) { RebuildSubModels(); }
 
-MessageModel::MessageModel(QObject *parent, Message *protobuf)
-    : ProtoModel(parent, protobuf->GetDescriptor()->name(), protobuf->GetDescriptor()), _protobuf(protobuf)
-      { RebuildSubModels(); }
+MessageModel::MessageModel(ProtoModel::NonProtoParent parent, Message *protobuf)
+    : ProtoModel(parent, protobuf->GetDescriptor()->name(), protobuf->GetDescriptor()),
+      _protobuf(protobuf) { RebuildSubModels(); }
 
-MessageModel::MessageModel(QObject *parent, const Descriptor *descriptor)
-    : ProtoModel(parent, descriptor->name(), descriptor), _protobuf(nullptr) {}
+MessageModel::MessageModel(ProtoModel *parent, const Descriptor *descriptor, int row_in_parent)
+    : ProtoModel(parent, descriptor->name(), descriptor, row_in_parent), _protobuf(nullptr) {}
 
 QString MessageModel::GetDisplayName() const {
+  QString name;
   auto& display = GetMessageDisplay(GetDescriptor()->full_name());
-  if (display.isValid) return Data(display.label_field).toString();
-  else return QString::fromStdString(GetDescriptor()->name());
+  if (display.isValid) {
+    name = Data(display.label_field).toString();
+    if (!name.isEmpty()) return name;
+  }
+  return ProtoModel::GetDisplayName();
 }
 
 QIcon MessageModel::GetDisplayIcon() const {
@@ -120,9 +124,9 @@ void MessageModel::RebuildSubModels() {
       // Only recursively build fields if they're set
       if (refl->HasField(*_protobuf, field)) {
         submodels_by_field_[field->number()] = submodels_by_row_[i] =
-            new MessageModel(this, refl->MutableMessage(_protobuf, field));
+            new MessageModel(this, refl->MutableMessage(_protobuf, field), i);
       } else {
-        submodels_by_field_[field->number()] = submodels_by_row_[i] = new MessageModel(this, field->message_type());
+        submodels_by_field_[field->number()] = submodels_by_row_[i] = new MessageModel(this, field->message_type(), i);
       }
     } else {
       submodels_by_field_[field->number()] = submodels_by_row_[i] = new PrimitiveModel(this, field);
@@ -276,7 +280,7 @@ QVariant MessageModel::headerData(int section, Qt::Orientation /*orientation*/, 
 }
 
 QModelIndex MessageModel::index(int row, int column, const QModelIndex & /*parent*/) const {
-  return this->createIndex(row, column, static_cast<void *>(_protobuf));
+  return this->createIndex(row, column, (void*) this);
 }
 
 Qt::ItemFlags MessageModel::flags(const QModelIndex &index) const {
@@ -292,7 +296,7 @@ MessageModel *MessageModel::BackupModel(QObject *parent) {
   if (!_protobuf) return nullptr;
   _backupProtobuf.reset(_protobuf->New());
   _backupProtobuf->CopyFrom(*_protobuf);
-  _modelBackup = new MessageModel(parent, _backupProtobuf.get());
+  _modelBackup = new MessageModel(NonProtoParent{parent}, _backupProtobuf.get());
   return _modelBackup;
 }
 

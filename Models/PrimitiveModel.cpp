@@ -17,6 +17,13 @@ const FieldDescriptor *PrimitiveModel::GetRowDescriptor(int row) const {
   return _parentModel->GetRowDescriptor(row_in_parent_);
 }
 
+QString PrimitiveModel::GetDisplayName() const {
+  if (field_or_null_) return QString::fromStdString(field_or_null_->name());
+  if (const auto *fd = _parentModel->GetRowDescriptor(row_in_parent_))
+    return QString::fromStdString(fd->full_name());
+  return "Error";
+}
+
 QIcon PrimitiveModel::GetDisplayIcon() const {
   const FieldDescriptor *field = GetRowDescriptor(0);
   auto &display = GetFieldDisplay(field->full_name());

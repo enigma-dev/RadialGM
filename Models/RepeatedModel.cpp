@@ -105,7 +105,7 @@ int RepeatedModel::columnCount(const QModelIndex &parent) const {
 
 QModelIndex RepeatedModel::index(int row, int column, const QModelIndex &parent) const {
   Q_UNUSED(parent);
-  return this->createIndex(row, column);
+  return createIndex(row, column, (void*) this);
 }
 
 QVariant RepeatedModel::headerData(int section, Qt::Orientation /*orientation*/, int role) const {

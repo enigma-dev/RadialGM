@@ -7,7 +7,7 @@ RepeatedMessageModel::RepeatedMessageModel(ProtoModel *parent, Message *message,
                              message->GetReflection()->GetMutableRepeatedFieldRef<Message>(message, field)) {
   const Reflection *refl = _protobuf->GetReflection();
   for (int j = 0; j < refl->FieldSize(*_protobuf, field); j++) {
-    _subModels.append(new MessageModel(parent, refl->MutableRepeatedMessage(_protobuf, field, j)));
+    _subModels.append(new MessageModel(this, refl->MutableRepeatedMessage(_protobuf, field, j), j));
   }
 }
 
@@ -19,7 +19,7 @@ void RepeatedMessageModel::SwapWithoutSignal(int left, int right) {
 void RepeatedMessageModel::AppendNewWithoutSignal() {
   auto m = field_ref_.NewMessage();
   field_ref_.Add(*m);
-  _subModels.append(new MessageModel(GetParentModel<MessageModel>(), m));
+  _subModels.append(new MessageModel(this, m, _subModels.size()));
 }
 
 void RepeatedMessageModel::RemoveLastNRowsWithoutSignal(int n) {
@@ -45,7 +45,7 @@ QModelIndex RepeatedMessageModel::insert(const Message &message, int row) {
   MessageModel* mm = m->TryCastAsMessageModel();
   R_EXPECT(mm, QModelIndex()) << "Failed to cast to message model";
   mm->ReplaceBuffer(&message);
-  return index(row, 0);
+  return createIndex(row, 0, this);
 }
 
 QModelIndex RepeatedMessageModel::duplicate(const QModelIndex &message) {

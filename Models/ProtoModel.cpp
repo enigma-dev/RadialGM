@@ -10,15 +10,16 @@
 
 ProtoModel::DisplayConfig ProtoModel::display_config_;
 
-ProtoModel::ProtoModel(QObject *parent, std::string name, const Descriptor *descriptor)
-    : ProtoModel(static_cast<ProtoModel *>(nullptr), name, descriptor) {
-  QObject::setParent(parent);
+ProtoModel::ProtoModel(NonProtoParent parent, std::string name, const Descriptor *descriptor)
+    : ProtoModel(static_cast<ProtoModel *>(nullptr), name, descriptor, -1) {
+  QObject::setParent(parent.parent);
 }
 
-ProtoModel::ProtoModel(ProtoModel *parent, std::string name, const Descriptor *descriptor)
+ProtoModel::ProtoModel(ProtoModel *parent, std::string name, const Descriptor *descriptor, int row_in_parent)
     : QAbstractItemModel(parent),
       _dirty(false),
       _parentModel(parent),
+      row_in_parent_(row_in_parent),
       _debug_path((parent ? parent->_debug_path + "." : "") + name),
       descriptor_(descriptor) {
   connect(this, &ProtoModel::DataChanged, this,
@@ -26,6 +27,16 @@ ProtoModel::ProtoModel(ProtoModel *parent, std::string name, const Descriptor *d
                  const QVariant & /*oldValue*/ = QVariant(0), const QVector<int> &roles = QVector<int>()) {
             emit QAbstractItemModel::dataChanged(topLeft, bottomRight, roles);
           });
+  if (parent) {
+    connect(this, &ProtoModel::dataChanged, this, [this](const QModelIndex&, const QModelIndex&, const QVector<int>&) {
+      auto me = _parentModel->index(row_in_parent_);
+      emit _parentModel->dataChanged(me, me, {});
+    });
+    connect(this, &ProtoModel::modelReset, this, [this]() {
+      auto me = _parentModel->index(row_in_parent_);
+      emit _parentModel->dataChanged(me, me, {});
+    });
+  }
 }
 
 void ProtoModel::ParentDataChanged() {
@@ -116,7 +127,16 @@ QVariant ProtoModel::headerData(int /*section*/, Qt::Orientation /*orientation*/
 
 QString ProtoModel::GetDisplayName() const {
   QString name = GetFieldDisplay(GetDescriptor()->full_name()).name;
-  if (name.isEmpty()) name = QString::fromStdString(GetDescriptor()->name());
+  if (!name.isEmpty()) return name;
+  // Require Message to avoid grabbing Nth field name for Nth item in a RepeatedMessageModel...
+  if (auto *parent = _parentModel ? _parentModel->TryCastAsMessageModel() : nullptr) {
+    if (const auto *fd = parent->GetRowDescriptor(row_in_parent_))
+      name = QString::fromStdString(fd->name());
+  }
+  if (name.isEmpty())
+    name = QString::fromStdString(GetDescriptor()->name());
+  if (name.isEmpty())
+    name = DebugName();
   return name;
 }
 

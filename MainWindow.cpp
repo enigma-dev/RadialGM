@@ -236,6 +236,10 @@ void MainWindow::openSubWindow(MessageModel* res, MainWindow::EditorFactoryFunct
   QMdiSubWindow *subWindow;
   if (swIt == _subWindows.end() || !*swIt) {
     BaseEditor *editor = factory_function(res, this);
+    if (!editor) {
+      qDebug() << "Failed to launch editor for model...";
+      return;
+    }
 
     // TODO: move all these connections into the model wrapper
     // connect(editor, &BaseEditor::ResourceRenamed, resourceMap.get(), &ResourceModelMap::ResourceRenamed);
@@ -322,6 +326,7 @@ void MainWindow::openNewProject() {
 template<typename Editor> TreeModel::EditorLauncher Launch(MainWindow *parent) {
   struct EditorFactoryFactory {
     static BaseEditor *Factory(MessageModel *model, MainWindow *parent) {
+      if (!model || !model->GetParentModel<MessageModel>()) return nullptr;
       return new Editor(model, parent);
     }
   };
@@ -422,7 +427,7 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
 
   resourceMap.reset(new ResourceModelMap(_project->mutable_game()->mutable_root(), nullptr));
 
-  auto pm = new MessageModel(this, _project->mutable_game()->mutable_root());
+  auto pm = new MessageModel(ProtoModel::NonProtoParent{this}, _project->mutable_game()->mutable_root());
   pm->SetDisplayConfig(msgConf);
 
   treeModel.reset(new TreeModel(pm, nullptr, treeConf));
