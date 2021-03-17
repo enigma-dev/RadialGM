@@ -425,7 +425,7 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   treeConf.SetMessagePassthrough<buffers::TreeNode::Folder>();
   treeConf.DisableOneofReassignment<buffers::TreeNode>();
 
-  resourceMap.reset(new ResourceModelMap(_project->mutable_game()->mutable_root(), nullptr));
+  resourceMap.reset(new ResourceModelMap(this));
 
   auto pm = new MessageModel(ProtoModel::NonProtoParent{this}, _project->mutable_game()->mutable_root());
   pm->SetDisplayConfig(msgConf);

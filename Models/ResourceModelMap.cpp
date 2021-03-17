@@ -18,35 +18,17 @@ static QString ResTypeAsString(TypeCase type) {
     case TypeCase::kSettings: return "settings";
     case TypeCase::kInclude: return "include";
     case TypeCase::kTimeline: return "timeline";
-    case TypeCase::TYPE_NOT_SET: case TypeCase::kUnknown:
-      return "unknown";
+    case TypeCase::TYPE_NOT_SET:
+    case TypeCase::kUnknown: return "unknown";
   }
   return "unknown";
 }
 
-ResourceModelMap::ResourceModelMap(buffers::TreeNode* root, QObject* parent) : QObject(parent) {
-  recursiveBindRes(root);
-}
+ResourceModelMap::ResourceModelMap(QObject* parent) : QObject(parent) {}
 
-void ResourceModelMap::recursiveBindRes(buffers::TreeNode* node) {
-  for (int i = 0; i < node->folder().children_size(); ++i) {
-    buffers::TreeNode* child = node->mutable_folder()->mutable_children(i);
-    if (child->has_folder()) {
-      recursiveBindRes(child);
-    }
-    this->AddResource(child);
-  }
-}
-
-void ResourceModelMap::AddResource(buffers::TreeNode* child) {
-  // TODO: What the fuck? Why is this "model map" thing just randomly allocating a new message model for it to own?
-  MessageModel* model = child->has_folder() ? nullptr : new MessageModel(ProtoModel::NonProtoParent{this}, child);
-  _resources[child->type_case()][QString::fromStdString(child->name())] =
-      QPair<buffers::TreeNode*, MessageModel*>(child, model);
-
-  if (model != nullptr) {
-    connect(model, &ProtoModel::DataChanged, [this]() { emit DataChanged(); });
-  }
+void ResourceModelMap::AddResource(TypeCase type, const QString& name, MessageModel* model) {
+  R_EXPECT_V(!_resources[type].contains(name))
+      << "Resource" << ResTypeAsString(type) << "with name:" << name << "already exists";
 }
 
 void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
@@ -56,7 +38,7 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
   // Delete all instances of this object type
   if (type == TypeCase::kObject) {
     for (auto room : qAsConst(_resources[TypeCase::kRoom])) {
-      MessageModel* roomModel = room.second->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
+      MessageModel* roomModel = room->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
       RepeatedMessageModel* instancesModel = roomModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
       RepeatedMessageModel::RowRemovalOperation remover(instancesModel);
 
@@ -89,7 +71,7 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
   // Delete all tiles using this background
   if (type == TypeCase::kBackground) {
     for (auto room : qAsConst(_resources[TypeCase::kRoom])) {
-      MessageModel* roomModel = room.second->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
+      MessageModel* roomModel = room->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
       RepeatedMessageModel* tilesModel = roomModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
       RepeatedMessageModel::RowRemovalOperation remover(tilesModel);
 
@@ -120,7 +102,7 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
   // Remove an references to this resource
   for (auto& res : qAsConst(_resources)) {
     for (auto& model : res) {
-      UpdateReferences(model.second, ResTypeAsString(type), name, "");
+      UpdateReferences(model, ResTypeAsString(type), name, "");
     }
   }
 
@@ -148,7 +130,7 @@ QString ResourceModelMap::CreateResourceName(int type, const QString& typeName) 
 
 MessageModel* ResourceModelMap::GetResourceByName(int type, const QString& name) {
   if (_resources[type].contains(name))
-    return _resources[type][name].second;
+    return _resources[type][name];
   else
     return nullptr;
 }
@@ -189,7 +171,7 @@ void ResourceModelMap::ResourceRenamed(TreeModel::Node* node, const QString& old
 
   for (auto& res : qAsConst(_resources)) {
     for (auto& model : res) {
-      UpdateReferences(model.second, ResTypeAsString(type), oldName, newName);
+      UpdateReferences(model, ResTypeAsString(type), oldName, newName);
     }
   }
 
@@ -247,6 +229,4 @@ QIcon GetBackgroundIconByNameField(const QVariant& bkg_name) {
   return ArtManager::GetIcon(bkg->Data(FieldPath::Of<Background>(Background::kImageFieldNumber)).toString());
 }
 
-QIcon GetFileIcon(const QVariant& fname) {
-  return ArtManager::GetIcon(fname.toString());
-}
+QIcon GetFileIcon(const QVariant& fname) { return ArtManager::GetIcon(fname.toString()); }
