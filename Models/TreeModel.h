@@ -48,8 +48,6 @@ class TreeModel : public QAbstractItemModel {
 
    private:
     ProtoModel *backing_model;
-    /// For MessageModels that have been pruned so that their only child takes their place, this is the original model.
-    MessageModel *passthrough_model = nullptr;
 
    public:
     /// Cache of the name (or value) field of the underlying proto.
