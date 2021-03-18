@@ -21,6 +21,7 @@ class ResourceModelMap : public QObject {
   QString CreateResourceName(int type, const QString& typeName);
 
  public slots:
+  void TreeChanged(MessageModel* model);
   void ResourceRenamed(TreeModel::Node *node, const QString& oldName, const QString& newName);
 
  signals:

@@ -44,6 +44,12 @@ class MessageModel : public ProtoModel {
   // In other words, tests whether the given row should be hidden because it isn't the selected option of some oneof.
   bool IsCulledOneofRow(int row) const;
 
+  // Returns the index in the oneof
+  int OneOfType(const std::string& name) const {
+    const OneofDescriptor* o = GetDescriptor()->FindOneofByName(name);
+    return _protobuf->GetReflection()->GetOneofFieldDescriptor(*_protobuf, o)->number();
+  }
+
   // Translates a row number from this model into the underlying Protocol Buffer tag (field number).
   int RowToField(int row) const { return descriptor_->field(row)->number(); }
 

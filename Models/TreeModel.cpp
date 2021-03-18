@@ -22,6 +22,7 @@ TreeModel::TreeModel(MessageModel *root, QObject *parent, const DisplayConfig &c
 
 void TreeModel::SomeDataSomewhereChanged(const QModelIndex &, const QModelIndex &, const QVector<int> &) {
   // TODO: probanly don't blow away the entire fucking tree when someone adds a subimage to a sprite
+  emit TreeChanged(root_model_);
   beginResetModel();
   root_->RebuildFromModel(root_model_);
   RebuildModelMapping();
@@ -29,6 +30,7 @@ void TreeModel::SomeDataSomewhereChanged(const QModelIndex &, const QModelIndex 
 }
 
 void TreeModel::DataBlownAway() {
+  emit TreeChanged(root_model_);
   beginResetModel();
   root_->RebuildFromModel(root_model_);
   RebuildModelMapping();
@@ -45,7 +47,7 @@ void TreeModel::RebuildModelMapping() {
 
 void TreeModel::Node::AddChildrenToMap() {
   backing_tree->live_nodes.insert(this);
-  for (const auto &child : children) {
+   for (const auto &child : children) {
     backing_tree->backing_nodes_.insert(child->backing_model, child);
     child->AddChildrenToMap();
   }

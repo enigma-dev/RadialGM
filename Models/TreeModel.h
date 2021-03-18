@@ -205,6 +205,7 @@ class TreeModel : public QAbstractItemModel {
   void DataBlownAway();
 
  signals:
+  void TreeChanged(MessageModel* root);
   // Called when the name of a single TreeNode changes.
   void ItemRenamed(TreeModel::Node *node, const QString &oldName, const QString &newName);
   // Called when a resource (or group of resources) is moved.

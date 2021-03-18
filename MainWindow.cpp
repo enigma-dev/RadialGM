@@ -430,11 +430,13 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   auto pm = new MessageModel(ProtoModel::NonProtoParent{this}, _project->mutable_game()->mutable_root());
   pm->SetDisplayConfig(msgConf);
 
+  resourceMap->TreeChanged(pm);
   treeModel.reset(new TreeModel(pm, nullptr, treeConf));
 
   _ui->treeView->setModel(treeModel.get());
-  treeModel->connect(treeModel.get(), &TreeModel::ItemRenamed, resourceMap.get(),
+  connect(treeModel.get(), &TreeModel::ItemRenamed, resourceMap.get(),
                      &ResourceModelMap::ResourceRenamed);
+  connect(treeModel.get(), &TreeModel::TreeChanged, resourceMap.get(), &ResourceModelMap::TreeChanged);
 }
 
 void MainWindow::on_actionNew_triggered() { openNewProject(); }
