@@ -98,12 +98,6 @@ class TreeModel : public QAbstractItemModel {
     void AddChildrenToMap();
 
    private:
-    // Bloated-ass Qt shit you need to accept even if you don't want any goddamn arguments. Calls the above four.
-    // Removed because these signals aren't just bloated; they're undisciplined. Everyone gets called when data changes.
-    // We need signals specific to when data in a particular message has changed.
-    // template <typename AnyModel>
-    // void QtShitFuckery(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles);
-
     void PushChild(ProtoModel *model, int source_row);
     void ComputeDisplayData();
     void Absorb(Node &child);
@@ -200,6 +194,8 @@ class TreeModel : public QAbstractItemModel {
   bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
                     const QModelIndex &parent) override;
 
+  Node *IndexToNode(const QModelIndex &index) const;
+
   // Slots
   void SomeDataSomewhereChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles);
   void DataBlownAway();
@@ -230,7 +226,6 @@ class TreeModel : public QAbstractItemModel {
   QVariant GetItemIcon(const Node *item) const;
   Node *GetNthChild(Node *item, int n) const;
   int GetChildCount(Node *item) const;
-  Node *IndexToNode(const QModelIndex &index) const;
   const std::string &GetMessageType(const Node *node);
 
   void RebuildModelMapping();

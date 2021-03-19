@@ -608,26 +608,46 @@ void MainWindow::on_actionProperties_triggered() {
   }
 }
 
-/*static void CollectNodes(const buffers::TreeNode *root, QSet<const buffers::TreeNode *> &cache) {
-  cache.insert(root);
-  for (int i = 0; i < root->folder().children_size(); ++i) {
-    auto *child = &root->folder().children(i);
-    cache.insert(child);
-    if (child->has_folder()) CollectNodes(child, cache);
+static void CollectNodes(const TreeModel::Node *node, QSet<const TreeModel::Node*> &cache) {
+  cache.insert(node);
+  for (auto& child : node->children) {
+    CollectNodes(child.get(), cache);
   }
-}*/
+}
 
-void MainWindow::on_actionDelete_triggered() {/*
+static QSet<const TreeModel::Node*> GroupNodes(const QSet<const TreeModel::Node*> &nodes) {
+  QSet<const TreeModel::Node*> ret;
+  for (const auto& n : nodes) {
+    const TreeModel::Node* t = n;
+    bool add = true;
+    while (t->parent) {
+      if (nodes.contains(t->parent)) {
+        add = false;
+        break;
+      }
+      t = t->parent;
+    }
+    if (add) ret.insert(n);
+  }
+  return ret;
+}
+
+void MainWindow::on_actionDelete_triggered() {
   if (!_ui->treeView->selectionModel()->hasSelection()) return;
   auto selected = _ui->treeView->selectionModel()->selectedIndexes();
-  QSet<MessageModel *> deleted_models;
+
+  QSet<const TreeModel::Node*> selectedNodes;
+  QSet<const TreeModel::Node*> effectiveNodes;
   for (auto index : selected) {
-    auto *treeNode = static_cast<buffers::TreeNode *>(index.internalPointer());
-    CollectNodes(treeNode, selectedNodes);
+    CollectNodes(treeModel->IndexToNode(index), selectedNodes);
+    effectiveNodes.insert(treeModel->IndexToNode(index));
   }
+
+  effectiveNodes = GroupNodes(effectiveNodes);
+
   QString selectedNames = "";
-  for (auto node : selectedNodes) {
-    selectedNames += (node == *selectedNodes.begin() ? "" : ", ") + QString::fromStdString(node->name());
+  for (auto& node : qAsConst(effectiveNodes)) {
+    selectedNames += (node == *selectedNodes.begin() ? "" : ", ") + node->display_name;
   }
 
   QMessageBox mb(
@@ -641,15 +661,26 @@ void MainWindow::on_actionDelete_triggered() {/*
   if (ret != QMessageBox::Yes) return;
 
   // close subwindows
-  for (auto node : selectedNodes) {
-    if (_subWindows.contains(node)) _subWindows[node]->close();
-  }
+  //if (_subWindows.contains(m)) _subWindows[m]->close();
 
-  // remove tree nodes (recursively unmaps names)
-  for (auto index : selected) {
-    this->treeModel->removeNode(index);
+  std::map<ProtoModel*, RepeatedMessageModel::RowRemovalOperation> removers;
+  for (auto& node : qAsConst(effectiveNodes)) {
+    R_ASSESS_C(node && node->BackingModel());
+    MessageModel* m = node->BackingModel()->TryCastAsMessageModel();
+    RepeatedMessageModel* siblings;
+    if (m) {
+      MessageModel* tree_node = m->GetParentModel<MessageModel*>();
+      R_ASSESS_C(tree_node);
+      siblings = tree_node->GetParentModel<RepeatedMessageModel*>();
+    } else { // is a folder I guess?
+      siblings = node->BackingModel()->TryCastAsRepeatedMessageModel();
+    }
+    R_ASSESS_C(siblings);
+    removers.emplace(siblings, siblings).first->second.RemoveRow(node->row_in_parent);
   }
-*/}
+  // done with removers
+  removers.clear();
+}
 
 void MainWindow::on_actionExpand_triggered() { _ui->treeView->expandAll(); }
 

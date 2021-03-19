@@ -487,7 +487,9 @@ QModelIndex TreeModel::duplicateNode(const QModelIndex & /*index*/) {
   return QModelIndex();
 }
 
-void TreeModel::removeNode(const QModelIndex & /*index*/) { /*
+void TreeModel::removeNode(const QModelIndex & /*index*/) {
+  qDebug() << "wut";
+  /*
   if (!index.isValid()) return;
   auto *node = static_cast<Message *>(index.internalPointer());
   if (!node) return;

@@ -27,20 +27,25 @@ static QString ResTypeAsString(TypeCase type) {
 ResourceModelMap::ResourceModelMap(QObject* parent) : QObject(parent) {}
 
 
-void ResourceModelMap::TreeChanged(MessageModel* model) {
+static void TreeChangedHelper(MessageModel* model, ResourceModelMap* rm) {
   const MessageModel* folder = model->GetSubModel<MessageModel*>(TreeNode::kFolderFieldNumber);
   if (folder) {
     const RepeatedMessageModel* children = folder->GetSubModel<RepeatedMessageModel*>(TreeNode::Folder::kChildrenFieldNumber);
     if (children) {
       for (int i = 0; i < children->rowCount(); ++i) {
-        TreeChanged(children->GetSubModel(i)->TryCastAsMessageModel());
+        TreeChangedHelper(children->GetSubModel(i)->TryCastAsMessageModel(), rm);
       }
     }
   } else {
     int type = model->OneOfType("type");
-    AddResource((buffers::TreeNode::TypeCase)type,
+    rm->AddResource((buffers::TreeNode::TypeCase)type,
                 model->Data(FieldPath::Of<TreeNode>(TreeNode::kNameFieldNumber)).toString(), model);
   }
+}
+
+void ResourceModelMap::TreeChanged(MessageModel* model) {
+  _resources.clear();
+  TreeChangedHelper(model, this);
 }
 
 void ResourceModelMap::AddResource(TypeCase type, const QString& name, MessageModel* model) {
