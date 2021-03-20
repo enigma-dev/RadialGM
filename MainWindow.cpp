@@ -646,7 +646,7 @@ void MainWindow::on_actionDelete_triggered() {
   effectiveNodes = GroupNodes(effectiveNodes);
 
   QString selectedNames = "";
-  for (auto& node : qAsConst(effectiveNodes)) {
+  for (auto& node : qAsConst(selectedNodes)) {
     selectedNames += (node == *selectedNodes.begin() ? "" : ", ") + node->display_name;
   }
 
@@ -661,7 +661,14 @@ void MainWindow::on_actionDelete_triggered() {
   if (ret != QMessageBox::Yes) return;
 
   // close subwindows
-  //if (_subWindows.contains(m)) _subWindows[m]->close();
+  for (auto& node : qAsConst(selectedNodes)) {
+    R_ASSESS_C(node && node->BackingModel());
+    MessageModel* m = node->BackingModel()->TryCastAsMessageModel();
+    if (m && _subWindows.contains(m)) {
+      static_cast<BaseEditor*>(_subWindows[m]->widget())->MarkDeleted();
+      _subWindows[m]->close();
+    }
+  }
 
   std::map<ProtoModel*, RepeatedMessageModel::RowRemovalOperation> removers;
   for (auto& node : qAsConst(effectiveNodes)) {
@@ -673,7 +680,8 @@ void MainWindow::on_actionDelete_triggered() {
       R_ASSESS_C(tree_node);
       siblings = tree_node->GetParentModel<RepeatedMessageModel*>();
     } else { // is a folder I guess?
-      siblings = node->BackingModel()->TryCastAsRepeatedMessageModel();
+      R_ASSESS_C(node->parent && node->parent->BackingModel());
+      siblings = node->parent->BackingModel()->TryCastAsRepeatedMessageModel();
     }
     R_ASSESS_C(siblings);
     removers.emplace(siblings, siblings).first->second.RemoveRow(node->row_in_parent);

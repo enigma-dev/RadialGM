@@ -27,7 +27,7 @@ BaseEditor::~BaseEditor() {
 }
 
 void BaseEditor::closeEvent(QCloseEvent* event) {
-  if (_resMapper->IsDirty()) {
+  if (_resMapper->IsDirty() && !_deleted) {
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(this, tr("Unsaved Changes"), tr("Would you like to save the changes?"),
                                   QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);

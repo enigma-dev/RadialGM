@@ -31,11 +31,13 @@ class BaseEditor : public QWidget {
                            const QVariant &oldValue = QVariant(0), const QVector<int> &roles = QVector<int>());
   virtual void RebindSubModels();
   void OnSave();
+  void MarkDeleted() { _deleted = true; }
 
  protected:
   virtual void closeEvent(QCloseEvent *event) override;
 
   bool _reset_model_on_close = false;
+  bool _deleted = false;
   MessageModel *_model;
   ModelMapper *_nodeMapper;
   ModelMapper *_resMapper;
