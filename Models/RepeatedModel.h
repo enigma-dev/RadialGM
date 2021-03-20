@@ -122,54 +122,8 @@ class RepeatedModel : public ProtoModel {
         RemoveRow(index.row());
     }
 
-    ~RowRemovalOperation() {
-      if (rows_.empty()) return;
-
-      // Compute ranges for our deleted rows.
-      struct Range {
-        int first, last;
-        Range() : first(), last() {}
-        Range(int f, int l) : first(f), last(l) {}
-        int size() { return last - first + 1; }
-      };
-      std::vector<Range> ranges;
-      for (int row : rows_) {
-        if (ranges.empty() || row != ranges.back().last + 1) {
-          ranges.emplace_back(row, row);
-        } else {
-          ranges.back().last = row;
-        }
-      }
-
-      model_.beginResetModel();
-
-      // Basic dense range removal. Move "deleted" rows to the end of the array.
-      int left = 0, right = 0;
-      for (auto range : ranges) {
-        while (right < range.first) {
-          model_.SwapWithoutSignal(left, right);
-          left++;
-          right++;
-        }
-        right = range.last + 1;
-      }
-      while (right < model_.rowCount()) {
-        model_.SwapWithoutSignal(left, right);
-        left++;
-        right++;
-      }
-
-      // Send the endRemoveRows operations in the reverse order, removing the
-      // correct number of rows incrementally, or else various components in Qt
-      // will bitch, piss, moan, wail, whine, and cry. Actually, they will anyway.
-      for (Range range : ranges) {
-        model_.RemoveLastNRowsWithoutSignal(range.size());
-      }
-
-      model_.endResetModel();
-
-      model_.ParentDataChanged();
-    }
+    /// This method completes the row removal.
+    ~RowRemovalOperation();
 
    private:
     std::set<int> rows_;
@@ -212,6 +166,8 @@ class BasicRepeatedModel : public RepeatedModel {
   }
 
   void RemoveLastNRowsWithoutSignal(int n) override {
+    R_EXPECT_V(n < field_ref_.size())
+        << "Trying to remove " << n << " rows from a " << field_ref_.size() << "-row field.";
     for (int j = 0; j < n; ++j) field_ref_.RemoveLast();
   }
 

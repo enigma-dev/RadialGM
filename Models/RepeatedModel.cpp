@@ -151,6 +151,65 @@ bool RepeatedModel::removeRows(int position, int count, const QModelIndex& paren
   return true;
 }
 
+RepeatedModel::RowRemovalOperation::~RowRemovalOperation() {
+  if (rows_.empty()) return;
+
+  // Compute ranges for our deleted rows.
+  struct Range {
+    int first, last;
+    Range() : first(), last() {}
+    Range(int f, int l) : first(f), last(l) {}
+    int size() { return last - first + 1; }
+  };
+  std::vector<Range> ranges;
+  for (int row : rows_) {
+    if (ranges.empty() || row != ranges.back().last + 1) {
+      ranges.emplace_back(row, row);
+    } else {
+      ranges.back().last = row;
+    }
+  }
+
+  model_.beginResetModel();
+
+  // Basic dense range removal. Move "deleted" rows to the end of the array.
+  int left = 0, right = 0;
+  int expected_range_size = 0;
+  for (auto range : ranges) {
+    if (right > left) {
+      while (right < range.first) {
+        model_.SwapWithoutSignal(left, right);
+        left++;
+        right++;
+      }
+    } else if (left <= range.first) {
+      left = range.first;
+    } else {
+      qDebug() << "Logic error: left pointer (" << left << ") is ahead of next range ("
+               << range.first << ", " << range.last << ")...";
+    }
+    right = range.last + 1;
+    expected_range_size += range.size();
+  }
+  while (right < model_.rowCount()) {
+    model_.SwapWithoutSignal(left, right);
+    left++;
+    right++;
+  }
+
+  const int actual_removal_size = model_.rowCount() - left;
+  if (expected_range_size != actual_removal_size) {
+    qDebug() << "Expected to remove " << expected_range_size
+             << " rows, but " << actual_removal_size << " rows are scheduled for removal";
+  }
+  if (actual_removal_size > 0 && actual_removal_size <= model_.rowCount()) {
+    model_.RemoveLastNRowsWithoutSignal(actual_removal_size);
+  }
+
+  model_.endResetModel();
+  model_.ParentDataChanged();
+}
+
 // Mimedata stuff required for Drag & Drop and clipboard functions
 Qt::DropActions RepeatedModel::supportedDropActions() const { return Qt::MoveAction | Qt::CopyAction; }
 
