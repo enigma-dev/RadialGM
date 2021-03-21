@@ -66,7 +66,7 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name,
       MessageModel* roomModel = room->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
       qDebug() << room->DebugName();
       RepeatedMessageModel* instancesModel = roomModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
-      auto remover = removers.emplace(instancesModel, instancesModel).first->second;
+      auto &remover = removers.try_emplace(instancesModel, instancesModel).first->second;
       qDebug() << "instance count:" << instancesModel->rowCount();
       if (instancesModel->rowCount() > 0) {
         qDebug() << instancesModel

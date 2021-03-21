@@ -112,7 +112,6 @@ class RepeatedModel : public ProtoModel {
 
   class RowRemovalOperation {
    public:
-    RowRemovalOperation(RepeatedModel *model) : model_(*model) {}
     void RemoveRow(int row) { rows_.insert(row); }
     void RemoveRows(int row, int count) {
       for (int i = row; i < row + count; ++i) rows_.insert(i);
@@ -122,6 +121,11 @@ class RepeatedModel : public ProtoModel {
         RemoveRow(index.row());
     }
 
+    /// Only allowable ctor
+    RowRemovalOperation(RepeatedModel *model) : model_(*model) {}
+    // Forbid copy, allow move.
+    RowRemovalOperation(const RowRemovalOperation&) = delete;
+    RowRemovalOperation(RowRemovalOperation&&) = default;
     /// This method completes the row removal.
     ~RowRemovalOperation();
 
