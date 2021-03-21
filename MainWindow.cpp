@@ -674,12 +674,11 @@ void MainWindow::on_actionDelete_triggered() {
       MessageModel* parent = m->GetParentModel<MessageModel*>();
       R_ASSESS_C(parent);
       TreeNode::TypeCase type = (buffers::TreeNode::TypeCase)parent->OneOfType("type");
-      qDebug() << "removing refs";
       resourceMap->RemoveResource(type, node->display_name, removers);
     }
   }
 
-  /*for (auto& node : qAsConst(effectiveNodes)) {
+  for (auto& node : qAsConst(effectiveNodes)) {
     R_ASSESS_C(node && node->BackingModel());
     MessageModel* m = node->BackingModel()->TryCastAsMessageModel();
     RepeatedMessageModel* siblings;
@@ -693,7 +692,7 @@ void MainWindow::on_actionDelete_triggered() {
     }
     R_ASSESS_C(siblings);
     removers.emplace(siblings, siblings).first->second.RemoveRow(node->row_in_parent);
-  }*/
+  }
   // done with removers
   removers.clear();
 }

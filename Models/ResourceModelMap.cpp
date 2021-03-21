@@ -61,20 +61,74 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name,
 
   // Delete all instances of this object type
   if (type == TypeCase::kObject) {
-    for (auto room : _resources[TypeCase::kRoom]) {
-      qDebug() << "room count:" << _resources[TypeCase::kRoom].size();
+    for (auto& room : qAsConst(_resources[TypeCase::kRoom])) {
+      R_EXPECT_V(room);
       MessageModel* roomModel = room->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
-      qDebug() << room->DebugName();
+      R_EXPECT_V(roomModel);
       RepeatedMessageModel* instancesModel = roomModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
-      auto &remover = removers.try_emplace(instancesModel, instancesModel).first->second;
-      qDebug() << "instance count:" << instancesModel->rowCount();
-      if (instancesModel->rowCount() > 0) {
-        qDebug() << instancesModel
-                    ->Data(
-                        FieldPath::Of<Room::Instance>(FieldPath::StartingAt(0), Room::Instance::kObjectTypeFieldNumber))
-                    .toString();
-        remover.RemoveRow(0);
+      auto& remover = removers.emplace(instancesModel, instancesModel).first->second;
+
+      for (int row = 0; row < instancesModel->rowCount(); ++row) {
+        if (instancesModel
+                ->Data(
+                    FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kObjectTypeFieldNumber))
+                .toString() == name)
+          remover.RemoveRow(row);
       }
+
+      // Only models in use in open editors should have backup models
+      MessageModel* backupModel = roomModel->GetBackupModel();
+      if (backupModel != nullptr) {
+        RepeatedMessageModel* instancesModelBak =
+            backupModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
+        auto& remover = removers.emplace(instancesModelBak, instancesModelBak).first->second;
+
+        for (int row = 0; row < instancesModelBak->rowCount(); ++row) {
+          if (instancesModelBak
+                  ->Data(
+                      FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kObjectTypeFieldNumber))
+                  .toString() == name)
+            remover.RemoveRow(row);
+        }
+      }
+    }
+  }
+
+  // Delete all tiles using this background
+  if (type == TypeCase::kBackground) {
+    for (auto& room : qAsConst(_resources[TypeCase::kRoom])) {
+      MessageModel* roomModel = room->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
+      RepeatedMessageModel* tilesModel = roomModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
+      auto& remover = removers.emplace(tilesModel, tilesModel).first->second;
+
+      for (int row = 0; row < tilesModel->rowCount(); ++row) {
+        if (tilesModel
+                ->Data(
+                    FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kObjectTypeFieldNumber))
+                .toString() == name)
+          remover.RemoveRow(row);
+      }
+
+      // Only models in use in open editors should have backup models
+      MessageModel* backupModel = roomModel->GetBackupModel();
+      if (backupModel != nullptr) {
+        RepeatedMessageModel* tilesModelBak = backupModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
+        auto& remover = removers.emplace(tilesModelBak, tilesModelBak).first->second;
+
+        for (int row = 0; row < tilesModelBak->rowCount(); ++row) {
+          if (tilesModelBak
+                  ->Data(FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kBackgroundNameFieldNumber))
+                  .toString() == name)
+            remover.RemoveRow(row);
+        }
+      }
+    }
+  }
+
+  // Remove an references to this resource
+  for (auto& res : qAsConst(_resources)) {
+    for (auto& model : res) {
+      //UpdateReferences(model, ResTypeAsString(type), name, "");
     }
   }
 }
