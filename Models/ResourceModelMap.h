@@ -5,8 +5,8 @@
 #include "TreeModel.h"
 
 #include <QHash>
-#include <QVector>
 #include <QIcon>
+#include <QVector>
 #include <string>
 
 class ResourceModelMap : public QObject {
@@ -16,13 +16,14 @@ class ResourceModelMap : public QObject {
   MessageModel* GetResourceByName(int type, const QString& name);
   MessageModel* GetResourceByName(int type, const std::string& name);
   void AddResource(TypeCase type, const QString& name, MessageModel* model);
-  void RemoveResource(TypeCase type, const QString& name);
+  void RemoveResource(TypeCase type, const QString& name,
+                      std::map<ProtoModel*, RepeatedModel::RowRemovalOperation>& removers);
   QString CreateResourceName(TreeNode* node);
   QString CreateResourceName(int type, const QString& typeName);
 
  public slots:
   void TreeChanged(MessageModel* model);
-  void ResourceRenamed(TreeModel::Node *node, const QString& oldName, const QString& newName);
+  void ResourceRenamed(TreeModel::Node* node, const QString& oldName, const QString& newName);
 
  signals:
   void DataChanged();

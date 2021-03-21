@@ -166,7 +166,7 @@ class BasicRepeatedModel : public RepeatedModel {
   }
 
   void RemoveLastNRowsWithoutSignal(int n) override {
-    R_EXPECT_V(n < field_ref_.size())
+    R_EXPECT_V(n <= field_ref_.size())
         << "Trying to remove " << n << " rows from a " << field_ref_.size() << "-row field.";
     for (int j = 0; j < n; ++j) field_ref_.RemoveLast();
   }

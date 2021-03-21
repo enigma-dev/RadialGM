@@ -24,7 +24,7 @@ void RepeatedMessageModel::AppendNewWithoutSignal() {
 }
 
 void RepeatedMessageModel::RemoveLastNRowsWithoutSignal(int n) {
-  R_EXPECT_V(n < field_ref_.size())
+  R_EXPECT_V(n <= field_ref_.size())
       << "Trying to remove " << n << " rows from a " << field_ref_.size() << "-row message field.";
   BasicRepeatedModel<Message>::RemoveLastNRowsWithoutSignal(n);
   _subModels.resize(_subModels.size() - n);

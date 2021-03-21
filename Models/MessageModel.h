@@ -3,6 +3,7 @@
 
 #include "ProtoModel.h"
 #include "Utils/FieldPath.h"
+#include "Components/Logger.h"
 
 #include <QHash>
 
@@ -47,6 +48,7 @@ class MessageModel : public ProtoModel {
   // Returns the index in the oneof
   int OneOfType(const std::string& name) const {
     const OneofDescriptor* o = GetDescriptor()->FindOneofByName(name);
+    R_EXPECT(o && _protobuf, -1) << "Failed to get oneof index";
     return _protobuf->GetReflection()->GetOneofFieldDescriptor(*_protobuf, o)->number();
   }
 
@@ -97,7 +99,7 @@ class MessageModel : public ProtoModel {
 
  protected:
   google::protobuf::Message *_protobuf;
-  MessageModel *_modelBackup;
+  MessageModel *_modelBackup = nullptr;
   QScopedPointer<Message> _backupProtobuf;
   QVector<ProtoModel *> submodels_by_row_;
   QHash<int, ProtoModel *> submodels_by_field_;

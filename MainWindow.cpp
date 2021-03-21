@@ -660,17 +660,24 @@ void MainWindow::on_actionDelete_triggered() {
   int ret = mb.exec();
   if (ret != QMessageBox::Yes) return;
 
+  std::map<ProtoModel*, RepeatedMessageModel::RowRemovalOperation> removers;
+
   // close subwindows
   for (auto& node : qAsConst(selectedNodes)) {
     R_ASSESS_C(node && node->BackingModel());
     MessageModel* m = node->BackingModel()->TryCastAsMessageModel();
-    if (m && _subWindows.contains(m)) {
-      static_cast<BaseEditor*>(_subWindows[m]->widget())->MarkDeleted();
-      _subWindows[m]->close();
+    if (m) {
+      if ( _subWindows.contains(m)) {
+        static_cast<BaseEditor*>(_subWindows[m]->widget())->MarkDeleted();
+        _subWindows[m]->close();
+      }
+      MessageModel* parent = m->GetParentModel<MessageModel*>();
+      R_ASSESS_C(parent);
+      TreeNode::TypeCase type = (buffers::TreeNode::TypeCase)parent->OneOfType("type");
+      resourceMap->RemoveResource(type, node->display_name, removers);
     }
   }
 
-  std::map<ProtoModel*, RepeatedMessageModel::RowRemovalOperation> removers;
   for (auto& node : qAsConst(effectiveNodes)) {
     R_ASSESS_C(node && node->BackingModel());
     MessageModel* m = node->BackingModel()->TryCastAsMessageModel();

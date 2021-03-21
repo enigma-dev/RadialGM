@@ -26,11 +26,11 @@ static QString ResTypeAsString(TypeCase type) {
 
 ResourceModelMap::ResourceModelMap(QObject* parent) : QObject(parent) {}
 
-
 static void TreeChangedHelper(MessageModel* model, ResourceModelMap* rm) {
   const MessageModel* folder = model->GetSubModel<MessageModel*>(TreeNode::kFolderFieldNumber);
   if (folder) {
-    const RepeatedMessageModel* children = folder->GetSubModel<RepeatedMessageModel*>(TreeNode::Folder::kChildrenFieldNumber);
+    const RepeatedMessageModel* children =
+        folder->GetSubModel<RepeatedMessageModel*>(TreeNode::Folder::kChildrenFieldNumber);
     if (children) {
       for (int i = 0; i < children->rowCount(); ++i) {
         TreeChangedHelper(children->GetSubModel(i)->TryCastAsMessageModel(), rm);
@@ -39,7 +39,7 @@ static void TreeChangedHelper(MessageModel* model, ResourceModelMap* rm) {
   } else {
     int type = model->OneOfType("type");
     rm->AddResource((buffers::TreeNode::TypeCase)type,
-                model->Data(FieldPath::Of<TreeNode>(TreeNode::kNameFieldNumber)).toString(), model);
+                    model->Data(FieldPath::Of<TreeNode>(TreeNode::kNameFieldNumber)).toString(), model);
   }
 }
 
@@ -54,16 +54,19 @@ void ResourceModelMap::AddResource(TypeCase type, const QString& name, MessageMo
   _resources[type][name] = model;
 }
 
-void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
-  if (!_resources.contains(type)) return;
+void ResourceModelMap::RemoveResource(TypeCase type, const QString& name,
+                                      std::map<ProtoModel*, RepeatedMessageModel::RowRemovalOperation>& removers) {
+  if (type == TypeCase::kFolder || !_resources.contains(type)) return;
   if (!_resources[type].contains(name)) return;
 
   // Delete all instances of this object type
   if (type == TypeCase::kObject) {
-    for (auto room : qAsConst(_resources[TypeCase::kRoom])) {
+    for (auto& room : qAsConst(_resources[TypeCase::kRoom])) {
+      R_EXPECT_V(room);
       MessageModel* roomModel = room->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
+      R_EXPECT_V(roomModel);
       RepeatedMessageModel* instancesModel = roomModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
-      RepeatedMessageModel::RowRemovalOperation remover(instancesModel);
+      auto remover = removers.emplace(instancesModel, instancesModel).first->second;
 
       for (int row = 0; row < instancesModel->rowCount(); ++row) {
         if (instancesModel
@@ -78,14 +81,14 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
       if (backupModel != nullptr) {
         RepeatedMessageModel* instancesModelBak =
             backupModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
-        RepeatedMessageModel::RowRemovalOperation removerBak(instancesModelBak);
+        auto remover = removers.emplace(instancesModelBak, instancesModelBak).first->second;
 
         for (int row = 0; row < instancesModelBak->rowCount(); ++row) {
           if (instancesModelBak
                   ->Data(
                       FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kObjectTypeFieldNumber))
                   .toString() == name)
-            removerBak.RemoveRow(row);
+            remover.RemoveRow(row);
         }
       }
     }
@@ -93,10 +96,10 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
 
   // Delete all tiles using this background
   if (type == TypeCase::kBackground) {
-    for (auto room : qAsConst(_resources[TypeCase::kRoom])) {
+    for (auto& room : qAsConst(_resources[TypeCase::kRoom])) {
       MessageModel* roomModel = room->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
       RepeatedMessageModel* tilesModel = roomModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
-      RepeatedMessageModel::RowRemovalOperation remover(tilesModel);
+      auto remover = removers.emplace(tilesModel, tilesModel).first->second;
 
       for (int row = 0; row < tilesModel->rowCount(); ++row) {
         if (tilesModel
@@ -110,13 +113,13 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
       MessageModel* backupModel = roomModel->GetBackupModel();
       if (backupModel != nullptr) {
         RepeatedMessageModel* tilesModelBak = backupModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
-        RepeatedMessageModel::RowRemovalOperation removerBak(tilesModelBak);
+        auto remover = removers.emplace(tilesModelBak, tilesModelBak).first->second;
 
         for (int row = 0; row < tilesModelBak->rowCount(); ++row) {
           if (tilesModelBak
                   ->Data(FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kBackgroundNameFieldNumber))
                   .toString() == name)
-            removerBak.RemoveRow(row);
+            remover.RemoveRow(row);
         }
       }
     }
@@ -125,7 +128,7 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name) {
   // Remove an references to this resource
   for (auto& res : qAsConst(_resources)) {
     for (auto& model : res) {
-      UpdateReferences(model, ResTypeAsString(type), name, "");
+      //UpdateReferences(model, ResTypeAsString(type), name, "");
     }
   }
 
