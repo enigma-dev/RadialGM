@@ -1,7 +1,8 @@
 #ifndef PRIMITIVEMODEL_H
 #define PRIMITIVEMODEL_H
 
-#include "ProtoModel.h"
+#include "MessageModel.h"
+#include "RepeatedModel.h"
 #include "Utils/ProtoManip.h"
 
 #include <google/protobuf/message.h>
@@ -12,10 +13,10 @@
 class PrimitiveModel : public ProtoModel {
  public:
   // Construct a repeated field index.
-  PrimitiveModel(ProtoModel *parent, int row_in_parent)
+  PrimitiveModel(RepeatedModel *parent, int row_in_parent)
       : ProtoModel(parent, parent->GetDescriptor()->name(), parent->GetDescriptor(), row_in_parent),
         field_or_null_(nullptr) {}
-  PrimitiveModel(ProtoModel *parent, const FieldDescriptor *field)
+  PrimitiveModel(MessageModel *parent, const FieldDescriptor *field)
       : ProtoModel(parent, parent->GetDescriptor()->name(), parent->GetDescriptor(), field->index()),
         field_or_null_(field) {}
 
@@ -42,6 +43,10 @@ class PrimitiveModel : public ProtoModel {
 
   QVariant GetDirect() const {
     return _parentModel->DataAtRow(row_in_parent_);
+  }
+  QString GetAsQString() const {
+    return field_or_null_ ? _parentModel->As<MessageModel>()->FastGetQString(field_or_null_)
+                          : _parentModel->As<RepeatedModel>()->FastGetQString(row_in_parent_);
   }
   bool SetDirect(const QVariant &value) {
     return _parentModel->SetDataAtRow(row_in_parent_, value);

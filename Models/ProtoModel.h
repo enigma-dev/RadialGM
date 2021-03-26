@@ -279,6 +279,7 @@ class ProtoModel : public QAbstractItemModel {
 
   // Casting helpers.
   virtual QString DebugName() const = 0;
+  const QString &DebugPath() const { return debug_path_;}
 
   virtual MessageModel         *TryCastAsMessageModel()         { return nullptr; }
   virtual RepeatedMessageModel *TryCastAsRepeatedMessageModel() { return nullptr; }
@@ -305,6 +306,10 @@ class ProtoModel : public QAbstractItemModel {
   }
   template<typename T, EnableIfCastable<T> = true>
   auto* TryCast() { return ProtoModel_private::SafeCast<T>::Cast(this); }
+  // While it's generally preferred to call the const version of a deduplicated const/non-const routine,
+  // it doesn't matter in this case because there's no reason for a cast to ever mutate this.
+  template<typename T, EnableIfCastable<T> = true>
+  const auto* TryCast() const { return ProtoModel_private::SafeCast<T>::Cast(const_cast<ProtoModel*>(this)); }
 
   // Returns the FieldDescriptor describing the given row.
   // The trick is that all nested proto data has some field attached, whether it's primitive, repeated, whatever.
@@ -337,7 +342,7 @@ signals:
   bool _dirty;
   ProtoModel *_parentModel;
   const int row_in_parent_;
-  const std::string _debug_path;
+  const QString debug_path_;
   const Descriptor *descriptor_;
 
  private:

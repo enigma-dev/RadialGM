@@ -24,6 +24,9 @@ class RepeatedModel : public ProtoModel {
   bool SetData(const QVariant &value) override;
   const ProtoModel *GetSubModel(const FieldPath &field_path) const override;
 
+  // Does the fastest possible conversion from field to QString. Returns empty for message fields.
+  virtual QString FastGetQString(int row) const  { (void) row; return {}; }
+
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
   bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override;
 

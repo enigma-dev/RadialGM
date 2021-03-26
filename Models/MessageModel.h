@@ -77,6 +77,8 @@ class MessageModel : public ProtoModel {
   // These are the same as the above but operate on the raw protobuf
   Message *GetBuffer();
   void ReplaceBuffer(const Message *buffer);
+  // Does the fastest possible conversion from field to QString. Returns empty for message fields.
+  QString FastGetQString(const FieldDescriptor *field) const;
 
   using ProtoModel::Data;
   using ProtoModel::SetData;

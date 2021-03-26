@@ -22,7 +22,12 @@ QString MessageModel::GetDisplayName() const {
   QString name;
   auto& display = GetMessageDisplay(GetDescriptor()->full_name());
   if (display.isValid) {
-    name = Data(display.label_field).toString();
+    if (const ProtoModel *holder = GetSubModel(display.label_field)) {
+      if (const auto *primitive = holder->TryCast<PrimitiveModel>()) {
+        name = primitive->GetAsQString();
+      }
+    }
+    // name = Data(display.label_field).toString();
     if (!name.isEmpty()) return name;
   }
   return ProtoModel::GetDisplayName();
@@ -198,6 +203,25 @@ const ProtoModel *MessageModel::GetSubModel(const FieldPath &field_path) const {
 QVariant MessageModel::Data() const {
   if (!_protobuf) return {};
   return QVariant::fromValue(AbstractMessage(*_protobuf));
+}
+
+QString MessageModel::FastGetQString(const FieldDescriptor *field) const {
+  if (!_protobuf) return {};
+  auto *refl = _protobuf->GetReflection();
+  switch (field->cpp_type()) {
+    case CppType::CPPTYPE_MESSAGE: return {};
+    case CppType::CPPTYPE_INT32:   return QString::number(refl->GetInt32(*_protobuf, field));
+    case CppType::CPPTYPE_INT64:   return QString::number(refl->GetInt64(*_protobuf, field));
+    case CppType::CPPTYPE_UINT32:  return QString::number(refl->GetUInt32(*_protobuf, field));
+    case CppType::CPPTYPE_UINT64:  return QString::number(refl->GetUInt64(*_protobuf, field));
+    case CppType::CPPTYPE_DOUBLE:  return QString::number(refl->GetDouble(*_protobuf, field));
+    case CppType::CPPTYPE_FLOAT:   return QString::number(refl->GetFloat(*_protobuf, field));
+    case CppType::CPPTYPE_BOOL:    return refl->GetBool(*_protobuf, field) ? "true" : "false";
+    case CppType::CPPTYPE_ENUM:    return QString::fromStdString(refl->GetEnum(*_protobuf, field)->name());
+    case CppType::CPPTYPE_STRING:  return QString::fromStdString(refl->GetString(*_protobuf, field));
+  }
+  qDebug() << "Unknown field type: " << field->DebugString().c_str();
+  return {};
 }
 
 bool MessageModel::SetData(const QVariant &value) {

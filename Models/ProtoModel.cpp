@@ -19,7 +19,7 @@ ProtoModel::ProtoModel(ProtoModel *parent, std::string name, const Descriptor *d
       _dirty(false),
       _parentModel(parent),
       row_in_parent_(row_in_parent),
-      _debug_path((parent ? parent->_debug_path + "." : "") + name),
+      debug_path_((parent ? parent->debug_path_ + "." : "") + QString::fromStdString(name)),
       descriptor_(descriptor) {
   connect(this, &ProtoModel::DataChanged, this,
           [this](const QModelIndex &topLeft, const QModelIndex &bottomRight,
