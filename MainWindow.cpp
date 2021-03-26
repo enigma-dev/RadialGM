@@ -20,10 +20,7 @@
 #include "Components/Logger.h"
 
 #include "Plugins/RGMPlugin.h"
-
-#ifdef RGM_SERVER_ENABLED
 #include "Plugins/ServerPlugin.h"
-#endif
 
 #include "gmk.h"
 #include "gmx.h"
@@ -169,7 +166,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
   settingsButton->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextBesideIcon);
   _ui->actionSettings->setMenu(_ui->menuChangeGameSettings);
 
-#ifdef RGM_SERVER_ENABLED
   RGMPlugin *pluginServer = new ServerPlugin(*this);
   auto outputTextBrowser = this->_ui->outputTextBrowser;
   connect(pluginServer, &RGMPlugin::LogOutput, outputTextBrowser, &QTextBrowser::append);
@@ -183,7 +179,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
   connect(_ui->actionRun, &QAction::triggered, pluginServer, &RGMPlugin::Run);
   connect(_ui->actionDebug, &QAction::triggered, pluginServer, &RGMPlugin::Debug);
   connect(_ui->actionCreateExecutable, &QAction::triggered, pluginServer, &RGMPlugin::CreateExecutable);
-#endif
 
   openNewProject();
 }
