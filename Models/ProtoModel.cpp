@@ -1,7 +1,6 @@
 #include "ProtoModel.h"
 #include "MessageModel.h"
 #include "RepeatedMessageModel.h"
-#include "RepeatedModel.h"
 
 #include "Components/Logger.h"
 

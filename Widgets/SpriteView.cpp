@@ -1,5 +1,6 @@
 #include "SpriteView.h"
 #include "Components/ArtManager.h"
+#include "Models/RepeatedPrimitiveModel.h"
 
 #include <QGraphicsPixmapItem>
 

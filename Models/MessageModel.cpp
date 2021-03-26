@@ -1,8 +1,8 @@
 #include "MessageModel.h"
 #include "Components/ArtManager.h"
 #include "Components/Logger.h"
-#include "RepeatedModel.h"
 #include "RepeatedMessageModel.h"
+#include "RepeatedPrimitiveModel.h"
 #include "ResourceModelMap.h"
 
 static constexpr int CCP_TYPE_ROLE = Qt::UserRole + 1;

@@ -3,6 +3,7 @@
 #include "Components/Utility.h"
 #include "SpriteEditor.h"
 #include "Models/MessageModel.h"
+#include "Models/RepeatedPrimitiveModel.h"
 #include "Utils/QBoilerplate.h"
 
 #include <QCheckBox>

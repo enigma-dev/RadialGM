@@ -1,7 +1,7 @@
 #include "EventsListModel.h"
 #include "MessageModel.h"
-#include "RepeatedModel.h"
 #include "RepeatedMessageModel.h"
+#include "RepeatedPrimitiveModel.h"
 
 #include <QIcon>
 

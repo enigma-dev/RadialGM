@@ -1,7 +1,7 @@
 #ifndef REPEATEDMESSAGEMODEL_H
 #define REPEATEDMESSAGEMODEL_H
 
-#include "RepeatedModel.h"
+#include "RepeatedPrimitiveModel.h"
 
 class RepeatedMessageModel : public BasicRepeatedModel<Message> {
   Q_OBJECT

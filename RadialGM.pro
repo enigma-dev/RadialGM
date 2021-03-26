@@ -143,6 +143,7 @@ HEADERS += \
     Models/PrimitiveModel.h \
     Models/RepeatedMessageModel.h \
     Models/RepeatedModel.h \
+    Models/RepeatedPrimitiveModel.h \
     Models/RepeatedSortFilterProxyModel.h \
     Utils/FieldPath.h \
     Utils/ProtoManip.h \

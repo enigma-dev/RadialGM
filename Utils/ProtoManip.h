@@ -92,6 +92,10 @@ QVariant GetField(google::protobuf::MutableRepeatedFieldRef<std::string> repeate
 
 QVariant GetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::Message> repeated_field, int row);
 
+template <typename number, std::enable_if_t<!std::is_same_v<decltype(QString::number(number{})), void>, bool> = 0>
+QString ToQString(number value) { return QString::number(value); }
+inline QString ToQString(const std::string &str) { return QString::fromStdString(str); }
+
 // =====================================================================================================================
 // == Repeated field assignment ========================================================================================
 // =====================================================================================================================

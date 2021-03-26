@@ -142,6 +142,8 @@ QString GetMimeType(const google::protobuf::FieldDescriptor *desc) {
     case google::protobuf::FieldDescriptor::CPPTYPE_ENUM:
       return "text/plain";
   }
+  qDebug() << "Grabbing MIME type of unknown field type " << desc->DebugString().c_str();
+  return {};
 }
 
 static void GetMimeTypes(const google::protobuf::Descriptor *desc, std::set<QString> &res) {
