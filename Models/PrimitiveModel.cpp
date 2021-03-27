@@ -1,7 +1,16 @@
 #include "PrimitiveModel.h"
+#include "MainWindow.h"
 
 #include <Components/ArtManager.h>
 #include <QIcon>
+
+PrimitiveModel::PrimitiveModel(MessageModel *parent, const FieldDescriptor *field)
+    : ProtoModel(parent, parent->GetDescriptor()->name(), parent->GetDescriptor(), field->index()),
+      field_or_null_(field) {
+  connect(MainWindow::resourceMap.get(),
+          qOverload<const std::string &, const QString &, const QString &>(&ResourceModelMap::ResourceRenamed), this,
+          &PrimitiveModel::ResourceRenamed);
+}
 
 const ProtoModel *PrimitiveModel::GetSubModel(const FieldPath &field_path) const {
   if (field_path) {
@@ -19,8 +28,7 @@ const FieldDescriptor *PrimitiveModel::GetRowDescriptor(int row) const {
 
 QString PrimitiveModel::GetDisplayName() const {
   if (field_or_null_) return QString::fromStdString(field_or_null_->name());
-  if (const auto *fd = _parentModel->GetRowDescriptor(row_in_parent_))
-    return QString::fromStdString(fd->full_name());
+  if (const auto *fd = _parentModel->GetRowDescriptor(row_in_parent_)) return QString::fromStdString(fd->full_name());
   return "Error";
 }
 
@@ -32,4 +40,10 @@ QIcon PrimitiveModel::GetDisplayIcon() const {
   if (!ret.isNull()) return ret;
   if (!display.default_icon_name.isEmpty()) return ArtManager::GetIcon(display.default_icon_name);
   return {};
+}
+
+void PrimitiveModel::ResourceRenamed(const std::string &type, const QString &oldName, const QString &newName) {
+  if (field_or_null_ && field_or_null_->options().GetExtension(buffers::resource_ref) == type) {
+    if (Data().toString() == oldName) SetData(newName);
+  }
 }

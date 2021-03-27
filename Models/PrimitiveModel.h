@@ -16,9 +16,7 @@ class PrimitiveModel : public ProtoModel {
   PrimitiveModel(RepeatedModel *parent, int row_in_parent)
       : ProtoModel(parent, parent->GetDescriptor()->name(), parent->GetDescriptor(), row_in_parent),
         field_or_null_(nullptr) {}
-  PrimitiveModel(MessageModel *parent, const FieldDescriptor *field)
-      : ProtoModel(parent, parent->GetDescriptor()->name(), parent->GetDescriptor(), field->index()),
-        field_or_null_(field) {}
+  PrimitiveModel(MessageModel *parent, const FieldDescriptor *field);
 
   bool Empty() { return rowCount() == 0; }
 
@@ -74,6 +72,10 @@ class PrimitiveModel : public ProtoModel {
     if (row || column) return QModelIndex();
     return createIndex(0, 0, (void*) this);
   }
+
+ public slots:
+  void ResourceRenamed(const std::string &type, const QString& oldName, const QString& newName);
+
 
  protected:
   const FieldDescriptor *const field_or_null_;

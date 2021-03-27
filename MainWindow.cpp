@@ -435,7 +435,7 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
 
   _ui->treeView->setModel(treeModel.get());
   connect(treeModel.get(), &TreeModel::ItemRenamed, resourceMap.get(),
-                     &ResourceModelMap::ResourceRenamed);
+                     qOverload<TreeModel::Node*, const QString&, const QString&>(&ResourceModelMap::ResourceRenamed));
   connect(treeModel.get(), &TreeModel::TreeChanged, resourceMap.get(), &ResourceModelMap::TreeChanged);
 }
 

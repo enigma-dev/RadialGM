@@ -342,32 +342,3 @@ bool MessageModel::RestoreBackup() {
 }
 
 Message *MessageModel::GetBuffer() { return _protobuf; }
-
-void UpdateReferences(MessageModel *model, const QString &type, const QString &oldName, const QString &newName) {
-  if (model == nullptr) return;
-
-  int rows = model->rowCount();
-  for (int row = 0; row < rows; row++) {
-    Message *protobuf = model->GetBuffer();
-
-    const Descriptor *desc = protobuf->GetDescriptor();
-    const FieldDescriptor *field = desc->field(row);
-    if (field != nullptr) {
-      if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
-        if (field->is_repeated()) {
-          RepeatedMessageModel *rm = model->GetSubModel<RepeatedMessageModel>(row);
-          int cols = rm->rowCount();
-          for (int col = 0; col < cols; col++) {
-            UpdateReferences(rm->GetSubModel<MessageModel>(col), type, oldName, newName);
-          }
-        } else
-          UpdateReferences(model->GetSubModel<MessageModel>(row), type, oldName, newName);
-      } else if (field->cpp_type() == CppType::CPPTYPE_STRING && !field->is_repeated()) {
-        const QString refType = QString::fromStdString(field->options().GetExtension(buffers::resource_ref));
-        if (refType == type && model->DataAtRow(row).toString() == oldName) {
-          model->SetDataAtRow(row, newName);
-        }
-      }
-    }
-  }
-}

@@ -3,7 +3,7 @@
 #include "MainWindow.h"
 #include "Models/RepeatedMessageModel.h"
 
-static QString ResTypeAsString(TypeCase type) {
+static std::string ResTypeAsString(TypeCase type) {
   switch (type) {
     case TypeCase::kFolder: return "treenode";
     case TypeCase::kBackground: return "background";
@@ -126,11 +126,7 @@ void ResourceModelMap::RemoveResource(TypeCase type, const QString& name,
   }
 
   // Remove an references to this resource
-  for (auto& res : qAsConst(_resources)) {
-    for (auto& model : res) {
-      //UpdateReferences(model, ResTypeAsString(type), name, "");
-    }
-  }
+  emit ResourceRenamed(ResTypeAsString(type), name, "");
 }
 
 QString ResourceModelMap::CreateResourceName(TreeNode* node) {
@@ -192,12 +188,7 @@ void ResourceModelMap::ResourceRenamed(TreeModel::Node* node, const QString& old
   if (oldName == newName || !_resources[type].contains(oldName)) return;
   _resources[type][newName] = _resources[type][oldName];
 
-  for (auto& res : qAsConst(_resources)) {
-    for (auto& model : res) {
-      UpdateReferences(model, ResTypeAsString(type), oldName, newName);
-    }
-  }
-
+  emit ResourceRenamed(ResTypeAsString(type), oldName, newName);
   _resources[type].remove(oldName);
 
   emit DataChanged();

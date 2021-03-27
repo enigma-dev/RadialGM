@@ -27,6 +27,7 @@ class ResourceModelMap : public QObject {
 
  signals:
   void DataChanged();
+  void ResourceRenamed(const std::string& type, const QString& oldName, const QString& newName);
 
  protected:
   QHash<int, QHash<QString, MessageModel*>> _resources;

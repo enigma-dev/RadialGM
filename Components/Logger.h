@@ -13,7 +13,10 @@ class LogAndReturn {
 
   template <typename T>
   LogAndReturn& operator<<(T t) {
-    logger << t;
+    if constexpr(std::is_same<T, std::string>::value)
+      logger << QString::fromStdString(t);
+    else
+      logger << t;
     return *this;
   }
   struct Void {

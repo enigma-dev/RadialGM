@@ -107,6 +107,4 @@ class MessageModel : public ProtoModel {
   QHash<int, ProtoModel *> submodels_by_field_;
 };
 
-void UpdateReferences(MessageModel *model, const QString &type, const QString &oldName, const QString &newName);
-
 #endif
