@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
   a.setWindowIcon(QIcon(":/icon.ico"));
   a.setAttribute(Qt::AA_DisableWindowContextHelpButton);
 
-  defaultStyle = a.style()->objectName();
+  defaultStyle = a.style() -> objectName();
 
   QSettings settings;
   settings.beginGroup(preferencesKey());
@@ -34,6 +34,7 @@ int main(int argc, char *argv[]) {
   settings.endGroup();  // Preferences
 
   MainWindow w(nullptr);
+  
   if (argc > 1) {
     w.openFile(QString(argv[1]));
   }
