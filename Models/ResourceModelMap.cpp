@@ -54,7 +54,7 @@ void ResourceModelMap::AddResource(TypeCase type, const QString& name, MessageMo
   _resources[type][name] = model;
 }
 
-void ResourceModelMap::RemoveResource(TypeCase type, const QString& name,
+void ResourceModelMap::ResourceRemoved(TypeCase type, const QString& name,
                                       std::map<ProtoModel*, RepeatedMessageModel::RowRemovalOperation>& removers) {
   if (type == TypeCase::kFolder || !_resources.contains(type)) return;
   if (!_resources[type].contains(name)) return;

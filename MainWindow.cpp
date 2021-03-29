@@ -437,6 +437,10 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   connect(treeModel.get(), &TreeModel::ItemRenamed, resourceMap.get(),
                      qOverload<TreeModel::Node*, const QString&, const QString&>(&ResourceModelMap::ResourceRenamed));
   connect(treeModel.get(), &TreeModel::TreeChanged, resourceMap.get(), &ResourceModelMap::TreeChanged);
+  connect(treeModel.get(), &TreeModel::ItemRemoved, resourceMap.get(), &ResourceModelMap::ResourceRemoved,
+          Qt::DirectConnection);
+  connect(treeModel.get(), &TreeModel::ModelAboutToBeDeleted, this, &MainWindow::ResourceModelDeleted,
+          Qt::DirectConnection);
 }
 
 void MainWindow::on_actionNew_triggered() { openNewProject(); }
@@ -553,6 +557,13 @@ void MainWindow::CreateResource(TypeCase typeCase) {
   treeModel->triggerNodeEdit(index, _ui->treeView);
 }
 
+void MainWindow::ResourceModelDeleted(MessageModel* m) {
+  if ( _subWindows.contains(m)) {
+    static_cast<BaseEditor*>(_subWindows[m]->widget())->MarkDeleted();
+    _subWindows[m]->close();
+  }
+}
+
 void MainWindow::on_actionCreateSprite_triggered() { CreateResource(TypeCase::kSprite); }
 
 void MainWindow::on_actionCreateSound_triggered() { CreateResource(TypeCase::kSound); }
@@ -608,46 +619,29 @@ void MainWindow::on_actionProperties_triggered() {
   }
 }
 
-static void CollectNodes(const TreeModel::Node *node, QSet<const TreeModel::Node*> &cache) {
-  cache.insert(node);
-  for (auto& child : node->children) {
-    CollectNodes(child.get(), cache);
-  }
-}
+static void CollectNodes(const QModelIndex& node, QSet<const  QModelIndex> &cache) {
+  auto model = node.model();
 
-static QSet<const TreeModel::Node*> GroupNodes(const QSet<const TreeModel::Node*> &nodes) {
-  QSet<const TreeModel::Node*> ret;
-  for (const auto& n : nodes) {
-    const TreeModel::Node* t = n;
-    bool add = true;
-    while (t->parent) {
-      if (nodes.contains(t->parent)) {
-        add = false;
-        break;
-      }
-      t = t->parent;
-    }
-    if (add) ret.insert(n);
+  cache.insert(node);
+  for (int r = 0; r < model->rowCount(node); ++r) {
+    CollectNodes(model->index(r, 0, node), cache);
   }
-  return ret;
 }
 
 void MainWindow::on_actionDelete_triggered() {
   if (!_ui->treeView->selectionModel()->hasSelection()) return;
   auto selected = _ui->treeView->selectionModel()->selectedIndexes();
 
-  QSet<const TreeModel::Node*> selectedNodes;
-  QSet<const TreeModel::Node*> effectiveNodes;
+  QSet<const QModelIndex> selectedNodes;
+  QSet<const QModelIndex> effectiveNodes;
   for (auto index : selected) {
-    CollectNodes(treeModel->IndexToNode(index), selectedNodes);
-    effectiveNodes.insert(treeModel->IndexToNode(index));
+    CollectNodes(index, selectedNodes);
+    effectiveNodes.insert(index);
   }
-
-  effectiveNodes = GroupNodes(effectiveNodes);
 
   QString selectedNames = "";
   for (auto& node : qAsConst(selectedNodes)) {
-    selectedNames += (node == *selectedNodes.begin() ? "" : ", ") + node->display_name;
+    selectedNames += (node == *selectedNodes.begin() ? "" : ", ") + node.data().toString();
   }
 
   QMessageBox mb(
@@ -660,41 +654,7 @@ void MainWindow::on_actionDelete_triggered() {
   int ret = mb.exec();
   if (ret != QMessageBox::Yes) return;
 
-  std::map<ProtoModel*, RepeatedMessageModel::RowRemovalOperation> removers;
-
-  // close subwindows
-  for (auto& node : qAsConst(selectedNodes)) {
-    R_ASSESS_C(node && node->BackingModel());
-    MessageModel* m = node->BackingModel()->TryCastAsMessageModel();
-    if (m) {
-      if ( _subWindows.contains(m)) {
-        static_cast<BaseEditor*>(_subWindows[m]->widget())->MarkDeleted();
-        _subWindows[m]->close();
-      }
-      MessageModel* parent = m->GetParentModel<MessageModel*>();
-      R_ASSESS_C(parent);
-      TreeNode::TypeCase type = (buffers::TreeNode::TypeCase)parent->OneOfType("type");
-      resourceMap->RemoveResource(type, node->display_name, removers);
-    }
-  }
-
-  for (auto& node : qAsConst(effectiveNodes)) {
-    R_ASSESS_C(node && node->BackingModel());
-    MessageModel* m = node->BackingModel()->TryCastAsMessageModel();
-    RepeatedMessageModel* siblings;
-    if (m) {
-      MessageModel* tree_node = m->GetParentModel<MessageModel*>();
-      R_ASSESS_C(tree_node);
-      siblings = tree_node->GetParentModel<RepeatedMessageModel*>();
-    } else { // is a folder I guess?
-      R_ASSESS_C(node->parent && node->parent->BackingModel());
-      siblings = node->parent->BackingModel()->TryCastAsRepeatedMessageModel();
-    }
-    R_ASSESS_C(siblings);
-    removers.emplace(siblings, siblings).first->second.RemoveRow(node->row_in_parent);
-  }
-  // done with removers
-  removers.clear();
+  treeModel->BatchRemove(effectiveNodes);
 }
 
 void MainWindow::on_actionExpand_triggered() { _ui->treeView->expandAll(); }

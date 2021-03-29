@@ -182,8 +182,6 @@ class TreeModel : public QAbstractItemModel {
   /// For valued nodes, launches the specified editor or begins editing the value column.
   void triggerNodeEdit(const QModelIndex &index, QAbstractItemView *view);
   /// Erases the node at the given index from the model. Triggers the appropriate events on the backing model,
-  /// and fires the ItemDeleted event on this proxy.
-  void removeNode(const QModelIndex &index);
   /// Sorts the data in the specified node alphabetically. Fires the appropriate events on the backing model.
   void sortByName(const QModelIndex &index);
 
@@ -195,8 +193,10 @@ class TreeModel : public QAbstractItemModel {
                     const QModelIndex &parent) override;
 
   Node *IndexToNode(const QModelIndex &index) const;
+  void BatchRemove(const QSet<const QModelIndex> &indexes);
 
   // Slots
+ public slots:
   void SomeDataSomewhereChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles);
   void DataBlownAway();
 
@@ -206,6 +206,10 @@ class TreeModel : public QAbstractItemModel {
   void ItemRenamed(TreeModel::Node *node, const QString &oldName, const QString &newName);
   // Called when a resource (or group of resources) is moved.
   void ItemMoved(TreeModel::Node *node, TreeNode *old_parent);
+  // Called when a resource (or group of resources) is removed.
+  void ItemRemoved(TreeNode::TypeCase type, const QString &name, std::map<ProtoModel*,
+                   RepeatedMessageModel::RowRemovalOperation>& removers);
+  void ModelAboutToBeDeleted(MessageModel *m);
 
  private:
   /// Set of all living nodes belonging to this tree.

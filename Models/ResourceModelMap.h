@@ -16,14 +16,14 @@ class ResourceModelMap : public QObject {
   MessageModel* GetResourceByName(int type, const QString& name);
   MessageModel* GetResourceByName(int type, const std::string& name);
   void AddResource(TypeCase type, const QString& name, MessageModel* model);
-  void RemoveResource(TypeCase type, const QString& name,
-                      std::map<ProtoModel*, RepeatedModel::RowRemovalOperation>& removers);
   QString CreateResourceName(TreeNode* node);
   QString CreateResourceName(int type, const QString& typeName);
 
  public slots:
   void TreeChanged(MessageModel* model);
   void ResourceRenamed(TreeModel::Node* node, const QString& oldName, const QString& newName);
+  void ResourceRemoved(TypeCase type, const QString& name,
+                      std::map<ProtoModel*, RepeatedModel::RowRemovalOperation>& removers);
 
  signals:
   void DataChanged();

@@ -7,9 +7,10 @@
 PrimitiveModel::PrimitiveModel(MessageModel *parent, const FieldDescriptor *field)
     : ProtoModel(parent, parent->GetDescriptor()->name(), parent->GetDescriptor(), field->index()),
       field_or_null_(field) {
-  connect(MainWindow::resourceMap.get(),
+  if (field_or_null_ && !field_or_null_->options().GetExtension(buffers::resource_ref).empty())
+    connect(MainWindow::resourceMap.get(),
           qOverload<const std::string &, const QString &, const QString &>(&ResourceModelMap::ResourceRenamed), this,
-          &PrimitiveModel::ResourceRenamed);
+          &PrimitiveModel::ResourceRenamed, Qt::DirectConnection);
 }
 
 const ProtoModel *PrimitiveModel::GetSubModel(const FieldPath &field_path) const {

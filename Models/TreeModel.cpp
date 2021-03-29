@@ -216,6 +216,63 @@ TreeModel::Node *TreeModel::IndexToNode(const QModelIndex &index) const {
   }
 }
 
+static QSet<const QModelIndex> GroupNodes(const QSet<const QModelIndex> &nodes) {
+  QSet <const QModelIndex> ret;
+  for (const auto& n : nodes) {
+    QModelIndex t = n;
+    bool add = true;
+    while (t.parent().isValid()) {
+      if (nodes.contains(t.parent())) {
+        add = false;
+        break;
+      }
+      t = t.parent();
+    }
+    if (add) ret.insert(n);
+  }
+  return ret;
+}
+
+void TreeModel::BatchRemove(const QSet<const QModelIndex> &indexes) {
+
+  std::map<ProtoModel*, RepeatedMessageModel::RowRemovalOperation> removers;
+
+  for (auto& index : qAsConst(indexes)) {
+    Node* node = IndexToNode(index);
+    R_ASSESS_C(node && node->BackingModel());
+    MessageModel* m = node->BackingModel()->TryCastAsMessageModel();
+    if (m) {
+      emit ModelAboutToBeDeleted(m);
+      MessageModel* parent = m->GetParentModel<MessageModel*>();
+      R_ASSESS_C(parent);
+      TreeNode::TypeCase type = (buffers::TreeNode::TypeCase)parent->OneOfType("type");
+      //FIXME: Slow & crashes
+      emit ItemRemoved(type, index.data().toString(), removers);
+    }
+  }
+
+  QSet<const QModelIndex> nodes = GroupNodes(indexes);
+
+  for (auto& index : qAsConst(nodes)) {
+    Node* node = IndexToNode(index);
+    R_ASSESS_C(node && node->BackingModel());
+    MessageModel* m = node->BackingModel()->TryCastAsMessageModel();
+    RepeatedMessageModel* siblings;
+    if (m) {
+      MessageModel* tree_node = m->GetParentModel<MessageModel*>();
+      R_ASSESS_C(tree_node);
+      siblings = tree_node->GetParentModel<RepeatedMessageModel*>();
+    } else { // is a folder I guess?
+      R_ASSESS_C(node->parent && node->parent->BackingModel());
+      siblings = node->parent->BackingModel()->TryCastAsRepeatedMessageModel();
+    }
+    R_ASSESS_C(siblings);
+    removers.emplace(siblings, siblings).first->second.RemoveRow(node->row_in_parent);
+  }
+  // done with removers
+  removers.clear();
+}
+
 // =====================================================================================================================
 // == Tree Building ====================================================================================================
 // =====================================================================================================================
@@ -402,12 +459,6 @@ TreeModel::Node *TreeModel::GetNthChild(Node *item, int n) const { return item ?
 int TreeModel::GetChildCount(Node *item) const { return item ? item->children.size() : 0; }
 const std::string &TreeModel::GetMessageType(const Node *node) { return node ? node->GetMessageType() : kEmptyString; }
 
-// This can't live exclusively on Node because it requires some metadata about how this model displays fields.
-// bool TreeModel::SetItemName(Node *item, const QString &name) {
-//   if (!item) return false;
-//   return item->SetName(name, item->BackingModel()->GetMessageDisplay(item->GetMessageType()));
-// }
-
 TreeModel::Node *TreeModel::Node::NthChild(int n) const {
   R_EXPECT(n >= 0 && (size_t)n < children.size(), nullptr)
       << "Accessing row " << n << " of a " << children.size() << "-row tree node `" << display_name << "`";
@@ -485,28 +536,6 @@ QModelIndex TreeModel::duplicateNode(const QModelIndex & /*index*/) {
   }*/
   qDebug() << rowCount() << " rows";
   return QModelIndex();
-}
-
-void TreeModel::removeNode(const QModelIndex & /*index*/) {
-  qDebug() << "wut";
-  /*
-  if (!index.isValid()) return;
-  auto *node = static_cast<Message *>(index.internalPointer());
-  if (!node) return;
-  if (node->has_folder()) {
-    for (int i = node->child_size(); i > 0; --i) {
-      removeNode(this->index(i - 1, 0, index));
-    }
-  }
-  Message *parent = parents[node];
-  int pos = 0;
-  for (; pos < parent->child_size(); ++pos)
-    if (parent->mutable_child(pos) == node) break;
-  if (pos == parent->child_size()) return;  // already removed?
-  emit beginRemoveRows(index.parent(), pos, pos);
-  resourceMap->RemoveResource(node->type_case(), QString::fromStdString(node->name()));
-  parent->mutable_child()->DeleteSubrange(pos, 1);
-  emit endRemoveRows();*/
 }
 
 void TreeModel::sortByName(const QModelIndex & /*index*/) { /*

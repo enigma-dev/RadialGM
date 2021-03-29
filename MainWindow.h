@@ -53,6 +53,7 @@ class MainWindow : public QMainWindow {
   void openFile(QString fName);
   void openNewProject();
   void CreateResource(TypeCase typeCase);
+  void ResourceModelDeleted(MessageModel* m);
   static void setCurrentConfig(const buffers::resources::Settings &settings);
 
  private slots:
