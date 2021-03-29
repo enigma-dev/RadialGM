@@ -251,6 +251,9 @@ void TreeModel::BatchRemove(const QSet<const QModelIndex> &indexes) {
     }
   }
 
+  // remove all the references
+  removers.clear();
+
   QSet<const QModelIndex> nodes = GroupNodes(indexes);
 
   for (auto& index : qAsConst(nodes)) {
