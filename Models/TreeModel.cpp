@@ -236,7 +236,9 @@ static QSet<const QModelIndex> GroupNodes(const QSet<const QModelIndex> &nodes) 
 void TreeModel::BatchRemove(const QSet<const QModelIndex> &indexes) {
 
   std::map<ProtoModel*, RepeatedMessageModel::RowRemovalOperation> removers;
+  QList<QPair<TreeNode::TypeCase, QString>> deletedResources;
 
+  // Loop all selected
   for (auto& index : qAsConst(indexes)) {
     Node* node = IndexToNode(index);
     R_ASSESS_C(node && node->BackingModel());
@@ -246,14 +248,13 @@ void TreeModel::BatchRemove(const QSet<const QModelIndex> &indexes) {
       MessageModel* parent = m->GetParentModel<MessageModel*>();
       R_ASSESS_C(parent);
       TreeNode::TypeCase type = (buffers::TreeNode::TypeCase)parent->OneOfType("type");
-      //FIXME: Slow & crashes
-      emit ItemRemoved(type, index.data().toString(), removers);
+      //FIXME: Slow as ass
+      // Can't mutate tree before all removes queued cause josh sucks
+      deletedResources.append({type, index.data().toString()});
     }
   }
 
-  // remove all the references
-  removers.clear();
-
+  // Don't delete children of deleted indexes
   QSet<const QModelIndex> nodes = GroupNodes(indexes);
 
   for (auto& index : qAsConst(nodes)) {
@@ -272,6 +273,10 @@ void TreeModel::BatchRemove(const QSet<const QModelIndex> &indexes) {
     R_ASSESS_C(siblings);
     removers.emplace(siblings, siblings).first->second.RemoveRow(node->row_in_parent);
   }
+
+  for (auto& res : deletedResources)
+    emit ItemRemoved(res.first, res.second, removers);
+
   // done with removers
   removers.clear();
 }

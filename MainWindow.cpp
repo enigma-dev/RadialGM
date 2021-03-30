@@ -633,10 +633,8 @@ void MainWindow::on_actionDelete_triggered() {
   auto selected = _ui->treeView->selectionModel()->selectedIndexes();
 
   QSet<const QModelIndex> selectedNodes;
-  QSet<const QModelIndex> effectiveNodes;
   for (auto index : selected) {
     CollectNodes(index, selectedNodes);
-    effectiveNodes.insert(index);
   }
 
   QString selectedNames = "";
@@ -654,7 +652,7 @@ void MainWindow::on_actionDelete_triggered() {
   int ret = mb.exec();
   if (ret != QMessageBox::Yes) return;
 
-  treeModel->BatchRemove(effectiveNodes);
+  treeModel->BatchRemove(selectedNodes);
 }
 
 void MainWindow::on_actionExpand_triggered() { _ui->treeView->expandAll(); }
