@@ -27,10 +27,19 @@ void RepeatedMessageModel::RemoveLastNRowsWithoutSignal(int n) {
   R_EXPECT_V(n <= field_ref_.size())
       << "Trying to remove " << n << " rows from a " << field_ref_.size() << "-row message field.";
   BasicRepeatedModel<Message>::RemoveLastNRowsWithoutSignal(n);
+  for (int i = 0; i < n; ++i) {
+    size_t idx = _subModels.size() - n - i;
+    _subModels.at(idx)->disconnect();
+    _subModels.at(idx)->deleteLater();
+  }
   _subModels.resize(_subModels.size() - n);
 }
 
 void RepeatedMessageModel::ClearWithoutSignal() {
+  for (auto& model : _subModels) {
+    model->disconnect();
+    model->deleteLater();
+  }
   field_ref_.Clear();
   _subModels.clear();
 }
