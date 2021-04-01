@@ -48,6 +48,9 @@ class TreeModel : public QAbstractItemModel {
 
    private:
     ProtoModel *backing_model;
+    /// The signal connection that updates this node when data changes, if applicable.
+    /// Stored only for leaf nodes.
+    std::vector<QMetaObject::Connection> updaters;
 
    public:
     /// Cache of the name (or value) field of the underlying proto.
@@ -101,6 +104,11 @@ class TreeModel : public QAbstractItemModel {
     void PushChild(ProtoModel *model, int source_row);
     void ComputeDisplayData();
     void Absorb(Node &child);
+
+    /// Rebuilds parent nodes' display data.
+    void UpdateParents();
+    /// Removes active listeners so that they can be repopulated for a new model.
+    void ClearListeners();
   };
 
   enum UserRoles {

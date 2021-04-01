@@ -276,9 +276,16 @@ class ProtoModel : public QAbstractItemModel {
 
   const Descriptor *GetDescriptor() const { return descriptor_; }
 
-  // Casting helpers.
+  // Casting helpers, type safety. =====================================================================================
+
   virtual QString DebugName() const = 0;
   const QString &DebugPath() const { return debug_path_;}
+
+  template<typename Model, std::enable_if_t<std::is_base_of_v<ProtoModel, Model>, bool> = false>
+  const Model *ValidateSubModel(const Model *model) const {
+    if (live_pointers_->find(model) != live_pointers_->end()) return model;
+    return nullptr;
+  }
 
   virtual MessageModel         *TryCastAsMessageModel()         { return nullptr; }
   virtual RepeatedMessageModel *TryCastAsRepeatedMessageModel() { return nullptr; }
@@ -327,6 +334,7 @@ class ProtoModel : public QAbstractItemModel {
   virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
 
   void SetDisplayConfig(const DisplayConfig &display_config);
+  ~ProtoModel() override;
 
 signals:
   // QAbstractItemModel has a datachanged signal but it doesn't store the old values
@@ -344,6 +352,9 @@ signals:
   const int row_in_parent_;
   const QString debug_path_;
   const Descriptor *descriptor_;
+
+  // Runtime pointer safety.
+  std::shared_ptr<std::set<ProtoModel const*>> live_pointers_;
 
  private:
    static DisplayConfig display_config_;

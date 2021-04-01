@@ -17,7 +17,6 @@ TreeModel::TreeModel(MessageModel *root, QObject *parent, const DisplayConfig &c
       root_(std::make_unique<Node>(this, nullptr, -1, root, -1)),
       root_model_(root) {
   RebuildModelMapping();
-  connect(root, &MessageModel::dataChanged, this, &TreeModel::SomeDataSomewhereChanged);
   connect(root, &MessageModel::modelReset, this, &TreeModel::DataBlownAway);
 }
 
@@ -226,7 +225,10 @@ TreeModel::Node *TreeModel::IndexToNode(const QModelIndex &index) const {
     Node *parent = static_cast<Node *>(index.internalPointer());
     R_EXPECT(live_nodes.find(parent) != live_nodes.end(), nullptr)
         << "Dangling internal pointer to tree Node: " << parent;
-    return parent->NthChild(index.row());
+    Node *node = parent->NthChild(index.row());
+    R_EXPECT (root_model_->ValidateSubModel(node->BackingModel()), nullptr)
+        << "Tree contains a node with a dead model attached.";
+    return node;
   } else {
     return root_.get();
   }
@@ -314,10 +316,18 @@ TreeModel::Node::Node(TreeModel *backing_tree, Node *parent, int row_in_parent, 
 
 void TreeModel::Node::RebuildFromModel(MessageModel *model) {
   children.clear();
+  ClearListeners();
   ComputeDisplayData();
   const auto &tree_meta = backing_tree->GetTreeDisplay(model->GetDescriptor()->full_name());
   const auto &msg_meta = BackingModel()->GetMessageDisplay(model->GetDescriptor()->full_name());
-  if (tree_meta.custom_editor) return;
+  if (tree_meta.custom_editor) {
+    // Leaf node; connect data change handler.
+    updaters.push_back(connect(model, &MessageModel::dataChanged, [this, model]{
+      this->RebuildFromModel(model);
+      this->UpdateParents();
+    }));
+    return;
+  }
   for (int row = 0; row < model->rowCount(); ++row) {
     if (tree_meta.disable_oneof_reassignment && model->IsCulledOneofRow(row)) continue;
     int field_num = model->RowToField(row);
@@ -346,10 +356,18 @@ TreeModel::Node::Node(TreeModel *backing_tree, Node *parent, int row_in_parent, 
 
 void TreeModel::Node::RebuildFromModel(RepeatedMessageModel *model) {
   children.clear();
+  ClearListeners();
   ComputeDisplayData();
   for (int row = 0; row < backing_model->rowCount(); ++row) {
     PushChild(model->GetSubModel<ProtoModel>(row), row);
   }
+  auto update = [this, model]{
+    this->RebuildFromModel(model);
+    this->UpdateParents();
+  };
+  updaters.push_back(connect(model, &MessageModel::rowsInserted, update));
+  updaters.push_back(connect(model, &MessageModel::rowsRemoved, update));
+  updaters.push_back(connect(model, &MessageModel::rowsMoved, update));
 }
 
 // Construct from Repeated Primitive Model (base RepeatedModel).
@@ -364,10 +382,18 @@ TreeModel::Node::Node(TreeModel *backing_tree, Node *parent, int row_in_parent, 
 
 void TreeModel::Node::RebuildFromModel(RepeatedModel *model) {
   children.clear();
+  ClearListeners();
   ComputeDisplayData();
   for (int row = 0; row < model->rowCount(); ++row) {
     PushChild(model->GetSubModel(row), row);
   }
+  auto update = [this, model]{
+    this->RebuildFromModel(model);
+    this->UpdateParents();
+  };
+  updaters.push_back(connect(model, &MessageModel::rowsInserted, update));
+  updaters.push_back(connect(model, &MessageModel::rowsRemoved, update));
+  updaters.push_back(connect(model, &MessageModel::rowsMoved, update));
 }
 
 // Construct as a leaf node.
@@ -380,9 +406,14 @@ TreeModel::Node::Node(TreeModel *backing_tree, Node *parent, int row_in_parent, 
   RebuildFromModel(model);
 }
 
-void TreeModel::Node::RebuildFromModel(PrimitiveModel * /*model*/) {
+void TreeModel::Node::RebuildFromModel(PrimitiveModel *model) {
   children.clear();
+  ClearListeners();
   ComputeDisplayData();
+  updaters.push_back(connect(model, &MessageModel::dataChanged, [this, model]{
+    this->RebuildFromModel(model);
+    this->UpdateParents();
+  }));
 }
 
 void TreeModel::Node::PushChild(ProtoModel *model, int source_row) {
@@ -427,6 +458,14 @@ void TreeModel::Node::Print(int indent) const {
 TreeModel::Node::~Node() {
   if (auto it = backing_tree->live_nodes.find(this); it != backing_tree->live_nodes.end())
     backing_tree->live_nodes.erase(it);
+}
+
+void TreeModel::Node::ClearListeners() {
+  for (const auto &connection : updaters) QObject::disconnect(connection);
+  updaters.clear();
+}
+void TreeModel::Node::UpdateParents() {
+  for (Node *p = parent; p; p = p->parent) p->ComputeDisplayData();
 }
 
 // =====================================================================================================================

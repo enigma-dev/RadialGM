@@ -10,7 +10,7 @@
 ProtoModel::DisplayConfig ProtoModel::display_config_;
 
 ProtoModel::ProtoModel(NonProtoParent parent, std::string name, const Descriptor *descriptor)
-    : ProtoModel(static_cast<ProtoModel *>(nullptr), name, descriptor, -1) {
+  : ProtoModel(static_cast<ProtoModel *>(nullptr), name, descriptor, -1) {
   QObject::setParent(parent.parent);
 }
 
@@ -20,7 +20,9 @@ ProtoModel::ProtoModel(ProtoModel *parent, std::string name, const Descriptor *d
       _parentModel(parent),
       row_in_parent_(row_in_parent),
       debug_path_((parent ? parent->debug_path_ + "." : "") + QString::fromStdString(name)),
-      descriptor_(descriptor) {
+      descriptor_(descriptor),
+      live_pointers_(parent ? parent->live_pointers_ : std::make_shared<std::set<const ProtoModel*>>()) {
+  live_pointers_->insert(this);
   connect(this, &ProtoModel::DataChanged, this,
           [this](const QModelIndex &topLeft, const QModelIndex &bottomRight,
                  const QVariant & /*oldValue*/ = QVariant(0), const QVector<int> &roles = QVector<int>()) {
@@ -36,6 +38,11 @@ ProtoModel::ProtoModel(ProtoModel *parent, std::string name, const Descriptor *d
       emit _parentModel->dataChanged(me, me, {});
     });
   }
+}
+
+ProtoModel::~ProtoModel() {
+  if (auto me = live_pointers_->find(this); me == live_pointers_->end()) qDebug() << "CRITICAL: Double-free!";
+  else live_pointers_->erase(me);
 }
 
 void ProtoModel::ParentDataChanged() {
