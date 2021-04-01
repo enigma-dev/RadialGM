@@ -45,6 +45,20 @@ QIcon PrimitiveModel::GetDisplayIcon() const {
 
 void PrimitiveModel::ResourceRenamed(const std::string &type, const QString &oldName, const QString &newName) {
   if (field_or_null_ && field_or_null_->options().GetExtension(buffers::resource_ref) == type) {
-    if (Data().toString() == oldName) SetData(newName);
+    if (Data().toString() == oldName) {
+      ProtoModel* m = this;
+      while (m) {
+        m->blockSignals(true);
+        m = m->GetParentModel<ProtoModel*>();
+      }
+
+      SetData(newName);
+
+      m = this;
+      while (m) {
+        m->blockSignals(false);
+        m = m->GetParentModel<ProtoModel*>();
+      }
+    }
   }
 }
