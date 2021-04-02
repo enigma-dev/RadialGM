@@ -13,7 +13,9 @@ MessageModel::MessageModel(ProtoModel *parent, Message *protobuf, int row_in_par
 
 MessageModel::MessageModel(ProtoModel::NonProtoParent parent, Message *protobuf)
     : ProtoModel(parent, protobuf->GetDescriptor()->name(), protobuf->GetDescriptor()),
-      _protobuf(protobuf) { RebuildSubModels(); }
+      _protobuf(protobuf) {
+  // Call RebuildSubModels manually after hooking up ProtoModel::MoedelConstructed signal
+}
 
 MessageModel::MessageModel(ProtoModel *parent, const Descriptor *descriptor, int row_in_parent)
     : ProtoModel(parent, descriptor->name(), descriptor, row_in_parent), _protobuf(nullptr) {}

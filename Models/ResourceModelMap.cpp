@@ -147,6 +147,14 @@ QString ResourceModelMap::CreateResourceName(int type, const QString& typeName) 
   return name;
 }
 
+bool ResourceModelMap::ValidName(TypeCase type, const QString& name) {
+  if (name.isEmpty() || !name[0].isLetter()) return false;
+  for (const auto& c : name) {
+    if (!c.isLetterOrNumber() && c != '_') return false;
+  }
+  return !_resources[type].contains(name);
+}
+
 MessageModel* ResourceModelMap::GetResourceByName(int type, const QString& name) {
   if (_resources[type].contains(name))
     return _resources[type][name];

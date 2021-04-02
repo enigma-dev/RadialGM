@@ -1,4 +1,5 @@
 #include "TreeModel.h"
+#include "MainWindow.h"
 
 #include "Components/ArtManager.h"
 #include "Components/Logger.h"
@@ -74,8 +75,9 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
   R_EXPECT(siblings, false);
   MessageModel* model = siblings->GetSubModel(node->row_in_parent)->TryCastAsMessageModel();
   QString oldName = model->Data(FieldPath::Of<buffers::TreeNode>(buffers::TreeNode::kNameFieldNumber)).toString();
-  // FIXME: check name is valid
-  emit ItemRenamed((buffers::TreeNode::TypeCase)model->OneOfType("type"), oldName, value.toString());
+  buffers::TreeNode::TypeCase type = (buffers::TreeNode::TypeCase)model->OneOfType("type");
+  R_EXPECT(MainWindow::resourceMap->ValidName(type, value.toString()), false) << "Invalid resource name";
+  emit ItemRenamed(type, oldName, value.toString());
   return model->SetData(FieldPath::Of<buffers::TreeNode>(buffers::TreeNode::kNameFieldNumber), value);
 }
 

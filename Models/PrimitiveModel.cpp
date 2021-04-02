@@ -7,10 +7,11 @@
 PrimitiveModel::PrimitiveModel(MessageModel *parent, const FieldDescriptor *field)
     : ProtoModel(parent, parent->GetDescriptor()->name(), parent->GetDescriptor(), field->index()),
       field_or_null_(field) {
-  if (field_or_null_ && !field_or_null_->options().GetExtension(buffers::resource_ref).empty())
-    connect(MainWindow::resourceMap.get(),
-          qOverload<const std::string &, const QString &, const QString &>(&ResourceModelMap::ResourceRenamed), this,
-          &PrimitiveModel::ResourceRenamed, Qt::DirectConnection);
+  ProtoModel* p = this;
+  while (p) {
+    emit p->ModelConstructed(this);
+    p = p->GetParentModel<ProtoModel*>();
+  }
 }
 
 const ProtoModel *PrimitiveModel::GetSubModel(const FieldPath &field_path) const {
@@ -41,24 +42,4 @@ QIcon PrimitiveModel::GetDisplayIcon() const {
   if (!ret.isNull()) return ret;
   if (!display.default_icon_name.isEmpty()) return ArtManager::GetIcon(display.default_icon_name);
   return {};
-}
-
-void PrimitiveModel::ResourceRenamed(const std::string &type, const QString &oldName, const QString &newName) {
-  if (field_or_null_ && field_or_null_->options().GetExtension(buffers::resource_ref) == type) {
-    if (Data().toString() == oldName) {
-      ProtoModel* m = this;
-      while (m) {
-        m->blockSignals(true);
-        m = m->GetParentModel<ProtoModel*>();
-      }
-
-      SetData(newName);
-
-      m = this;
-      while (m) {
-        m->blockSignals(false);
-        m = m->GetParentModel<ProtoModel*>();
-      }
-    }
-  }
 }

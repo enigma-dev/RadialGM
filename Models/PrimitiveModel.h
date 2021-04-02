@@ -57,6 +57,8 @@ class PrimitiveModel : public ProtoModel {
   PrimitiveModel *TryCastAsPrimitiveModel() override { return this; }
 
   const FieldDescriptor *GetRowDescriptor(int row) const override;
+  const FieldDescriptor *GetFieldDescriptor() const { return field_or_null_; }
+
 
   QString GetDisplayName() const override;
   QIcon GetDisplayIcon() const override;
@@ -73,8 +75,26 @@ class PrimitiveModel : public ProtoModel {
     return createIndex(0, 0, (void*) this);
   }
 
- public slots:
-  void ResourceRenamed(const std::string &type, const QString& oldName, const QString& newName);
+  template <class T>
+  void ExtensionChanged(T t, const std::string &type, const QString &oldValue, const QString &newValue) {
+    if (field_or_null_ && field_or_null_->options().GetExtension(t) == type) {
+      if (Data().toString() == oldValue) {
+        ProtoModel* m = this;
+        while (m) {
+          m->blockSignals(true);
+          m = m->GetParentModel<ProtoModel*>();
+        }
+
+        SetData(newValue);
+
+        m = this;
+        while (m) {
+          m->blockSignals(false);
+          m = m->GetParentModel<ProtoModel*>();
+        }
+      }
+    }
+  }
 
 
  protected:

@@ -105,7 +105,6 @@ class ProtoModel : public QAbstractItemModel {
   // For a specific instance, it will be a pointer to a room's `instances` field's model.
   // FIXME: Sanity check this cast
   template <class T> auto *GetParentModel() const { return _parentModel ? _parentModel->As<T>() : nullptr; };
-
   // If a submodel changed technically any model that owns it has also changed.
   // so we need to notify all parents when anything changes in their descendants.
   void ParentDataChanged();
@@ -337,6 +336,7 @@ signals:
   // (ie If you changed a sprite you would want to redraw the object in the room)
   void DataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVariant &oldValue = QVariant(0),
                    const QVector<int> &roles = QVector<int>());
+  void ModelConstructed(ProtoModel* model);
 
  protected:
   bool _dirty;

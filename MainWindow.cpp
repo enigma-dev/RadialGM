@@ -420,6 +420,25 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   resourceMap.reset(new ResourceModelMap(this));
 
   auto pm = new MessageModel(ProtoModel::NonProtoParent{this}, _project->mutable_game()->mutable_root());
+
+  // Connect methods to auto update fields with extensions
+  connect(pm, &ProtoModel::ModelConstructed, [](ProtoModel *model) {
+    PrimitiveModel *primitive_model = model->TryCastAsPrimitiveModel();
+    if (primitive_model) {
+      const FieldDescriptor *const field = primitive_model->GetFieldDescriptor();
+      if (field && !field->options().GetExtension(buffers::resource_ref).empty())
+        connect(resourceMap.get(),
+                qOverload<const std::string &, const QString &, const QString &>(&ResourceModelMap::ResourceRenamed),
+                primitive_model,
+                [primitive_model](const std::string &type, const QString &newValue, const QString &oldValue) {
+                  primitive_model->ExtensionChanged<decltype(buffers::resource_ref)>(buffers::resource_ref, type,
+                                                                                     newValue, oldValue);
+                });
+    }
+  });
+
+  pm->RebuildSubModels();
+
   pm->SetDisplayConfig(msgConf);
 
   resourceMap->TreeChanged(pm);

@@ -18,6 +18,7 @@ class ResourceModelMap : public QObject {
   void AddResource(TypeCase type, const QString& name, MessageModel* model);
   QString CreateResourceName(TreeNode* node);
   QString CreateResourceName(int type, const QString& typeName);
+  bool ValidName(TypeCase type, const QString& name);
 
  public slots:
   void TreeChanged(MessageModel* model);
