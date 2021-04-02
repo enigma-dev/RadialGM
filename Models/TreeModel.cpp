@@ -66,10 +66,24 @@ int TreeModel::rowCount(const QModelIndex &parent) const {
   return node->children.size();
 }
 
+bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int role) {
+  if (!index.isValid() || role != Qt::EditRole) return false;
+  Node *node = IndexToNode(index);
+  R_EXPECT(node && node->parent && node->parent->BackingModel(), false);
+  RepeatedMessageModel* siblings = node->parent->BackingModel()->TryCastAsRepeatedMessageModel();
+  R_EXPECT(siblings, false);
+  MessageModel* model = siblings->GetSubModel(node->row_in_parent)->TryCastAsMessageModel();
+  QString oldName = model->Data(FieldPath::Of<buffers::TreeNode>(buffers::TreeNode::kNameFieldNumber)).toString();
+  // FIXME: check name is valid
+  emit ItemRenamed((buffers::TreeNode::TypeCase)model->OneOfType("type"), oldName, value.toString());
+  return model->SetData(FieldPath::Of<buffers::TreeNode>(buffers::TreeNode::kNameFieldNumber), value);
+}
+
 QVariant TreeModel::data(const QModelIndex &index, int role) const {
   if (!index.isValid()) return {};
   R_EXPECT(IndexToNode(index), QVariant()) << "Failed to convert index:" << index << "to node";
   switch (role) {
+    case Qt::EditRole:
     case Qt::DisplayRole: return IndexToNode(index)->display_name;
     case Qt::DecorationRole: return IndexToNode(index)->display_icon;
   }
@@ -78,7 +92,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
 
 Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const {
   Qt::ItemFlags flags = QAbstractItemModel::flags(index);
-  if (index.isValid()) flags |= Qt::ItemIsDragEnabled;
+  if (index.isValid()) flags |= Qt::ItemIsDragEnabled | Qt::ItemIsEditable;
   flags |= Qt::ItemIsDropEnabled;
   return flags;
 }
@@ -236,7 +250,7 @@ static QSet<const QModelIndex> GroupNodes(const QSet<const QModelIndex> &nodes) 
 void TreeModel::BatchRemove(const QSet<const QModelIndex> &indexes) {
 
   std::map<ProtoModel*, RepeatedMessageModel::RowRemovalOperation> removers;
-  QList<QPair<TreeNode::TypeCase, QString>> deletedResources;
+  QVector<QPair<TreeNode::TypeCase, QString>> deletedResources;
 
   // Loop all selected
   for (auto& index : qAsConst(indexes)) {
@@ -248,8 +262,6 @@ void TreeModel::BatchRemove(const QSet<const QModelIndex> &indexes) {
       MessageModel* parent = m->GetParentModel<MessageModel*>();
       R_ASSESS_C(parent);
       TreeNode::TypeCase type = (buffers::TreeNode::TypeCase)parent->OneOfType("type");
-      //FIXME: Slow as ass
-      // Can't mutate tree before all removes queued cause josh sucks
       deletedResources.append({type, index.data().toString()});
     }
   }

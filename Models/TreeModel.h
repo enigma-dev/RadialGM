@@ -158,7 +158,7 @@ class TreeModel : public QAbstractItemModel {
   // == Data layer =====================================================================================================
   // ===================================================================================================================
 
-  // bool setData(const QModelIndex &index, const QVariant &value, int role) override;
+  bool setData(const QModelIndex &index, const QVariant &value, int role) override;
   QVariant data(const QModelIndex &index, int role) const override;
   Qt::ItemFlags flags(const QModelIndex &index) const override;
   QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -203,7 +203,7 @@ class TreeModel : public QAbstractItemModel {
  signals:
   void TreeChanged(MessageModel* root);
   // Called when the name of a single TreeNode changes.
-  void ItemRenamed(TreeModel::Node *node, const QString &oldName, const QString &newName);
+  void ItemRenamed(TreeNode::TypeCase type, const QString &oldName, const QString &newName);
   // Called when a resource (or group of resources) is moved.
   void ItemMoved(TreeModel::Node *node, TreeNode *old_parent);
   // Called when a resource (or group of resources) is removed.

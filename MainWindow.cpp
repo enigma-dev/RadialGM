@@ -31,16 +31,15 @@
 
 #include <QtWidgets>
 
-#include <functional>
-#include <unordered_map>
 #include <QFile>
+#include <functional>
 #include <sstream>
+#include <unordered_map>
 
 #undef GetMessage
 
-QList<QString> MainWindow::EnigmaSearchPaths = {
-  QDir::currentPath(), "./enigma-dev", "../enigma-dev", "../RadialGM/Submodules/enigma-dev"
-};
+QList<QString> MainWindow::EnigmaSearchPaths = {QDir::currentPath(), "./enigma-dev", "../enigma-dev",
+                                                "../RadialGM/Submodules/enigma-dev"};
 QFileInfo MainWindow::EnigmaRoot = MainWindow::getEnigmaRoot();
 QList<buffers::SystemType> MainWindow::systemCache;
 MainWindow *MainWindow::_instance = nullptr;
@@ -96,19 +95,19 @@ QFileInfo MainWindow::getEnigmaRoot() {
     auto entryList = dir.entryInfoList(QStringList({"ENIGMAsystem"}), filters, QDir::SortFlag::NoSort);
     if (!entryList.empty()) {
       EnigmaRoot = entryList.first();
-        break;
+      break;
     }
   }
 
   return EnigmaRoot;
 }
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainWindow){
-
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainWindow) {
   if (!EnigmaRoot.filePath().isEmpty()) {
     _event_data = std::make_unique<EventData>(ParseEventFile((EnigmaRoot.absolutePath() + "/events.ey").toStdString()));
   } else {
-    qDebug() << "Error: Failed to locate ENIGMA sources. Loading internal events.ey.\n" << "Search Paths:\n"
+    qDebug() << "Error: Failed to locate ENIGMA sources. Loading internal events.ey.\n"
+             << "Search Paths:\n"
              << MainWindow::EnigmaSearchPaths;
     QFile internal_events(":/events.ey");
     internal_events.open(QIODevice::ReadOnly | QFile::Text);
@@ -191,7 +190,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
   openNewProject();
 }
 
-MainWindow::~MainWindow() { diagnosticTextEdit = nullptr; delete _ui; }
+MainWindow::~MainWindow() {
+  diagnosticTextEdit = nullptr;
+  delete _ui;
+}
 
 void MainWindow::setCurrentConfig(const buffers::resources::Settings &settings) {
   emit _instance->CurrentConfigChanged(settings);
@@ -225,7 +227,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   event->accept();
 }
 
-void MainWindow::openSubWindow(MessageModel* res, MainWindow::EditorFactoryFunction factory_function) {
+void MainWindow::openSubWindow(MessageModel *res, MainWindow::EditorFactoryFunction factory_function) {
   using namespace google::protobuf;
   if (!res) {
     qDebug() << "Attempt to edit null resource...";
@@ -240,15 +242,6 @@ void MainWindow::openSubWindow(MessageModel* res, MainWindow::EditorFactoryFunct
       qDebug() << "Failed to launch editor for model...";
       return;
     }
-
-    // TODO: move all these connections into the model wrapper
-    // connect(editor, &BaseEditor::ResourceRenamed, resourceMap.get(), &ResourceModelMap::ResourceRenamed);
-    // connect(editor, &BaseEditor::ResourceRenamed, [=]() { treeModel->dataChanged(QModelIndex(), QModelIndex()); });
-    // connect(treeModel.get(), &TreeModel::ItemRenamed, editor,
-    //         [res](TreeModel::Node */*node*/, const QString & /*oldName*/, const QString & /*newName*/) {
-    //           const QModelIndex index = res->index(TreeNode::kNameFieldNumber);
-    //           emit res->DataChanged(index, index);
-    //         });
 
     subWindow = _subWindows[res] = _ui->mdiArea->addSubWindow(editor);
     subWindow->resize(subWindow->frameSize().expandedTo(editor->size()));
@@ -282,9 +275,9 @@ void MainWindow::updateWindowMenu() {
     numberString = numberString.insert(numberString.length() - 1, '&');
     QString text = tr("%1 %2").arg(numberString, windowTitle);
 
-    QAction *action = _ui->menuWindow->addAction(
-        mdiSubWindow->windowIcon(), text, mdiSubWindow,
-          [this, mdiSubWindow]() { _ui->mdiArea->setActiveSubWindow(mdiSubWindow); });
+    QAction *action =
+        _ui->menuWindow->addAction(mdiSubWindow->windowIcon(), text, mdiSubWindow,
+                                   [this, mdiSubWindow]() { _ui->mdiArea->setActiveSubWindow(mdiSubWindow); });
     windowActions.append(action);
     action->setCheckable(true);
     action->setChecked(mdiSubWindow == _ui->mdiArea->activeSubWindow());
@@ -315,7 +308,7 @@ void MainWindow::openNewProject() {
                                   tr("Scripts"), tr("Shaders"), tr("Fonts"),       tr("Timelines"),
                                   tr("Objects"), tr("Rooms"),   tr("Includes"),    tr("Configs")};
   // We can edit the proto directly, here, since the model doesn't exist, yet.
-  for (const auto& groupName : defaultGroups) {
+  for (const auto &groupName : defaultGroups) {
     auto *groupNode = root->mutable_folder()->add_children();
     groupNode->set_name(groupName.toStdString());
     groupNode->mutable_folder();
@@ -323,19 +316,19 @@ void MainWindow::openNewProject() {
   openProject(std::move(newProject));
 }
 
-template<typename Editor> TreeModel::EditorLauncher Launch(MainWindow *parent) {
+template <typename Editor>
+TreeModel::EditorLauncher Launch(MainWindow *parent) {
   struct EditorFactoryFactory {
     static BaseEditor *Factory(MessageModel *model, MainWindow *parent) {
       if (!model || !model->GetParentModel<MessageModel>()) return nullptr;
       return new Editor(model, parent);
     }
   };
-  return [parent](MessageModel *model) {
-    parent->openSubWindow(model, EditorFactoryFactory::Factory);
-  };
+  return [parent](MessageModel *model) { parent->openSubWindow(model, EditorFactoryFactory::Factory); };
 }
 
-void ConfigureIconFields(ProtoModel::DisplayConfig *conf, const Descriptor *desc, std::set<const Descriptor*> *visited) {
+void ConfigureIconFields(ProtoModel::DisplayConfig *conf, const Descriptor *desc,
+                         std::set<const Descriptor *> *visited) {
   for (int i = 0; i < desc->field_count(); ++i) {
     const FieldDescriptor *field = desc->field(i);
     if (field->options().HasExtension(buffers::resource_ref)) {
@@ -365,10 +358,9 @@ void ConfigureIconFields(ProtoModel::DisplayConfig *conf, const Descriptor *desc
 }
 
 void ConfigureIconFields(ProtoModel::DisplayConfig *conf, const Descriptor *desc) {
-  std::set<const Descriptor*> visited{desc};
+  std::set<const Descriptor *> visited{desc};
   return ConfigureIconFields(conf, desc, &visited);
 }
-
 
 void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   this->_ui->mdiArea->closeAllSubWindows();
@@ -407,10 +399,10 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   ConfigureIconFields(&msgConf, TreeNode::GetDescriptor());
 
   msgConf.SetMessageIconPathField<buffers::resources::Sprite>(
-        FieldPath::RepeatedOffset(buffers::resources::Sprite::kSubimagesFieldNumber, 0));
+      FieldPath::RepeatedOffset(buffers::resources::Sprite::kSubimagesFieldNumber, 0));
   msgConf.SetMessageIconPathField<buffers::resources::Background>(buffers::resources::Background::kImageFieldNumber);
   msgConf.SetMessageIconIdLookup<buffers::resources::Object>(GetSpriteIconByNameField,
-                                                              buffers::resources::Object::kSpriteNameFieldNumber);
+                                                             buffers::resources::Object::kSpriteNameFieldNumber);
 
   msgConf.SetMessageLabelField<buffers::TreeNode>(buffers::TreeNode::kNameFieldNumber);
 
@@ -435,7 +427,7 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
 
   _ui->treeView->setModel(treeModel.get());
   connect(treeModel.get(), &TreeModel::ItemRenamed, resourceMap.get(),
-                     qOverload<TreeModel::Node*, const QString&, const QString&>(&ResourceModelMap::ResourceRenamed));
+          qOverload<buffers::TreeNode::TypeCase, const QString &, const QString &>(&ResourceModelMap::ResourceRenamed));
   connect(treeModel.get(), &TreeModel::TreeChanged, resourceMap.get(), &ResourceModelMap::TreeChanged);
   connect(treeModel.get(), &TreeModel::ItemRemoved, resourceMap.get(), &ResourceModelMap::ResourceRemoved,
           Qt::DirectConnection);
@@ -490,7 +482,9 @@ void MainWindow::on_actionCloseOthers_triggered() {
   }
 }
 
-void MainWindow::on_actionToggleTabbedView_triggered() { this->setTabbedMode(_ui->actionToggleTabbedView->isChecked()); }
+void MainWindow::on_actionToggleTabbedView_triggered() {
+  this->setTabbedMode(_ui->actionToggleTabbedView->isChecked());
+}
 
 void MainWindow::on_actionNext_triggered() { _ui->mdiArea->activateNextSubWindow(); }
 
@@ -520,8 +514,7 @@ void MainWindow::on_actionExploreENIGMA_triggered() { QDesktopServices::openUrl(
 
 void MainWindow::on_actionAbout_triggered() {
   QMessageBox aboutBox(QMessageBox::Information, tr("About"),
-                       tr("ENIGMA is a free, open-source, and cross-platform game engine."),
-                       QMessageBox::Ok, this);
+                       tr("ENIGMA is a free, open-source, and cross-platform game engine."), QMessageBox::Ok, this);
   QAbstractButton *aboutQtButton = aboutBox.addButton(tr("About Qt"), QMessageBox::HelpRole);
   aboutBox.exec();
 
@@ -557,9 +550,9 @@ void MainWindow::CreateResource(TypeCase typeCase) {
   treeModel->triggerNodeEdit(index, _ui->treeView);
 }
 
-void MainWindow::ResourceModelDeleted(MessageModel* m) {
-  if ( _subWindows.contains(m)) {
-    static_cast<BaseEditor*>(_subWindows[m]->widget())->MarkDeleted();
+void MainWindow::ResourceModelDeleted(MessageModel *m) {
+  if (_subWindows.contains(m)) {
+    static_cast<BaseEditor *>(_subWindows[m]->widget())->MarkDeleted();
     _subWindows[m]->close();
   }
 }
@@ -619,7 +612,7 @@ void MainWindow::on_actionProperties_triggered() {
   }
 }
 
-static void CollectNodes(const QModelIndex& node, QSet<const  QModelIndex> &cache) {
+static void CollectNodes(const QModelIndex &node, QSet<const QModelIndex> &cache) {
   auto model = node.model();
 
   cache.insert(node);
@@ -638,20 +631,16 @@ void MainWindow::on_actionDelete_triggered() {
   }
 
   QString selectedNames = "";
-  for (auto& node : qAsConst(selectedNodes)) {
+  for (auto &node : qAsConst(selectedNodes)) {
     selectedNames += (node == *selectedNodes.begin() ? "" : ", ") + node.data().toString();
   }
 
-  QMessageBox mb(
-    QMessageBox::Icon::Question,
-    tr("Delete Resources"),
-    tr("Do you want to delete the selected resources from the project?"),
-    QMessageBox::Yes | QMessageBox::No, this
-  );
+  QMessageBox mb(QMessageBox::Icon::Question, tr("Delete Resources"),
+                 tr("Do you want to delete the selected resources from the project?"),
+                 QMessageBox::Yes | QMessageBox::No, this);
   mb.setDetailedText(selectedNames);
   int ret = mb.exec();
   if (ret != QMessageBox::Yes) return;
-
   treeModel->BatchRemove(selectedNodes);
 }
 

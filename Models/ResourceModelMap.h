@@ -21,7 +21,7 @@ class ResourceModelMap : public QObject {
 
  public slots:
   void TreeChanged(MessageModel* model);
-  void ResourceRenamed(TreeModel::Node* node, const QString& oldName, const QString& newName);
+  void ResourceRenamed(TypeCase type, const QString& oldName, const QString& newName);
   void ResourceRemoved(TypeCase type, const QString& name,
                       std::map<ProtoModel*, RepeatedModel::RowRemovalOperation>& removers);
 

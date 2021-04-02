@@ -183,8 +183,7 @@ TypeCase Type(TreeModel::Node* node) {
   return res->second;
 }
 
-void ResourceModelMap::ResourceRenamed(TreeModel::Node* node, const QString& oldName, const QString& newName) {
-  auto type = Type(node);
+void ResourceModelMap::ResourceRenamed(TypeCase type, const QString& oldName, const QString& newName) {
   if (oldName == newName || !_resources[type].contains(oldName)) return;
   _resources[type][newName] = _resources[type][oldName];
 
