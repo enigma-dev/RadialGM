@@ -6,19 +6,18 @@
 #include "Models/TreeModel.h"
 
 class MainWindow;
+#include "Components/EGMManager.h"
 #include "Components/RecentFiles.h"
 
 #include "project.pb.h"
 #include "server.pb.h"
-#include "event_reader/event_parser.h"
-#include "egm.h"
 
+#include <QFileInfo>
 #include <QList>
 #include <QMainWindow>
 #include <QMdiSubWindow>
 #include <QPointer>
 #include <QProcess>
-#include <QFileInfo>
 
 namespace Ui {
 class MainWindow;
@@ -27,6 +26,21 @@ class MainWindow;
 class MainWindow : public QMainWindow {
   Q_OBJECT
 
+ private:
+  void closeEvent(QCloseEvent *event) override;
+
+  static MainWindow *_instance;
+  static EGMManager egmManager;
+  QHash<buffers::TreeNode *, QMdiSubWindow *> _subWindows;
+  Ui::MainWindow *_ui;
+  QPointer<RecentFiles> _recentFiles;
+
+  void openSubWindow(buffers::TreeNode *item);
+  void readSettings();
+  void writeSettings();
+  void setTabbedMode(bool enabled);
+  static QFileInfo getEnigmaRoot();
+
  public:
   static QScopedPointer<ResourceModelMap> resourceMap;
   static QScopedPointer<TreeModel> treeModel;
@@ -34,12 +48,13 @@ class MainWindow : public QMainWindow {
 
   explicit MainWindow(QWidget *parent);
   ~MainWindow();
-  void openProject(std::unique_ptr<buffers::Project> openedProject);
-  buffers::Game *Game() const { return this->_project->mutable_game(); }
+  void openProject(buffers::Project* openedProject);
+  buffers::Game *Game() const { return egmManager.GetGame(); }
+  static EventData *GetEventData() { return egmManager.GetEventData(); }
+  static void ResourceChanged(Resource &res, ResChange change, QString oldName = "");
 
   static QList<QString> EnigmaSearchPaths;
   static QFileInfo EnigmaRoot;
-  static EventData* GetEventData() { return _event_data.get(); }
 
  signals:
   void CurrentConfigChanged(const buffers::resources::Settings &settings);
@@ -101,26 +116,6 @@ class MainWindow : public QMainWindow {
 
   void on_treeView_doubleClicked(const QModelIndex &index);
   void on_treeView_customContextMenuRequested(const QPoint &pos);
-
- private:
-  void closeEvent(QCloseEvent *event) override;
-
-  static MainWindow *_instance;
-
-  QHash<buffers::TreeNode *, QMdiSubWindow *> _subWindows;
-
-  Ui::MainWindow *_ui;
-
-  std::unique_ptr<buffers::Project> _project;
-  QPointer<RecentFiles> _recentFiles;
-
-  static std::unique_ptr<EventData> _event_data;
-
-  void openSubWindow(buffers::TreeNode *item);
-  void readSettings();
-  void writeSettings();
-  void setTabbedMode(bool enabled);
-  static QFileInfo getEnigmaRoot();
 };
 
 #endif  // MAINWINDOW_H

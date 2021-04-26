@@ -7,6 +7,12 @@
 #include <QVector>
 #include <string>
 
+struct Resource {
+ QString name;
+ buffers::TreeNode* buffer;
+ MessageModel* model;
+};
+
 class ResourceModelMap : public QObject {
   Q_OBJECT
  public:
@@ -17,6 +23,7 @@ class ResourceModelMap : public QObject {
   void RemoveResource(TypeCase type, const QString& name);
   QString CreateResourceName(TreeNode* node);
   QString CreateResourceName(int type, const QString& typeName);
+  bool ValidResourceName(const QString& name);
 
  public slots:
   void ResourceRenamed(TypeCase type, const QString& oldName, const QString& newName);

@@ -56,9 +56,13 @@ LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
         -L$$PWD/Submodules/enigma-dev/ \
         -lProtocols \
         -lpugixml \
-        -lgrpc++
+        -lgrpc++ \
+        -lgit2
 
 SOURCES += \
+    Components/EGMManager.cpp \
+    Components/GitTreeItem.cpp \
+    Components/GitTreeStyledDelegate.cpp \
     Dialogs/EventArgumentsDialog.cpp \
     Dialogs/TimelineChangeMoment.cpp \
     Editors/IncludeEditor.cpp \
@@ -67,10 +71,12 @@ SOURCES += \
     Models/EventTypesListModel.cpp \
     Models/EventTypesListSortFilterProxyModel.cpp \
     Models/EventsListModel.cpp \
+    Models/GitHistoryModel.cpp \
     Models/MessageModel.cpp \
     Models/RepeatedImageModel.cpp \
     Models/RepeatedMessageModel.cpp \
     Models/RepeatedStringModel.cpp \
+    Models/ResourceChangesModel.cpp \
     Widgets/AssetScrollAreaBackground.cpp \
     Widgets/PathView.cpp \
     Widgets/SpriteSubimageListView.cpp \
@@ -109,6 +115,9 @@ SOURCES += \
     Models/TreeSortFilterProxyModel.cpp
 
 HEADERS += \
+    Components/EGMManager.h \
+    Components/GitTreeItem.h \
+    Components/GitTreeStyledDelegate.h \
     Dialogs/EventArgumentsDialog.h \
     Dialogs/TimelineChangeMoment.h \
     Editors/IncludeEditor.h \
@@ -128,11 +137,13 @@ HEADERS += \
     Models/EventTypesListModel.h \
     Models/EventTypesListSortFilterProxyModel.h \
     Models/EventsListModel.h \
+    Models/GitHistoryModel.h \
     Models/MessageModel.h \
     Models/RepeatedImageModel.h \
     Models/RepeatedMessageModel.h \
     Models/RepeatedModel.h \
     Models/RepeatedStringModel.h \
+    Models/ResourceChangesModel.h \
     Widgets/AssetScrollArea.h \
     Widgets/AssetScrollAreaBackground.h \
     Widgets/BackgroundView.h \

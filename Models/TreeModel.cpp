@@ -5,6 +5,8 @@
 #include "Models/RepeatedImageModel.h"
 #include "Models/ResourceModelMap.h"
 
+#include "MainWindow.h"
+
 #include <QCoreApplication>
 #include <QMimeData>
 
@@ -42,9 +44,12 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
   R_EXPECT(index.isValid(), false) << "Supplied index was invalid:" << index;
   if (role != Qt::EditRole) return false;
 
+ if (!MainWindow::resourceMap->ValidResourceName(value.toString())) return false;
+
   buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
   const QString oldName = QString::fromStdString(item->name());
   const QString newName = value.toString();
+
   if (oldName == newName) return true;
   item->set_name(newName.toStdString());
   emit ResourceRenamed(item->type_case(), oldName, value.toString());
