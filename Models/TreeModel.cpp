@@ -14,7 +14,7 @@ TreeModel::TreeModel(MessageModel *root, QObject *parent, const DisplayConfig &c
     : QAbstractItemModel(parent),
       mime_types_(GetMimeTypes(root->GetDescriptor())),
       display_config_(config),
-      root_(std::make_unique<Node>(this, nullptr, -1, root, -1)),
+      root_(Node::PassThrough(std::make_shared<Node>(this, nullptr, -1, root, -1))),
       root_model_(root) {
   RebuildModelMapping();
   connect(root, &MessageModel::modelReset, this, &TreeModel::DataBlownAway);
@@ -24,7 +24,7 @@ void TreeModel::SomeDataSomewhereChanged(const QModelIndex &, const QModelIndex 
   // TODO: probanly don't blow away the entire fucking tree when someone adds a subimage to a sprite
   emit TreeChanged(root_model_);
   beginResetModel();
-  root_->RebuildFromModel(root_model_);
+  root_->RebuildFromModel(root_model_, nullptr, 0);
   RebuildModelMapping();
   endResetModel();
 }
@@ -32,7 +32,7 @@ void TreeModel::SomeDataSomewhereChanged(const QModelIndex &, const QModelIndex 
 void TreeModel::DataBlownAway() {
   emit TreeChanged(root_model_);
   beginResetModel();
-  root_->RebuildFromModel(root_model_);
+  root_->RebuildFromModel(root_model_, nullptr, 0);
   RebuildModelMapping();
   endResetModel();
 }
@@ -206,7 +206,8 @@ QVariant TreeModel::headerData(int /*section*/, Qt::Orientation /*orientation*/,
 
 QModelIndex TreeModel::index(int row, int column, const QModelIndex &parent) const {
   if (column) return {};
-  return IndexToNode(parent)->index(row);
+  if (Node *n = IndexToNode(parent)) return n->index(row);
+  return {};
 }
 
 QModelIndex TreeModel::parent(const QModelIndex &index) const {
@@ -226,7 +227,8 @@ TreeModel::Node *TreeModel::IndexToNode(const QModelIndex &index) const {
     R_EXPECT(live_nodes.find(parent) != live_nodes.end(), nullptr)
         << "Dangling internal pointer to tree Node: " << parent;
     Node *node = parent->NthChild(index.row());
-    R_EXPECT (root_model_->ValidateSubModel(node->BackingModel()), nullptr)
+    if (!node) return nullptr;
+    R_EXPECT(root_model_->ValidateSubModel(node->BackingModel()), nullptr)
         << "Tree contains a node with a dead model attached.";
     return node;
   } else {
@@ -311,21 +313,72 @@ TreeModel::Node::Node(TreeModel *backing_tree, Node *parent, int row_in_parent, 
       backing_model(model),
       row_in_parent(row_in_parent),
       row_in_model(row_in_model) {
-  RebuildFromModel(model);
+  RebuildFromModel(model, parent, row_in_parent);
 }
 
-void TreeModel::Node::RebuildFromModel(MessageModel *model) {
-  children.clear();
-  ClearListeners();
-  ComputeDisplayData();
+void TreeModel::Node::RegisterDataListener() {
+  updaters.push_back(connect(backing_model, &PrimitiveModel::dataChanged, [this]{
+    if (!parent) backing_tree->endResetModel();
+    UndoPassThrough();
+    RebuildFromAnyModel(backing_model, parent, row_in_parent);
+    UpdateParents();
+    if (parent) {
+      const QModelIndex ind = parent->index(row_in_parent);
+      emit backing_tree->dataChanged(ind, ind);
+    } else {
+      backing_tree->endResetModel();
+    }
+  }));
+}
+
+void TreeModel::Node::RegisterRowListeners() {
+  auto update = [this]{
+    if (!parent) backing_tree->beginResetModel();
+    qDebug() << "Rebuild " << backing_model->DebugName() << " tree Node";
+    std::cerr << "Rebuild " << backing_model->DebugName().toStdString() << " tree Node (named " << display_name.toStdString() << ")" << std::endl;
+    UndoPassThrough();
+    this->RebuildFromAnyModel(backing_model, parent, row_in_parent);
+    this->UpdateParents();
+    if (parent) {
+      const QModelIndex ind = parent->index(row_in_parent);
+      emit backing_tree->dataChanged(ind, ind);
+      // emit backing_tree->layoutChanged({ind});
+    } else {
+      backing_tree->endResetModel();
+    }
+  };
+  updaters.push_back(connect(backing_model, &ProtoModel::rowsInserted, update));
+  updaters.push_back(connect(backing_model, &ProtoModel::modelReset, update));
+  updaters.push_back(connect(backing_model, &ProtoModel::rowsRemoved, [this](QModelIndex, int first, int last) {
+        QModelIndex ind;  // Get an index to this node. We are the parent.
+        if (parent) ind = parent->index(row_in_parent);
+        backing_tree->beginRemoveRows(ind, first, last);
+        UndoPassThrough();
+        qDebug() << "I have " << children.size() << " rows before rebuild";
+        this->RebuildFromAnyModel(backing_model, parent, row_in_parent);
+        qDebug() << "I have " << children.size() << " rows after rebuild";
+        backing_tree->endRemoveRows();
+        this->UpdateParents();
+      }));
+  updaters.push_back(connect(backing_model, &ProtoModel::rowsMoved, update));
+}
+
+
+void TreeModel::Node::RebuildFromAnyModel(ProtoModel *model, Node *parent, int row_in_parent) {
+  if (auto *m = model->TryCastAsMessageModel()) return RebuildFromModel(m, parent, row_in_parent);
+  if (auto *m = model->TryCastAsRepeatedMessageModel()) return RebuildFromModel(m, parent, row_in_parent);
+  if (auto *m = model->TryCastAsRepeatedModel()) return RebuildFromModel(m, parent, row_in_parent);
+  if (auto *m = model->TryCastAsPrimitiveModel()) return RebuildFromModel(m, parent, row_in_parent);
+  qDebug() << "Model type could not be inferred...";
+}
+
+void TreeModel::Node::RebuildFromModel(MessageModel *model, Node *parent, int row_in_parent) {
+  Reset(model, parent, row_in_parent);
   const auto &tree_meta = backing_tree->GetTreeDisplay(model->GetDescriptor()->full_name());
   const auto &msg_meta = BackingModel()->GetMessageDisplay(model->GetDescriptor()->full_name());
   if (tree_meta.custom_editor) {
-    // Leaf node; connect data change handler.
-    updaters.push_back(connect(model, &MessageModel::dataChanged, [this, model]{
-      this->RebuildFromModel(model);
-      this->UpdateParents();
-    }));
+    // Leaf node; connect the data change handler.
+    RegisterDataListener();
     return;
   }
   for (int row = 0; row < model->rowCount(); ++row) {
@@ -336,11 +389,10 @@ void TreeModel::Node::RebuildFromModel(MessageModel *model) {
     // if (Describes(meta.icon_file_field, field_num)) continue;
     PushChild(model->SubModelForRow(row), row);
   }
-  if (tree_meta.is_passthrough && children.size() == 1) {
-    std::shared_ptr<Node> child = children[0];
-    children.clear();
-    Absorb(*child);
-  }
+  is_passthrough = tree_meta.is_passthrough;
+  // Nothing can modify rows of a MessageModel in a way that its TreeNode must handle.
+  // Example: you cannot insert or remove rows of a message model. Edits will be handled by child models.
+  // Register no data cchange handlers.
 }
 
 // Construct from Repeated Message Model.
@@ -351,23 +403,15 @@ TreeModel::Node::Node(TreeModel *backing_tree, Node *parent, int row_in_parent, 
       backing_model(model),
       row_in_parent(row_in_parent),
       row_in_model(row_in_model) {
-  RebuildFromModel(model);
+  RebuildFromModel(model, parent, row_in_parent);
 }
 
-void TreeModel::Node::RebuildFromModel(RepeatedMessageModel *model) {
-  children.clear();
-  ClearListeners();
-  ComputeDisplayData();
+void TreeModel::Node::RebuildFromModel(RepeatedMessageModel *model, Node *parent, int row_in_parent) {
+  Reset(model, parent, row_in_parent);
   for (int row = 0; row < backing_model->rowCount(); ++row) {
     PushChild(model->GetSubModel<ProtoModel>(row), row);
   }
-  auto update = [this, model]{
-    this->RebuildFromModel(model);
-    this->UpdateParents();
-  };
-  updaters.push_back(connect(model, &MessageModel::rowsInserted, update));
-  updaters.push_back(connect(model, &MessageModel::rowsRemoved, update));
-  updaters.push_back(connect(model, &MessageModel::rowsMoved, update));
+  RegisterRowListeners();
 }
 
 // Construct from Repeated Primitive Model (base RepeatedModel).
@@ -377,23 +421,15 @@ TreeModel::Node::Node(TreeModel *backing_tree, Node *parent, int row_in_parent, 
       backing_model(model),
       row_in_parent(row_in_parent),
       row_in_model(row_in_model) {
-  RebuildFromModel(model);
+  RebuildFromModel(model, parent, row_in_parent);
 }
 
-void TreeModel::Node::RebuildFromModel(RepeatedModel *model) {
-  children.clear();
-  ClearListeners();
-  ComputeDisplayData();
+void TreeModel::Node::RebuildFromModel(RepeatedModel *model, Node *parent, int row_in_parent) {
+  Reset(model, parent, row_in_parent);
   for (int row = 0; row < model->rowCount(); ++row) {
     PushChild(model->GetSubModel(row), row);
   }
-  auto update = [this, model]{
-    this->RebuildFromModel(model);
-    this->UpdateParents();
-  };
-  updaters.push_back(connect(model, &MessageModel::rowsInserted, update));
-  updaters.push_back(connect(model, &MessageModel::rowsRemoved, update));
-  updaters.push_back(connect(model, &MessageModel::rowsMoved, update));
+  RegisterRowListeners();
 }
 
 // Construct as a leaf node.
@@ -403,17 +439,21 @@ TreeModel::Node::Node(TreeModel *backing_tree, Node *parent, int row_in_parent, 
       backing_model(model),
       row_in_parent(row_in_parent),
       row_in_model(row_in_model) {
-  RebuildFromModel(model);
+  RebuildFromModel(model, parent, row_in_parent);
 }
 
-void TreeModel::Node::RebuildFromModel(PrimitiveModel *model) {
+void TreeModel::Node::RebuildFromModel(PrimitiveModel *model, Node *parent, int row_in_parent) {
+  Reset(model, parent, row_in_parent);
+}
+
+void TreeModel::Node::Reset(ProtoModel *model, Node *parent, int row_in_parent) {
   children.clear();
+  this->parent = parent;
+  this->row_in_parent = row_in_parent;
   ClearListeners();
+  backing_model = model;
+  is_passthrough = false;
   ComputeDisplayData();
-  updaters.push_back(connect(model, &MessageModel::dataChanged, [this, model]{
-    this->RebuildFromModel(model);
-    this->UpdateParents();
-  }));
 }
 
 void TreeModel::Node::PushChild(ProtoModel *model, int source_row) {
@@ -421,32 +461,35 @@ void TreeModel::Node::PushChild(ProtoModel *model, int source_row) {
   std::shared_ptr<Node> node;
   if (auto it = backing_tree->backing_nodes_.find(model); it != backing_tree->backing_nodes_.end()) {
     node = *it;
+    if (node->passthrough_node) {
+      node = node->passthrough_node;
+    }
   }
   if (auto *sub_message = model->TryCastAsMessageModel()) {
     if (node)
-      node->RebuildFromModel(sub_message);
+      node->RebuildFromModel(sub_message, this, children.size());
     else
       node = std::make_unique<Node>(backing_tree, this, children.size(), sub_message, source_row);
   } else if (auto *repeated_message = model->TryCastAsRepeatedMessageModel()) {
     if (node)
-      node->RebuildFromModel(repeated_message);
+      node->RebuildFromModel(repeated_message, this, children.size());
     else
       node = std::make_unique<Node>(backing_tree, this, children.size(), repeated_message, source_row);
   } else if (auto *repeated_message = model->TryCastAsRepeatedModel()) {
     if (node)
-      node->RebuildFromModel(repeated_message);
+      node->RebuildFromModel(repeated_message, this, children.size());
     else
       node = std::make_unique<Node>(backing_tree, this, children.size(), repeated_message, source_row);
   } else if (auto *primitive_message = model->TryCastAsPrimitiveModel()) {
     if (node)
-      node->RebuildFromModel(primitive_message);
+      node->RebuildFromModel(primitive_message, this, children.size());
     else
       node = std::make_unique<Node>(backing_tree, this, children.size(), primitive_message, source_row);
   } else {
     qDebug() << "Node has unknown type...";
     return;
   }
-  children.push_back(node);
+  children.push_back(PassThrough(node));
 }
 
 void TreeModel::Node::Print(int indent) const {
@@ -466,6 +509,36 @@ void TreeModel::Node::ClearListeners() {
 }
 void TreeModel::Node::UpdateParents() {
   for (Node *p = parent; p; p = p->parent) p->ComputeDisplayData();
+}
+
+std::shared_ptr<TreeModel::Node> TreeModel::Node::PassThrough(const std::shared_ptr<TreeModel::Node> node) {
+  /*if (node->is_passthrough && node->children.size() == 1) {
+    std::shared_ptr<TreeModel::Node> res = node->children[0];
+    res->passthrough_node = node;
+    res->parent = node->parent;
+    res->row_in_parent = node->row_in_parent;
+    node->children.clear();
+    if (res->display_icon.isNull()) res->display_icon = node->display_icon;
+    if (!node->display_name.isEmpty()) res->display_name = node->display_name;
+    return res;
+  }*/
+  // node->PassThrough();
+  return node;
+}
+
+void TreeModel::Node::PassThrough() {
+  if (!is_passthrough || children.size() != 1) return;
+  passthrough_node = children[0];
+  children = passthrough_node->children;
+  if (display_icon.isNull()) display_icon = passthrough_node->display_icon;
+  if (!passthrough_node->display_name.isEmpty()) display_name = passthrough_node->display_name;
+}
+
+void TreeModel::Node::UndoPassThrough() {
+  if (!passthrough_node) return;
+  children.clear();
+  children.push_back(passthrough_node);
+  passthrough_node.reset();
 }
 
 // =====================================================================================================================
@@ -546,19 +619,29 @@ void TreeModel::Node::ComputeDisplayData() {
   }
   display_icon = backing_model->GetDisplayIcon();
 }
-
+/*
 void TreeModel::Node::Absorb(TreeModel::Node &child) {
   // Our parent and row_in_parent remain unchanged.
   // But otherwise, we become exactly the givene child node.
+  passthrough_node = backing_model;
   backing_model = child.backing_model;
   row_in_model = child.row_in_model;
   if (!child.display_icon.isNull()) display_icon = child.display_icon;
   children.swap(child.children);
 
   // Our parent doesn't change... but our children's parents sure do.
-  for (auto &child : children) child->parent = this;
+  for (auto &nchild : children) nchild->parent = this;
+  // Hack: Doesn't maintain the same logic for leaf vs intermediate as the initial registration...
+  // Determines whether the child was a leaf node by whether it's registered one event (dataChanged) or three.
+  ClearListeners();
+  if (child.updaters.size() == 1) {
+    RegisterDataListener();
+  } else {
+    RegisterRowListeners();
+  }
+  child.ClearListeners();
 }
-
+*/
 // =====================================================================================================================
 // == Data Management Helpers ==========================================================================================
 // =====================================================================================================================

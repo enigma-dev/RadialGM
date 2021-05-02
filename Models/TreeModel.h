@@ -48,6 +48,9 @@ class TreeModel : public QAbstractItemModel {
 
    private:
     ProtoModel *backing_model;
+    /// For nodes whose child was a single passthrough node with a single child,
+    /// this is the intermediate node that is not displayed.
+    std::shared_ptr<Node> passthrough_node;
     /// The signal connection that updates this node when data changes, if applicable.
     /// Stored only for leaf nodes.
     std::vector<QMetaObject::Connection> updaters;
@@ -63,6 +66,8 @@ class TreeModel : public QAbstractItemModel {
     /// The row number of this node's data in its model (i.e. parent->backing_model).
     /// This may not correspond 1:1 with the node's position in its parent. Use `row_in_parent` for that.
     int row_in_model = 0;
+    /// Denotes whether this node is passthrough.
+    bool is_passthrough = false;
 
     /// A cache of the children of this node, giving the models and metadata corresponding to each.
     std::vector<std::shared_ptr<Node>> children;
@@ -92,23 +97,33 @@ class TreeModel : public QAbstractItemModel {
     /// Removes self from the live set.
     ~Node();
 
-    void RebuildFromModel(MessageModel *model);
-    void RebuildFromModel(RepeatedModel *model);
-    void RebuildFromModel(RepeatedMessageModel *model);
-    void RebuildFromModel(PrimitiveModel *model);
+    void RebuildFromModel(MessageModel *model, Node *parent, int row_in_parent);
+    void RebuildFromModel(RepeatedModel *model, Node *parent, int row_in_parent);
+    void RebuildFromModel(RepeatedMessageModel *model, Node *parent, int row_in_parent);
+    void RebuildFromModel(PrimitiveModel *mode, Node *parent, int row_in_parentl);
+    void RebuildFromAnyModel(ProtoModel *model, Node *parent, int row_in_parent);
 
     /// Adds this node to the containing tree's model map.
     void AddChildrenToMap();
 
+    /// Returns the input node's first displayed descendant, which may be the input node itself.
+    static std::shared_ptr<Node> PassThrough(std::shared_ptr<Node> node);
+    void PassThrough();
+    void UndoPassThrough();
+
    private:
     void PushChild(ProtoModel *model, int source_row);
     void ComputeDisplayData();
-    void Absorb(Node &child);
+    void Reset(ProtoModel *model, Node *parent, int row_in_parent);
 
     /// Rebuilds parent nodes' display data.
     void UpdateParents();
     /// Removes active listeners so that they can be repopulated for a new model.
     void ClearListeners();
+    /// Listens for data change events to the given model and rebuilds.
+    void RegisterDataListener();
+    /// Listens for row insert/move/delete operations on the given model and rebuilds.
+    void RegisterRowListeners();
   };
 
   enum UserRoles {

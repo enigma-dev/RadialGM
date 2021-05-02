@@ -51,6 +51,7 @@ static QTextEdit *diagnosticTextEdit = nullptr;
 static QAction *toggleDiagnosticsAction = nullptr;
 
 void diagnosticHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
+  return;
   if (toggleDiagnosticsAction) {
     if (!toggleDiagnosticsAction->isChecked()) {
       toggleDiagnosticsAction->setIcon(QIcon(":/actions/log-debug.png"));
