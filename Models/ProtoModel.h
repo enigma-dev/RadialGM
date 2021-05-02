@@ -103,8 +103,8 @@ class ProtoModel : public QAbstractItemModel {
   // For resource models like a Room, this will be the main Project model.
   // For a room's `instances` list, it will be a pointer to the containing room.
   // For a specific instance, it will be a pointer to a room's `instances` field's model.
-  // FIXME: Sanity check this cast
   template <class T> auto *GetParentModel() const { return _parentModel ? _parentModel->As<T>() : nullptr; };
+  ProtoModel *GetParentModel() const { return _parentModel; };
   // If a submodel changed technically any model that owns it has also changed.
   // so we need to notify all parents when anything changes in their descendants.
   void ParentDataChanged();
@@ -274,6 +274,7 @@ class ProtoModel : public QAbstractItemModel {
     return setData(index(row, col, QModelIndex()), value);
   }
 
+  int RowInParent() const { return row_in_parent_; }
   const Descriptor *GetDescriptor() const { return descriptor_; }
 
   // Casting helpers, type safety. =====================================================================================
@@ -347,9 +348,16 @@ signals:
   void ModelConstructed(ProtoModel* model);
 
  protected:
+  /// Allows child classes to change row_in_parent_ when swapping their own submodels.
+  template<typename ModelT, EnableIfCastable<ModelT> = true>
+  static void SwapModels(ModelT* &left, ModelT* &right) {
+    std::swap(left, right);
+    std::swap(left->row_in_parent_, right->row_in_parent_);
+  }
+
   bool _dirty;
   ProtoModel *_parentModel;
-  const int row_in_parent_;
+  int row_in_parent_;
   const QString debug_path_;
   const Descriptor *descriptor_;
 

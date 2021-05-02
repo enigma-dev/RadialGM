@@ -14,7 +14,7 @@ RepeatedMessageModel::RepeatedMessageModel(ProtoModel *parent, Message *message,
 void RepeatedMessageModel::SwapWithoutSignal(int left, int right) {
   R_EXPECT_V(left != right) << "Swapping same element";
   BasicRepeatedModel<Message>::SwapWithoutSignal(left, right);
-  std::swap(_subModels[left], _subModels[right]);
+  SwapModels(_subModels[left], _subModels[right]);
 }
 
 void RepeatedMessageModel::AppendNewWithoutSignal() {

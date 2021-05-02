@@ -16,8 +16,13 @@ class RepeatedPrimitiveModel : public BasicRepeatedModel<T> {
     return BasicRepeatedModel<T>::field_ref_.Get(row);
   }
 
-  virtual QString FastGetQString(int row) const {
+  virtual QString FastGetQString(int row) const override {
     return ToQString(PrimitiveData(row));
+  }
+
+  void SwapWithoutSignal(int left, int right) override {
+    BasicRepeatedModel<T>::SwapWithoutSignal(left, right);
+    ProtoModel::SwapModels(submodels_[left], submodels_[right]);
   }
 
   // Need to implement this in all RepeatedModels

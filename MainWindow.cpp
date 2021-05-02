@@ -660,6 +660,7 @@ void MainWindow::on_actionDelete_triggered() {
   mb.setDetailedText(selectedNames);
   int ret = mb.exec();
   if (ret != QMessageBox::Yes) return;
+  _ui->treeView->selectionModel()->clear();
   treeModel->BatchRemove(selectedNodes);
 }
 
