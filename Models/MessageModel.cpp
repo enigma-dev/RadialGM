@@ -323,6 +323,7 @@ MessageModel *MessageModel::BackupModel(QObject *parent) {
   _backupProtobuf.reset(_protobuf->New());
   _backupProtobuf->CopyFrom(*_protobuf);
   _modelBackup = new MessageModel(NonProtoParent{parent}, _backupProtobuf.get());
+  _modelBackup->RebuildSubModels();
   return _modelBackup;
 }
 
