@@ -110,13 +110,16 @@ class TreeModel : public QAbstractItemModel {
     void RebuildFromAnyModel(ProtoModel *model, Node *parent, int row_in_parent);
 
     /// Adds this node to the containing tree's model map.
-    void AddChildrenToMap();
+    /// Requires a shared_ptr to this, as there is no other way of obtaining it.
+    void AddSelfToMap(const std::shared_ptr<Node> &self);
 
     /// Where applicable (and enabled), prunes the only child of this node,
     /// showing its children but not the node itself.
     void PassThrough();
     /// Undoes a successful call to PassThrough(), restoring the intermediate child node to the tree.
     void UndoPassThrough();
+    /// Undoes PassThrough() operations on self and all children.
+    void RecursiveUndoPassThrough();
 
    private:
     void PushChild(ProtoModel *model, int source_row);

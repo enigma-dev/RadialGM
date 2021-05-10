@@ -32,16 +32,23 @@ void TreeModel::RebuildModelMapping() {
   // Drop references to orphans.
   QHash<ProtoModel *, std::shared_ptr<Node>> temp;
   temp.swap(backing_nodes_);
-  backing_nodes_.insert(root_model_, root_);
-  root_->AddChildrenToMap();
+  root_->AddSelfToMap(root_);
 }
 
-void TreeModel::Node::AddChildrenToMap() {
+void TreeModel::Node::AddSelfToMap(const std::shared_ptr<Node> &self) {
   backing_tree->live_nodes.insert(this);
-   for (const auto &child : children) {
-    backing_tree->backing_nodes_.insert(child->backing_model, child);
-    child->AddChildrenToMap();
+  if (passthrough_model) {
+    backing_tree->backing_nodes_.insert(passthrough_model, self);
+    if (passthrough_node) {
+      passthrough_node->AddSelfToMap(passthrough_node);
+    } else {
+      qDebug() << "Child node has passthrough model but not passthrough node.";
+    }
+  } else {
+    backing_tree->backing_nodes_.insert(backing_model, self);
   }
+
+  for (const auto &child : children) child->AddSelfToMap(child);
 }
 
 // =====================================================================================================================
@@ -249,7 +256,6 @@ static QSet<const QModelIndex> GroupNodes(const QSet<const QModelIndex> &nodes) 
 }
 
 void TreeModel::BatchRemove(const QSet<const QModelIndex> &indexes) {
-
   std::map<ProtoModel*, RepeatedMessageModel::RowRemovalOperation> removers;
   QVector<QPair<TreeNode::TypeCase, QString>> deletedResources;
 
@@ -333,12 +339,14 @@ void TreeModel::Node::RegisterRowListeners() {
     } else {
       backing_tree->beginResetModel();
     }
+    RecursiveUndoPassThrough();
     this->RebuildFromAnyModel(backing_model, parent, row_in_parent);
-    this->UpdateParents();
     if (parent) {
+      this->UpdateParents();
       emit backing_tree->dataChanged(ind, ind);
       emit backing_tree->layoutChanged({ind});
     } else {
+      backing_tree->RebuildModelMapping();
       backing_tree->endResetModel();
     }
   };
@@ -358,6 +366,7 @@ void TreeModel::Node::RebuildFromAnyModel(ProtoModel *model, Node *parent, int r
 }
 
 void TreeModel::Node::RebuildFromModel(MessageModel *model, Node *parent, int row_in_parent) {
+  // qDebug() << "Rebuild " << DebugPath();
   Reset(model, parent, row_in_parent);
   const auto &tree_meta = backing_tree->GetTreeDisplay(model->GetDescriptor()->full_name());
   const auto &msg_meta = BackingModel()->GetMessageDisplay(model->GetDescriptor()->full_name());
@@ -393,6 +402,7 @@ TreeModel::Node::Node(TreeModel *backing_tree, Node *parent, int row_in_parent, 
 }
 
 void TreeModel::Node::RebuildFromModel(RepeatedMessageModel *model, Node *parent, int row_in_parent) {
+  // qDebug() << "Rebuild " << DebugPath();
   Reset(model, parent, row_in_parent);
   for (int row = 0; row < backing_model->rowCount(); ++row) {
     PushChild(model->GetSubModel<ProtoModel>(row), row);
@@ -433,11 +443,15 @@ void TreeModel::Node::RebuildFromModel(PrimitiveModel *model, Node *parent, int 
 }
 
 void TreeModel::Node::Reset(ProtoModel *model, Node *parent, int row_in_parent) {
-  ClearListeners();
   UndoPassThrough();
+  ClearListeners();
   children.clear();
-  this->parent = parent;
-  this->row_in_parent = row_in_parent;
+  if (parent == this || (parent && parent->parent == this)) {
+    qDebug() << "SEVERE: Cyclical parents: " << DebugPath() << " is being assigned " << parent->DebugPath();
+  } else {
+    this->parent = parent;
+    this->row_in_parent = row_in_parent;
+  }
   backing_model = model;
   is_passthrough = false;
   ComputeDisplayData();
@@ -448,8 +462,9 @@ void TreeModel::Node::PushChild(ProtoModel *model, int source_row) {
   std::shared_ptr<Node> node;
   if (auto it = backing_tree->backing_nodes_.find(model); it != backing_tree->backing_nodes_.end()) {
     node = *it;
-    if (node->passthrough_node) {
-      node = node->passthrough_node;
+    if (node->backing_model != model) {
+      qDebug() << "Model in map is stale; something bad is bound to happen.";
+      node.reset();
     }
   }
   if (auto *sub_message = model->TryCastAsMessageModel()) {
@@ -496,7 +511,8 @@ void TreeModel::Node::ClearListeners() {
   updaters.clear();
 }
 void TreeModel::Node::UpdateParents() {
-  for (Node *p = parent; p; p = p->parent) p->ComputeDisplayData();
+  for (Node *p = parent; p; p = p->parent)
+    p->ComputeDisplayData();
 }
 
 void TreeModel::Node::PassThrough() {
@@ -508,16 +524,27 @@ void TreeModel::Node::PassThrough() {
   passthrough_model = backing_model;
   backing_model = passthrough_node->backing_model;
   children = passthrough_node->children;
-  for (auto &child : children) child->parent = this;
-  if (display_icon.isNull()) display_icon = passthrough_node->display_icon;
-  if (display_name.isEmpty()) display_name = passthrough_node->display_name;
+  for (auto &child : children) {
+    if (parent == child.get()) {
+      qDebug() << "CRITICAL: Node parent loop. Disconnecting loop. Something bad will happen.";
+    } else {
+      child->parent = this;
+    }
+  }
   RegisterRowListeners();
+  ComputeDisplayData();
 }
 
 void TreeModel::Node::UndoPassThrough() {
   if (!passthrough_node) return;
   ClearListeners();
-  for (auto &child : children) child->parent = passthrough_node.get();
+  for (auto &child : children) {
+    if (passthrough_node->parent == child.get()) {
+      qDebug() << "CRITICAL: Node parent loop. Disconnecting loop. Something bad will happen.";
+    } else {
+      child->parent = passthrough_node.get();
+    }
+  }
   children.clear();
   children.push_back(passthrough_node);
   passthrough_node->parent = this;
@@ -528,6 +555,11 @@ void TreeModel::Node::UndoPassThrough() {
   backing_model = passthrough_model;
   passthrough_model = nullptr;
   RegisterRowListeners();
+}
+
+void TreeModel::Node::RecursiveUndoPassThrough() {
+  UndoPassThrough();
+  for (auto &child : children) child->RecursiveUndoPassThrough();
 }
 
 // =====================================================================================================================
@@ -600,13 +632,20 @@ void TreeModel::DisplayConfig::UseEditorWidget(const std::string &message, Edito
 }
 
 void TreeModel::Node::ComputeDisplayData() {
-  display_name = backing_model->GetDisplayName();
-  if (auto *primitive_model = backing_model->TryCastAsPrimitiveModel()) {
+  auto *display_model = passthrough_model ? passthrough_model : backing_model;
+  display_name = display_model->GetDisplayName();
+  if (auto *primitive_model = display_model->TryCastAsPrimitiveModel()) {
     if (const QVariant value = primitive_model->GetDirect(); !value.isNull()) {
       display_name += " = " + value.toString();
     }
   }
-  display_icon = backing_model->GetDisplayIcon();
+  display_icon = display_model->GetDisplayIcon();
+
+  if (passthrough_node) {
+    if (display_icon.isNull() || display_name.isEmpty()) passthrough_node->ComputeDisplayData();
+    if (display_icon.isNull()) display_icon = passthrough_node->display_icon;
+    if (display_name.isEmpty()) display_name = passthrough_node->display_name;
+  }
 }
 
 
