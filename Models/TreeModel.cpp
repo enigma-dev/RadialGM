@@ -183,14 +183,18 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
       //oldRepeated->ExtractSubrange(itemRow, 1, nullptr);
       //RepeatedFieldInsert<buffers::TreeNode>(parentNode->mutable_child(), node, row);
       //parents[node] = parentNode;
+
       endMoveRows();
       ++row;
 
       //emit ResourceMoved(node, oldParent);
     } else {
       //if (node->folder()) continue;
-      //node = duplicateNode(*node);
-      //insert(parent, row++, node);
+
+      auto oldParent = IndexToNode(index.parent());
+      auto oldParentModel = (RepeatedMessageModel*)oldParent->BackingModel();
+      auto oldModel = (MessageModel*)oldParentModel->GetSubModel(index.row());
+      parentNode->insert(*oldModel->GetBuffer(), row++);
     }
   }
 
