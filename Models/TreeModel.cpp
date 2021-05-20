@@ -158,6 +158,7 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
       index = this->index(itemRow, 0, index);
       stream >> delimiter;
     }
+    auto node = IndexToNode(index);
 
     qDebug() << index << delimiter;
     if (action != Qt::CopyAction) {
@@ -169,9 +170,6 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
         itemRow -= removedCount[oldParent];
       }
 
-      bool canDo = beginMoveRows(index.parent(), itemRow, itemRow, parent, row);
-      if (!canDo) continue;
-
       // count this row as having been moved from this parent
       if (parent != oldParent || row > itemRow) removedCount[oldParent]++;
 
@@ -179,19 +177,10 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
       // since its own removal will affect the row we reinsert it at
       if (parent == oldParent && row > itemRow) --row;
 
-      //auto oldRepeated = oldParent->mutable_child();
-      //oldRepeated->ExtractSubrange(itemRow, 1, nullptr);
-      //RepeatedFieldInsert<buffers::TreeNode>(parentNode->mutable_child(), node, row);
-      //parents[node] = parentNode;
-
-      endMoveRows();
-      ++row;
-
-      //emit ResourceMoved(node, oldParent);
+      node->duplicate(parentNode, row++);
+      BatchRemove({index.sibling(itemRow, 0)});
     } else {
-      //if (node->folder()) continue;
-
-      IndexToNode(index)->duplicate(parentNode, row++);
+      node->duplicate(parentNode, row);
     }
   }
 
