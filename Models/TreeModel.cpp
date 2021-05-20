@@ -191,10 +191,7 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
     } else {
       //if (node->folder()) continue;
 
-      auto oldParent = IndexToNode(index.parent());
-      auto oldParentModel = (RepeatedMessageModel*)oldParent->BackingModel();
-      auto oldModel = (MessageModel*)oldParentModel->GetSubModel(index.row());
-      parentNode->insert(*oldModel->GetBuffer(), row++);
+      IndexToNode(index)->duplicate(parentNode, row++);
     }
   }
 
@@ -728,6 +725,15 @@ QModelIndex TreeModel::Node::insert(const Message &message, int row) {
   auto *const repeated_message_model = backing_model->TryCastAsRepeatedMessageModel();
   R_EXPECT(repeated_message_model, QModelIndex()) << "Insert " << message.DebugString().c_str();
   return backing_tree->mapFromSource(repeated_message_model->insert(message, row));
+}
+
+QModelIndex TreeModel::Node::duplicate(Node* newParent, int row) {
+    auto *const parent_backing_model = parent->BackingModel();
+    auto *const repeated_message_model = parent_backing_model->TryCastAsRepeatedMessageModel();
+    auto *const proto_model = repeated_message_model->GetSubModel(row_in_parent);
+    auto *const message_model = proto_model->TryCastAsMessageModel();
+    auto *const buffer = message_model->GetBuffer();
+    return newParent->insert(*buffer, row);
 }
 
 bool TreeModel::Node::IsRepeated() const { return backing_model->TryCastAsRepeatedModel(); }

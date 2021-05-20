@@ -81,6 +81,7 @@ class TreeModel : public QAbstractItemModel {
     QModelIndex mapFromSource(const QModelIndex &index) const;
     QModelIndex index(int row) const;
     QModelIndex insert(const Message &message, int row);
+    QModelIndex duplicate(Node* newParent, int row);
 
     /// Build a string representation of this node's position in the tree (a concatenation of display_names).
     QString DebugPath() const;
