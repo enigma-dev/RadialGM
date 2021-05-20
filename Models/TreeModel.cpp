@@ -145,7 +145,8 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
   Node *parentNode = IndexToNode(parent);
   if (!parentNode) parentNode = root_.get();
   if (row == -1) row = rowCount(parent);
-  QHash<QModelIndex, unsigned> removedCount;
+  int removedFromOldParentCount = 0;
+  QSet<const QModelIndex> removed;
 
   while (!stream.atEnd()) {
     int itemRow = 0;
@@ -166,23 +167,21 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
 
       // offset the row we are removing by the number of
       // rows already removed from the same parent
-      if (parent != oldParent || row > itemRow) {
-        itemRow -= removedCount[oldParent];
+      if (parent == oldParent && row < itemRow) {
+        itemRow += removedFromOldParentCount++;
       }
 
-      // count this row as having been moved from this parent
-      if (parent != oldParent || row > itemRow) removedCount[oldParent]++;
-
-      // if moving the node within the same parent we need to adjust the row
-      // since its own removal will affect the row we reinsert it at
-      if (parent == oldParent && row > itemRow) --row;
+      index = index.sibling(itemRow, 0);
+      node = IndexToNode(index);
 
       node->duplicate(parentNode, row++);
-      BatchRemove({index.sibling(itemRow, 0)});
+      removed.insert(index);
     } else {
       node->duplicate(parentNode, row);
     }
   }
+
+  BatchRemove(removed);
 
   return true;
 }
