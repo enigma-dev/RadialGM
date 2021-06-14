@@ -52,12 +52,26 @@ bool RepeatedMessageModel::setData(const QModelIndex &index, const QVariant &val
 }
 
 QModelIndex RepeatedMessageModel::insert(const Message &message, int row) {
-  R_EXPECT(insertRows(row, 1), QModelIndex()) <<  "Insert message failed";
+  R_EXPECT(row <= rowCount(), QModelIndex()) <<  "Insert message failed";
+
+  beginInsertRows(QModelIndex(), row, row);
+
+  int p = rowCount();
+
+  // Append `count` new rows to the list, then move them backward to where they were supposed to be inserted.
+  AppendNewWithoutSignal();
+  SwapBackWithoutSignal(row, p, rowCount());
+
   auto m = GetSubModel(row);
   R_EXPECT(m, QModelIndex()) << "Requested submodel is null";
   MessageModel* mm = m->TryCastAsMessageModel();
   R_EXPECT(mm, QModelIndex()) << "Failed to cast to message model";
   mm->ReplaceBuffer(&message);
+
+  ParentDataChanged();
+
+  endInsertRows();
+
   return createIndex(row, 0, this);
 }
 
