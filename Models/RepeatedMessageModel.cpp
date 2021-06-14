@@ -58,10 +58,11 @@ QModelIndex RepeatedMessageModel::insert(const Message &message, int row) {
 
   int p = rowCount();
 
-  // Append `count` new rows to the list, then move them backward to where they were supposed to be inserted.
+  // Append new row to the list, then move it backwards to where it's supposed to be inserted.
   AppendNewWithoutSignal();
   SwapBackWithoutSignal(row, p, rowCount());
 
+  // Overwrite default-initialized message with the one we are inserting.
   auto m = GetSubModel(row);
   R_EXPECT(m, QModelIndex()) << "Requested submodel is null";
   MessageModel* mm = m->TryCastAsMessageModel();
