@@ -167,15 +167,17 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
 
       // offset the row we are removing by the number of
       // rows already removed from the same parent
-      if (parent == oldParent && row < itemRow) {
-        itemRow += removedFromOldParentCount++;
+      if (parent == oldParent) {
+        if (row < itemRow)
+          itemRow += removedFromOldParentCount;
+        ++removedFromOldParentCount;
       }
 
       index = index.sibling(itemRow, 0);
       node = IndexToNode(index);
 
       node->duplicate(parentNode, row++);
-      removed.insert(index);
+      removed.insert(index.sibling(itemRow+((row < itemRow)?1:0), 0));
     } else {
       node->duplicate(parentNode, row);
     }
