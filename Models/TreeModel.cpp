@@ -145,8 +145,8 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
   Node *parentNode = IndexToNode(parent);
   if (!parentNode) parentNode = root_.get();
   if (row == -1) row = rowCount(parent);
-  int removedFromOldParentCount = 0;
   QSet<const QModelIndex> removed;
+  std::vector<Message*> messages;
 
   while (!stream.atEnd()) {
     int itemRow = 0;
@@ -159,36 +159,31 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
       index = this->index(itemRow, 0, index);
       stream >> delimiter;
     }
+    qDebug() << index << delimiter;
     auto node = IndexToNode(index);
 
-    qDebug() << index << delimiter;
-    if (action != Qt::CopyAction) {
-      auto oldParent = index.parent();
+    auto oldParent = index.parent();
+    auto oldParentNode = IndexToNode(oldParent);
+    auto *const parent_backing_model = oldParentNode->BackingModel();
+    auto *const repeated_message_model = parent_backing_model->TryCastAsRepeatedMessageModel();
+    auto *const proto_model = repeated_message_model->GetSubModel(node->row_in_parent);
+    auto *const message_model = proto_model->TryCastAsMessageModel();
+    auto *const buffer = message_model->GetBuffer();
+    Message* m_copy = buffer->New();
+    m_copy->CopyFrom(*buffer);
+    messages.push_back(m_copy);
 
-      // offset the row we are removing by the number of
-      // rows already removed from the same parent
-      if (parent == oldParent) {
-        if (row < itemRow)
-          itemRow += removedFromOldParentCount;
-        ++removedFromOldParentCount;
-      }
-
-      index = index.sibling(itemRow, 0);
-      node = IndexToNode(index);
-
-      node->duplicate(parentNode, row++);
-      // if dragging to same parent and before previous row
-      // we need to offset remove by one since duplicating
-      if (parent == oldParent && row < itemRow) {
-        index = index.sibling(itemRow+1,0);
-      }
+    if (action == Qt::MoveAction)
       removed.insert(index);
-    } else {
-      node->duplicate(parentNode, row);
-    }
   }
 
-  BatchRemove(removed);
+  if (action == Qt::MoveAction)
+    BatchRemove(removed);
+
+  for (auto* msg : messages) {
+    parentNode->insert(*msg, row);
+    delete msg;
+  }
 
   return true;
 }
