@@ -177,7 +177,12 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
       node = IndexToNode(index);
 
       node->duplicate(parentNode, row++);
-      removed.insert(index.sibling(itemRow+((row < itemRow)?1:0), 0));
+      // if dragging to same parent and before previous row
+      // we need to offset remove by one since duplicating
+      if (parent == oldParent && row < itemRow) {
+        index = index.sibling(itemRow+1,0);
+      }
+      removed.insert(index);
     } else {
       node->duplicate(parentNode, row);
     }
