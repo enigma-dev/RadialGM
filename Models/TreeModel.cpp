@@ -173,8 +173,13 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
     m_copy->CopyFrom(*buffer);
     messages.push_back(m_copy);
 
-    if (action == Qt::MoveAction)
+    if (action == Qt::MoveAction) {
+      // offset the row to insert at by the number of
+      // rows already removed from the same parent
+      if (parent == oldParent && itemRow < row)
+        --row;
       removed.insert(index);
+    }
   }
 
   if (action == Qt::MoveAction)
