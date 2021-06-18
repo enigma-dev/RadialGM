@@ -92,7 +92,9 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const {
 Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const {
   Qt::ItemFlags flags = QAbstractItemModel::flags(index);
   if (index.isValid()) flags |= Qt::ItemIsDragEnabled | Qt::ItemIsEditable;
-  flags |= Qt::ItemIsDropEnabled;
+  Node* node = IndexToNode(index);
+  if (node->IsRepeated())
+    flags |= Qt::ItemIsDropEnabled;
   return flags;
 }
 
