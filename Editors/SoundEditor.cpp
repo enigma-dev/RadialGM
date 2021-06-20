@@ -23,8 +23,6 @@ SoundEditor::SoundEditor(MessageModel* model, QWidget* parent)
   _nodeMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
   _resMapper->addMapping(_ui->volumeSpinBox, Sound::kVolumeFieldNumber);
 
-  _ui->volumeSlider->setValue(static_cast<int>(_ui->volumeSpinBox->value() * 100));
-
   connect(_ui->saveButton, &QAbstractButton::pressed, this, &BaseEditor::OnSave);
 
   _playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
@@ -68,6 +66,8 @@ void SoundEditor::RebindSubModels() {
   _soundModel = _model->GetSubModel<MessageModel*>(TreeNode::kSoundFieldNumber);
   _playlist->addMedia(QUrl::fromLocalFile(_soundModel->Data(FieldPath::Of<Sound>(Sound::kDataFieldNumber)).toString()));
   BaseEditor::RebindSubModels();
+  // sync volume slider to model after rebind (e.g, for .sound.gmx)
+  _ui->volumeSlider->setValue(static_cast<int>(_ui->volumeSpinBox->value() * 100));
 }
 
 void SoundEditor::on_playButton_clicked() {
