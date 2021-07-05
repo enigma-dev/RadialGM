@@ -75,9 +75,10 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
   buffers::TreeNode::TypeCase type = (buffers::TreeNode::TypeCase)model->OneOfType("type");
   R_EXPECT(MainWindow::resourceMap->ValidName(type, value.toString()), false) << "Invalid resource name";
   bool ret = model->SetData(FieldPath::Of<buffers::TreeNode>(buffers::TreeNode::kNameFieldNumber), value);
+  if (!ret) return false;
   node->DataChanged();
   emit ItemRenamed(type, oldName, value.toString());
-  return ret;
+  return true;
 }
 
 QVariant TreeModel::data(const QModelIndex &index, int role) const {
