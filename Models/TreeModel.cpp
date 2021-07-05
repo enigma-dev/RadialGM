@@ -74,9 +74,10 @@ bool TreeModel::setData(const QModelIndex &index, const QVariant &value, int rol
   QString oldName = model->Data(FieldPath::Of<buffers::TreeNode>(buffers::TreeNode::kNameFieldNumber)).toString();
   buffers::TreeNode::TypeCase type = (buffers::TreeNode::TypeCase)model->OneOfType("type");
   R_EXPECT(MainWindow::resourceMap->ValidName(type, value.toString()), false) << "Invalid resource name";
-  node->display_name = value.toString();
+  bool ret = model->SetData(FieldPath::Of<buffers::TreeNode>(buffers::TreeNode::kNameFieldNumber), value);
+  node->DataChanged();
   emit ItemRenamed(type, oldName, value.toString());
-  return model->SetData(FieldPath::Of<buffers::TreeNode>(buffers::TreeNode::kNameFieldNumber), value);
+  return ret;
 }
 
 QVariant TreeModel::data(const QModelIndex &index, int role) const {
@@ -454,6 +455,10 @@ void TreeModel::Node::Reset(ProtoModel *model, Node *parent, int row_in_parent) 
   backing_model = model;
   is_passthrough = false;
   ComputeDisplayData();
+}
+
+void TreeModel::Node::DataChanged() {
+  this->ComputeDisplayData();
 }
 
 void TreeModel::Node::PushChild(ProtoModel *model, int source_row) {

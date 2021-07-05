@@ -122,6 +122,8 @@ class TreeModel : public QAbstractItemModel {
     /// Undoes PassThrough() operations on self and all children.
     void RecursiveUndoPassThrough();
 
+    void DataChanged();
+
    private:
     void PushChild(ProtoModel *model, int source_row);
     void ComputeDisplayData();
