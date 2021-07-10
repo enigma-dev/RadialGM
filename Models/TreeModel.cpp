@@ -96,7 +96,7 @@ Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const {
   Qt::ItemFlags flags = QAbstractItemModel::flags(index);
   if (index.isValid()) flags |= Qt::ItemIsDragEnabled | Qt::ItemIsEditable;
   Node* node = IndexToNode(index);
-  if (node->IsRepeated())
+  if (node && node->IsRepeated())
     flags |= Qt::ItemIsDropEnabled;
   return flags;
 }
