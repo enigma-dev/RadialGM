@@ -10,6 +10,23 @@
 #include <QMimeData>
 #include <QStack>
 
+static QSet<const QModelIndex> GroupNodes(const QSet<const QModelIndex> &nodes) {
+  QSet <const QModelIndex> ret;
+  for (const auto& n : nodes) {
+    QModelIndex t = n;
+    bool add = true;
+    while (t.parent().isValid()) {
+      if (nodes.contains(t.parent())) {
+        add = false;
+        break;
+      }
+      t = t.parent();
+    }
+    if (add) ret.insert(n);
+  }
+  return ret;
+}
+
 TreeModel::TreeModel(MessageModel *root, QObject *parent, const DisplayConfig &config)
     : QAbstractItemModel(parent),
       mime_types_(GetMimeTypes(root->GetDescriptor())),
@@ -150,7 +167,7 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
   Node *parentNode = IndexToNode(parent);
   if (!parentNode) parentNode = root_.get();
   if (row == -1) row = rowCount(parent);
-  QSet<const QModelIndex> removed;
+  QSet<const QModelIndex> nodes;
   std::vector<Message*> messages;
 
   while (!stream.atEnd()) {
@@ -164,7 +181,11 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
       index = this->index(itemRow, 0, index);
       stream >> delimiter;
     }
-    qDebug() << index << delimiter;
+    nodes.insert(index);
+  }
+  nodes = GroupNodes(nodes);
+
+  for (auto index : nodes) {
     auto node = IndexToNode(index);
 
     auto oldParent = index.parent();
@@ -181,14 +202,13 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
     if (action == Qt::MoveAction) {
       // offset the row to insert at by the number of
       // rows already removed from the same parent
-      if (parent == oldParent && itemRow < row)
+      if (parent == oldParent && index.row() < row)
         --row;
-      removed.insert(index);
     }
   }
 
   if (action == Qt::MoveAction)
-    BatchRemove(removed);
+    BatchRemove(nodes);
 
   for (auto* msg : messages) {
     parentNode->insert(*msg, row);
@@ -237,23 +257,6 @@ TreeModel::Node *TreeModel::IndexToNode(const QModelIndex &index) const {
   } else {
     return root_.get();
   }
-}
-
-static QSet<const QModelIndex> GroupNodes(const QSet<const QModelIndex> &nodes) {
-  QSet <const QModelIndex> ret;
-  for (const auto& n : nodes) {
-    QModelIndex t = n;
-    bool add = true;
-    while (t.parent().isValid()) {
-      if (nodes.contains(t.parent())) {
-        add = false;
-        break;
-      }
-      t = t.parent();
-    }
-    if (add) ret.insert(n);
-  }
-  return ret;
 }
 
 void TreeModel::BatchRemove(const QSet<const QModelIndex> &indexes) {
