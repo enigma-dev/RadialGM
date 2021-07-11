@@ -353,6 +353,7 @@ void TreeModel::Node::RegisterRowListeners() {
       backing_tree->RebuildModelMapping();
       backing_tree->endResetModel();
     }
+    AddSelfToMap(passthrough_node);
   };
   updaters.push_back(connect(backing_model, &ProtoModel::rowsInserted, update));
   updaters.push_back(connect(backing_model, &ProtoModel::modelReset, update));
