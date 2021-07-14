@@ -18,8 +18,8 @@ void RepeatedMessageModel::SwapWithoutSignal(int left, int right) {
 }
 
 void RepeatedMessageModel::AppendNewWithoutSignal() {
-  auto m = field_ref_.NewMessage();
-  field_ref_.Add(*m);
+  auto refl = _protobuf->GetReflection();
+  auto m = refl->AddMessage(_protobuf, field_);
   _subModels.append(new MessageModel(this, m, _subModels.size()));
 }
 
