@@ -187,16 +187,11 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
 
   for (auto index : nodes) {
     auto node = IndexToNode(index);
-
     auto oldParent = index.parent();
-    auto oldParentNode = IndexToNode(oldParent);
-    auto *const parent_backing_model = oldParentNode->BackingModel();
-    auto *const repeated_message_model = parent_backing_model->TryCastAsRepeatedMessageModel();
-    auto *const proto_model = repeated_message_model->GetSubModel(node->row_in_parent);
-    auto *const message_model = proto_model->TryCastAsMessageModel();
-    auto *const buffer = message_model->GetBuffer();
-    Message* m_copy = buffer->New();
-    m_copy->CopyFrom(*buffer);
+
+    auto msg = node->GetMessage();
+    Message* m_copy = msg.New();
+    m_copy->CopyFrom(msg);
     messages.push_back(m_copy);
 
     if (action == Qt::MoveAction) {
@@ -622,6 +617,12 @@ QVariant TreeModel::GetItemIcon(const Node *item) const { return item ? item->di
 TreeModel::Node *TreeModel::GetNthChild(Node *item, int n) const { return item ? item->NthChild(n) : nullptr; }
 int TreeModel::GetChildCount(Node *item) const { return item ? item->children.size() : 0; }
 const std::string &TreeModel::GetMessageType(const Node *node) { return node ? node->GetMessageType() : kEmptyString; }
+TreeNode TreeModel::Node::GetMessage() const {
+  auto *const model = passthrough_model ? passthrough_model : backing_model;
+  auto *const message_model = model->TryCastAsMessageModel();
+  auto *const buffer = static_cast<TreeNode*>(message_model->GetBuffer());
+  return *buffer;
+}
 
 TreeModel::Node *TreeModel::Node::NthChild(int n) const {
   R_EXPECT(n >= 0 && (size_t)n < children.size(), nullptr)
@@ -736,12 +737,7 @@ QModelIndex TreeModel::Node::insert(const Message &message, int row) {
 }
 
 QModelIndex TreeModel::Node::duplicate(Node* newParent, int row) {
-    auto *const parent_backing_model = parent->BackingModel();
-    auto *const repeated_message_model = parent_backing_model->TryCastAsRepeatedMessageModel();
-    auto *const proto_model = repeated_message_model->GetSubModel(row_in_parent);
-    auto *const message_model = proto_model->TryCastAsMessageModel();
-    auto *const buffer = message_model->GetBuffer();
-    return newParent->insert(*buffer, row);
+  return newParent->insert(GetMessage(), row);
 }
 
 bool TreeModel::Node::IsRepeated() const { return backing_model->TryCastAsRepeatedModel(); }

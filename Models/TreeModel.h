@@ -78,6 +78,7 @@ class TreeModel : public QAbstractItemModel {
     bool SetName(const QString &name, const ProtoModel::MessageDisplayConfig &meta);
     Node *NthChild(int n) const;
     const std::string &GetMessageType() const;
+    TreeNode GetMessage() const;
     QModelIndex mapFromSource(const QModelIndex &index) const;
     QModelIndex index(int row) const;
     QModelIndex insert(const Message &message, int row);
