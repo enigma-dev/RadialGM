@@ -599,7 +599,7 @@ void MainWindow::on_actionCreateRoom_triggered() { CreateResource(TypeCase::kRoo
 void MainWindow::on_actionCreateSettings_triggered() { CreateResource(TypeCase::kSettings); }
 
 void MainWindow::on_actionDuplicate_triggered() {
-  // if (!_ui->treeView->selectionModel()->hasSelection()) return;
+ // if (!_ui->treeView->selectionModel()->hasSelection()) return;
   const auto index = _ui->treeView->selectionModel()->currentIndex();
   QModelIndex dupIndex = treeModel->duplicateNode(index);
   // Triggers edit of either resource or name label.

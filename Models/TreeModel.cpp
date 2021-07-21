@@ -689,13 +689,13 @@ QModelIndex TreeModel::addNode(const Message &child, const QModelIndex &parent) 
   return insert(insertParent, pos, child);
 }
 
-QModelIndex TreeModel::duplicateNode(const QModelIndex & /*index*/) {
-  /*Node *node = IndexToNode(index);
-  if (node->repeated_model) {
-    return node->mapFromSource(node->repeated_model->duplicate(mapToSource(index)));
-  }*/
-  qDebug() << rowCount() << " rows";
-  return QModelIndex();
+QModelIndex TreeModel::duplicateNode(const QModelIndex & index) {
+  Node *node = IndexToNode(index);
+  if (node->IsRepeated()) {
+    //return node->mapFromSource(node->repeated_model->duplicate(mapToSource(index)));
+  }
+  Node *parent = IndexToNode(index.parent());
+  return node->duplicate(parent, node->row_in_parent+1);
 }
 
 void TreeModel::sortByName(const QModelIndex & /*index*/) { /*
