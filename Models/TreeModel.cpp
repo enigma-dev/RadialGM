@@ -699,14 +699,10 @@ QModelIndex TreeModel::duplicateNode(const QModelIndex & index) {
   return node->duplicate(parent, node->row_in_parent+1);
 }
 
-void TreeModel::sortByName(const QModelIndex & /*index*/) { /*
-  if (!index.isValid()) return;
-  auto *node = static_cast<Message *>(index.internalPointer());
+void TreeModel::sortByName(const QModelIndex & index) {
+  auto node = IndexToNode(index);
   if (!node) return;
-  auto *child_field = node->mutable_child();
-  std::sort(child_field->begin(), child_field->end(),
-            [](const Message &a, const Message &b) { return a.name() < b.name(); });
-  emit dataChanged(this->index(0, 0, index), this->index(node->child_size(), 0, index));*/
+  node->sort();
 }
 
 void TreeModel::triggerNodeEdit(const QModelIndex &index, QAbstractItemView *view) {
@@ -728,6 +724,18 @@ void TreeModel::triggerNodeEdit(const QModelIndex &index, QAbstractItemView *vie
   view->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
   // start editing the name of the resource in the tree for convenience
   view->edit(index);
+}
+
+void TreeModel::Node::sort() {
+  if (!IsRepeated()) return;
+  auto *const model = passthrough_model ? passthrough_model : backing_model;
+  auto *const message_model = model->TryCastAsMessageModel();
+  auto *const buffer = static_cast<TreeNode*>(message_model->GetBuffer());
+  auto *child_field = buffer->mutable_folder()->mutable_children();
+  std::sort(child_field->begin(), child_field->end(),
+            [](const TreeNode &a, const TreeNode &b) { return a.name() < b.name(); });
+  RebuildFromAnyModel(model, parent, row_in_parent);
+  AddSelfToMap(passthrough_node);
 }
 
 QModelIndex TreeModel::Node::insert(const Message &message, int row) {

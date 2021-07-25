@@ -80,6 +80,7 @@ class TreeModel : public QAbstractItemModel {
     const std::string &GetMessageType() const;
     TreeNode GetMessage() const;
     QModelIndex mapFromSource(const QModelIndex &index) const;
+    void sort();
     QModelIndex index(int row) const;
     QModelIndex insert(const Message &message, int row);
     QModelIndex duplicate(Node* newParent, int row);
