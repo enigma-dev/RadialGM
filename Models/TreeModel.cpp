@@ -288,7 +288,12 @@ void TreeModel::BatchRemove(const QSet<const QModelIndex> &indexes) {
     }
 
     R_ASSESS_C(remove_from);
+    //TODO: Calling redundantly so delete/dnd last child of group doesn't spam warnings
+    //RowRemovalOperation resets model which for some reason doesn't fix it, but this does
+    //Calling begin/end remove fixes both cases
+    beginRemoveRows(index.parent(), index.row(), index.row());
     removers.emplace(remove_from, remove_from).first->second.RemoveRow(remove_me->RowInParent());
+    endRemoveRows();
   }
 
   for (auto& res : deletedResources)
