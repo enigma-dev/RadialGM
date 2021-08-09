@@ -254,12 +254,27 @@ TreeModel::Node *TreeModel::IndexToNode(const QModelIndex &index) const {
   }
 }
 
+static void CollectNodes(const QModelIndex &node, QSet<const QModelIndex> &cache) {
+  auto model = node.model();
+
+  cache.insert(node);
+  for (int r = 0; r < model->rowCount(node); ++r) {
+    CollectNodes(model->index(r, 0, node), cache);
+  }
+}
+
 void TreeModel::BatchRemove(const QSet<const QModelIndex> &indexes) {
   std::map<ProtoModel*, RepeatedMessageModel::RowRemovalOperation> removers;
   QVector<QPair<TreeNode::TypeCase, QString>> deletedResources;
 
-  // Loop all selected
+  // Fully expand groups so we can correctly fire all necessary ItemRemoved signals
+  QSet<const QModelIndex> selectedNodes;
   for (auto& index : qAsConst(indexes)) {
+    CollectNodes(index, selectedNodes);
+  }
+
+  // Loop all selected
+  for (auto& index : qAsConst(selectedNodes)) {
     Node* node = IndexToNode(index);
     R_ASSESS_C(node && node->BackingModel());
     MessageModel* m = node->BackingModel()->TryCastAsMessageModel();

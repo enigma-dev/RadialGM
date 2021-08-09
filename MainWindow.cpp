@@ -631,22 +631,13 @@ void MainWindow::on_actionProperties_triggered() {
   }
 }
 
-static void CollectNodes(const QModelIndex &node, QSet<const QModelIndex> &cache) {
-  auto model = node.model();
-
-  cache.insert(node);
-  for (int r = 0; r < model->rowCount(node); ++r) {
-    CollectNodes(model->index(r, 0, node), cache);
-  }
-}
-
 void MainWindow::on_actionDelete_triggered() {
   if (!_ui->treeView->selectionModel()->hasSelection()) return;
   auto selected = _ui->treeView->selectionModel()->selectedIndexes();
 
   QSet<const QModelIndex> selectedNodes;
-  for (auto index : selected) {
-    CollectNodes(index, selectedNodes);
+  for (auto& index : qAsConst(selected)) {
+    selectedNodes.insert(index);
   }
 
   QString selectedNames = "";
