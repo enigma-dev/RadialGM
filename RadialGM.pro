@@ -30,15 +30,6 @@ rgm_enable_syntaxhighlight {
   SOURCES += Widgets/CodeWidgetPlain.cpp
 }
 
-# Uncomment if you want compilation & code analysis
-#CONFIG += rgm_enable_grpc_server
-
-rgm_enable_grpc_server {
-  DEFINES += RGM_SERVER_ENABLED
-  SOURCES += Plugins/ServerPlugin.cpp
-  HEADERS += Plugins/ServerPlugin.h
-}
-
 # we do this even in release mode for "Editor Diagnostics"
 DEFINES += QT_MESSAGELOGCONTEXT
 
@@ -111,6 +102,7 @@ SOURCES += \
     Models/ImmediateMapper.cpp \
     Components/Utility.cpp \
     Plugins/RGMPlugin.cpp \
+    Plugins/ServerPlugin.cpp \
     Components/RecentFiles.cpp \
     Editors/CodeEditor.cpp \
     Editors/ScriptEditor.cpp \
@@ -165,6 +157,7 @@ HEADERS += \
     Models/ImmediateMapper.h \
     Components/Utility.h \
     Plugins/RGMPlugin.h \
+    Plugins/ServerPlugin.h \
     Components/RecentFiles.h \
     Widgets/SpriteSubimageListView.h \
     Widgets/SpriteView.h \

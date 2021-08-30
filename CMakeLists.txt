@@ -3,7 +3,6 @@ project(RadialGM)
 
 include(CMakeDependentOption)
 
-option(RGM_ENABLE_GRPC_SERVER "Enable the GRPC client plugin for compilation and code analysis." ON)
 option(RGM_BUILD_EMAKE "Build Emake and the compiler." ON)
 
 # FIXME: MSVC dynamic linking requires US TO DLLEXPORT our funcs
@@ -194,11 +193,8 @@ else()
     set(EDITOR_SOURCES Widgets/CodeWidgetScintilla.cpp)
 endif()
 
-if (RGM_ENABLE_GRPC_SERVER)
-  add_definitions(-DRGM_SERVER_ENABLED)
-  set(RGM_SOURCES ${RGM_SOURCES} Plugins/ServerPlugin.cpp)
-  set(RGM_HEADERS ${RGM_HEADERS} Plugins/ServerPlugin.h)
-endif()
+ set(RGM_SOURCES ${RGM_SOURCES} Plugins/ServerPlugin.cpp)
+ set(RGM_HEADERS ${RGM_HEADERS} Plugins/ServerPlugin.h)
 
 # Tell CMake to create the RadialGM executable
 add_executable(${EXE} WIN32 ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${EDITOR_SOURCES} ${RGM_RC})
@@ -245,19 +241,17 @@ include_directories(${EXE} PRIVATE ${RAPIDJSON_INCLUDE_DIRS})
 find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${EXE} PRIVATE yaml-cpp)
 
-if (RGM_ENABLE_GRPC_SERVER)
-  #Find gRPC
-  if (MSVC) # Windows actually does something right for once
-    find_package(gRPC CONFIG REQUIRED)
-    target_link_libraries(${EXE} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
-  else() # https://tinyurl.com/arch-grpc-bug
-    find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
-    find_library(LIB_GPR NAMES gpr)
-    find_library(LIB_CARES NAMES cares)
-    find_library(LIB_ADDRESS_SORTING NAMES address_sorting)
-    target_link_libraries(${EXE} PRIVATE ${LIB_CARES} ${LIB_ADDRESS_SORTING} ${LIB_GPR} ${LIB_GRPC_UNSECURE})
-  endif()
-endif()
+ #Find gRPC
+ if (MSVC) # Windows actually does something right for once
+   find_package(gRPC CONFIG REQUIRED)
+   target_link_libraries(${EXE} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
+ else() # https://tinyurl.com/arch-grpc-bug
+   find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
+   find_library(LIB_GPR NAMES gpr)
+   find_library(LIB_CARES NAMES cares)
+   find_library(LIB_ADDRESS_SORTING NAMES address_sorting)
+   target_link_libraries(${EXE} PRIVATE ${LIB_CARES} ${LIB_ADDRESS_SORTING} ${LIB_GPR} ${LIB_GRPC_UNSECURE})
+ endif()
 
 # Find Protobuf
 include(FindProtobuf)

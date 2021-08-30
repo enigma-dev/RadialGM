@@ -19,21 +19,15 @@
 #include "Components/ArtManager.h"
 #include "Components/Logger.h"
 
-#include "Plugins/RGMPlugin.h"
-
-#ifdef RGM_SERVER_ENABLED
-#include "Plugins/ServerPlugin.h"
-#endif
-
 #include "gmk.h"
 #include "gmx.h"
 #include "yyp.h"
 
 #include <QtWidgets>
-
 #include <QFile>
-#include <functional>
+
 #include <sstream>
+#include <functional>
 #include <unordered_map>
 
 #undef GetMessage
@@ -501,9 +495,7 @@ void MainWindow::on_actionCloseOthers_triggered() {
   }
 }
 
-void MainWindow::on_actionToggleTabbedView_triggered() {
-  this->setTabbedMode(_ui->actionToggleTabbedView->isChecked());
-}
+void MainWindow::on_actionToggleTabbedView_triggered() { this->setTabbedMode(_ui->actionToggleTabbedView->isChecked()); }
 
 void MainWindow::on_actionNext_triggered() { _ui->mdiArea->activateNextSubWindow(); }
 
