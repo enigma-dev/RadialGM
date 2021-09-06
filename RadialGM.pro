@@ -20,8 +20,12 @@ QMAKE_TARGET_PRODUCT = RadialGM IDE
 QMAKE_TARGET_DESCRIPTION = ENIGMA Development Environment
 QMAKE_TARGET_COPYRIGHT = "Copyright \\251 2007-2020 ENIGMA Dev Team"
 
+QMAKE_EXTRA_TARGETS += enigma
+PRE_TARGETDEPS += enigma
+enigma.commands = cd $$PWD/Submodules/enigma-dev/ && make emake
+
 # Uncomment if you want QScintilla
-#CONFIG += rgm_enable_syntaxhighlight
+CONFIG += rgm_enable_syntaxhighlight
 
 rgm_enable_syntaxhighlight {
   SOURCES += Widgets/CodeWidgetScintilla.cpp

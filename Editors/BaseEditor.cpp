@@ -46,13 +46,9 @@ void BaseEditor::closeEvent(QCloseEvent* event) {
 
 void BaseEditor::ReplaceBuffer(google::protobuf::Message* buffer) { _resMapper->ReplaceBuffer(buffer); }
 
-void BaseEditor::dataChanged(const QModelIndex& topLeft, const QModelIndex& /*bottomRight*/, const QVariant& oldValue,
+void BaseEditor::dataChanged(const QModelIndex& /*topLeft*/, const QModelIndex& /*bottomRight*/, const QVariant& /*oldValue*/,
                              const QVector<int>& /*roles*/) {
-  buffers::TreeNode* n = static_cast<buffers::TreeNode*>(_nodeMapper->GetModel()->GetBuffer());
-  if (n == topLeft.internalPointer() && topLeft.row() == TreeNode::kNameFieldNumber) {
-    this->setWindowTitle(QString::fromStdString(n->name()));
-    emit ResourceRenamed(n->type_case(), oldValue.toString(), QString::fromStdString(n->name()));
-  }
+   setWindowTitle(_model->Data(FieldPath::Of<TreeNode>(TreeNode::kNameFieldNumber)).toString());
   _resMapper->SetDirty(true);
 }
 

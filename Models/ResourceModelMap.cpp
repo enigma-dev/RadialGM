@@ -195,6 +195,8 @@ void ResourceModelMap::ResourceRenamed(TypeCase type, const QString& oldName, co
   if (oldName == newName || !_resources[type].contains(oldName)) return;
   _resources[type][newName] = _resources[type][oldName];
 
+  //MainWindow::
+
   emit ResourceRenamed(ResTypeAsString(type), oldName, newName);
   _resources[type].remove(oldName);
 

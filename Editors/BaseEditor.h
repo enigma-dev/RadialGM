@@ -23,9 +23,6 @@ class BaseEditor : public QWidget {
   ~BaseEditor();
   void ReplaceBuffer(google::protobuf::Message *buffer);
 
- signals:
-  void ResourceRenamed(TypeCase type, const QString &oldName, const QString &newName);
-
  public slots:
   virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
                            const QVariant &oldValue = QVariant(0), const QVector<int> &roles = QVector<int>());
