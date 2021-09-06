@@ -3,15 +3,12 @@
 
 #include "AssetView.h"
 #include "Models/MessageModel.h"
+#include "Models/RepeatedSortFilterProxyModel.h"
 
-#include <QObject>
-#include <QSortFilterProxyModel>
-#include <QWidget>
-
-class InstanceSortFilterProxyModel : public QSortFilterProxyModel {
+class InstanceSortFilterProxyModel : public RepeatedSortFilterProxyModel {
  public:
-  InstanceSortFilterProxyModel(QWidget *parent) : QSortFilterProxyModel(parent) {}
-  bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
+  InstanceSortFilterProxyModel(QObject *parent) : RepeatedSortFilterProxyModel(parent) {}
+  bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
 };
 
 class RoomView : public AssetView {
@@ -26,7 +23,7 @@ class RoomView : public AssetView {
  protected:
   MessageModel *_model;
   InstanceSortFilterProxyModel *_sortedInstances;
-  QSortFilterProxyModel *_sortedTiles;
+  RepeatedSortFilterProxyModel *_sortedTiles;
   QPixmap _transparentPixmap;
 
   void paintTiles(QPainter &painter);

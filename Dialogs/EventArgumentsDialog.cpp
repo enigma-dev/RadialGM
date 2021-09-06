@@ -47,10 +47,11 @@ EventArgumentsDialog::EventArgumentsDialog(QWidget *parent, const QStringList &a
 
       QLineEdit *lineEdit = new QLineEdit(this);
       lineEdit->setReadOnly(true);
-      QModelIndex firstObjIdx = treeProxy
-                                    ->match(treeProxy->index(0, 0), TreeModel::UserRoles::TypeCaseRole,
-                                            TypeCase::kObject, 1, Qt::MatchRecursive)
-                                    .first();
+      auto object_message_name = QString::fromStdString(buffers::resources::Object::descriptor()->full_name());
+      auto search = treeProxy->match(treeProxy->index(0, 0), TreeModel::UserRoles::MessageTypeRole, object_message_name,
+                                     1, Qt::MatchRecursive);
+      QModelIndex firstObjIdx = search.first();
+
       QString firstObj = firstObjIdx.data(Qt::DisplayRole).toString();
       objButton->setIcon(firstObjIdx.data(Qt::DecorationRole).value<QIcon>());
       lineEdit->setText(firstObj);
@@ -69,7 +70,7 @@ EventArgumentsDialog::EventArgumentsDialog(QWidget *parent, const QStringList &a
     } else {
       QComboBox *combo = new QComboBox(this);
       auto argList = MainWindow::GetEventData()->value_names_for_type(name->text().toStdString());
-      for (auto a : argList) {
+      for (auto& a : argList) {
         combo->addItem(QString::fromStdString(a.first));
       }
       value = combo;
@@ -93,7 +94,7 @@ EventArgumentsDialog::EventArgumentsDialog(QWidget *parent, const QStringList &a
 const QStringList &EventArgumentsDialog::GetArguments() const { return arguments_; }
 
 void EventArgumentsDialog::done(int r) {
-  for (const QWidget *w : widgets_) {
+  for (const QWidget *w : qAsConst(widgets_)) {
     QVariant argument = w->metaObject()->userProperty().read(w);
     QString argstr = "";
     if (argument.isValid())

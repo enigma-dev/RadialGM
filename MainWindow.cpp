@@ -27,15 +27,16 @@
 #include "yyp.h"
 
 #include <QtWidgets>
+#include <QFile>
 
+#include <sstream>
 #include <functional>
 #include <unordered_map>
-#include <QFile>
-#include <sstream>
 
 #undef GetMessage
 
-QList<QString> MainWindow::EnigmaSearchPaths = {QDir::currentPath(), "./enigma-dev", "../enigma-dev", "../RadialGM/Submodules/enigma-dev"};
+QList<QString> MainWindow::EnigmaSearchPaths = {QDir::currentPath(), "./enigma-dev", "../enigma-dev",
+                                                "../RadialGM/Submodules/enigma-dev"};
 QFileInfo MainWindow::EnigmaRoot = MainWindow::getEnigmaRoot();
 QList<buffers::SystemType> MainWindow::systemCache;
 MainWindow *MainWindow::_instance = nullptr;
@@ -91,19 +92,20 @@ QFileInfo MainWindow::getEnigmaRoot() {
     auto entryList = dir.entryInfoList(QStringList({"ENIGMAsystem"}), filters, QDir::SortFlag::NoSort);
     if (!entryList.empty()) {
       EnigmaRoot = entryList.first();
-        break;
+      break;
     }
   }
 
   return EnigmaRoot;
 }
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainWindow){
-
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainWindow) {
   if (!EnigmaRoot.filePath().isEmpty()) {
     _event_data = std::make_unique<EventData>(ParseEventFile((EnigmaRoot.absolutePath() + "/events.ey").toStdString()));
   } else {
-    qDebug() << "Error: Failed to locate ENIGMA sources. Loading internal events.ey.\n" << "Search Paths:\n" << MainWindow::EnigmaSearchPaths;
+    qDebug() << "Error: Failed to locate ENIGMA sources. Loading internal events.ey.\n"
+             << "Search Paths:\n"
+             << MainWindow::EnigmaSearchPaths;
     QFile internal_events(":/events.ey");
     internal_events.open(QIODevice::ReadOnly | QFile::Text);
     std::stringstream ss;
@@ -183,7 +185,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
   openNewProject();
 }
 
-MainWindow::~MainWindow() { diagnosticTextEdit = nullptr; delete _ui; }
+MainWindow::~MainWindow() {
+  diagnosticTextEdit = nullptr;
+  delete _ui;
+}
 
 void MainWindow::setCurrentConfig(const buffers::resources::Settings &settings) {
   emit _instance->CurrentConfigChanged(settings);
@@ -217,54 +222,31 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   event->accept();
 }
 
-template <typename T>
-T *EditorFactory(MessageModel *model, QWidget *parent) {
-  return new T(model, parent);
-}
-
-void MainWindow::openSubWindow(buffers::TreeNode *item) {
+void MainWindow::openSubWindow(MessageModel *res, MainWindow::EditorFactoryFunction factory_function) {
   using namespace google::protobuf;
+  if (!res) {
+    qDebug() << "Attempt to edit null resource...";
+    return;
+  }
 
-  using TypeCase = buffers::TreeNode::TypeCase;
-  using FactoryMap = std::unordered_map<TypeCase, std::function<BaseEditor *(MessageModel * m, QWidget * p)>>;
-
-  static FactoryMap factoryMap({{TypeCase::kSprite, EditorFactory<SpriteEditor>},
-                                {TypeCase::kSound, EditorFactory<SoundEditor>},
-                                {TypeCase::kBackground, EditorFactory<BackgroundEditor>},
-                                {TypeCase::kPath, EditorFactory<PathEditor>},
-                                {TypeCase::kFont, EditorFactory<FontEditor>},
-                                {TypeCase::kScript, EditorFactory<ScriptEditor>},
-                                {TypeCase::kShader, EditorFactory<ShaderEditor>},
-                                {TypeCase::kTimeline, EditorFactory<TimelineEditor>},
-                                {TypeCase::kObject, EditorFactory<ObjectEditor>},
-                                {TypeCase::kRoom, EditorFactory<RoomEditor>},
-                                {TypeCase::kSettings, EditorFactory<SettingsEditor>}});
-
-  auto swIt = _subWindows.find(item);
+  auto swIt = _subWindows.find(res);
   QMdiSubWindow *subWindow;
   if (swIt == _subWindows.end() || !*swIt) {
-    auto factoryFunction = factoryMap.find(item->type_case());
-    if (factoryFunction == factoryMap.end()) return;  // no registered editor
+    BaseEditor *editor = factory_function(res, this);
+    if (!editor) {
+      qDebug() << "Failed to launch editor for model...";
+      return;
+    }
 
-    MessageModel *res = resourceMap->GetResourceByName(item->type_case(), item->name());
-    BaseEditor *editor = factoryFunction->second(res, this);
-
-    connect(editor, &BaseEditor::ResourceRenamed, resourceMap.get(), &ResourceModelMap::ResourceRenamed);
-    connect(editor, &BaseEditor::ResourceRenamed, [=]() { treeModel->dataChanged(QModelIndex(), QModelIndex()); });
-    connect(treeModel.get(), &TreeModel::ResourceRenamed, editor,
-            [res](TypeCase /*type*/, const QString & /*oldName*/, const QString & /*newName*/) {
-              const QModelIndex index = res->index(TreeNode::kNameFieldNumber);
-              emit res->DataChanged(index, index);
-            });
-
-    subWindow = _subWindows[item] = _ui->mdiArea->addSubWindow(editor);
+    subWindow = _subWindows[res] = _ui->mdiArea->addSubWindow(editor);
     subWindow->resize(subWindow->frameSize().expandedTo(editor->size()));
     editor->setParent(subWindow);
 
-    subWindow->connect(subWindow, &QObject::destroyed, [=]() { _subWindows.remove(item); });
+    subWindow->connect(subWindow, &QObject::destroyed, [=]() { _subWindows.remove(res); });
 
     subWindow->setWindowIcon(subWindow->widget()->windowIcon());
-    editor->setWindowTitle(QString::fromStdString(item->name()));
+    editor->setWindowTitle(
+        res->GetParentModel<MessageModel>()->Data(FieldPath::Of<TreeNode>(TreeNode::kNameFieldNumber)).toString());
   } else {
     subWindow = *swIt;
   }
@@ -286,11 +268,11 @@ void MainWindow::updateWindowMenu() {
     const auto windowTitle = mdiSubWindow->windowTitle();
     QString numberString = QString::number(i + 1);
     numberString = numberString.insert(numberString.length() - 1, '&');
-    QString text = tr("%1 %2").arg(numberString).arg(windowTitle);
+    QString text = tr("%1 %2").arg(numberString, windowTitle);
 
-    QAction *action = _ui->menuWindow->addAction(
-        mdiSubWindow->windowIcon(), text, mdiSubWindow,
-          [this, mdiSubWindow]() { _ui->mdiArea->setActiveSubWindow(mdiSubWindow); });
+    QAction *action =
+        _ui->menuWindow->addAction(mdiSubWindow->windowIcon(), text, mdiSubWindow,
+                                   [this, mdiSubWindow]() { _ui->mdiArea->setActiveSubWindow(mdiSubWindow); });
     windowActions.append(action);
     action->setCheckable(true);
     action->setChecked(mdiSubWindow == _ui->mdiArea->activeSubWindow());
@@ -315,17 +297,64 @@ void MainWindow::openFile(QString fName) {
 
 void MainWindow::openNewProject() {
   MainWindow::setWindowTitle(tr("<new game> - ENIGMA"));
-  auto newProject = std::unique_ptr<buffers::Project>(new buffers::Project());
+  auto newProject = std::make_unique<buffers::Project>();
   auto *root = newProject->mutable_game()->mutable_root();
   QList<QString> defaultGroups = {tr("Sprites"), tr("Sounds"),  tr("Backgrounds"), tr("Paths"),
                                   tr("Scripts"), tr("Shaders"), tr("Fonts"),       tr("Timelines"),
                                   tr("Objects"), tr("Rooms"),   tr("Includes"),    tr("Configs")};
-  for (auto groupName : defaultGroups) {
-    auto *groupNode = root->add_child();
-    groupNode->set_folder(true);
+  // We can edit the proto directly, here, since the model doesn't exist, yet.
+  for (const auto &groupName : defaultGroups) {
+    auto *groupNode = root->mutable_folder()->add_children();
     groupNode->set_name(groupName.toStdString());
+    groupNode->mutable_folder();
   }
   openProject(std::move(newProject));
+}
+
+template <typename Editor>
+TreeModel::EditorLauncher Launch(MainWindow *parent) {
+  struct EditorFactoryFactory {
+    static BaseEditor *Factory(MessageModel *model, MainWindow *parent) {
+      if (!model || !model->GetParentModel<MessageModel>()) return nullptr;
+      return new Editor(model, parent);
+    }
+  };
+  return [parent](MessageModel *model) { parent->openSubWindow(model, EditorFactoryFactory::Factory); };
+}
+
+void ConfigureIconFields(ProtoModel::DisplayConfig *conf, const Descriptor *desc,
+                         std::set<const Descriptor *> *visited) {
+  for (int i = 0; i < desc->field_count(); ++i) {
+    const FieldDescriptor *field = desc->field(i);
+    if (field->options().HasExtension(buffers::resource_ref)) {
+      std::string resource_type = field->options().GetExtension(buffers::resource_ref);
+      if (resource_type == "object") {
+        conf->SetFieldIconLookup(field, GetObjectSpriteByNameField);
+        conf->SetFieldDefaultIcon(field, "object");
+      } else if (resource_type == "sprite") {
+        conf->SetFieldIconLookup(field, GetSpriteIconByNameField);
+      } else if (resource_type == "background") {
+        conf->SetFieldIconLookup(field, GetBackgroundIconByNameField);
+      } else if (resource_type == "room") {
+        // no preview for rooms yet
+      } else {
+        qDebug() << "Unknown resource ref type: " << resource_type.c_str();
+      }
+    }
+    if (field->options().HasExtension(buffers::file_kind)) {
+      if (field->options().GetExtension(buffers::file_kind) == buffers::FileKind::IMAGE) {
+        conf->SetFieldIconLookup(field, GetFileIcon);
+      }
+    }
+    if (const Descriptor *submsg = field->message_type()) {
+      if (visited->insert(submsg).second) ConfigureIconFields(conf, submsg, visited);
+    }
+  }
+}
+
+void ConfigureIconFields(ProtoModel::DisplayConfig *conf, const Descriptor *desc) {
+  std::set<const Descriptor *> visited{desc};
+  return ConfigureIconFields(conf, desc, &visited);
 }
 
 void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
@@ -334,12 +363,90 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
 
   _project = std::move(openedProject);
 
-  resourceMap.reset(new ResourceModelMap(_project->mutable_game()->mutable_root(), nullptr));
-  treeModel.reset(new TreeModel(_project->mutable_game()->mutable_root(), resourceMap.get(), nullptr));
+  TreeModel::DisplayConfig treeConf;
+  treeConf.UseEditorLauncher<buffers::resources::Sprite>(Launch<SpriteEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::Sound>(Launch<SoundEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::Background>(Launch<BackgroundEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::Path>(Launch<PathEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::Font>(Launch<FontEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::Script>(Launch<ScriptEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::Shader>(Launch<ShaderEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::Timeline>(Launch<TimelineEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::Object>(Launch<ObjectEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::Room>(Launch<RoomEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::Settings>(Launch<SettingsEditor>(this));
+
+  ProtoModel::DisplayConfig msgConf;
+  msgConf.SetDefaultIcon<buffers::TreeNode::Folder>("group");
+  msgConf.SetDefaultIcon<buffers::TreeNode::UnknownResource>("info");
+  msgConf.SetDefaultIcon<buffers::resources::Sprite>("sprite");
+  msgConf.SetDefaultIcon<buffers::resources::Sound>("sound");
+  msgConf.SetDefaultIcon<buffers::resources::Background>("background");
+  msgConf.SetDefaultIcon<buffers::resources::Path>("path");
+  msgConf.SetDefaultIcon<buffers::resources::Script>("script");
+  msgConf.SetDefaultIcon<buffers::resources::Shader>("shader");
+  msgConf.SetDefaultIcon<buffers::resources::Font>("font");
+  msgConf.SetDefaultIcon<buffers::resources::Timeline>("timeline");
+  msgConf.SetDefaultIcon<buffers::resources::Object>("object");
+  msgConf.SetDefaultIcon<buffers::resources::Room>("room");
+  msgConf.SetDefaultIcon<buffers::resources::Settings>("settings");
+
+  ConfigureIconFields(&msgConf, TreeNode::GetDescriptor());
+
+  msgConf.SetMessageIconPathField<buffers::resources::Sprite>(
+      FieldPath::RepeatedOffset(buffers::resources::Sprite::kSubimagesFieldNumber, 0));
+  msgConf.SetMessageIconPathField<buffers::resources::Background>(buffers::resources::Background::kImageFieldNumber);
+  msgConf.SetMessageIconIdLookup<buffers::resources::Object>(GetSpriteIconByNameField,
+                                                             buffers::resources::Object::kSpriteNameFieldNumber);
+
+  msgConf.SetMessageLabelField<buffers::TreeNode>(buffers::TreeNode::kNameFieldNumber);
+
+  msgConf.SetFieldHeaderIcon<buffers::resources::Path::Point>(":/actions/diamond-red.png",
+                                                              buffers::resources::Path::Point::kXFieldNumber);
+  msgConf.SetFieldHeaderIcon<buffers::resources::Path::Point>(":/actions/diamond-green.png",
+                                                              buffers::resources::Path::Point::kYFieldNumber);
+  msgConf.SetFieldHeaderIcon<buffers::resources::Path::Point>(":/actions/diamond-blue.png",
+                                                              buffers::resources::Path::Point::kSpeedFieldNumber);
+
+  treeConf.SetMessagePassthrough<buffers::TreeNode>();
+  treeConf.SetMessagePassthrough<buffers::TreeNode::Folder>();
+  treeConf.DisableOneofReassignment<buffers::TreeNode>();
+
+  resourceMap.reset(new ResourceModelMap(this));
+
+  auto pm = new MessageModel(ProtoModel::NonProtoParent{this}, _project->mutable_game()->mutable_root());
+
+  // Connect methods to auto update fields with extensions
+  connect(pm, &ProtoModel::ModelConstructed, [](ProtoModel *model) {
+    PrimitiveModel *primitive_model = model->TryCastAsPrimitiveModel();
+    if (primitive_model) {
+      const FieldDescriptor *const field = primitive_model->GetFieldDescriptor();
+      if (field && !field->options().GetExtension(buffers::resource_ref).empty())
+        connect(resourceMap.get(),
+                qOverload<const std::string &, const QString &, const QString &>(&ResourceModelMap::ResourceRenamed),
+                primitive_model,
+                [primitive_model](const std::string &type, const QString &newValue, const QString &oldValue) {
+                  primitive_model->ExtensionChanged<decltype(buffers::resource_ref)>(buffers::resource_ref, type,
+                                                                                     newValue, oldValue);
+                });
+    }
+  });
+
+  pm->RebuildSubModels();
+
+  pm->SetDisplayConfig(msgConf);
+
+  resourceMap->TreeChanged(pm);
+  treeModel.reset(new TreeModel(pm, nullptr, treeConf));
 
   _ui->treeView->setModel(treeModel.get());
-  treeModel->connect(treeModel.get(), &TreeModel::ResourceRenamed, resourceMap.get(),
-                     &ResourceModelMap::ResourceRenamed);
+  connect(treeModel.get(), &TreeModel::ItemRenamed, resourceMap.get(),
+          qOverload<buffers::TreeNode::TypeCase, const QString &, const QString &>(&ResourceModelMap::ResourceRenamed));
+  connect(treeModel.get(), &TreeModel::TreeChanged, resourceMap.get(), &ResourceModelMap::TreeChanged);
+  connect(treeModel.get(), &TreeModel::ItemRemoved, resourceMap.get(), &ResourceModelMap::ResourceRemoved,
+          Qt::DirectConnection);
+  connect(treeModel.get(), &TreeModel::ModelAboutToBeDeleted, this, &MainWindow::ResourceModelDeleted,
+          Qt::DirectConnection);
 }
 
 void MainWindow::on_actionNew_triggered() { openNewProject(); }
@@ -419,8 +526,7 @@ void MainWindow::on_actionExploreENIGMA_triggered() { QDesktopServices::openUrl(
 
 void MainWindow::on_actionAbout_triggered() {
   QMessageBox aboutBox(QMessageBox::Information, tr("About"),
-                       tr("ENIGMA is a free, open-source, and cross-platform game engine."),
-                       QMessageBox::Ok, this);
+                       tr("ENIGMA is a free, open-source, and cross-platform game engine."), QMessageBox::Ok, this);
   QAbstractButton *aboutQtButton = aboutBox.addButton(tr("About Qt"), QMessageBox::HelpRole);
   aboutBox.exec();
 
@@ -430,41 +536,37 @@ void MainWindow::on_actionAbout_triggered() {
 }
 
 void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
-  buffers::TreeNode *item = static_cast<buffers::TreeNode *>(index.internalPointer());
-  const QString name = QString::fromStdString(item->name());
-
-  if (item->has_folder()) {
+  if (treeModel->rowCount(index)) {
+    // Allow node expansion to happen.
     return;
   }
-
-  openSubWindow(item);
+  treeModel->triggerNodeEdit(index, _ui->treeView);
 }
 
 void MainWindow::on_actionClearRecentMenu_triggered() { _recentFiles->clear(); }
 
 void MainWindow::CreateResource(TypeCase typeCase) {
-  auto child = std::unique_ptr<TreeNode>(new TreeNode());
+  TreeNode child;
   auto fieldNum = ResTypeFields[typeCase];
-  const Descriptor *desc = child->GetDescriptor();
-  const Reflection *refl = child->GetReflection();
+  const Descriptor *desc = child.GetDescriptor();
+  const Reflection *refl = child.GetReflection();
   const FieldDescriptor *field = desc->FindFieldByNumber(fieldNum);
 
   // allocate and set the child's resource field
-  refl->MutableMessage(child.get(), field);
+  refl->MutableMessage(&child, field);
 
   // find a unique name for the new resource
-  const QString name = resourceMap->CreateResourceName(child.get());
-  child->set_name(name.toStdString());
-  // open the new resource for editing
-  this->resourceMap->AddResource(child.get());
-  openSubWindow(child.get());
+  child.set_name(resourceMap->CreateResourceName(&child).toStdString());
   // release ownership of the new child to its parent and the tree
-  auto index = this->treeModel->addNode(child.release(), _ui->treeView->currentIndex());
+  auto index = this->treeModel->addNode(child, _ui->treeView->currentIndex());
+  treeModel->triggerNodeEdit(index, _ui->treeView);
+}
 
-  // select the new node so that it gets "revealed" and its parent is expanded
-  _ui->treeView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
-  // start editing the name of the resource in the tree for convenience
-  _ui->treeView->edit(index);
+void MainWindow::ResourceModelDeleted(MessageModel *m) {
+  if (_subWindows.contains(m)) {
+    static_cast<BaseEditor *>(_subWindows[m]->widget())->MarkDeleted();
+    _subWindows[m]->close();
+  }
 }
 
 void MainWindow::on_actionCreateSprite_triggered() { CreateResource(TypeCase::kSprite); }
@@ -490,39 +592,23 @@ void MainWindow::on_actionCreateRoom_triggered() { CreateResource(TypeCase::kRoo
 void MainWindow::on_actionCreateSettings_triggered() { CreateResource(TypeCase::kSettings); }
 
 void MainWindow::on_actionDuplicate_triggered() {
-  if (!_ui->treeView->selectionModel()->hasSelection()) return;
+ // if (!_ui->treeView->selectionModel()->hasSelection()) return;
   const auto index = _ui->treeView->selectionModel()->currentIndex();
-  const auto *node = static_cast<const buffers::TreeNode *>(index.internalPointer());
-  if (node->has_folder()) return;
-
-  // duplicate the node
-  auto *dup = treeModel->duplicateNode(*node);
-  // insert the duplicate into the tree
-  const auto dupIndex = treeModel->insert(index.parent(), index.row() + 1, dup);
-  // open an editor for the duplicate node
-  openSubWindow(dup);
-
-  // select the new node so that it gets "revealed" and its parent is expanded
-  _ui->treeView->selectionModel()->setCurrentIndex(dupIndex, QItemSelectionModel::ClearAndSelect);
-  // start editing the name of the resource in the tree for convenience
-  _ui->treeView->edit(dupIndex);
+  QModelIndex dupIndex = treeModel->duplicateNode(index);
+  // Triggers edit of either resource or name label.
+  // TODO: maybe confirm before duplicating an entire fucking group; we're all reasonable people
+  treeModel->triggerNodeEdit(dupIndex, _ui->treeView);
 }
 
 void MainWindow::on_actionCreateGroup_triggered() {
-  auto child = std::unique_ptr<TreeNode>(new TreeNode());
-  child->set_folder(true);
+  TreeNode child;
+  child.mutable_folder();  // Gives the node an empty folder.
 
   // find a unique name for the new group
   const QString name = resourceMap->CreateResourceName(TypeCase::kFolder, "group");
-  child->set_name(name.toStdString());
-  // release ownership of the new child to its parent and the tree
-  this->resourceMap->AddResource(child.get());
-  auto index = this->treeModel->addNode(child.release(), _ui->treeView->currentIndex());
+  child.set_name(name.toStdString());
 
-  // select the new node so that it gets "revealed" and its parent is expanded
-  _ui->treeView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
-  // start editing the name of the resource in the tree for convenience
-  _ui->treeView->edit(index);
+  this->treeModel->triggerNodeEdit(this->treeModel->addNode(child, _ui->treeView->currentIndex()), _ui->treeView);
 }
 
 void MainWindow::on_actionRename_triggered() {
@@ -534,52 +620,31 @@ void MainWindow::on_actionProperties_triggered() {
   if (!_ui->treeView->selectionModel()->hasSelection()) return;
   auto selected = _ui->treeView->selectionModel()->selectedIndexes();
   for (auto index : selected) {
-    auto *treeNode = static_cast<buffers::TreeNode *>(index.internalPointer());
-    openSubWindow(treeNode);
-  }
-}
-
-static void CollectNodes(buffers::TreeNode *root, QSet<buffers::TreeNode *> &cache) {
-  cache.insert(root);
-  for (int i = 0; i < root->child_size(); ++i) {
-    auto *child = root->mutable_child(i);
-    cache.insert(child);
-    if (child->has_folder()) CollectNodes(child, cache);
+    treeModel->triggerNodeEdit(index, _ui->treeView);
   }
 }
 
 void MainWindow::on_actionDelete_triggered() {
   if (!_ui->treeView->selectionModel()->hasSelection()) return;
   auto selected = _ui->treeView->selectionModel()->selectedIndexes();
-  QSet<buffers::TreeNode *> selectedNodes;
-  for (auto index : selected) {
-    auto *treeNode = static_cast<buffers::TreeNode *>(index.internalPointer());
-    CollectNodes(treeNode, selectedNodes);
-  }
-  QString selectedNames = "";
-  for (auto node : selectedNodes) {
-    selectedNames += (node == *selectedNodes.begin() ? "" : ", ") + QString::fromStdString(node->name());
+
+  QSet<const QModelIndex> selectedNodes;
+  for (auto& index : qAsConst(selected)) {
+    selectedNodes.insert(index);
   }
 
-  QMessageBox mb(
-    QMessageBox::Icon::Question,
-    tr("Delete Resources"),
-    tr("Do you want to delete the selected resources from the project?"),
-    QMessageBox::Yes | QMessageBox::No, this
-  );
+  QString selectedNames = "";
+  for (auto &node : qAsConst(selectedNodes)) {
+    selectedNames += (node == *selectedNodes.begin() ? "" : ", ") + node.data().toString();
+  }
+
+  QMessageBox mb(QMessageBox::Icon::Question, tr("Delete Resources"),
+                 tr("Do you want to delete the selected resources from the project?"),
+                 QMessageBox::Yes | QMessageBox::No, this);
   mb.setDetailedText(selectedNames);
   int ret = mb.exec();
   if (ret != QMessageBox::Yes) return;
-
-  // close subwindows
-  for (auto node : selectedNodes) {
-    if (_subWindows.contains(node)) _subWindows[node]->close();
-  }
-
-  // remove tree nodes (recursively unmaps names)
-  for (auto index : selected) {
-    this->treeModel->removeNode(index);
-  }
+  treeModel->BatchRemove(selectedNodes);
 }
 
 void MainWindow::on_actionExpand_triggered() { _ui->treeView->expandAll(); }

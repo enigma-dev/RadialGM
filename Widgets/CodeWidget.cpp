@@ -21,7 +21,8 @@ void CodeWidget::loadSource() {
   fileDialog.setFileMode(QFileDialog::ExistingFile);
   fileDialog.setMimeTypeFilters(this->fileFilters());
   if (fileDialog.exec() != QDialog::Accepted) return;
-  const QString fn = fileDialog.selectedFiles().first();
+  if (fileDialog.selectedFiles().empty()) return;
+  const QString fn = fileDialog.selectedFiles().at(0);
   if (fn.isEmpty()) return;
   QFile file(fn);
 
@@ -37,7 +38,8 @@ void CodeWidget::saveSource() {
   fileDialog.setMimeTypeFilters(this->fileFilters());
   if (fileDialog.exec() != QDialog::Accepted) return;
 
-  const QString fn = fileDialog.selectedFiles().first();
+  if (fileDialog.selectedFiles().empty()) return;
+  const QString fn = fileDialog.selectedFiles().at(0);
   if (fn.isEmpty()) return;
   QFile file(fn);
 

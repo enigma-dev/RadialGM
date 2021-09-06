@@ -1,8 +1,10 @@
-#include "SpriteEditor.h"
-#include "Components/Utility.h"
-#include "Models/MessageModel.h"
-
 #include "ui_SpriteEditor.h"
+
+#include "Components/Utility.h"
+#include "SpriteEditor.h"
+#include "Models/MessageModel.h"
+#include "Models/RepeatedPrimitiveModel.h"
+#include "Utils/QBoilerplate.h"
 
 #include <QCheckBox>
 #include <QClipboard>
@@ -20,10 +22,11 @@ SpriteEditor::SpriteEditor(MessageModel* model, QWidget* parent)
   connect(_ui->actionSave, &QAction::triggered, this, &BaseEditor::OnSave);
   _ui->scrollAreaWidget->SetAssetView(_ui->subimagePreview);
 
-  QCheckBox* showBBox = new QCheckBox(tr("Show BBox"),this);
+  QCheckBox* showBBox = new QCheckBox(tr("Show BBox"), this);
   showBBox->setChecked(true);
-  QCheckBox* showOrigin = new QCheckBox(tr("Show Origin"),this);
+  QCheckBox* showOrigin = new QCheckBox(tr("Show Origin"), this);
   showOrigin->setChecked(true);
+  _ui->subImageList->setItemDelegate(new qboilerplate::RemoveDisplayRole);
 
   _ui->mainToolBar->addWidget(showBBox);
   _ui->mainToolBar->addWidget(showOrigin);
@@ -40,21 +43,22 @@ SpriteEditor::SpriteEditor(MessageModel* model, QWidget* parent)
   _resMapper->addMapping(_ui->topSpinBox, Sprite::kBboxTopFieldNumber);
   _resMapper->addMapping(_ui->bottomSpinBox, Sprite::kBboxBottomFieldNumber);
 
-  RebindSubModels();
+  SpriteEditor::RebindSubModels();
 }
 
 SpriteEditor::~SpriteEditor() { delete _ui; }
 
 void SpriteEditor::RebindSubModels() {
-  MessageModel* _spriteModel = _model->GetSubModel<MessageModel*>(TreeNode::kSpriteFieldNumber);
-  _subimagesModel = _spriteModel->GetSubModel<RepeatedImageModel*>(Sprite::kSubimagesFieldNumber);
+  _spriteModel = _model->GetSubModel<MessageModel*>(TreeNode::kSpriteFieldNumber);
+  _subimagesModel = _spriteModel->GetSubModel<RepeatedStringModel*>(Sprite::kSubimagesFieldNumber);
+  connect(_spriteModel, &ProtoModel::DataChanged, this, [this]() { _ui->subimagePreview->update(); });
+
+  _ui->subImageList->setIconSize(QSize(64, 64));
 
   _ui->subImageList->setModel(_subimagesModel);
-  _ui->subImageList->setIconSize(_subimagesModel->GetIconSize());
-  _ui->subImageList->setGridSize(_subimagesModel->GetIconSize());
 
   _ui->subimagePreview->SetResourceModel(_spriteModel);
-  connect(_subimagesModel, &RepeatedImageModel::MismatchedImageSize, this, &SpriteEditor::LoadedMismatchedImage);
+  //connect(_subimagesModel, &RepeatedImageModel::MismatchedImageSize, this, &SpriteEditor::LoadedMismatchedImage);
 
   connect(_ui->subImageList->selectionModel(), &QItemSelectionModel::selectionChanged, this,
           &SpriteEditor::SelectionChanged);
@@ -63,7 +67,7 @@ void SpriteEditor::RebindSubModels() {
 
   BaseEditor::RebindSubModels();
 
-  on_bboxComboBox_currentIndexChanged(_spriteModel->Data(Sprite::kBboxModeFieldNumber).toInt());
+  on_bboxComboBox_currentIndexChanged(_spriteModel->Data(FieldPath::Of<Sprite>(Sprite::kBboxModeFieldNumber)).toInt());
 }
 
 void SpriteEditor::LoadedMismatchedImage(QSize expectedSize, QSize actualSize) {
@@ -73,7 +77,7 @@ void SpriteEditor::LoadedMismatchedImage(QSize expectedSize, QSize actualSize) {
   QString actual = tr("Actual: ") + QString::number(actualSize.width()) + " x " + QString::number(actualSize.height());
 
   QMessageBox::critical(this, tr("Failed to load image"),
-                        QString(tr("Error mismatched image sizes\n%1\n%2")).arg(expected).arg(actual), QMessageBox::Ok);
+                        QString(tr("Error mismatched image sizes\n%1\n%2")).arg(expected, actual), QMessageBox::Ok);
   // TODO: Add some remedies to this such as streching, croping or scaling the background
 }
 
@@ -83,7 +87,8 @@ void SpriteEditor::SubImagesRemoved() {
 
 void SpriteEditor::RemoveSelectedIndexes() {
   RepeatedStringModel::RowRemovalOperation remover(_subimagesModel);
-  for (QModelIndex idx : _ui->subImageList->selectionModel()->selectedIndexes()) {
+  auto const idxs = _ui->subImageList->selectionModel()->selectedIndexes();
+  for (QModelIndex idx : idxs) {
     remover.RemoveRow(idx.row());
   }
 }
@@ -132,7 +137,7 @@ void SpriteEditor::on_actionNewSubimage_triggered() {
   QString fName(QDir::tempPath() + "/" + uid.mid(1, uid.length() - 2) + ".png");
   img.save(fName);
   _subimagesModel->insertRow(_subimagesModel->rowCount());
-  _subimagesModel->SetData(fName, _subimagesModel->rowCount() - 1);
+  _subimagesModel->SetDataAtRow(_subimagesModel->rowCount() - 1, fName);
 }
 
 void SpriteEditor::on_actionDeleteSubimages_triggered() { RemoveSelectedIndexes(); }
@@ -158,43 +163,52 @@ void SpriteEditor::on_actionLoadSubimages_triggered() {
   dialog->setFileMode(QFileDialog::ExistingFiles);
 
   if (dialog->exec() && dialog->selectedFiles().size() > 0) {
-    QImageReader img(dialog->selectedFiles()[0]);
+    QImageReader img(dialog->selectedFiles().at(0));
     if (img.size().width() > 0 && img.size().height() > 0) {
       _subimagesModel->Clear();
-      for (QString fName : dialog->selectedFiles()) {
+      auto const selected = dialog->selectedFiles();
+      for (const QString& fName : selected) {
         QImageReader newImg(fName);
         if (img.size() == newImg.size()) {
           _subimagesModel->insertRow(_subimagesModel->rowCount());
           // TODO: Internalize file
-          _subimagesModel->SetData(fName, _subimagesModel->rowCount() - 1);
+          _subimagesModel->SetDataAtRow(_subimagesModel->rowCount() - 1, fName);
+          _ui->subimagePreview->SetSubimage(0);
+          // Redo BBox
+          on_bboxComboBox_currentIndexChanged(
+              _spriteModel->Data(FieldPath::Of<Sprite>(Sprite::kBboxModeFieldNumber)).toInt());
         } else {
           LoadedMismatchedImage(img.size(), newImg.size());
         }
       }
     } else {
-      qDebug() << " Failed to load image: " << dialog->selectedFiles()[0];
+      qDebug() << " Failed to load image: " << dialog->selectedFiles().at(0);
     }
   }
 }
 
+// FIXME: this duplicated from above
 void SpriteEditor::on_actionAddSubimages_triggered() {
   FileDialog* dialog = new FileDialog(this, FileDialog_t::SpriteLoad, false);
   dialog->setFileMode(QFileDialog::ExistingFiles);
 
   if (dialog->exec() && dialog->selectedFiles().size() > 0) {
     QSize imgSize = _ui->subimagePreview->GetPixmap().size();
-    for (QString fName : dialog->selectedFiles()) {
+    auto const files = dialog->selectedFiles();
+    for (const QString& fName : files) {
       QImageReader newImg(fName);
       if (imgSize == newImg.size()) {
         _subimagesModel->insertRow(_subimagesModel->rowCount());
         // TODO: Internalize file
-        _subimagesModel->SetData(fName, _subimagesModel->rowCount() - 1);
+        _subimagesModel->SetData(FieldPath::Of<Sprite>(FieldPath::StartingAt(_subimagesModel->rowCount() - 1),
+                                                       Sprite::kSubimagesFieldNumber),
+                                 fName);
       } else {
         LoadedMismatchedImage(imgSize, newImg.size());
       }
     }
   } else {
-    qDebug() << " Failed to load image: " << dialog->selectedFiles()[0];
+    qDebug() << " Failed to load image: " << dialog->selectedFiles().at(0);
   }
 }
 
@@ -205,8 +219,10 @@ void SpriteEditor::on_actionZoomIn_triggered() { _ui->scrollAreaWidget->ZoomIn()
 void SpriteEditor::on_actionZoomOut_triggered() { _ui->scrollAreaWidget->ZoomOut(); }
 
 void SpriteEditor::on_actionEditSubimages_triggered() {
-  for (QModelIndex idx : _ui->subImageList->selectionModel()->selectedIndexes()) {
-    QDesktopServices::openUrl(QUrl::fromLocalFile(_subimagesModel->Data(idx.row()).toString()));
+  auto const selected = _ui->subImageList->selectionModel()->selectedIndexes();
+  for (const QModelIndex& idx : selected) {
+    QDesktopServices::openUrl(QUrl::fromLocalFile(
+        _subimagesModel->DataAtRow(idx.row()).toString()));
     // TODO: file watcher reload
     // TODO: editor settings
   }

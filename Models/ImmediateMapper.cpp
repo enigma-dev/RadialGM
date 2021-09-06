@@ -86,7 +86,7 @@ void ImmediateDataWidgetMapper::setCurrentIndex(int index) {
   // NOTE: this probably is not threadsafe or reentrant, just like the rest of Qt
   // and any other GUI framework, so take care when synchronizing it with other threads
   QList<QWidget *> wasBlocked;
-  for (QWidget *widget : _widgetList) {
+  for (QWidget *widget : qAsConst(_widgetList)) {
     if (!widget->blockSignals(true)) {
       wasBlocked.append(widget);
     }

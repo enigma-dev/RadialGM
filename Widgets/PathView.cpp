@@ -28,11 +28,11 @@ int PathView::Size() const {
   RepeatedMessageModel *pointsModel = _pathModel->GetSubModel<RepeatedMessageModel *>(Path::kPointsFieldNumber);
   return pointsModel->rowCount();
 }
-
-bool PathView::Closed() const { return _pathModel->Data(Path::kClosedFieldNumber).toBool(); }
-bool PathView::Smooth() const { return _pathModel->Data(Path::kSmoothFieldNumber).toBool(); }
+//>Data(FieldPath::Of<Background>(Background::kImageFieldNumber))
+bool PathView::Closed() const { return _pathModel->Data(FieldPath::Of<Path>(Path::kClosedFieldNumber)).toBool(); }
+bool PathView::Smooth() const { return _pathModel->Data(FieldPath::Of<Path>(Path::kSmoothFieldNumber)).toBool(); }
 int PathView::Precision() const {
-  QVariant prec = _pathModel->Data(Path::kPrecisionFieldNumber);
+  QVariant prec = _pathModel->Data(FieldPath::Of<Path>(Path::kPrecisionFieldNumber));
   if (!prec.isValid()) return 4;
   int res = prec.toInt();
   if (res < 1) return 1;
@@ -57,8 +57,9 @@ int PathView::EffectiveIndex(int n, int size, bool closed) const {
 QPoint PathView::EffectivePoint(int n, int size, bool closed) const { return Point(EffectiveIndex(n, size, closed)); }
 QPoint PathView::Point(int n) const {
   RepeatedMessageModel *pointsModel = _pathModel->GetSubModel<RepeatedMessageModel *>(Path::kPointsFieldNumber);
-  return QPoint(pointsModel->Data(n, Path::Point::kXFieldNumber).toInt(),
-                pointsModel->Data(n, Path::Point::kYFieldNumber).toInt());
+  return QPoint(
+      pointsModel->Data(FieldPath::Of<Path::Point>(FieldPath::StartingAt(n), Path::Point::kXFieldNumber)).toInt(),
+      pointsModel->Data(FieldPath::Of<Path::Point>(FieldPath::StartingAt(n), Path::Point::kYFieldNumber)).toInt());
 }
 
 namespace {
@@ -127,9 +128,10 @@ QVector<QPoint> PathView::RenderPoints(const QVector<QPoint> &user_points) const
 }
 
 void PathView::Paint(QPainter &painter) {
+  parentWidget()->update();
   RoomView::Paint(painter);
 
-  RepeatedMessageModel *pointsModel = _pathModel->GetSubModel<RepeatedMessageModel *>(Path::kPointsFieldNumber);
+  RepeatedMessageModel *pointsModel = _pathModel->GetSubModel<RepeatedMessageModel>(Path::kPointsFieldNumber);
   if (!pointsModel->Empty()) {
     int size = pointsModel->rowCount();
 
@@ -138,7 +140,7 @@ void PathView::Paint(QPainter &painter) {
     for (int i = 0; i < size; ++i) user_points[i] = Point(i);
 
     QVector<QPoint> rendered_points = RenderPoints(user_points);
-    path.moveTo(rendered_points[0]);
+    if (rendered_points.size() > 0) path.moveTo(rendered_points[0]);
     for (int i = 0; i < rendered_points.size(); ++i) {
       path.lineTo(rendered_points[i]);
     }
@@ -150,7 +152,7 @@ void PathView::Paint(QPainter &painter) {
     painter.setPen(QPen(Qt::black, 1));
 
     painter.setBrush(QBrush(Qt::blue));
-    for (const QPoint &point : user_points) {
+    for (const QPoint &point : qAsConst(user_points)) {
       painter.drawEllipse(point, 4, 4);
     }
 

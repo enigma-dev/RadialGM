@@ -20,8 +20,12 @@ QMAKE_TARGET_PRODUCT = RadialGM IDE
 QMAKE_TARGET_DESCRIPTION = ENIGMA Development Environment
 QMAKE_TARGET_COPYRIGHT = "Copyright \\251 2007-2020 ENIGMA Dev Team"
 
+QMAKE_EXTRA_TARGETS += enigma
+PRE_TARGETDEPS += enigma
+enigma.commands = cd $$PWD/Submodules/enigma-dev/ && make emake
+
 # Uncomment if you want QScintilla
-#CONFIG += rgm_enable_syntaxhighlight
+CONFIG += rgm_enable_syntaxhighlight
 
 rgm_enable_syntaxhighlight {
   SOURCES += Widgets/CodeWidgetScintilla.cpp
@@ -68,9 +72,12 @@ SOURCES += \
     Models/EventTypesListSortFilterProxyModel.cpp \
     Models/EventsListModel.cpp \
     Models/MessageModel.cpp \
-    Models/RepeatedImageModel.cpp \
+    Models/PrimitiveModel.cpp \
     Models/RepeatedMessageModel.cpp \
-    Models/RepeatedStringModel.cpp \
+    Models/RepeatedModel.cpp \
+    Models/RepeatedSortFilterProxyModel.cpp \
+    Utils/FieldPath.cpp \
+    Utils/ProtoManip.cpp \
     Widgets/AssetScrollAreaBackground.cpp \
     Widgets/PathView.cpp \
     Widgets/SpriteSubimageListView.cpp \
@@ -129,10 +136,15 @@ HEADERS += \
     Models/EventTypesListSortFilterProxyModel.h \
     Models/EventsListModel.h \
     Models/MessageModel.h \
-    Models/RepeatedImageModel.h \
+    Models/PrimitiveModel.h \
     Models/RepeatedMessageModel.h \
     Models/RepeatedModel.h \
-    Models/RepeatedStringModel.h \
+    Models/RepeatedPrimitiveModel.h \
+    Models/RepeatedSortFilterProxyModel.h \
+    Utils/FieldPath.h \
+    Utils/ProtoManip.h \
+    Utils/QBoilerplate.h \
+    Utils/SafeCasts.h \
     Widgets/AssetScrollArea.h \
     Widgets/AssetScrollAreaBackground.h \
     Widgets/BackgroundView.h \
@@ -185,4 +197,28 @@ RESOURCES += \
     images.qrc
 
 DISTFILES += \
-  CMakeLists.txt
+  CMakeLists.txt \
+  Submodules/enigma-dev/shared/protos/Action.proto \
+  Submodules/enigma-dev/shared/protos/Background.proto \
+  Submodules/enigma-dev/shared/protos/Building.md \
+  Submodules/enigma-dev/shared/protos/CMakeLists.txt \
+  Submodules/enigma-dev/shared/protos/EventDescriptor.proto \
+  Submodules/enigma-dev/shared/protos/Font.proto \
+  Submodules/enigma-dev/shared/protos/GameInformation.proto \
+  Submodules/enigma-dev/shared/protos/Include.proto \
+  Submodules/enigma-dev/shared/protos/Makefile \
+  Submodules/enigma-dev/shared/protos/Object.proto \
+  Submodules/enigma-dev/shared/protos/Path.proto \
+  Submodules/enigma-dev/shared/protos/Room.proto \
+  Submodules/enigma-dev/shared/protos/Script.proto \
+  Submodules/enigma-dev/shared/protos/Settings.proto \
+  Submodules/enigma-dev/shared/protos/Shader.proto \
+  Submodules/enigma-dev/shared/protos/Sound.proto \
+  Submodules/enigma-dev/shared/protos/Sprite.proto \
+  Submodules/enigma-dev/shared/protos/Timeline.proto \
+  Submodules/enigma-dev/shared/protos/compiler.proto \
+  Submodules/enigma-dev/shared/protos/game.proto \
+  Submodules/enigma-dev/shared/protos/options.proto \
+  Submodules/enigma-dev/shared/protos/project.proto \
+  Submodules/enigma-dev/shared/protos/server.proto \
+  Submodules/enigma-dev/shared/protos/treenode.proto
