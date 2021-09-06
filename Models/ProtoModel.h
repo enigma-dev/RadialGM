@@ -12,6 +12,8 @@
 #include <QList>
 #include <QSize>
 
+#include <optional>
+
 using namespace google::protobuf;
 using CppType = FieldDescriptor::CppType;
 using TypeCase = buffers::TreeNode::TypeCase;
