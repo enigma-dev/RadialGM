@@ -43,6 +43,10 @@ static void TreeChangedHelper(MessageModel* model, ResourceModelMap* rm) {
   }
 }
 
+void ResourceModelMap::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles) {
+  emit DataChanged();
+}
+
 void ResourceModelMap::TreeChanged(MessageModel* model) {
   _resources.clear();
   TreeChangedHelper(model, this);
@@ -194,8 +198,6 @@ TypeCase Type(TreeModel::Node* node) {
 void ResourceModelMap::ResourceRenamed(TypeCase type, const QString& oldName, const QString& newName) {
   if (oldName == newName || !_resources[type].contains(oldName)) return;
   _resources[type][newName] = _resources[type][oldName];
-
-  //MainWindow::
 
   emit ResourceRenamed(ResTypeAsString(type), oldName, newName);
   _resources[type].remove(oldName);

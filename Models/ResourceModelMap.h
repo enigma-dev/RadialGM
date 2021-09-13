@@ -21,6 +21,7 @@ class ResourceModelMap : public QObject {
   bool ValidName(TypeCase type, const QString& name);
 
  public slots:
+  void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int>());
   void TreeChanged(MessageModel* model);
   void ResourceRenamed(TypeCase type, const QString& oldName, const QString& newName);
   void ResourceRemoved(TypeCase type, const QString& name,
