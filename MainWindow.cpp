@@ -445,6 +445,8 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   connect(treeModel.get(), &TreeModel::TreeChanged, resourceMap.get(), &ResourceModelMap::TreeChanged);
   connect(treeModel.get(), &TreeModel::ItemRemoved, resourceMap.get(), &ResourceModelMap::ResourceRemoved,
           Qt::DirectConnection);
+  connect(pm, &ProtoModel::dataChanged, resourceMap.get(), &ResourceModelMap::dataChanged,
+          Qt::DirectConnection);
   connect(treeModel.get(), &TreeModel::ModelAboutToBeDeleted, this, &MainWindow::ResourceModelDeleted,
           Qt::DirectConnection);
 }
