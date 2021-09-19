@@ -29,9 +29,9 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
  public:
-  static QScopedPointer<ResourceModelMap> resourceMap;
-  static QScopedPointer<MessageModel> resourceModel;
-  static QScopedPointer<TreeModel> treeModel;
+  static ResourceModelMap* resourceMap;
+  static MessageModel* resourceModel;
+  static TreeModel* treeModel;
   static QList<buffers::SystemType> systemCache;
 
   explicit MainWindow(QWidget *parent);
