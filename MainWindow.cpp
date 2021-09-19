@@ -40,8 +40,8 @@ QList<QString> MainWindow::EnigmaSearchPaths = {QDir::currentPath(), "./enigma-d
 QFileInfo MainWindow::EnigmaRoot = MainWindow::getEnigmaRoot();
 QList<buffers::SystemType> MainWindow::systemCache;
 MainWindow *MainWindow::_instance = nullptr;
-QScopedPointer<ResourceModelMap> MainWindow::resourceMap;
-QScopedPointer<TreeModel> MainWindow::treeModel;
+ResourceModelMap *MainWindow::resourceMap = nullptr;
+TreeModel *MainWindow::treeModel = nullptr;
 std::unique_ptr<EventData> MainWindow::_event_data;
 
 static QTextEdit *diagnosticTextEdit = nullptr;
@@ -412,7 +412,8 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   treeConf.SetMessagePassthrough<buffers::TreeNode::Folder>();
   treeConf.DisableOneofReassignment<buffers::TreeNode>();
 
-  resourceMap.reset(new ResourceModelMap(this));
+  delete resourceMap;
+  resourceMap = new ResourceModelMap(this);
 
   auto pm = new MessageModel(ProtoModel::NonProtoParent{this}, _project->mutable_game()->mutable_root());
 
@@ -422,7 +423,7 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
     if (primitive_model) {
       const FieldDescriptor *const field = primitive_model->GetFieldDescriptor();
       if (field && !field->options().GetExtension(buffers::resource_ref).empty())
-        connect(resourceMap.get(),
+        connect(resourceMap,
                 qOverload<const std::string &, const QString &, const QString &>(&ResourceModelMap::ResourceRenamed),
                 primitive_model,
                 [primitive_model](const std::string &type, const QString &newValue, const QString &oldValue) {
@@ -437,17 +438,18 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   pm->SetDisplayConfig(msgConf);
 
   resourceMap->TreeChanged(pm);
-  treeModel.reset(new TreeModel(pm, nullptr, treeConf));
+  delete treeModel;
+  treeModel = new TreeModel(pm, nullptr, treeConf);
 
-  _ui->treeView->setModel(treeModel.get());
-  connect(treeModel.get(), &TreeModel::ItemRenamed, resourceMap.get(),
+  _ui->treeView->setModel(treeModel);
+  connect(treeModel, &TreeModel::ItemRenamed, resourceMap,
           qOverload<buffers::TreeNode::TypeCase, const QString &, const QString &>(&ResourceModelMap::ResourceRenamed));
-  connect(treeModel.get(), &TreeModel::TreeChanged, resourceMap.get(), &ResourceModelMap::TreeChanged);
-  connect(treeModel.get(), &TreeModel::ItemRemoved, resourceMap.get(), &ResourceModelMap::ResourceRemoved,
+  connect(treeModel, &TreeModel::TreeChanged, resourceMap, &ResourceModelMap::TreeChanged);
+  connect(treeModel, &TreeModel::ItemRemoved, resourceMap, &ResourceModelMap::ResourceRemoved,
           Qt::DirectConnection);
-  connect(pm, &ProtoModel::dataChanged, resourceMap.get(), &ResourceModelMap::dataChanged,
+  connect(pm, &ProtoModel::dataChanged, resourceMap, &ResourceModelMap::dataChanged,
           Qt::DirectConnection);
-  connect(treeModel.get(), &TreeModel::ModelAboutToBeDeleted, this, &MainWindow::ResourceModelDeleted,
+  connect(treeModel, &TreeModel::ModelAboutToBeDeleted, this, &MainWindow::ResourceModelDeleted,
           Qt::DirectConnection);
 }
 

@@ -40,7 +40,7 @@ EventArgumentsDialog::EventArgumentsDialog(QWidget *parent, const QStringList &a
       QMenuView *objMenu = new QMenuView(this);
       TreeSortFilterProxyModel *treeProxy = new TreeSortFilterProxyModel(this);
       treeProxy->SetFilterType(TreeNode::TypeCase::kObject);
-      treeProxy->setSourceModel(MainWindow::treeModel.get());
+      treeProxy->setSourceModel(MainWindow::treeModel);
       objMenu->setModel(treeProxy);
       objButton->setMenu(objMenu);
       objButton->setPopupMode(QToolButton::MenuButtonPopup);

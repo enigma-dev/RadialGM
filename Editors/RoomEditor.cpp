@@ -62,7 +62,7 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   QMenuView* objMenu = new QMenuView(this);
   TreeSortFilterProxyModel* treeProxy = new TreeSortFilterProxyModel(this);
   treeProxy->SetFilterType(TreeNode::TypeCase::kObject);
-  treeProxy->setSourceModel(MainWindow::treeModel.get());
+  treeProxy->setSourceModel(MainWindow::treeModel);
   objMenu->setModel(treeProxy);
   _ui->objectSelectButton->setMenu(objMenu);
 
@@ -82,7 +82,7 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   _ui->statusBar->addWidget(_assetNameLabel);
 
   // This updates all the model views in the event of a sprite is changed
-  connect(MainWindow::resourceMap.get(), &ResourceModelMap::DataChanged, this, [this]() {
+  connect(MainWindow::resourceMap, &ResourceModelMap::DataChanged, this, [this]() {
     _ui->instancesListView->reset();
     _ui->tilesListView->reset();
     _ui->layersPropertiesView->reset();
