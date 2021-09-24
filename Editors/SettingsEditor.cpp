@@ -1,4 +1,5 @@
 #include "SettingsEditor.h"
+#include "Models/SystemsModel.h"
 #include "MainWindow.h"
 #include "ui_SettingsEditor.h"
 
@@ -8,85 +9,49 @@
 
 using namespace buffers::resources;
 
-Q_DECLARE_METATYPE(buffers::SystemInfo);
+static QMap<QString, SystemsModel*> systemsModels;
 
-static std::string get_combo_system_id(const QComboBox* combo) {
-  auto data = combo->currentData();
-  auto subsystem = data.value<buffers::SystemInfo>();
-  return subsystem.id();
+static void initModelCache() {
+  if (systemsModels.empty()) {
+    for (const auto& sys : qAsConst(MainWindow::systemCache)) {
+      systemsModels.insert(QString::fromStdString(sys.name()), new SystemsModel(sys, MainWindow::instance));
+    }
+  }
 }
 
 SettingsEditor::SettingsEditor(MessageModel* model, QWidget* parent)
     : BaseEditor(model, parent), ui(new Ui::SettingsEditor) {
   ui->setupUi(this);
 
-  QPushButton* saveButton = ui->buttonBox->button(QDialogButtonBox::Save);
-  saveButton->setIcon(QIcon(":/actions/accept.png"));
-  connect(saveButton, &QPushButton::clicked, [=]() {
-    Settings settings;
-    auto* api = settings.mutable_api();
-    api->set_target_audio(get_combo_system_id(ui->audioCombo));
-    api->set_target_collision(get_combo_system_id(ui->collisionCombo));
-    api->set_target_compiler(get_combo_system_id(ui->compilerCombo));
-    api->set_target_graphics(get_combo_system_id(ui->graphicsCombo));
-    api->set_target_network(get_combo_system_id(ui->networkCombo));
-    api->set_target_platform(get_combo_system_id(ui->platformCombo));
-    api->set_target_widgets(get_combo_system_id(ui->widgetsCombo));
-    api->add_extensions("Paths");
-
-    emit MainWindow::setCurrentConfig(settings);
-  });
-  QPushButton* discardButton = ui->buttonBox->button(QDialogButtonBox::Discard);
-  discardButton->setIcon(QIcon(":/actions/cancel.png"));
-
   pageMap = {{"api", ui->apiPage},           {"extensions", ui->extensionsPage}, {"compiler", ui->compilerPage},
              {"controls", ui->controlsPage}, {"graphics", ui->graphicsPage},     {"project info", ui->projectInfoPage},
              {"version", ui->versionPage}};
 
-  const QMap<QString, QWidget*> systemUIMap = {
-      {QString("Audio"), ui->audioCombo},         {QString("Platform"), ui->platformCombo},
-      {QString("Graphics"), ui->graphicsCombo},   {QString("Widget"), ui->widgetsCombo},
-      {QString("Collision"), ui->collisionCombo}, {QString("Compilers"), ui->compilerCombo},
-      {QString("Network"), ui->networkCombo},     {QString("Extensions"), ui->extensionsList},
-  };
-  for (const auto& system : qAsConst(MainWindow::systemCache)) {
-    const QString systemName = QString::fromStdString(system.name());
-    auto it = systemUIMap.find(systemName);
-    if (it == systemUIMap.end()) continue;
-    auto widget = it.value();
-    const QString className = widget->metaObject()->className();
-    QListWidget* listWidget = nullptr;
-    QComboBox* combo = nullptr;
-    if (className == "QListWidget") {
-      listWidget = static_cast<QListWidget*>(widget);
-    } else if (className == "QComboBox") {
-      combo = static_cast<QComboBox*>(widget);
-      connect(combo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), [=]() {
-        auto data = combo->currentData();
-        auto subsystem = data.value<buffers::SystemInfo>();
-        const QString subsystemDesc = QString::fromStdString(subsystem.description());
-        const QString subsystemAuthor = QString::fromStdString(subsystem.author());
-        ui->authorName->setText(subsystemAuthor);
-        ui->systemDesc->setPlainText(subsystemDesc);
-      });
-    }
-    for (const auto &subsystem : system.subsystems()) {
-      const QString subsystemName = QString::fromStdString(subsystem.name());
-      const QString subsystemId = QString::fromStdString(subsystem.id());
-      const QString subsystemDesc = QString::fromStdString(subsystem.description());
-      if (combo) {
-        QVariant data;
-        data.setValue(subsystem);
-        combo->addItem(subsystemName, data);
-      } else if (listWidget) {
-        auto item = new QListWidgetItem(subsystemName, listWidget);
-        item->setFlags(item->flags() | Qt::ItemFlag::ItemIsUserCheckable);
-        item->setCheckState(Qt::Unchecked);
-        item->setToolTip(subsystemDesc);
-        item->setData(Qt::UserRole, subsystemId);
-      }
-    }
-  }
+  initModelCache();
+
+  ui->audioCombo->setModel(systemsModels["Audio"]);
+  ui->platformCombo->setModel(systemsModels["Platform"]);
+  ui->compilerCombo->setModel(systemsModels["Compilers"]);
+  ui->graphicsCombo->setModel(systemsModels["Graphics"]);
+  ui->widgetsCombo->setModel(systemsModels["Widget"]);
+  ui->collisionCombo->setModel(systemsModels["Collision"]);
+  ui->networkCombo->setModel(systemsModels["Network"]);
+
+  SettingsEditor::RebindSubModels();
+}
+
+void SettingsEditor::RebindSubModels() {
+  MessageModel* sm = _model->GetSubModel<MessageModel*>(TreeNode::kSettingsFieldNumber);
+
+  ModelMapper* apiMapper = new ModelMapper(sm->GetSubModel<MessageModel*>(Settings::kApiFieldNumber));
+  apiMapper->addMapping(ui->audioCombo, API::kTargetAudioFieldNumber);
+  apiMapper->addMapping(ui->platformCombo, API::kTargetPlatformFieldNumber);
+  apiMapper->addMapping(ui->compilerCombo, API::kTargetCompilerFieldNumber);
+  apiMapper->addMapping(ui->graphicsCombo, API::kTargetGraphicsFieldNumber);
+  apiMapper->addMapping(ui->widgetsCombo, API::kTargetWidgetsFieldNumber);
+  apiMapper->addMapping(ui->networkCombo, API::kTargetNetworkFieldNumber);
+
+  BaseEditor::RebindSubModels();
 }
 
 SettingsEditor::~SettingsEditor() { delete ui; }

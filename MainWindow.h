@@ -33,6 +33,7 @@ class MainWindow : public QMainWindow {
   static MessageModel* resourceModel;
   static TreeModel* treeModel;
   static QList<buffers::SystemType> systemCache;
+  static MainWindow *instance;
 
   explicit MainWindow(QWidget *parent);
   ~MainWindow();
@@ -110,8 +111,6 @@ class MainWindow : public QMainWindow {
 
  private:
   void closeEvent(QCloseEvent *event) override;
-
-  static MainWindow *_instance;
 
   QHash<const MessageModel *, QMdiSubWindow *> _subWindows;
 

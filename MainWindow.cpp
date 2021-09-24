@@ -39,7 +39,7 @@ QList<QString> MainWindow::EnigmaSearchPaths = {QDir::currentPath(), "./enigma-d
                                                 "../RadialGM/Submodules/enigma-dev"};
 QFileInfo MainWindow::EnigmaRoot = MainWindow::getEnigmaRoot();
 QList<buffers::SystemType> MainWindow::systemCache;
-MainWindow *MainWindow::_instance = nullptr;
+MainWindow *MainWindow::instance = nullptr;
 ResourceModelMap *MainWindow::resourceMap = nullptr;
 TreeModel *MainWindow::treeModel = nullptr;
 std::unique_ptr<EventData> MainWindow::_event_data;
@@ -117,7 +117,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
 
   ArtManager::Init();
 
-  _instance = this;
+  instance = this;
 
   setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
   setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
@@ -191,7 +191,7 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::setCurrentConfig(const buffers::resources::Settings &settings) {
-  emit _instance->CurrentConfigChanged(settings);
+  emit instance->CurrentConfigChanged(settings);
 }
 
 void MainWindow::readSettings() {
