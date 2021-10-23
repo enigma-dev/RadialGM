@@ -407,6 +407,10 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
                                                               buffers::resources::Path::Point::kYFieldNumber);
   msgConf.SetFieldHeaderIcon<buffers::resources::Path::Point>(":/actions/diamond-blue.png",
                                                               buffers::resources::Path::Point::kSpeedFieldNumber);
+  msgConf.SetFieldHeaderLabel<buffers::resources::Path::Point>(tr("X"), buffers::resources::Path::Point::kXFieldNumber);
+  msgConf.SetFieldHeaderLabel<buffers::resources::Path::Point>(tr("Y"), buffers::resources::Path::Point::kYFieldNumber);
+  msgConf.SetFieldHeaderLabel<buffers::resources::Path::Point>(tr("Speed"),
+                                                               buffers::resources::Path::Point::kSpeedFieldNumber);
 
   treeConf.SetMessagePassthrough<buffers::TreeNode>();
   treeConf.SetMessagePassthrough<buffers::TreeNode::Folder>();

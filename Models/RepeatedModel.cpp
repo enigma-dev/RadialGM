@@ -112,7 +112,12 @@ QVariant RepeatedModel::headerData(int section, Qt::Orientation /*orientation*/,
   if (section < 0 || section >= field_->message_type()->field_count()) return QVariant();
 
   switch (role) {
-    case Qt::DisplayRole: return QString::fromStdString(field_->message_type()->field(section)->name());
+    case Qt::DisplayRole:  {
+      const auto field = field_->message_type()->field(section);
+      const auto& fd = GetFieldDisplay(field->full_name());
+      if (!fd.name.isEmpty()) return fd.name;
+      else return QString::fromStdString(field->name());
+    }
     case Qt::DecorationRole: {
       const auto& fd = GetFieldDisplay(field_->message_type()->field(section)->full_name());
       if (!fd.header_icon.isEmpty()) return ArtManager::GetIcon(fd.header_icon);

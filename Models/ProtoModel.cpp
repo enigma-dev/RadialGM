@@ -97,6 +97,16 @@ void ProtoModel::DisplayConfig::SetFieldHeaderIcon(const std::string &message, c
   field_display_configs_[field].header_icon = icon_name;
 }
 
+void ProtoModel::DisplayConfig::SetFieldHeaderLabel(const std::string &message, const FieldPath &field_path,
+                                                   const QString &label) {
+  std::string field = message;
+  message_display_configs_[message].icon_field = field_path;
+  for (const auto &fcomp : field_path.fields) field += "." + fcomp->name();
+  if (field_path.size() != 1)
+    qDebug() << "Warning: Nested label fields not currently implemented; `" << field.c_str() << "` won't work properly";
+  field_display_configs_[field].name = label;
+}
+
 const ProtoModel::FieldDisplayConfig &ProtoModel::DisplayConfig::GetFieldDisplay(const std::string &field_qname) const {
   static const ProtoModel::FieldDisplayConfig sentinel(false);
   if (auto it = field_display_configs_.find(field_qname); it != field_display_configs_.end()) return *it;
