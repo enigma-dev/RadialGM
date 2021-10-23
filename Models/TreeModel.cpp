@@ -171,6 +171,7 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
   if (row == -1) row = rowCount(parent);
   QSet<const QModelIndex> nodes;
   std::vector<Message*> messages;
+  QPersistentModelIndex insertIndex = index(row, 0, parent);
 
   while (!stream.atEnd()) {
     int itemRow = 0;
@@ -189,24 +190,17 @@ bool TreeModel::dropMimeData(const QMimeData *mimeData, Qt::DropAction action, i
 
   for (auto index : nodes) {
     auto node = IndexToNode(index);
-    auto oldParent = index.parent();
 
     auto msg = node->GetMessage();
     Message* m_copy = msg.New();
     m_copy->CopyFrom(msg);
     messages.push_back(m_copy);
-
-    if (action == Qt::MoveAction) {
-      // offset the row to insert at by the number of
-      // rows already removed from the same parent
-      if (parent == oldParent && index.row() < row)
-        --row;
-    }
   }
 
   if (action == Qt::MoveAction)
     BatchRemove(nodes);
 
+  row = insertIndex.row();
   for (auto* msg : messages) {
     parentNode->insert(*msg, row);
     delete msg;
