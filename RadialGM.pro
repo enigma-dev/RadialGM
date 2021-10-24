@@ -22,7 +22,7 @@ QMAKE_TARGET_COPYRIGHT = "Copyright \\251 2007-2020 ENIGMA Dev Team"
 
 QMAKE_EXTRA_TARGETS += enigma
 PRE_TARGETDEPS += enigma
-enigma.commands = cd $$PWD/Submodules/enigma-dev/ && make emake
+enigma.commands = cd $$PWD/Submodules/enigma-dev/ && $(MAKE) emake
 
 # Uncomment if you want QScintilla
 CONFIG += rgm_enable_syntaxhighlight
