@@ -2,60 +2,161 @@
 #define REPEATEDMODEL_H
 
 #include "ProtoModel.h"
+#include "Utils/ProtoManip.h"
+#include "Components/Logger.h"
 
 #include <google/protobuf/message.h>
 #include <google/protobuf/reflection.h>
 #include <google/protobuf/repeated_field.h>
 
 // Model representing a repeated field. Do not instantiate an object of this class directly
-template <class T>
 class RepeatedModel : public ProtoModel {
  public:
-  RepeatedModel(ProtoModel *parent, Message *message, const FieldDescriptor *field, MutableRepeatedFieldRef<T> fieldRef)
-      : ProtoModel(parent, message), _field(field), _fieldRef(fieldRef) {}
-
-  // Need to implement this in all RepeatedModels
-  virtual void AppendNew() = 0;
-
-  // Used to apply changes to any underlying data structure if needed
-  virtual void Swap(int /*left*/, int /*right*/) {}
-  virtual void Resize(int /*newSize*/) {}
-  virtual void Clear() { _fieldRef.Clear(); }
+  RepeatedModel(ProtoModel *parent, Message *message, const FieldDescriptor *field)
+      : ProtoModel(parent, message->GetDescriptor()->name(), message->GetDescriptor(), field->index()),
+        _protobuf(message), field_(field) {}
 
   bool Empty() { return rowCount() == 0; }
 
-  virtual QVariant Data(int row, int column = 0) const = 0;
-  virtual bool SetData(const QVariant &value, int row, int column = 0) = 0;
-  virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override = 0;
-  virtual QVariant data(const QModelIndex &index, int role) const override = 0;
+  using ProtoModel::Data;
+  using ProtoModel::SetData;
+  QVariant Data() const override;
+  bool SetData(const QVariant &value) override;
+  const ProtoModel *GetSubModel(const FieldPath &field_path) const override;
 
-  // Moves / deletion / addition only make sense in repeated fields
+  // Does the fastest possible conversion from field to QString. Returns empty for message fields.
+  virtual QString FastGetQString(int row) const  { (void) row; return {}; }
 
-  virtual bool moveRows(const QModelIndex &sourceParent, int source, int count, const QModelIndex &destinationParent,
-                        int destination) override {
-    int left = source;
-    int right = source + count;
-    if (left < 0 || destination < 0) return false;
-    if (right > rowCount() || destination > rowCount()) return false;
-    if (destination >= left && destination < right) return false;
+  QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+  bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole) override;
 
-    beginMoveRows(sourceParent, source, source + count - 1, destinationParent, destination);
+  // Return the submodel serving as the view of the node at the given index.
+  virtual ProtoModel *GetSubModel(int index) const = 0;
 
-    if (destination < left) {
-      SwapBack(destination, left, right);
-    } else {  // Verified above that we're dest < left or dest >= right
-      SwapBack(left, right, destination);
+  QString DebugName() const override {
+    return QString::fromStdString("RepeatedModel<" + field_->full_name() + ">");
+  }
+  RepeatedModel *TryCastAsRepeatedModel() override { return this; }
+
+  /// Represents data in this model as a string. Caution: can be enormous.
+  QString DataDebugString() const;
+
+  const FieldDescriptor *GetRowDescriptor(int row) const override {
+    Q_UNUSED(row);  // All rows of a repeated field have the same descriptor.
+    return field_;
+  }
+
+  void Clear() {
+    beginResetModel();
+    ClearWithoutSignal();
+    endResetModel();
+    ParentDataChanged();
+  }
+
+  const google::protobuf::FieldDescriptor *GetFieldDescriptor() const { return field_; }
+
+  // ===================================================================================================================
+  // == Virtual data mutators. =========================================================================================
+  // ===================================================================================================================
+  // These allow us to implement basic operations in this class without knowing the type of our repeated field.
+
+  // Adds an empty element to the end of the list. Does not emit data change signals.
+  virtual void AppendNewWithoutSignal() = 0;
+  // Swaps two elements in the underlying model efficiently. Does not emit data change signals.
+  virtual void SwapWithoutSignal(int left, int right) = 0;
+  // Removes the last N elements from the underlying model efficiently. Does not emit data change signals.
+  virtual void RemoveLastNRowsWithoutSignal(int n) = 0;
+  // Clears all data in the underlying model. Does not emit data change signals.
+  virtual void ClearWithoutSignal() = 0;
+
+  // Directly update the given row with the given value. The caller will have performed bounds checking.
+  // Type checking (and conversion, where possible) is on the implementer.
+  virtual bool SetDirect(int row, const QVariant &value) = 0;
+  // Directly fetch the given row as a Variant. The caller will have performed bounds checking.
+  virtual QVariant GetDirect(int row) const = 0;
+
+  // Takes the elements in range [part, right) and move them to `left` by swapping.
+  // Rearranges elements so that all those at or after the partition point are
+  // moved to the beginning of the range (`left`). Does not emit data change signals.
+  void SwapBackWithoutSignal(int left, int part, int right) {
+    if (left >= part || part >= right) return;
+    int npart = (part - left) % (right - part);
+    while (part > left) {
+      SwapWithoutSignal(--part, --right);
+    }
+    SwapBackWithoutSignal(left, left + npart, right);
+  }
+
+  // ===================================================================================================================
+  // == Moves / deletion / addition - Qt implementations for repeated fields. ==========================================
+  // ===================================================================================================================
+
+  bool moveRows(const QModelIndex &sourceParent, int source, int count,
+                const QModelIndex &destinationParent, int destination) override;
+
+  int rowCount(const QModelIndex &parent = QModelIndex()) const override = 0;
+  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+  QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
+  QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+
+  // Convenience function for internal moves
+  bool moveRows(int source, int count, int destination);
+  bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+  bool removeRows(int position, int count, const QModelIndex& parent = QModelIndex()) override;
+  QMimeData *mimeData(const QModelIndexList &indexes) const override;
+  bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column,
+                    const QModelIndex &parent) override;
+
+  // Mimedata stuff required for Drag & Drop and clipboard functions
+  Qt::ItemFlags flags(const QModelIndex &index) const override;
+  Qt::DropActions supportedDropActions() const override;
+  QStringList mimeTypes() const override;
+
+  class RowRemovalOperation {
+   public:
+    void RemoveRow(int row) { rows_.insert(row); }
+    void RemoveRows(int row, int count) {
+      for (int i = row; i < row + count; ++i) rows_.insert(i);
+    }
+    void RemoveRows(const QModelIndexList& indexes) {
+      foreach (auto index, indexes)
+        RemoveRow(index.row());
     }
 
-    endMoveRows();
-    ParentDataChanged();
+    /// Only allowable ctor
+    RowRemovalOperation(RepeatedModel *model) : model_(*model) {}
+    // Forbid copy, allow move.
+    RowRemovalOperation(const RowRemovalOperation&) = delete;
+    RowRemovalOperation(RowRemovalOperation&&) = default;
+    /// This method completes the row removal.
+    ~RowRemovalOperation();
 
-    return true;
-  }
+   private:
+    std::set<int> rows_;
+    RepeatedModel &model_;
+  };
+
+ protected:
+  Message *_protobuf;
+  const FieldDescriptor *field_;
+};
+
+// Model representing a repeated field. Do not instantiate an object of this class directly
+template<typename T>
+class BasicRepeatedModel : public RepeatedModel {
+ public:
+  BasicRepeatedModel(ProtoModel *parent, Message *message, const FieldDescriptor *field,
+                     MutableRepeatedFieldRef<T> field_ref)
+      : RepeatedModel(parent, message, field), field_ref_(field_ref) {}
+
+  // Used to apply changes to any underlying data structure if needed
+  // virtual void Swap(int /*left*/, int /*right*/) = 0;
+  // virtual void Resize(int /*newSize*/) = 0;
+  void ClearWithoutSignal() override { field_ref_.Clear(); }
 
   virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override {
     if (parent.isValid()) return 0;
-    return _fieldRef.size();
+    return field_ref_.size();
   }
 
   virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override {
@@ -63,143 +164,22 @@ class RepeatedModel : public ProtoModel {
     return 1;
   }
 
-  virtual QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override {
-    Q_UNUSED(parent);
-    return this->createIndex(row, column);
+  virtual bool SetDirect(int row, const QVariant &value) override { return SetField(field_ref_, row, value); }
+  virtual QVariant GetDirect(int row) const override { return GetField(field_ref_, row); }
+
+  void SwapWithoutSignal(int left, int right) override {
+    field_ref_.SwapElements(left, right);
   }
 
-  virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override {
-    auto data = ProtoModel::headerData(section, orientation, role);
-    if (data.isValid()) return data;
-    if (section == 0 || role != Qt::DisplayRole || orientation != Qt::Orientation::Horizontal)
-      return data;
-    return QString::fromStdString(_field->message_type()->field(section - 1)->name());
+  void RemoveLastNRowsWithoutSignal(int n) override {
+    R_EXPECT_V(n <= field_ref_.size())
+        << "Trying to remove " << n << " rows from a " << field_ref_.size() << "-row field.";
+    for (int j = 0; j < n; ++j) field_ref_.RemoveLast();
   }
-
-  // Convience function for internal moves
-  bool moveRows(int source, int count, int destination) {
-    return moveRows(QModelIndex(), source, count, QModelIndex(), destination);
-  }
-
-  virtual bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override {
-    if (row > rowCount()) return false;
-
-    beginInsertRows(parent, row, row + count - 1);
-
-    int p = rowCount();
-
-    AppendNew();
-
-    SwapBack(row, p, rowCount());
-    ParentDataChanged();
-
-    endInsertRows();
-
-    return true;
-  };
-
-  virtual bool removeRows(int position, int count, const QModelIndex & /*parent*/) override {
-    RowRemovalOperation remover(this);
-    remover.RemoveRows(position, count);
-    return true;
-  }
-
-  // Mimedata stuff required for Drag & Drop and clipboard functions
-  virtual Qt::DropActions supportedDropActions() const override { return Qt::MoveAction | Qt::CopyAction; }
-
-  virtual QStringList mimeTypes() const override {
-    return QStringList("RadialGM/" + QString::fromStdString(_field->DebugString()));
-  }
-
-  virtual Qt::ItemFlags flags(const QModelIndex &index) const override {
-    Qt::ItemFlags defaultFlags = QAbstractItemModel::flags(index);
-
-    if (index.isValid())
-      return Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | defaultFlags;
-    else
-      return Qt::ItemIsDropEnabled | defaultFlags;
-  }
-
-  // Takes the elements in range [part, right) and move them to `left` by swapping.
-  // Rearranges elements so that all those at or after the partition point are
-  // moved to the beginning of the range (`left`).
-  void SwapBack(int left, int part, int right) {
-    if (left >= part || part >= right) return;
-    int npart = (part - left) % (right - part);
-    while (part > left) {
-      Swap(--part, --right);
-      _fieldRef.SwapElements(part, right);
-    }
-    SwapBack(left, left + npart, right);
-  }
-
-  class RowRemovalOperation {
-    std::set<int> _rows;
-    RepeatedModel<T> &_model;
-    MutableRepeatedFieldRef<T> _field;
-
-   public:
-    RowRemovalOperation(RepeatedModel<T> *model) : _model(*model), _field(model->GetfieldRef()) {}
-    void RemoveRow(int row) { _rows.insert(row); }
-    void RemoveRows(int row, int count) {
-      for (int i = row; i < row + count; ++i) _rows.insert(i);
-    }
-
-    ~RowRemovalOperation() {
-      if (_rows.empty()) return;
-
-      // Compute ranges for our deleted rows.
-      struct Range {
-        int first, last;
-        Range() : first(), last() {}
-        Range(int f, int l) : first(f), last(l) {}
-        int size() { return last - first + 1; }
-      };
-      std::vector<Range> ranges;
-      for (int row : _rows) {
-        if (ranges.empty() || row != ranges.back().last + 1) {
-          ranges.emplace_back(row, row);
-        } else {
-          ranges.back().last = row;
-        }
-      }
-
-      // Basic dense range removal. Move "deleted" rows to the end of the array.
-      int left = 0, right = 0;
-      for (auto range : ranges) {
-        while (right < range.first) {
-          _field.SwapElements(left, right);
-          _model.Swap(left, right);
-          left++;
-          right++;
-        }
-        right = range.last + 1;
-      }
-      while (right < _field.size()) {
-        _field.SwapElements(left, right);
-        _model.Swap(left, right);
-        left++;
-        right++;
-      }
-
-      // Send the endRemoveRows operations in the reverse order, removing the
-      // correct number of rows incrementally, or else various components in Qt
-      // will bitch, piss, moan, wail, whine, and cry. Actually, they will anyway.
-      for (Range range : ranges) {
-        emit _model.beginRemoveRows(QModelIndex(), range.first, range.last);
-        _model.Resize(_field.size() - range.size());
-        for (int j = range.first; j <= range.last; ++j) _field.RemoveLast();
-        emit _model.endRemoveRows();
-      }
-
-      _model.ParentDataChanged();
-    }
-  };
 
  protected:
-  MutableRepeatedFieldRef<T> GetfieldRef() const { return _fieldRef; }
-  const FieldDescriptor *_field;
-  MutableRepeatedFieldRef<T> _fieldRef;
+  MutableRepeatedFieldRef<T> GetfieldRef() const { return field_ref_; }
+  MutableRepeatedFieldRef<T> field_ref_;
 };
 
 #endif

@@ -49,7 +49,7 @@ SettingsEditor::SettingsEditor(MessageModel* model, QWidget* parent)
       {QString("Collision"), ui->collisionCombo}, {QString("Compilers"), ui->compilerCombo},
       {QString("Network"), ui->networkCombo},     {QString("Extensions"), ui->extensionsList},
   };
-  for (auto system : MainWindow::systemCache) {
+  for (const auto& system : qAsConst(MainWindow::systemCache)) {
     const QString systemName = QString::fromStdString(system.name());
     auto it = systemUIMap.find(systemName);
     if (it == systemUIMap.end()) continue;
@@ -70,7 +70,7 @@ SettingsEditor::SettingsEditor(MessageModel* model, QWidget* parent)
         ui->systemDesc->setPlainText(subsystemDesc);
       });
     }
-    for (auto subsystem : system.subsystems()) {
+    for (const auto &subsystem : system.subsystems()) {
       const QString subsystemName = QString::fromStdString(subsystem.name());
       const QString subsystemId = QString::fromStdString(subsystem.id());
       const QString subsystemDesc = QString::fromStdString(subsystem.description());

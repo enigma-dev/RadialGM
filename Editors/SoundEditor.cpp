@@ -23,8 +23,6 @@ SoundEditor::SoundEditor(MessageModel* model, QWidget* parent)
   _nodeMapper->addMapping(_ui->nameEdit, TreeNode::kNameFieldNumber);
   _resMapper->addMapping(_ui->volumeSpinBox, Sound::kVolumeFieldNumber);
 
-  _ui->volumeSlider->setValue(static_cast<int>(_ui->volumeSpinBox->value() * 100));
-
   connect(_ui->saveButton, &QAbstractButton::pressed, this, &BaseEditor::OnSave);
 
   _playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
@@ -45,7 +43,8 @@ SoundEditor::SoundEditor(MessageModel* model, QWidget* parent)
 
   connect(_mediaPlayer, &QMediaPlayer::mediaChanged, [=]() {
     _playlist->clear();
-    _playlist->addMedia(QUrl::fromLocalFile(_soundModel->Data(Sound::kDataFieldNumber).toString()));
+    _playlist->addMedia(
+        QUrl::fromLocalFile(_soundModel->Data(FieldPath::Of<Sound>(Sound::kDataFieldNumber)).toString()));
   });
 
   connect(_mediaPlayer, &QMediaPlayer::stateChanged, [=]() {
@@ -57,7 +56,7 @@ SoundEditor::SoundEditor(MessageModel* model, QWidget* parent)
 
   _mediaPlayer->setPlaylist(_playlist);
 
-  RebindSubModels();
+  SoundEditor::RebindSubModels();
 }
 
 SoundEditor::~SoundEditor() { delete _ui; }
@@ -65,8 +64,10 @@ SoundEditor::~SoundEditor() { delete _ui; }
 void SoundEditor::RebindSubModels() {
   _playlist->clear();
   _soundModel = _model->GetSubModel<MessageModel*>(TreeNode::kSoundFieldNumber);
-  _playlist->addMedia(QUrl::fromLocalFile(_soundModel->Data(Sound::kDataFieldNumber).toString()));
+  _playlist->addMedia(QUrl::fromLocalFile(_soundModel->Data(FieldPath::Of<Sound>(Sound::kDataFieldNumber)).toString()));
   BaseEditor::RebindSubModels();
+  // sync volume slider to model after rebind (e.g, for .sound.gmx)
+  _ui->volumeSlider->setValue(static_cast<int>(_ui->volumeSpinBox->value() * 100));
 }
 
 void SoundEditor::on_playButton_clicked() {
@@ -113,12 +114,12 @@ void SoundEditor::on_loadButton_clicked() {
   FileDialog* dialog = new FileDialog(this, FileDialog_t::SoundLoad, false);
 
   if (dialog->exec() && dialog->selectedFiles().size() > 0) {
-    QString fName = dialog->selectedFiles()[0];
-    if (fName.endsWith("Sound.gmx")) {
-      Sound* snd = gmx::LoadSound(fName.toStdString());
-      if (snd != nullptr) {
+    QString fName = dialog->selectedFiles().at(0);
+    if (fName.endsWith("Sound.gmx") || fName.endsWith(".spr")) {
+      std::optional<Sound> snd = egm::LoadResource<Sound>(fName.toStdString());
+      if (snd.has_value()) {
         // QString lastData = GetModelData(Sound::kDataFieldNumber).toString();
-        ReplaceBuffer(snd);
+        ReplaceBuffer(&snd.value());
         // QString newData = GetModelData(Sound::kDataFieldNumber).toString();
         // TODO: Copy data into our egm and reset the path
         // SetModelData(Sound::kDataFieldNumber, lastData);
@@ -126,14 +127,14 @@ void SoundEditor::on_loadButton_clicked() {
         qDebug() << "Failed to load gmx sound";
     } else {
       // TODO: Copy data into our egm
-      _soundModel->SetData(fName, Sound::kDataFieldNumber);
+      _soundModel->SetData(FieldPath::Of<Sound>(Sound::kDataFieldNumber), fName);
       emit _mediaPlayer->mediaChanged(_mediaPlayer->media());
     }
   }
 }
 
 void SoundEditor::on_editButton_clicked() {
-  QString fName = _model->Data(Sound::kDataFieldNumber).toString();
+  QString fName = _model->Data(FieldPath::Of<Sound>(Sound::kDataFieldNumber)).toString();
   QDesktopServices::openUrl(QUrl::fromLocalFile(fName));
   // TODO: file watcher reload
   // TODO: editor settings

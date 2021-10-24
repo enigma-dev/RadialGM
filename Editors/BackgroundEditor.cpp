@@ -33,7 +33,7 @@ BackgroundEditor::BackgroundEditor(MessageModel* model, QWidget* parent)
   _resMapper->addMapping(_ui->verticalSpacingSpinBox, Background::kVerticalSpacingFieldNumber);
   _resMapper->toFirst();
 
-  RebindSubModels();
+  BackgroundEditor::RebindSubModels();
 }
 
 BackgroundEditor::~BackgroundEditor() { delete _ui; }
@@ -75,12 +75,12 @@ void BackgroundEditor::on_actionLoadImage_triggered() {
   FileDialog* dialog = new FileDialog(this, FileDialog_t::BackgroundLoad, false);
 
   if (dialog->exec() && dialog->selectedFiles().size() > 0) {
-    QString fName = dialog->selectedFiles()[0];
-    if (fName.endsWith("Background.gmx")) {
-      Background* bkg = gmx::LoadBackground(fName.toStdString());
-      if (bkg != nullptr) {
+    QString fName = dialog->selectedFiles().at(0);
+    if (fName.endsWith("Background.gmx") || fName.endsWith(".bkg")) {
+      std::optional<Background> bkg = egm::LoadResource<Background>(fName.toStdString());
+      if (bkg.has_value()) {
         // QString lastData = GetModelData(Background::kImageFieldNumber).toString();
-        ReplaceBuffer(bkg);
+        ReplaceBuffer(&bkg.value());
         // QString newData = GetModelData(Background::kImageFieldNumber).toString();
         // TODO: Copy data into our egm and reset the path
         // SetModelData(Background::kImageFieldNumber, lastData);
@@ -89,7 +89,8 @@ void BackgroundEditor::on_actionLoadImage_triggered() {
       }
     } else {
       // TODO: Copy data into our egm
-      _backgroundModel->SetData(fName, Background::kImageFieldNumber);
+      _backgroundModel->SetData(FieldPath::Of<Background>(Background::kImageFieldNumber), fName);
+      _ui->backgroundView->SetImage(fName);
     }
   }
 }
@@ -98,13 +99,13 @@ void BackgroundEditor::on_actionSaveImage_triggered() {
   FileDialog* dialog = new FileDialog(this, FileDialog_t::BackgroundSave, true);
 
   if (dialog->exec() && dialog->selectedFiles().size() > 0) {
-    QString fName = dialog->selectedFiles()[0];
+    QString fName = dialog->selectedFiles().at(0);
     _ui->backgroundView->WriteImage(fName, dialog->selectedMimeTypeFilter());
   }
 }
 
 void BackgroundEditor::on_actionEditImage_triggered() {
-  QString fName = _backgroundModel->Data(Background::kImageFieldNumber).toString();
+  QString fName = _backgroundModel->Data(FieldPath::Of<Background>(Background::kImageFieldNumber)).toString();
   QDesktopServices::openUrl(QUrl::fromLocalFile(fName));
   // TODO: file watcher reload
   // TODO: editor settings

@@ -1,5 +1,6 @@
 #include "AssetScrollAreaBackground.h"
 #include "Components/ArtManager.h"
+#include "Components/Logger.h"
 #include "MainWindow.h"
 #include "Widgets/RoomView.h"
 
@@ -21,11 +22,11 @@ AssetScrollAreaBackground::AssetScrollAreaBackground(AssetScrollArea* parent)
   installEventFilter(this);
   setMouseTracking(true);
   // Redraw on an model changes
-  connect(MainWindow::resourceMap.get(), &ResourceModelMap::DataChanged, this, [this]() { this->update(); });
+  connect(MainWindow::resourceMap, &ResourceModelMap::DataChanged, this, [this]() { this->update(); });
 }
 
 AssetScrollAreaBackground::~AssetScrollAreaBackground() {
-  disconnect(MainWindow::resourceMap.get(), &ResourceModelMap::DataChanged, this, nullptr);
+  disconnect(MainWindow::resourceMap, &ResourceModelMap::DataChanged, this, nullptr);
 }
 
 void AssetScrollAreaBackground::SetAssetView(AssetView* asset) {
@@ -165,6 +166,10 @@ QPoint AssetScrollAreaBackground::GetCenterOffset() {
       (rect().height() < _assetView->rect().height()) ? 0 : rect().center().y() - _assetView->rect().center().y());
 }
 
+QPoint AssetScrollAreaBackground::MapToAsset(const QPoint &pos) const {
+  return (pos - _totalDrawOffset) / _currentZoom;
+}
+
 void AssetScrollAreaBackground::paintEvent(QPaintEvent* /* event */) {
   QPainter painter(this);
 
@@ -199,6 +204,7 @@ void AssetScrollAreaBackground::paintEvent(QPaintEvent* /* event */) {
     }
   }
 
+  R_EXPECT_V(_assetView) << "Asset view is null";
   _assetView->PaintTop(painter);
 }
 
@@ -206,9 +212,8 @@ bool AssetScrollAreaBackground::eventFilter(QObject* obj, QEvent* event) {
   switch (event->type()) {
     case QEvent::MouseMove: {
       QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
-      QPoint roomPos = mouseEvent->pos() - _totalDrawOffset;
-      roomPos /= _currentZoom;
-      emit MouseMoved(roomPos.x(), roomPos.y());
+      QPoint assetPos = MapToAsset(mouseEvent->pos());
+      emit MouseMoved(assetPos.x(), assetPos.y());
       break;
     }
     case QEvent::MouseButtonPress: {
