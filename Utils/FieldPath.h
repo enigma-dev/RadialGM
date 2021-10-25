@@ -88,9 +88,10 @@ class FieldPath {
   }
 
   std::string str() const {
-    std::string field = "";
-    for (const auto &fcomp : fields) {
-      if (!field.empty()) field += ".";
+    if (this->size() <= 0) return "";
+    std::string field = fields.front()->full_name();
+    for (size_t i = 1; i < fields.size(); ++i) {
+      const auto &fcomp = fields[i];
       field += fcomp->name();
     }
     return field;
