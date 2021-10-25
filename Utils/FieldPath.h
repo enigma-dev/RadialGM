@@ -87,6 +87,16 @@ class FieldPath {
     return FieldPath(-1, {fields.begin(), fields.end()});
   }
 
+  std::string str() const {
+    if (this->size() <= 0) return "";
+    std::string field = fields.front()->full_name();
+    for (size_t i = 1; i < fields.size(); ++i) {
+      const auto &fcomp = fields[i];
+      field += fcomp->name();
+    }
+    return field;
+  }
+
   // Returns the concatenation of the two field paths, if the first field of the right-hand path is a
   // field of the last field of the left-hand path. Otherwise, the left-hand path is returned as-is.
   FieldPath operator+(const FieldPath &field_path) const;

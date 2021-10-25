@@ -197,6 +197,12 @@ class ProtoModel : public QAbstractItemModel {
       SetFieldHeaderIcon(T::descriptor()->full_name(), FieldPath::Of<T>(field_path...), icon_name);
     }
 
+    /// Set the label to be used for field's header data.
+    template<typename T, typename... Fields>
+    void SetFieldHeaderLabel(const QString &label, Fields... field_path) {
+      SetFieldHeaderLabel(T::descriptor()->full_name(), FieldPath::Of<T>(field_path...), label);
+    }
+
     /// Associates a field with a lambda to fetch an icon from its value.
     /// The field can contain any identifying information that can be mapped to an icon by the specified function.
     void SetFieldIconLookup(const FieldDescriptor *field, FieldDisplayConfig::IconLookupFn icon_lookup_function);
@@ -218,6 +224,7 @@ class ProtoModel : public QAbstractItemModel {
     void SetMessageIconIdField(const std::string &message, const FieldPath &field_path,
                                FieldDisplayConfig::IconLookupFn icon_lookup_function);
     void SetFieldHeaderIcon(const std::string &message, const FieldPath &field_path, const QString &icon_name);
+    void SetFieldHeaderLabel(const std::string &message, const FieldPath &field_path, const QString &label);
 
     QMap<std::string, MessageDisplayConfig> message_display_configs_;
     QMap<std::string, FieldDisplayConfig> field_display_configs_;
