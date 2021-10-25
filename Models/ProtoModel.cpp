@@ -70,9 +70,8 @@ void ProtoModel::DisplayConfig::SetMessageLabelField(const std::string &message,
 }
 void ProtoModel::DisplayConfig::SetMessageIconIdField(const std::string &message, const FieldPath &field_path,
                                                       FieldDisplayConfig::IconLookupFn icon_lookup_function) {
-  std::string field = message;
   message_display_configs_[message].icon_field = field_path;
-  for (const auto &fcomp : field_path.fields) field += "." + fcomp->name();
+  std::string field = message + '.' + field_path.str();
   if (field_path.size() != 1)
     qDebug() << "Warning: Nested icon fields not currently implemented; `" << field.c_str() << "` won't work properly";
   field_display_configs_[field].icon_lookup_function = icon_lookup_function;
@@ -89,9 +88,7 @@ void ProtoModel::DisplayConfig::SetFieldDefaultIcon(const FieldDescriptor *field
 
 void ProtoModel::DisplayConfig::SetFieldHeaderIcon(const std::string &message, const FieldPath &field_path,
                                                    const QString &icon_name) {
-  std::string field = message;
-  message_display_configs_[message].icon_field = field_path;
-  for (const auto &fcomp : field_path.fields) field += "." + fcomp->name();
+  std::string field = message + '.' + field_path.str();
   if (field_path.size() != 1)
     qDebug() << "Warning: Nested icon fields not currently implemented; `" << field.c_str() << "` won't work properly";
   field_display_configs_[field].header_icon = icon_name;
@@ -99,9 +96,7 @@ void ProtoModel::DisplayConfig::SetFieldHeaderIcon(const std::string &message, c
 
 void ProtoModel::DisplayConfig::SetFieldHeaderLabel(const std::string &message, const FieldPath &field_path,
                                                    const QString &label) {
-  std::string field = message;
-  message_display_configs_[message].icon_field = field_path;
-  for (const auto &fcomp : field_path.fields) field += "." + fcomp->name();
+  std::string field = message + '.' + field_path.str();
   if (field_path.size() != 1)
     qDebug() << "Warning: Nested label fields not currently implemented; `" << field.c_str() << "` won't work properly";
   field_display_configs_[field].name = label;
