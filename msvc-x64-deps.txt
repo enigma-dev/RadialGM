@@ -92,7 +92,6 @@ boost-odeint
 boost-optional
 boost-outcome
 boost-parameter
-boost-parameter-python
 boost-phoenix
 boost-poly-collection
 boost-polygon
