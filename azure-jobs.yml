@@ -205,7 +205,41 @@ jobs:
           assetUploadMode: replace
           assets: |
             $(Agent.BuildDirectory)/RadialGM-MSVC-x86_64.exe
-          
+
+- job: Mac
+  displayName: 'MacOS'
+  pool:
+    vmImage: 'macOS-11'
+
+  steps:
+    - checkout: ${{ parameters.repo }}
+      submodules: true
+      path: RadialGM
+      persistCredentials: true
+    
+    - ${{ if ne(parameters.repo, 'self') }}:
+      - script: | 
+          cd $(Agent.BuildDirectory)/RadialGM/Submodules/enigma-dev
+          git remote remove origin
+          git remote add origin https://github.com/enigma-dev/enigma-dev.git
+          git fetch origin --force --tags --prune --progress ${{ parameters.enigmaref }}:enigmaref
+          git checkout --progress --force enigmaref
+        displayName: Checkout ENIGMA Reference
+
+    - bash: |
+        set -e
+        brew install cmake protobuf grpc pugixml yaml-cpp rapidjson boost openssl@3 qt@5 qscintilla2 double-conversion harfbuzz
+      displayName: 'Install Deps'
+
+    - bash: |
+        set -e
+        cd $(Agent.BuildDirectory)/RadialGM
+        mkdir package
+        cd package
+        cmake -G "Xcode" -DCMAKE_BUILD_TYPE=MinSizeRel -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -DOPENSSL_LIBRARIES=/usr/local/opt/openssl/lib -DQt5_DIR=$(brew --prefix qt5)/lib/cmake/Qt5 ..
+        cmake --build . --config MinSizeRel
+      displayName: 'Release Build'
+
 - job: Arch
   displayName: 'Arch Linux'
   pool:
