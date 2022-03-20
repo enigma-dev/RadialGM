@@ -55,12 +55,13 @@ INCLUDEPATH += /usr/include/qt/ \
 LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
         -lENIGMAShared \
         -lEGM \
-        -lprotobuf \
         -Wl,--rpath=$$PWD/Submodules/enigma-dev/ \
         -L$$PWD/Submodules/enigma-dev/ \
         -lProtocols \
         -lpugixml \
-        -lgrpc++
+
+CONFIG += link_pkgconfig
+PKGCONFIG += protobuf grpc++
 
 SOURCES += \
     Dialogs/EventArgumentsDialog.cpp \
