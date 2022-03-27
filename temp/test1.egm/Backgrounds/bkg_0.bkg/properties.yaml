@@ -1,0 +1,13 @@
+use_as_tileset: 0
+tile_width: 16
+tile_height: 16
+horizontal_offset: 0
+vertical_offset: 0
+horizontal_spacing: 0
+vertical_spacing: 0
+h_tile: 0
+v_tile: 0
+for3D: 0
+width: 800
+height: 600
+image: data/bkg_0.png

@@ -1,0 +1,19 @@
+alpha_tolerance: 0
+separate_mask: 0
+origin_x: 0
+origin_y: 0
+shape: 1
+bbox_mode: 0
+bbox_left: 30
+bbox_right: 218
+bbox_top: 0
+bbox_bottom: 255
+h_tile: 0
+v_tile: 0
+for3D: 0
+width: 256
+height: 256
+subimages:
+  - data/spr_0_0.png
+  - data/spr_0_1.png
+  - data/spr_0_2.png

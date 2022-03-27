@@ -1,0 +1,214 @@
+caption: ""
+width: 1280
+height: 600
+hsnap: 16
+vsnap: 16
+isometric: 0
+speed: 30
+persistent: 0
+color: 12632256
+show_color: 1
+enable_views: 0
+clear_view_background: 1
+backgrounds:
+  - visible: 0
+    foreground: 0
+    background_name: ""
+    x: 0
+    y: 0
+    htiled: 1
+    vtiled: 1
+    hspeed: 0.000000
+    vspeed: 0.000000
+    stretch: 0
+  - visible: 0
+    foreground: 0
+    background_name: ""
+    x: 0
+    y: 0
+    htiled: 1
+    vtiled: 1
+    hspeed: 0.000000
+    vspeed: 0.000000
+    stretch: 0
+  - visible: 0
+    foreground: 0
+    background_name: ""
+    x: 0
+    y: 0
+    htiled: 1
+    vtiled: 1
+    hspeed: 0.000000
+    vspeed: 0.000000
+    stretch: 0
+  - visible: 0
+    foreground: 0
+    background_name: ""
+    x: 0
+    y: 0
+    htiled: 1
+    vtiled: 1
+    hspeed: 0.000000
+    vspeed: 0.000000
+    stretch: 0
+  - visible: 0
+    foreground: 0
+    background_name: ""
+    x: 0
+    y: 0
+    htiled: 1
+    vtiled: 1
+    hspeed: 0.000000
+    vspeed: 0.000000
+    stretch: 0
+  - visible: 0
+    foreground: 0
+    background_name: ""
+    x: 0
+    y: 0
+    htiled: 1
+    vtiled: 1
+    hspeed: 0.000000
+    vspeed: 0.000000
+    stretch: 0
+  - visible: 0
+    foreground: 0
+    background_name: ""
+    x: 0
+    y: 0
+    htiled: 1
+    vtiled: 1
+    hspeed: 0.000000
+    vspeed: 0.000000
+    stretch: 0
+  - visible: 0
+    foreground: 0
+    background_name: ""
+    x: 0
+    y: 0
+    htiled: 1
+    vtiled: 1
+    hspeed: 0.000000
+    vspeed: 0.000000
+    stretch: 0
+views:
+  - visible: 0
+    xview: 0
+    yview: 0
+    wview: 640
+    hview: 480
+    xport: 0
+    yport: 0
+    wport: 640
+    hport: 480
+    hborder: 32
+    vborder: 32
+    hspeed: -1.000000
+    vspeed: -1.000000
+  - visible: 0
+    xview: 0
+    yview: 0
+    wview: 640
+    hview: 480
+    xport: 0
+    yport: 0
+    wport: 640
+    hport: 480
+    hborder: 32
+    vborder: 32
+    hspeed: -1.000000
+    vspeed: -1.000000
+  - visible: 0
+    xview: 0
+    yview: 0
+    wview: 640
+    hview: 480
+    xport: 0
+    yport: 0
+    wport: 640
+    hport: 480
+    hborder: 32
+    vborder: 32
+    hspeed: -1.000000
+    vspeed: -1.000000
+  - visible: 0
+    xview: 0
+    yview: 0
+    wview: 640
+    hview: 480
+    xport: 0
+    yport: 0
+    wport: 640
+    hport: 480
+    hborder: 32
+    vborder: 32
+    hspeed: -1.000000
+    vspeed: -1.000000
+  - visible: 0
+    xview: 0
+    yview: 0
+    wview: 640
+    hview: 480
+    xport: 0
+    yport: 0
+    wport: 640
+    hport: 480
+    hborder: 32
+    vborder: 32
+    hspeed: -1.000000
+    vspeed: -1.000000
+  - visible: 0
+    xview: 0
+    yview: 0
+    wview: 640
+    hview: 480
+    xport: 0
+    yport: 0
+    wport: 640
+    hport: 480
+    hborder: 32
+    vborder: 32
+    hspeed: -1.000000
+    vspeed: -1.000000
+  - visible: 0
+    xview: 0
+    yview: 0
+    wview: 640
+    hview: 480
+    xport: 0
+    yport: 0
+    wport: 640
+    hport: 480
+    hborder: 32
+    vborder: 32
+    hspeed: -1.000000
+    vspeed: -1.000000
+  - visible: 0
+    xview: 0
+    yview: 0
+    wview: 640
+    hview: 480
+    xport: 0
+    yport: 0
+    wport: 640
+    hport: 480
+    hborder: 32
+    vborder: 32
+    hspeed: -1.000000
+    vspeed: -1.000000
+physics_settings:
+  use_physics: 0
+  phy_world_top: 0
+  phy_world_left: 0
+  phy_world_right: 640
+  phy_world_bottom: 480
+  phy_world_xgravity: 0.000000
+  phy_world_ygravity: 10.000000
+  phy_world_pixel_meters: 0.100000
+instance-layers:
+  - Format: svg-d
+    Data: |
+      I 100001 n "inst_6DFE8F29" o "obj_0" S 0.5 C #7fffffff P 80, 400
+tile-layers:
+  - Format: svg-d
+    Data: |

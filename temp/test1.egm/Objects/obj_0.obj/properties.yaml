@@ -1,0 +1,17 @@
+sprite_name: spr_0
+depth: 0
+solid: 0
+visible: 1
+persistent: 0
+physics_settings:
+  use_physics: 0
+  phy_sensor: 0
+  phy_shape_type: 0
+  phy_density: 0.500000
+  phy_restitution: 0.100000
+  phy_group: 0
+  phy_linear_damping: 0.100000
+  phy_angular_damping: 0.100000
+  phy_friction: 0.200000
+  phy_awake: 1
+  phy_kinematic: 0
