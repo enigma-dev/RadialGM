@@ -119,6 +119,7 @@ class MainWindow : public QMainWindow {
   Ui::MainWindow *_ui;
 
   std::unique_ptr<buffers::Project> _project;
+  std::unique_ptr<buffers::Project> _defaults_project;
   QPointer<RecentFiles> _recentFiles;
 
   static std::unique_ptr<EventData> _event_data;
@@ -127,6 +128,9 @@ class MainWindow : public QMainWindow {
   void writeSettings();
   void setTabbedMode(bool enabled);
   static QFileInfo getEnigmaRoot();
+  // load an egm project and save it internally in _defaults_project, helpful for referring defaults during resource
+  // creation and also allow user to edit and save for future reference
+  void openDefaultsProject();
 };
 
 #endif  // MAINWINDOW_H

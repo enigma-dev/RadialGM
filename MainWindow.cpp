@@ -183,6 +183,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
   connect(_ui->actionCreateExecutable, &QAction::triggered, pluginServer, &RGMPlugin::CreateExecutable);
 
   openNewProject();
+  // openDefaultsProject();
 }
 
 MainWindow::~MainWindow() {
@@ -309,6 +310,10 @@ void MainWindow::openNewProject() {
     groupNode->mutable_folder();
   }
   openProject(std::move(newProject));
+}
+
+void MainWindow::openDefaultsProject() {
+  // _defaults_project = egm::LoadProject("/home/kash/github/stuff_radialgm/test4.egm/tree.yaml");
 }
 
 template <typename Editor>
@@ -469,11 +474,12 @@ void MainWindow::on_actionOpen_triggered() {
 }
 
 void MainWindow::on_actionSave_triggered() {
-    const QString &filter = "EGM (*.egm)";
-    const QString &fileName = QFileDialog::getSaveFileName(this, tr("Save Project"), "", filter);
-    if (!fileName.isEmpty()) {
-        egm::WriteProject(_project.get(), fileName.toStdString());
-    }
+  const QString &filter = "EGM (*.egm)";
+  const QString &fileName = QFileDialog::getSaveFileName(this, tr("Save Project"), "", filter);
+
+  if (!fileName.isEmpty()) {
+      egm::WriteProject(_project.get(), fileName.toStdString());
+  }
 }
 
 void MainWindow::on_actionPreferences_triggered() {
