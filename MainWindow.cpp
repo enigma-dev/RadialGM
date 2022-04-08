@@ -26,6 +26,8 @@
 #include "gmx.h"
 #include "yyp.h"
 
+#include <google/protobuf/text_format.h>
+
 #include <QtWidgets>
 #include <QFile>
 
@@ -478,7 +480,10 @@ void MainWindow::on_actionSave_triggered() {
   const QString &fileName = QFileDialog::getSaveFileName(this, tr("Save Project"), "", filter);
 
   if (!fileName.isEmpty()) {
-      egm::WriteProject(_project.get(), fileName.toStdString());
+    egm::WriteProject(_project.get(), fileName.toStdString());
+    std::string str;
+    google::protobuf::TextFormat::PrintToString(*(_project), &str);
+    std::cout<<str<<std::endl;
   }
 }
 
