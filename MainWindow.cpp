@@ -564,7 +564,13 @@ void MainWindow::CreateResource(TypeCase typeCase) {
   refl->MutableMessage(&child, field);
 
   // find a unique name for the new resource
-  child.set_name(resourceMap->CreateResourceName(&child).toStdString());
+  QString resourceName = resourceMap->CreateResourceName(&child);
+  child.set_name(resourceName.toStdString());
+
+  // add new resource with created name, helps in creating another unique name
+  auto messageModelRef = MessageModel(ProtoModel::NonProtoParent{this}, &child);
+  resourceMap->AddResource(typeCase, resourceName, &messageModelRef);
+
   // release ownership of the new child to its parent and the tree
   auto index = this->treeModel->addNode(child, _ui->treeView->currentIndex());
   treeModel->triggerNodeEdit(index, _ui->treeView);
