@@ -63,8 +63,6 @@ void ResourceModelMap::ResourceRemoved(TypeCase type, const QString& name,
   if (type == TypeCase::kFolder || !_resources.contains(type)) return;
   if (!_resources[type].contains(name)) return;
 
-  std::cout<<"Resource re moved called"<<std::endl;
-
   // Delete all instances of this object type
   if (type == TypeCase::kObject) {
     for (auto& room : qAsConst(_resources[TypeCase::kRoom])) {
@@ -131,8 +129,7 @@ void ResourceModelMap::ResourceRemoved(TypeCase type, const QString& name,
     }
   }
 
-  // Remove an references to this resource
-  // emit ResourceRenamed(ResTypeAsString(type), name, "");
+  // Remove references to this resource
   _resources[type].remove(name);
   emit DataChanged();
 }
@@ -200,7 +197,6 @@ TypeCase Type(TreeModel::Node* node) {
 }
 
 void ResourceModelMap::ResourceRenamed(TypeCase type, const QString& oldName, const QString& newName) {
-  std::cout<<"Resource renamed called"<<std::endl;
   if (oldName == newName || !_resources[type].contains(oldName)) return;
   _resources[type][newName] = _resources[type][oldName];
 
