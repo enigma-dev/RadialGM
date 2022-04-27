@@ -184,8 +184,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
   connect(_ui->actionDebug, &QAction::triggered, pluginServer, &RGMPlugin::Debug);
   connect(_ui->actionCreateExecutable, &QAction::triggered, pluginServer, &RGMPlugin::CreateExecutable);
 
+  openDefaultsProject();
   openNewProject();
-  // openDefaultsProject();
 }
 
 MainWindow::~MainWindow() {
@@ -315,7 +315,15 @@ void MainWindow::openNewProject() {
 }
 
 void MainWindow::openDefaultsProject() {
-  // _defaults_project = egm::LoadProject("/home/kash/github/stuff_radialgm/test4.egm/tree.yaml");
+  QString deafultProjectPath = "/path/to/default.egm";
+  _defaults_project = egm::LoadProject(deafultProjectPath.toStdString());
+
+  if (!_defaults_project) {
+    QMessageBox::warning(this, tr("Failed To Open Default Project"),
+                          tr("There was a problem loading the egm defaults project from ") + deafultProjectPath,
+                          QMessageBox::Ok);
+    return;
+  }
 }
 
 template <typename Editor>
@@ -473,6 +481,7 @@ void MainWindow::on_actionOpen_triggered() {
          "(*.yyp);;GameMaker: Studio Projects (*.project.gmx);;Classic "
          "GameMaker Files (*.gm81 *.gmk *.gm6 *.gmd);;All Files (*)"));
   if (!fileName.isEmpty()) openFile(fileName);
+  std::cout<<fileName.toStdString()<<std::endl;
 }
 
 void MainWindow::on_actionSave_triggered() {
@@ -481,9 +490,6 @@ void MainWindow::on_actionSave_triggered() {
 
   if (!fileName.isEmpty()) {
     egm::WriteProject(_project.get(), fileName.toStdString());
-    std::string str;
-    google::protobuf::TextFormat::PrintToString(*(_project), &str);
-    std::cout<<str<<std::endl;
   }
 }
 
