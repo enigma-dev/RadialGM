@@ -464,7 +464,8 @@ void MainWindow::on_actionOpen_triggered() {
       this, tr("Open Project"), "",
       tr("All supported formats (*.egm *.yyp *.project.gmx *.gm81 *.gmk *.gm6 *.gmd);;GameMaker: Studio 2 Projects "
          "(*.yyp);;GameMaker: Studio Projects (*.project.gmx);;Classic "
-         "GameMaker Files (*.gm81 *.gmk *.gm6 *.gmd);;All Files (*)"));
+         "GameMaker Files (*.gm81 *.gmk *.gm6 *.gmd);;"
+         "Tiled Tileset (*.tsx);;All Files (*)"));
   if (!fileName.isEmpty()) openFile(fileName);
 }
 
