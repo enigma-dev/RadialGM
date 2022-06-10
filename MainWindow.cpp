@@ -478,16 +478,18 @@ void MainWindow::on_actionSave_triggered() {
                                                   extensionMap.keys().join(QStringLiteral(";;")),
                                                   &selectedFilter);
 
+  if(fileName.isEmpty()) {
+    return;
+  }
+
   if(!fileName.endsWith(extensionMap[selectedFilter], Qt::CaseInsensitive)) {
     // removes any trailing periods(.) from the file path
     while(fileName.endsWith(QLatin1Char('.')))
       fileName.chop(1);
     fileName.append(extensionMap[selectedFilter]);
   }
-  std::cout<<fileName.toStdString()<<"\n";
-  if(!fileName.isEmpty()) {
-    egm::WriteProject(_project.get(), fileName.toStdString());
-  }
+
+  egm::WriteProject(_project.get(), fileName.toStdString());
 }
 
 void MainWindow::on_actionPreferences_triggered() {
