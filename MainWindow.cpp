@@ -470,35 +470,21 @@ void MainWindow::on_actionOpen_triggered() {
 
 void MainWindow::on_actionSave_triggered() {
   // map useful to quickly fetch extension from the selected filter in QDialog (because Qt doesn't give a better way)
-  std::unordered_map<QString, QString> extensionMap;
+  QHash<QString, QString> extensionMap;
   extensionMap["EGM (*.egm)"] = ".egm";
 
-  // lambda to create a QString of all filters separated by ";;" except last. The generated QString is required
-  // as an argument in getSaveFileName
-  auto getFilters = [&extensionMap]() -> QString {
-    assert(static_cast<int>(extensionMap.size()) > 0);
-
-    auto itr = extensionMap.begin();
-    QString f = itr->first;
-    ++itr;
-
-    for(; itr != extensionMap.end(); ++itr){
-      f += ";;" + itr->first;
-    }
-    return f;
-  };
-
   QString selectedFilter;
-  QString fileName = QFileDialog::getSaveFileName(this, tr("Save Project"), "", getFilters(), &selectedFilter);
+  QString fileName = QFileDialog::getSaveFileName(this, tr("Save Project"), "",
+                                                  extensionMap.keys().join(QStringLiteral(";;")),
+                                                  &selectedFilter);
 
-  // to check if fileName contains extension
-  const std::filesystem::path &filePath = fileName.toStdString();
-  const std::string &ext = ToLower(filePath.extension().u8string());
-  if (ext.empty()) {
-    // if it doesn't then fetch extension from selected filter and add it to fileName
-    fileName += extensionMap[selectedFilter];
+  if(!fileName.endsWith(extensionMap[selectedFilter], Qt::CaseInsensitive)) {
+    // removes any trailing periods(.) from the file path
+    while(fileName.endsWith(QLatin1Char('.')))
+      fileName.chop(1);
+    fileName.append(extensionMap[selectedFilter]);
   }
-
+  std::cout<<fileName.toStdString()<<"\n";
   if(!fileName.isEmpty()) {
     egm::WriteProject(_project.get(), fileName.toStdString());
   }
