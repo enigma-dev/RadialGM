@@ -468,6 +468,30 @@ void MainWindow::on_actionOpen_triggered() {
   if (!fileName.isEmpty()) openFile(fileName);
 }
 
+void MainWindow::on_actionSave_triggered() {
+  // map useful to quickly fetch extension from the selected filter in QDialog (because Qt doesn't give a better way)
+  QHash<QString, QString> extensionMap;
+  extensionMap["EGM (*.egm)"] = ".egm";
+
+  QString selectedFilter;
+  QString fileName = QFileDialog::getSaveFileName(this, tr("Save Project"), "",
+                                                  extensionMap.keys().join(QStringLiteral(";;")),
+                                                  &selectedFilter);
+
+  if(fileName.isEmpty()) {
+    return;
+  }
+
+  if(!fileName.endsWith(extensionMap[selectedFilter], Qt::CaseInsensitive)) {
+    // removes any trailing periods(.) from the file path
+    while(fileName.endsWith(QLatin1Char('.')))
+      fileName.chop(1);
+    fileName.append(extensionMap[selectedFilter]);
+  }
+
+  egm::WriteProject(_project.get(), fileName.toStdString());
+}
+
 void MainWindow::on_actionPreferences_triggered() {
   PreferencesDialog preferencesDialog(this);
   preferencesDialog.exec();
