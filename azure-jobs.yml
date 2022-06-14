@@ -115,6 +115,97 @@ jobs:
           assets: |
            $(Agent.BuildDirectory)/RadialGM-MinGW-$(MINGW_ARCH).exe
          
+- job: MSVC_64_VS_2019
+  displayName: 'MSVC x86_64 (Visual Studio 2019)'
+  ? ${{ if and(eq(parameters.repo, 'self'), eq(variables['Build.SourceBranch'], 'refs/heads/master')) }}
+  : dependsOn: CreateReleaseCandidate
+  pool:
+    vmImage: 'windows-2019'
+  timeoutInMinutes: 360
+
+  steps:
+    - checkout: ${{ parameters.repo }}
+      submodules: true
+      path: RadialGM
+      persistCredentials: true
+
+    - ${{ if ne(parameters.repo, 'self') }}:
+        - script: |
+            cd $(Agent.BuildDirectory)/RadialGM/Submodules/enigma-dev
+            git remote remove origin
+            git remote add origin https://github.com/enigma-dev/enigma-dev.git
+            git remote -v
+            git fetch origin --force --tags --prune --progress ${{ parameters.enigmaref }}:enigmaref
+            git checkout --progress --force enigmaref
+          displayName: Checkout ENIGMA Reference
+
+    - task: Cache@2
+      displayName: 'Cache VCPKG Artifacts'
+      inputs:
+        key: $(Agent.BuildDirectory)/RadialGM/msvc-x64-deps.txt | "$(vcpkgGitRef)" | "$(Agent.OS)"
+        path: '$(Build.BinariesDirectory)/vcpkg'
+
+    - task: run-vcpkg@0
+      displayName: 'Run VCPKG'
+      inputs:
+        vcpkgArguments: '@$(Agent.BuildDirectory)/RadialGM/msvc-x64-deps.txt'
+        vcpkgGitCommitId: $(vcpkgGitRef)
+        vcpkgGitURL: https://github.com/microsoft/vcpkg.git
+
+    - script: |
+        set PATH=%PATH%;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\tools\qt5\bin\
+        set VCINSTALLDIR=%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC
+        call "%VCINSTALLDIR%\Auxiliary\Build\vcvars64.bat"
+        cd $(Build.SourcesDirectory)/RadialGM
+        mkdir Release
+        cd Release
+        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=../cmake-package/Release -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Agent.BuildDirectory)\RadialGM
+        cmake --build . --config MinSizeRel
+        cmake --install . --config MinSizeRel
+      displayName: 'Release Build'
+
+    - script: |
+        set PATH=%PATH%;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\debug\bin;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\bin;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\tools\qt5\debug\bin\
+        set VCINSTALLDIR=%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC
+        call "%VCINSTALLDIR%\Auxiliary\Build\vcvars64.bat"
+        cd $(Build.SourcesDirectory)/RadialGM
+        mkdir Debug
+        cd Debug
+        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=../cmake-package/Debug -DCMAKE_BUILD_TYPE=Debug -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Agent.BuildDirectory)\RadialGM
+        cmake --build . --config Debug
+        cmake --install . --config Debug
+      displayName: 'Debug Build'
+
+    - script: |
+        cd $(Agent.BuildDirectory)/RadialGM
+        mkdir package
+        cd package
+        cmake -G "Visual Studio 16 2019" -A x64 ../cmake-package
+        cmake --build . --config Release --target PACKAGE
+        mv ENIGMA-Installer*.exe $(Agent.BuildDirectory)/RadialGM-MSVC-x86_64.exe
+      displayName: 'Package'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Push Build Artifacts'
+      inputs:
+        pathtoPublish: '$(Agent.BuildDirectory)/RadialGM-MSVC-x86_64.exe'
+        artifactName: RadialGM-MSVC-x86_64
+
+    - ? ${{ if and(eq(parameters.repo, 'self'), eq(variables['Build.SourceBranch'], 'refs/heads/master')) }}
+      : - task: GithubRelease@0
+          displayName: 'Add MSVC to GitHub Release'
+          inputs:
+            gitHubConnection: github.com_EnigmaBot
+            repositoryName: enigma-dev/RadialGM
+            action: edit
+            tagSource: manual
+            tag: '$(releasetag)'
+            isDraft: true
+            isPreRelease: true
+            assetUploadMode: replace
+            assets: |
+              $(Agent.BuildDirectory)/RadialGM-MSVC-x86_64.exe
+
 - job: MSVC_64
   displayName: 'MSVC x86_64'
   ${{ if and(eq(parameters.repo, 'self'), eq(variables['Build.SourceBranch'], 'refs/heads/master')) }}:
@@ -154,24 +245,24 @@ jobs:
 
     - script: |
         set PATH=%PATH%;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\tools\qt5\bin\
-        set VCINSTALLDIR=%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC
+        set VCINSTALLDIR=%ProgramFiles(x86)%\Microsoft Visual Studio\2022\Enterprise\VC
         call "%VCINSTALLDIR%\Auxiliary\Build\vcvars64.bat"
         cd $(Build.SourcesDirectory)/RadialGM
         mkdir Release
         cd Release
-        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=../cmake-package/Release -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Agent.BuildDirectory)\RadialGM
+        cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=../cmake-package/Release -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Agent.BuildDirectory)\RadialGM
         cmake --build . --config MinSizeRel
         cmake --install . --config MinSizeRel
       displayName: 'Release Build'
     
     - script: |
         set PATH=%PATH%;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\debug\bin;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\bin;$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\tools\qt5\debug\bin\
-        set VCINSTALLDIR=%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC
+        set VCINSTALLDIR=%ProgramFiles(x86)%\Microsoft Visual Studio\2022\Enterprise\VC
         call "%VCINSTALLDIR%\Auxiliary\Build\vcvars64.bat"
         cd $(Build.SourcesDirectory)/RadialGM
         mkdir Debug
         cd Debug
-        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=../cmake-package/Debug -DCMAKE_BUILD_TYPE=Debug -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Agent.BuildDirectory)\RadialGM
+        cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=../cmake-package/Debug -DCMAKE_BUILD_TYPE=Debug -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Agent.BuildDirectory)\RadialGM
         cmake --build . --config Debug
         cmake --install . --config Debug
       displayName: 'Debug Build'
@@ -180,7 +271,7 @@ jobs:
         cd $(Agent.BuildDirectory)/RadialGM
         mkdir package
         cd package
-        cmake -G "Visual Studio 16 2019" -A x64 ../cmake-package
+        cmake -G "Visual Studio 17 2022" -A x64 ../cmake-package
         cmake --build . --config Release --target PACKAGE
         mv ENIGMA-Installer*.exe $(Agent.BuildDirectory)/RadialGM-MSVC-x86_64.exe
       displayName: 'Package'
