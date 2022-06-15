@@ -26,6 +26,8 @@
 #include "gmx.h"
 #include "yyp.h"
 
+#include <google/protobuf/text_format.h>
+
 #include <QtWidgets>
 #include <QFile>
 
@@ -182,6 +184,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
   connect(_ui->actionDebug, &QAction::triggered, pluginServer, &RGMPlugin::Debug);
   connect(_ui->actionCreateExecutable, &QAction::triggered, pluginServer, &RGMPlugin::CreateExecutable);
 
+  openDefaultsProject();
   openNewProject();
 }
 
@@ -309,6 +312,18 @@ void MainWindow::openNewProject() {
     groupNode->mutable_folder();
   }
   openProject(std::move(newProject));
+}
+
+void MainWindow::openDefaultsProject() {
+  QString deafultProjectPath = "/path/to/default.egm";
+  _defaults_project = egm::LoadProject(deafultProjectPath.toStdString());
+
+  if (!_defaults_project) {
+    QMessageBox::warning(this, tr("Failed To Open Default Project"),
+                          tr("There was a problem loading the egm defaults project from ") + deafultProjectPath,
+                          QMessageBox::Ok);
+    return;
+  }
 }
 
 template <typename Editor>
@@ -466,6 +481,16 @@ void MainWindow::on_actionOpen_triggered() {
          "(*.yyp);;GameMaker: Studio Projects (*.project.gmx);;Classic "
          "GameMaker Files (*.gm81 *.gmk *.gm6 *.gmd);;All Files (*)"));
   if (!fileName.isEmpty()) openFile(fileName);
+  std::cout<<fileName.toStdString()<<std::endl;
+}
+
+void MainWindow::on_actionSave_triggered() {
+  const QString &filter = "EGM (*.egm)";
+  const QString &fileName = QFileDialog::getSaveFileName(this, tr("Save Project"), "", filter);
+
+  if (!fileName.isEmpty()) {
+    egm::WriteProject(_project.get(), fileName.toStdString());
+  }
 }
 
 void MainWindow::on_actionSave_triggered() {
