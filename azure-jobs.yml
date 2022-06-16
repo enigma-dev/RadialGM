@@ -159,7 +159,7 @@ jobs:
         cd $(Build.SourcesDirectory)/RadialGM
         mkdir Release
         cd Release
-        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=../cmake-package/Release -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Agent.BuildDirectory)\RadialGM
+        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=../cmake-package/Release -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_BUILD_SHARED_LIBS=ON -DPROTOBUF_LIBRARY="$(Build.BinariesDirectory)\vcpkg\packages\protobuf_x64-windows\lib\libprotobuf.lib" $(Agent.BuildDirectory)\RadialGM
         cmake --build . --config MinSizeRel
         cmake --install . --config MinSizeRel
       displayName: 'Release Build'
@@ -171,7 +171,7 @@ jobs:
         cd $(Build.SourcesDirectory)/RadialGM
         mkdir Debug
         cd Debug
-        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=../cmake-package/Debug -DCMAKE_BUILD_TYPE=Debug -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Agent.BuildDirectory)\RadialGM
+        cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=../cmake-package/Debug -DCMAKE_BUILD_TYPE=Debug -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_BUILD_SHARED_LIBS=ON -DPROTOBUF_LIBRARY="$(Build.BinariesDirectory)\vcpkg\packages\protobuf_x64-windows\lib\libprotobuf.lib" $(Agent.BuildDirectory)\RadialGM
         cmake --build . --config Debug
         cmake --install . --config Debug
       displayName: 'Debug Build'
@@ -250,7 +250,7 @@ jobs:
         cd $(Build.SourcesDirectory)/RadialGM
         mkdir Release
         cd Release
-        cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=../cmake-package/Release -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Agent.BuildDirectory)\RadialGM
+        cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=../cmake-package/Release -DCMAKE_BUILD_TYPE=MinSizeRel -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_BUILD_SHARED_LIBS=ON -DPROTOBUF_LIBRARY="$(Build.BinariesDirectory)\vcpkg\packages\protobuf_x64-windows\lib\libprotobuf.lib" $(Agent.BuildDirectory)\RadialGM
         cmake --build . --config MinSizeRel
         cmake --install . --config MinSizeRel
       displayName: 'Release Build'
@@ -262,7 +262,7 @@ jobs:
         cd $(Build.SourcesDirectory)/RadialGM
         mkdir Debug
         cd Debug
-        cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=../cmake-package/Debug -DCMAKE_BUILD_TYPE=Debug -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake $(Agent.BuildDirectory)\RadialGM
+        cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_INSTALL_PREFIX:PATH=../cmake-package/Debug -DCMAKE_BUILD_TYPE=Debug -DVCPKG_ROOT=$(Build.BinariesDirectory)\vcpkg -DVCPKG_TARGET_TRIPLET=x64-windows -DPROTOBUF_IMPORT_DIRS=$(Build.BinariesDirectory)\vcpkg\installed\x64-windows\include -DCMAKE_TOOLCHAIN_FILE=$(Build.BinariesDirectory)\vcpkg\scripts\buildsystems\vcpkg.cmake -Dprotobuf_BUILD_TESTS=OFF -Dprotobuf_BUILD_SHARED_LIBS=ON -DPROTOBUF_LIBRARY="$(Build.BinariesDirectory)\vcpkg\packages\protobuf_x64-windows\lib\libprotobuf.lib" $(Agent.BuildDirectory)\RadialGM
         cmake --build . --config Debug
         cmake --install . --config Debug
       displayName: 'Debug Build'
@@ -420,3 +420,4 @@ jobs:
           assetUploadMode: replace
           isDraft: false
           isPreRelease: true
+
