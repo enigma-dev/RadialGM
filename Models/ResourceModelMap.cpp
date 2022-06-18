@@ -129,6 +129,12 @@ void ResourceModelMap::ResourceRemoved(TypeCase type, const QString& name,
     }
   }
 
+  // NOTE: There is an unhandled BUG related to order in which references are deleted,
+  // and following hack doesnt solve it
+
+  // Remove an references to this resource
+  //emit ResourceRenamed(ResTypeAsString(type), name, "");
+
   // Remove references to this resource
   _resources[type].remove(name);
   emit DataChanged();

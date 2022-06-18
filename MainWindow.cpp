@@ -554,6 +554,11 @@ void MainWindow::on_treeView_doubleClicked(const QModelIndex &index) {
 void MainWindow::on_actionClearRecentMenu_triggered() { _recentFiles->clear(); }
 
 void MainWindow::CreateResource(TypeCase typeCase) {
+  if(this->treeModel == NULL){
+    qDebug() << "Attempt to add resource with NULL treeModel...";
+    return;
+  }
+
   TreeNode child;
   auto fieldNum = ResTypeFields[typeCase];
   const Descriptor *desc = child.GetDescriptor();
@@ -571,8 +576,20 @@ void MainWindow::CreateResource(TypeCase typeCase) {
   auto index = this->treeModel->addNode(child, _ui->treeView->currentIndex());
   treeModel->triggerNodeEdit(index, _ui->treeView);
 
+  TreeModel::Node *node = this->treeModel->IndexToNode(index);
+  if(node == NULL){
+    qDebug() << "Attempt to add resource with NULL treeModel node...";
+    return;
+  }
+
+  ProtoModel *protoModel = node->BackingModel();
+  if(protoModel == NULL){
+    qDebug() << "Attempt to add resource with NULL protoModel...";
+    return;
+  }
+
+  MessageModel *messageModel = protoModel->TryCastAsMessageModel();
   // add new resource with created name, helps in creating another unique name
-  MessageModel* messageModel = treeModel->IndexToNode(index)->BackingModel()->TryCastAsMessageModel();
   if(messageModel)
     resourceMap->AddResource(typeCase, resourceName, messageModel);
   else
