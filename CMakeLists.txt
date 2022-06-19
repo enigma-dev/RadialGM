@@ -344,6 +344,7 @@ if (WIN32)
 
   install(CODE "
           include(BundleUtilities)
+          set(GET_PREREQUISITES_VERBOSE TRUE)
           fixup_bundle(\"${RGM_APP}\" \"${LIBS}\" \"${SEARCH_PATHS}\")
           fixup_bundle(\"${EMAKE_APP}\" \"${LIBS}\" \"${SEARCH_PATHS}\")
           execute_process(COMMAND windeployqt.exe ${WINDEPLOY_ARGS} ${RGM_APP})
