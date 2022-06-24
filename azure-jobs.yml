@@ -115,8 +115,8 @@ jobs:
           assets: |
            $(Agent.BuildDirectory)/RadialGM-MinGW-$(MINGW_ARCH).exe
          
-- job: MSVC_64_VS_2019
-  displayName: 'MSVC x86_64 (Visual Studio 2019)'
+- job: MSVC_64_2019
+  displayName: 'MSVC 2019 x86_64'
   ? ${{ if and(eq(parameters.repo, 'self'), eq(variables['Build.SourceBranch'], 'refs/heads/master')) }}
   : dependsOn: CreateReleaseCandidate
   pool:
@@ -206,8 +206,8 @@ jobs:
             assets: |
               $(Agent.BuildDirectory)/RadialGM-MSVC-x86_64.exe
 
-- job: MSVC_64
-  displayName: 'MSVC x86_64'
+- job: MSVC_64_2022
+  displayName: 'MSVC 2022 x86_64'
   ${{ if and(eq(parameters.repo, 'self'), eq(variables['Build.SourceBranch'], 'refs/heads/master')) }}:
     dependsOn: CreateReleaseCandidate
   pool:
