@@ -166,3 +166,7 @@ void RoomEditor::on_actionZoomIn_triggered() { _ui->roomPreviewBackground->ZoomI
 void RoomEditor::on_actionZoomOut_triggered() { _ui->roomPreviewBackground->ZoomOut(); }
 
 void RoomEditor::on_actionZoom_triggered() { _ui->roomPreviewBackground->ResetZoom(); }
+
+void RoomEditor::on_actionShowHideGrid_triggered() {
+  _ui->roomPreviewBackground->SetGridVisible(_ui->actionShowHideGrid->isChecked());
+}

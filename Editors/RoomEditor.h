@@ -29,6 +29,7 @@ class RoomEditor : public BaseEditor {
   void on_actionZoomIn_triggered();
   void on_actionZoomOut_triggered();
   void on_actionZoom_triggered();
+  void on_actionShowHideGrid_triggered();
   void updateCursorPositionLabel(const QPoint& pos);
 
  private:
