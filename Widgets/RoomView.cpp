@@ -89,6 +89,13 @@ void RoomView::paintTiles(QPainter& painter) {
     bkg = bkg->GetSubModel<MessageModel*>(TreeNode::kBackgroundFieldNumber);
     if (!bkg) continue;
 
+    // useful in setting source rect correctly
+    bool bkgUseAsTileset = bkg->Data(FieldPath::Of<Background>(Background::kUseAsTilesetFieldNumber)).toBool();
+    int bkgTileWidth = bkg->Data(FieldPath::Of<Background>(Background::kTileWidthFieldNumber)).toInt();
+    int bkgTileHeight = bkg->Data(FieldPath::Of<Background>(Background::kTileHeightFieldNumber)).toInt();
+    int bkgImageWidth = bkg->Data(FieldPath::Of<Background>(Background::kWidthFieldNumber)).toInt();
+    int bkgImageHeight = bkg->Data(FieldPath::Of<Background>(Background::kHeightFieldNumber)).toInt();
+
     int x =
         _sortedTiles->Data(FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kXFieldNumber)).toInt();
     int y =
@@ -103,6 +110,11 @@ void RoomView::paintTiles(QPainter& painter) {
                 .toInt();
     int h = _sortedTiles->Data(FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kHeightFieldNumber))
                 .toInt();
+    double rotation =
+        _sortedTiles->Data(FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kRotationFieldNumber)).toDouble();
+    bool hasAlpha = false;
+    double alpha = _sortedTiles->
+        Data(FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kAlphaFieldNumber)).toDouble(&hasAlpha);
 
     QVariant xScale = _sortedTiles->DataOrDefault(
         FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kXscaleFieldNumber));
@@ -113,10 +125,35 @@ void RoomView::paintTiles(QPainter& painter) {
     QPixmap pixmap = ArtManager::GetCachedPixmap(imgFile);
     if (pixmap.isNull()) continue;
 
+    // dest rect handles proper scaling of tile in different scenarios, such as image based background is scaled or
+    // case when a given tile of tileset based background is scaled(possible in tiled using objects)
     QRectF dest(x, y, w, h);
-    QRectF src(xOff, yOff, w, h);
+    QRectF src;
+
+    // if background contains multiple tiles then set the rect using tilewidth and tileheight
+    // otherwise set it as image width and height
+    if(bkgUseAsTileset)
+      src = QRectF(xOff, yOff, bkgTileWidth, bkgTileHeight);
+    else
+      src = QRectF(xOff, yOff, bkgImageWidth, bkgImageHeight);
+
     const QTransform transform = painter.transform();
+    // Note: Current rotation support is only according to the location of tiles in Tiled, rotation for other formats
+    // (if exist) would be inaccurate
+    painter.translate(x,y+h);
+    painter.rotate(rotation);
+    painter.translate(-x,-y-h);
+
+    // for scale to work properly, origin must to adjusted to center of pixmap, and its resetted after applying scale
+    // Note: scale also handles horizontal and vertical flip of tiles
+    painter.translate(x+(w/2),y+(h/2));
     painter.scale(xScale.toFloat(), yScale.toFloat());
+    painter.translate(-x-(w/2),-y-(h/2));
+
+    // set opacity
+    if(hasAlpha)
+      painter.setOpacity(alpha);
+
     painter.drawPixmap(dest, pixmap, src);
     painter.setTransform(transform);
   }
