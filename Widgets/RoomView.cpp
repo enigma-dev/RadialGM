@@ -128,14 +128,13 @@ void RoomView::paintTiles(QPainter& painter) {
     // dest rect handles proper scaling of tile in different scenarios, such as image based background is scaled or
     // case when a given tile of tileset based background is scaled(possible in tiled using objects)
     QRectF dest(x, y, w, h);
-    QRectF src;
 
     // if background contains multiple tiles then set the rect using tilewidth and tileheight
     // otherwise set it as image width and height
-    if(bkgUseAsTileset)
-      src = QRectF(xOff, yOff, bkgTileWidth, bkgTileHeight);
-    else
-      src = QRectF(xOff, yOff, bkgImageWidth, bkgImageHeight);
+    int bkgUseAsTilesetInt = bkgUseAsTileset; // convert to int to avoid if else branch
+    QRectF src = QRectF(xOff, yOff,
+                   bkgUseAsTilesetInt*bkgTileWidth + (1-bkgUseAsTilesetInt)*bkgImageWidth,
+                   bkgUseAsTilesetInt*bkgTileHeight + (1-bkgUseAsTilesetInt)*bkgImageHeight);
 
     const QTransform transform = painter.transform();
     // Note: Current rotation support is only according to the location of tiles in Tiled, rotation for other formats
@@ -151,8 +150,9 @@ void RoomView::paintTiles(QPainter& painter) {
     painter.translate(-x-(w/2),-y-(h/2));
 
     // set opacity
-    if(hasAlpha)
-      painter.setOpacity(alpha);
+    int hasAlphaInt = hasAlpha; // convert to int to avoid if else branch
+    double finalAlpha = hasAlphaInt*alpha + (1-hasAlphaInt)*1.0;
+    painter.setOpacity(finalAlpha);
 
     painter.drawPixmap(dest, pixmap, src);
     painter.setTransform(transform);
