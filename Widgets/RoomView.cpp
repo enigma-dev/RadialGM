@@ -74,13 +74,16 @@ void RoomView::Paint(QPainter& painter) {
       QRectF(0, 0, roomWidth.isValid() ? roomWidth.toUInt() : 640, roomWidth.isValid() ? roomHeight.toUInt() : 480),
       QBrush(roomColor));
 
+  // to check whether room (in case of tmx importer) is of hexagonal orientation or not
+  QString orientation = _model->Data(FieldPath::Of<Room>(Room::kOrientationFieldNumber)).toString();
+
   paintBackgrounds(painter, false);
-  paintTiles(painter);
+  paintTiles(painter, orientation == "hexagonal");
   paintInstances(painter);
   paintBackgrounds(painter, true);
 }
 
-void RoomView::paintTiles(QPainter& painter) {
+void RoomView::paintTiles(QPainter& painter, int isHexMap) {
   for (int row = 0; row < _sortedTiles->rowCount(); row++) {
     QVariant bkgName = _sortedTiles->Data(
         FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kBackgroundNameFieldNumber));
@@ -137,11 +140,15 @@ void RoomView::paintTiles(QPainter& painter) {
                    bkgUseAsTilesetInt*bkgTileHeight + (1-bkgUseAsTilesetInt)*bkgImageHeight);
 
     const QTransform transform = painter.transform();
-    // Note: Current rotation support is only according to the location of tiles in Tiled, rotation for other formats
-    // (if exist) would be inaccurate
-    painter.translate(x,y+h);
+
+    // Note: Current rotation support is only according to the location of tiles in ortho and hex Tiled maps,
+    // if hexMap is 1(true) tile is rotated from its origin, if hexMap is 0(false) tile is rotate from top-left corner
+    // Side node: This translate back-and-forth is to achieve correct transformation in global space
+    painter.translate(isHexMap * (x+(w/2))  + (1 - isHexMap) * x,
+                      isHexMap * (y+(h/2))  + (1 - isHexMap) * (y+h));
     painter.rotate(rotation);
-    painter.translate(-x,-y-h);
+    painter.translate(isHexMap * (-x-(w/2)) + (1 - isHexMap) * -x,
+                      isHexMap * (-y-(h/2)) + (1 - isHexMap) * (-y-h));
 
     // for scale to work properly, origin must to adjusted to center of pixmap, and its resetted after applying scale
     // Note: scale also handles horizontal and vertical flip of tiles
