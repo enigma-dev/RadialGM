@@ -373,7 +373,7 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   treeConf.UseEditorLauncher<buffers::resources::Shader>(Launch<ShaderEditor>(this));
   treeConf.UseEditorLauncher<buffers::resources::Timeline>(Launch<TimelineEditor>(this));
   treeConf.UseEditorLauncher<buffers::resources::Object>(Launch<ObjectEditor>(this));
-  treeConf.UseEditorLauncher<buffers::resources::Room>(Launch<RoomEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::EGMRoom>(Launch<RoomEditor>(this));
   treeConf.UseEditorLauncher<buffers::resources::Settings>(Launch<SettingsEditor>(this));
 
   ProtoModel::DisplayConfig msgConf;
@@ -388,7 +388,7 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   msgConf.SetDefaultIcon<buffers::resources::Font>("font");
   msgConf.SetDefaultIcon<buffers::resources::Timeline>("timeline");
   msgConf.SetDefaultIcon<buffers::resources::Object>("object");
-  msgConf.SetDefaultIcon<buffers::resources::Room>("room");
+  msgConf.SetDefaultIcon<buffers::resources::EGMRoom>("egmroom");
   msgConf.SetDefaultIcon<buffers::resources::Settings>("settings");
 
   ConfigureIconFields(&msgConf, TreeNode::GetDescriptor());

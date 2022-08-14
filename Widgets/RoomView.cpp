@@ -37,10 +37,10 @@ void RoomView::SetResourceModel(MessageModel* model) {
   _model = model;
 
   if (model != nullptr) {
-    _sortedInstances->SetSourceModel(model->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber));
-    _sortedInstances->sort(Room::Instance::kObjectTypeFieldNumber);
-    _sortedTiles->SetSourceModel(model->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber));
-    _sortedTiles->sort(Room::Tile::kDepthFieldNumber);
+    _sortedInstances->SetSourceModel(model->GetSubModel<RepeatedMessageModel*>(EGMRoom::kInstancesFieldNumber));
+    _sortedInstances->sort(EGMRoom::Instance::kObjectTypeFieldNumber);
+    _sortedTiles->SetSourceModel(model->GetSubModel<RepeatedMessageModel*>(EGMRoom::kTilesFieldNumber));
+    _sortedTiles->sort(EGMRoom::Tile::kDepthFieldNumber);
   }
   setFixedSize(sizeHint());
   repaint();
@@ -48,8 +48,8 @@ void RoomView::SetResourceModel(MessageModel* model) {
 
 QSize RoomView::sizeHint() const {
   if (!_model) return QSize(640, 480);
-  QVariant roomWidth = _model->DataOrDefault(FieldPath::Of<Room>(Room::kWidthFieldNumber), 640),
-           roomHeight = _model->DataOrDefault(FieldPath::Of<Room>(Room::kHeightFieldNumber), 480);
+  QVariant roomWidth = _model->DataOrDefault(FieldPath::Of<EGMRoom>(EGMRoom::kWidthFieldNumber), 640),
+           roomHeight = _model->DataOrDefault(FieldPath::Of<EGMRoom>(EGMRoom::kHeightFieldNumber), 480);
   return QSize(roomWidth.toUInt(), roomHeight.toUInt());
 }
 
@@ -58,24 +58,24 @@ void RoomView::Paint(QPainter& painter) {
 
   if (!_model) return;
 
-  QVariant hsnap = _model->Data(FieldPath::Of<Room>(Room::kHsnapFieldNumber));
-  QVariant vsnap = _model->Data(FieldPath::Of<Room>(Room::kVsnapFieldNumber));
+  QVariant hsnap = _model->Data(FieldPath::Of<EGMRoom>(EGMRoom::kHsnapFieldNumber));
+  QVariant vsnap = _model->Data(FieldPath::Of<EGMRoom>(EGMRoom::kVsnapFieldNumber));
   _grid.horSpacing = hsnap.isValid() ? hsnap.toInt() : 16;
   _grid.vertSpacing = vsnap.isValid() ? vsnap.toInt() : 16;
 
   QColor roomColor = QColor(255, 255, 255, 100);
 
-  if (_model->Data(FieldPath::Of<Room>(Room::kShowColorFieldNumber)).toBool())
-    roomColor = _model->Data(FieldPath::Of<Room>(Room::kColorFieldNumber)).toInt();
+  if (_model->Data(FieldPath::Of<EGMRoom>(EGMRoom::kShowColorFieldNumber)).toBool())
+    roomColor = _model->Data(FieldPath::Of<EGMRoom>(EGMRoom::kColorFieldNumber)).toInt();
 
-  QVariant roomWidth = _model->Data(FieldPath::Of<Room>(Room::kWidthFieldNumber)),
-           roomHeight = _model->Data(FieldPath::Of<Room>(Room::kHeightFieldNumber));
+  QVariant roomWidth = _model->Data(FieldPath::Of<EGMRoom>(EGMRoom::kWidthFieldNumber)),
+           roomHeight = _model->Data(FieldPath::Of<EGMRoom>(EGMRoom::kHeightFieldNumber));
   painter.fillRect(
       QRectF(0, 0, roomWidth.isValid() ? roomWidth.toUInt() : 640, roomWidth.isValid() ? roomHeight.toUInt() : 480),
       QBrush(roomColor));
 
   // to check whether room (in case of tmx importer) is of hexagonal orientation or not
-  QString orientation = _model->Data(FieldPath::Of<Room>(Room::kOrientationFieldNumber)).toString();
+  QString orientation = _model->Data(FieldPath::Of<EGMRoom>(EGMRoom::kOrientationFieldNumber)).toString();
 
   paintBackgrounds(painter, false);
   paintTiles(painter, orientation == "hexagonal");
@@ -86,7 +86,7 @@ void RoomView::Paint(QPainter& painter) {
 void RoomView::paintTiles(QPainter& painter, int isHexMap) {
   for (int row = 0; row < _sortedTiles->rowCount(); row++) {
     QVariant bkgName = _sortedTiles->Data(
-        FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kBackgroundNameFieldNumber));
+        FieldPath::Of<EGMRoom::Tile>(FieldPath::StartingAt(row), EGMRoom::Tile::kBackgroundNameFieldNumber));
     MessageModel* bkg = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, bkgName.toString());
     if (!bkg) continue;
     bkg = bkg->GetSubModel<MessageModel*>(TreeNode::kBackgroundFieldNumber);
@@ -100,29 +100,29 @@ void RoomView::paintTiles(QPainter& painter, int isHexMap) {
     int bkgImageHeight = bkg->Data(FieldPath::Of<Background>(Background::kHeightFieldNumber)).toInt();
 
     int x =
-        _sortedTiles->Data(FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kXFieldNumber)).toInt();
+        _sortedTiles->Data(FieldPath::Of<EGMRoom::Tile>(FieldPath::StartingAt(row), EGMRoom::Tile::kXFieldNumber)).toInt();
     int y =
-        _sortedTiles->Data(FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kYFieldNumber)).toInt();
+        _sortedTiles->Data(FieldPath::Of<EGMRoom::Tile>(FieldPath::StartingAt(row), EGMRoom::Tile::kYFieldNumber)).toInt();
     int xOff =
-        _sortedTiles->Data(FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kXoffsetFieldNumber))
+        _sortedTiles->Data(FieldPath::Of<EGMRoom::Tile>(FieldPath::StartingAt(row), EGMRoom::Tile::kXoffsetFieldNumber))
             .toInt();
     int yOff =
-        _sortedTiles->Data(FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kYoffsetFieldNumber))
+        _sortedTiles->Data(FieldPath::Of<EGMRoom::Tile>(FieldPath::StartingAt(row), EGMRoom::Tile::kYoffsetFieldNumber))
             .toInt();
-    int w = _sortedTiles->Data(FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kWidthFieldNumber))
+    int w = _sortedTiles->Data(FieldPath::Of<EGMRoom::Tile>(FieldPath::StartingAt(row), EGMRoom::Tile::kWidthFieldNumber))
                 .toInt();
-    int h = _sortedTiles->Data(FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kHeightFieldNumber))
+    int h = _sortedTiles->Data(FieldPath::Of<EGMRoom::Tile>(FieldPath::StartingAt(row), EGMRoom::Tile::kHeightFieldNumber))
                 .toInt();
     double rotation =
-        _sortedTiles->Data(FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kRotationFieldNumber)).toDouble();
+        _sortedTiles->Data(FieldPath::Of<EGMRoom::Tile>(FieldPath::StartingAt(row), EGMRoom::Tile::kRotationFieldNumber)).toDouble();
     bool hasAlpha = false;
     double alpha = _sortedTiles->
-        Data(FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kAlphaFieldNumber)).toDouble(&hasAlpha);
+        Data(FieldPath::Of<EGMRoom::Tile>(FieldPath::StartingAt(row), EGMRoom::Tile::kAlphaFieldNumber)).toDouble(&hasAlpha);
 
     QVariant xScale = _sortedTiles->DataOrDefault(
-        FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kXscaleFieldNumber));
+        FieldPath::Of<EGMRoom::Tile>(FieldPath::StartingAt(row), EGMRoom::Tile::kXscaleFieldNumber));
     QVariant yScale = _sortedTiles->DataOrDefault(
-        FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kYscaleFieldNumber));
+        FieldPath::Of<EGMRoom::Tile>(FieldPath::StartingAt(row), EGMRoom::Tile::kYscaleFieldNumber));
 
     QString imgFile = bkg->Data(FieldPath::Of<Background>(Background::kImageFieldNumber)).toString();
     QPixmap pixmap = ArtManager::GetCachedPixmap(imgFile);
@@ -167,19 +167,19 @@ void RoomView::paintTiles(QPainter& painter, int isHexMap) {
 }
 
 void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
-  RepeatedMessageModel* backgrounds = _model->GetSubModel<RepeatedMessageModel*>(Room::kBackgroundsFieldNumber);
+  RepeatedMessageModel* backgrounds = _model->GetSubModel<RepeatedMessageModel*>(EGMRoom::kBackgroundsFieldNumber);
   for (int row = 0; row < backgrounds->rowCount(); row++) {
     bool visible =
         backgrounds
-            ->Data(FieldPath::Of<Room::Background>(FieldPath::StartingAt(row), Room::Background::kVisibleFieldNumber))
+            ->Data(FieldPath::Of<EGMRoom::Background>(FieldPath::StartingAt(row), EGMRoom::Background::kVisibleFieldNumber))
             .toBool();
     bool foreground = backgrounds
-                          ->Data(FieldPath::Of<Room::Background>(FieldPath::StartingAt(row),
-                                                                 Room::Background::kForegroundFieldNumber))
+                          ->Data(FieldPath::Of<EGMRoom::Background>(FieldPath::StartingAt(row),
+                                                                 EGMRoom::Background::kForegroundFieldNumber))
                           .toBool();
     QString bkgName = backgrounds
-                          ->Data(FieldPath::Of<Room::Background>(FieldPath::StartingAt(row),
-                                                                 Room::Background::kBackgroundNameFieldNumber))
+                          ->Data(FieldPath::Of<EGMRoom::Background>(FieldPath::StartingAt(row),
+                                                                 EGMRoom::Background::kBackgroundNameFieldNumber))
                           .toString();
 
     if (!visible || foreground != foregrounds) continue;
@@ -189,10 +189,10 @@ void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
     if (!bkgRes) continue;
 
     int x =
-        backgrounds->Data(FieldPath::Of<Room::Background>(FieldPath::StartingAt(row), Room::Background::kXFieldNumber))
+        backgrounds->Data(FieldPath::Of<EGMRoom::Background>(FieldPath::StartingAt(row), EGMRoom::Background::kXFieldNumber))
             .toInt();
     int y =
-        backgrounds->Data(FieldPath::Of<Room::Background>(FieldPath::StartingAt(row), Room::Background::kYFieldNumber))
+        backgrounds->Data(FieldPath::Of<EGMRoom::Background>(FieldPath::StartingAt(row), EGMRoom::Background::kYFieldNumber))
             .toInt();
     int w = bkgRes->Data(FieldPath::Of<Background>(Background::kWidthFieldNumber)).toInt();
     int h = bkgRes->Data(FieldPath::Of<Background>(Background::kHeightFieldNumber)).toInt();
@@ -206,10 +206,10 @@ void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
 
     bool stretch =
         backgrounds
-            ->Data(FieldPath::Of<Room::Background>(FieldPath::StartingAt(row), Room::Background::kStretchFieldNumber))
+            ->Data(FieldPath::Of<EGMRoom::Background>(FieldPath::StartingAt(row), EGMRoom::Background::kStretchFieldNumber))
             .toBool();
-    int room_w = _model->Data(FieldPath::Of<Room>(Room::kWidthFieldNumber)).toInt();
-    int room_h = _model->Data(FieldPath::Of<Room>(Room::kHeightFieldNumber)).toInt();
+    int room_w = _model->Data(FieldPath::Of<EGMRoom>(EGMRoom::kWidthFieldNumber)).toInt();
+    int room_h = _model->Data(FieldPath::Of<EGMRoom>(EGMRoom::kHeightFieldNumber)).toInt();
 
     const QTransform transform = painter.transform();
     if (stretch) {
@@ -218,11 +218,11 @@ void RoomView::paintBackgrounds(QPainter& painter, bool foregrounds) {
 
     bool hTiled =
         backgrounds
-            ->Data(FieldPath::Of<Room::Background>(FieldPath::StartingAt(row), Room::Background::kHtiledFieldNumber))
+            ->Data(FieldPath::Of<EGMRoom::Background>(FieldPath::StartingAt(row), EGMRoom::Background::kHtiledFieldNumber))
             .toBool();
     bool vTiled =
         backgrounds
-            ->Data(FieldPath::Of<Room::Background>(FieldPath::StartingAt(row), Room::Background::kVtiledFieldNumber))
+            ->Data(FieldPath::Of<EGMRoom::Background>(FieldPath::StartingAt(row), EGMRoom::Background::kVtiledFieldNumber))
             .toBool();
 
     if (hTiled) {
@@ -251,7 +251,7 @@ void RoomView::paintInstances(QPainter& painter) {
     int yoff = 0;
 
     QVariant sprName = _sortedInstances->Data(
-        FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kObjectTypeFieldNumber));
+        FieldPath::Of<EGMRoom::Instance>(FieldPath::StartingAt(row), EGMRoom::Instance::kObjectTypeFieldNumber));
 
     MessageModel* spr = GetObjectSprite(sprName.toString());
     if (spr == nullptr || spr->GetSubModel<RepeatedStringModel*>(Sprite::kSubimagesFieldNumber)->Empty()) {
@@ -269,15 +269,15 @@ void RoomView::paintInstances(QPainter& painter) {
     if (pixmap.isNull()) continue;
 
     QVariant x = _sortedInstances->Data(
-        FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kXFieldNumber));
+        FieldPath::Of<EGMRoom::Instance>(FieldPath::StartingAt(row), EGMRoom::Instance::kXFieldNumber));
     QVariant y = _sortedInstances->Data(
-        FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kYFieldNumber));
+        FieldPath::Of<EGMRoom::Instance>(FieldPath::StartingAt(row), EGMRoom::Instance::kYFieldNumber));
     QVariant xScale = _sortedInstances->DataOrDefault(
-        FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kXscaleFieldNumber), 1);
+        FieldPath::Of<EGMRoom::Instance>(FieldPath::StartingAt(row), EGMRoom::Instance::kXscaleFieldNumber), 1);
     QVariant yScale = _sortedInstances->DataOrDefault(
-        FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kYscaleFieldNumber), 1);
+        FieldPath::Of<EGMRoom::Instance>(FieldPath::StartingAt(row), EGMRoom::Instance::kYscaleFieldNumber), 1);
     QVariant rot = _sortedInstances->DataOrDefault(
-        FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kRotationFieldNumber), 0);
+        FieldPath::Of<EGMRoom::Instance>(FieldPath::StartingAt(row), EGMRoom::Instance::kRotationFieldNumber), 0);
 
     QRectF dest(0, 0, w, h);
     QRectF src(0, 0, w, h);

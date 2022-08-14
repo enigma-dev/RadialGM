@@ -29,15 +29,15 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   _nodeMapper->addMapping(_ui->roomName, TreeNode::kNameFieldNumber);
   _nodeMapper->toFirst();
 
-  _resMapper->addMapping(_ui->speedSpinBox, Room::kSpeedFieldNumber);
-  _resMapper->addMapping(_ui->widthSpinBox, Room::kWidthFieldNumber);
-  _resMapper->addMapping(_ui->heightSpinBox, Room::kHeightFieldNumber);
-  _resMapper->addMapping(_ui->clearCheckBox, Room::kClearDisplayBufferFieldNumber);
-  _resMapper->addMapping(_ui->persistentCheckBox, Room::kPersistentFieldNumber);
-  _resMapper->addMapping(_ui->captionLineEdit, Room::kCaptionFieldNumber);
+  _resMapper->addMapping(_ui->speedSpinBox, EGMRoom::kSpeedFieldNumber);
+  _resMapper->addMapping(_ui->widthSpinBox, EGMRoom::kWidthFieldNumber);
+  _resMapper->addMapping(_ui->heightSpinBox, EGMRoom::kHeightFieldNumber);
+  _resMapper->addMapping(_ui->clearCheckBox, EGMRoom::kClearDisplayBufferFieldNumber);
+  _resMapper->addMapping(_ui->persistentCheckBox, EGMRoom::kPersistentFieldNumber);
+  _resMapper->addMapping(_ui->captionLineEdit, EGMRoom::kCaptionFieldNumber);
 
-  _resMapper->addMapping(_ui->enableViewsCheckBox, Room::kEnableViewsFieldNumber);
-  _resMapper->addMapping(_ui->clearViewportCheckBox, Room::kClearViewBackgroundFieldNumber);
+  _resMapper->addMapping(_ui->enableViewsCheckBox, EGMRoom::kEnableViewsFieldNumber);
+  _resMapper->addMapping(_ui->clearViewportCheckBox, EGMRoom::kClearViewBackgroundFieldNumber);
   _resMapper->toFirst();
 
   _viewMapper = new ImmediateDataWidgetMapper(this);
@@ -97,41 +97,41 @@ void RoomEditor::RebindSubModels() {
   _roomModel = _model->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
   _ui->roomView->SetResourceModel(_roomModel);
 
-  RepeatedMessageModel* im = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
+  RepeatedMessageModel* im = _roomModel->GetSubModel<RepeatedMessageModel*>(EGMRoom::kInstancesFieldNumber);
   RepeatedSortFilterProxyModel* imp = new RepeatedSortFilterProxyModel(this);
   imp->SetSourceModel(im);
   _ui->instancesListView->setModel(imp);
 
   for (int c = 0; c < im->columnCount(); ++c) {
-    if (c != im->FieldToColumn(Room::Instance::kNameFieldNumber) &&
-        c != im->FieldToColumn(Room::Instance::kObjectTypeFieldNumber) &&
-        c != im->FieldToColumn(Room::Instance::kIdFieldNumber))
+    if (c != im->FieldToColumn(EGMRoom::Instance::kNameFieldNumber) &&
+        c != im->FieldToColumn(EGMRoom::Instance::kObjectTypeFieldNumber) &&
+        c != im->FieldToColumn(EGMRoom::Instance::kIdFieldNumber))
       _ui->instancesListView->hideColumn(c);
     else
       _ui->instancesListView->resizeColumnToContents(c);
   }
 
-  _ui->instancesListView->header()->swapSections(im->FieldToColumn(Room::Instance::kNameFieldNumber),
-                                                 im->FieldToColumn(Room::Instance::kObjectTypeFieldNumber));
+  _ui->instancesListView->header()->swapSections(im->FieldToColumn(EGMRoom::Instance::kNameFieldNumber),
+                                                 im->FieldToColumn(EGMRoom::Instance::kObjectTypeFieldNumber));
 
-  RepeatedMessageModel* tm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
+  RepeatedMessageModel* tm = _roomModel->GetSubModel<RepeatedMessageModel*>(EGMRoom::kTilesFieldNumber);
   RepeatedSortFilterProxyModel* tmp = new RepeatedSortFilterProxyModel(this);
   tmp->SetSourceModel(tm);
   _ui->tilesListView->setModel(tmp);
 
   for (int c = 0; c < tm->columnCount(); ++c) {
-    if (c != tm->FieldToColumn(Room::Tile::kBackgroundNameFieldNumber) &&
-        c != tm->FieldToColumn(Room::Tile::kIdFieldNumber) && c != tm->FieldToColumn(Room::Tile::kDepthFieldNumber) &&
-        c != tm->FieldToColumn(Room::Tile::kNameFieldNumber))
+    if (c != tm->FieldToColumn(EGMRoom::Tile::kBackgroundNameFieldNumber) &&
+        c != tm->FieldToColumn(EGMRoom::Tile::kIdFieldNumber) && c != tm->FieldToColumn(EGMRoom::Tile::kDepthFieldNumber) &&
+        c != tm->FieldToColumn(EGMRoom::Tile::kNameFieldNumber))
       _ui->tilesListView->hideColumn(c);
     else
       _ui->tilesListView->resizeColumnToContents(c);
   }
 
-  _ui->tilesListView->header()->swapSections(tm->FieldToColumn(Room::Tile::kNameFieldNumber),
-                                             tm->FieldToColumn(Room::Tile::kBackgroundNameFieldNumber));
+  _ui->tilesListView->header()->swapSections(tm->FieldToColumn(EGMRoom::Tile::kNameFieldNumber),
+                                             tm->FieldToColumn(EGMRoom::Tile::kBackgroundNameFieldNumber));
 
-  RepeatedMessageModel* vm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kViewsFieldNumber);
+  RepeatedMessageModel* vm = _roomModel->GetSubModel<RepeatedMessageModel*>(EGMRoom::kViewsFieldNumber);
   _viewMapper->setModel(vm);
 
   connect(_ui->instancesListView->selectionModel(), &QItemSelectionModel::selectionChanged,

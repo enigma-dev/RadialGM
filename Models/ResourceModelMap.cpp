@@ -69,13 +69,13 @@ void ResourceModelMap::ResourceRemoved(TypeCase type, const QString& name,
       R_EXPECT_V(room);
       MessageModel* roomModel = room->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
       R_EXPECT_V(roomModel);
-      RepeatedMessageModel* instancesModel = roomModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
+      RepeatedMessageModel* instancesModel = roomModel->GetSubModel<RepeatedMessageModel*>(EGMRoom::kInstancesFieldNumber);
       auto& remover = removers.emplace(instancesModel, instancesModel).first->second;
 
       for (int row = 0; row < instancesModel->rowCount(); ++row) {
         if (instancesModel
                 ->Data(
-                    FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kObjectTypeFieldNumber))
+                    FieldPath::Of<EGMRoom::Instance>(FieldPath::StartingAt(row), EGMRoom::Instance::kObjectTypeFieldNumber))
                 .toString() == name)
           remover.RemoveRow(row);
       }
@@ -84,13 +84,13 @@ void ResourceModelMap::ResourceRemoved(TypeCase type, const QString& name,
       MessageModel* backupModel = roomModel->GetBackupModel();
       if (backupModel != nullptr) {
         RepeatedMessageModel* instancesModelBak =
-            backupModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
+            backupModel->GetSubModel<RepeatedMessageModel*>(EGMRoom::kInstancesFieldNumber);
         auto& remover = removers.emplace(instancesModelBak, instancesModelBak).first->second;
 
         for (int row = 0; row < instancesModelBak->rowCount(); ++row) {
           if (instancesModelBak
                   ->Data(
-                      FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kObjectTypeFieldNumber))
+                      FieldPath::Of<EGMRoom::Instance>(FieldPath::StartingAt(row), EGMRoom::Instance::kObjectTypeFieldNumber))
                   .toString() == name)
             remover.RemoveRow(row);
         }
@@ -102,13 +102,13 @@ void ResourceModelMap::ResourceRemoved(TypeCase type, const QString& name,
   if (type == TypeCase::kBackground) {
     for (auto& room : qAsConst(_resources[TypeCase::kRoom])) {
       MessageModel* roomModel = room->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
-      RepeatedMessageModel* tilesModel = roomModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
+      RepeatedMessageModel* tilesModel = roomModel->GetSubModel<RepeatedMessageModel*>(EGMRoom::kTilesFieldNumber);
       auto& remover = removers.emplace(tilesModel, tilesModel).first->second;
 
       for (int row = 0; row < tilesModel->rowCount(); ++row) {
         if (tilesModel
                 ->Data(
-                    FieldPath::Of<Room::Instance>(FieldPath::StartingAt(row), Room::Instance::kObjectTypeFieldNumber))
+                    FieldPath::Of<EGMRoom::Instance>(FieldPath::StartingAt(row), EGMRoom::Instance::kObjectTypeFieldNumber))
                 .toString() == name)
           remover.RemoveRow(row);
       }
@@ -116,12 +116,12 @@ void ResourceModelMap::ResourceRemoved(TypeCase type, const QString& name,
       // Only models in use in open editors should have backup models
       MessageModel* backupModel = roomModel->GetBackupModel();
       if (backupModel != nullptr) {
-        RepeatedMessageModel* tilesModelBak = backupModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
+        RepeatedMessageModel* tilesModelBak = backupModel->GetSubModel<RepeatedMessageModel*>(EGMRoom::kTilesFieldNumber);
         auto& remover = removers.emplace(tilesModelBak, tilesModelBak).first->second;
 
         for (int row = 0; row < tilesModelBak->rowCount(); ++row) {
           if (tilesModelBak
-                  ->Data(FieldPath::Of<Room::Tile>(FieldPath::StartingAt(row), Room::Tile::kBackgroundNameFieldNumber))
+                  ->Data(FieldPath::Of<EGMRoom::Tile>(FieldPath::StartingAt(row), EGMRoom::Tile::kBackgroundNameFieldNumber))
                   .toString() == name)
             remover.RemoveRow(row);
         }
@@ -193,7 +193,7 @@ TypeCase Type(TreeModel::Node* node) {
       {FullName<buffers::resources::Shader>(), TypeCase::kShader},
       {FullName<buffers::resources::Timeline>(), TypeCase::kTimeline},
       {FullName<buffers::resources::Object>(), TypeCase::kObject},
-      {FullName<buffers::resources::Room>(), TypeCase::kRoom},
+      {FullName<buffers::resources::EGMRoom>(), TypeCase::kRoom},
       {FullName<buffers::resources::Settings>(), TypeCase::kSettings},
   };
 
