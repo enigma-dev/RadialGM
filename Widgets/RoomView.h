@@ -25,8 +25,10 @@ class RoomView : public AssetView {
   InstanceSortFilterProxyModel *_sortedInstances;
   RepeatedSortFilterProxyModel *_sortedTiles;
   QPixmap _transparentPixmap;
+  RepeatedMessageModel *_objectGroups;
 
-  void paintTiles(QPainter &painter, int isHexMap = 0);
+  void paintTiles(QPainter &painter);
+  void paintTiledObjects(QPainter &painter, int isHexMap = 0);
   void paintBackgrounds(QPainter &painter, bool foregrounds = false);
   void paintInstances(QPainter &painter);
 };

@@ -10,7 +10,7 @@
 #include "Models/TreeSortFilterProxyModel.h"
 #include "Models/RepeatedSortFilterProxyModel.h"
 
-#include "Room.pb.h"
+#include "EGMRoom.pb.h"
 
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
@@ -18,7 +18,7 @@
 
 #include <algorithm>
 
-using View = buffers::resources::Room::View;
+using View = buffers::resources::EGMRoom::View;
 
 RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model, parent), _ui(new Ui::RoomEditor) {
   _ui->setupUi(this);
