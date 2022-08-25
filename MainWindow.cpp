@@ -462,7 +462,7 @@ void MainWindow::on_actionNew_triggered() { openNewProject(); }
 void MainWindow::on_actionOpen_triggered() {
   const QString &fileName = QFileDialog::getOpenFileName(
       this, tr("Open Project"), "",
-      tr("All supported formats (*.egm *.yyp *.project.gmx *.gm81 *.gmk *.gm6 *.gmd);;GameMaker: Studio 2 Projects "
+      tr("All supported formats (*.egm *.yyp *.project.gmx *.gm81 *.gmk *.gm6 *.gmd *.tsx *.tmx);;GameMaker: Studio 2 Projects "
          "(*.yyp);;GameMaker: Studio Projects (*.project.gmx);;Classic "
          "GameMaker Files (*.gm81 *.gmk *.gm6 *.gmd);;"
          "Tiled Tilesets (*.tsx);;Tiled Maps (*.tmx);;All Files (*)"));
@@ -492,6 +492,74 @@ void MainWindow::on_actionSave_triggered() {
   }
 
   egm::WriteProject(_project.get(), fileName.toStdString());
+}
+
+int MainWindow::findRoom(buffers::TreeNode *root, buffers::resources::EGMRoom *&room) {
+  if(root->type_case() == TypeCase::kRoom) {
+      room = root->mutable_room();
+      return 0;
+  }
+
+  for (int i=0; i < root->folder().children_size(); ++i) {
+    int res = findRoom(root->mutable_folder()->mutable_children(i), room);
+    if (res) return res;
+  }
+
+  return 0;
+}
+
+void MainWindow::on_actionMerge_triggered() {
+  buffers::resources::EGMRoom *existingRoom = NULL;
+
+  findRoom(_project->mutable_game()->mutable_root(), existingRoom);
+
+  // check if there is an existing project
+  if(!existingRoom) {
+    std::cout << "Load the project first" << std::endl;
+  }
+  // pass the existing project to MergeProject method with fileName and current project as arguments
+  else {
+    std::cout << "Merging projects" << std::endl;
+
+    const QString &fName = QFileDialog::getOpenFileName(
+        this, tr("Select TMX project to merge"), "",
+        tr("Tiled Maps (*.tmx)"));
+
+    if (!fName.isEmpty()) {
+      std::unique_ptr<buffers::Project> loadedProject = egm::LoadProject(fName.toStdString());
+
+      if (!loadedProject) {
+        QMessageBox::warning(this, tr("Failed To Open Project"), tr("There was a problem loading the project: ") + fName,
+                             QMessageBox::Ok);
+        return;
+      }
+
+      buffers::resources::EGMRoom *loadedRoom = NULL;
+      findRoom(loadedProject->mutable_game()->mutable_root(), loadedRoom);
+
+      if(loadedRoom) {
+        existingRoom->set_orientation(loadedRoom->orientation());
+        existingRoom->set_renderorder(loadedRoom->renderorder());
+        existingRoom->set_width(loadedRoom->width());
+        existingRoom->set_height(loadedRoom->height());
+        existingRoom->set_tilewidth(loadedRoom->tilewidth());
+        existingRoom->set_tileheight(loadedRoom->tileheight());
+        existingRoom->set_infinite(loadedRoom->infinite());
+        existingRoom->set_parallaxoriginx(loadedRoom->parallaxoriginx());
+        existingRoom->set_parallaxoriginy(loadedRoom->parallaxoriginy());
+        existingRoom->set_nextlayerid(loadedRoom->nextlayerid());
+        existingRoom->set_nextobjectid(loadedRoom->nextobjectid());
+        existingRoom->set_firstgid(loadedRoom->firstgid());
+        existingRoom->set_hexsidelength(loadedRoom->has_hexsidelength());
+        existingRoom->set_staggeraxis(loadedRoom->staggeraxis());
+        existingRoom->set_staggerindex(loadedRoom->staggerindex());
+        existingRoom->set_color(loadedRoom->color());
+        existingRoom->mutable_objectgroups()->CopyFrom(loadedRoom->objectgroups());
+      }
+      else
+        std::cout << "Fatal error, couldnt find loaded room" << std::endl;
+    }
+  }
 }
 
 void MainWindow::on_actionPreferences_triggered() {

@@ -62,6 +62,7 @@ class MainWindow : public QMainWindow {
   void on_actionOpen_triggered();
   void on_actionClearRecentMenu_triggered();
   void on_actionSave_triggered();
+  void on_actionMerge_triggered();
   void on_actionPreferences_triggered();
   void on_actionExit_triggered();
 
@@ -127,6 +128,7 @@ class MainWindow : public QMainWindow {
   void writeSettings();
   void setTabbedMode(bool enabled);
   static QFileInfo getEnigmaRoot();
+  int findRoom(buffers::TreeNode *root, buffers::resources::EGMRoom *&room);
 };
 
 #endif  // MAINWINDOW_H
