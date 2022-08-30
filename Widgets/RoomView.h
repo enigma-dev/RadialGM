@@ -33,6 +33,9 @@ class RoomView : public AssetView {
   void paintTileLayerTiles(QPainter &painter, int isHexMap = 0);
   void paintBackgrounds(QPainter &painter, bool foregrounds = false);
   void paintInstances(QPainter &painter);
+
+ private:
+  void painterTiledTileHelper(QPainter& painter, const ProtoModel *currTile, int isHexMap);
 };
 
 #endif  // ROOMVIEW_H
