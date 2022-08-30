@@ -42,6 +42,7 @@ void RoomView::SetResourceModel(MessageModel* model) {
     _sortedTiles->SetSourceModel(model->GetSubModel<RepeatedMessageModel*>(EGMRoom::kTilesFieldNumber));
     _sortedTiles->sort(EGMRoom::Tile::kDepthFieldNumber);
     _objectGroups = model->GetSubModel<RepeatedMessageModel*>(EGMRoom::kObjectGroupsFieldNumber);
+    _tileLayers = model->GetSubModel<RepeatedMessageModel*>(EGMRoom::kTileLayersFieldNumber);
   }
   setFixedSize(sizeHint());
   repaint();
@@ -81,6 +82,7 @@ void RoomView::Paint(QPainter& painter) {
   paintBackgrounds(painter, false);
   paintTiles(painter);
   paintTiledObjects(painter, orientation == "hexagonal");
+  paintTileLayerTiles(painter, orientation == "hexagonal");
   paintInstances(painter);
   paintBackgrounds(painter, true);
 }
@@ -160,6 +162,7 @@ void RoomView::paintTiledObjects(QPainter& painter, int isHexMap) {
                              EGMRoom::ObjectGroup::Object::kXFieldNumber)).toInt();
       int y = currObject->Data(FieldPath::Of<EGMRoom::ObjectGroup::Object>(
                              EGMRoom::ObjectGroup::Object::kYFieldNumber)).toInt();
+      // TODO: Add support to loading tileset tile as an object
       int xOff = 0;
       int yOff = 0;
       int w = currObject->Data(FieldPath::Of<EGMRoom::ObjectGroup::Object>(
@@ -194,6 +197,103 @@ void RoomView::paintTiledObjects(QPainter& painter, int isHexMap) {
                      bkgUseAsTilesetInt*bkgTileWidth + (1-bkgUseAsTilesetInt)*bkgImageWidth,
                      bkgUseAsTilesetInt*bkgTileHeight + (1-bkgUseAsTilesetInt)*bkgImageHeight);
 
+      const QTransform transform = painter.transform();
+
+      // Note: Current rotation support is only according to the location of tiles in ortho and hex Tiled maps,
+      // if hexMap is 1(true) tile is rotated from its origin, if hexMap is 0(false) tile is rotate from top-left corner
+      // Side node: This translate back-and-forth is to achieve correct transformation in global space
+      painter.translate(isHexMap * (x+(w/2))  + (1 - isHexMap) * x,
+                        isHexMap * (y+(h/2))  + (1 - isHexMap) * (y+h));
+      painter.rotate(rotation);
+      painter.translate(isHexMap * (-x-(w/2)) + (1 - isHexMap) * -x,
+                        isHexMap * (-y-(h/2)) + (1 - isHexMap) * (-y-h));
+
+      // for scale to work properly, origin must to adjusted to center of pixmap, and its resetted after applying scale
+      // Note: scale also handles horizontal and vertical flip of tiles
+      painter.translate(x+(w/2),y+(h/2));
+      painter.scale(xScale.toFloat(), yScale.toFloat());
+      painter.translate(-x-(w/2),-y-(h/2));
+
+      // set opacity
+      int hasAlphaInt = hasAlpha; // convert to int to avoid if else branch
+      double finalAlpha = hasAlphaInt*alpha + (1-hasAlphaInt)*1.0;
+      painter.setOpacity(finalAlpha);
+
+      painter.drawPixmap(dest, pixmap, src);
+      painter.setTransform(transform);
+    }
+  }
+}
+
+void RoomView::paintTileLayerTiles(QPainter& painter, int isHexMap) {
+  for(int row = 0; row < _tileLayers->rowCount(); ++row) {
+    const ProtoModel *currLayerData = _tileLayers->GetSubModel(FieldPath::Of<EGMRoom::TileLayer>(
+                                                                 FieldPath::StartingAt(row),
+                                                                 EGMRoom::TileLayer::kDataFieldNumber));
+    if(!currLayerData)
+      continue;
+
+    const ProtoModel *chunks = currLayerData->GetSubModel(FieldPath::Of<EGMRoom::TileLayer::Data>(
+                                                           EGMRoom::TileLayer::Data::kChunksFieldNumber));
+
+    const ProtoModel *tiles = currLayerData->GetSubModel(FieldPath::Of<EGMRoom::TileLayer::Data>(
+                                                           EGMRoom::TileLayer::Data::kTilesFieldNumber));
+
+    if(!tiles)
+      continue;
+    const RepeatedMessageModel *tilesAsRepeated = tiles->TryCast<RepeatedMessageModel>();
+    if(!tilesAsRepeated)
+      continue;
+
+    for(int tileRow = 0; tileRow < tilesAsRepeated->rowCount(); ++tileRow) {
+      const ProtoModel *currTile = tilesAsRepeated->GetSubModel(tileRow);
+      // std::string bg = currTile->Data(FieldPath::Of<EGMRoom::Tile>(EGMRoom::Tile::kBackgroundNameFieldNumber)).toString().toStdString();
+      // std::cout << bg << std::endl;
+      if(!currTile)
+        continue;
+
+      QVariant bkgName = currTile->Data(FieldPath::Of<EGMRoom::Tile>(EGMRoom::Tile::kBackgroundNameFieldNumber));
+
+      MessageModel* bkg = MainWindow::resourceMap->GetResourceByName(TreeNode::kBackground, bkgName.toString());
+      if (!bkg) continue;
+      bkg = bkg->GetSubModel<MessageModel*>(TreeNode::kBackgroundFieldNumber);
+      if (!bkg) continue;
+
+      // useful in setting source rect correctly
+      bool bkgUseAsTileset = bkg->Data(FieldPath::Of<Background>(Background::kUseAsTilesetFieldNumber)).toBool();
+      int bkgTileWidth = bkg->Data(FieldPath::Of<Background>(Background::kTileWidthFieldNumber)).toInt();
+      int bkgTileHeight = bkg->Data(FieldPath::Of<Background>(Background::kTileHeightFieldNumber)).toInt();
+      int bkgImageWidth = bkg->Data(FieldPath::Of<Background>(Background::kWidthFieldNumber)).toInt();
+      int bkgImageHeight = bkg->Data(FieldPath::Of<Background>(Background::kHeightFieldNumber)).toInt();
+
+      int x = currTile->Data(FieldPath::Of<EGMRoom::Tile>(EGMRoom::Tile::kXFieldNumber)).toInt();
+      int y = currTile->Data(FieldPath::Of<EGMRoom::Tile>(EGMRoom::Tile::kYFieldNumber)).toInt();
+      int xOff = currTile->Data(FieldPath::Of<EGMRoom::Tile>(EGMRoom::Tile::kXoffsetFieldNumber)).toInt();
+      int yOff = currTile->Data(FieldPath::Of<EGMRoom::Tile>(EGMRoom::Tile::kYoffsetFieldNumber)).toInt();
+      int w = currTile->Data(FieldPath::Of<EGMRoom::Tile>(EGMRoom::Tile::kWidthFieldNumber)).toInt();
+      int h = currTile->Data(FieldPath::Of<EGMRoom::Tile>(EGMRoom::Tile::kHeightFieldNumber)).toInt();
+      double rotation = currTile->Data(FieldPath::Of<EGMRoom::Tile>(EGMRoom::Tile::kRotationFieldNumber)).toDouble();
+      bool hasAlpha = false;
+      double alpha = currTile->Data(FieldPath::Of<EGMRoom::Tile>(EGMRoom::Tile::kAlphaFieldNumber)).toDouble(&hasAlpha);
+
+      QVariant xScale = currTile->DataOrDefault(FieldPath::Of<EGMRoom::Tile>(EGMRoom::Tile::kXscaleFieldNumber));
+      QVariant yScale = currTile->DataOrDefault(FieldPath::Of<EGMRoom::Tile>(EGMRoom::Tile::kYscaleFieldNumber));
+
+      QString imgFile = bkg->Data(FieldPath::Of<Background>(Background::kImageFieldNumber)).toString();
+      QPixmap pixmap = ArtManager::GetCachedPixmap(imgFile);
+      if (pixmap.isNull()) continue;
+
+      // dest rect handles proper scaling of tile in different scenarios, such as image based background is scaled or
+      // case when a given tile of tileset based background is scaled(possible in tiled using objects)
+      QRectF dest(x, y, w, h);
+
+      // if background contains multiple tiles then set the rect using tilewidth and tileheight
+      // otherwise set it as image width and height
+      int bkgUseAsTilesetInt = bkgUseAsTileset; // convert to int to avoid if else branch
+      QRectF src = QRectF(xOff, yOff,
+                     bkgUseAsTilesetInt*bkgTileWidth + (1-bkgUseAsTilesetInt)*bkgImageWidth,
+                     bkgUseAsTilesetInt*bkgTileHeight + (1-bkgUseAsTilesetInt)*bkgImageHeight);
+//      QRectF src(xOff, yOff, w, h);
       const QTransform transform = painter.transform();
 
       // Note: Current rotation support is only according to the location of tiles in ortho and hex Tiled maps,

@@ -555,6 +555,7 @@ void MainWindow::on_actionMerge_triggered() {
         existingRoom->set_staggerindex(loadedRoom->staggerindex());
         existingRoom->set_color(loadedRoom->color());
         existingRoom->mutable_objectgroups()->CopyFrom(loadedRoom->objectgroups());
+        existingRoom->mutable_tilelayers()->CopyFrom(loadedRoom->tilelayers());
       }
       else
         std::cout << "Fatal error, couldnt find loaded room" << std::endl;
