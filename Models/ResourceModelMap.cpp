@@ -10,7 +10,8 @@ static std::string ResTypeAsString(TypeCase type) {
     case TypeCase::kFont: return "font";
     case TypeCase::kObject: return "object";
     case TypeCase::kPath: return "path";
-    case TypeCase::kRoom: return "room";
+    case TypeCase::kGmRoom: return "deprecated_room";
+    case TypeCase::kEgmRoom: return "room";
     case TypeCase::kSound: return "sound";
     case TypeCase::kSprite: return "sprite";
     case TypeCase::kShader: return "shader";
@@ -65,9 +66,9 @@ void ResourceModelMap::ResourceRemoved(TypeCase type, const QString& name,
 
   // Delete all instances of this object type
   if (type == TypeCase::kObject) {
-    for (auto& room : qAsConst(_resources[TypeCase::kRoom])) {
+    for (auto& room : qAsConst(_resources[TypeCase::kEgmRoom])) {
       R_EXPECT_V(room);
-      MessageModel* roomModel = room->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
+      MessageModel* roomModel = room->GetSubModel<MessageModel*>(TreeNode::kEgmRoomFieldNumber);
       R_EXPECT_V(roomModel);
       RepeatedMessageModel* instancesModel = roomModel->GetSubModel<RepeatedMessageModel*>(EGMRoom::kInstancesFieldNumber);
       auto& remover = removers.emplace(instancesModel, instancesModel).first->second;
@@ -100,8 +101,8 @@ void ResourceModelMap::ResourceRemoved(TypeCase type, const QString& name,
 
   // Delete all tiles using this background
   if (type == TypeCase::kBackground) {
-    for (auto& room : qAsConst(_resources[TypeCase::kRoom])) {
-      MessageModel* roomModel = room->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
+    for (auto& room : qAsConst(_resources[TypeCase::kEgmRoom])) {
+      MessageModel* roomModel = room->GetSubModel<MessageModel*>(TreeNode::kEgmRoomFieldNumber);
       RepeatedMessageModel* tilesModel = roomModel->GetSubModel<RepeatedMessageModel*>(EGMRoom::kTilesFieldNumber);
       auto& remover = removers.emplace(tilesModel, tilesModel).first->second;
 
@@ -193,7 +194,7 @@ TypeCase Type(TreeModel::Node* node) {
       {FullName<buffers::resources::Shader>(), TypeCase::kShader},
       {FullName<buffers::resources::Timeline>(), TypeCase::kTimeline},
       {FullName<buffers::resources::Object>(), TypeCase::kObject},
-      {FullName<buffers::resources::EGMRoom>(), TypeCase::kRoom},
+      {FullName<buffers::resources::EGMRoom>(), TypeCase::kEgmRoom},
       {FullName<buffers::resources::Settings>(), TypeCase::kSettings},
   };
 

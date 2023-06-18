@@ -12,7 +12,7 @@ static const QHash<int, int> ResTypeFields = {
     {TypeCase::kSound, TreeNode::kSoundFieldNumber},       {TypeCase::kBackground, TreeNode::kBackgroundFieldNumber},
     {TypeCase::kPath, TreeNode::kPathFieldNumber},         {TypeCase::kFont, TreeNode::kFontFieldNumber},
     {TypeCase::kScript, TreeNode::kScriptFieldNumber},     {TypeCase::kTimeline, TreeNode::kTimelineFieldNumber},
-    {TypeCase::kObject, TreeNode::kObjectFieldNumber},     {TypeCase::kRoom, TreeNode::kRoomFieldNumber},
+    {TypeCase::kObject, TreeNode::kObjectFieldNumber},     {TypeCase::kEgmRoom, TreeNode::kEgmRoomFieldNumber},
     {TypeCase::kSettings, TreeNode::kSettingsFieldNumber}, {TypeCase::kShader, TreeNode::kShaderFieldNumber}};
 
 class BaseEditor : public QWidget {

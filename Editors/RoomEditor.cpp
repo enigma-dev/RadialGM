@@ -94,7 +94,7 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
 RoomEditor::~RoomEditor() { delete _ui; }
 
 void RoomEditor::RebindSubModels() {
-  _roomModel = _model->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
+  _roomModel = _model->GetSubModel<MessageModel*>(TreeNode::kEgmRoomFieldNumber);
   _ui->roomView->SetResourceModel(_roomModel);
 
   RepeatedMessageModel* im = _roomModel->GetSubModel<RepeatedMessageModel*>(EGMRoom::kInstancesFieldNumber);

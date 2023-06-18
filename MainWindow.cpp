@@ -495,8 +495,8 @@ void MainWindow::on_actionSave_triggered() {
 }
 
 int MainWindow::findRoom(buffers::TreeNode *root, buffers::resources::EGMRoom *&room) {
-  if(root->type_case() == TypeCase::kRoom) {
-      room = root->mutable_room();
+  if(root->type_case() == TypeCase::kEgmRoom) {
+      room = root->mutable_egm_room();
       return 0;
   }
 
@@ -716,7 +716,7 @@ void MainWindow::on_actionCreateTimeline_triggered() { CreateResource(TypeCase::
 
 void MainWindow::on_actionCreateObject_triggered() { CreateResource(TypeCase::kObject); }
 
-void MainWindow::on_actionCreateRoom_triggered() { CreateResource(TypeCase::kRoom); }
+void MainWindow::on_actionCreateRoom_triggered() { CreateResource(TypeCase::kEgmRoom); }
 
 void MainWindow::on_actionCreateSettings_triggered() { CreateResource(TypeCase::kSettings); }
 

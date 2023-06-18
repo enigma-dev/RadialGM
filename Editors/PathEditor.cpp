@@ -36,7 +36,7 @@ PathEditor::PathEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
 
   _ui->mainToolBar->addSeparator();
 
-  ResourceSelector* roomButton(new ResourceSelector(this, TreeNode::TypeCase::kRoom));
+  ResourceSelector* roomButton(new ResourceSelector(this, TreeNode::TypeCase::kEgmRoom));
   roomButton->setPopupMode(QToolButton::MenuButtonPopup);
   roomButton->setIcon(ArtManager::GetIcon(":/resources/room.png"));
   _ui->mainToolBar->addWidget(roomButton);
@@ -108,8 +108,8 @@ void PathEditor::RebindSubModels() {
 
   QString roomName = _pathModel->Data(FieldPath::Of<Path>(Path::kBackgroundRoomNameFieldNumber)).toString();
   if (roomName != "") {
-    _ui->roomView->SetResourceModel(MainWindow::resourceMap->GetResourceByName(TypeCase::kRoom, roomName)
-                                        ->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber));
+    _ui->roomView->SetResourceModel(MainWindow::resourceMap->GetResourceByName(TypeCase::kEgmRoom, roomName)
+                                        ->GetSubModel<MessageModel*>(TreeNode::kEgmRoomFieldNumber));
   }
   _roomLineEdit->setText(roomName);
 
@@ -152,8 +152,8 @@ void PathEditor::SetSnapToGrid(bool snap) { this->_snapToGrid = snap; }
 
 void PathEditor::RoomMenuItemSelected(QAction* action) {
   _roomLineEdit->setText(action->text());
-  _ui->roomView->SetResourceModel(MainWindow::resourceMap->GetResourceByName(TypeCase::kRoom, action->text())
-                                      ->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber));
+  _ui->roomView->SetResourceModel(MainWindow::resourceMap->GetResourceByName(TypeCase::kEgmRoom, action->text())
+                                      ->GetSubModel<MessageModel*>(TreeNode::kEgmRoomFieldNumber));
   _ui->pathPreviewBackground->SetZoom(1);
   _pathModel->SetData(FieldPath::Of<Path>(Path::kBackgroundRoomNameFieldNumber), action->text());
 }
