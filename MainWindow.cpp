@@ -282,7 +282,7 @@ void MainWindow::updateWindowMenu() {
 void MainWindow::openFile(QString fName) {
   QFileInfo fileInfo(fName);
 
-  std::unique_ptr<buffers::Project> loadedProject = egm::LoadProject(fName.toStdString());
+  std::unique_ptr<buffers::Project> loadedProject = egm::LoadProject(fName.toStdString(), true);
 
   if (!loadedProject) {
     QMessageBox::warning(this, tr("Failed To Open Project"), tr("There was a problem loading the project: ") + fName,
@@ -526,7 +526,7 @@ void MainWindow::on_actionMerge_triggered() {
         tr("Tiled Maps (*.tmx)"));
 
     if (!fName.isEmpty()) {
-      std::unique_ptr<buffers::Project> loadedProject = egm::LoadProject(fName.toStdString());
+      std::unique_ptr<buffers::Project> loadedProject = egm::LoadProject(fName.toStdString(), true);
 
       if (!loadedProject) {
         QMessageBox::warning(this, tr("Failed To Open Project"), tr("There was a problem loading the project: ") + fName,
