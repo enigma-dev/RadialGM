@@ -651,7 +651,9 @@ TreeModel::Node *TreeModel::Node::NthChild(int n) const {
       << "Accessing row " << n << " of a " << children.size() << "-row tree node `" << DebugPath() << "`";
   return children[n].get();
 }
-const std::string &TreeModel::Node::GetMessageType() const { return backing_model->GetDescriptor()->full_name(); }
+const std::string &TreeModel::Node::GetMessageType() const {
+    return backing_model->GetDescriptor()->full_name();
+}
 
 void TreeModel::DisplayConfig::SetMessagePassthrough(const std::string &message) {
   tree_display_configs_[message].is_passthrough = true;

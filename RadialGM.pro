@@ -203,14 +203,15 @@ DISTFILES += \
   Submodules/enigma-dev/shared/protos/Background.proto \
   Submodules/enigma-dev/shared/protos/Building.md \
   Submodules/enigma-dev/shared/protos/CMakeLists.txt \
+  Submodules/enigma-dev/shared/protos/EGMRoom.proto \
   Submodules/enigma-dev/shared/protos/EventDescriptor.proto \
   Submodules/enigma-dev/shared/protos/Font.proto \
+  Submodules/enigma-dev/shared/protos/GMRoom.proto \
   Submodules/enigma-dev/shared/protos/GameInformation.proto \
   Submodules/enigma-dev/shared/protos/Include.proto \
   Submodules/enigma-dev/shared/protos/Makefile \
   Submodules/enigma-dev/shared/protos/Object.proto \
   Submodules/enigma-dev/shared/protos/Path.proto \
-  Submodules/enigma-dev/shared/protos/Room.proto \
   Submodules/enigma-dev/shared/protos/Script.proto \
   Submodules/enigma-dev/shared/protos/Settings.proto \
   Submodules/enigma-dev/shared/protos/Shader.proto \

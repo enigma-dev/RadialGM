@@ -309,7 +309,7 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   qDebug() << "Using emake exe at: " << emakeFileInfo.absolutePath();
   qDebug() << "Using ENIGMA sources at: " << MainWindow::EnigmaRoot.absolutePath();
   process->setWorkingDirectory(emakeFileInfo.absolutePath());
-  QString program = emakeFileInfo.fileName();
+  QString program = "./" + emakeFileInfo.fileName();
   QStringList arguments;
   arguments << "--server"
             << "-e"
