@@ -3,7 +3,6 @@ project(RadialGM)
 
 include(CMakeDependentOption)
 
-option(RGM_ENABLE_GRPC_SERVER "Enable the GRPC client plugin for compilation and code analysis." ON)
 option(RGM_BUILD_EMAKE "Build Emake and the compiler." ON)
 
 # FIXME: MSVC dynamic linking requires US TO DLLEXPORT our funcs
@@ -49,104 +48,120 @@ include_directories("${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/protos/" "
 
 # Populate a CMake variable with the sources
 set(RGM_SOURCES
-    Plugins/RGMPlugin.cpp
-    main.cpp
-    MainWindow.cpp
-    Dialogs/PreferencesDialog.cpp
-    Dialogs/TimelineChangeMoment.cpp
-    Components/ArtManager.cpp
-    Components/Utility.cpp
-    Components/QMenuView.cpp
-    Components/RecentFiles.cpp
-    Models/TreeSortFilterProxyModel.cpp
-    Models/MessageModel.cpp
-    Models/RepeatedImageModel.cpp
-    Models/RepeatedStringModel.cpp
-    Models/ModelMapper.cpp
-    Models/ProtoModel.cpp
-    Models/RepeatedMessageModel.cpp
-    Models/ImmediateMapper.cpp
-    Models/ResourceModelMap.cpp
-    Models/TreeModel.cpp
-    Editors/ObjectEditor.cpp
-    Editors/PathEditor.cpp
-    Editors/CodeEditor.cpp
-    Editors/SoundEditor.cpp
-    Editors/FontEditor.cpp
-    Editors/BackgroundEditor.cpp
-    Editors/TimelineEditor.cpp
-    Editors/ShaderEditor.cpp
-    Editors/ScriptEditor.cpp
-    Editors/SettingsEditor.cpp
-    Editors/SpriteEditor.cpp
-    Editors/BaseEditor.cpp
-    Editors/RoomEditor.cpp
-    Editors/InformationEditor.cpp
-    Editors/IncludeEditor.cpp
-    Widgets/AssetView.cpp
-    Widgets/CodeWidget.cpp
-    Widgets/BackgroundView.cpp
-    Widgets/StackedCodeWidget.cpp
-    Widgets/RoomView.cpp
-    Widgets/PathView.cpp
-    Widgets/AssetScrollAreaBackground.cpp
-    Widgets/SpriteSubimageListView.cpp
-    Widgets/ColorPicker.cpp
-    Widgets/SpriteView.cpp
+  Models/RepeatedMessageModel.cpp
+  Models/TreeSortFilterProxyModel.cpp
+  Models/PrimitiveModel.cpp
+  Models/EventsListModel.cpp
+  Models/ModelMapper.cpp
+  Models/RepeatedModel.cpp
+  Models/MessageModel.cpp
+  Models/TreeModel.cpp
+  Models/EventTypesListModel.cpp
+  Models/ResourceModelMap.cpp
+  Models/ImmediateMapper.cpp
+  Models/ProtoModel.cpp
+  Models/EventTypesListSortFilterProxyModel.cpp
+  Models/RepeatedSortFilterProxyModel.cpp
+  Components/Utility.cpp
+  Components/RecentFiles.cpp
+  Components/QMenuView.cpp
+  Components/ArtManager.cpp
+  Editors/PathEditor.cpp
+  Editors/RoomEditor.cpp
+  Editors/ObjectEditor.cpp
+  Editors/FontEditor.cpp
+  Editors/SpriteEditor.cpp
+  Editors/BackgroundEditor.cpp
+  Editors/SettingsEditor.cpp
+  Editors/ShaderEditor.cpp
+  Editors/SoundEditor.cpp
+  Editors/IncludeEditor.cpp
+  Editors/InformationEditor.cpp
+  Editors/BaseEditor.cpp
+  Editors/ScriptEditor.cpp
+  Editors/CodeEditor.cpp
+  Editors/TimelineEditor.cpp
+  main.cpp
+  Plugins/RGMPlugin.cpp
+  Plugins/ServerPlugin.cpp
+  Dialogs/EventArgumentsDialog.cpp
+  Dialogs/TimelineChangeMoment.cpp
+  Dialogs/PreferencesDialog.cpp
+  Utils/ProtoManip.cpp
+  Utils/FieldPath.cpp
+  MainWindow.cpp
+  Widgets/BackgroundView.cpp
+  Widgets/ColorPicker.cpp
+  Widgets/AssetView.cpp
+  Widgets/PathView.cpp
+  Widgets/RoomView.cpp
+  Widgets/SpriteView.cpp
+  Widgets/CodeWidget.cpp
+  Widgets/SpriteSubimageListView.cpp
+  Widgets/StackedCodeWidget.cpp
+  Widgets/AssetScrollAreaBackground.cpp
 )
 
 set(RGM_HEADERS
-    Plugins/RGMPlugin.h
-    MainWindow.h
-    main.h
-    Dialogs/PreferencesDialog.h
-    Dialogs/PreferencesKeys.h
-    Dialogs/TimelineChangeMoment.h
-    Components/Logger.h
-    Components/RecentFiles.h
-    Components/QMenuView.h
-    Components/ArtManager.h
-    Components/QMenuView_p.h
-    Components/Utility.h
-    Models/TreeModel.h
-    Models/RepeatedStringModel.h
-    Models/ResourceModelMap.h
-    Models/ModelMapper.h
-    Models/TreeSortFilterProxyModel.h
-    Models/RepeatedImageModel.h
-    Models/MessageModel.h
-    Models/ImmediateMapper.h
-    Models/RepeatedMessageModel.h
-    Models/ProtoModel.h
-    Models/RepeatedModel.h
-    Editors/FontEditor.h
-    Editors/PathEditor.h
-    Editors/SpriteEditor.h
-    Editors/SettingsEditor.h
-    Editors/SoundEditor.h
-    Editors/TimelineEditor.h
-    Editors/BackgroundEditor.h
-    Editors/ObjectEditor.h
-    Editors/RoomEditor.h
-    Editors/BaseEditor.h
-    Editors/ScriptEditor.h
-    Editors/CodeEditor.h
-    Editors/ShaderEditor.h
-    Editors/InformationEditor.h
-    Editors/IncludeEditor.h
-    Widgets/AssetScrollArea.h
-    Widgets/StackedCodeWidget.h
-    Widgets/AssetScrollAreaBackground.h
-    Widgets/PathView.h
-    Widgets/ResourceSelector.h
-    Widgets/RoomView.h
-    Widgets/AssetView.h
-    Widgets/ColorPicker.h
-    Widgets/SpriteSubimageListView.h
-    Widgets/CodeWidget.h
-    Widgets/SpriteView.h
-    Widgets/BackgroundView.h
-
+  Models/MessageModel.h
+  Models/ProtoModel.h
+  Models/TreeModel.h
+  Models/PrimitiveModel.h
+  Models/RepeatedMessageModel.h
+  Models/EventTypesListSortFilterProxyModel.h
+  Models/ResourceModelMap.h
+  Models/EventTypesListModel.h
+  Models/ImmediateMapper.h
+  Models/RepeatedModel.h
+  Models/EventsListModel.h
+  Models/ModelMapper.h
+  Models/RepeatedSortFilterProxyModel.h
+  Models/TreeSortFilterProxyModel.h
+  main.h
+  Components/RecentFiles.h
+  Components/QMenuView_p.h
+  Components/Utility.h
+  Components/QMenuView.h
+  Components/Logger.h
+  Components/ArtManager.h
+  Editors/ObjectEditor.h
+  Editors/PathEditor.h
+  Editors/ScriptEditor.h
+  Editors/CodeEditor.h
+  Editors/SoundEditor.h
+  Editors/IncludeEditor.h
+  Editors/InformationEditor.h
+  Editors/TimelineEditor.h
+  Editors/SettingsEditor.h
+  Editors/ShaderEditor.h
+  Editors/RoomEditor.h
+  Editors/BaseEditor.h
+  Editors/FontEditor.h
+  Editors/SpriteEditor.h
+  Editors/BackgroundEditor.h
+  Plugins/ServerPlugin.h
+  Plugins/RGMPlugin.h
+  MainWindow.h
+  Dialogs/EventArgumentsDialog.h
+  Dialogs/PreferencesDialog.h
+  Dialogs/PreferencesKeys.h
+  Dialogs/TimelineChangeMoment.h
+  Utils/SafeCasts.h
+  Utils/ProtoManip.h
+  Utils/FieldPath.h
+  Utils/QBoilerplate.h
+  Widgets/BackgroundView.h
+  Widgets/CodeWidget.h
+  Widgets/ResourceSelector.h
+  Widgets/ColorPicker.h
+  Widgets/AssetScrollArea.h
+  Widgets/SpriteView.h
+  Widgets/AssetView.h
+  Widgets/PathView.h
+  Widgets/StackedCodeWidget.h
+  Widgets/SpriteSubimageListView.h
+  Widgets/AssetScrollAreaBackground.h
+  Widgets/RoomView.h
 )
 
 set(RGM_UI
@@ -181,11 +196,8 @@ else()
     set(EDITOR_SOURCES Widgets/CodeWidgetScintilla.cpp)
 endif()
 
-if (RGM_ENABLE_GRPC_SERVER)
-  add_definitions(-DRGM_SERVER_ENABLED)
-  set(RGM_SOURCES ${RGM_SOURCES} Plugins/ServerPlugin.cpp)
-  set(RGM_HEADERS ${RGM_HEADERS} Plugins/ServerPlugin.h)
-endif()
+ set(RGM_SOURCES ${RGM_SOURCES} Plugins/ServerPlugin.cpp)
+ set(RGM_HEADERS ${RGM_HEADERS} Plugins/ServerPlugin.h)
 
 # Tell CMake to create the RadialGM executable
 add_executable(${EXE} WIN32 ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${EDITOR_SOURCES} ${RGM_RC})
@@ -209,7 +221,7 @@ set(CompilerFlags
     CMAKE_CXX_FLAGS_RELEASE
     CMAKE_CXX_FLAGS_RELWITHDEBINFO
     )
-  
+
 foreach(CompilerFlag ${CompilerFlags})
   message(STATUS "  '${CompilerFlag}': ${${CompilerFlag}}")
 endforeach()
@@ -232,19 +244,9 @@ include_directories(${EXE} PRIVATE ${RAPIDJSON_INCLUDE_DIRS})
 find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${EXE} PRIVATE yaml-cpp)
 
-if (RGM_ENABLE_GRPC_SERVER)
-  #Find gRPC
-  if (MSVC) # Windows actually does something right for once
-    find_package(gRPC CONFIG REQUIRED)
-    target_link_libraries(${EXE} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
-  else() # https://tinyurl.com/arch-grpc-bug
-    find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
-    find_library(LIB_GPR NAMES gpr)
-    find_library(LIB_CARES NAMES cares)
-    find_library(LIB_ADDRESS_SORTING NAMES address_sorting)
-    target_link_libraries(${EXE} PRIVATE ${LIB_CARES} ${LIB_ADDRESS_SORTING} ${LIB_GPR} ${LIB_GRPC_UNSECURE})
-  endif()
-endif()
+ #Find gRPC
+ find_package(gRPC CONFIG REQUIRED)
+ target_link_libraries(${EXE} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
 
 # Find Protobuf
 include(FindProtobuf)
@@ -322,7 +324,7 @@ file(TO_CMAKE_PATH ${VCPKG_ROOT} VCPKG_ROOT)
     set(SEARCH_PATHS "${VCPKG_ROOT}/installed/x64-windows/bin/")
   endif()
 else()
-  set(LIBS "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}EGM${CMAKE_SHARED_LIBRARY_SUFFIX}" 
+  set(LIBS "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}EGM${CMAKE_SHARED_LIBRARY_SUFFIX}"
            "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}Protocols${CMAKE_SHARED_LIBRARY_SUFFIX}"
            "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}ENIGMAShared${CMAKE_SHARED_LIBRARY_SUFFIX}")
 endif()

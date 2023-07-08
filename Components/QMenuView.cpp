@@ -138,7 +138,7 @@ QMenuView::QMenuView(QWidget * parent) : QMenu(parent), d(new QMenuViewPrivate(t
 //! Destroy the menu.
 QMenuView::~QMenuView()
 {
-  setModel(0);
+  QMenuView::setModel(0);
 }
 
 /*!

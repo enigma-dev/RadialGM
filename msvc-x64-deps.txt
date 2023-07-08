@@ -8,5 +8,8 @@ rapidjson
 yaml-cpp 
 protobuf 
 grpc 
-boost
+boost-system
+boost-filesystem
+boost-program-options
+boost-container
 yaml-cpp

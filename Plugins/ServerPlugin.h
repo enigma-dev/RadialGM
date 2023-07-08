@@ -60,6 +60,7 @@ class CompilerClient : public QObject {
   void SetDefinitions(std::string code, std::string yaml);
   void SetCurrentConfig(const resources::Settings& settings);
   void SyntaxCheck();
+  void TearDown();
 
  signals:
   void CompileStatusChanged(bool finished = false);
