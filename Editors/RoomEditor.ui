@@ -1353,6 +1353,7 @@
          <addaction name="actionSelectionMode"/>
          <addaction name="actionSnapToGrid"/>
          <addaction name="separator"/>
+         <addaction name="actionShowHideGrid"/>
          <addaction name="actionZoom"/>
          <addaction name="actionZoomIn"/>
          <addaction name="actionZoomOut"/>
@@ -1542,6 +1543,24 @@
    </property>
    <property name="toolTip">
     <string>Paste</string>
+   </property>
+  </action>
+  <action name="actionShowHideGrid">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/grid.png</normaloff>:/actions/grid.png</iconset>
+   </property>
+   <property name="text">
+    <string>Show or Hide Grid</string>
+   </property>
+   <property name="toolTip">
+    <string>Show/Hide Grid</string>
    </property>
   </action>
  </widget>

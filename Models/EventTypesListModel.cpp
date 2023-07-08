@@ -39,5 +39,5 @@ QVariant EventTypesListModel::data(const QModelIndex& index, int role) const {
   }
 }
 
-int EventTypesListModel::rowCount(const QModelIndex& parent) const { return eventData_->events().size(); }
-int EventTypesListModel::columnCount(const QModelIndex& parent) const { return 1; }
+int EventTypesListModel::rowCount(const QModelIndex& /*parent*/) const { return eventData_->events().size(); }
+int EventTypesListModel::columnCount(const QModelIndex& /*parent*/) const { return 1; }

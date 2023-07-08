@@ -4,6 +4,7 @@
 #include "Models/ProtoModel.h"
 #include "Models/ResourceModelMap.h"
 #include "Models/TreeModel.h"
+#include "Editors/BaseEditor.h"
 
 class MainWindow;
 #include "Components/RecentFiles.h"
@@ -28,8 +29,9 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
  public:
-  static QScopedPointer<ResourceModelMap> resourceMap;
-  static QScopedPointer<TreeModel> treeModel;
+  static ResourceModelMap* resourceMap;
+  static MessageModel* resourceModel;
+  static TreeModel* treeModel;
   static QList<buffers::SystemType> systemCache;
 
   explicit MainWindow(QWidget *parent);
@@ -41,6 +43,9 @@ class MainWindow : public QMainWindow {
   static QFileInfo EnigmaRoot;
   static EventData* GetEventData() { return _event_data.get(); }
 
+  typedef BaseEditor *EditorFactoryFunction(MessageModel *model, MainWindow *parent);
+  void openSubWindow(MessageModel *res, EditorFactoryFunction factory_function);
+
  signals:
   void CurrentConfigChanged(const buffers::resources::Settings &settings);
 
@@ -48,6 +53,7 @@ class MainWindow : public QMainWindow {
   void openFile(QString fName);
   void openNewProject();
   void CreateResource(TypeCase typeCase);
+  void ResourceModelDeleted(MessageModel* m);
   static void setCurrentConfig(const buffers::resources::Settings &settings);
 
  private slots:
@@ -55,6 +61,7 @@ class MainWindow : public QMainWindow {
   void on_actionNew_triggered();
   void on_actionOpen_triggered();
   void on_actionClearRecentMenu_triggered();
+  void on_actionSave_triggered();
   void on_actionPreferences_triggered();
   void on_actionExit_triggered();
 
@@ -107,7 +114,7 @@ class MainWindow : public QMainWindow {
 
   static MainWindow *_instance;
 
-  QHash<buffers::TreeNode *, QMdiSubWindow *> _subWindows;
+  QHash<const MessageModel *, QMdiSubWindow *> _subWindows;
 
   Ui::MainWindow *_ui;
 
@@ -115,9 +122,7 @@ class MainWindow : public QMainWindow {
   QPointer<RecentFiles> _recentFiles;
 
   static std::unique_ptr<EventData> _event_data;
-  egm::EGM egm;
 
-  void openSubWindow(buffers::TreeNode *item);
   void readSettings();
   void writeSettings();
   void setTabbedMode(bool enabled);

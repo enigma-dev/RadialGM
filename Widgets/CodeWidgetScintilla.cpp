@@ -67,9 +67,10 @@ CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), _font(QFont("Courier"
   codeEdit->registerImage(KeywordType::GLOBAL, QPixmap(":/actions/right-arrow-green.png"));
   codeEdit->registerImage(KeywordType::FUNCTION, QPixmap(":/actions/function.png"));
 
-  for (auto type : TreeModel::iconMap) {
+  // FIXME: this was moved / renamed
+  /*for (auto type : TreeModel::iconMap) {
     codeEdit->registerImage(KeywordType::MAX + type.first, type.second.pixmap(18, 18));
-  }
+  }*/
 
   QShortcut* shortcut = new QShortcut(codeEdit);
   shortcut->setKey(QKeySequence(Qt::CTRL + Qt::Key_Space));

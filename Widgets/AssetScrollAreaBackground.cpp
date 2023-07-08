@@ -1,5 +1,6 @@
 #include "AssetScrollAreaBackground.h"
 #include "Components/ArtManager.h"
+#include "Components/Logger.h"
 #include "MainWindow.h"
 #include "Widgets/RoomView.h"
 
@@ -21,11 +22,11 @@ AssetScrollAreaBackground::AssetScrollAreaBackground(AssetScrollArea* parent)
   installEventFilter(this);
   setMouseTracking(true);
   // Redraw on an model changes
-  connect(MainWindow::resourceMap.get(), &ResourceModelMap::DataChanged, this, [this]() { this->update(); });
+  connect(MainWindow::resourceMap, &ResourceModelMap::DataChanged, this, [this]() { this->update(); });
 }
 
 AssetScrollAreaBackground::~AssetScrollAreaBackground() {
-  disconnect(MainWindow::resourceMap.get(), &ResourceModelMap::DataChanged, this, nullptr);
+  disconnect(MainWindow::resourceMap, &ResourceModelMap::DataChanged, this, nullptr);
 }
 
 void AssetScrollAreaBackground::SetAssetView(AssetView* asset) {
@@ -203,6 +204,7 @@ void AssetScrollAreaBackground::paintEvent(QPaintEvent* /* event */) {
     }
   }
 
+  R_EXPECT_V(_assetView) << "Asset view is null";
   _assetView->PaintTop(painter);
 }
 

@@ -8,7 +8,7 @@ class ColorPicker : public QWidget {
   Q_OBJECT
 
   Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged USER true)
-  Q_PROPERTY(bool alphaEnabled READ alphaEnabled WRITE setAlphaEnabled)
+  Q_PROPERTY(bool alphaEnabled READ alphaEnabled WRITE setAlphaEnabled NOTIFY alphaChanged)
 
  public:
   explicit ColorPicker(QWidget *parent = nullptr);
@@ -20,6 +20,7 @@ class ColorPicker : public QWidget {
 
  signals:
   void colorChanged(QColor);
+  void alphaChanged(bool);
 
  private slots:
   void updateButtonIcon();

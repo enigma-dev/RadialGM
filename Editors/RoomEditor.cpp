@@ -8,6 +8,8 @@
 #include "Models/MessageModel.h"
 #include "Models/RepeatedMessageModel.h"
 #include "Models/TreeSortFilterProxyModel.h"
+#include "Models/RepeatedSortFilterProxyModel.h"
+
 #include "Room.pb.h"
 
 #include <QGraphicsPixmapItem>
@@ -83,7 +85,7 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   QMenuView* objMenu = new QMenuView(this);
   TreeSortFilterProxyModel* treeProxy = new TreeSortFilterProxyModel(this);
   treeProxy->SetFilterType(TreeNode::TypeCase::kObject);
-  treeProxy->setSourceModel(MainWindow::treeModel.get());
+  treeProxy->setSourceModel(MainWindow::treeModel);
   objMenu->setModel(treeProxy);
   _ui->objectSelectButton->setMenu(objMenu);
   _ui->objectSelectButton->setPopupMode(QToolButton::MenuButtonPopup);
@@ -113,12 +115,13 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   _ui->statusBar->addWidget(_assetNameLabel);
 
   // This updates all the model views in the event of a sprite is changed
-  connect(MainWindow::resourceMap.get(), &ResourceModelMap::DataChanged, this, [this]() {
-    _ui->elementsListView->reset();
-    _ui->propertiesView->reset();
+  connect(MainWindow::resourceMap, &ResourceModelMap::DataChanged, this, [this]() {
+    _ui->instancesListView->reset();
+    _ui->tilesListView->reset();
+    _ui->layersPropertiesView->reset();
   });
 
-  RebindSubModels();
+  RoomEditor::RebindSubModels();
 }
 
 RoomEditor::~RoomEditor() { delete _ui; }
@@ -127,62 +130,39 @@ void RoomEditor::RebindSubModels() {
   _roomModel = _model->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);
   _ui->roomView->SetResourceModel(_roomModel);
 
-  connect(_ui->roomPreviewBackground, &AssetScrollAreaBackground::MouseMoved, this, &RoomEditor::MouseMoved);
-  connect(_ui->roomPreviewBackground, &AssetScrollAreaBackground::MousePressed, this, &RoomEditor::MousePressed);
-  connect(_ui->roomPreviewBackground, &AssetScrollAreaBackground::MouseReleased, this, &RoomEditor::MouseReleased);
+  RepeatedMessageModel* im = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
+  RepeatedSortFilterProxyModel* imp = new RepeatedSortFilterProxyModel(this);
+  imp->SetSourceModel(im);
+  _ui->instancesListView->setModel(imp);
 
-  RepeatedMessageModel* lm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kLayersFieldNumber);
-  lm->setHeaderData(Room::Layer::kNameFieldNumber, Qt::Horizontal,
-                    tr("Name"), Qt::DisplayRole);
-  lm->setHeaderData(Room::Layer::kDepthFieldNumber, Qt::Horizontal,
-                    tr("Depth"), Qt::DisplayRole);
-  lm->setHeaderData(Room::Layer::kVisibleFieldNumber, Qt::Horizontal,
-                    tr(""), Qt::DisplayRole);
-  lm->setHeaderData(Room::Layer::kVisibleFieldNumber, Qt::Horizontal,
-                    tr("Visible"), Qt::ToolTipRole);
-  lm->setHeaderData(Room::Layer::kVisibleFieldNumber, Qt::Horizontal,
-                    QIcon(":/actions/find.png"), Qt::DecorationRole);
-  _ui->layersListView->setModel(lm);
-  for (int c = 0; c < lm->columnCount(); ++c) {
-    if (c != Room::Layer::kNameFieldNumber &&
-        c != Room::Layer::kDepthFieldNumber &&
-        c != Room::Layer::kVisibleFieldNumber)
-      _ui->layersListView->hideColumn(c);
+  for (int c = 0; c < im->columnCount(); ++c) {
+    if (c != im->FieldToColumn(Room::Instance::kNameFieldNumber) &&
+        c != im->FieldToColumn(Room::Instance::kObjectTypeFieldNumber) &&
+        c != im->FieldToColumn(Room::Instance::kIdFieldNumber))
+      _ui->instancesListView->hideColumn(c);
+    else
+      _ui->instancesListView->resizeColumnToContents(c);
   }
 
-  QSortFilterProxyModel* emp = new QSortFilterProxyModel(this);
-  _ui->elementsListView->setModel(emp);
+  _ui->instancesListView->header()->swapSections(im->FieldToColumn(Room::Instance::kNameFieldNumber),
+                                                 im->FieldToColumn(Room::Instance::kObjectTypeFieldNumber));
 
-  connect(_ui->layersListView->selectionModel(), &QItemSelectionModel::selectionChanged,
-          [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
-            if (selected.empty()) {
-              _ui->propertiesView->setModel(nullptr);
-              _ui->propertiesView->setEnabled(false);
-              emp->setSourceModel(nullptr);
-              _ui->elementsListWidget->setEnabled(false);
-              return;
-            }
-            auto selectedIndex = selected.indexes().first();
-            auto currentLayerModel = lm->GetSubModel<MessageModel*>(selectedIndex.row());
-            _ui->propertiesView->setModel(currentLayerModel);
-            _ui->propertiesView->setEnabled(true);
+  RepeatedMessageModel* tm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
+  RepeatedSortFilterProxyModel* tmp = new RepeatedSortFilterProxyModel(this);
+  tmp->SetSourceModel(tm);
+  _ui->tilesListView->setModel(tmp);
 
-            RepeatedMessageModel* im = currentLayerModel->GetSubModel<RepeatedMessageModel*>(
-                  Layer::kInstancesFieldNumber);
-            emp->setSourceModel(im);
-            _ui->elementsListWidget->setEnabled(true);
+  for (int c = 0; c < tm->columnCount(); ++c) {
+    if (c != tm->FieldToColumn(Room::Tile::kBackgroundNameFieldNumber) &&
+        c != tm->FieldToColumn(Room::Tile::kIdFieldNumber) && c != tm->FieldToColumn(Room::Tile::kDepthFieldNumber) &&
+        c != tm->FieldToColumn(Room::Tile::kNameFieldNumber))
+      _ui->tilesListView->hideColumn(c);
+    else
+      _ui->tilesListView->resizeColumnToContents(c);
+  }
 
-            for (int c = 0; c < im->columnCount(); ++c) {
-              if (c != Room::Instance::kNameFieldNumber && c != Room::Instance::kObjectTypeFieldNumber &&
-                  c != Room::Instance::kIdFieldNumber)
-                _ui->elementsListView->hideColumn(c);
-              else
-                _ui->elementsListView->resizeColumnToContents(c);
-            }
-
-            _ui->elementsListView->header()->swapSections(Room::Instance::kNameFieldNumber,
-                                                           Room::Instance::kObjectTypeFieldNumber);
-          });
+  _ui->tilesListView->header()->swapSections(tm->FieldToColumn(Room::Tile::kNameFieldNumber),
+                                             tm->FieldToColumn(Room::Tile::kBackgroundNameFieldNumber));
 
   RepeatedMessageModel* vm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kViewsFieldNumber);
   _viewMapper->setModel(vm);
@@ -190,12 +170,19 @@ void RoomEditor::RebindSubModels() {
   connect(_ui->elementsListView->selectionModel(), &QItemSelectionModel::selectionChanged,
           [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
             if (selected.empty()) return;
-            auto currentLayerModel = lm->GetSubModel<MessageModel*>(_ui->layersListView->currentIndex().row());
-            RepeatedMessageModel* im = currentLayerModel->GetSubModel<RepeatedMessageModel*>(
-                  Layer::kInstancesFieldNumber);
+            _ui->tilesListView->clearSelection();
             auto selectedIndex = selected.indexes().first();
-            auto currentInstanceModel = im->GetSubModel<MessageModel*>(selectedIndex.row());
-            _ui->propertiesView->setModel(currentInstanceModel);
+            auto currentInstanceModel = imp->GetSubModel(selectedIndex.row());
+            _ui->layersPropertiesView->setModel(currentInstanceModel);
+          });
+
+  connect(_ui->tilesListView->selectionModel(), &QItemSelectionModel::selectionChanged,
+          [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
+            if (selected.empty()) return;
+            _ui->instancesListView->clearSelection();
+            auto selectedIndex = selected.indexes().first();
+            auto currentInstanceModel = tmp->GetSubModel(selectedIndex.row());
+            _ui->layersPropertiesView->setModel(currentInstanceModel);
           });
 
   BaseEditor::RebindSubModels();
@@ -227,3 +214,7 @@ void RoomEditor::on_actionZoomIn_triggered() { _ui->roomPreviewBackground->ZoomI
 void RoomEditor::on_actionZoomOut_triggered() { _ui->roomPreviewBackground->ZoomOut(); }
 
 void RoomEditor::on_actionZoom_triggered() { _ui->roomPreviewBackground->ResetZoom(); }
+
+void RoomEditor::on_actionShowHideGrid_triggered() {
+  _ui->roomPreviewBackground->SetGridVisible(_ui->actionShowHideGrid->isChecked());
+}
