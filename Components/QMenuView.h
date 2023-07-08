@@ -47,8 +47,8 @@ protected:
   virtual void postPopulated();
   void createMenu(const QModelIndex &parent, QMenu *parentMenu = 0, QMenu *menu = 0);
 signals:
-  void hovered(const QString &text) const;
-  void triggered(const QModelIndex & index) const;
+  void hovered(const QString &text);
+  void triggered(const QModelIndex & index);
 private:
   QScopedPointer<QMenuViewPrivate> d;
   friend class QMenuViewPrivate;

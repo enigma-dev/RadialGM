@@ -31,6 +31,9 @@ class AssetScrollAreaBackground : public QWidget {
   void SetZoomRange(qreal scalingFactor, qreal min, qreal max);
   bool GetGridVisible();
   QPoint GetCenterOffset();
+  // maps a point on the asset scroll area background (e.g, from mouse event)
+  // into the asset with scaling by the zoom and translation
+  QPoint MapToAsset(const QPoint &pos) const;
 
  public slots:
   void SetZoom(qreal _currentZoom);
@@ -40,7 +43,6 @@ class AssetScrollAreaBackground : public QWidget {
   void SetGridVisible(bool visible);
   void SetGridHSnap(int hSnap);
   void SetGridVSnap(int vSnap);
-  void SetParentHasFocus(bool focus);
 
  signals:
   void MouseMoved(int x, int y);
@@ -66,7 +68,6 @@ class AssetScrollAreaBackground : public QWidget {
   QPoint _userDrawOffset;
   QSet<int> _pressedKeys;
   QColor _backgroundColor;
-  bool _parentHasFocus;
   int _viewMoveSpeed;
 };
 

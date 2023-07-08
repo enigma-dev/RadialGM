@@ -15,6 +15,7 @@ CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), _font(QFont("Courier"
   QPlainTextEdit* plainTextEdit = new QPlainTextEdit(this);
   this->_textWidget = plainTextEdit;
   plainTextEdit->setFont(_font);
+  plainTextEdit->setWordWrapMode(QTextOption::NoWrap);
 
   connect(plainTextEdit, &QPlainTextEdit::textChanged, this, &CodeWidget::codeChanged);
   connect(plainTextEdit, &QPlainTextEdit::blockCountChanged, this, &CodeWidget::lineCountChanged);

@@ -9,7 +9,8 @@ void TreeSortFilterProxyModel::SetFilterType(TreeNode::TypeCase type) {
 }
 
 inline bool recHasType(TreeNode& n, TreeNode::TypeCase type) {
-  for (auto child : n.child()) {
+  if (!n.has_folder()) return false;
+  for (auto child : n.folder().children()) {
     if (child.type_case() == TreeNode::kFolder) return recHasType(child, type);
     if (child.type_case() == type) return true;
   }
@@ -23,7 +24,7 @@ bool TreeSortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex
   QModelIndex idx = sourceModel()->index(sourceRow, 0, sourceParent);
   buffers::TreeNode *item = static_cast<buffers::TreeNode *>(idx.internalPointer());
 
-  if (item->folder() && item->child_size() > 0) {
+  if (item->has_folder() && item->folder().children_size() > 0) {
     return recHasType(*item, filterType);
   }
 
