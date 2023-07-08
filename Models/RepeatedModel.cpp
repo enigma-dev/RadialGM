@@ -175,12 +175,12 @@ RepeatedModel::RowRemovalOperation::~RowRemovalOperation() {
     }
   }
 
-  model_.beginResetModel();
-
   // Basic dense range removal. Move "deleted" rows to the end of the array.
   int left = 0, right = 0;
   int expected_range_size = 0;
   for (auto range : ranges) {
+    emit model_.beginRemoveRows(QModelIndex(), range.first, range.last);
+
     if (right > left) {
       while (right < range.first) {
         model_.SwapWithoutSignal(left, right);
@@ -195,6 +195,8 @@ RepeatedModel::RowRemovalOperation::~RowRemovalOperation() {
     }
     right = range.last + 1;
     expected_range_size += range.size();
+
+    emit model_.endRemoveRows();
   }
   while (right < model_.rowCount()) {
     model_.SwapWithoutSignal(left, right);
@@ -211,7 +213,6 @@ RepeatedModel::RowRemovalOperation::~RowRemovalOperation() {
     model_.RemoveLastNRowsWithoutSignal(actual_removal_size);
   }
 
-  model_.endResetModel();
   model_.ParentDataChanged();
 }
 
