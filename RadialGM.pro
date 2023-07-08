@@ -64,6 +64,7 @@ CONFIG += link_pkgconfig
 PKGCONFIG += protobuf grpc++
 
 SOURCES += \
+    Dialogs/KeybindingPreferences.cpp \
     Dialogs/EventArgumentsDialog.cpp \
     Dialogs/TimelineChangeMoment.cpp \
     Editors/IncludeEditor.cpp \
@@ -117,6 +118,7 @@ SOURCES += \
     Models/TreeSortFilterProxyModel.cpp
 
 HEADERS += \
+    Dialogs/KeybindingPreferences.h \
     Dialogs/EventArgumentsDialog.h \
     Dialogs/TimelineChangeMoment.h \
     Editors/IncludeEditor.h \
