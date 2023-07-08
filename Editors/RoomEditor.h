@@ -23,7 +23,6 @@ class RoomEditor : public BaseEditor {
 
  public slots:
   void RebindSubModels() override;
-  void SelectedObjectChanged(QAction* action);
 
  private slots:
   void on_actionZoomIn_triggered();

@@ -85,7 +85,7 @@
        <attribute name="title">
         <string>Layers</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <layout class="QVBoxLayout" name="layersTabLayout">
         <property name="spacing">
          <number>4</number>
         </property>
@@ -106,56 +106,66 @@
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
-          <widget class="QTreeView" name="tilesListView">
-           <property name="editTriggers">
-            <set>QAbstractItemView::NoEditTriggers</set>
-           </property>
-           <property name="selectionMode">
-            <enum>QAbstractItemView::ExtendedSelection</enum>
-           </property>
-           <property name="itemsExpandable">
-            <bool>false</bool>
-           </property>
-           <property name="sortingEnabled">
-            <bool>true</bool>
-           </property>
-           <property name="expandsOnDoubleClick">
-            <bool>false</bool>
-           </property>
-          </widget>
-          <widget class="QWidget" name="layoutWidget">
-           <layout class="QVBoxLayout" name="layersAssetsLayout">
+          <widget class="QWidget" name="verticalLayoutWidget">
+           <layout class="QVBoxLayout" name="layersListLayout">
             <property name="spacing">
              <number>4</number>
             </property>
             <item>
-             <widget class="QTreeView" name="instancesListView">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                <horstretch>0</horstretch>
-                <verstretch>1</verstretch>
-               </sizepolicy>
+             <layout class="QHBoxLayout" name="layersListEditLayout">
+              <property name="spacing">
+               <number>4</number>
               </property>
-              <property name="minimumSize">
-               <size>
-                <width>259</width>
-                <height>0</height>
-               </size>
-              </property>
+              <item>
+               <widget class="QToolButton" name="addLayerButton">
+                <property name="toolTip">
+                 <string>Add Layer</string>
+                </property>
+                <property name="text">
+                 <string>Add Layer</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../images.qrc">
+                  <normaloff>:/actions/add-on-top.png</normaloff>:/actions/add-on-top.png</iconset>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="layerListEditSpacer">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QToolButton" name="deleteLayerButton">
+                <property name="toolTip">
+                 <string>Delete Layer</string>
+                </property>
+                <property name="text">
+                 <string>Delete Layer</string>
+                </property>
+                <property name="icon">
+                 <iconset resource="../images.qrc">
+                  <normaloff>:/actions/delete.png</normaloff>:/actions/delete.png</iconset>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QTreeView" name="layersListView">
               <property name="editTriggers">
-               <set>QAbstractItemView::NoEditTriggers</set>
+               <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
               </property>
               <property name="selectionMode">
-               <enum>QAbstractItemView::ExtendedSelection</enum>
-              </property>
-              <property name="selectionBehavior">
-               <enum>QAbstractItemView::SelectRows</enum>
-              </property>
-              <property name="rootIsDecorated">
-               <bool>false</bool>
-              </property>
-              <property name="uniformRowHeights">
-               <bool>true</bool>
+               <enum>QAbstractItemView::SingleSelection</enum>
               </property>
               <property name="itemsExpandable">
                <bool>false</bool>
@@ -168,6 +178,28 @@
               </property>
              </widget>
             </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="elementsListWidget" native="true">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <layout class="QVBoxLayout" name="elementsListLayout">
+            <property name="spacing">
+             <number>4</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
             <item>
              <layout class="QHBoxLayout" name="layersAssetsTools">
               <property name="spacing">
@@ -201,7 +233,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QToolButton" name="deleteAssetButton">
+               <widget class="QToolButton" name="deleteElementButton">
                 <property name="toolTip">
                  <string>Delete Assets</string>
                 </property>
@@ -216,9 +248,52 @@
               </item>
              </layout>
             </item>
+            <item>
+             <widget class="QTreeView" name="elementsListView">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>1</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>259</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
+              </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::SingleSelection</enum>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+              <property name="rootIsDecorated">
+               <bool>false</bool>
+              </property>
+              <property name="uniformRowHeights">
+               <bool>true</bool>
+              </property>
+              <property name="itemsExpandable">
+               <bool>false</bool>
+              </property>
+              <property name="sortingEnabled">
+               <bool>true</bool>
+              </property>
+              <property name="expandsOnDoubleClick">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
-          <widget class="QTableView" name="layersPropertiesView">
+          <widget class="QTableView" name="propertiesView">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="editTriggers">
             <set>QAbstractItemView::AllEditTriggers</set>
            </property>
@@ -1306,7 +1381,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>712</width>
+            <width>714</width>
             <height>572</height>
            </rect>
           </property>
