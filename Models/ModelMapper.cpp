@@ -14,7 +14,7 @@ ModelMapper::ModelMapper(MessageModel *model, BaseEditor *parent) : QObject(pare
 MessageModel *ModelMapper::GetModel() { return _model; }
 
 void ModelMapper::addMapping(QWidget *widget, int section, QByteArray propName) {
-  _mapper->addMapping(widget, section, propName);
+  _mapper->addMapping(widget, _model->FieldToRow(section), propName);
 }
 
 void ModelMapper::clearMapping() { _mapper->clearMapping(); }

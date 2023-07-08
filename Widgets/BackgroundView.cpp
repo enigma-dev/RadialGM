@@ -16,7 +16,7 @@ BackgroundView::BackgroundView(AssetScrollAreaBackground *parent) : AssetView(pa
 
 void BackgroundView::SetResourceModel(MessageModel *model) {
   this->_model = model;
-  SetImage(model->Data(Background::kImageFieldNumber).toString());
+  SetImage(model->Data(FieldPath::Of<Background>(Background::kImageFieldNumber)).toString());
 }
 
 bool BackgroundView::SetImage(QPixmap image) {
@@ -67,14 +67,14 @@ void BackgroundView::Paint(QPainter &painter) {
   bool transparent = false;
   painter.drawPixmap(0, 0, (transparent) ? _transparentPixmap : _pixmap);
 
-  if (_model->Data(Background::kUseAsTilesetFieldNumber).toBool()) {
+  if (_model->Data(FieldPath::Of<Background>(Background::kUseAsTilesetFieldNumber)).toBool()) {
     _grid.show = true;
-    _grid.horSpacing = _model->Data(Background::kHorizontalSpacingFieldNumber).toInt();
-    _grid.vertSpacing = _model->Data(Background::kVerticalSpacingFieldNumber).toInt();
-    _grid.horOff = _model->Data(Background::kHorizontalOffsetFieldNumber).toInt();
-    _grid.vertOff = _model->Data(Background::kVerticalOffsetFieldNumber).toInt();
-    _grid.cellWidth = _model->Data(Background::kTileWidthFieldNumber).toInt();
-    _grid.cellHeight = _model->Data(Background::kTileHeightFieldNumber).toInt();
+    _grid.horSpacing = _model->Data(FieldPath::Of<Background>(Background::kHorizontalSpacingFieldNumber)).toInt();
+    _grid.vertSpacing = _model->Data(FieldPath::Of<Background>(Background::kVerticalSpacingFieldNumber)).toInt();
+    _grid.horOff = _model->Data(FieldPath::Of<Background>(Background::kHorizontalOffsetFieldNumber)).toInt();
+    _grid.vertOff = _model->Data(FieldPath::Of<Background>(Background::kVerticalOffsetFieldNumber)).toInt();
+    _grid.cellWidth = _model->Data(FieldPath::Of<Background>(Background::kTileWidthFieldNumber)).toInt();
+    _grid.cellHeight = _model->Data(FieldPath::Of<Background>(Background::kTileHeightFieldNumber)).toInt();
     _grid.width = _pixmap.width();
     _grid.height = _pixmap.height();
   } else {

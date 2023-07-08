@@ -1,25 +1,24 @@
 #include "EventsListModel.h"
 #include "MessageModel.h"
-#include "RepeatedStringModel.h"
 #include "RepeatedMessageModel.h"
+#include "RepeatedPrimitiveModel.h"
 
 #include <QIcon>
 
 Event EventsListModel::GetEvent(const QModelIndex &index) const {
-  auto sourceIndex = sourceModel()->index(index.row(), Object::EgmEvent::kIdFieldNumber);
-  std::string name = sourceModel()->data(sourceIndex,
-                                         Qt::DisplayRole).toString().toStdString();
+  std::string name =
+      model_->Data(FieldPath::Of<Object::EgmEvent>(FieldPath::StartingAt(index.row()), Object::EgmEvent::kIdFieldNumber))
+          .toString()
+          .toStdString();
   std::vector<std::string> arguments_vec;
 
-  MessageModel* event =
-  static_cast<RepeatedMessageModel*>(
-              sourceModel())->GetSubModel<MessageModel*>(index.row());
+  MessageModel* event = model_->GetSubModel<MessageModel*>(index.row());
 
   RepeatedStringModel* arguments = event->GetSubModel<RepeatedStringModel*>(
         Object::EgmEvent::kArgumentsFieldNumber);
 
   for (int i = 0; i < arguments->rowCount(); ++i) {
-    arguments_vec.emplace_back(arguments->Data(i).toString().toStdString());
+    arguments_vec.emplace_back(arguments->PrimitiveData(i));
   }
 
   return eventData_->get_event(name, arguments_vec);
@@ -27,6 +26,11 @@ Event EventsListModel::GetEvent(const QModelIndex &index) const {
 
 EventsListModel::EventsListModel(EventData* eventData, QObject* parent) :
   QIdentityProxyModel(parent), eventData_(eventData) {
+}
+
+void EventsListModel::SetSourceModel(RepeatedMessageModel *newSourceModel) {
+  QIdentityProxyModel::setSourceModel(newSourceModel);
+  model_ = newSourceModel;
 }
 
 QVariant EventsListModel::headerData(int section, Qt::Orientation /*orientation*/, int role) const {
@@ -47,10 +51,8 @@ QVariant EventsListModel::data(const QModelIndex &index, int role) const {
       return QIcon(":/events/other.png");
     }
     case Qt::ToolTipRole: {
-      MessageModel* event =
-      static_cast<RepeatedMessageModel*>(
-                  sourceModel())->GetSubModel<MessageModel*>(index.row());
-      return event->Data(Object::EgmEvent::kCodeFieldNumber);
+      MessageModel* event = model_->GetSubModel<MessageModel*>(index.row());
+      return event->Data(FieldPath::Of<Object::EgmEvent>(Object::EgmEvent::kCodeFieldNumber));
     }
     default: return QVariant();
   }

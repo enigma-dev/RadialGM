@@ -34,7 +34,7 @@
     <number>4</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,3">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
      <property name="spacing">
       <number>4</number>
      </property>
@@ -78,6 +78,11 @@
        <item>
         <property name="text">
          <string>Appearance</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Keybinding</string>
         </property>
        </item>
        <item>
@@ -133,7 +138,7 @@
           <enum>QFrame::NoFrame</enum>
          </property>
          <property name="currentIndex">
-          <number>3</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="generalPage">
           <layout class="QFormLayout" name="formLayout_2">
@@ -259,6 +264,178 @@
               </font>
              </property>
             </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="keybindingPage">
+          <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0">
+           <property name="spacing">
+            <number>4</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_3">
+             <property name="spacing">
+              <number>4</number>
+             </property>
+             <item>
+              <widget class="QDialogButtonBox" name="keybindingButtons">
+               <property name="standardButtons">
+                <set>QDialogButtonBox::Open|QDialogButtonBox::RestoreDefaults|QDialogButtonBox::Save</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QTreeWidget" name="keybindingTree">
+               <property name="focusPolicy">
+                <enum>Qt::StrongFocus</enum>
+               </property>
+               <property name="alternatingRowColors">
+                <bool>true</bool>
+               </property>
+               <property name="selectionMode">
+                <enum>QAbstractItemView::SingleSelection</enum>
+               </property>
+               <property name="selectionBehavior">
+                <enum>QAbstractItemView::SelectItems</enum>
+               </property>
+               <property name="textElideMode">
+                <enum>Qt::ElideRight</enum>
+               </property>
+               <property name="indentation">
+                <number>20</number>
+               </property>
+               <property name="rootIsDecorated">
+                <bool>true</bool>
+               </property>
+               <property name="uniformRowHeights">
+                <bool>false</bool>
+               </property>
+               <property name="itemsExpandable">
+                <bool>true</bool>
+               </property>
+               <property name="animated">
+                <bool>false</bool>
+               </property>
+               <property name="allColumnsShowFocus">
+                <bool>false</bool>
+               </property>
+               <property name="headerHidden">
+                <bool>false</bool>
+               </property>
+               <attribute name="headerVisible">
+                <bool>true</bool>
+               </attribute>
+               <attribute name="headerCascadingSectionResizes">
+                <bool>true</bool>
+               </attribute>
+               <attribute name="headerDefaultSectionSize">
+                <number>100</number>
+               </attribute>
+               <attribute name="headerStretchLastSection">
+                <bool>false</bool>
+               </attribute>
+               <column>
+                <property name="text">
+                 <string>Action</string>
+                </property>
+                <property name="textAlignment">
+                 <set>AlignCenter</set>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Shortcut</string>
+                </property>
+                <property name="textAlignment">
+                 <set>AlignCenter</set>
+                </property>
+               </column>
+               <item>
+                <property name="text">
+                 <string>Global</string>
+                </property>
+                <property name="textAlignment">
+                 <set>AlignLeading|AlignVCenter</set>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="flags">
+                 <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Cut</string>
+                 </property>
+                 <property name="textAlignment">
+                  <set>AlignTrailing|AlignVCenter</set>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../images.qrc">
+                   <normaloff>:/actions/cut.png</normaloff>:/actions/cut.png</iconset>
+                 </property>
+                 <property name="text">
+                  <string>Ctrl+X</string>
+                 </property>
+                 <property name="flags">
+                  <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Copy</string>
+                 </property>
+                 <property name="textAlignment">
+                  <set>AlignTrailing|AlignVCenter</set>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../images.qrc">
+                   <normaloff>:/actions/copy.png</normaloff>:/actions/copy.png</iconset>
+                 </property>
+                 <property name="text">
+                  <string>Ctrl+C</string>
+                 </property>
+                 <property name="textAlignment">
+                  <set>AlignLeading|AlignVCenter</set>
+                 </property>
+                 <property name="flags">
+                  <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Paste</string>
+                 </property>
+                 <property name="textAlignment">
+                  <set>AlignTrailing|AlignVCenter</set>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="../images.qrc">
+                   <normaloff>:/actions/paste.png</normaloff>:/actions/paste.png</iconset>
+                 </property>
+                 <property name="text">
+                  <string>Ctrl+V</string>
+                 </property>
+                 <property name="flags">
+                  <set>ItemIsDragEnabled|ItemIsDropEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+                 </property>
+                </item>
+               </item>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </widget>

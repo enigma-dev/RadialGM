@@ -51,7 +51,7 @@ void RecentFiles::updateActions() {
     const QString fileName = QFileInfo(recentFiles.at(i)).fileName();
     QString numberString = QString::number(i + 1);
     numberString = numberString.insert(numberString.length() - 1, '&');
-    QString text = tr("%1 %2").arg(numberString).arg(fileName);
+    QString text = tr("%1 %2").arg(numberString, fileName);
     recentFileActs[i]->setText(text);
     recentFileActs[i]->setData(recentFiles.at(i));
     recentFileActs[i]->setVisible(true);

@@ -3,6 +3,8 @@
 
 #include <QAbstractButton>
 #include <QDialog>
+#include <QSettings>
+#include <QJsonObject>
 
 namespace Ui {
 class PreferencesDialog;
@@ -15,6 +17,9 @@ class PreferencesDialog : public QDialog {
   explicit PreferencesDialog(QWidget *parent);
   ~PreferencesDialog();
 
+  static QJsonObject groupToJson(const QSettings& settings);
+  static void groupFromJson(QSettings& settings, QJsonObject obj);
+
  private slots:
   void applyClicked();
   void restoreDefaultsClicked();
@@ -25,6 +30,8 @@ class PreferencesDialog : public QDialog {
  private:
   Ui::PreferencesDialog *ui;
 
+  void setupKeybindingUI();
+  void setupKeybindingContextUI();
   void apply();
   void reset();
 };

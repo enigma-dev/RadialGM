@@ -1278,6 +1278,7 @@
          <addaction name="actionSelectionMode"/>
          <addaction name="actionSnapToGrid"/>
          <addaction name="separator"/>
+         <addaction name="actionShowHideGrid"/>
          <addaction name="actionZoom"/>
          <addaction name="actionZoomIn"/>
          <addaction name="actionZoomOut"/>
@@ -1469,6 +1470,24 @@
     <string>Paste</string>
    </property>
   </action>
+  <action name="actionShowHideGrid">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../images.qrc">
+     <normaloff>:/actions/grid.png</normaloff>:/actions/grid.png</iconset>
+   </property>
+   <property name="text">
+    <string>Show or Hide Grid</string>
+   </property>
+   <property name="toolTip">
+    <string>Show/Hide Grid</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -1493,18 +1512,6 @@
    <class>RoomView</class>
    <extends>QWidget</extends>
    <header>Widgets/RoomView.h</header>
-  </customwidget>
-  <customwidget>
-   <class>AssetScrollArea</class>
-   <extends>QScrollArea</extends>
-   <header>Widgets/AssetScrollArea.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>AssetScrollAreaBackground</class>
-   <extends>QWidget</extends>
-   <header>Widgets/AssetScrollAreaBackground.h</header>
-   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

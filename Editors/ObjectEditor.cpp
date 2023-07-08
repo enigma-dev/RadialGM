@@ -4,7 +4,7 @@
 #include "MainWindow.h"
 #include "Models/EventTypesListModel.h"
 #include "Models/RepeatedMessageModel.h"
-#include "Models/RepeatedStringModel.h"
+#include "Models/RepeatedModel.h"
 
 #include "ui_ObjectEditor.h"
 
@@ -36,7 +36,7 @@ ObjectEditor::ObjectEditor(MessageModel *model, QWidget *parent)
   BindEventMenu(_ui->addEventButton, true);
   BindEventMenu(_ui->changeEventButton, false);
 
-  RebindSubModels();
+  ObjectEditor::RebindSubModels();
 }
 
 ObjectEditor::~ObjectEditor() { delete _ui; }
@@ -84,7 +84,7 @@ void ObjectEditor::AddChangeFromMenuEvent(const QModelIndex &index, bool add) {
 
 void ObjectEditor::RebindSubModels() {
   _objectModel = _model->GetSubModel<MessageModel *>(TreeNode::kObjectFieldNumber);
-  _eventsModel->setSourceModel(_objectModel->GetSubModel<RepeatedMessageModel *>(Object::kEgmEventsFieldNumber));
+  _eventsModel->SetSourceModel(_objectModel->GetSubModel<RepeatedMessageModel *>(Object::kEgmEventsFieldNumber));
 
   _sortedEvents = new QSortFilterProxyModel(_eventsModel);
   _sortedEvents->setSourceModel(_eventsModel);
@@ -135,9 +135,13 @@ void ObjectEditor::AddEvent(Object::EgmEvent event) {
 void ObjectEditor::ChangeEvent(int idx, Object::EgmEvent event, bool changeCode) {
   RepeatedMessageModel *eventsModel = _objectModel->GetSubModel<RepeatedMessageModel *>(Object::kEgmEventsFieldNumber);
 
-  eventsModel->SetData(QString::fromStdString(event.id()), idx, Object::EgmEvent::kIdFieldNumber);
+  eventsModel->SetData(FieldPath::Of<Object::EgmEvent>(FieldPath::StartingAt(idx), Object::EgmEvent::kIdFieldNumber),
+                       QString::fromStdString(event.id()));
 
-  if (changeCode) eventsModel->SetData(QString::fromStdString(event.code()), idx, Object::EgmEvent::kCodeFieldNumber);
+  if (changeCode)
+    eventsModel->SetData(
+        FieldPath::Of<Object::EgmEvent>(FieldPath::StartingAt(idx), Object::EgmEvent::kCodeFieldNumber),
+        QString::fromStdString(event.code()));
 
   RepeatedStringModel *argsModel = eventsModel->GetSubModel<MessageModel *>(idx)->GetSubModel<RepeatedStringModel *>(
       Object::EgmEvent::kArgumentsFieldNumber);
@@ -147,7 +151,8 @@ void ObjectEditor::ChangeEvent(int idx, Object::EgmEvent event, bool changeCode)
   if (event.arguments_size() > 0) {
     argsModel->insertRows(argsModel->rowCount(), event.arguments_size());
     for (const auto &arg : event.arguments()) {
-      argsModel->SetData(QString::fromStdString(arg), argc++);
+      argsModel->SetDirect(argc, QString::fromStdString(arg));
+      argc++;
     }
   }
 

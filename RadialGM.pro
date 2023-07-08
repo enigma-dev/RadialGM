@@ -20,23 +20,18 @@ QMAKE_TARGET_PRODUCT = RadialGM IDE
 QMAKE_TARGET_DESCRIPTION = ENIGMA Development Environment
 QMAKE_TARGET_COPYRIGHT = "Copyright \\251 2007-2020 ENIGMA Dev Team"
 
+QMAKE_EXTRA_TARGETS += enigma
+PRE_TARGETDEPS += enigma
+enigma.commands = cd $$PWD/Submodules/enigma-dev/ && $(MAKE) emake
+
 # Uncomment if you want QScintilla
-#CONFIG += rgm_enable_syntaxhighlight
+CONFIG += rgm_enable_syntaxhighlight
 
 rgm_enable_syntaxhighlight {
   SOURCES += Widgets/CodeWidgetScintilla.cpp
   CONFIG += qscintilla2
 } else {
   SOURCES += Widgets/CodeWidgetPlain.cpp
-}
-
-# Uncomment if you want compilation & code analysis
-#CONFIG += rgm_enable_grpc_server
-
-rgm_enable_grpc_server {
-  DEFINES += RGM_SERVER_ENABLED
-  SOURCES += Plugins/ServerPlugin.cpp
-  HEADERS += Plugins/ServerPlugin.h
 }
 
 # we do this even in release mode for "Editor Diagnostics"
@@ -60,16 +55,19 @@ INCLUDEPATH += /usr/include/qt/ \
 LIBS += -L$$PWD/Submodules/enigma-dev/CommandLine/libEGM/ \
         -lENIGMAShared \
         -lEGM \
-        -lprotobuf \
         -Wl,--rpath=$$PWD/Submodules/enigma-dev/ \
         -L$$PWD/Submodules/enigma-dev/ \
         -lProtocols \
         -lpugixml \
-        -lgrpc++
+
+CONFIG += link_pkgconfig
+PKGCONFIG += protobuf grpc++
 
 SOURCES += \
+    Dialogs/KeybindingPreferences.cpp \
     Dialogs/EventArgumentsDialog.cpp \
     Dialogs/TimelineChangeMoment.cpp \
+    Editors/InformationEditor.cpp \
     Editors/IncludeEditor.cpp \
     Editors/ShaderEditor.cpp \
     Editors/SpriteEditor.cpp \
@@ -77,9 +75,12 @@ SOURCES += \
     Models/EventTypesListSortFilterProxyModel.cpp \
     Models/EventsListModel.cpp \
     Models/MessageModel.cpp \
-    Models/RepeatedImageModel.cpp \
+    Models/PrimitiveModel.cpp \
     Models/RepeatedMessageModel.cpp \
-    Models/RepeatedStringModel.cpp \
+    Models/RepeatedModel.cpp \
+    Models/RepeatedSortFilterProxyModel.cpp \
+    Utils/FieldPath.cpp \
+    Utils/ProtoManip.cpp \
     Widgets/AssetScrollAreaBackground.cpp \
     Widgets/PathView.cpp \
     Widgets/SpriteSubimageListView.cpp \
@@ -108,6 +109,7 @@ SOURCES += \
     Models/ImmediateMapper.cpp \
     Components/Utility.cpp \
     Plugins/RGMPlugin.cpp \
+    Plugins/ServerPlugin.cpp \
     Components/RecentFiles.cpp \
     Editors/CodeEditor.cpp \
     Editors/ScriptEditor.cpp \
@@ -117,8 +119,10 @@ SOURCES += \
     Models/TreeSortFilterProxyModel.cpp
 
 HEADERS += \
+    Dialogs/KeybindingPreferences.h \
     Dialogs/EventArgumentsDialog.h \
     Dialogs/TimelineChangeMoment.h \
+    Editors/InformationEditor.h \
     Editors/IncludeEditor.h \
     Editors/ShaderEditor.h \
     Editors/SpriteEditor.h \
@@ -137,10 +141,15 @@ HEADERS += \
     Models/EventTypesListSortFilterProxyModel.h \
     Models/EventsListModel.h \
     Models/MessageModel.h \
-    Models/RepeatedImageModel.h \
+    Models/PrimitiveModel.h \
     Models/RepeatedMessageModel.h \
     Models/RepeatedModel.h \
-    Models/RepeatedStringModel.h \
+    Models/RepeatedPrimitiveModel.h \
+    Models/RepeatedSortFilterProxyModel.h \
+    Utils/FieldPath.h \
+    Utils/ProtoManip.h \
+    Utils/QBoilerplate.h \
+    Utils/SafeCasts.h \
     Widgets/AssetScrollArea.h \
     Widgets/AssetScrollAreaBackground.h \
     Widgets/BackgroundView.h \
@@ -157,6 +166,7 @@ HEADERS += \
     Models/ImmediateMapper.h \
     Components/Utility.h \
     Plugins/RGMPlugin.h \
+    Plugins/ServerPlugin.h \
     Components/RecentFiles.h \
     Widgets/SpriteSubimageListView.h \
     Widgets/SpriteView.h \
@@ -173,6 +183,7 @@ HEADERS += \
 
 FORMS += \
     Dialogs/TimelineChangeMoment.ui \
+    Editors/InformationEditor.ui \
     Editors/IncludeEditor.ui \
     Editors/TimelineEditor.ui \
     MainWindow.ui \
@@ -192,4 +203,28 @@ RESOURCES += \
     images.qrc
 
 DISTFILES += \
-  CMakeLists.txt
+  CMakeLists.txt \
+  Submodules/enigma-dev/shared/protos/Action.proto \
+  Submodules/enigma-dev/shared/protos/Background.proto \
+  Submodules/enigma-dev/shared/protos/Building.md \
+  Submodules/enigma-dev/shared/protos/CMakeLists.txt \
+  Submodules/enigma-dev/shared/protos/EventDescriptor.proto \
+  Submodules/enigma-dev/shared/protos/Font.proto \
+  Submodules/enigma-dev/shared/protos/GameInformation.proto \
+  Submodules/enigma-dev/shared/protos/Include.proto \
+  Submodules/enigma-dev/shared/protos/Makefile \
+  Submodules/enigma-dev/shared/protos/Object.proto \
+  Submodules/enigma-dev/shared/protos/Path.proto \
+  Submodules/enigma-dev/shared/protos/Room.proto \
+  Submodules/enigma-dev/shared/protos/Script.proto \
+  Submodules/enigma-dev/shared/protos/Settings.proto \
+  Submodules/enigma-dev/shared/protos/Shader.proto \
+  Submodules/enigma-dev/shared/protos/Sound.proto \
+  Submodules/enigma-dev/shared/protos/Sprite.proto \
+  Submodules/enigma-dev/shared/protos/Timeline.proto \
+  Submodules/enigma-dev/shared/protos/compiler.proto \
+  Submodules/enigma-dev/shared/protos/game.proto \
+  Submodules/enigma-dev/shared/protos/options.proto \
+  Submodules/enigma-dev/shared/protos/project.proto \
+  Submodules/enigma-dev/shared/protos/server.proto \
+  Submodules/enigma-dev/shared/protos/treenode.proto

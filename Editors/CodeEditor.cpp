@@ -40,7 +40,8 @@ CodeEditor::~CodeEditor() { delete _ui; }
 void CodeEditor::SetDisabled(bool disabled) {
   (disabled) ? _ui->stackedWidget->hide() : _ui->stackedWidget->show();
   (disabled) ? _ui->statusBar->hide() : _ui->statusBar->show();
-  for (QAction* action : _ui->mainToolBar->actions()) {
+  auto const actions = _ui->mainToolBar->actions();
+  for (QAction* action : actions) {
     action->setDisabled(disabled);
   }
 }
