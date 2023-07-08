@@ -67,6 +67,7 @@ SOURCES += \
     Dialogs/KeybindingPreferences.cpp \
     Dialogs/EventArgumentsDialog.cpp \
     Dialogs/TimelineChangeMoment.cpp \
+    Editors/InformationEditor.cpp \
     Editors/IncludeEditor.cpp \
     Editors/ShaderEditor.cpp \
     Editors/SpriteEditor.cpp \
@@ -121,6 +122,7 @@ HEADERS += \
     Dialogs/KeybindingPreferences.h \
     Dialogs/EventArgumentsDialog.h \
     Dialogs/TimelineChangeMoment.h \
+    Editors/InformationEditor.h \
     Editors/IncludeEditor.h \
     Editors/ShaderEditor.h \
     Editors/SpriteEditor.h \
@@ -181,6 +183,7 @@ HEADERS += \
 
 FORMS += \
     Dialogs/TimelineChangeMoment.ui \
+    Editors/InformationEditor.ui \
     Editors/IncludeEditor.ui \
     Editors/TimelineEditor.ui \
     MainWindow.ui \

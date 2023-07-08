@@ -76,6 +76,7 @@ set(RGM_SOURCES
   Editors/ShaderEditor.cpp
   Editors/SoundEditor.cpp
   Editors/IncludeEditor.cpp
+  Editors/InformationEditor.cpp
   Editors/BaseEditor.cpp
   Editors/ScriptEditor.cpp
   Editors/CodeEditor.cpp
@@ -129,6 +130,7 @@ set(RGM_HEADERS
   Editors/CodeEditor.h
   Editors/SoundEditor.h
   Editors/IncludeEditor.h
+  Editors/InformationEditor.h
   Editors/TimelineEditor.h
   Editors/SettingsEditor.h
   Editors/ShaderEditor.h
@@ -177,6 +179,7 @@ set(RGM_UI
     Editors/FontEditor.ui
     Editors/TimelineEditor.ui
     Editors/ObjectEditor.ui
+    Editors/InformationEditor.ui
     Editors/IncludeEditor.ui
 )
 
