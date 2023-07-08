@@ -36,7 +36,7 @@
 #undef GetMessage
 
 QList<QString> MainWindow::EnigmaSearchPaths = {QDir::currentPath(), "./enigma-dev", "../enigma-dev",
-                                                "../RadialGM/Submodules/enigma-dev"};
+                                                "../RadialGM/Submodules/enigma-dev", "/opt/enigma-dev/", "/usr/lib/enigma-dev"};
 QFileInfo MainWindow::EnigmaRoot = MainWindow::getEnigmaRoot();
 QList<buffers::SystemType> MainWindow::systemCache;
 MainWindow *MainWindow::_instance = nullptr;
