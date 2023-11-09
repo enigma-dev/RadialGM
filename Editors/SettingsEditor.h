@@ -14,6 +14,7 @@ class SettingsEditor : public BaseEditor {
 
  public:
   explicit SettingsEditor(MessageModel* model, QWidget* parent);
+  void RebindSubModels() override;
   ~SettingsEditor();
 
  private slots:

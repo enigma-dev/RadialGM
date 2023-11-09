@@ -60,6 +60,7 @@ set(RGM_SOURCES
   Models/ResourceModelMap.cpp
   Models/ImmediateMapper.cpp
   Models/ProtoModel.cpp
+  Models/SystemsModel.cpp
   Models/EventTypesListSortFilterProxyModel.cpp
   Models/RepeatedSortFilterProxyModel.cpp
   Components/Utility.cpp
@@ -115,6 +116,7 @@ set(RGM_HEADERS
   Models/RepeatedModel.h
   Models/EventsListModel.h
   Models/ModelMapper.h
+  Models/SystemsModel.h
   Models/RepeatedSortFilterProxyModel.h
   Models/TreeSortFilterProxyModel.h
   main.h

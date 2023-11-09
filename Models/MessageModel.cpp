@@ -150,7 +150,7 @@ int MessageModel::rowCount(const QModelIndex &parent) const {
 int MessageModel::columnCount(const QModelIndex & /*parent*/) const { return 1; }
 
 bool MessageModel::setData(const QModelIndex &index, const QVariant &value, int role) {
-  R_EXPECT(index.isValid(), false) << "Supplied index was invalid:" << index;
+  R_EXPECT(index.isValid(), false) << DebugName() << "Supplied index was invalid:" << index;
 
   const Descriptor *desc = _protobuf->GetDescriptor();
   const Reflection *refl = _protobuf->GetReflection();

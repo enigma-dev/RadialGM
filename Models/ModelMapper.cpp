@@ -9,7 +9,11 @@ ModelMapper::ModelMapper(MessageModel *model, BaseEditor *parent) : QObject(pare
   parent->connect(model, &ProtoModel::DataChanged, parent, &BaseEditor::dataChanged);
 }
 
-// mapper
+ModelMapper::ModelMapper(MessageModel *model) : QObject(model), _model(model)  {
+  _mapper = new ImmediateDataWidgetMapper(this);
+  _mapper->setOrientation(Qt::Vertical);
+  _mapper->setModel(model);
+}
 
 MessageModel *ModelMapper::GetModel() { return _model; }
 
