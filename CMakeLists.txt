@@ -244,14 +244,14 @@ include_directories(${EXE} PRIVATE ${RAPIDJSON_INCLUDE_DIRS})
 find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${EXE} PRIVATE yaml-cpp)
 
- #Find gRPC
- find_package(gRPC CONFIG REQUIRED)
- target_link_libraries(${EXE} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
-
 # Find Protobuf
 include(FindProtobuf)
 include_directories(${Protobuf_INCLUDE_DIRS})
 target_link_libraries(${EXE} PRIVATE ${Protobuf_LIBRARIES})
+
+ #Find gRPC
+ find_package(gRPC CONFIG REQUIRED)
+ target_link_libraries(${EXE} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
 
 # Find OpenSSL
 find_package(OpenSSL REQUIRED)
@@ -347,6 +347,7 @@ if (WIN32)
 
   install(CODE "
           include(BundleUtilities)
+          set(GET_PREREQUISITES_VERBOSE TRUE)
           fixup_bundle(\"${RGM_APP}\" \"${LIBS}\" \"${SEARCH_PATHS}\")
           fixup_bundle(\"${EMAKE_APP}\" \"${LIBS}\" \"${SEARCH_PATHS}\")
           execute_process(COMMAND windeployqt.exe ${WINDEPLOY_ARGS} ${RGM_APP})
