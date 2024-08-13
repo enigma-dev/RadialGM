@@ -90,15 +90,15 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   _ui->objectSelectButton->setMenu(objMenu);
   _ui->objectSelectButton->setPopupMode(QToolButton::MenuButtonPopup);
 
-  auto objects = treeProxy
-      ->match(treeProxy->index(0, 0), TreeModel::UserRoles::TypeCaseRole,
-              TypeCase::kObject, 1, Qt::MatchRecursive);
-  if (!objects.empty()) {
-    QModelIndex firstObjIdx = objects.first();
-    QString firstObj = firstObjIdx.data(Qt::DisplayRole).toString();
-    _ui->objectSelectButton->setIcon(firstObjIdx.data(Qt::DecorationRole).value<QIcon>());
-    _ui->currentObject->setText(firstObj);
-  }
+  // auto objects = treeProxy
+  //     ->match(treeProxy->index(0, 0), TreeModel::UserRoles::TypeCaseRole,
+  //             TypeCase::kObject, 1, Qt::MatchRecursive);
+  // if (!objects.empty()) {
+  //   QModelIndex firstObjIdx = objects.first();
+  //   QString firstObj = firstObjIdx.data(Qt::DisplayRole).toString();
+  //   _ui->objectSelectButton->setIcon(firstObjIdx.data(Qt::DecorationRole).value<QIcon>());
+  //   _ui->currentObject->setText(firstObj);
+  // }
 
   connect(objMenu, &QMenuView::triggered, [=](const QModelIndex &index) {
     _ui->currentObject->setText(treeProxy->data(index, Qt::DisplayRole).toString());
@@ -116,9 +116,9 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
 
   // This updates all the model views in the event of a sprite is changed
   connect(MainWindow::resourceMap, &ResourceModelMap::DataChanged, this, [this]() {
-    _ui->instancesListView->reset();
-    _ui->tilesListView->reset();
-    _ui->layersPropertiesView->reset();
+    // _ui->instancesListView->reset();
+    _ui->layersListView->reset();
+    _ui->propertiesView->reset();
   });
 
   RoomEditor::RebindSubModels();
@@ -133,35 +133,35 @@ void RoomEditor::RebindSubModels() {
   RepeatedMessageModel* im = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kInstancesFieldNumber);
   RepeatedSortFilterProxyModel* imp = new RepeatedSortFilterProxyModel(this);
   imp->SetSourceModel(im);
-  _ui->instancesListView->setModel(imp);
+  // _ui->instancesListView->setModel(imp);
 
-  for (int c = 0; c < im->columnCount(); ++c) {
-    if (c != im->FieldToColumn(Room::Instance::kNameFieldNumber) &&
-        c != im->FieldToColumn(Room::Instance::kObjectTypeFieldNumber) &&
-        c != im->FieldToColumn(Room::Instance::kIdFieldNumber))
-      _ui->instancesListView->hideColumn(c);
-    else
-      _ui->instancesListView->resizeColumnToContents(c);
-  }
+  // for (int c = 0; c < im->columnCount(); ++c) {
+  //   if (c != im->FieldToColumn(Room::Instance::kNameFieldNumber) &&
+  //       c != im->FieldToColumn(Room::Instance::kObjectTypeFieldNumber) &&
+  //       c != im->FieldToColumn(Room::Instance::kIdFieldNumber))
+  //     _ui->instancesListView->hideColumn(c);
+  //   else
+  //     _ui->instancesListView->resizeColumnToContents(c);
+  // }
 
-  _ui->instancesListView->header()->swapSections(im->FieldToColumn(Room::Instance::kNameFieldNumber),
-                                                 im->FieldToColumn(Room::Instance::kObjectTypeFieldNumber));
+  // _ui->instancesListView->header()->swapSections(im->FieldToColumn(Room::Instance::kNameFieldNumber),
+  //                                                im->FieldToColumn(Room::Instance::kObjectTypeFieldNumber));
 
   RepeatedMessageModel* tm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kTilesFieldNumber);
   RepeatedSortFilterProxyModel* tmp = new RepeatedSortFilterProxyModel(this);
   tmp->SetSourceModel(tm);
-  _ui->tilesListView->setModel(tmp);
+  _ui->layersListView->setModel(tmp);
 
   for (int c = 0; c < tm->columnCount(); ++c) {
     if (c != tm->FieldToColumn(Room::Tile::kBackgroundNameFieldNumber) &&
         c != tm->FieldToColumn(Room::Tile::kIdFieldNumber) && c != tm->FieldToColumn(Room::Tile::kDepthFieldNumber) &&
         c != tm->FieldToColumn(Room::Tile::kNameFieldNumber))
-      _ui->tilesListView->hideColumn(c);
+      _ui->layersListView->hideColumn(c);
     else
-      _ui->tilesListView->resizeColumnToContents(c);
+      _ui->layersListView->resizeColumnToContents(c);
   }
 
-  _ui->tilesListView->header()->swapSections(tm->FieldToColumn(Room::Tile::kNameFieldNumber),
+  _ui->layersListView->header()->swapSections(tm->FieldToColumn(Room::Tile::kNameFieldNumber),
                                              tm->FieldToColumn(Room::Tile::kBackgroundNameFieldNumber));
 
   RepeatedMessageModel* vm = _roomModel->GetSubModel<RepeatedMessageModel*>(Room::kViewsFieldNumber);
@@ -170,19 +170,19 @@ void RoomEditor::RebindSubModels() {
   connect(_ui->elementsListView->selectionModel(), &QItemSelectionModel::selectionChanged,
           [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
             if (selected.empty()) return;
-            _ui->tilesListView->clearSelection();
+            _ui->layersListView->clearSelection();
             auto selectedIndex = selected.indexes().first();
             auto currentInstanceModel = imp->GetSubModel(selectedIndex.row());
-            _ui->layersPropertiesView->setModel(currentInstanceModel);
+            _ui->propertiesView->setModel(currentInstanceModel);
           });
 
-  connect(_ui->tilesListView->selectionModel(), &QItemSelectionModel::selectionChanged,
+  connect(_ui->layersListView->selectionModel(), &QItemSelectionModel::selectionChanged,
           [=](const QItemSelection& selected, const QItemSelection& /*deselected*/) {
             if (selected.empty()) return;
-            _ui->instancesListView->clearSelection();
+            // _ui->instancesListView->clearSelection();
             auto selectedIndex = selected.indexes().first();
             auto currentInstanceModel = tmp->GetSubModel(selectedIndex.row());
-            _ui->layersPropertiesView->setModel(currentInstanceModel);
+            _ui->propertiesView->setModel(currentInstanceModel);
           });
 
   BaseEditor::RebindSubModels();
@@ -201,7 +201,7 @@ void RoomEditor::MousePressed(Qt::MouseButton button) {
   if (button == Qt::MouseButton::LeftButton) {
     auto index = layerElements->rowCount();
     layerElements->insertRow(index);
-    layerElements->SetData(_ui->currentObject->text(), index, Room::Instance::kObjectTypeFieldNumber);
+    // layerElements->SetData(_ui->currentObject->text(), index, Room::Instance::kObjectTypeFieldNumber);
   }
 }
 
@@ -217,4 +217,8 @@ void RoomEditor::on_actionZoom_triggered() { _ui->roomPreviewBackground->ResetZo
 
 void RoomEditor::on_actionShowHideGrid_triggered() {
   _ui->roomPreviewBackground->SetGridVisible(_ui->actionShowHideGrid->isChecked());
+}
+
+void RoomEditor::updateCursorPositionLabel(const QPoint& pos) {
+
 }
