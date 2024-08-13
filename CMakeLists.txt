@@ -40,7 +40,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/Dialogs")
+set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/" "${CMAKE_CURRENT_SOURCE_DIR}/Dialogs" "${CMAKE_CURRENT_SOURCE_DIR}/Editors")
 
 # Include ENIGMA things
 set(ENIGMA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/enigma-dev)
@@ -87,6 +87,7 @@ set(RGM_SOURCES
   Dialogs/EventArgumentsDialog.cpp
   Dialogs/TimelineChangeMoment.cpp
   Dialogs/PreferencesDialog.cpp
+  Dialogs/KeyBindingPreferences.cpp
   Utils/ProtoManip.cpp
   Utils/FieldPath.cpp
   MainWindow.cpp
