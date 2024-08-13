@@ -147,6 +147,7 @@ set(RGM_HEADERS
   Dialogs/PreferencesDialog.h
   Dialogs/PreferencesKeys.h
   Dialogs/TimelineChangeMoment.h
+  Dialogs/KeyBindingPreferences.h
   Utils/SafeCasts.h
   Utils/ProtoManip.h
   Utils/FieldPath.h
