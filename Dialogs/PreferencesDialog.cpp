@@ -2,7 +2,7 @@
 #include "ui_PreferencesDialog.h"
 
 #include "PreferencesKeys.h"
-#include "KeybindingPreferences.h"
+#include "KeyBindingPreferences.h"
 #include "main.h"
 #include "Components/Logger.h"
 
