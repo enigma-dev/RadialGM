@@ -5,3 +5,14 @@ This project is an experimental C++ IDE for ENIGMA written in the [Qt Framework]
 RadialGM has been made possible by your contributions & the support you've given us on Patreon!
 
 [![Patreon](https://enigma-dev.org/site/images/v4/patreon.png)](https://www.patreon.com/m/enigma_dev) 
+
+
+Building This Thing
+==================
+You're going to want to make sure you do a recursive git clone of the repo so you get the enigma-dev submodules initialized properly. Otherwise the architecture is pretty straight forward.
+
+1) the editors have forms which are declarative so you can edit them in the Qt designer
+2) the editors have matching C++ classes to add functionality and data bindings to the forms
+3) the main window has a plugin system with external facing API for plugins
+ - a builtin emake/enigma plugin is provided out of the box
+ - emake functions as a server (see enigma-dev `server.proto`) and can service JDI requests remotely or over localhost
