@@ -83,7 +83,6 @@ set(RGM_SOURCES
   Editors/TimelineEditor.cpp
   main.cpp
   Plugins/RGMPlugin.cpp
-  Plugins/ServerPlugin.cpp
   Dialogs/EventArgumentsDialog.cpp
   Dialogs/TimelineChangeMoment.cpp
   Dialogs/PreferencesDialog.cpp
@@ -140,7 +139,6 @@ set(RGM_HEADERS
   Editors/FontEditor.h
   Editors/SpriteEditor.h
   Editors/BackgroundEditor.h
-  Plugins/ServerPlugin.h
   Plugins/RGMPlugin.h
   MainWindow.h
   Dialogs/EventArgumentsDialog.h
@@ -198,8 +196,8 @@ else()
     set(EDITOR_SOURCES Widgets/CodeWidgetScintilla.cpp)
 endif()
 
- set(RGM_SOURCES ${RGM_SOURCES} Plugins/ServerPlugin.cpp)
- set(RGM_HEADERS ${RGM_HEADERS} Plugins/ServerPlugin.h)
+set(RGM_SOURCES ${RGM_SOURCES} Plugins/ServerPlugin.cpp)
+set(RGM_HEADERS ${RGM_HEADERS} Plugins/ServerPlugin.h)
 
 # Tell CMake to create the RadialGM executable
 add_executable(${EXE} WIN32 ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${EDITOR_SOURCES} ${RGM_RC})
@@ -246,7 +244,7 @@ include_directories(${EXE} PRIVATE ${RAPIDJSON_INCLUDE_DIRS})
 find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${EXE} PRIVATE yaml-cpp)
 
-#Find gRPC
+# Find gRPC
 find_package(gRPC CONFIG REQUIRED)
 target_link_libraries(${EXE} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
 
