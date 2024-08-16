@@ -246,14 +246,13 @@ include_directories(${EXE} PRIVATE ${RAPIDJSON_INCLUDE_DIRS})
 find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${EXE} PRIVATE yaml-cpp)
 
- #Find gRPC
- find_package(gRPC CONFIG REQUIRED)
- target_link_libraries(${EXE} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
+#Find gRPC
+find_package(gRPC CONFIG REQUIRED)
+target_link_libraries(${EXE} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
 
 # Find Protobuf
-include(FindProtobuf)
-include_directories(${Protobuf_INCLUDE_DIRS})
-target_link_libraries(${EXE} PRIVATE ${Protobuf_LIBRARIES})
+find_package(Protobuf CONFIG REQUIRED)
+target_link_libraries(${EXE} PRIVATE protobuf::libprotobuf)
 
 # Find OpenSSL
 find_package(OpenSSL REQUIRED)
