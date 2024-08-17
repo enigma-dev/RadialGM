@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.14)
 project(RadialGM)
 
+# Uncomment to give priority to the local CMake modules
+# set(CMAKE_PREFIX_PATH "/usr/local/lib")
+
 include(CMakeDependentOption)
 
 option(RGM_BUILD_EMAKE "Build Emake and the compiler." ON)
@@ -41,6 +44,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/" "${CMAKE_CURRENT_SOURCE_DIR}/Dialogs" "${CMAKE_CURRENT_SOURCE_DIR}/Editors")
+
+# Uncomment to be able to use local grpc_cpp_plugin
+# set(GRPC_EXE "/usr/local/bin/grpc_cpp_plugin")
 
 # Include ENIGMA things
 set(ENIGMA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/enigma-dev)
