@@ -116,7 +116,7 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
 
   // This updates all the model views in the event of a sprite is changed
   connect(MainWindow::resourceMap, &ResourceModelMap::DataChanged, this, [this]() {
-    // _ui->instancesListView->reset();
+    _ui->entitiesListView->reset();
     _ui->layersListView->reset();
     _ui->propertiesView->reset();
   });
