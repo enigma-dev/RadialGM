@@ -315,6 +315,9 @@ if (RGM_BUILD_EMAKE)
   add_dependencies(${EXE} ${CLI_TARGET})
 endif()
 
+# Copy ENIGMA's source files
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/enigma-dev/ENIGMAsystem DESTINATION ${CMAKE_BINARY_DIR}/Submodules/enigma-dev)
+
 install(TARGETS ${EXE} RUNTIME DESTINATION .)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${EXE}.dir/Debug/${EXE}.pdb" DESTINATION . OPTIONAL)
 
