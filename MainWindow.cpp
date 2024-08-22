@@ -36,7 +36,6 @@
 #undef GetMessage
 
 QList<QString> MainWindow::EnigmaSearchPaths = {"/opt/enigma-dev/", "/usr/lib/enigma-dev",
-                                                QDir::currentPath() + "/Submodules/enigma-dev/CommandLine/emake", 
                                                 QDir::currentPath() + "/../Submodules/enigma-dev/"};
 QFileInfo MainWindow::EnigmaRoot = MainWindow::getEnigmaRoot();
 QList<buffers::SystemType> MainWindow::systemCache;

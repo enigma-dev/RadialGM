@@ -315,8 +315,18 @@ if (RGM_BUILD_EMAKE)
   add_dependencies(${EXE} ${CLI_TARGET})
 endif()
 
-# Copy ENIGMA's source files
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/enigma-dev/ENIGMAsystem DESTINATION ${CMAKE_BINARY_DIR}/Submodules/enigma-dev)
+add_custom_command(
+    TARGET ${EXE}
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/emake/${CLI_TARGET}
+        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/libEGM/libEGM.so
+        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CompilerSource/libcompileEGMf.so
+        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/protos/libProtocols.so
+        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/libENIGMAShared.so
+        ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/enigma-dev
+    COMMENT "Copying exes to ENIGMA's root directory"
+)
 
 install(TARGETS ${EXE} RUNTIME DESTINATION .)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${EXE}.dir/Debug/${EXE}.pdb" DESTINATION . OPTIONAL)
