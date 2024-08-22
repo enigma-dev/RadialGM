@@ -102,6 +102,9 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="currentIndex">
+       <number>6</number>
+      </property>
       <widget class="QWidget" name="emptyPage"/>
       <widget class="QWidget" name="projectInfoPage">
        <layout class="QFormLayout" name="formLayout_2">
@@ -1215,11 +1218,11 @@
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="inheritIncrementGroup"/>
-  <buttongroup name="treatLiteralsGroup"/>
-  <buttongroup name="treatNegativesGroup"/>
   <buttongroup name="inheritStringsGroup"/>
   <buttongroup name="inheritEscapesGroup"/>
   <buttongroup name="inheritEquivalenceGroup"/>
+  <buttongroup name="inheritIncrementGroup"/>
+  <buttongroup name="treatNegativesGroup"/>
+  <buttongroup name="treatLiteralsGroup"/>
  </buttongroups>
 </ui>

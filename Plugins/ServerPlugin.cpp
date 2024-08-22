@@ -5,6 +5,7 @@
 #include <QFileDialog>
 #include <QList>
 #include <QTemporaryFile>
+#include <QThread>
 
 #include <thread>
 #include <memory>
@@ -323,6 +324,8 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
 
   process->start(program, arguments);
   process->waitForStarted();
+
+  QThread::sleep(5);
 
   // construct the channel and connect to the server running in the process
   // Note: gRPC is too dumb to resolve localhost on linux

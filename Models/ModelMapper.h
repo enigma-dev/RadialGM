@@ -11,6 +11,7 @@ class BaseEditor;
 class ModelMapper : public QObject {
  public:
   ModelMapper(MessageModel *_model, BaseEditor *parent);
+  ModelMapper(MessageModel *_model);
 
   // mapper
   void addMapping(QWidget *widget, int section, QByteArray propName = "");

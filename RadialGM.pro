@@ -79,6 +79,7 @@ SOURCES += \
     Models/RepeatedMessageModel.cpp \
     Models/RepeatedModel.cpp \
     Models/RepeatedSortFilterProxyModel.cpp \
+    Models/SystemsModel.cpp \
     Utils/FieldPath.cpp \
     Utils/ProtoManip.cpp \
     Widgets/AssetScrollAreaBackground.cpp \
@@ -146,6 +147,7 @@ HEADERS += \
     Models/RepeatedModel.h \
     Models/RepeatedPrimitiveModel.h \
     Models/RepeatedSortFilterProxyModel.h \
+    Models/SystemsModel.h \
     Utils/FieldPath.h \
     Utils/ProtoManip.h \
     Utils/QBoilerplate.h \
