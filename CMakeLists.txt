@@ -309,6 +309,7 @@ if (RGM_BUILD_EMAKE)
   add_subdirectory(Submodules/enigma-dev/CommandLine/emake)
   if (CMAKE_BUILD_TYPE MATCHES "Debug")
     set(CLI_TARGET "emake-debug")
+    set(CMAKE_DEBUG_POSTFIX "d")
   else()
     set(CLI_TARGET "emake")
   endif()
@@ -320,10 +321,10 @@ add_custom_command(
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/emake/${CLI_TARGET}
-        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/libEGM/libEGM.so
-        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CompilerSource/libcompileEGMf.so
-        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/protos/libProtocols.so
-        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/libENIGMAShared.so
+        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/libEGM/libEGM${CMAKE_DEBUG_POSTFIX}.so
+        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CompilerSource/libcompileEGMf${CMAKE_DEBUG_POSTFIX}.so
+        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/protos/libProtocols${CMAKE_DEBUG_POSTFIX}.so
+        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/libENIGMAShared${CMAKE_DEBUG_POSTFIX}.so
         ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/enigma-dev
     COMMENT "Copying exes to ENIGMA's root directory"
 )
