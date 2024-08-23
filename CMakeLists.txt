@@ -107,6 +107,7 @@ set(RGM_SOURCES
   Widgets/SpriteSubimageListView.cpp
   Widgets/StackedCodeWidget.cpp
   Widgets/AssetScrollAreaBackground.cpp
+  VisualShader/VisualShaderEditor.cpp
 )
 
 set(RGM_HEADERS
@@ -169,6 +170,7 @@ set(RGM_HEADERS
   Widgets/SpriteSubimageListView.h
   Widgets/AssetScrollAreaBackground.h
   Widgets/RoomView.h
+  VisualShader/VisualShaderEditor.h
 )
 
 set(RGM_UI
@@ -294,6 +296,13 @@ target_link_libraries(${EXE} PRIVATE ${LIB_PCRE2})
 # Find double-conversion
 find_library(LIB_DOUBLE_CONVERSION NAMES double-conversion)
 target_link_libraries(${EXE} PRIVATE ${LIB_DOUBLE_CONVERSION})
+
+# nodeeditor
+if (CMAKE_BUILD_TYPE MATCHES "Debug")
+  set(BUILD_DEBUG_POSTFIX_D ON)
+endif()
+set(USE_QT6 OFF) # We use Qt5
+add_subdirectory(Submodules/nodeeditor)
 
 if(WIN32)
   # Windows is a turd
