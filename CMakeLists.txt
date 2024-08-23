@@ -12,18 +12,34 @@ option(RGM_BUILD_EMAKE "Build Emake and the compiler." ON)
 # since we currently don't, I'm force disabling the option on MSVC
 cmake_dependent_option(RGM_BUILD_STATIC "Build static libs." ON "MSVC" OFF)
 
+# Check https://stackoverflow.com/q/33062728/14629018 for more information.
+# if(MSVC)
+#     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+# endif()
+
 if (RGM_BUILD_STATIC)
- set(LIB_TYPE STATIC)
+ set(LIB_TYPE STATIC CACHE STRING "Static Library type")
 else()
- set(LIB_TYPE SHARED)
+ set(LIB_TYPE SHARED CACHE STRING "Shared Library type")
+endif()
+
+# Set default build type
+if(NOT CMAKE_BUILD_TYPE)
+  message(STATUS "Build type not set - defaulting to Debug")
+  set(
+    CMAKE_BUILD_TYPE "Debug"
+    CACHE
+      STRING
+      "Choose the type of build from:  Debug Release RelWithDebInfo MinSizeRel."
+    FORCE)
 endif()
 
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
-  set(EXE "RadialGM-Debug")
+  set(EXE "RadialGM-Debug" CACHE STRING "RGM Executable name")
   add_definitions(-DRGM_DEBUG)
-  set(CMAKE_DEBUG_POSTFIX "d")
+  set(CMAKE_DEBUG_POSTFIX d)
 else()
-  set(EXE "RadialGM")
+  set(EXE "RadialGM" CACHE STRING "RGM Executable name")
 endif()
 
 set(EXE_DESCRIPTION "ENIGMA IDE")
@@ -50,7 +66,7 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/" "${CMAKE_CURRENT_S
 # set(GRPC_EXE "/usr/local/bin/grpc_cpp_plugin")
 
 # Include ENIGMA things
-set(ENIGMA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/enigma-dev)
+set(ENIGMA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/enigma-dev CACHE PATH "ENIGMA directory")
 include_directories("${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/protos/" "${ENIGMA_DIR}/CommandLine/libEGM" "${ENIGMA_DIR}/shared")
 
 # Populate a CMake variable with the sources
@@ -270,11 +286,13 @@ find_package(Qt5 COMPONENTS Core Widgets Gui PrintSupport Multimedia REQUIRED)
 target_link_libraries(${EXE} PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Multimedia)
 
 # LibProto
-add_subdirectory(Submodules/enigma-dev/shared)
+# Arrangement of these is important: shared depends on proto and emake depends on all of them
+# We need to cache the library names first so we can build on top of them
 add_subdirectory(Submodules/enigma-dev/shared/protos)
+add_subdirectory(Submodules/enigma-dev/shared)
 add_subdirectory(Submodules/enigma-dev/CommandLine/libEGM)
-add_dependencies(${EXE} "EGM")
-target_link_libraries(${EXE} PRIVATE "EGM" "Protocols" "ENIGMAShared")
+add_dependencies(${EXE} ${LIB_EGM})
+target_link_libraries(${EXE} PRIVATE ${LIB_EGM} ${LIB_PROTO} ${SHARED_LIB})
 
 # Find FreeType
 find_package(Freetype REQUIRED)
@@ -298,6 +316,7 @@ find_library(LIB_DOUBLE_CONVERSION NAMES double-conversion)
 target_link_libraries(${EXE} PRIVATE ${LIB_DOUBLE_CONVERSION})
 
 # nodeeditor
+# FIXME: In order for BUILD_DEBUG_POSTFIX_D and USE_QT6 to be set correctly, you will need to configure the project twice: https://cmake.org/cmake/help/latest/policy/CMP0077.html
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
   set(BUILD_DEBUG_POSTFIX_D ON)
 endif()
@@ -317,11 +336,6 @@ endif()
 if (RGM_BUILD_EMAKE)
   add_subdirectory(Submodules/enigma-dev/CompilerSource)
   add_subdirectory(Submodules/enigma-dev/CommandLine/emake)
-  if (CMAKE_BUILD_TYPE MATCHES "Debug")
-    set(CLI_TARGET "emake-debug")
-  else()
-    set(CLI_TARGET "emake")
-  endif()
   add_dependencies(${EXE} ${CLI_TARGET})
 endif()
 
@@ -329,11 +343,11 @@ add_custom_command(
     TARGET ${EXE}
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/emake/${CLI_TARGET}
-        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/libEGM/libEGM${CMAKE_DEBUG_POSTFIX}.so
-        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CompilerSource/libcompileEGMf${CMAKE_DEBUG_POSTFIX}.so
-        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/protos/libProtocols${CMAKE_DEBUG_POSTFIX}.so
-        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/libENIGMAShared${CMAKE_DEBUG_POSTFIX}.so
+        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/emake/${CLI_TARGET}${CMAKE_EXECUTABLE_SUFFIX}
+        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/libEGM/${CMAKE_SHARED_LIBRARY_PREFIX}${LIB_EGM}${CMAKE_DEBUG_POSTFIX}${CMAKE_SHARED_LIBRARY_SUFFIX}
+        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CompilerSource/${CMAKE_SHARED_LIBRARY_PREFIX}${COMPILER_LIB}${CMAKE_DEBUG_POSTFIX}${CMAKE_SHARED_LIBRARY_SUFFIX}
+        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/protos/${CMAKE_SHARED_LIBRARY_PREFIX}${LIB_PROTO}${CMAKE_DEBUG_POSTFIX}${CMAKE_SHARED_LIBRARY_SUFFIX}
+        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/${CMAKE_SHARED_LIBRARY_PREFIX}${SHARED_LIB}${CMAKE_DEBUG_POSTFIX}${CMAKE_SHARED_LIBRARY_SUFFIX}
         ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/enigma-dev
     COMMENT "Copying exes to ENIGMA's root directory"
 )
@@ -352,9 +366,9 @@ file(TO_CMAKE_PATH ${VCPKG_ROOT} VCPKG_ROOT)
     set(SEARCH_PATHS "${VCPKG_ROOT}/installed/x64-windows/bin/")
   endif()
 else()
-  set(LIBS "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}EGM${CMAKE_SHARED_LIBRARY_SUFFIX}"
-           "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}Protocols${CMAKE_SHARED_LIBRARY_SUFFIX}"
-           "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}ENIGMAShared${CMAKE_SHARED_LIBRARY_SUFFIX}")
+  set(LIBS "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}${LIB_EGM}${CMAKE_SHARED_LIBRARY_SUFFIX}"
+           "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}${LIB_PROTO}${CMAKE_SHARED_LIBRARY_SUFFIX}"
+           "${CMAKE_INSTALL_PREFIX}/${CMAKE_SHARED_LIBRARY_PREFIX}${SHARED_LIB}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 endif()
 
 if (WIN32)
