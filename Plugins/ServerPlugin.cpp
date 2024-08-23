@@ -262,6 +262,12 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
     emit LogOutput(process->readAllStandardError());
   });
 
+  connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+                    [&](int exitCode, QProcess::ExitStatus exitStatus) {
+    qDebug() << "Process finished with exit code:" << exitCode
+                                << "and exit status:" << exitStatus;
+  });
+
   #ifdef _WIN32
   //TODO: Make all this stuff configurable in IDE
   QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
@@ -322,7 +328,13 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   qDebug() << "Running: " << program << " " << arguments;
 
   process->start(program, arguments);
-  process->waitForStarted();
+  
+  bool status {process->waitForStarted()};
+
+  if (!status) {
+    qDebug() << "Failed to start emake server! Error: " << process->errorString() << Qt::endl;
+    return;
+  }
 
   // construct the channel and connect to the server running in the process
   // Note: gRPC is too dumb to resolve localhost on linux
@@ -340,7 +352,11 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
 
 ServerPlugin::~ServerPlugin() {
   compilerClient->TearDown();
-  process->waitForFinished();
+
+  bool status {process->waitForFinished()};
+  if (!status) {
+    qDebug() << "Failed to stop emake server! Error: " << process->errorString() << Qt::endl;
+  }
 }
 
 void ServerPlugin::Run() { compilerClient->CompileBuffer(mainWindow.Game(), CompileRequest::RUN); }
