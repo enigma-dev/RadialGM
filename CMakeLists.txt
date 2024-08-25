@@ -104,6 +104,7 @@ set(RGM_SOURCES
   Editors/ScriptEditor.cpp
   Editors/CodeEditor.cpp
   Editors/TimelineEditor.cpp
+  Editors/VisualShaderEditor.cpp
   main.cpp
   Plugins/RGMPlugin.cpp
   Dialogs/EventArgumentsDialog.cpp
@@ -123,7 +124,6 @@ set(RGM_SOURCES
   Widgets/SpriteSubimageListView.cpp
   Widgets/StackedCodeWidget.cpp
   Widgets/AssetScrollAreaBackground.cpp
-  VisualShader/VisualShaderEditor.cpp
 )
 
 set(RGM_HEADERS
@@ -163,6 +163,7 @@ set(RGM_HEADERS
   Editors/FontEditor.h
   Editors/SpriteEditor.h
   Editors/BackgroundEditor.h
+  Editors/VisualShaderEditor.h
   Plugins/RGMPlugin.h
   MainWindow.h
   Dialogs/EventArgumentsDialog.h
@@ -186,7 +187,6 @@ set(RGM_HEADERS
   Widgets/SpriteSubimageListView.h
   Widgets/AssetScrollAreaBackground.h
   Widgets/RoomView.h
-  VisualShader/VisualShaderEditor.h
 )
 
 set(RGM_UI
