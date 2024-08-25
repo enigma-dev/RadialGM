@@ -92,6 +92,14 @@ class ServerPlugin : public RGMPlugin {
   void CreateExecutable() override;
   void SetCurrentConfig(const buffers::resources::Settings& settings) override;
 
+ private slots:
+  void onErrorOccurred(QProcess::ProcessError error);
+  void onProcessFinished(int exit_code, QProcess::ExitStatus exit_status);
+  void onReadyReadStandardError();
+  void onReadyReadStandardOutput();
+  void onProcessStarted();
+  void onStateChanged(QProcess::ProcessState state);
+
  private:
   QProcess* process;
   CompilerClient* compilerClient;
