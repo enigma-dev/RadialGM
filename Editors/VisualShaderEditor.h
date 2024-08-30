@@ -29,5 +29,14 @@
 #define ENIGMA_VISUAL_SHADER_EDITOR_H
 
 #include "ResourceTransformations/VisualShader/visual_shader.h"
+#include "BaseEditor.h"
+
+class VisualShaderEditor : public BaseEditor {
+    Q_OBJECT
+
+ public:
+  VisualShaderEditor(MessageModel* model, QWidget* parent = nullptr);
+
+};
 
 #endif // ENIGMA_VISUAL_SHADER_EDITOR_H

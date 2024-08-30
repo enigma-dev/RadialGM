@@ -83,6 +83,7 @@ class MainWindow : public QMainWindow {
   void on_actionCreatePath_triggered();
   void on_actionCreateScript_triggered();
   void on_actionCreateShader_triggered();
+  void on_actionCreateVisualShader_triggered();
   void on_actionCreateFont_triggered();
   void on_actionCreateTimeline_triggered();
   void on_actionCreateObject_triggered();

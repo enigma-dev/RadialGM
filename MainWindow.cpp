@@ -12,6 +12,7 @@
 #include "Editors/ScriptEditor.h"
 #include "Editors/SettingsEditor.h"
 #include "Editors/ShaderEditor.h"
+#include "Editors/VisualShaderEditor.h"
 #include "Editors/SoundEditor.h"
 #include "Editors/SpriteEditor.h"
 #include "Editors/TimelineEditor.h"
@@ -305,7 +306,7 @@ void MainWindow::openNewProject() {
   auto newProject = std::make_unique<buffers::Project>();
   auto *root = newProject->mutable_game()->mutable_root();
   QList<QString> defaultGroups = {tr("Sprites"), tr("Sounds"),  tr("Backgrounds"), tr("Paths"),
-                                  tr("Scripts"), tr("Shaders"), tr("Fonts"),       tr("Timelines"),
+                                  tr("Scripts"), tr("Shaders"), tr("Visual Shaders"), tr("Fonts"),       tr("Timelines"),
                                   tr("Objects"), tr("Rooms"),   tr("Includes"),    tr("Configs")};
   // We can edit the proto directly, here, since the model doesn't exist, yet.
   for (const auto &groupName : defaultGroups) {
@@ -376,6 +377,7 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   treeConf.UseEditorLauncher<buffers::resources::Font>(Launch<FontEditor>(this));
   treeConf.UseEditorLauncher<buffers::resources::Script>(Launch<ScriptEditor>(this));
   treeConf.UseEditorLauncher<buffers::resources::Shader>(Launch<ShaderEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::VisualShader>(Launch<VisualShaderEditor>(this));
   treeConf.UseEditorLauncher<buffers::resources::Timeline>(Launch<TimelineEditor>(this));
   treeConf.UseEditorLauncher<buffers::resources::Object>(Launch<ObjectEditor>(this));
   treeConf.UseEditorLauncher<buffers::resources::Room>(Launch<RoomEditor>(this));
@@ -390,6 +392,7 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   msgConf.SetDefaultIcon<buffers::resources::Path>("path");
   msgConf.SetDefaultIcon<buffers::resources::Script>("script");
   msgConf.SetDefaultIcon<buffers::resources::Shader>("shader");
+  msgConf.SetDefaultIcon<buffers::resources::VisualShader>("visual_shader");
   msgConf.SetDefaultIcon<buffers::resources::Font>("font");
   msgConf.SetDefaultIcon<buffers::resources::Timeline>("timeline");
   msgConf.SetDefaultIcon<buffers::resources::Object>("object");
@@ -645,6 +648,8 @@ void MainWindow::on_actionCreatePath_triggered() { CreateResource(TypeCase::kPat
 void MainWindow::on_actionCreateScript_triggered() { CreateResource(TypeCase::kScript); }
 
 void MainWindow::on_actionCreateShader_triggered() { CreateResource(TypeCase::kShader); }
+
+void MainWindow::on_actionCreateVisualShader_triggered() { CreateResource(TypeCase::kVisualShader); }
 
 void MainWindow::on_actionCreateFont_triggered() { CreateResource(TypeCase::kFont); }
 

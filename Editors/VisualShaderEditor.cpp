@@ -24,3 +24,12 @@
  **  or programs made in the environment.                                        **
  **                                                                              **
  \********************************************************************************/
+
+#include "VisualShaderEditor.h"
+
+#include "VisualShader.pb.h"
+
+VisualShaderEditor::VisualShaderEditor(MessageModel* model, QWidget* parent) : BaseEditor(model, parent) {
+//   this->setWindowIcon(QIcon(":/resources/visual_shader.png"));
+  
+}
