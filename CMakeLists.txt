@@ -65,6 +65,7 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/" "${CMAKE_CURRENT_S
 # Uncomment to be able to use local grpc_cpp_plugin
 # set(GRPC_EXE "/usr/local/bin/grpc_cpp_plugin")
 
+# TODO: I think it will be better to send this var to the C++ level and use it everywhere instead of hardcoding it each time
 # Include ENIGMA things
 set(ENIGMA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/enigma-dev CACHE PATH "ENIGMA directory")
 include_directories("${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/protos/" "${ENIGMA_DIR}/CommandLine/libEGM" "${ENIGMA_DIR}/shared")
