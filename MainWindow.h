@@ -21,6 +21,10 @@ class MainWindow;
 #include <QProcess>
 #include <QFileInfo>
 
+#ifndef ENIGMA_DIR
+#error "ENIGMA_DIR not defined"
+#endif
+
 namespace Ui {
 class MainWindow;
 }
@@ -111,7 +115,7 @@ class MainWindow : public QMainWindow {
   void on_treeView_doubleClicked(const QModelIndex &index);
   void on_treeView_customContextMenuRequested(const QPoint &pos);
 
-  void on_compileStatus_changed(bool finished);
+  void on_compileStatusChanged(bool finished);
 
  private:
   void closeEvent(QCloseEvent *event) override;

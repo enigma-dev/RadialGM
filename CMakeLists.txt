@@ -32,13 +32,25 @@ if(NOT CMAKE_BUILD_TYPE)
       STRING
       "Choose the type of build from:  Debug Release MinSizeRel RelWithDebInfo."
     FORCE)
+else()
+  if (NOT CMAKE_BUILD_TYPE MATCHES "Debug" AND NOT CMAKE_BUILD_TYPE MATCHES "Release" AND NOT CMAKE_BUILD_TYPE MATCHES "MinSizeRel" AND NOT CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo")
+    message(FATAL_ERROR "Invalid build type: ${CMAKE_BUILD_TYPE}")
+  endif()
 endif()
+
+set(CMAKE_DEBUG_POSTFIX "d")
+set(CMAKE_RELEASE_POSTFIX "")
+set(CMAKE_MINSIZEREL_POSTFIX "s")
+set(CMAKE_RELWITHDEBINFO_POSTFIX "rd")
 
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
   set(EXE "RadialGM-Debug" CACHE STRING "RGM Executable name")
   add_definitions(-DRGM_DEBUG)
-  set(CMAKE_DEBUG_POSTFIX d)
-else()
+elseif(CMAKE_BUILD_TYPE MATCHES "MinSizeRel")
+  set(EXE "RadialGM-MinSizeRel" CACHE STRING "RGM Executable name")
+elseif(CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo")
+  set(EXE "RadialGM-RelWithDebInfo" CACHE STRING "RGM Executable name")
+else() # Release
   set(EXE "RadialGM" CACHE STRING "RGM Executable name")
 endif()
 
@@ -65,9 +77,11 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/" "${CMAKE_CURRENT_S
 # Uncomment to be able to use local grpc_cpp_plugin
 # set(GRPC_EXE "/usr/local/bin/grpc_cpp_plugin")
 
-# TODO: I think it will be better to send this var to the C++ level and use it everywhere instead of hardcoding it each time
+set(RGM_ROOTDIR "${CMAKE_CURRENT_SOURCE_DIR}")
+
+# The ENIGMA_DIR is sent to the C++ code as a define
 # Include ENIGMA things
-set(ENIGMA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/enigma-dev CACHE PATH "ENIGMA directory")
+set(ENIGMA_DIR ${RGM_ROOTDIR}/Submodules/enigma-dev CACHE PATH "ENIGMA directory")
 include_directories("${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/protos/" "${ENIGMA_DIR}/CommandLine/libEGM" "${ENIGMA_DIR}/shared")
 
 # Populate a CMake variable with the sources
@@ -229,7 +243,7 @@ set(RGM_HEADERS ${RGM_HEADERS} Plugins/ServerPlugin.h)
 add_executable(${EXE} WIN32 ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${EDITOR_SOURCES} ${RGM_RC})
 
 # we do this even in release mode for "Editor Diagnostics"
-target_compile_definitions(${EXE} PUBLIC QT_MESSAGELOGCONTEXT)
+target_compile_definitions(${EXE} PUBLIC QT_MESSAGELOGCONTEXT ENIGMA_DIR="${ENIGMA_DIR}")
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT WIN32)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
@@ -289,9 +303,9 @@ target_link_libraries(${EXE} PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintS
 # LibProto
 # Arrangement of these is important: shared depends on proto and emake depends on all of them
 # We need to cache the library names first so we can build on top of them
-add_subdirectory(Submodules/enigma-dev/shared/protos)
-add_subdirectory(Submodules/enigma-dev/shared)
-add_subdirectory(Submodules/enigma-dev/CommandLine/libEGM)
+add_subdirectory(${ENIGMA_DIR}/shared/protos)
+add_subdirectory(${ENIGMA_DIR}/shared)
+add_subdirectory(${ENIGMA_DIR}/CommandLine/libEGM)
 add_dependencies(${EXE} ${LIB_EGM})
 target_link_libraries(${EXE} PRIVATE ${LIB_EGM} ${LIB_PROTO} ${SHARED_LIB})
 
@@ -331,8 +345,8 @@ if(MSVC)
 endif()
 
 if (RGM_BUILD_EMAKE)
-  add_subdirectory(Submodules/enigma-dev/CompilerSource)
-  add_subdirectory(Submodules/enigma-dev/CommandLine/emake)
+  add_subdirectory(${ENIGMA_DIR}/CompilerSource)
+  add_subdirectory(${ENIGMA_DIR}/CommandLine/emake)
   add_dependencies(${EXE} ${CLI_TARGET})
 endif()
 
@@ -341,12 +355,12 @@ add_custom_command(
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/emake/${CLI_TARGET}${CMAKE_EXECUTABLE_SUFFIX}
-        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/libEGM/${CMAKE_SHARED_LIBRARY_PREFIX}${LIB_EGM}${CMAKE_DEBUG_POSTFIX}${CMAKE_SHARED_LIBRARY_SUFFIX}
-        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CompilerSource/${CMAKE_SHARED_LIBRARY_PREFIX}${COMPILER_LIB}${CMAKE_DEBUG_POSTFIX}${CMAKE_SHARED_LIBRARY_SUFFIX}
-        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/protos/${CMAKE_SHARED_LIBRARY_PREFIX}${LIB_PROTO}${CMAKE_DEBUG_POSTFIX}${CMAKE_SHARED_LIBRARY_SUFFIX}
-        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/${CMAKE_SHARED_LIBRARY_PREFIX}${SHARED_LIB}${CMAKE_DEBUG_POSTFIX}${CMAKE_SHARED_LIBRARY_SUFFIX}
-        ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/enigma-dev
-    COMMENT "Copying exes to ENIGMA's root directory"
+        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/libEGM/${CMAKE_SHARED_LIBRARY_PREFIX}${LIB_EGM}$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>,${CMAKE_DEBUG_POSTFIX},$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},MinSizeRel>,${CMAKE_MINSIZEREL_POSTFIX},$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},RelWithDebInfo>,${CMAKE_RELWITHDEBINFO_POSTFIX},>>>${CMAKE_SHARED_LIBRARY_SUFFIX}
+        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CompilerSource/${CMAKE_SHARED_LIBRARY_PREFIX}${COMPILER_LIB}$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>,${CMAKE_DEBUG_POSTFIX},$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},MinSizeRel>,${CMAKE_MINSIZEREL_POSTFIX},$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},RelWithDebInfo>,${CMAKE_RELWITHDEBINFO_POSTFIX},>>>${CMAKE_SHARED_LIBRARY_SUFFIX}
+        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/protos/${CMAKE_SHARED_LIBRARY_PREFIX}${LIB_PROTO}$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>,${CMAKE_DEBUG_POSTFIX},$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},MinSizeRel>,${CMAKE_MINSIZEREL_POSTFIX},$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},RelWithDebInfo>,${CMAKE_RELWITHDEBINFO_POSTFIX},>>>${CMAKE_SHARED_LIBRARY_SUFFIX}
+        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/${CMAKE_SHARED_LIBRARY_PREFIX}${SHARED_LIB}$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>,${CMAKE_DEBUG_POSTFIX},$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},MinSizeRel>,${CMAKE_MINSIZEREL_POSTFIX},$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},RelWithDebInfo>,${CMAKE_RELWITHDEBINFO_POSTFIX},>>>${CMAKE_SHARED_LIBRARY_SUFFIX}
+        ${ENIGMA_DIR}
+    COMMENT "Copying exes to ${ENIGMA_DIR}"
 )
 
 install(TARGETS ${EXE} RUNTIME DESTINATION .)

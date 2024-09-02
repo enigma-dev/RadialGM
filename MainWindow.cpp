@@ -36,8 +36,7 @@
 
 #undef GetMessage
 
-QList<QString> MainWindow::EnigmaSearchPaths = {"/opt/enigma-dev/", "/usr/lib/enigma-dev",
-                                                QDir::currentPath() + "/../Submodules/enigma-dev/"};
+QList<QString> MainWindow::EnigmaSearchPaths = {"/opt/enigma-dev/", "/usr/lib/enigma-dev", ENIGMA_DIR};
 QFileInfo MainWindow::EnigmaRoot = MainWindow::getEnigmaRoot();
 QList<buffers::SystemType> MainWindow::systemCache;
 MainWindow *MainWindow::_instance = nullptr;
@@ -177,7 +176,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
   RGMPlugin *pluginServer = new ServerPlugin(*this);
   auto outputTextBrowser = this->_ui->outputTextBrowser;
   connect(pluginServer, &RGMPlugin::LogOutput, outputTextBrowser, &QTextBrowser::append);
-  connect(pluginServer, &RGMPlugin::CompileStatusChanged, this, &MainWindow::on_compileStatus_changed);
+  connect(pluginServer, &RGMPlugin::CompileStatusChanged, this, &MainWindow::on_compileStatusChanged);
   connect(this, &MainWindow::CurrentConfigChanged, pluginServer, &RGMPlugin::SetCurrentConfig);
   connect(_ui->actionRun, &QAction::triggered, pluginServer, &RGMPlugin::Run);
   connect(_ui->actionDebug, &QAction::triggered, pluginServer, &RGMPlugin::Debug);
@@ -730,7 +729,7 @@ void MainWindow::on_treeView_customContextMenuRequested(const QPoint &pos) {
   _ui->menuEdit->exec(_ui->treeView->mapToGlobal(pos));
 }
 
-void MainWindow::on_compileStatus_changed(bool finished) {
+void MainWindow::on_compileStatusChanged(bool finished) {
   _ui->outputDockWidget->show();
   _ui->actionRun->setEnabled(finished);
   _ui->actionDebug->setEnabled(finished);
