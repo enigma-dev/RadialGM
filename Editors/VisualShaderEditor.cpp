@@ -39,8 +39,27 @@
 using QtNodes::GraphicsView;
 using QtNodes::NodeRole;
 
-VisualShaderEditor::VisualShaderEditor(MessageModel* model, QWidget* parent) : BaseEditor(model, parent), graph(nullptr), scene(nullptr), layout(nullptr), view(nullptr) {
-//   this->setWindowIcon(QIcon(":/resources/visual_shader.png"));
+VisualShaderEditor::VisualShaderEditor(MessageModel* model, QWidget* parent) : BaseEditor(model, parent), 
+                                                                               layout(nullptr),
+                                                                               layers_stack(nullptr),
+                                                                               scene_layer(nullptr), 
+                                                                               scene_layer_layout(nullptr), 
+                                                                               graph(nullptr), 
+                                                                               scene(nullptr), 
+                                                                               view(nullptr), 
+                                                                               menu_bar(nullptr) {
+    // Create the main layout.
+    layout = new QHBoxLayout(this);
+
+    // Create the layers widget.
+    layers_stack = new QStackedLayout();
+    layers_stack->setStackingMode(QStackedLayout::StackAll); // See https://doc.qt.io/qt-5/qstackedlayout.html#stackingMode-prop
+
+    // Create the scene layer.
+    scene_layer = new QWidget();
+
+    // Create the scene layer layout.
+    scene_layer_layout = new QHBoxLayout(scene_layer);
 
     graph = new VisualShaderGraph();
 
@@ -56,67 +75,79 @@ VisualShaderEditor::VisualShaderEditor(MessageModel* model, QWidget* parent) : B
     }
 
     scene = new BasicGraphicsScene(*graph);
+    scene->setOrientation(Qt::Horizontal);
 
-    scene->setOrientation(Qt::Vertical);
+    view = new GraphicsView(scene);
 
-    layout = new QHBoxLayout(this);
+    scene_layer_layout->addWidget(view);
 
-    view =  new GraphicsView(scene);
+    // Set the scene layer layout.
+    scene_layer->setLayout(scene_layer_layout);
 
-    layout->addWidget(view);
+    // Add the scene layer to the layers widget.
+    layers_stack->addWidget(scene_layer); // Scene layer is added first so it has index 0.
 
-    QGroupBox *groupBox = new QGroupBox("Orientation");
+    // Create the menu bar layer.
+    top_layer = new QWidget();
 
-    QRadioButton *radio1 = new QRadioButton("Vertical");
-    QRadioButton *radio2 = new QRadioButton("Horizontal");
+    // Create the menu bar layout.
+    menu_bar = new QHBoxLayout(top_layer);
 
-    QVBoxLayout *vbl = new QVBoxLayout;
-    vbl->addWidget(radio1);
-    vbl->addWidget(radio2);
-    vbl->addStretch();
-    groupBox->setLayout(vbl);
+    // Create the add node button.
+    add_node_button = new QPushButton("Add Node", top_layer);
+    menu_bar->addWidget(add_node_button);
+    QObject::connect(add_node_button, &QPushButton::clicked, this, &VisualShaderEditor::create_node);
 
-    QObject::connect(radio1, &QRadioButton::clicked, [this]() {
-        scene->setOrientation(Qt::Vertical);
-    });
+    // Create the preview shader button.
+    preview_shader_button = new QPushButton("Preview Shader", top_layer);
+    menu_bar->addWidget(preview_shader_button);
 
-    QObject::connect(radio2, &QRadioButton::clicked, [this]() {
-        scene->setOrientation(Qt::Horizontal);
-    });
+    // Align the buttons to the top-left corner.
+    menu_bar->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 
-    radio1->setChecked(true);
+    // Set the top layer layout.
+    top_layer->setLayout(menu_bar);
 
-    layout->addWidget(groupBox);
+    // Add the top layer to the layers widget and set it as the current widget.
+    layers_stack->addWidget(top_layer); // Top layer is added second so it has index 1.
 
-    // Setup context menu for creating new nodes.
-    view->setContextMenuPolicy(Qt::ActionsContextMenu);
-    QAction createNodeAction(QStringLiteral("Create Node"), view);
-    QObject::connect(&createNodeAction, &QAction::triggered, [&]() {
-        // Mouse position in scene coordinates.
-        QPointF posView = view->mapToScene(view->mapFromGlobal(QCursor::pos()));
+    layout->addLayout(layers_stack);
 
-        NodeId const newId = graph->addNode();
-        graph->setNodeData(newId, NodeRole::Position, posView);
-    });
-    view->insertAction(view->actions().front(), &createNodeAction);
-
+    // Set the window title and icon.
+    this->setWindowTitle("Visual Shader Editor");
+    // this->setWindowIcon(QIcon(":/resources/visual_shader.png"));
     this->setLayout(layout);
 }
 
 VisualShaderEditor::~VisualShaderEditor() {
+    if (preview_shader_button) delete preview_shader_button;
+    if (add_node_button) delete add_node_button;
+    if (menu_bar) delete menu_bar;
+    if (top_layer) delete top_layer;
     if (view) delete view;
-    if (layout) delete layout;
     if (scene) delete scene;
     if (graph) delete graph;
+    if (scene_layer_layout) delete scene_layer_layout;
+    if (scene_layer) delete scene_layer;
+    if (layers_stack) delete layers_stack;
+    if (layout) delete layout;
 }
 
-VisualShaderGraph::VisualShaderGraph()
-    : _nextNodeId{0}
-{}
+void VisualShaderEditor::create_node() {
+    std::cout << "Creating node" << std::endl;
+    VisualShaderEditor::add_node();
+}
 
-VisualShaderGraph::~VisualShaderGraph()
-{
+void VisualShaderEditor::add_node() {
     
+}
+
+VisualShaderGraph::VisualShaderGraph() : _nextNodeId{0} {
+
+}
+
+VisualShaderGraph::~VisualShaderGraph() {
+
 }
 
 std::unordered_set<NodeId> VisualShaderGraph::allNodeIds() const

@@ -32,6 +32,8 @@
 #include <QtCore/QPointF>
 #include <QtCore/QSize>
 #include <QtWidgets/QHBoxLayout>
+#include <QPushButton>
+#include <QStackedLayout>
 
 #include <QtNodes/AbstractGraphModel>
 #include <QtNodes/ConnectionIdUtils>
@@ -65,13 +67,25 @@ class VisualShaderEditor : public BaseEditor {
   VisualShaderEditor(MessageModel* model, QWidget* parent = nullptr);
   ~VisualShaderEditor() override;
 
+  void create_node();
+
+  void add_node();
+
  private:
-  VisualShaderGraph* graph;
-
-  BasicGraphicsScene* scene;
   QHBoxLayout* layout;
+  QStackedLayout* layers_stack;
 
+  QWidget* scene_layer; // Layer having the scene.
+  QHBoxLayout* scene_layer_layout;
+  VisualShaderGraph* graph;
+  BasicGraphicsScene* scene;
   GraphicsView* view;
+
+  QWidget* top_layer; // Layer having the menu bar.
+  QHBoxLayout* menu_bar;
+
+  QPushButton* add_node_button;
+  QPushButton* preview_shader_button;
 };
 
 /**
@@ -81,6 +95,7 @@ class VisualShaderEditor : public BaseEditor {
 class VisualShaderGraph : public QtNodes::AbstractGraphModel
 {
     Q_OBJECT
+
 public:
     struct NodeGeometryData
     {
@@ -88,7 +103,6 @@ public:
         QPointF pos;
     };
 
-public:
     VisualShaderGraph();
 
     ~VisualShaderGraph() override;
@@ -144,9 +158,6 @@ public:
     void loadNode(QJsonObject const &nodeJson) override;
 
 private:
-    NodeId newNodeId() override { return _nextNodeId++; }
-
-private:
     std::unordered_set<NodeId> _nodeIds;
 
     /// [Important] This is a user defined data structure backing your model.
@@ -162,6 +173,8 @@ private:
 
     /// A convenience variable needed for generating unique node ids.
     NodeId _nextNodeId;
+
+    NodeId newNodeId() override { return _nextNodeId++; }
 };
 
 #endif // ENIGMA_VISUAL_SHADER_EDITOR_H
