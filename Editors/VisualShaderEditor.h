@@ -34,6 +34,9 @@
 #include <QtWidgets/QHBoxLayout>
 #include <QPushButton>
 #include <QStackedLayout>
+#include <QDialog>
+#include <QVBoxLayout>
+#include <QMouseEvent>
 
 #include <QtNodes/AbstractGraphModel>
 #include <QtNodes/ConnectionIdUtils>
@@ -59,6 +62,11 @@ using QtNodes::BasicGraphicsScene;
 using QtNodes::GraphicsView;
 
 class VisualShaderGraph;
+class CreateNodeDialog;
+
+/*************************************/
+/* VisualShaderEditor                */
+/*************************************/
 
 class VisualShaderEditor : public BaseEditor {
     Q_OBJECT
@@ -71,9 +79,11 @@ class VisualShaderEditor : public BaseEditor {
 
   void add_node();
 
+  void show_create_node_dialog(const bool& custom_mouse_pos = false);
+
  private:
   QHBoxLayout* layout;
-  QStackedLayout* layers_stack;
+  QVBoxLayout* layers_layout;
 
   QWidget* scene_layer; // Layer having the scene.
   QHBoxLayout* scene_layer_layout;
@@ -84,9 +94,39 @@ class VisualShaderEditor : public BaseEditor {
   QWidget* top_layer; // Layer having the menu bar.
   QHBoxLayout* menu_bar;
 
-  QPushButton* add_node_button;
+  QPushButton* create_node_button;
   QPushButton* preview_shader_button;
+
+  // Dialogs
+  CreateNodeDialog* create_node_dialog;
 };
+
+/*************************************/
+/* CreateNodeDialog                  */
+/*************************************/
+
+class CreateNodeDialog : public QDialog {
+    Q_OBJECT
+
+ public:
+  CreateNodeDialog(QWidget* parent = nullptr);
+  ~CreateNodeDialog();
+
+ private slots:
+  void on_CreateButtonTriggered();
+  void on_CancelButtonTriggered();
+
+ private:
+  QVBoxLayout* layout;
+
+  QHBoxLayout* buttons_layout;
+  QPushButton* create_button;
+  QPushButton* cancel_button;
+};
+
+/*************************************/
+/* VisualShaderGraph                 */
+/*************************************/
 
 /**
  * The class implements a bare minimum required to demonstrate a model-based

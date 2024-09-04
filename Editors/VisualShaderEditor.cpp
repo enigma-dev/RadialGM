@@ -39,27 +39,47 @@
 using QtNodes::GraphicsView;
 using QtNodes::NodeRole;
 
+/*************************************/
+/* VisualShaderEditor                */
+/*************************************/
+
 VisualShaderEditor::VisualShaderEditor(MessageModel* model, QWidget* parent) : BaseEditor(model, parent), 
                                                                                layout(nullptr),
-                                                                               layers_stack(nullptr),
+                                                                               layers_layout(nullptr),
                                                                                scene_layer(nullptr), 
                                                                                scene_layer_layout(nullptr), 
                                                                                graph(nullptr), 
                                                                                scene(nullptr), 
                                                                                view(nullptr), 
-                                                                               menu_bar(nullptr) {
+                                                                               menu_bar(nullptr),
+                                                                               create_node_button(nullptr),
+                                                                               preview_shader_button(nullptr),
+                                                                               create_node_dialog(nullptr) {
     // Create the main layout.
     layout = new QHBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0); // Left, top, right, bottom
+    layout->setSizeConstraint(QLayout::SetNoConstraint);
+    layout->setSpacing(0);
+    layout->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 
     // Create the layers widget.
-    layers_stack = new QStackedLayout();
-    layers_stack->setStackingMode(QStackedLayout::StackAll); // See https://doc.qt.io/qt-5/qstackedlayout.html#stackingMode-prop
+    layers_layout = new QVBoxLayout();
+    layers_layout->setContentsMargins(0, 0, 0, 0); // Left, top, right, bottom
+    layers_layout->setSizeConstraint(QLayout::SetNoConstraint);
+    layers_layout->setSpacing(2);
+    layers_layout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 
     // Create the scene layer.
     scene_layer = new QWidget();
+    scene_layer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    scene_layer->setContentsMargins(0, 0, 0, 0); // Left, top, right, bottom
 
     // Create the scene layer layout.
     scene_layer_layout = new QHBoxLayout(scene_layer);
+    scene_layer_layout->setContentsMargins(0, 0, 0, 0); // Left, top, right, bottom
+    scene_layer_layout->setSpacing(0);
+    scene_layer_layout->setSizeConstraint(QLayout::SetNoConstraint);
+    scene_layer_layout->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 
     graph = new VisualShaderGraph();
 
@@ -78,40 +98,56 @@ VisualShaderEditor::VisualShaderEditor(MessageModel* model, QWidget* parent) : B
     scene->setOrientation(Qt::Horizontal);
 
     view = new GraphicsView(scene);
+    view->setContentsMargins(0, 0, 0, 0); // Left, top, right, bottom
+    view->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     scene_layer_layout->addWidget(view);
 
     // Set the scene layer layout.
     scene_layer->setLayout(scene_layer_layout);
 
-    // Add the scene layer to the layers widget.
-    layers_stack->addWidget(scene_layer); // Scene layer is added first so it has index 0.
-
     // Create the menu bar layer.
     top_layer = new QWidget();
+    top_layer->setContentsMargins(0, 0, 0, 0); // Left, top, right, bottom
+    top_layer->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     // Create the menu bar layout.
     menu_bar = new QHBoxLayout(top_layer);
+    menu_bar->setContentsMargins(10, 10, 10, 10); // Left, top, right, bottom
+    menu_bar->setSpacing(5);  // Adjust spacing as needed
+    menu_bar->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    menu_bar->setSizeConstraint(QLayout::SetMinimumSize);
 
     // Create the add node button.
-    add_node_button = new QPushButton("Add Node", top_layer);
-    menu_bar->addWidget(add_node_button);
-    QObject::connect(add_node_button, &QPushButton::clicked, this, &VisualShaderEditor::create_node);
+    create_node_button = new QPushButton("Add Node", top_layer);
+    create_node_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    create_node_button->setContentsMargins(0, 0, 0, 0); // Left, top, right, bottom
+    menu_bar->addWidget(create_node_button);
+    QObject::connect(create_node_button, &QPushButton::clicked, this, &VisualShaderEditor::show_create_node_dialog);
+    create_node_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     // Create the preview shader button.
     preview_shader_button = new QPushButton("Preview Shader", top_layer);
+    preview_shader_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    preview_shader_button->setContentsMargins(0, 0, 0, 0); // Left, top, right, bottom
     menu_bar->addWidget(preview_shader_button);
-
-    // Align the buttons to the top-left corner.
-    menu_bar->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    preview_shader_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     // Set the top layer layout.
     top_layer->setLayout(menu_bar);
 
     // Add the top layer to the layers widget and set it as the current widget.
-    layers_stack->addWidget(top_layer); // Top layer is added second so it has index 1.
+    layers_layout->addWidget(top_layer);
 
-    layout->addLayout(layers_stack);
+    // Add the scene layer to the layers widget.
+    layers_layout->addWidget(scene_layer);
+
+    layout->addLayout(layers_layout);
+
+    // Create the create node dialog.
+    create_node_dialog = new CreateNodeDialog(this);
+
+    this->setContentsMargins(0, 0, 0, 0); // Left, top, right, bottom
 
     // Set the window title and icon.
     this->setWindowTitle("Visual Shader Editor");
@@ -120,8 +156,10 @@ VisualShaderEditor::VisualShaderEditor(MessageModel* model, QWidget* parent) : B
 }
 
 VisualShaderEditor::~VisualShaderEditor() {
+    // TODO: We don't need to delete the pointers as they are destroyed when the parent is destroyed.
+    if (create_node_dialog) delete create_node_dialog;
     if (preview_shader_button) delete preview_shader_button;
-    if (add_node_button) delete add_node_button;
+    if (create_node_button) delete create_node_button;
     if (menu_bar) delete menu_bar;
     if (top_layer) delete top_layer;
     if (view) delete view;
@@ -129,7 +167,7 @@ VisualShaderEditor::~VisualShaderEditor() {
     if (graph) delete graph;
     if (scene_layer_layout) delete scene_layer_layout;
     if (scene_layer) delete scene_layer;
-    if (layers_stack) delete layers_stack;
+    if (layers_layout) delete layers_layout;
     if (layout) delete layout;
 }
 
@@ -141,6 +179,68 @@ void VisualShaderEditor::create_node() {
 void VisualShaderEditor::add_node() {
     
 }
+
+void VisualShaderEditor::show_create_node_dialog(const bool& custom_mouse_pos) {
+    int status = create_node_dialog->exec();
+    switch (status) {
+        case QDialog::Accepted:
+            std::cout << "Create node dialog accepted" << std::endl;
+            break;
+        case QDialog::Rejected:
+            std::cout << "Create node dialog rejected" << std::endl;
+            break;
+        default:
+            std::cout << "Create node dialog unknown status" << std::endl;
+            break;
+    }
+}
+
+/*************************************/
+/* CreateNodeDialog                  */
+/*************************************/
+
+CreateNodeDialog::CreateNodeDialog(QWidget* parent) : QDialog(parent),
+                                                      layout(nullptr),
+                                                      buttons_layout(nullptr),
+                                                      create_button(nullptr),
+                                                      cancel_button(nullptr) {
+    layout = new QVBoxLayout(this);
+
+    buttons_layout = new QHBoxLayout();
+
+    create_button = new QPushButton("Create", this);
+    QObject::connect(create_button, &QPushButton::clicked, this, &CreateNodeDialog::on_CreateButtonTriggered);
+
+    cancel_button = new QPushButton("Cancel", this);
+    QObject::connect(cancel_button, &QPushButton::clicked, this, &CreateNodeDialog::on_CancelButtonTriggered);
+
+    buttons_layout->addWidget(create_button);
+    buttons_layout->addWidget(cancel_button);
+
+    layout->addLayout(buttons_layout);
+
+    this->setWindowTitle("Create Shader Node");
+    this->setLayout(layout);
+}
+
+CreateNodeDialog::~CreateNodeDialog() {
+    if (cancel_button) delete cancel_button;
+    if (create_button) delete create_button;
+    if (buttons_layout) delete buttons_layout;
+    if (layout) delete layout;
+}
+
+void CreateNodeDialog::on_CreateButtonTriggered() {
+    this->accept();
+}
+
+void CreateNodeDialog::on_CancelButtonTriggered() {
+    this->reject();
+}
+
+/*************************************/
+/* VisualShaderGraph                 */
+/*************************************/
 
 VisualShaderGraph::VisualShaderGraph() : _nextNodeId{0} {
 
