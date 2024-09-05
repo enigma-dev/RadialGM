@@ -33,10 +33,13 @@
 #include <QtCore/QSize>
 #include <QtWidgets/QHBoxLayout>
 #include <QPushButton>
-#include <QStackedLayout>
 #include <QDialog>
 #include <QVBoxLayout>
-#include <QMouseEvent>
+#include <QTreeWidget>
+#include <QTextEdit>
+
+#include <string>
+#include <vector>
 
 #include <QtNodes/AbstractGraphModel>
 #include <QtNodes/ConnectionIdUtils>
@@ -68,6 +71,8 @@ class CreateNodeDialog;
 /* VisualShaderEditor                */
 /*************************************/
 
+// Add const to any function that does not modify the object.
+
 class VisualShaderEditor : public BaseEditor {
     Q_OBJECT
 
@@ -81,12 +86,14 @@ class VisualShaderEditor : public BaseEditor {
 
   void show_create_node_dialog(const bool& custom_mouse_pos = false);
 
+  std::vector<std::string> pasre_node_category_path(const std::string& node_category_path);
+  QTreeWidgetItem* find_or_create_category_item(QTreeWidgetItem* parent, const std::string& category, const std::string& category_path, QTreeWidget* create_node_dialog_nodes_tree, std::unordered_map<std::string, QTreeWidgetItem*>& category_path_map);
+
  private:
   QHBoxLayout* layout;
-  QVBoxLayout* layers_layout;
 
-  QWidget* scene_layer; // Layer having the scene.
   QHBoxLayout* scene_layer_layout;
+  QWidget* scene_layer; // Layer having the scene.
   VisualShaderGraph* graph;
   BasicGraphicsScene* scene;
   GraphicsView* view;
@@ -97,7 +104,34 @@ class VisualShaderEditor : public BaseEditor {
   QPushButton* create_node_button;
   QPushButton* preview_shader_button;
 
-  // Dialogs
+  ////////////////////////////////////
+  // CreateNodeDialog Nodes Tree
+  ////////////////////////////////////
+
+  struct CreateNodeDialogNodesTreeItem {
+    std::string name;
+    std::string category_path;
+    std::string type;
+    std::string description;
+    std::vector<TVariant> ops;
+    VisualShaderNode::PortType return_type;
+
+    CreateNodeDialogNodesTreeItem(const std::string& name = std::string(), 
+                                  const std::string& category_path = std::string(), 
+                                  const std::string& type = std::string(), 
+                                  const std::string& description = std::string(),
+                                  const std::vector<TVariant>& ops = std::vector<TVariant>(),
+                                  const VisualShaderNode::PortType& return_type = VisualShaderNode::PortType::PORT_TYPE_ENUM_SIZE) : name(name), 
+                                                                                                                                     category_path(category_path), 
+                                                                                                                                     type(type), 
+                                                                                                                                     description(description),
+                                                                                                                                     ops(ops),
+                                                                                                                                     return_type(return_type) {}
+
+  };
+
+  static const VisualShaderEditor::CreateNodeDialogNodesTreeItem create_node_dialog_nodes_tree_items[];
+
   CreateNodeDialog* create_node_dialog;
 };
 
@@ -112,12 +146,19 @@ class CreateNodeDialog : public QDialog {
   CreateNodeDialog(QWidget* parent = nullptr);
   ~CreateNodeDialog();
 
+  QTreeWidget* get_nodes_tree() const { return create_node_dialog_nodes_tree; }
+
  private slots:
   void on_CreateButtonTriggered();
   void on_CancelButtonTriggered();
 
  private:
   QVBoxLayout* layout;
+
+  QVBoxLayout* create_node_dialog_nodes_tree_layout;
+
+  QTreeWidget* create_node_dialog_nodes_tree;
+  QTextEdit* create_node_dialog_nodes_description;
 
   QHBoxLayout* buttons_layout;
   QPushButton* create_button;
@@ -197,6 +238,8 @@ public:
    */
     void loadNode(QJsonObject const &nodeJson) override;
 
+    void set_visual_shader_editor(VisualShaderEditor* visual_shader_editor) { this->visual_shader_editor = visual_shader_editor; }
+
 private:
     std::unordered_set<NodeId> _nodeIds;
 
@@ -215,6 +258,8 @@ private:
     NodeId _nextNodeId;
 
     NodeId newNodeId() override { return _nextNodeId++; }
+
+    VisualShaderEditor* visual_shader_editor;
 };
 
 #endif // ENIGMA_VISUAL_SHADER_EDITOR_H
