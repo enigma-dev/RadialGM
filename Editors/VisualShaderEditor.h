@@ -80,16 +80,25 @@ class VisualShaderEditor : public BaseEditor {
   VisualShaderEditor(MessageModel* model, QWidget* parent = nullptr);
   ~VisualShaderEditor() override;
 
-  void create_node();
+  void create_node(const QPointF& pos);
 
-  void add_node();
+  void add_node(QTreeWidgetItem* selected_item, const QPointF& pos);
 
-  void show_create_node_dialog(const bool& custom_mouse_pos = false);
+  void show_create_node_dialog(const QPointF& pos);
 
   std::vector<std::string> pasre_node_category_path(const std::string& node_category_path);
   QTreeWidgetItem* find_or_create_category_item(QTreeWidgetItem* parent, const std::string& category, const std::string& category_path, QTreeWidget* create_node_dialog_nodes_tree, std::unordered_map<std::string, QTreeWidgetItem*>& category_path_map);
 
+ Q_SIGNALS:
+  void on_create_node_dialog_requested(const QPointF& pos = {0, 0}); // {0, 0} is the top-left corner of the scene.
+
+ private Q_SLOTS:
+  void on_create_node_button_pressed();
+  void on_create_node_action_triggered();
+
  private:
+  VisualShader* visual_shader;
+
   QHBoxLayout* layout;
 
   QHBoxLayout* scene_layer_layout;
@@ -104,6 +113,8 @@ class VisualShaderEditor : public BaseEditor {
   QPushButton* create_node_button;
   QPushButton* preview_shader_button;
 
+  QAction* create_node_action;
+
   ////////////////////////////////////
   // CreateNodeDialog Nodes Tree
   ////////////////////////////////////
@@ -113,20 +124,14 @@ class VisualShaderEditor : public BaseEditor {
     std::string category_path;
     std::string type;
     std::string description;
-    std::vector<TVariant> ops;
-    VisualShaderNode::PortType return_type;
 
     CreateNodeDialogNodesTreeItem(const std::string& name = std::string(), 
                                   const std::string& category_path = std::string(), 
                                   const std::string& type = std::string(), 
-                                  const std::string& description = std::string(),
-                                  const std::vector<TVariant>& ops = std::vector<TVariant>(),
-                                  const VisualShaderNode::PortType& return_type = VisualShaderNode::PortType::PORT_TYPE_ENUM_SIZE) : name(name), 
-                                                                                                                                     category_path(category_path), 
-                                                                                                                                     type(type), 
-                                                                                                                                     description(description),
-                                                                                                                                     ops(ops),
-                                                                                                                                     return_type(return_type) {}
+                                  const std::string& description = std::string()) : name(name), 
+                                                                                    category_path(category_path), 
+                                                                                    type(type), 
+                                                                                    description(description) {}
 
   };
 
@@ -148,9 +153,13 @@ class CreateNodeDialog : public QDialog {
 
   QTreeWidget* get_nodes_tree() const { return create_node_dialog_nodes_tree; }
 
- private slots:
-  void on_CreateButtonTriggered();
-  void on_CancelButtonTriggered();
+  QTreeWidgetItem* get_selected_item() const { return selected_item; }
+
+ private Q_SLOTS:
+  void on_create_node_button_pressed();
+  void on_cancel_node_creation_button_pressed();
+
+  void update_selected_item();
 
  private:
   QVBoxLayout* layout;
@@ -163,6 +172,8 @@ class CreateNodeDialog : public QDialog {
   QHBoxLayout* buttons_layout;
   QPushButton* create_button;
   QPushButton* cancel_button;
+
+  QTreeWidgetItem* selected_item;
 };
 
 /*************************************/
@@ -190,58 +201,51 @@ public:
 
     std::unordered_set<NodeId> allNodeIds() const override;
 
-    std::unordered_set<ConnectionId> allConnectionIds(NodeId const nodeId) const override;
+    std::unordered_set<ConnectionId> allConnectionIds(NodeId const node_id) const override;
 
-    std::unordered_set<ConnectionId> connections(NodeId nodeId,
-                                                 PortType portType,
-                                                 PortIndex portIndex) const override;
+    std::unordered_set<ConnectionId> connections(NodeId node_id,
+                                                 PortType port_type,
+                                                 PortIndex port_index) const override;
 
-    bool connectionExists(ConnectionId const connectionId) const override;
+    bool connectionExists(ConnectionId const connection_id) const override;
 
-    NodeId addNode(QString const nodeType = QString()) override;
+    NodeId addNode(QString const node_type = QString()) override;
 
     /**
    * Connection is possible when graph contains no connectivity data
    * in both directions `Out -> In` and `In -> Out`.
    */
-    bool connectionPossible(ConnectionId const connectionId) const override;
+    bool connectionPossible(ConnectionId const connection_id) const override;
 
-    void addConnection(ConnectionId const connectionId) override;
+    void addConnection(ConnectionId const connection_id) override;
 
-    bool nodeExists(NodeId const nodeId) const override;
+    bool nodeExists(NodeId const node_id) const override;
 
-    QVariant nodeData(NodeId nodeId, NodeRole role) const override;
+    QVariant nodeData(NodeId node_id, NodeRole role) const override;
 
-    bool setNodeData(NodeId nodeId, NodeRole role, QVariant value) override;
+    bool setNodeData(NodeId node_id, NodeRole role, QVariant value) override;
 
-    QVariant portData(NodeId nodeId,
-                      PortType portType,
-                      PortIndex portIndex,
+    QVariant portData(NodeId node_id,
+                      PortType port_type,
+                      PortIndex port_index,
                       PortRole role) const override;
 
-    bool setPortData(NodeId nodeId,
-                     PortType portType,
-                     PortIndex portIndex,
+    bool setPortData(NodeId node_id,
+                     PortType port_type,
+                     PortIndex port_index,
                      QVariant const &value,
                      PortRole role = PortRole::Data) override;
 
-    bool deleteConnection(ConnectionId const connectionId) override;
+    bool deleteConnection(ConnectionId const connection_id) override;
 
-    bool deleteNode(NodeId const nodeId) override;
+    bool deleteNode(NodeId const node_id) override;
 
-    QJsonObject saveNode(NodeId const) const override;
+    void register_visual_shader(VisualShader* visual_shader) const { this->visual_shader = visual_shader; }
 
-    /// @brief Creates a new node based on the informatoin in `nodeJson`.
-    /**
-   * @param nodeJson conains a `NodeId`, node's position, internal node
-   * information.
-   */
-    void loadNode(QJsonObject const &nodeJson) override;
-
-    void set_visual_shader_editor(VisualShaderEditor* visual_shader_editor) { this->visual_shader_editor = visual_shader_editor; }
+    void set_visual_shader_editor(VisualShaderEditor* visual_shader_editor) const { this->visual_shader_editor = visual_shader_editor; }
 
 private:
-    std::unordered_set<NodeId> _nodeIds;
+    std::unordered_set<NodeId> _node_ids;
 
     /// [Important] This is a user defined data structure backing your model.
     /// In your case it could be anything else representing a graph, for example, a
@@ -252,14 +256,12 @@ private:
     /// directions, i.e. from Node1 to Node2 and from Node2 to Node1.
     std::unordered_set<ConnectionId> _connectivity;
 
-    mutable std::unordered_map<NodeId, NodeGeometryData> _nodeGeometryData;
+    mutable std::unordered_map<NodeId, NodeGeometryData> _node_geometry_data;
 
-    /// A convenience variable needed for generating unique node ids.
-    NodeId _nextNodeId;
+    NodeId newNodeId() override { return (NodeId)visual_shader->get_valid_node_id(); }
 
-    NodeId newNodeId() override { return _nextNodeId++; }
-
-    VisualShaderEditor* visual_shader_editor;
+    mutable VisualShader* visual_shader;
+    mutable VisualShaderEditor* visual_shader_editor;
 };
 
 #endif // ENIGMA_VISUAL_SHADER_EDITOR_H
