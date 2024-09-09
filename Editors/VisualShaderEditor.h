@@ -209,7 +209,7 @@ public:
 
     bool connectionExists(ConnectionId const connection_id) const override;
 
-    NodeId addNode(QString const node_type = QString()) override;
+    void add_node_custom(const std::shared_ptr<VisualShaderNode>& node, const QPointF& offset);
 
     /**
    * Connection is possible when graph contains no connectivity data
@@ -258,10 +258,12 @@ private:
 
     mutable std::unordered_map<NodeId, NodeGeometryData> _node_geometry_data;
 
-    NodeId newNodeId() override { return (NodeId)visual_shader->get_valid_node_id(); }
-
     mutable VisualShader* visual_shader;
     mutable VisualShaderEditor* visual_shader_editor;
+
+    NodeId newNodeId() override { return (NodeId)visual_shader->get_valid_node_id(); }
+
+    NodeId addNode(QString const node_type = QString()) override;
 };
 
 #endif // ENIGMA_VISUAL_SHADER_EDITOR_H

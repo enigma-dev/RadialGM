@@ -325,7 +325,6 @@ void VisualShaderEditor::add_node(QTreeWidgetItem* selected_item, const QPointF&
         node = std::make_shared<VisualShaderNodeSwitch>();
     } else {
         std::cout << "Unknown node type: " << type << std::endl;
-        return;
     }
 
     if (!node) {
@@ -335,14 +334,7 @@ void VisualShaderEditor::add_node(QTreeWidgetItem* selected_item, const QPointF&
 
     QPointF offset {view->mapToScene(pos.toPoint())}; // Top-left corner of the view
 
-    // Create the node and get the new node id.
-    NodeId new_node_id {graph->addNode()};
-
-    // Add the node to the graph.
-    visual_shader->add_node(node, {(float)offset.x(), (float)offset.y()}, new_node_id);
-    
-    graph->setNodeData(new_node_id, NodeRole::Caption, QString::fromStdString(node->get_caption()));
-    graph->setNodeData(new_node_id, NodeRole::Position, offset);
+    graph->add_node_custom(node, offset);
 }
 
 void VisualShaderEditor::show_create_node_dialog(const QPointF& pos) {
@@ -527,13 +519,11 @@ VisualShaderGraph::~VisualShaderGraph() {
 
 }
 
-std::unordered_set<NodeId> VisualShaderGraph::allNodeIds() const
-{
+std::unordered_set<NodeId> VisualShaderGraph::allNodeIds() const {
     return _node_ids;
 }
 
-std::unordered_set<ConnectionId> VisualShaderGraph::allConnectionIds(NodeId const node_id) const
-{
+std::unordered_set<ConnectionId> VisualShaderGraph::allConnectionIds(NodeId const node_id) const {
     std::unordered_set<ConnectionId> result;
 
     std::copy_if(_connectivity.begin(),
@@ -562,48 +552,56 @@ std::unordered_set<ConnectionId> VisualShaderGraph::connections(NodeId node_id,
     return result;
 }
 
-bool VisualShaderGraph::connectionExists(ConnectionId const connection_id) const
-{
+bool VisualShaderGraph::connectionExists(ConnectionId const connection_id) const {
     return (_connectivity.find(connection_id) != _connectivity.end());
 }
 
-NodeId VisualShaderGraph::addNode(QString const node_type)
-{
+void VisualShaderGraph::add_node_custom(const std::shared_ptr<VisualShaderNode>& node, const QPointF& offset) {
     NodeId new_id {newNodeId()};
 
     // Create new node.
     _node_ids.insert(new_id);
 
-    Q_EMIT nodeCreated(new_id);
+    // Add the node to the graph.
+    visual_shader->add_node(node, {(float)offset.x(), (float)offset.y()}, (int)new_id);
 
-    return new_id;
+    this->setNodeData(new_id, NodeRole::Position, offset);
+
+    Q_EMIT nodeCreated(new_id);
 }
 
-bool VisualShaderGraph::connectionPossible(ConnectionId const connection_id) const
-{
+NodeId VisualShaderGraph::addNode(QString const node_type) {
+    std::cerr << "Unsupported operation: addNode" << std::endl;
+    return -1;
+}
+
+bool VisualShaderGraph::connectionPossible(ConnectionId const connection_id) const {
     return _connectivity.find(connection_id) == _connectivity.end();
 }
 
-void VisualShaderGraph::addConnection(ConnectionId const connection_id)
-{
+void VisualShaderGraph::addConnection(ConnectionId const connection_id) {
     _connectivity.insert(connection_id);
 
     Q_EMIT connectionCreated(connection_id);
 }
 
-bool VisualShaderGraph::nodeExists(NodeId const node_id) const
-{
+bool VisualShaderGraph::nodeExists(NodeId const node_id) const {
     return (_node_ids.find(node_id) != _node_ids.end());
 }
 
 QVariant VisualShaderGraph::nodeData(NodeId node_id, NodeRole role) const {
-    Q_UNUSED(node_id);
-
+    const std::shared_ptr<VisualShaderNode> n{visual_shader->get_node((int)node_id)};
+    
     QVariant result;
+
+    // Make sure the node exists.
+    if (!n) {
+        return result;
+    }
 
     switch (role) {
     case NodeRole::Type:
-        result = QString("Default Node Type");
+        result = QString::fromStdString(n->get_caption());
         break;
 
     case NodeRole::Position:
@@ -619,7 +617,7 @@ QVariant VisualShaderGraph::nodeData(NodeId node_id, NodeRole role) const {
         break;
 
     case NodeRole::Caption:
-        result = QString("Node");
+        result = QString::fromStdString(n->get_caption());
         break;
 
     case NodeRole::Style: {
@@ -631,11 +629,11 @@ QVariant VisualShaderGraph::nodeData(NodeId node_id, NodeRole role) const {
         break;
 
     case NodeRole::InPortCount:
-        result = 5u;
+        result = n->get_input_port_count();
         break;
 
     case NodeRole::OutPortCount:
-        result = 3u;
+        result = n->get_output_port_count();
         break;
 
     case NodeRole::Widget:
@@ -691,10 +689,9 @@ bool VisualShaderGraph::setNodeData(NodeId node_id, NodeRole role, QVariant valu
 }
 
 QVariant VisualShaderGraph::portData(NodeId node_id,
-                                    PortType port_type,
-                                    PortIndex port_index,
-                                    PortRole role) const
-{
+                                     PortType port_type,
+                                     PortIndex port_index,
+                                     PortRole role) const {
     switch (role) {
     case PortRole::Data:
         return QVariant();
@@ -724,9 +721,11 @@ QVariant VisualShaderGraph::portData(NodeId node_id,
     return QVariant();
 }
 
-bool VisualShaderGraph::setPortData(
-    NodeId node_id, PortType port_type, PortIndex port_index, QVariant const &value, PortRole role)
-{
+bool VisualShaderGraph::setPortData(NodeId node_id, 
+                                    PortType port_type, 
+                                    PortIndex port_index, 
+                                    QVariant const &value, 
+                                    PortRole role) {
     Q_UNUSED(node_id);
     Q_UNUSED(port_type);
     Q_UNUSED(port_index);
@@ -736,8 +735,7 @@ bool VisualShaderGraph::setPortData(
     return false;
 }
 
-bool VisualShaderGraph::deleteConnection(ConnectionId const connection_id)
-{
+bool VisualShaderGraph::deleteConnection(ConnectionId const connection_id) {
     bool disconnected = false;
 
     auto it = _connectivity.find(connection_id);
@@ -754,8 +752,7 @@ bool VisualShaderGraph::deleteConnection(ConnectionId const connection_id)
     return disconnected;
 }
 
-bool VisualShaderGraph::deleteNode(NodeId const node_id)
-{
+bool VisualShaderGraph::deleteNode(NodeId const node_id) {
     // Delete connections to this node first.
     auto connectionIds = allConnectionIds(node_id);
     for (auto &cId : connectionIds) {
