@@ -37,6 +37,7 @@
 #include <QVBoxLayout>
 #include <QTreeWidget>
 #include <QTextEdit>
+#include <QComboBox>
 
 #include <string>
 #include <vector>
@@ -245,17 +246,6 @@ public:
     void set_visual_shader_editor(VisualShaderEditor* visual_shader_editor) const { this->visual_shader_editor = visual_shader_editor; }
 
 private:
-    std::unordered_set<NodeId> _node_ids;
-
-    /// [Important] This is a user defined data structure backing your model.
-    /// In your case it could be anything else representing a graph, for example, a
-    /// table. Or a collection of structs with pointers to each other. Or an
-    /// abstract syntax tree, you name it.
-    ///
-    /// This data structure contains the graph connectivity information in both
-    /// directions, i.e. from Node1 to Node2 and from Node2 to Node1.
-    std::unordered_set<ConnectionId> _connectivity;
-
     mutable std::unordered_map<NodeId, NodeGeometryData> _node_geometry_data;
 
     mutable VisualShader* visual_shader;
@@ -264,6 +254,27 @@ private:
     NodeId newNodeId() override { return (NodeId)visual_shader->get_valid_node_id(); }
 
     NodeId addNode(QString const node_type = QString()) override;
+};
+
+/*************************************/
+/* NodesCustomWidget                 */
+/*************************************/
+
+class NodesCustomWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    NodesCustomWidget(const std::shared_ptr<VisualShaderNode>& node, QWidget *parent = nullptr);
+    ~NodesCustomWidget();
+
+private Q_SLOTS:
+    void on_combo_box0_current_index_changed(const int& index);
+
+private:
+    QVBoxLayout* layout;
+
+    QComboBox* combo_boxes[2];
 };
 
 #endif // ENIGMA_VISUAL_SHADER_EDITOR_H

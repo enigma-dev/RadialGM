@@ -85,6 +85,7 @@ VisualShaderEditor::VisualShaderEditor(MessageModel* model, QWidget* parent) : B
     scene_layer_layout->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 
     graph = new VisualShaderGraph();
+    graph->register_visual_shader(visual_shader);
 
     scene = new BasicGraphicsScene(*graph);
     scene->setOrientation(Qt::Horizontal);
@@ -187,10 +188,10 @@ VisualShaderEditor::VisualShaderEditor(MessageModel* model, QWidget* parent) : B
 
     //////////////// Start of Footer ////////////////
 
-    graph->register_visual_shader(visual_shader);
     graph->set_visual_shader_editor(this);
 
     this->setContentsMargins(0, 0, 0, 0); // Left, top, right, bottom
+    // this->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     // Set the window title and icon.
     this->setWindowTitle("Visual Shader Editor");
@@ -520,18 +521,32 @@ VisualShaderGraph::~VisualShaderGraph() {
 }
 
 std::unordered_set<NodeId> VisualShaderGraph::allNodeIds() const {
-    return _node_ids;
+    std::unordered_set<NodeId> result;
+
+    std::vector<int> ids {visual_shader->get_used_ids()};
+
+    for (const int& id : ids) {
+        result.insert(id);
+    }
+
+    return result;
 }
 
 std::unordered_set<ConnectionId> VisualShaderGraph::allConnectionIds(NodeId const node_id) const {
     std::unordered_set<ConnectionId> result;
 
-    std::copy_if(_connectivity.begin(),
-                 _connectivity.end(),
-                 std::inserter(result, std::end(result)),
-                 [&node_id](ConnectionId const &cid) {
-                     return cid.inNodeId == node_id || cid.outNodeId == node_id;
-                 });
+    std::vector<VisualShader::Connection> all_connections {visual_shader->get_all_connections()};
+
+    for (const VisualShader::Connection& c : all_connections) {
+        if (c.from_node == node_id || c.to_node == node_id) {
+            ConnectionId cid;
+            cid.inNodeId = c.to_node;
+            cid.inPortIndex = c.to_port;
+            cid.outNodeId = c.from_node;
+            cid.outPortIndex = c.from_port;
+            result.insert(cid);
+        }
+    }
 
     return result;
 }
@@ -541,52 +556,72 @@ std::unordered_set<ConnectionId> VisualShaderGraph::connections(NodeId node_id,
                                                                 PortIndex port_index) const {
     std::unordered_set<ConnectionId> result;
 
-    std::copy_if(_connectivity.begin(),
-                 _connectivity.end(),
-                 std::inserter(result, std::end(result)),
-                 [&port_type, &port_index, &node_id](ConnectionId const &cid) {
-                     return (getNodeId(port_type, cid) == node_id
-                             && getPortIndex(port_type, cid) == port_index);
-                 });
+    std::vector<VisualShader::Connection> all_connections {visual_shader->get_all_connections()};
+
+    for (const VisualShader::Connection& c : all_connections) {
+        switch (port_type) {
+            case PortType::In:
+                if (c.to_node == node_id && c.to_port == port_index) {
+                    ConnectionId cid;
+                    cid.inNodeId = c.to_node;
+                    cid.inPortIndex = c.to_port;
+                    cid.outNodeId = c.from_node;
+                    cid.outPortIndex = c.from_port;
+                    result.insert(cid);
+                }
+                break;
+            case PortType::Out:
+                if (c.from_node == node_id && c.from_port == port_index) {
+                    ConnectionId cid;
+                    cid.inNodeId = c.to_node;
+                    cid.inPortIndex = c.to_port;
+                    cid.outNodeId = c.from_node;
+                    cid.outPortIndex = c.from_port;
+                    result.insert(cid);
+                }
+                break;
+            default:
+                std::cout << "Unknown port type" << std::endl;
+                break;
+        }
+    }
 
     return result;
 }
 
 bool VisualShaderGraph::connectionExists(ConnectionId const connection_id) const {
-    return (_connectivity.find(connection_id) != _connectivity.end());
+    return !visual_shader->can_connect_nodes((int)connection_id.outNodeId, (int)connection_id.outPortIndex, (int)connection_id.inNodeId, (int)connection_id.inPortIndex);
 }
 
 void VisualShaderGraph::add_node_custom(const std::shared_ptr<VisualShaderNode>& node, const QPointF& offset) {
     NodeId new_id {newNodeId()};
 
-    // Create new node.
-    _node_ids.insert(new_id);
-
     // Add the node to the graph.
     visual_shader->add_node(node, {(float)offset.x(), (float)offset.y()}, (int)new_id);
 
     this->setNodeData(new_id, NodeRole::Position, offset);
+    this->setNodeData(new_id, NodeRole::Size, QSize(25, 50));
 
     Q_EMIT nodeCreated(new_id);
 }
 
-NodeId VisualShaderGraph::addNode(QString const node_type) {
-    std::cerr << "Unsupported operation: addNode" << std::endl;
-    return -1;
-}
-
 bool VisualShaderGraph::connectionPossible(ConnectionId const connection_id) const {
-    return _connectivity.find(connection_id) == _connectivity.end();
+    return visual_shader->can_connect_nodes((int)connection_id.outNodeId, (int)connection_id.outPortIndex, (int)connection_id.inNodeId, (int)connection_id.inPortIndex);
 }
 
 void VisualShaderGraph::addConnection(ConnectionId const connection_id) {
-    _connectivity.insert(connection_id);
+    bool status {visual_shader->connect_nodes((int)connection_id.outNodeId, (int)connection_id.outPortIndex, (int)connection_id.inNodeId, (int)connection_id.inPortIndex)};
+
+    if (!status) {
+        std::cout << "Failed to connect nodes: " << connection_id.outNodeId << " -> " << connection_id.inNodeId << std::endl;
+        return;
+    }
 
     Q_EMIT connectionCreated(connection_id);
 }
 
 bool VisualShaderGraph::nodeExists(NodeId const node_id) const {
-    return (_node_ids.find(node_id) != _node_ids.end());
+    return visual_shader->get_node((int)node_id) != nullptr;
 }
 
 QVariant VisualShaderGraph::nodeData(NodeId node_id, NodeRole role) const {
@@ -637,7 +672,8 @@ QVariant VisualShaderGraph::nodeData(NodeId node_id, NodeRole role) const {
         break;
 
     case NodeRole::Widget:
-        result = QVariant();
+        NodesCustomWidget* custom_widget = new NodesCustomWidget(n);
+        result = QVariant::fromValue(custom_widget);
         break;
     }
 
@@ -688,37 +724,54 @@ bool VisualShaderGraph::setNodeData(NodeId node_id, NodeRole role, QVariant valu
     return result;
 }
 
+NodeId VisualShaderGraph::addNode(QString const node_type) {
+    std::cerr << "Unsupported operation: addNode" << std::endl;
+    return -1;
+}
+
 QVariant VisualShaderGraph::portData(NodeId node_id,
                                      PortType port_type,
                                      PortIndex port_index,
                                      PortRole role) const {
-    switch (role) {
-    case PortRole::Data:
-        return QVariant();
-        break;
+    const std::shared_ptr<VisualShaderNode> n{visual_shader->get_node((int)node_id)};
+    
+    QVariant result;
 
-    case PortRole::DataType:
-        return QVariant();
-        break;
-
-    case PortRole::ConnectionPolicyRole:
-        return QVariant::fromValue(ConnectionPolicy::One);
-        break;
-
-    case PortRole::CaptionVisible:
-        return true;
-        break;
-
-    case PortRole::Caption:
-        if (port_type == PortType::In)
-            return QString::fromUtf8("Port In");
-        else
-            return QString::fromUtf8("Port Out");
-
-        break;
+    if (!n) {
+        return result;
     }
 
-    return QVariant();
+    switch (role) {
+        case PortRole::Data:
+            break;
+
+        case PortRole::DataType:
+            break;
+
+        case PortRole::ConnectionPolicyRole:
+            result = QVariant::fromValue(ConnectionPolicy::One);
+            break;
+
+        case PortRole::CaptionVisible:
+            result = true;
+            break;
+
+        case PortRole::Caption:
+            switch (port_type) {
+                case PortType::In:
+                    result = QString::fromStdString(n->get_input_port_name((int)port_index));
+                    break;
+                case PortType::Out:
+                    result = QString::fromStdString(n->get_output_port_name((int)port_index));
+                    break;
+                default:
+                    std::cout << "Unknown port type" << std::endl;
+                    break;
+            }
+            break;
+    }
+
+    return result;
 }
 
 bool VisualShaderGraph::setPortData(NodeId node_id, 
@@ -736,33 +789,122 @@ bool VisualShaderGraph::setPortData(NodeId node_id,
 }
 
 bool VisualShaderGraph::deleteConnection(ConnectionId const connection_id) {
-    bool disconnected = false;
+    bool status {visual_shader->disconnect_nodes((int)connection_id.outNodeId, (int)connection_id.outPortIndex, (int)connection_id.inNodeId, (int)connection_id.inPortIndex)};
 
-    auto it = _connectivity.find(connection_id);
-
-    if (it != _connectivity.end()) {
-        disconnected = true;
-
-        _connectivity.erase(it);
+    if (!status) {
+        return status;
     }
 
-    if (disconnected)
-        Q_EMIT connectionDeleted(connection_id);
+    Q_EMIT connectionDeleted(connection_id);
 
-    return disconnected;
+    return status;
 }
 
 bool VisualShaderGraph::deleteNode(NodeId const node_id) {
-    // Delete connections to this node first.
-    auto connectionIds = allConnectionIds(node_id);
-    for (auto &cId : connectionIds) {
-        deleteConnection(cId);
+    bool status {visual_shader->remove_node((int)node_id)};
+
+    if (!status) {
+        return status;
     }
 
-    _node_ids.erase(node_id);
     _node_geometry_data.erase(node_id);
 
     Q_EMIT nodeDeleted(node_id);
 
-    return true;
+    return status;
+}
+
+/*************************************/
+/* NodesCustomWidget                 */
+/*************************************/
+
+NodesCustomWidget::NodesCustomWidget(const std::shared_ptr<VisualShaderNode>& node, QWidget* parent) : QWidget(parent), 
+                                                                                                       layout(nullptr) {
+    // Create the main layout.
+    layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0); // Left, top, right, bottom
+    layout->setSizeConstraint(QLayout::SetMinimumSize);
+    layout->setSpacing(0);
+    layout->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+
+    //////////////// End of Header ////////////////
+
+    combo_boxes[0] = new QComboBox();
+    combo_boxes[0]->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    combo_boxes[0]->setContentsMargins(0, 0, 0, 0); // Left, top, right, bottom
+    combo_boxes[0]->setMaximumSize(combo_boxes[0]->sizeHint());
+
+    // Add items to the combo box
+    combo_boxes[0]->addItem("Item 1");
+    combo_boxes[0]->addItem("Item 2");
+    combo_boxes[0]->addItem("Item 3");
+
+    layout->addWidget(combo_boxes[0]);
+
+    // Connect the combo box signal to the slot
+    QObject::connect(combo_boxes[0], QOverload<int>::of(&QComboBox::currentIndexChanged), this, &NodesCustomWidget::on_combo_box0_current_index_changed);
+
+
+    if (std::dynamic_pointer_cast<VisualShaderNodeInput>(node)) {
+
+    } else if (std::dynamic_pointer_cast<VisualShaderNodeColorConstant>(node)) {
+
+    } else if (std::dynamic_pointer_cast<VisualShaderNodeBooleanConstant>(node)) {
+
+    } else if (std::dynamic_pointer_cast<VisualShaderNodeFloatConstant>(node)) {
+
+    } else if (std::dynamic_pointer_cast<VisualShaderNodeIntConstant>(node)) {
+
+    } else if (std::dynamic_pointer_cast<VisualShaderNodeUIntConstant>(node)) {
+
+    } else if (std::dynamic_pointer_cast<VisualShaderNodeVec2Constant>(node)) {
+
+    } else if (std::dynamic_pointer_cast<VisualShaderNodeVec3Constant>(node)) {
+
+    } else if (std::dynamic_pointer_cast<VisualShaderNodeVec4Constant>(node)) {
+
+    } else if (std::dynamic_pointer_cast<VisualShaderNodeFloatFunc>(node)) {
+
+    } else if (std::dynamic_pointer_cast<VisualShaderNodeIntFunc>(node)) {
+
+    } else if (std::dynamic_pointer_cast<VisualShaderNodeUIntFunc>(node)) {
+
+    } else if (std::dynamic_pointer_cast<VisualShaderNodeDerivativeFunc>(node)) {
+
+    } else if (std::dynamic_pointer_cast<VisualShaderNodeFloatOp>(node)) {
+
+    } else if (std::dynamic_pointer_cast<VisualShaderNodeIntOp>(node)) {
+
+    } else if (std::dynamic_pointer_cast<VisualShaderNodeUIntOp>(node)) {
+
+    } else if (std::dynamic_pointer_cast<VisualShaderNodeValueNoise>(node)) {
+
+    } else if (std::dynamic_pointer_cast<VisualShaderNodeCompare>(node)) {
+
+    } else if (std::dynamic_pointer_cast<VisualShaderNodeIf>(node)) {
+
+    } else if (std::dynamic_pointer_cast<VisualShaderNodeIs>(node)) {
+
+    } else if (std::dynamic_pointer_cast<VisualShaderNodeSwitch>(node)) {
+
+    } else {
+        std::cout << "Unknown node type" << std::endl;
+    }
+
+    //////////////// Start of Footer ////////////////
+
+    // TODO: Set the size of this widget based on the contents.
+
+    this->setContentsMargins(0, 0, 0, 0); // Left, top, right, bottom
+    // this->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+
+    this->setLayout(layout);
+}
+
+NodesCustomWidget::~NodesCustomWidget() {
+    if (layout) delete layout;
+}
+
+void NodesCustomWidget::on_combo_box0_current_index_changed(const int& index) {
+    std::cout << "Combo box index changed: " << index << std::endl;
 }
