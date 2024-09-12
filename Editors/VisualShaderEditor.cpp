@@ -34,25 +34,25 @@
 
 #include <unordered_map>
 
-#include <QtNodes/GraphicsView>
-
 #include "VisualShader.pb.h"
 #include "ResourceTransformations/VisualShader/visual_shader_nodes.h"
 #include "ResourceTransformations/VisualShader/vs_noise_nodes.h"
 
-using QtNodes::GraphicsView;
-using QtNodes::NodeRole;
-
-/*************************************/
-/* VisualShaderEditor                */
-/*************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/*****                                                            *****/
+/*****               VisualShaderEditor                           *****/
+/*****                                                            *****/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
 
 VisualShaderEditor::VisualShaderEditor(MessageModel* model, QWidget* parent) : BaseEditor(model, parent), 
                                                                                visual_shader(nullptr),
                                                                                layout(nullptr),
                                                                                scene_layer_layout(nullptr), 
                                                                                scene_layer(nullptr), 
-                                                                               graph(nullptr), 
                                                                                scene(nullptr), 
                                                                                view(nullptr), 
                                                                                top_layer(nullptr),
@@ -84,23 +84,19 @@ VisualShaderEditor::VisualShaderEditor(MessageModel* model, QWidget* parent) : B
     scene_layer_layout->setSizeConstraint(QLayout::SetNoConstraint);
     scene_layer_layout->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 
-    graph = new VisualShaderGraph();
-    graph->register_visual_shader(visual_shader);
+    scene = new VisualShaderGraphicsScene();
 
-    scene = new BasicGraphicsScene(*graph);
-    scene->setOrientation(Qt::Horizontal);
-
-    view = new GraphicsView(scene);
+    view = new VisualShaderGraphicsView(scene, scene_layer);
     view->setContentsMargins(0, 0, 0, 0); // Left, top, right, bottom
     view->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     scene_layer_layout->addWidget(view);
 
-    // Setup context menu for creating new nodes.
-    view->setContextMenuPolicy(Qt::ActionsContextMenu);
-    create_node_action = new QAction(QStringLiteral("Create Node"), view);
-    QObject::connect(create_node_action, &QAction::triggered, this, &VisualShaderEditor::on_create_node_action_triggered);
-    view->insertAction(view->actions().front(), create_node_action);
+    // // Setup context menu for creating new nodes.
+    // view->setContextMenuPolicy(Qt::ActionsContextMenu);
+    // create_node_action = new QAction(QStringLiteral("Create Node"), view);
+    // QObject::connect(create_node_action, &QAction::triggered, this, &VisualShaderEditor::on_create_node_action_triggered);
+    // view->insertAction(view->actions().front(), create_node_action);
 
     // Set the scene layer layout.
     scene_layer->setLayout(scene_layer_layout);
@@ -188,8 +184,6 @@ VisualShaderEditor::VisualShaderEditor(MessageModel* model, QWidget* parent) : B
 
     //////////////// Start of Footer ////////////////
 
-    graph->set_visual_shader_editor(this);
-
     this->setContentsMargins(0, 0, 0, 0); // Left, top, right, bottom
     // this->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
@@ -209,7 +203,6 @@ VisualShaderEditor::~VisualShaderEditor() {
     if (top_layer) delete top_layer;
     if (view) delete view;
     if (scene) delete scene;
-    if (graph) delete graph;
     if (scene_layer) delete scene_layer;
     if (scene_layer_layout) delete scene_layer_layout;
     if (layout) delete layout;
@@ -262,18 +255,18 @@ const VisualShaderEditor::CreateNodeDialogNodesTreeItem VisualShaderEditor::crea
     {"", "", "", ""},
 };
 
-void VisualShaderEditor::create_node(const QPointF& pos) {
-    QTreeWidgetItem* selected_item = create_node_dialog->get_selected_item();
+void VisualShaderEditor::create_node(const QPointF& coordinate) {
+    QTreeWidgetItem* selected_item {create_node_dialog->get_selected_item()};
 
     if (!selected_item) {
         return;
     }
 
-    VisualShaderEditor::add_node(selected_item, pos);
+    VisualShaderEditor::add_node(selected_item, coordinate);
 }
 
-void VisualShaderEditor::add_node(QTreeWidgetItem* selected_item, const QPointF& pos) {
-    std::string type = selected_item->data(0, Qt::UserRole).toString().toStdString();
+void VisualShaderEditor::add_node(QTreeWidgetItem* selected_item, const QPointF& coordinate) {
+    std::string type {selected_item->data(0, Qt::UserRole).toString().toStdString()};
 
     if (type.empty()) {
         return;
@@ -333,17 +326,15 @@ void VisualShaderEditor::add_node(QTreeWidgetItem* selected_item, const QPointF&
         return;
     }
 
-    QPointF offset {view->mapToScene(pos.toPoint())}; // Top-left corner of the view
-
-    graph->add_node_custom(node, offset);
+    std::cout << "END of START hahaha" << std::endl;
 }
 
-void VisualShaderEditor::show_create_node_dialog(const QPointF& pos) {
+void VisualShaderEditor::show_create_node_dialog(const QPointF& coordinate) {
     int status {create_node_dialog->exec()};
     switch (status) {
         case QDialog::Accepted:
             std::cout << "Create node dialog accepted" << std::endl;
-            VisualShaderEditor::create_node(pos);
+            VisualShaderEditor::create_node(coordinate);
             break;
         case QDialog::Rejected:
             std::cout << "Create node dialog rejected" << std::endl;
@@ -359,8 +350,8 @@ void VisualShaderEditor::on_create_node_button_pressed() {
 }
 
 void VisualShaderEditor::on_create_node_action_triggered() {
-    QPointF pos {view->mapToScene(view->mapFromGlobal(QCursor::pos()))};
-    Q_EMIT on_create_node_dialog_requested(pos);
+    QPointF coordinate {view->mapToScene(view->mapFromGlobal(QCursor::pos()))};
+    Q_EMIT on_create_node_dialog_requested(coordinate);
 }
 
 std::vector<std::string> VisualShaderEditor::pasre_node_category_path(const std::string& node_category_path) {
@@ -396,9 +387,15 @@ QTreeWidgetItem* VisualShaderEditor::find_or_create_category_item(QTreeWidgetIte
     return new_item;
 }
 
-/*************************************/
-/* CreateNodeDialog                  */
-/*************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/*****                                                            *****/
+/*****               CreateNodeDialog                             *****/
+/*****                                                            *****/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
 
 CreateNodeDialog::CreateNodeDialog(QWidget* parent) : QDialog(parent),
                                                       layout(nullptr),
@@ -498,7 +495,7 @@ void CreateNodeDialog::on_cancel_node_creation_button_pressed() {
 }
 
 void CreateNodeDialog::update_selected_item() {
-    QTreeWidgetItem* item = create_node_dialog_nodes_tree->currentItem();
+    QTreeWidgetItem* item {create_node_dialog_nodes_tree->currentItem()};
     if (item) {
         selected_item = item;
         create_node_dialog_nodes_description->setText(item->data(0, Qt::UserRole + 1).toString());
@@ -508,315 +505,288 @@ void CreateNodeDialog::update_selected_item() {
     }
 }
 
-/*************************************/
-/* VisualShaderGraph                 */
-/*************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/*****                                                            *****/
+/*****               VisualShaderGraphicsScene                    *****/
+/*****                                                            *****/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
 
-VisualShaderGraph::VisualShaderGraph() {
-
+VisualShaderGraphicsScene::VisualShaderGraphicsScene(QObject *parent) : QGraphicsScene(parent) {
+	
 }
 
-VisualShaderGraph::~VisualShaderGraph() {
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/*****                                                            *****/
+/*****               VisualShaderGraphicsView                     *****/
+/*****                                                            *****/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
 
+//////////////////////////////
+// Public functions
+//////////////////////////////
+
+VisualShaderGraphicsView::VisualShaderGraphicsView(VisualShaderGraphicsScene *scene, QWidget *parent) : QGraphicsView(scene, parent), 
+                                                                                                        context_menu(nullptr),
+                                                                                                        create_node_action(nullptr),
+                                                                                                        delete_node_action(nullptr) {
+    setDragMode(QGraphicsView::ScrollHandDrag);
+	setRenderHint(QPainter::Antialiasing);
+
+	setBackgroundBrush(this->background_color);
+
+	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+	setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+
+	setCacheMode(QGraphicsView::CacheBackground);
+	setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+
+    // Allow dezooming 8 times from the default zoom level.
+	zoom_min = (1.0f / std::pow(zoom_step, 8.0f));
+	// Allow zooming 4 times from the default zoom level.
+	zoom_max = (1.0f * std::pow(zoom_step, 4.0f));
+
+	setSceneRect(rect_x, rect_y, rect_width, rect_height);
+
+    // Set the context menu
+    context_menu = new QMenu(this);
+    create_node_action = new QAction(QStringLiteral("Create Node"), context_menu);
+    QObject::connect(create_node_action, &QAction::triggered, this, &VisualShaderGraphicsView::on_create_node_action_triggered);
+    context_menu->addAction(create_node_action);
+
+    delete_node_action = new QAction(QStringLiteral("Delete Node"), context_menu);
+    delete_node_action->setShortcutContext(Qt::ShortcutContext::WidgetShortcut);
+	delete_node_action->setShortcut(QKeySequence(QKeySequence::Delete));
+    QObject::connect(delete_node_action, &QAction::triggered, this, &VisualShaderGraphicsView::on_delete_node_action_triggered);
+    context_menu->addAction(delete_node_action);
 }
 
-std::unordered_set<NodeId> VisualShaderGraph::allNodeIds() const {
-    std::unordered_set<NodeId> result;
-
-    std::vector<int> ids {visual_shader->get_used_ids()};
-
-    for (const int& id : ids) {
-        result.insert(id);
-    }
-
-    return result;
+VisualShaderGraphicsView::~VisualShaderGraphicsView() {
+    if (context_menu) delete context_menu;
+    if (create_node_action) delete create_node_action;
 }
 
-std::unordered_set<ConnectionId> VisualShaderGraph::allConnectionIds(NodeId const node_id) const {
-    std::unordered_set<ConnectionId> result;
+//////////////////////////////
+// Private slots
+//////////////////////////////
 
-    std::vector<VisualShader::Connection> all_connections {visual_shader->get_all_connections()};
+void VisualShaderGraphicsView::setup_zoom(const float& zoom) {
+    float t_zoom {zoom};
 
-    for (const VisualShader::Connection& c : all_connections) {
-        if (c.from_node == node_id || c.to_node == node_id) {
-            ConnectionId cid;
-            cid.inNodeId = c.to_node;
-            cid.inPortIndex = c.to_port;
-            cid.outNodeId = c.from_node;
-            cid.outPortIndex = c.from_port;
-            result.insert(cid);
-        }
-    }
+    t_zoom = std::max(zoom_min, std::min(zoom_max, t_zoom));
 
-    return result;
+	if (t_zoom <= 0.0f)
+		return;
+
+	if (t_zoom == transform().m11())
+		return;
+
+	QTransform matrix;
+	matrix.scale(t_zoom, t_zoom);
+	setTransform(matrix, false);
+
+	Q_EMIT zoom_changed(t_zoom);
 }
 
-std::unordered_set<ConnectionId> VisualShaderGraph::connections(NodeId node_id,
-                                                                PortType port_type,
-                                                                PortIndex port_index) const {
-    std::unordered_set<ConnectionId> result;
-
-    std::vector<VisualShader::Connection> all_connections {visual_shader->get_all_connections()};
-
-    for (const VisualShader::Connection& c : all_connections) {
-        switch (port_type) {
-            case PortType::In:
-                if (c.to_node == node_id && c.to_port == port_index) {
-                    ConnectionId cid;
-                    cid.inNodeId = c.to_node;
-                    cid.inPortIndex = c.to_port;
-                    cid.outNodeId = c.from_node;
-                    cid.outPortIndex = c.from_port;
-                    result.insert(cid);
-                }
-                break;
-            case PortType::Out:
-                if (c.from_node == node_id && c.from_port == port_index) {
-                    ConnectionId cid;
-                    cid.inNodeId = c.to_node;
-                    cid.inPortIndex = c.to_port;
-                    cid.outNodeId = c.from_node;
-                    cid.outPortIndex = c.from_port;
-                    result.insert(cid);
-                }
-                break;
-            default:
-                std::cout << "Unknown port type" << std::endl;
-                break;
-        }
-    }
-
-    return result;
+void VisualShaderGraphicsView::on_create_node_action_triggered() {
+    
 }
 
-bool VisualShaderGraph::connectionExists(ConnectionId const connection_id) const {
-    return !visual_shader->can_connect_nodes((int)connection_id.outNodeId, (int)connection_id.outPortIndex, (int)connection_id.inNodeId, (int)connection_id.inPortIndex);
+void VisualShaderGraphicsView::on_delete_node_action_triggered() {
+    
 }
 
-void VisualShaderGraph::add_node_custom(const std::shared_ptr<VisualShaderNode>& node, const QPointF& offset) {
-    NodeId new_id {newNodeId()};
+void VisualShaderGraphicsView::zoom_in() {
+	const float factor {std::pow(zoom_step, 1.0f)};
 
-    // Add the node to the graph.
-    visual_shader->add_node(node, {(float)offset.x(), (float)offset.y()}, (int)new_id);
-
-    this->setNodeData(new_id, NodeRole::Position, offset);
-    this->setNodeData(new_id, NodeRole::Size, QSize(25, 50));
-
-    Q_EMIT nodeCreated(new_id);
-}
-
-bool VisualShaderGraph::connectionPossible(ConnectionId const connection_id) const {
-    return visual_shader->can_connect_nodes((int)connection_id.outNodeId, (int)connection_id.outPortIndex, (int)connection_id.inNodeId, (int)connection_id.inPortIndex);
-}
-
-void VisualShaderGraph::addConnection(ConnectionId const connection_id) {
-    bool status {visual_shader->connect_nodes((int)connection_id.outNodeId, (int)connection_id.outPortIndex, (int)connection_id.inNodeId, (int)connection_id.inPortIndex)};
-
-    if (!status) {
-        std::cout << "Failed to connect nodes: " << connection_id.outNodeId << " -> " << connection_id.inNodeId << std::endl;
+	QTransform t {transform()};
+    t.scale(factor, factor);
+    if (t.m11() >= zoom_max) {
+        setup_zoom(t.m11());
         return;
     }
 
-    Q_EMIT connectionCreated(connection_id);
+	scale(factor, factor);
+	Q_EMIT zoom_changed(transform().m11());
 }
 
-bool VisualShaderGraph::nodeExists(NodeId const node_id) const {
-    return visual_shader->get_node((int)node_id) != nullptr;
-}
-
-QVariant VisualShaderGraph::nodeData(NodeId node_id, NodeRole role) const {
-    const std::shared_ptr<VisualShaderNode> n{visual_shader->get_node((int)node_id)};
+void VisualShaderGraphicsView::reset_zoom() {
     
-    QVariant result;
-
-    // Make sure the node exists.
-    if (!n) {
-        return result;
-    }
-
-    switch (role) {
-    case NodeRole::Type:
-        result = QString::fromStdString(n->get_caption());
-        break;
-
-    case NodeRole::Position:
-        result = _node_geometry_data[node_id].pos;
-        break;
-
-    case NodeRole::Size:
-        result = _node_geometry_data[node_id].size;
-        break;
-
-    case NodeRole::CaptionVisible:
-        result = true;
-        break;
-
-    case NodeRole::Caption:
-        result = QString::fromStdString(n->get_caption());
-        break;
-
-    case NodeRole::Style: {
-        auto style = StyleCollection::nodeStyle();
-        result = style.toJson().toVariantMap();
-    } break;
-
-    case NodeRole::InternalData:
-        break;
-
-    case NodeRole::InPortCount:
-        result = n->get_input_port_count();
-        break;
-
-    case NodeRole::OutPortCount:
-        result = n->get_output_port_count();
-        break;
-
-    case NodeRole::Widget:
-        NodesCustomWidget* custom_widget = new NodesCustomWidget(n);
-        result = QVariant::fromValue(custom_widget);
-        break;
-    }
-
-    return result;
 }
 
-bool VisualShaderGraph::setNodeData(NodeId node_id, NodeRole role, QVariant value) {
-    bool result {false};
+void VisualShaderGraphicsView::zoom_out() {
+	const float factor {std::pow(zoom_step, -1.0f)};
 
-    switch (role) {
-    case NodeRole::Type:
-        break;
-    case NodeRole::Position: {
-        _node_geometry_data[node_id].pos = value.value<QPointF>();
-
-        Q_EMIT nodePositionUpdated(node_id);
-
-        result = true;
-    } break;
-
-    case NodeRole::Size: {
-        _node_geometry_data[node_id].size = value.value<QSize>();
-        result = true;
-    } break;
-
-    case NodeRole::CaptionVisible:
-        break;
-
-    case NodeRole::Caption:
-        break;
-
-    case NodeRole::Style:
-        break;
-
-    case NodeRole::InternalData:
-        break;
-
-    case NodeRole::InPortCount:
-        break;
-
-    case NodeRole::OutPortCount:
-        break;
-
-    case NodeRole::Widget:
-        break;
+	QTransform t {transform()};
+    t.scale(factor, factor);
+    if (t.m11() <= zoom_min) {
+        setup_zoom(t.m11());
+        return;
     }
 
-    return result;
+	scale(factor, factor);
+	Q_EMIT zoom_changed(transform().m11());
 }
 
-NodeId VisualShaderGraph::addNode(QString const node_type) {
-    std::cerr << "Unsupported operation: addNode" << std::endl;
-    return -1;
+//////////////////////////////
+// Private functions
+//////////////////////////////
+
+void VisualShaderGraphicsView::drawBackground(QPainter *painter, const QRectF &r) {
+    QGraphicsView::drawBackground(painter, r);
+
+	std::function<void(float)> draw_grid = [&](float grid_step) {
+		QRect window_rect {this->rect()};
+
+		QPointF tl {mapToScene(window_rect.topLeft())};
+		QPointF br {mapToScene(window_rect.bottomRight())};
+
+		float left {(float)std::floor(tl.x() / grid_step - 0.5f)};
+		float right {(float)std::floor(br.x() / grid_step + 1.0f)};
+		float bottom {(float)std::floor(tl.y() / grid_step - 0.5f)};
+		float top {(float)std::floor(br.y() / grid_step + 1.0f)};
+
+		// Vertical lines
+		for (int xi {(int)left}; xi <= (int)right; ++xi) {
+			QLineF line(xi * grid_step, bottom * grid_step, xi * grid_step, top * grid_step);
+			painter->drawLine(line);
+		}
+
+		// Horizontal lines
+		for (int yi {(int)bottom}; yi <= (int)top; ++yi) {
+			QLineF line(left * grid_step, yi * grid_step, right * grid_step, yi * grid_step);
+			painter->drawLine(line);
+		}
+	};
+
+	QPen fine_pen(this->fine_grid_color, 1.0f);
+    painter->setPen(fine_pen);
+	draw_grid(15.0f);
+
+    QPen coarse_pen(this->coarse_grid_color, 1.0f);
+    painter->setPen(coarse_pen);
+    draw_grid(150.0f);
 }
 
-QVariant VisualShaderGraph::portData(NodeId node_id,
-                                     PortType port_type,
-                                     PortIndex port_index,
-                                     PortRole role) const {
-    const std::shared_ptr<VisualShaderNode> n{visual_shader->get_node((int)node_id)};
-    
-    QVariant result;
+void VisualShaderGraphicsView::contextMenuEvent(QContextMenuEvent *event) {
+    if (itemAt(event->pos())) {
+		QGraphicsView::contextMenuEvent(event);
+		return;
+	}
 
-    if (!n) {
-        return result;
+	QPointF scene_coordinate {mapToScene(event->pos())};
+
+	context_menu->exec(event->globalPos());
+}
+
+void VisualShaderGraphicsView::wheelEvent(QWheelEvent *event) {
+	const QPoint delta {event->angleDelta()};
+
+	if (delta.y() == 0) {
+		event->ignore();
+		return;
+	}
+
+	if (delta.y() > 0)
+		zoom_in();
+	else
+		zoom_out();
+}
+
+void VisualShaderGraphicsView::mousePressEvent(QMouseEvent *event) {
+	QGraphicsView::mousePressEvent(event);
+
+    switch (event->button()) {
+        case Qt::LeftButton:
+            last_click_coordinate = mapToScene(event->pos());
+            break;
+        default:
+            break;
     }
+}
 
-    switch (role) {
-        case PortRole::Data:
-            break;
+void VisualShaderGraphicsView::mouseMoveEvent(QMouseEvent *event) {
+	QGraphicsView::mouseMoveEvent(event);
 
-        case PortRole::DataType:
-            break;
-
-        case PortRole::ConnectionPolicyRole:
-            result = QVariant::fromValue(ConnectionPolicy::One);
-            break;
-
-        case PortRole::CaptionVisible:
-            result = true;
-            break;
-
-        case PortRole::Caption:
-            switch (port_type) {
-                case PortType::In:
-                    result = QString::fromStdString(n->get_input_port_name((int)port_index));
-                    break;
-                case PortType::Out:
-                    result = QString::fromStdString(n->get_output_port_name((int)port_index));
-                    break;
-                default:
-                    std::cout << "Unknown port type" << std::endl;
-                    break;
+    switch (event->buttons()) {
+        case Qt::LeftButton:
+            {
+                QPointF current_coordinate {mapToScene(event->pos())};
+                QPointF difference {last_click_coordinate - current_coordinate};
+                setSceneRect(sceneRect().translated(difference.x(), difference.y()));
+                last_click_coordinate = current_coordinate;
             }
             break;
+        default:
+            break;
+    }
+}
+
+void VisualShaderGraphicsView::mouseReleaseEvent(QMouseEvent *event) {
+    QGraphicsView::mouseReleaseEvent(event);
+}
+
+void VisualShaderGraphicsView::showEvent(QShowEvent *event) {
+	QGraphicsView::showEvent(event);
+
+	center_scene();
+}
+
+void VisualShaderGraphicsView::center_scene() {
+    scene()->setSceneRect(QRectF());
+
+    QRectF rect {scene()->itemsBoundingRect()};
+    QRectF scene_scene {QRectF(0, 0, rect.left() * 2 + rect.width(), rect.top() * 2 + rect.height())};
+
+    if (scene_scene.width() > this->rect().width() || scene_scene.height() > this->rect().height()) {
+        fitInView(scene_scene, Qt::KeepAspectRatio);
     }
 
-    return result;
+    centerOn(scene_scene.center());
 }
 
-bool VisualShaderGraph::setPortData(NodeId node_id, 
-                                    PortType port_type, 
-                                    PortIndex port_index, 
-                                    QVariant const &value, 
-                                    PortRole role) {
-    Q_UNUSED(node_id);
-    Q_UNUSED(port_type);
-    Q_UNUSED(port_index);
-    Q_UNUSED(value);
-    Q_UNUSED(role);
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/*****                                                            *****/
+/*****               VisualShaderNodeGraphicsObject               *****/
+/*****                                                            *****/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
 
-    return false;
-}
 
-bool VisualShaderGraph::deleteConnection(ConnectionId const connection_id) {
-    bool status {visual_shader->disconnect_nodes((int)connection_id.outNodeId, (int)connection_id.outPortIndex, (int)connection_id.inNodeId, (int)connection_id.inPortIndex)};
 
-    if (!status) {
-        return status;
-    }
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/*****                                                            *****/
+/*****           VisualShaderConnectionGraphicsObject             *****/
+/*****                                                            *****/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
 
-    Q_EMIT connectionDeleted(connection_id);
 
-    return status;
-}
 
-bool VisualShaderGraph::deleteNode(NodeId const node_id) {
-    bool status {visual_shader->remove_node((int)node_id)};
-
-    if (!status) {
-        return status;
-    }
-
-    _node_geometry_data.erase(node_id);
-
-    Q_EMIT nodeDeleted(node_id);
-
-    return status;
-}
-
-/*************************************/
-/* NodesCustomWidget                 */
-/*************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/*****                                                            *****/
+/*****               NodesCustomWidget                            *****/
+/*****                                                            *****/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
 
 NodesCustomWidget::NodesCustomWidget(const std::shared_ptr<VisualShaderNode>& node, QWidget* parent) : QWidget(parent), 
                                                                                                        layout(nullptr) {
@@ -887,8 +857,10 @@ NodesCustomWidget::NodesCustomWidget(const std::shared_ptr<VisualShaderNode>& no
 
     } else if (std::dynamic_pointer_cast<VisualShaderNodeSwitch>(node)) {
 
+    } else if (std::dynamic_pointer_cast<VisualShaderNodeOutput>(node)) {
+
     } else {
-        std::cout << "Unknown node type" << std::endl;
+        std::cout << "--- Unknown node type ---" << std::endl;
     }
 
     //////////////// Start of Footer ////////////////

@@ -32,45 +32,40 @@
 #include <QtCore/QPointF>
 #include <QtCore/QSize>
 #include <QtWidgets/QHBoxLayout>
-#include <QPushButton>
-#include <QDialog>
-#include <QVBoxLayout>
-#include <QTreeWidget>
-#include <QTextEdit>
-#include <QComboBox>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QTreeWidget>
+#include <QtWidgets/QTextEdit>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QGraphicsScene>
+#include <QtWidgets/QGraphicsView>
+#include <QtWidgets/QGraphicsObject>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QAction>
+#include <QContextMenuEvent>
 
 #include <string>
 #include <vector>
 
-#include <QtNodes/AbstractGraphModel>
-#include <QtNodes/ConnectionIdUtils>
-#include <QtNodes/StyleCollection>
-#include <QtNodes/BasicGraphicsScene>
-#include <QtNodes/GraphicsView>
-
 #include "ResourceTransformations/VisualShader/visual_shader.h"
 #include "BaseEditor.h"
 
-using ConnectionId = QtNodes::ConnectionId;
-using ConnectionPolicy = QtNodes::ConnectionPolicy;
-using NodeFlag = QtNodes::NodeFlag;
-using NodeId = QtNodes::NodeId;
-using NodeRole = QtNodes::NodeRole;
-using PortIndex = QtNodes::PortIndex;
-using PortRole = QtNodes::PortRole;
-using PortType = QtNodes::PortType;
-using StyleCollection = QtNodes::StyleCollection;
-using QtNodes::InvalidNodeId;
-
-using QtNodes::BasicGraphicsScene;
-using QtNodes::GraphicsView;
-
-class VisualShaderGraph;
+class VisualShaderGraphicsScene;
+class VisualShaderGraphicsView;
+class VisualShaderNodeGraphicsObject;
+class VisualShaderConnectionGraphicsObject;
 class CreateNodeDialog;
 
-/*************************************/
-/* VisualShaderEditor                */
-/*************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/*****                                                            *****/
+/*****               VisualShaderEditor                           *****/
+/*****                                                            *****/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
 
 // Add const to any function that does not modify the object.
 
@@ -81,17 +76,17 @@ class VisualShaderEditor : public BaseEditor {
   VisualShaderEditor(MessageModel* model, QWidget* parent = nullptr);
   ~VisualShaderEditor() override;
 
-  void create_node(const QPointF& pos);
+  void create_node(const QPointF& coordinate);
 
-  void add_node(QTreeWidgetItem* selected_item, const QPointF& pos);
+  void add_node(QTreeWidgetItem* selected_item, const QPointF& coordinate);
 
-  void show_create_node_dialog(const QPointF& pos);
+  void show_create_node_dialog(const QPointF& coordinate);
 
   std::vector<std::string> pasre_node_category_path(const std::string& node_category_path);
   QTreeWidgetItem* find_or_create_category_item(QTreeWidgetItem* parent, const std::string& category, const std::string& category_path, QTreeWidget* create_node_dialog_nodes_tree, std::unordered_map<std::string, QTreeWidgetItem*>& category_path_map);
 
  Q_SIGNALS:
-  void on_create_node_dialog_requested(const QPointF& pos = {0, 0}); // {0, 0} is the top-left corner of the scene.
+  void on_create_node_dialog_requested(const QPointF& coordinate = {0, 0}); // {0, 0} is the top-left corner of the scene.
 
  private Q_SLOTS:
   void on_create_node_button_pressed();
@@ -104,9 +99,8 @@ class VisualShaderEditor : public BaseEditor {
 
   QHBoxLayout* scene_layer_layout;
   QWidget* scene_layer; // Layer having the scene.
-  VisualShaderGraph* graph;
-  BasicGraphicsScene* scene;
-  GraphicsView* view;
+  VisualShaderGraphicsScene* scene;
+  VisualShaderGraphicsView* view;
 
   QWidget* top_layer; // Layer having the menu bar.
   QHBoxLayout* menu_bar;
@@ -141,9 +135,15 @@ class VisualShaderEditor : public BaseEditor {
   CreateNodeDialog* create_node_dialog;
 };
 
-/*************************************/
-/* CreateNodeDialog                  */
-/*************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/*****                                                            *****/
+/*****               CreateNodeDialog                             *****/
+/*****                                                            *****/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
 
 class CreateNodeDialog : public QDialog {
     Q_OBJECT
@@ -177,88 +177,132 @@ class CreateNodeDialog : public QDialog {
   QTreeWidgetItem* selected_item;
 };
 
-/*************************************/
-/* VisualShaderGraph                 */
-/*************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/*****                                                            *****/
+/*****               VisualShaderGraphicsScene                    *****/
+/*****                                                            *****/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
 
-/**
- * The class implements a bare minimum required to demonstrate a model-based
- * graph.
- */
-class VisualShaderGraph : public QtNodes::AbstractGraphModel
-{
-    Q_OBJECT
+class VisualShaderGraphicsScene : public QGraphicsScene {
+	Q_OBJECT
 
 public:
-    struct NodeGeometryData
-    {
-        QSize size;
-        QPointF pos;
-    };
+	VisualShaderGraphicsScene(QObject *parent = nullptr);
 
-    VisualShaderGraph();
-
-    ~VisualShaderGraph() override;
-
-    std::unordered_set<NodeId> allNodeIds() const override;
-
-    std::unordered_set<ConnectionId> allConnectionIds(NodeId const node_id) const override;
-
-    std::unordered_set<ConnectionId> connections(NodeId node_id,
-                                                 PortType port_type,
-                                                 PortIndex port_index) const override;
-
-    bool connectionExists(ConnectionId const connection_id) const override;
-
-    void add_node_custom(const std::shared_ptr<VisualShaderNode>& node, const QPointF& offset);
-
-    /**
-   * Connection is possible when graph contains no connectivity data
-   * in both directions `Out -> In` and `In -> Out`.
-   */
-    bool connectionPossible(ConnectionId const connection_id) const override;
-
-    void addConnection(ConnectionId const connection_id) override;
-
-    bool nodeExists(NodeId const node_id) const override;
-
-    QVariant nodeData(NodeId node_id, NodeRole role) const override;
-
-    bool setNodeData(NodeId node_id, NodeRole role, QVariant value) override;
-
-    QVariant portData(NodeId node_id,
-                      PortType port_type,
-                      PortIndex port_index,
-                      PortRole role) const override;
-
-    bool setPortData(NodeId node_id,
-                     PortType port_type,
-                     PortIndex port_index,
-                     QVariant const &value,
-                     PortRole role = PortRole::Data) override;
-
-    bool deleteConnection(ConnectionId const connection_id) override;
-
-    bool deleteNode(NodeId const node_id) override;
-
-    void register_visual_shader(VisualShader* visual_shader) const { this->visual_shader = visual_shader; }
-
-    void set_visual_shader_editor(VisualShaderEditor* visual_shader_editor) const { this->visual_shader_editor = visual_shader_editor; }
-
-private:
-    mutable std::unordered_map<NodeId, NodeGeometryData> _node_geometry_data;
-
-    mutable VisualShader* visual_shader;
-    mutable VisualShaderEditor* visual_shader_editor;
-
-    NodeId newNodeId() override { return (NodeId)visual_shader->get_valid_node_id(); }
-
-    NodeId addNode(QString const node_type = QString()) override;
+	~VisualShaderGraphicsScene() = default;
 };
 
-/*************************************/
-/* NodesCustomWidget                 */
-/*************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/*****                                                            *****/
+/*****               VisualShaderGraphicsView                     *****/
+/*****                                                            *****/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+
+class VisualShaderGraphicsView : public QGraphicsView {
+	Q_OBJECT
+
+public:
+	VisualShaderGraphicsView(VisualShaderGraphicsScene *scene, QWidget *parent = nullptr);
+
+	~VisualShaderGraphicsView();
+
+private Q_SLOTS:
+	void setup_zoom(const float& zoom);
+
+    void on_create_node_action_triggered();
+    void on_delete_node_action_triggered();
+
+    void zoom_in();
+    void reset_zoom();
+    void zoom_out();
+
+Q_SIGNALS:
+	void zoom_changed(const float& zoom);
+
+private:
+    // Style
+    QColor background_color = QColor(53, 53, 53);
+    QColor fine_grid_color = QColor(60, 60, 60);
+    QColor coarse_grid_color = QColor(25, 25, 25);
+
+    // Scene Rect
+    float t_size = std::numeric_limits<short>::max(); // 32767
+    float rect_x = t_size;
+    float rect_y = -1.0f * t_size;
+    float rect_width = t_size * 2.0f;
+    float rect_height = t_size * 2.0f;
+
+    // Zoom
+    float zoom = 1.0f;
+	float zoom_step = 1.2f;
+	float zoom_min;
+	float zoom_max;
+
+    QMenu* context_menu;
+    QAction* create_node_action;
+
+    QAction* delete_node_action;
+
+    QPointF last_click_coordinate;
+
+    void drawBackground(QPainter *painter, const QRectF &r) override;
+    void contextMenuEvent(QContextMenuEvent *event) override;
+	void wheelEvent(QWheelEvent *event) override;
+	void mousePressEvent(QMouseEvent *event) override;
+	void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+	void showEvent(QShowEvent *event) override;
+
+    void center_scene();
+};
+
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/*****                                                            *****/
+/*****               VisualShaderNodeGraphicsObject               *****/
+/*****                                                            *****/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+
+class VisualShaderNodeGraphicsObject : public QGraphicsObject {
+	Q_OBJECT
+
+};
+
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/*****                                                            *****/
+/*****           VisualShaderConnectionGraphicsObject             *****/
+/*****                                                            *****/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+
+class VisualShaderConnectionGraphicsObject : public QGraphicsObject {
+	Q_OBJECT
+
+};
+
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/*****                                                            *****/
+/*****               NodesCustomWidget                            *****/
+/*****                                                            *****/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
 
 class NodesCustomWidget : public QWidget
 {

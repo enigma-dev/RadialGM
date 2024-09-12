@@ -72,6 +72,19 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# if(MSVC)
+#     string(APPEND CMAKE_CXX_FLAGS " /EHsc /wd26812")
+#     string(APPEND CMAKE_C_FLAGS " /EHsc /wd26812")
+# endif()
+
+# # Disable C++ exceptions.
+# if(MSVC)
+#     string(REGEX REPLACE "/EHsc" "/EHs-c-" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+#     add_definitions(-D_HAS_EXCEPTIONS=0)
+# else()
+#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-unwind-tables -fno-asynchronous-unwind-tables")
+# endif()
+
 set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/" "${CMAKE_CURRENT_SOURCE_DIR}/Dialogs" "${CMAKE_CURRENT_SOURCE_DIR}/Editors")
 
 # Uncomment to be able to use local grpc_cpp_plugin
