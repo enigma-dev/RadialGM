@@ -72,6 +72,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# TODO: Do we need to disable exceptions in RGM like we do in ENIGMA?
 # if(MSVC)
 #     string(APPEND CMAKE_CXX_FLAGS " /EHsc /wd26812")
 #     string(APPEND CMAKE_C_FLAGS " /EHsc /wd26812")

@@ -107,6 +107,9 @@ class VisualShaderEditor : public BaseEditor {
 
   QPushButton* create_node_button;
   QPushButton* preview_shader_button;
+  QPushButton* zoom_in_button;
+  QPushButton* reset_zoom_button;
+  QPushButton* zoom_out_button;
 
   QAction* create_node_action;
 
@@ -191,9 +194,28 @@ class VisualShaderGraphicsScene : public QGraphicsScene {
 	Q_OBJECT
 
 public:
-	VisualShaderGraphicsScene(QObject *parent = nullptr);
+	VisualShaderGraphicsScene(VisualShader* vs, QObject *parent = nullptr);
 
-	~VisualShaderGraphicsScene() = default;
+	~VisualShaderGraphicsScene();
+
+    bool add_node(const int& n_id);
+    bool delete_node();
+
+    bool add_connection();
+    bool delete_connection();
+
+    VisualShaderNodeGraphicsObject* get_node_graphics_object(const int& n_id) const;
+    VisualShaderConnectionGraphicsObject* get_connection_graphics_object(const int& c_id) const;
+
+    VisualShader* get_visual_shader() const { return vs; }
+
+private:
+    VisualShader* vs;
+
+    std::unordered_map<int, VisualShaderNodeGraphicsObject*> node_graphics_objects;
+    std::unordered_map<int, VisualShaderConnectionGraphicsObject*> connection_graphics_objects;
+
+    VisualShaderConnectionGraphicsObject* one_free_end_connection;
 };
 
 /**********************************************************************/
@@ -214,15 +236,14 @@ public:
 
 	~VisualShaderGraphicsView();
 
-private Q_SLOTS:
-	void setup_zoom(const float& zoom);
-
-    void on_create_node_action_triggered();
-    void on_delete_node_action_triggered();
-
+public Q_SLOTS:
     void zoom_in();
     void reset_zoom();
     void zoom_out();
+
+private Q_SLOTS:
+    void on_create_node_action_triggered();
+    void on_delete_node_action_triggered();
 
 Q_SIGNALS:
 	void zoom_changed(const float& zoom);
@@ -235,10 +256,12 @@ private:
 
     // Scene Rect
     float t_size = std::numeric_limits<short>::max(); // 32767
-    float rect_x = t_size;
-    float rect_y = -1.0f * t_size;
-    float rect_width = t_size * 2.0f;
-    float rect_height = t_size * 2.0f;
+    float rect_x = -1.0f * t_size * 0.5f;
+    float rect_y = -1.0f * t_size * 0.5f;
+    float rect_width = t_size;
+    float rect_height = t_size;
+
+    float fit_in_view_margin = 50.0f;
 
     // Zoom
     float zoom = 1.0f;
@@ -251,6 +274,10 @@ private:
 
     QAction* delete_node_action;
 
+    QAction* zoom_in_action;
+    QAction* reset_zoom_action;
+    QAction* zoom_out_action;
+
     QPointF last_click_coordinate;
 
     void drawBackground(QPainter *painter, const QRectF &r) override;
@@ -261,7 +288,7 @@ private:
     void mouseReleaseEvent(QMouseEvent *event) override;
 	void showEvent(QShowEvent *event) override;
 
-    void center_scene();
+    void move_view_to_fit_items();
 };
 
 /**********************************************************************/
@@ -277,6 +304,49 @@ private:
 class VisualShaderNodeGraphicsObject : public QGraphicsObject {
 	Q_OBJECT
 
+public:
+    VisualShaderNodeGraphicsObject(VisualShader* vs, const int& n_id, QGraphicsItem *parent = nullptr);
+    ~VisualShaderNodeGraphicsObject();
+
+private:
+    VisualShader* vs;
+    int n_id;
+
+    // Style
+    QColor normal_boundary_color = QColor(255, 255, 255);
+    QColor selected_boundary_color = QColor(255, 165, 0);
+    QColor gradient_color0 = QColor(80, 80, 80);
+    QColor gradient_color1 = QColor(64, 64, 64);
+    QColor gradient_color2 = QColor(58, 58, 58);
+    QColor shadow_color = QColor(20, 20, 20);
+    QColor font_color = QColor(255, 255, 255);
+    QColor font_color_faded = QColor(169, 169, 169);
+    QColor connection_point_color = QColor(169, 169, 169);
+    QColor filled_connection_point_color = QColor(0, 255, 255);
+    QColor error_color = QColor(255, 0, 0);
+    QColor warning_color = QColor(128, 128, 0);
+    QColor fill_color = QColor(0, 0, 0, 0);
+
+    float pen_width = 1.0f;
+    float hovered_pen_width = 1.5f;
+
+    float opacity = 0.8f;
+    float corner_radius = 3.0f;
+
+    float port_spacing = 10.0f;
+
+    float rect_margin_ratio = 0.2f;
+
+    // Ports Style
+    float connected_port_diameter = 8.0f;
+    float unconnected_port_diameter = 6.0f;
+
+    // Size
+    QSizeF size = QSizeF(100.0f, 200.0f);
+
+    QRectF boundingRect() const override;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr) override;
+
 };
 
 /**********************************************************************/
@@ -291,6 +361,14 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
 
 class VisualShaderConnectionGraphicsObject : public QGraphicsObject {
 	Q_OBJECT
+
+public:
+    VisualShaderConnectionGraphicsObject(QGraphicsItem *parent = nullptr);
+    ~VisualShaderConnectionGraphicsObject();
+
+private:
+    QRectF boundingRect() const override;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr) override;
 
 };
 

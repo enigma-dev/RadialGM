@@ -60,6 +60,9 @@ VisualShaderEditor::VisualShaderEditor(MessageModel* model, QWidget* parent) : B
                                                                                create_node_button(nullptr),
                                                                                preview_shader_button(nullptr),
                                                                                create_node_action(nullptr),
+                                                                               zoom_in_button(nullptr),
+                                                                               reset_zoom_button(nullptr),
+                                                                               zoom_out_button(nullptr),
                                                                                create_node_dialog(nullptr) {
     visual_shader = new VisualShader();
     
@@ -84,7 +87,7 @@ VisualShaderEditor::VisualShaderEditor(MessageModel* model, QWidget* parent) : B
     scene_layer_layout->setSizeConstraint(QLayout::SetNoConstraint);
     scene_layer_layout->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 
-    scene = new VisualShaderGraphicsScene();
+    scene = new VisualShaderGraphicsScene(visual_shader);
 
     view = new VisualShaderGraphicsView(scene, scene_layer);
     view->setContentsMargins(0, 0, 0, 0); // Left, top, right, bottom
@@ -127,6 +130,24 @@ VisualShaderEditor::VisualShaderEditor(MessageModel* model, QWidget* parent) : B
     preview_shader_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     preview_shader_button->setContentsMargins(0, 0, 0, 0); // Left, top, right, bottom
     menu_bar->addWidget(preview_shader_button);
+
+    zoom_in_button = new QPushButton("Zoom In", scene_layer);
+    zoom_in_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    zoom_in_button->setContentsMargins(0, 0, 0, 0); // Left, top, right, bottom
+    menu_bar->addWidget(zoom_in_button);
+    QObject::connect(zoom_in_button, &QPushButton::pressed, view, &VisualShaderGraphicsView::zoom_in);
+
+    reset_zoom_button = new QPushButton("Reset Zoom", scene_layer);
+    reset_zoom_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    reset_zoom_button->setContentsMargins(0, 0, 0, 0); // Left, top, right, bottom
+    menu_bar->addWidget(reset_zoom_button);
+    QObject::connect(reset_zoom_button, &QPushButton::pressed, view, &VisualShaderGraphicsView::reset_zoom);
+
+    zoom_out_button = new QPushButton("Zoom Out", scene_layer);
+    zoom_out_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    zoom_out_button->setContentsMargins(0, 0, 0, 0); // Left, top, right, bottom
+    menu_bar->addWidget(zoom_out_button);
+    QObject::connect(zoom_out_button, &QPushButton::pressed, view, &VisualShaderGraphicsView::zoom_out);
 
     // Set the top layer layout.
     top_layer->setLayout(menu_bar);
@@ -196,6 +217,9 @@ VisualShaderEditor::VisualShaderEditor(MessageModel* model, QWidget* parent) : B
 VisualShaderEditor::~VisualShaderEditor() {
     // TODO: We don't need to delete the pointers as they are destroyed when the parent is destroyed.
     if (create_node_dialog) delete create_node_dialog;
+    if (zoom_out_button) delete zoom_out_button;
+    if (reset_zoom_button) delete reset_zoom_button;
+    if (zoom_in_button) delete zoom_in_button;
     if (create_node_action) delete create_node_action;
     if (preview_shader_button) delete preview_shader_button;
     if (create_node_button) delete create_node_button;
@@ -272,6 +296,12 @@ void VisualShaderEditor::add_node(QTreeWidgetItem* selected_item, const QPointF&
         return;
     }
 
+    int new_node_id {visual_shader->get_valid_node_id()};
+
+    if (new_node_id == VisualShader::NODE_ID_INVALID) {
+        return;
+    }
+
     // Instantiate the node based on the type
     std::shared_ptr<VisualShaderNode> node;
 
@@ -326,7 +356,13 @@ void VisualShaderEditor::add_node(QTreeWidgetItem* selected_item, const QPointF&
         return;
     }
 
-    std::cout << "END of START hahaha" << std::endl;
+    bool result {visual_shader->add_node(node, {(float)coordinate.x(), (float)coordinate.y()}, new_node_id)};
+
+    if (!result) {
+        return;
+    }
+
+    scene->add_node(new_node_id);
 }
 
 void VisualShaderEditor::show_create_node_dialog(const QPointF& coordinate) {
@@ -515,8 +551,101 @@ void CreateNodeDialog::update_selected_item() {
 /**********************************************************************/
 /**********************************************************************/
 
-VisualShaderGraphicsScene::VisualShaderGraphicsScene(QObject *parent) : QGraphicsScene(parent) {
-	
+//////////////////////////////
+// Public functions
+//////////////////////////////
+
+VisualShaderGraphicsScene::VisualShaderGraphicsScene(VisualShader* vs, QObject* parent) : QGraphicsScene(parent), vs(vs) {
+	setItemIndexMethod(QGraphicsScene::NoIndex); // https://doc.qt.io/qt-6/qgraphicsscene.html#ItemIndexMethod-enum
+
+    // Populate the scene with nodes
+    std::vector<int> nodes {vs->get_nodes()};
+
+    for (const int& node_id : nodes) {
+        const std::shared_ptr<VisualShaderNode> node {vs->get_node(node_id)};
+
+        if (!node) {
+            continue;
+        }
+
+        VisualShaderNodeGraphicsObject* n_o {new VisualShaderNodeGraphicsObject(vs, node_id)};
+        node_graphics_objects[node_id] = n_o;
+        this->addItem(n_o);
+        this->update();
+    }
+
+    // Populate the scene with connections
+    std::vector<int> connections {vs->get_connections()};
+
+    for (const int& connection_id : connections) {
+        const VisualShader::Connection connection {vs->get_connection(connection_id)};
+
+        VisualShaderConnectionGraphicsObject* c_o {new VisualShaderConnectionGraphicsObject()};
+        connection_graphics_objects[connection_id] = c_o;
+        this->addItem(c_o);
+        this->update();
+    }
+}
+
+VisualShaderGraphicsScene::~VisualShaderGraphicsScene() {
+    
+}
+
+bool VisualShaderGraphicsScene::add_node(const int& n_id) {
+    // Make sure the node doesn't already exist, we don't want to overwrite a node.
+    if (node_graphics_objects.find(n_id) != node_graphics_objects.end()) {
+        vs->remove_node(n_id);
+        return false;
+    }
+
+    const std::shared_ptr<VisualShaderNode> node {vs->get_node(n_id)};
+    
+    if (!node) {
+        vs->remove_node(n_id);
+        return false;
+    }
+
+    VisualShaderNodeGraphicsObject* n_o {new VisualShaderNodeGraphicsObject(vs, n_id)};
+
+    node_graphics_objects[n_id] = n_o;
+
+    addItem(n_o);
+
+    return true;
+}
+
+bool VisualShaderGraphicsScene::delete_node() {
+    return false;
+}
+
+bool VisualShaderGraphicsScene::add_connection() {
+    return false;
+}
+
+bool VisualShaderGraphicsScene::delete_connection() {
+    return false;
+}
+
+VisualShaderNodeGraphicsObject* VisualShaderGraphicsScene::get_node_graphics_object(const int& n_id) const {
+    VisualShaderNodeGraphicsObject* n_o {nullptr};
+
+    auto it {node_graphics_objects.find(n_id)};
+    if (it != node_graphics_objects.end()) {
+        n_o = it->second;
+    }
+
+    return n_o;
+}
+
+VisualShaderConnectionGraphicsObject* VisualShaderGraphicsScene::get_connection_graphics_object(const int& c_id) const {
+    VisualShaderConnectionGraphicsObject* c_o {nullptr};
+
+    auto it {connection_graphics_objects.find(c_id)};
+    if (it != connection_graphics_objects.end()) {
+        c_o = it->second;
+    }
+
+    return c_o;
 }
 
 /**********************************************************************/
@@ -536,7 +665,10 @@ VisualShaderGraphicsScene::VisualShaderGraphicsScene(QObject *parent) : QGraphic
 VisualShaderGraphicsView::VisualShaderGraphicsView(VisualShaderGraphicsScene *scene, QWidget *parent) : QGraphicsView(scene, parent), 
                                                                                                         context_menu(nullptr),
                                                                                                         create_node_action(nullptr),
-                                                                                                        delete_node_action(nullptr) {
+                                                                                                        delete_node_action(nullptr),
+                                                                                                        zoom_in_action(nullptr),
+                                                                                                        reset_zoom_action(nullptr),
+                                                                                                        zoom_out_action(nullptr) {
     setDragMode(QGraphicsView::ScrollHandDrag);
 	setRenderHint(QPainter::Antialiasing);
 
@@ -557,6 +689,8 @@ VisualShaderGraphicsView::VisualShaderGraphicsView(VisualShaderGraphicsScene *sc
 
 	setSceneRect(rect_x, rect_y, rect_width, rect_height);
 
+    reset_zoom();
+
     // Set the context menu
     context_menu = new QMenu(this);
     create_node_action = new QAction(QStringLiteral("Create Node"), context_menu);
@@ -568,34 +702,35 @@ VisualShaderGraphicsView::VisualShaderGraphicsView(VisualShaderGraphicsScene *sc
 	delete_node_action->setShortcut(QKeySequence(QKeySequence::Delete));
     QObject::connect(delete_node_action, &QAction::triggered, this, &VisualShaderGraphicsView::on_delete_node_action_triggered);
     context_menu->addAction(delete_node_action);
+
+    zoom_in_action = new QAction(QStringLiteral("Zoom In"), context_menu);
+    zoom_in_action->setShortcutContext(Qt::ShortcutContext::WidgetShortcut);
+    zoom_in_action->setShortcut(QKeySequence(QKeySequence::ZoomIn));
+    QObject::connect(zoom_in_action, &QAction::triggered, this, &VisualShaderGraphicsView::zoom_in);
+    context_menu->addAction(zoom_in_action);
+
+    reset_zoom_action = new QAction(QStringLiteral("Reset Zoom"), context_menu);
+    QObject::connect(reset_zoom_action, &QAction::triggered, this, &VisualShaderGraphicsView::reset_zoom);
+    context_menu->addAction(reset_zoom_action);
+
+    zoom_out_action = new QAction(QStringLiteral("Zoom Out"), context_menu);
+    zoom_out_action->setShortcutContext(Qt::ShortcutContext::WidgetShortcut);
+    zoom_out_action->setShortcut(QKeySequence(QKeySequence::ZoomOut));
+    QObject::connect(zoom_out_action, &QAction::triggered, this, &VisualShaderGraphicsView::zoom_out);
+    context_menu->addAction(zoom_out_action);
 }
 
 VisualShaderGraphicsView::~VisualShaderGraphicsView() {
-    if (context_menu) delete context_menu;
+    if (zoom_out_action) delete zoom_out_action;
+    if (reset_zoom_action) delete reset_zoom_action;
+    if (zoom_in_action) delete zoom_in_action;
     if (create_node_action) delete create_node_action;
+    if (context_menu) delete context_menu;
 }
 
 //////////////////////////////
 // Private slots
 //////////////////////////////
-
-void VisualShaderGraphicsView::setup_zoom(const float& zoom) {
-    float t_zoom {zoom};
-
-    t_zoom = std::max(zoom_min, std::min(zoom_max, t_zoom));
-
-	if (t_zoom <= 0.0f)
-		return;
-
-	if (t_zoom == transform().m11())
-		return;
-
-	QTransform matrix;
-	matrix.scale(t_zoom, t_zoom);
-	setTransform(matrix, false);
-
-	Q_EMIT zoom_changed(t_zoom);
-}
 
 void VisualShaderGraphicsView::on_create_node_action_triggered() {
     
@@ -606,12 +741,11 @@ void VisualShaderGraphicsView::on_delete_node_action_triggered() {
 }
 
 void VisualShaderGraphicsView::zoom_in() {
-	const float factor {std::pow(zoom_step, 1.0f)};
+	const float factor {std::pow(zoom_step, zoom)};
 
 	QTransform t {transform()};
     t.scale(factor, factor);
     if (t.m11() >= zoom_max) {
-        setup_zoom(t.m11());
         return;
     }
 
@@ -620,16 +754,20 @@ void VisualShaderGraphicsView::zoom_in() {
 }
 
 void VisualShaderGraphicsView::reset_zoom() {
-    
+    if ((float)transform().m11() == zoom) {
+        return;
+    }
+
+    resetTransform(); // Reset the zoom level to 1.0f
+    Q_EMIT zoom_changed(transform().m11());
 }
 
 void VisualShaderGraphicsView::zoom_out() {
-	const float factor {std::pow(zoom_step, -1.0f)};
+	const float factor {std::pow(zoom_step, -1.0f * zoom)};
 
 	QTransform t {transform()};
     t.scale(factor, factor);
     if (t.m11() <= zoom_min) {
-        setup_zoom(t.m11());
         return;
     }
 
@@ -650,10 +788,10 @@ void VisualShaderGraphicsView::drawBackground(QPainter *painter, const QRectF &r
 		QPointF tl {mapToScene(window_rect.topLeft())};
 		QPointF br {mapToScene(window_rect.bottomRight())};
 
-		float left {(float)std::floor(tl.x() / grid_step - 0.5f)};
-		float right {(float)std::floor(br.x() / grid_step + 1.0f)};
-		float bottom {(float)std::floor(tl.y() / grid_step - 0.5f)};
-		float top {(float)std::floor(br.y() / grid_step + 1.0f)};
+        float left {std::floor((float)tl.x() / grid_step)};
+        float right {std::ceil((float)br.x() / grid_step)};
+        float bottom {std::floor((float)tl.y() / grid_step)};
+        float top {std::ceil((float)br.y() / grid_step)};
 
 		// Vertical lines
 		for (int xi {(int)left}; xi <= (int)right; ++xi) {
@@ -678,8 +816,9 @@ void VisualShaderGraphicsView::drawBackground(QPainter *painter, const QRectF &r
 }
 
 void VisualShaderGraphicsView::contextMenuEvent(QContextMenuEvent *event) {
+    QGraphicsView::contextMenuEvent(event);
+
     if (itemAt(event->pos())) {
-		QGraphicsView::contextMenuEvent(event);
 		return;
 	}
 
@@ -689,6 +828,8 @@ void VisualShaderGraphicsView::contextMenuEvent(QContextMenuEvent *event) {
 }
 
 void VisualShaderGraphicsView::wheelEvent(QWheelEvent *event) {
+    float t_zoom {(float)transform().m11()};
+
 	const QPoint delta {event->angleDelta()};
 
 	if (delta.y() == 0) {
@@ -696,10 +837,13 @@ void VisualShaderGraphicsView::wheelEvent(QWheelEvent *event) {
 		return;
 	}
 
-	if (delta.y() > 0)
-		zoom_in();
-	else
-		zoom_out();
+    if (delta.y() > 0 && (std::abs(t_zoom - zoom_max) > std::numeric_limits<double>::epsilon())) {
+        zoom_in();
+    } else if (delta.y() < 0 && (std::abs(t_zoom - zoom_min) > std::numeric_limits<double>::epsilon())) {
+        zoom_out();
+    } else {
+        event->ignore();
+    }
 }
 
 void VisualShaderGraphicsView::mousePressEvent(QMouseEvent *event) {
@@ -738,20 +882,48 @@ void VisualShaderGraphicsView::mouseReleaseEvent(QMouseEvent *event) {
 void VisualShaderGraphicsView::showEvent(QShowEvent *event) {
 	QGraphicsView::showEvent(event);
 
-	center_scene();
-}
-
-void VisualShaderGraphicsView::center_scene() {
-    scene()->setSceneRect(QRectF());
-
-    QRectF rect {scene()->itemsBoundingRect()};
-    QRectF scene_scene {QRectF(0, 0, rect.left() * 2 + rect.width(), rect.top() * 2 + rect.height())};
-
-    if (scene_scene.width() > this->rect().width() || scene_scene.height() > this->rect().height()) {
-        fitInView(scene_scene, Qt::KeepAspectRatio);
+    if (!scene()) {
+        return;
     }
 
-    centerOn(scene_scene.center());
+    if (scene()->items().isEmpty()) {
+        return;
+    }
+
+    std::cout << "Changing view port to fit items..." << std::endl;
+
+	move_view_to_fit_items();
+}
+
+void VisualShaderGraphicsView::move_view_to_fit_items() {
+    QRectF items_bounding_rect {scene()->itemsBoundingRect()};
+    items_bounding_rect.adjust(-fit_in_view_margin, -fit_in_view_margin, fit_in_view_margin, fit_in_view_margin);
+
+    QPointF scene_tl {this->scene()->sceneRect().topLeft()};
+    QPointF scene_br {this->scene()->sceneRect().bottomRight()};
+    QPointF items_tl {items_bounding_rect.topLeft()};
+    QPointF items_br {items_bounding_rect.bottomRight()};
+
+    // Make sure the items bounding rect is inside the scene rect
+    if (items_tl.x() < scene_tl.x()) {
+        items_bounding_rect.setLeft(scene_tl.x());
+    }
+
+    if (items_tl.y() > scene_tl.y()) {
+        items_bounding_rect.setTop(scene_tl.y());
+    }
+
+    if (items_br.x() > scene_br.x()) {
+        items_bounding_rect.setRight(scene_br.x());
+    }
+
+    if (items_br.y() < scene_br.y()) {
+        items_bounding_rect.setBottom(scene_br.y());
+    }
+
+    fitInView(items_bounding_rect, Qt::KeepAspectRatio);
+
+    centerOn(items_bounding_rect.center());
 }
 
 /**********************************************************************/
@@ -764,7 +936,107 @@ void VisualShaderGraphicsView::center_scene() {
 /**********************************************************************/
 /**********************************************************************/
 
+VisualShaderNodeGraphicsObject::VisualShaderNodeGraphicsObject(VisualShader* vs, const int& n_id, QGraphicsItem* parent) : QGraphicsObject(parent), 
+                                                                                                                           vs(vs),
+                                                                                                                           n_id(n_id) {
+    setFlag(QGraphicsItem::ItemDoesntPropagateOpacityToChildren, true);
+	setFlag(QGraphicsItem::ItemIsFocusable, true);
+    setFlag(QGraphicsItem::ItemIsMovable, true);
+	setFlag(QGraphicsItem::ItemIsSelectable, true);
+	setFlag(QGraphicsItem::ItemSendsScenePositionChanges, true);
 
+	setCacheMode(QGraphicsItem::DeviceCoordinateCache);
+
+    setVisible(true);
+	setOpacity(this->opacity);
+
+	setZValue(0);
+
+    TVector2 coordinate {vs->get_node_coordinate(n_id)};
+
+    std::cout << "Node ID: " << n_id << " Coordinate: " << coordinate.x << ", " << coordinate.y << std::endl;
+
+	setPos(coordinate.x, coordinate.y);
+}
+
+VisualShaderNodeGraphicsObject::~VisualShaderNodeGraphicsObject() {
+    
+}
+
+QRectF VisualShaderNodeGraphicsObject::boundingRect() const {
+	float w_margin {(float)size.width() * rect_margin_ratio};
+	float h_margin {(float)size.height() * rect_margin_ratio};
+
+	QMargins margins((int)w_margin, (int)h_margin, (int)w_margin, (int)h_margin);
+
+	QRectF r({0.0f, 0.0f}, size);
+
+    std::cout << "Bounding rect: " << r.x() << ", " << r.y() << ", " << r.width() << ", " << r.height() << std::endl;
+
+	return r.marginsAdded(margins);
+}
+
+void VisualShaderNodeGraphicsObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    std::cout << " ----------------- Paint method called for node ID: " << n_id << std::endl;
+    
+    const std::shared_ptr<VisualShaderNode> n {vs->get_node(n_id)};
+
+    if (!n) {
+        return;
+    }
+
+    painter->setClipRect(option->exposedRect);
+
+    {
+        // Draw Node Rect
+        QColor rect_color;
+        if (isSelected()) {
+            rect_color = this->normal_boundary_color;
+        } else {
+            rect_color = this->selected_boundary_color;
+        }
+
+        QPen p(rect_color, this->pen_width);
+        painter->setPen(p);
+
+        painter->setBrush(this->fill_color);
+
+        QRectF boundary(0, 0, size.width(), size.height());
+
+        painter->drawRoundedRect(boundary, this->corner_radius, this->corner_radius);
+    }
+
+    {
+        // Draw Caption
+        QString caption {QString::fromStdString(n->get_caption())};
+
+        QFont f {painter->font()};
+        f.setBold(true);
+        QFontMetrics fm(f);
+        QRect text_rect {fm.boundingRect(caption)};
+
+        // Calculate the coordinate of the caption
+        float x {0.5f * (float)(size.width() - text_rect.width())};
+        float y {0.5f * this->port_spacing + (float)text_rect.height()};
+        QPointF coordinate {QPointF(x, y)};
+
+        painter->setFont(f);
+        painter->setPen(this->font_color);
+        painter->drawText(coordinate, caption);
+
+        f.setBold(false);
+        painter->setFont(f);
+    }
+
+    {
+        // Draw Input Ports
+        const int in_port_count {n->get_input_port_count()};
+    }
+
+    {
+        // Draw Output Ports
+    }
+}
 
 /**********************************************************************/
 /**********************************************************************/
@@ -776,7 +1048,21 @@ void VisualShaderGraphicsView::center_scene() {
 /**********************************************************************/
 /**********************************************************************/
 
+VisualShaderConnectionGraphicsObject::VisualShaderConnectionGraphicsObject(QGraphicsItem* parent) : QGraphicsObject(parent) {
+    
+}
 
+VisualShaderConnectionGraphicsObject::~VisualShaderConnectionGraphicsObject() {
+    
+}
+
+QRectF VisualShaderConnectionGraphicsObject::boundingRect() const {
+    return QRectF();
+}
+
+void VisualShaderConnectionGraphicsObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+
+}
 
 /**********************************************************************/
 /**********************************************************************/
