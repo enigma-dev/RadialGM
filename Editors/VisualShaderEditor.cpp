@@ -571,7 +571,6 @@ VisualShaderGraphicsScene::VisualShaderGraphicsScene(VisualShader* vs, QObject* 
         VisualShaderNodeGraphicsObject* n_o {new VisualShaderNodeGraphicsObject(vs, node_id)};
         node_graphics_objects[node_id] = n_o;
         this->addItem(n_o);
-        this->update();
     }
 
     // Populate the scene with connections
@@ -580,11 +579,16 @@ VisualShaderGraphicsScene::VisualShaderGraphicsScene(VisualShader* vs, QObject* 
     for (const int& connection_id : connections) {
         const VisualShader::Connection connection {vs->get_connection(connection_id)};
 
-        VisualShaderConnectionGraphicsObject* c_o {new VisualShaderConnectionGraphicsObject()};
+        VisualShaderConnectionGraphicsObject* c_o {new VisualShaderConnectionGraphicsObject(connection.from_node, connection.from_port)};
         connection_graphics_objects[connection_id] = c_o;
         this->addItem(c_o);
-        this->update();
     }
+
+    QObject::connect(this, &VisualShaderGraphicsScene::node_moved, this, &VisualShaderGraphicsScene::on_node_moved);
+
+    VisualShaderConnectionGraphicsObject* c_o {new VisualShaderConnectionGraphicsObject(1, 0)};
+    connection_graphics_objects[0] = c_o;
+    this->addItem(c_o);
 }
 
 VisualShaderGraphicsScene::~VisualShaderGraphicsScene() {
@@ -603,6 +607,13 @@ bool VisualShaderGraphicsScene::add_node(const int& n_id) {
     if (!node) {
         vs->remove_node(n_id);
         return false;
+    }
+
+    if (vs->get_node_coordinate(n_id).x > this->sceneRect().bottomRight().x() || 
+        vs->get_node_coordinate(n_id).y < this->sceneRect().bottomRight().y() ||
+        vs->get_node_coordinate(n_id).x < this->sceneRect().topLeft().x() || 
+        vs->get_node_coordinate(n_id).y > this->sceneRect().topLeft().y()) {
+        std::cout << "Node is out of scene bounds" << std::endl;
     }
 
     VisualShaderNodeGraphicsObject* n_o {new VisualShaderNodeGraphicsObject(vs, n_id)};
@@ -646,6 +657,11 @@ VisualShaderConnectionGraphicsObject* VisualShaderGraphicsScene::get_connection_
     }
 
     return c_o;
+}
+
+void VisualShaderGraphicsScene::on_node_moved(const int& n_id, const QPointF& new_position) {
+    // Here we will move all connections that are connected to the node
+    // std::cout << "Node moved: " << n_id << " to " << new_position.x() << ", " << new_position.y() << std::endl;
 }
 
 /**********************************************************************/
@@ -882,6 +898,10 @@ void VisualShaderGraphicsView::mouseReleaseEvent(QMouseEvent *event) {
 void VisualShaderGraphicsView::showEvent(QShowEvent *event) {
 	QGraphicsView::showEvent(event);
 
+	move_view_to_fit_items();
+}
+
+void VisualShaderGraphicsView::move_view_to_fit_items() {
     if (!scene()) {
         return;
     }
@@ -892,10 +912,6 @@ void VisualShaderGraphicsView::showEvent(QShowEvent *event) {
 
     std::cout << "Changing view port to fit items..." << std::endl;
 
-	move_view_to_fit_items();
-}
-
-void VisualShaderGraphicsView::move_view_to_fit_items() {
     QRectF items_bounding_rect {scene()->itemsBoundingRect()};
     items_bounding_rect.adjust(-fit_in_view_margin, -fit_in_view_margin, fit_in_view_margin, fit_in_view_margin);
 
@@ -924,6 +940,16 @@ void VisualShaderGraphicsView::move_view_to_fit_items() {
     fitInView(items_bounding_rect, Qt::KeepAspectRatio);
 
     centerOn(items_bounding_rect.center());
+
+    if ((float)transform().m11() > zoom_max) {
+        std::cout << "Current zoom level is greater than the maximum zoom level." << std::endl;
+        std::cout << "Maybe due to having a very large distance between the nodes." << std::endl;
+    }
+
+    if ((float)transform().m11() < zoom_min) {
+        std::cout << "Current zoom level is less than the minimum zoom level." << std::endl;
+        std::cout << "Maybe due to having all the nodes outside the scene bounds." << std::endl;
+    }
 }
 
 /**********************************************************************/
@@ -938,7 +964,9 @@ void VisualShaderGraphicsView::move_view_to_fit_items() {
 
 VisualShaderNodeGraphicsObject::VisualShaderNodeGraphicsObject(VisualShader* vs, const int& n_id, QGraphicsItem* parent) : QGraphicsObject(parent), 
                                                                                                                            vs(vs),
-                                                                                                                           n_id(n_id) {
+                                                                                                                           n_id(n_id),
+                                                                                                                           rect_margin(0.0f),
+                                                                                                                           rect_padding(0.0f) {
     setFlag(QGraphicsItem::ItemDoesntPropagateOpacityToChildren, true);
 	setFlag(QGraphicsItem::ItemIsFocusable, true);
     setFlag(QGraphicsItem::ItemIsMovable, true);
@@ -954,8 +982,6 @@ VisualShaderNodeGraphicsObject::VisualShaderNodeGraphicsObject(VisualShader* vs,
 
     TVector2 coordinate {vs->get_node_coordinate(n_id)};
 
-    std::cout << "Node ID: " << n_id << " Coordinate: " << coordinate.x << ", " << coordinate.y << std::endl;
-
 	setPos(coordinate.x, coordinate.y);
 }
 
@@ -964,21 +990,27 @@ VisualShaderNodeGraphicsObject::~VisualShaderNodeGraphicsObject() {
 }
 
 QRectF VisualShaderNodeGraphicsObject::boundingRect() const {
-	float w_margin {(float)size.width() * rect_margin_ratio};
-	float h_margin {(float)size.height() * rect_margin_ratio};
+	QRectF r({0.0f, 0.0f}, this->size);
 
-	QMargins margins((int)w_margin, (int)h_margin, (int)w_margin, (int)h_margin);
+    float rect_w {(float)r.width()};
+    float rect_h {(float)r.height()};
 
-	QRectF r({0.0f, 0.0f}, size);
+    float min_side {(float)qMin(rect_w, rect_h)};
 
-    std::cout << "Bounding rect: " << r.x() << ", " << r.y() << ", " << r.width() << ", " << r.height() << std::endl;
+    // Calculate the margin
+    this->rect_margin = min_side * 0.1f;
 
-	return r.marginsAdded(margins);
+    // Calculate the rect padding
+    // We add a safe area around the rect to make it easier to get an accurate coordinate of the size
+    this->rect_padding = min_side * 0.15f;
+
+    r.adjust(-rect_margin - rect_padding, -rect_margin - rect_padding,
+             rect_margin + rect_padding, rect_margin + rect_padding);
+
+	return r;
 }
 
 void VisualShaderNodeGraphicsObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-    std::cout << " ----------------- Paint method called for node ID: " << n_id << std::endl;
-    
     const std::shared_ptr<VisualShaderNode> n {vs->get_node(n_id)};
 
     if (!n) {
@@ -986,6 +1018,10 @@ void VisualShaderNodeGraphicsObject::paint(QPainter *painter, const QStyleOption
     }
 
     painter->setClipRect(option->exposedRect);
+
+    // Get the rect without the padding
+    QRectF r {this->boundingRect()};
+    r.adjust(rect_padding, rect_padding, -rect_padding, -rect_padding);
 
     {
         // Draw Node Rect
@@ -1001,42 +1037,277 @@ void VisualShaderNodeGraphicsObject::paint(QPainter *painter, const QStyleOption
 
         painter->setBrush(this->fill_color);
 
-        QRectF boundary(0, 0, size.width(), size.height());
-
-        painter->drawRoundedRect(boundary, this->corner_radius, this->corner_radius);
+        painter->drawRoundedRect(r, this->corner_radius, this->corner_radius);
     }
+
+    // Add the margin to the rect
+    r.adjust(rect_margin, rect_margin, -rect_margin, -rect_margin);
+
+    float rect_x {(float)r.topLeft().x()};
+    float rect_y {(float)r.topLeft().y()};
+
+    float rect_w {(float)r.width()};
+    float rect_h {(float)r.height()};
+
+    float min_side {(float)qMin(rect_w, rect_h)};
+
+    QRectF caption_rect(rect_x, rect_y, rect_w, min_side * 0.2f);
 
     {
         // Draw Caption
         QString caption {QString::fromStdString(n->get_caption())};
 
-        QFont f {painter->font()};
+        QFont t_f {painter->font()};
+
+        QFont f {t_f};
         f.setBold(true);
+        f.setPointSize(min_side * 0.1f);
+        painter->setFont(f);
         QFontMetrics fm(f);
         QRect text_rect {fm.boundingRect(caption)};
 
-        // Calculate the coordinate of the caption
-        float x {0.5f * (float)(size.width() - text_rect.width())};
-        float y {0.5f * this->port_spacing + (float)text_rect.height()};
-        QPointF coordinate {QPointF(x, y)};
+        // Calculate the coordinates of the caption
+        float x {rect_x + (float)(caption_rect.center().x() - text_rect.center().x())};
 
-        painter->setFont(f);
+        // Instead of subtracting, add the ascent to properly align text within the rect
+        float y {rect_y + (float)(caption_rect.center().y() - text_rect.center().y())};
+
+        QPointF coordinate {x, y};
+
         painter->setPen(this->font_color);
         painter->drawText(coordinate, caption);
 
-        f.setBold(false);
-        painter->setFont(f);
+        painter->setFont(t_f); // Reset the font
     }
+
+    QPointF caption_rect_bl {caption_rect.bottomLeft()};
+    QPointF first_in_port_coordinate {caption_rect_bl.x(), caption_rect_bl.y() + min_side * 0.4f};
+
+    // Correct X coordinate: Remove the margin
+    first_in_port_coordinate.setX((float)first_in_port_coordinate.x() - this->rect_margin);
 
     {
         // Draw Input Ports
-        const int in_port_count {n->get_input_port_count()};
+        int in_port_count {n->get_input_port_count()};
+
+        for (unsigned i {0}; i < in_port_count; ++i) {
+            if (in_port_graphics_objects.find(i) != in_port_graphics_objects.end()) 
+                continue;
+
+            QPointF port_coordinate {first_in_port_coordinate.x(), first_in_port_coordinate.y() + (min_side * 0.3f) * i};
+
+            QRectF port_rect(port_coordinate.x(), port_coordinate.y(), min_side * 0.1f, min_side * 0.1f);
+
+            // Adjust the port rect to be centered
+            port_rect.adjust(-port_rect.width() * 0.5f, -port_rect.height() * 0.5f, -port_rect.width() * 0.5f, -port_rect.height() * 0.5f);
+
+            QString p_n {QString::fromStdString(n->get_input_port_name(i))};
+
+            VisualShaderInputPortGraphicsObject* p_o {new VisualShaderInputPortGraphicsObject(p_n, r, port_rect, i, this)};
+            in_port_graphics_objects[i] = p_o;
+        }
     }
+
+    QPointF caption_rect_br {caption_rect.bottomRight()};
+    QPointF first_out_port_coordinate {caption_rect_br.x(), caption_rect_br.y() + min_side * 0.4f};
+
+    // Correct X coordinate: Remove the margin
+    first_out_port_coordinate.setX((float)first_out_port_coordinate.x() + this->rect_margin);
 
     {
         // Draw Output Ports
+        int out_port_count {n->get_output_port_count()};
+
+        for (unsigned i {0}; i < out_port_count; ++i) {
+            if (out_port_graphics_objects.find(i) != out_port_graphics_objects.end()) 
+                continue;
+            
+            QPointF port_coordinate {first_out_port_coordinate.x(), first_out_port_coordinate.y() + (min_side * 0.3f) * i};
+
+            QRectF port_rect(port_coordinate.x(), port_coordinate.y(), min_side * 0.1f, min_side * 0.1f);
+
+            // Adjust the port rect to be centered
+            port_rect.adjust(-port_rect.width() * 0.5f, -port_rect.height() * 0.5f, -port_rect.width() * 0.5f, -port_rect.height() * 0.5f);
+
+            QString p_n {QString::fromStdString(n->get_output_port_name(i))};
+
+            VisualShaderOutputPortGraphicsObject* p_o {new VisualShaderOutputPortGraphicsObject(p_n, r, port_rect, i, this)};
+            out_port_graphics_objects[i] = p_o;
+        }
+    }    
+}
+
+
+QVariant VisualShaderNodeGraphicsObject::itemChange(GraphicsItemChange change, const QVariant &value) {
+	if (scene() && change == ItemScenePositionHasChanged) {
+        Q_EMIT dynamic_cast<VisualShaderGraphicsScene*>(scene())->node_moved(n_id, pos());
+	}
+
+	return QGraphicsObject::itemChange(change, value);
+}
+
+void VisualShaderNodeGraphicsObject::mousePressEvent(QGraphicsSceneMouseEvent *event) {
+    QGraphicsObject::mousePressEvent(event);
+}
+
+void VisualShaderNodeGraphicsObject::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
+    QGraphicsObject::mouseMoveEvent(event);
+}
+
+void VisualShaderNodeGraphicsObject::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
+    QGraphicsObject::mouseReleaseEvent(event);
+}
+
+void VisualShaderNodeGraphicsObject::contextMenuEvent(QGraphicsSceneContextMenuEvent *event) {
+    QGraphicsObject::contextMenuEvent(event);
+}
+
+VisualShaderInputPortGraphicsObject::VisualShaderInputPortGraphicsObject(const QString& name,
+                                                                         const QRectF& parent_node_rect, 
+                                                                         const QRectF& rect,
+                                                                         const int& p_index, 
+                                                                         QGraphicsItem* parent) : QGraphicsObject(parent), 
+                                                                                                  name(name),
+                                                                                                  rect(rect), 
+                                                                                                  parent_node_rect(parent_node_rect),
+                                                                                                  p_index(p_index) {
+    setFlag(QGraphicsItem::ItemDoesntPropagateOpacityToChildren, true);
+	setFlag(QGraphicsItem::ItemIsFocusable, true);
+	setFlag(QGraphicsItem::ItemIsSelectable, true);
+
+	setCacheMode(QGraphicsItem::DeviceCoordinateCache);
+
+    setVisible(true);
+	setOpacity(this->opacity);
+
+	setZValue(0);
+}
+
+VisualShaderInputPortGraphicsObject::~VisualShaderInputPortGraphicsObject() {
+    
+}
+
+QRectF VisualShaderInputPortGraphicsObject::boundingRect() const {
+    QFont f;
+    QFontMetrics fm(f);
+    QRect text_rect {fm.boundingRect(name)};
+    return rect.united(text_rect);
+}
+
+void VisualShaderInputPortGraphicsObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    painter->setClipRect(option->exposedRect);
+
+    float parent_rect_x {(float)parent_node_rect.topLeft().x()};
+    float parent_rect_y {(float)parent_node_rect.topLeft().y()};
+
+    float parent_rect_w {(float)parent_node_rect.width()};
+    float parent_rect_h {(float)parent_node_rect.height()};
+
+    float parent_min_side {(float)qMin(parent_rect_w, parent_rect_h)};
+    
+    painter->setBrush(this->connection_point_color);
+
+    painter->drawEllipse(rect);
+
+    {
+        // Draw input port name
+        if (!name.isEmpty()) {
+            QFont t_f {painter->font()};
+
+            QFont f {t_f};
+            f.setPointSize(parent_min_side * 0.06f);
+            painter->setFont(f);
+            QFontMetrics fm(f);
+            QRect text_rect {fm.boundingRect(name)};
+
+            float x {(float)rect.x() + (float)rect.width() + parent_min_side * 0.08f};
+
+            float y {parent_rect_y + (float)(rect.center().y() - text_rect.center().y())};
+
+            QPointF coordinate {x, y};
+
+            painter->setPen(this->font_color);
+            painter->drawText(coordinate, name);
+
+            painter->setFont(t_f); // Reset the font
+        }
     }
 }
+
+VisualShaderOutputPortGraphicsObject::VisualShaderOutputPortGraphicsObject(const QString& name,
+                                                                           const QRectF& parent_node_rect, 
+                                                                           const QRectF& rect,
+                                                                           const int& p_index, 
+                                                                           QGraphicsItem* parent) : QGraphicsObject(parent), 
+                                                                                                    name(name),
+                                                                                                    rect(rect),
+                                                                                                    parent_node_rect(parent_node_rect),
+                                                                                                    p_index(p_index) {
+    setFlag(QGraphicsItem::ItemDoesntPropagateOpacityToChildren, true);
+	setFlag(QGraphicsItem::ItemIsFocusable, true);
+	setFlag(QGraphicsItem::ItemIsSelectable, true);
+
+	setCacheMode(QGraphicsItem::DeviceCoordinateCache);
+
+    setVisible(true);
+	setOpacity(this->opacity);
+
+	setZValue(0);
+}
+
+VisualShaderOutputPortGraphicsObject::~VisualShaderOutputPortGraphicsObject() {
+    
+}
+
+QRectF VisualShaderOutputPortGraphicsObject::boundingRect() const {
+    QFont f;
+    QFontMetrics fm(f);
+    QRect text_rect {fm.boundingRect(name)};
+    return rect.united(text_rect);
+}
+
+void VisualShaderOutputPortGraphicsObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    painter->setClipRect(option->exposedRect);
+
+    float parent_rect_x {(float)parent_node_rect.topLeft().x()};
+    float parent_rect_y {(float)parent_node_rect.topLeft().y()};
+
+    float parent_rect_w {(float)parent_node_rect.width()};
+    float parent_rect_h {(float)parent_node_rect.height()};
+
+    float parent_min_side {(float)qMin(parent_rect_w, parent_rect_h)};
+    
+    painter->setBrush(this->connection_point_color);
+
+    painter->drawEllipse(rect);
+
+    {
+        // Draw output port name
+        if (!name.isEmpty()) {
+            QFont t_f {painter->font()};
+
+            QFont f {t_f};
+            f.setPointSize(parent_min_side * 0.06f);
+            painter->setFont(f);
+            QFontMetrics fm(f);
+            QRect text_rect {fm.boundingRect(name)};
+
+            float x {(float)rect.x() + (float)rect.width() + parent_min_side * 0.08f};
+
+            float y {parent_rect_y + (float)(rect.center().y() - text_rect.center().y())};
+
+            QPointF coordinate {x, y};
+
+            painter->setPen(this->font_color);
+            painter->drawText(coordinate, name);
+
+            painter->setFont(t_f); // Reset the font
+        }
+    
+    }
+}
+
+
 
 /**********************************************************************/
 /**********************************************************************/
@@ -1048,8 +1319,18 @@ void VisualShaderNodeGraphicsObject::paint(QPainter *painter, const QStyleOption
 /**********************************************************************/
 /**********************************************************************/
 
-VisualShaderConnectionGraphicsObject::VisualShaderConnectionGraphicsObject(QGraphicsItem* parent) : QGraphicsObject(parent) {
-    
+VisualShaderConnectionGraphicsObject::VisualShaderConnectionGraphicsObject(const int& from_n_id, 
+                                                                           const int& from_p_index, 
+                                                                           QGraphicsItem* parent) : QGraphicsObject(parent),
+                                                                                                    from_n_id(from_n_id),
+                                                                                                    from_p_index(from_p_index),
+                                                                                                    start_graphics_object(nullptr),
+                                                                                                    end_graphics_object(nullptr) {
+    setFlag(QGraphicsItem::ItemIsMovable, true);
+	setFlag(QGraphicsItem::ItemIsFocusable, true);
+	setFlag(QGraphicsItem::ItemIsSelectable, true);
+
+	setZValue(-1.0f);
 }
 
 VisualShaderConnectionGraphicsObject::~VisualShaderConnectionGraphicsObject() {
@@ -1057,11 +1338,314 @@ VisualShaderConnectionGraphicsObject::~VisualShaderConnectionGraphicsObject() {
 }
 
 QRectF VisualShaderConnectionGraphicsObject::boundingRect() const {
-    return QRectF();
+    QRectF r {calculate_bounding_rect_from_coordinates(start_coordinate, end_coordinate)};
+
+    // Calculate the rect padding
+    // We add a safe area around the rect to make it easier to get an accurate coordinate of the size
+    this->rect_padding = 10.0f;
+
+    r.adjust(-rect_padding, -rect_padding, rect_padding, rect_padding);
+
+	return r;
 }
 
 void VisualShaderConnectionGraphicsObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    painter->setClipRect(option->exposedRect);
 
+    // Get the rect without the padding
+    QRectF r {this->boundingRect()};
+
+    // {
+    //     // Draw rect
+    //     QColor rect_color {Qt::red};
+
+    //     QPen p(rect_color, 3.0f);
+    //     painter->setPen(p);
+
+    //     painter->setBrush(Qt::NoBrush);
+
+    //     painter->drawRect(r);
+    // }
+
+    // Add the padding to the rect
+    r.adjust(rect_padding, rect_padding, -rect_padding, -rect_padding);
+
+    float rect_x {(float)r.topLeft().x()};
+    float rect_y {(float)r.topLeft().y()};
+
+    float rect_w {(float)r.width()};
+    float rect_h {(float)r.height()};
+
+    float min_side {(float)qMin(rect_w, rect_h)};
+
+    {
+        QPen pen;
+        pen.setWidth(min_side * 0.05f);
+        pen.setColor(this->construction_color);
+        pen.setStyle(Qt::DashLine);
+
+        painter->setPen(pen);
+        painter->setBrush(Qt::NoBrush);
+
+        std::pair<QPointF, QPointF> control_points {calculate_control_points(start_coordinate, end_coordinate)}; 
+
+        QPainterPath cubic(start_coordinate);
+        cubic.cubicTo(control_points.first, control_points.second, end_coordinate);
+
+        // cubic spline
+        painter->drawPath(cubic);
+    }
+
+    {
+        // draw normal line
+        QPen p;
+        p.setWidth(min_side * 0.05f);
+
+        const bool selected {this->isSelected()};
+
+        std::pair<QPointF, QPointF> control_points {calculate_control_points(start_coordinate, end_coordinate)}; 
+
+        QPainterPath cubic(start_coordinate);
+        cubic.cubicTo(control_points.first, control_points.second, end_coordinate);
+
+        p.setColor(this->normal_color);
+
+        if (selected) {
+            p.setColor(this->selected_color);
+        }
+
+        painter->setPen(p);
+        painter->setBrush(Qt::NoBrush);
+
+        painter->drawPath(cubic);
+    }
+
+    {
+        // Draw start and end points
+        if (!start_graphics_object) {
+            QRectF start_rect(start_coordinate.x(), start_coordinate.y(), min_side * 0.2f, min_side * 0.2f);
+
+            // Adjust the port rect to be centered
+            start_rect.adjust(-start_rect.width() * 0.5f, -start_rect.height() * 0.5f, -start_rect.width() * 0.5f, -start_rect.height() * 0.5f);
+
+            VisualShaderConnectionStartGraphicsObject* s_o {new VisualShaderConnectionStartGraphicsObject(start_rect, this)};
+            start_graphics_object = s_o;
+        }
+
+        if (!end_graphics_object) {
+            QRectF end_rect(end_coordinate.x(), end_coordinate.y(), min_side * 0.2f, min_side * 0.2f);
+
+            // Adjust the port rect to be centered
+            end_rect.adjust(-end_rect.width() * 0.5f, -end_rect.height() * 0.5f, -end_rect.width() * 0.5f, -end_rect.height() * 0.5f);
+
+            VisualShaderConnectionEndGraphicsObject* e_o {new VisualShaderConnectionEndGraphicsObject(end_rect, this)};
+            end_graphics_object = e_o;
+        }
+    }
+}
+
+int VisualShaderConnectionGraphicsObject::detect_quadrant(const QPointF& reference, const QPointF& target) const {
+    float relative_x {(float)(target.x() - reference.x())};
+    float relative_y {(float)(target.y() - reference.y())};
+
+    // Note that the default coordinate system in Qt is as follows:
+    // - X-axis: Positive to the right, negative to the left
+    // - Y-axis: Positive downwards, negative upwards
+
+    // Check if the point is on an axis or the origin
+    if (relative_x == 0 && relative_y == 0) {
+        return 0; // Stack on the reference
+    } else if (relative_y == 0) {
+        return (relative_x > 0) ? 5 : 6; // On X-axis: 5 is the +ve part while 6 is the -ve one.
+    } else if (relative_x == 0) {
+        return (relative_y < 0) ? 7 : 8; // On Y-axis: 7 is the +ve part while 8 is the -ve one.
+    }
+
+    // Determine the quadrant based on the relative coordinates
+    if (relative_x > 0 && relative_y < 0) {
+        return 1; // Quadrant I
+    } else if (relative_x < 0 && relative_y < 0) {
+        return 2; // Quadrant II
+    } else if (relative_x < 0 && relative_y > 0) {
+        return 3; // Quadrant III
+    } else if (relative_x > 0 && relative_y > 0) {
+        return 4; // Quadrant IV
+    }
+
+    // Default case (should not reach here)
+    return -1;
+}
+
+QRectF VisualShaderConnectionGraphicsObject::calculate_bounding_rect_from_coordinates(const QPointF& start_coordinate, const QPointF& end_coordinate) const {
+    float x1 {(float)start_coordinate.x()};
+    float y1 {(float)start_coordinate.y()};
+    float x2 {(float)end_coordinate.x()};
+    float y2 {(float)end_coordinate.y()};
+    
+    // Calculate the expanded rect
+    float min_x {(float)qMin(x1, x2)};
+    float min_y {(float)qMin(y1, y2)};
+    float max_x {(float)qMax(x1, x2)};
+    float max_y {(float)qMax(y1, y2)};
+
+    QRectF r({min_x, min_y}, QSizeF(max_x - min_x, max_y - min_y));
+
+    bool in_abnormal_region {x2 < (x1 + min_h_distance)};
+
+    float a_width_expansion {((x1 + min_h_distance) - x2) * abnormal_face_to_back_control_width_expansion_factor};
+
+    if (in_abnormal_region) {
+        // The connection is not going from left to right normally
+        // Our control points will be outside the end_coordinate and start_coordinate bounding rect
+        // We will expand the bounding rect horizontally to make it easier to get an accurate coordinate of the size
+        r.adjust(-a_width_expansion, 0.0f, a_width_expansion, 0.0f);
+    }
+
+    return r;
+}
+
+std::pair<QPointF, QPointF> VisualShaderConnectionGraphicsObject::calculate_control_points(const QPointF& start_coordinate, const QPointF& end_coordinated) const {
+    QPointF cp1;
+    QPointF cp2;
+    
+    float x1 {(float)start_coordinate.x()};
+    float y1 {(float)start_coordinate.y()};
+    float x2 {(float)end_coordinate.x()};
+    float y2 {(float)end_coordinate.y()};
+    
+    QRectF r {calculate_bounding_rect_from_coordinates(start_coordinate, end_coordinate)};
+
+    bool in_abnormal_region {x2 < (x1 + min_h_distance)};
+
+    int quadrant {detect_quadrant({x1, y1}, {x2, y2})};
+
+    float face_to_face_control_width_expansion_factor {0.8f};
+    float face_to_face_control_height_expansion_factor {0.25f};
+
+    float width_expansion {(x2 - x1) * face_to_face_control_width_expansion_factor};
+
+    float a_width_expansion {((x1 + min_h_distance) - x2) * abnormal_face_to_back_control_width_expansion_factor};
+    float a_height_expansion {a_width_expansion * abnormal_face_to_back_control_height_expansion_factor};
+
+    if (in_abnormal_region) {
+        r.adjust(-a_width_expansion, 0.0f, a_width_expansion, 0.0f);
+    }
+
+    switch(quadrant) {
+        case 1: // Quadrant I: Normal face to back
+            // Find out if the connection is going from left to right normally
+            if (in_abnormal_region) {
+                // The connection is not going from left to right normally
+                // Our control points will be outside the end_coordinate and start_coordinate bounding rect
+                // We will expand the bounding rect horizontally to make it easier to get an accurate coordinate of the size
+
+                // Here we cover cases of nodes not facing each other.
+                // This means we can't just send the path straight to the node.
+
+                // Treated as inside Quadrant II
+                cp1 = {x1 + a_width_expansion, y1};
+                cp2 = {x2 - a_width_expansion, y2};
+                
+            } else {
+                // Treated as inside Quadrant I
+                cp1 = {x1 + width_expansion, y1};
+                cp2 = {x2 - width_expansion, y2};
+            }
+            break;
+        case 2: // Quadrant II: Abnormal face to back
+            cp1 = {x1 + a_width_expansion, y1};
+            cp2 = {x2 - a_width_expansion, y2};
+            break;
+        case 3: // Quadrant III: Abnormal face to back
+            cp1 = {x1 + a_width_expansion, y1 + a_height_expansion};
+            cp2 = {x2 - a_width_expansion, y2 - a_height_expansion};
+            break;
+        case 4: // Quadrant IV: Normal face to back
+            if (in_abnormal_region) {
+                // Treated as inside Quadrant III
+                cp1 = {x1 + a_width_expansion, y1};
+                cp2 = {x2 - a_width_expansion, y2};
+            } else {
+                // Treated as inside Quadrant IV
+                cp1 = {x1 + width_expansion, y1};
+                cp2 = {x2 - width_expansion, y2};
+            }
+            break;
+        case 5: // On +ve X-axis: Normal face to back
+            // Straight line
+            cp1 = {x1, y1};
+            cp2 = {x2, y2};
+            break;
+        case 6: // On -ve X-axis: Abnormal face to back
+            r.adjust(0.0f, -a_height_expansion, 0.0f, a_height_expansion);
+            cp1 = {x1 + a_width_expansion, y1};
+            cp2 = {x2 - a_width_expansion, y2};
+            break;
+        case 7: // On +ve Y-axis: Abnormal face to back
+            r.adjust(0.0f, -a_height_expansion, 0.0f, a_height_expansion);
+            cp1 = {x1 + a_width_expansion, y1};
+            cp2 = {x2 - a_width_expansion, y2};
+            break;
+        case 8: // On -ve Y-axis: Abnormal face to back
+            r.adjust(0.0f, -a_height_expansion, 0.0f, a_height_expansion);
+            cp1 = {x1 + a_width_expansion, y1};
+            cp2 = {x2 - a_width_expansion, y2};
+            break;
+        default:
+            return std::make_pair(start_coordinate, end_coordinate);
+    }
+
+    return std::make_pair(cp1, cp2);
+}
+
+VisualShaderConnectionStartGraphicsObject::VisualShaderConnectionStartGraphicsObject(const QRectF& rect, QGraphicsItem* parent) : QGraphicsObject(parent), 
+                                                                                                                                  rect(rect) {
+    setFlag(QGraphicsItem::ItemIsMovable, true);
+	setFlag(QGraphicsItem::ItemIsFocusable, true);
+	setFlag(QGraphicsItem::ItemIsSelectable, true);
+
+    setVisible(true);
+    setOpacity(this->opacity);
+
+    setZValue(-1.0f);
+}
+
+VisualShaderConnectionStartGraphicsObject::~VisualShaderConnectionStartGraphicsObject() {}
+
+QRectF VisualShaderConnectionStartGraphicsObject::boundingRect() const {
+    return rect;
+}
+
+void VisualShaderConnectionStartGraphicsObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    painter->setClipRect(option->exposedRect);
+
+    painter->setBrush(this->connection_point_color);
+    painter->drawEllipse(rect);
+}
+
+VisualShaderConnectionEndGraphicsObject::VisualShaderConnectionEndGraphicsObject(const QRectF& rect, QGraphicsItem* parent) : QGraphicsObject(parent), 
+                                                                                                                              rect(rect) {
+    setFlag(QGraphicsItem::ItemIsMovable, true);
+	setFlag(QGraphicsItem::ItemIsFocusable, true);
+	setFlag(QGraphicsItem::ItemIsSelectable, true);
+
+    setVisible(true);
+    setOpacity(this->opacity);
+
+    setZValue(-1.0f);
+}
+
+VisualShaderConnectionEndGraphicsObject::~VisualShaderConnectionEndGraphicsObject() {}
+
+QRectF VisualShaderConnectionEndGraphicsObject::boundingRect() const {
+    return rect;
+}
+
+void VisualShaderConnectionEndGraphicsObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    painter->setClipRect(option->exposedRect);
+
+    painter->setBrush(this->connection_point_color);
+    painter->drawEllipse(rect);
 }
 
 /**********************************************************************/
