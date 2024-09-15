@@ -242,6 +242,11 @@ public:
 
 	~VisualShaderGraphicsView();
 
+    float get_x() const { return rect_x; }
+    float get_y() const { return rect_y; }
+    float get_width() const { return rect_width; }
+    float get_height() const { return rect_height; }
+
 public Q_SLOTS:
     /**
      * @brief 
@@ -350,6 +355,14 @@ private:
     float opacity = 0.8f;
     float corner_radius = 3.0f;
 
+    mutable float rect_width; // Calculated in boundingRect()
+    mutable float caption_rect_height; // Calculated in boundingRect()
+
+    mutable float rect_height; // Calculated in boundingRect()
+    float body_rect_header_height = 30.0f;
+    float body_rect_port_step = 35.0f;
+    float body_rect_footer_height = 30.0f;
+
     mutable float rect_padding; // Calculated in boundingRect()
     mutable float rect_margin; // Calculated in boundingRect()
 
@@ -357,8 +370,9 @@ private:
     float connected_port_diameter = 8.0f;
     float unconnected_port_diameter = 6.0f;
 
-    // Size of the node
-    QSizeF size = QSizeF(150.0f, 250.0f);
+    // Caption
+    float caption_font_size = 18.0f;
+    float port_caption_font_size = 8.0f;
 
     QRectF boundingRect() const override;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr) override;
@@ -371,52 +385,44 @@ private:
 
 class VisualShaderInputPortGraphicsObject : public QGraphicsObject {
 public:
-    VisualShaderInputPortGraphicsObject(const QString& name,
-                                        const QRectF& parent_node_rect, 
-                                        const QRectF& rect, 
+    VisualShaderInputPortGraphicsObject(const QRectF& rect, 
                                         const int& p_index, 
                                         QGraphicsItem* parent = nullptr);
     ~VisualShaderInputPortGraphicsObject();
 
-    QRectF boundingRect() const override;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
-
 private:
-    QString name;
     int p_index;
     QRectF rect;
-    QRectF parent_node_rect;
 
     // Style
     QColor font_color = QColor(255, 255, 255);
     QColor connection_point_color = QColor(169, 169, 169);
 
     float opacity = 1.0f;
+
+    QRectF boundingRect() const override;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 };
 
 class VisualShaderOutputPortGraphicsObject : public QGraphicsObject {
 public:
-    VisualShaderOutputPortGraphicsObject(const QString& name,
-                                         const QRectF& parent_node_rect, 
-                                         const QRectF& rect, 
+    VisualShaderOutputPortGraphicsObject(const QRectF& rect, 
                                          const int& p_index, 
                                          QGraphicsItem* parent = nullptr);
     ~VisualShaderOutputPortGraphicsObject();
 
-    QRectF boundingRect() const override;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
-
 private:
-    QString name;
     int p_index;
     QRectF rect;
-    QRectF parent_node_rect;
 
     // Style
     QColor font_color = QColor(255, 255, 255);
     QColor connection_point_color = QColor(169, 169, 169);
 
     float opacity = 1.0f;
+
+    QRectF boundingRect() const override;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 };
 
 /**********************************************************************/
@@ -480,15 +486,18 @@ public:
     VisualShaderConnectionStartGraphicsObject(const QRectF& rect, QGraphicsItem* parent = nullptr);
     ~VisualShaderConnectionStartGraphicsObject();
 
-    QRectF boundingRect() const override;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
-
 private:
+    int n_id;
+    int p_index; // This is an output port index
+
     QRectF rect;
 
     // Style
     QColor connection_point_color = QColor(169, 169, 169);
     float opacity = 1.0f;
+
+    QRectF boundingRect() const override;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 };
 
 class VisualShaderConnectionEndGraphicsObject : public QGraphicsObject {
@@ -496,15 +505,18 @@ public:
     VisualShaderConnectionEndGraphicsObject(const QRectF& rect, QGraphicsItem* parent = nullptr);
     ~VisualShaderConnectionEndGraphicsObject();
 
-    QRectF boundingRect() const override;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
-
 private:
+    int n_id;
+    int p_index; // This is an input port index
+
     QRectF rect;
 
     // Style
     QColor connection_point_color = QColor(169, 169, 169);
     float opacity = 1.0f;
+
+    QRectF boundingRect() const override;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 };
 
 /**********************************************************************/

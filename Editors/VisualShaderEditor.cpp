@@ -609,11 +609,19 @@ bool VisualShaderGraphicsScene::add_node(const int& n_id) {
         return false;
     }
 
-    if (vs->get_node_coordinate(n_id).x > this->sceneRect().bottomRight().x() || 
-        vs->get_node_coordinate(n_id).y < this->sceneRect().bottomRight().y() ||
-        vs->get_node_coordinate(n_id).x < this->sceneRect().topLeft().x() || 
-        vs->get_node_coordinate(n_id).y > this->sceneRect().topLeft().y()) {
-        std::cout << "Node is out of scene bounds" << std::endl;
+    QList<QGraphicsView *> views {this->views()};
+    if (views.isEmpty()) {
+        std::cout << "No views available" << std::endl;
+        return false;
+    }
+
+    VisualShaderGraphicsView* view {dynamic_cast<VisualShaderGraphicsView *>(views.first())};
+
+    if (vs->get_node_coordinate(n_id).x < view->get_x() || 
+        vs->get_node_coordinate(n_id).x > view->get_x() + view->get_width() ||
+        vs->get_node_coordinate(n_id).y < view->get_y() || 
+        vs->get_node_coordinate(n_id).y > view->get_y() + view->get_height()) {
+        std::cout << "Node is out of view bounds" << std::endl;
     }
 
     VisualShaderNodeGraphicsObject* n_o {new VisualShaderNodeGraphicsObject(vs, n_id)};
@@ -990,19 +998,42 @@ VisualShaderNodeGraphicsObject::~VisualShaderNodeGraphicsObject() {
 }
 
 QRectF VisualShaderNodeGraphicsObject::boundingRect() const {
-	QRectF r({0.0f, 0.0f}, this->size);
+    const std::shared_ptr<VisualShaderNode> n {vs->get_node(n_id)};
 
-    float rect_w {(float)r.width()};
-    float rect_h {(float)r.height()};
+    if (!n) {
+        return QRectF();
+    }
 
-    float min_side {(float)qMin(rect_w, rect_h)};
+    QFont f("Arial", caption_font_size);
+    f.setBold(true);
+    QFontMetrics fm(f);
+
+    QString caption {QString::fromStdString(n->get_caption())};
+
+    rect_width = (float)(fm.horizontalAdvance(caption, caption.length()) + 20.0f);
+    caption_rect_height = (float)((fm.height()) + 30.0f);
+
+    int max_num_ports {qMax(n->get_input_port_count(), n->get_output_port_count())};
+
+    // Calculate the height of the node
+    float t_rect_h {caption_rect_height};
+
+    t_rect_h += body_rect_header_height; // Header
+    if (max_num_ports >= 0) {
+        t_rect_h += (float)(max_num_ports - 1) * body_rect_port_step; // Ports
+    }
+    t_rect_h += body_rect_footer_height; // Footer
+
+    rect_height = t_rect_h;
+
+	QRectF r({0.0f, 0.0f}, QSizeF(rect_width, rect_height));
 
     // Calculate the margin
-    this->rect_margin = min_side * 0.1f;
+    this->rect_margin = rect_width * 0.1f;
 
     // Calculate the rect padding
     // We add a safe area around the rect to make it easier to get an accurate coordinate of the size
-    this->rect_padding = min_side * 0.15f;
+    this->rect_padding = rect_width * 0.15f;
 
     r.adjust(-rect_margin - rect_padding, -rect_margin - rect_padding,
              rect_margin + rect_padding, rect_margin + rect_padding);
@@ -1049,9 +1080,9 @@ void VisualShaderNodeGraphicsObject::paint(QPainter *painter, const QStyleOption
     float rect_w {(float)r.width()};
     float rect_h {(float)r.height()};
 
-    float min_side {(float)qMin(rect_w, rect_h)};
+    float min_side {qMin(rect_w, rect_h)};
 
-    QRectF caption_rect(rect_x, rect_y, rect_w, min_side * 0.2f);
+    QRectF caption_rect(rect_x, rect_y, rect_w, caption_rect_height);
 
     {
         // Draw Caption
@@ -1059,18 +1090,16 @@ void VisualShaderNodeGraphicsObject::paint(QPainter *painter, const QStyleOption
 
         QFont t_f {painter->font()};
 
-        QFont f {t_f};
+        QFont f("Arial", caption_font_size);
         f.setBold(true);
-        f.setPointSize(min_side * 0.1f);
-        painter->setFont(f);
         QFontMetrics fm(f);
-        QRect text_rect {fm.boundingRect(caption)};
+        painter->setFont(f);
 
         // Calculate the coordinates of the caption
-        float x {rect_x + (float)(caption_rect.center().x() - text_rect.center().x())};
+        float x {(float)(caption_rect.center().x() - (float)fm.horizontalAdvance(caption) * 0.5f)};
 
         // Instead of subtracting, add the ascent to properly align text within the rect
-        float y {rect_y + (float)(caption_rect.center().y() - text_rect.center().y())};
+        float y {(float)(caption_rect.center().y() + (float)fm.ascent() * 0.5f)};
 
         QPointF coordinate {x, y};
 
@@ -1081,7 +1110,7 @@ void VisualShaderNodeGraphicsObject::paint(QPainter *painter, const QStyleOption
     }
 
     QPointF caption_rect_bl {caption_rect.bottomLeft()};
-    QPointF first_in_port_coordinate {caption_rect_bl.x(), caption_rect_bl.y() + min_side * 0.4f};
+    QPointF first_in_port_coordinate {caption_rect_bl.x(), caption_rect_bl.y() + body_rect_header_height};
 
     // Correct X coordinate: Remove the margin
     first_in_port_coordinate.setX((float)first_in_port_coordinate.x() - this->rect_margin);
@@ -1091,25 +1120,46 @@ void VisualShaderNodeGraphicsObject::paint(QPainter *painter, const QStyleOption
         int in_port_count {n->get_input_port_count()};
 
         for (unsigned i {0}; i < in_port_count; ++i) {
-            if (in_port_graphics_objects.find(i) != in_port_graphics_objects.end()) 
-                continue;
-
-            QPointF port_coordinate {first_in_port_coordinate.x(), first_in_port_coordinate.y() + (min_side * 0.3f) * i};
+            QPointF port_coordinate {first_in_port_coordinate.x(), first_in_port_coordinate.y() + body_rect_port_step * i};
 
             QRectF port_rect(port_coordinate.x(), port_coordinate.y(), min_side * 0.1f, min_side * 0.1f);
 
             // Adjust the port rect to be centered
             port_rect.adjust(-port_rect.width() * 0.5f, -port_rect.height() * 0.5f, -port_rect.width() * 0.5f, -port_rect.height() * 0.5f);
 
+            // Draw caption
             QString p_n {QString::fromStdString(n->get_input_port_name(i))};
 
-            VisualShaderInputPortGraphicsObject* p_o {new VisualShaderInputPortGraphicsObject(p_n, r, port_rect, i, this)};
+            if (!p_n.isEmpty()) {
+                QFont t_f {painter->font()};
+
+                QFont f("Arial", port_caption_font_size);
+                QFontMetrics fm(f);
+                painter->setFont(f);
+
+                float x {rect_x + 5.0f};
+
+                float y {(float)(port_rect.center().y()) + (float)fm.ascent() * 0.5f};
+
+                QPointF coordinate {x, y};
+
+                painter->setPen(this->font_color);
+                painter->drawText(coordinate, p_n);
+
+                painter->setFont(t_f); // Reset the font
+            }
+
+            if (in_port_graphics_objects.find(i) != in_port_graphics_objects.end()) 
+                continue;
+
+            // Draw the port
+            VisualShaderInputPortGraphicsObject* p_o {new VisualShaderInputPortGraphicsObject(port_rect, i, this)};
             in_port_graphics_objects[i] = p_o;
         }
     }
 
     QPointF caption_rect_br {caption_rect.bottomRight()};
-    QPointF first_out_port_coordinate {caption_rect_br.x(), caption_rect_br.y() + min_side * 0.4f};
+    QPointF first_out_port_coordinate {caption_rect_br.x(), caption_rect_br.y() + body_rect_header_height};
 
     // Correct X coordinate: Remove the margin
     first_out_port_coordinate.setX((float)first_out_port_coordinate.x() + this->rect_margin);
@@ -1119,19 +1169,40 @@ void VisualShaderNodeGraphicsObject::paint(QPainter *painter, const QStyleOption
         int out_port_count {n->get_output_port_count()};
 
         for (unsigned i {0}; i < out_port_count; ++i) {
-            if (out_port_graphics_objects.find(i) != out_port_graphics_objects.end()) 
-                continue;
-            
-            QPointF port_coordinate {first_out_port_coordinate.x(), first_out_port_coordinate.y() + (min_side * 0.3f) * i};
+            QPointF port_coordinate {first_out_port_coordinate.x(), first_out_port_coordinate.y() + body_rect_port_step * i};
 
             QRectF port_rect(port_coordinate.x(), port_coordinate.y(), min_side * 0.1f, min_side * 0.1f);
 
             // Adjust the port rect to be centered
             port_rect.adjust(-port_rect.width() * 0.5f, -port_rect.height() * 0.5f, -port_rect.width() * 0.5f, -port_rect.height() * 0.5f);
 
+            // Draw caption
             QString p_n {QString::fromStdString(n->get_output_port_name(i))};
 
-            VisualShaderOutputPortGraphicsObject* p_o {new VisualShaderOutputPortGraphicsObject(p_n, r, port_rect, i, this)};
+            if (!p_n.isEmpty()) {
+                QFont t_f {painter->font()};
+
+                QFont f("Arial", port_caption_font_size);
+                QFontMetrics fm(f);
+                painter->setFont(f);
+
+                float x {rect_x + rect_w - (float)fm.horizontalAdvance(p_n, p_n.length()) - 5.0f};
+
+                float y {(float)(port_rect.center().y()) + (float)fm.ascent() * 0.5f};
+
+                QPointF coordinate {x, y};
+
+                painter->setPen(this->font_color);
+                painter->drawText(coordinate, p_n);
+
+                painter->setFont(t_f); // Reset the font
+            }
+
+            if (out_port_graphics_objects.find(i) != out_port_graphics_objects.end()) 
+                continue;
+
+            // Draw the port
+            VisualShaderOutputPortGraphicsObject* p_o {new VisualShaderOutputPortGraphicsObject(port_rect, i, this)};
             out_port_graphics_objects[i] = p_o;
         }
     }    
@@ -1162,14 +1233,10 @@ void VisualShaderNodeGraphicsObject::contextMenuEvent(QGraphicsSceneContextMenuE
     QGraphicsObject::contextMenuEvent(event);
 }
 
-VisualShaderInputPortGraphicsObject::VisualShaderInputPortGraphicsObject(const QString& name,
-                                                                         const QRectF& parent_node_rect, 
-                                                                         const QRectF& rect,
+VisualShaderInputPortGraphicsObject::VisualShaderInputPortGraphicsObject(const QRectF& rect,
                                                                          const int& p_index, 
                                                                          QGraphicsItem* parent) : QGraphicsObject(parent), 
-                                                                                                  name(name),
                                                                                                   rect(rect), 
-                                                                                                  parent_node_rect(parent_node_rect),
                                                                                                   p_index(p_index) {
     setFlag(QGraphicsItem::ItemDoesntPropagateOpacityToChildren, true);
 	setFlag(QGraphicsItem::ItemIsFocusable, true);
@@ -1188,60 +1255,21 @@ VisualShaderInputPortGraphicsObject::~VisualShaderInputPortGraphicsObject() {
 }
 
 QRectF VisualShaderInputPortGraphicsObject::boundingRect() const {
-    QFont f;
-    QFontMetrics fm(f);
-    QRect text_rect {fm.boundingRect(name)};
-    return rect.united(text_rect);
+    return rect;
 }
 
 void VisualShaderInputPortGraphicsObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     painter->setClipRect(option->exposedRect);
-
-    float parent_rect_x {(float)parent_node_rect.topLeft().x()};
-    float parent_rect_y {(float)parent_node_rect.topLeft().y()};
-
-    float parent_rect_w {(float)parent_node_rect.width()};
-    float parent_rect_h {(float)parent_node_rect.height()};
-
-    float parent_min_side {(float)qMin(parent_rect_w, parent_rect_h)};
     
     painter->setBrush(this->connection_point_color);
 
     painter->drawEllipse(rect);
-
-    {
-        // Draw input port name
-        if (!name.isEmpty()) {
-            QFont t_f {painter->font()};
-
-            QFont f {t_f};
-            f.setPointSize(parent_min_side * 0.06f);
-            painter->setFont(f);
-            QFontMetrics fm(f);
-            QRect text_rect {fm.boundingRect(name)};
-
-            float x {(float)rect.x() + (float)rect.width() + parent_min_side * 0.08f};
-
-            float y {parent_rect_y + (float)(rect.center().y() - text_rect.center().y())};
-
-            QPointF coordinate {x, y};
-
-            painter->setPen(this->font_color);
-            painter->drawText(coordinate, name);
-
-            painter->setFont(t_f); // Reset the font
-        }
-    }
 }
 
-VisualShaderOutputPortGraphicsObject::VisualShaderOutputPortGraphicsObject(const QString& name,
-                                                                           const QRectF& parent_node_rect, 
-                                                                           const QRectF& rect,
+VisualShaderOutputPortGraphicsObject::VisualShaderOutputPortGraphicsObject(const QRectF& rect,
                                                                            const int& p_index, 
                                                                            QGraphicsItem* parent) : QGraphicsObject(parent), 
-                                                                                                    name(name),
                                                                                                     rect(rect),
-                                                                                                    parent_node_rect(parent_node_rect),
                                                                                                     p_index(p_index) {
     setFlag(QGraphicsItem::ItemDoesntPropagateOpacityToChildren, true);
 	setFlag(QGraphicsItem::ItemIsFocusable, true);
@@ -1260,51 +1288,15 @@ VisualShaderOutputPortGraphicsObject::~VisualShaderOutputPortGraphicsObject() {
 }
 
 QRectF VisualShaderOutputPortGraphicsObject::boundingRect() const {
-    QFont f;
-    QFontMetrics fm(f);
-    QRect text_rect {fm.boundingRect(name)};
-    return rect.united(text_rect);
+    return rect;
 }
 
 void VisualShaderOutputPortGraphicsObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     painter->setClipRect(option->exposedRect);
-
-    float parent_rect_x {(float)parent_node_rect.topLeft().x()};
-    float parent_rect_y {(float)parent_node_rect.topLeft().y()};
-
-    float parent_rect_w {(float)parent_node_rect.width()};
-    float parent_rect_h {(float)parent_node_rect.height()};
-
-    float parent_min_side {(float)qMin(parent_rect_w, parent_rect_h)};
     
     painter->setBrush(this->connection_point_color);
 
     painter->drawEllipse(rect);
-
-    {
-        // Draw output port name
-        if (!name.isEmpty()) {
-            QFont t_f {painter->font()};
-
-            QFont f {t_f};
-            f.setPointSize(parent_min_side * 0.06f);
-            painter->setFont(f);
-            QFontMetrics fm(f);
-            QRect text_rect {fm.boundingRect(name)};
-
-            float x {(float)rect.x() + (float)rect.width() + parent_min_side * 0.08f};
-
-            float y {parent_rect_y + (float)(rect.center().y() - text_rect.center().y())};
-
-            QPointF coordinate {x, y};
-
-            painter->setPen(this->font_color);
-            painter->drawText(coordinate, name);
-
-            painter->setFont(t_f); // Reset the font
-        }
-    
-    }
 }
 
 
@@ -1376,7 +1368,7 @@ void VisualShaderConnectionGraphicsObject::paint(QPainter *painter, const QStyle
     float rect_w {(float)r.width()};
     float rect_h {(float)r.height()};
 
-    float min_side {(float)qMin(rect_w, rect_h)};
+    float min_side {qMin(rect_w, rect_h)};
 
     {
         QPen pen;
@@ -1483,10 +1475,10 @@ QRectF VisualShaderConnectionGraphicsObject::calculate_bounding_rect_from_coordi
     float y2 {(float)end_coordinate.y()};
     
     // Calculate the expanded rect
-    float min_x {(float)qMin(x1, x2)};
-    float min_y {(float)qMin(y1, y2)};
-    float max_x {(float)qMax(x1, x2)};
-    float max_y {(float)qMax(y1, y2)};
+    float min_x {qMin(x1, x2)};
+    float min_y {qMin(y1, y2)};
+    float max_x {qMax(x1, x2)};
+    float max_y {qMax(y1, y2)};
 
     QRectF r({min_x, min_y}, QSizeF(max_x - min_x, max_y - min_y));
 
