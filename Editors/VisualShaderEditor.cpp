@@ -555,7 +555,9 @@ void CreateNodeDialog::update_selected_item() {
 // Public functions
 //////////////////////////////
 
-VisualShaderGraphicsScene::VisualShaderGraphicsScene(VisualShader* vs, QObject* parent) : QGraphicsScene(parent), vs(vs) {
+VisualShaderGraphicsScene::VisualShaderGraphicsScene(VisualShader* vs, QObject* parent) : QGraphicsScene(parent), 
+                                                                                          vs(vs), 
+                                                                                          one_free_end_connection(nullptr) {
 	setItemIndexMethod(QGraphicsScene::NoIndex); // https://doc.qt.io/qt-6/qgraphicsscene.html#ItemIndexMethod-enum
 
     // Populate the scene with nodes
@@ -579,16 +581,14 @@ VisualShaderGraphicsScene::VisualShaderGraphicsScene(VisualShader* vs, QObject* 
     for (const int& connection_id : connections) {
         const VisualShader::Connection connection {vs->get_connection(connection_id)};
 
-        VisualShaderConnectionGraphicsObject* c_o {new VisualShaderConnectionGraphicsObject(connection.from_node, connection.from_port)};
+        VisualShaderNodeGraphicsObject* n_o {get_node_graphics_object(connection.from_node)};
+
+        VisualShaderConnectionGraphicsObject* c_o {new VisualShaderConnectionGraphicsObject(connection.from_node, connection.from_port, n_o->find_output_port_coordinate(connection.from_port))};
         connection_graphics_objects[connection_id] = c_o;
         this->addItem(c_o);
     }
 
     QObject::connect(this, &VisualShaderGraphicsScene::node_moved, this, &VisualShaderGraphicsScene::on_node_moved);
-
-    VisualShaderConnectionGraphicsObject* c_o {new VisualShaderConnectionGraphicsObject(1, 0)};
-    connection_graphics_objects[0] = c_o;
-    this->addItem(c_o);
 }
 
 VisualShaderGraphicsScene::~VisualShaderGraphicsScene() {
@@ -667,9 +667,132 @@ VisualShaderConnectionGraphicsObject* VisualShaderGraphicsScene::get_connection_
     return c_o;
 }
 
-void VisualShaderGraphicsScene::on_node_moved(const int& n_id, const QPointF& new_position) {
-    // Here we will move all connections that are connected to the node
-    // std::cout << "Node moved: " << n_id << " to " << new_position.x() << ", " << new_position.y() << std::endl;
+void VisualShaderGraphicsScene::on_node_moved(const int& n_id, const QPointF& new_coordinate) {
+    const std::shared_ptr<VisualShaderNode> n {vs->get_node(n_id)};
+
+    if (!n) {
+        return;
+    }
+
+    // Update the node's coordinate in the VisualShader
+    vs->set_node_coordinate(n_id, {(float)new_coordinate.x(), (float)new_coordinate.y()});
+
+    VisualShaderNodeGraphicsObject* n_o {get_node_graphics_object(n_id)};
+
+    if (!n_o) {
+        return;
+    }
+
+    // Update input ports
+    for (int i {0}; i < n->get_input_port_count(); i++) {
+        VisualShaderInputPortGraphicsObject* i_p_o {n_o->get_input_port_graphics_object(i)};
+
+        if (!i_p_o) {
+            continue;
+        }
+
+        i_p_o->set_coordinate(n_o->find_input_port_coordinate(i));
+    }
+
+    // Update output ports
+    for (int i {0}; i < n->get_output_port_count(); i++) {
+        VisualShaderOutputPortGraphicsObject* o_p_o {n_o->get_output_port_graphics_object(i)};
+
+        if (!o_p_o) {
+            continue;
+        }
+
+        o_p_o->set_coordinate(n_o->find_output_port_coordinate(i));
+    }
+}
+
+void VisualShaderGraphicsScene::on_port_dragged(QGraphicsObject* port, const QPointF& coordinate) {
+    VisualShaderOutputPortGraphicsObject* o_port {dynamic_cast<VisualShaderOutputPortGraphicsObject *>(port)};
+
+    if (!o_port) {
+        VisualShaderInputPortGraphicsObject* i_port {dynamic_cast<VisualShaderInputPortGraphicsObject *>(port)};
+
+        if (!i_port) {
+            return;
+        }
+
+        // If it is not connected, then we don't need to do anything
+        // If it is connected, however, we will convert the complete connection to a one free end connection
+        if (!i_port->is_connected()) {
+            return;
+        }
+
+        return;
+    }
+
+    if (!one_free_end_connection) {
+        // Create a One Free End Connection
+        QPointF start_coord {o_port->get_coordinate()};
+        one_free_end_connection = new VisualShaderConnectionGraphicsObject(o_port->get_node_id(), o_port->get_port_index(), start_coord);
+        addItem(one_free_end_connection);
+    }
+
+    one_free_end_connection->set_end_coordinate(coordinate);
+}
+
+void VisualShaderGraphicsScene::on_port_dropped(QGraphicsObject* port, const QPointF& coordinate) {
+    if (!one_free_end_connection) {
+        return;
+    }
+
+    // Find all items under the coordinate
+    QList<QGraphicsItem*> items_at_coordinate {this->items(coordinate)};
+
+    // Iterate through the items and check if an input port is under the mouse
+    VisualShaderInputPortGraphicsObject* in_p_o {nullptr};
+    for (QGraphicsItem* item : items_at_coordinate) {
+        // Check if the item is an input port
+        in_p_o = dynamic_cast<VisualShaderInputPortGraphicsObject *>(item);
+
+        if (in_p_o) {
+            break;
+        }
+    }
+
+    if (!in_p_o) {
+        // Delete the connection
+        this->removeItem(one_free_end_connection);
+        delete one_free_end_connection;
+        one_free_end_connection = nullptr;
+        return;
+    }
+
+    bool result {vs->can_connect_nodes(one_free_end_connection->get_from_node_id(), one_free_end_connection->get_from_port_index(), in_p_o->get_node_id(), in_p_o->get_port_index())};
+
+    if (!result) {
+        // Delete the connection
+        this->removeItem(one_free_end_connection);
+        delete one_free_end_connection;
+        one_free_end_connection = nullptr;
+        std::cout << "Failed to connect nodes" << std::endl;
+        return;
+    }
+
+    // Get a connection id before connecting
+    int c_id {vs->get_valid_connection_id()};
+
+    // Connect the nodes
+    result = vs->connect_nodes(one_free_end_connection->get_from_node_id(), one_free_end_connection->get_from_port_index(), in_p_o->get_node_id(), in_p_o->get_port_index());
+
+    if (!result) {
+        // Delete the connection
+        this->removeItem(one_free_end_connection);
+        delete one_free_end_connection;
+        one_free_end_connection = nullptr;
+        std::cout << "Failed to connect nodes" << std::endl;
+        return;
+    }
+
+    // Add the connection to the scene
+    connection_graphics_objects[c_id] = one_free_end_connection;
+
+    // Reset the one free end connection
+    one_free_end_connection = nullptr;
 }
 
 /**********************************************************************/
@@ -997,6 +1120,38 @@ VisualShaderNodeGraphicsObject::~VisualShaderNodeGraphicsObject() {
     
 }
 
+VisualShaderInputPortGraphicsObject* VisualShaderNodeGraphicsObject::get_input_port_graphics_object(const int& p_index) const {
+    if (in_port_graphics_objects.find(p_index) != in_port_graphics_objects.end()) {
+        return in_port_graphics_objects.at(p_index);
+    }
+
+    return nullptr;
+}
+
+VisualShaderOutputPortGraphicsObject* VisualShaderNodeGraphicsObject::get_output_port_graphics_object(const int& p_index) const {
+    if (out_port_graphics_objects.find(p_index) != out_port_graphics_objects.end()) {
+        return out_port_graphics_objects.at(p_index);
+    }
+
+    return nullptr;
+}
+
+QPointF VisualShaderNodeGraphicsObject::find_input_port_coordinate(const int& p_index) const {
+    if (in_port_graphics_objects.find(p_index) != in_port_graphics_objects.end()) {
+        return in_port_graphics_objects.at(p_index)->get_coordinate();
+    }
+
+    return QPointF();
+}
+
+QPointF VisualShaderNodeGraphicsObject::find_output_port_coordinate(const int& p_index) const {
+    if (out_port_graphics_objects.find(p_index) != out_port_graphics_objects.end()) {
+        return out_port_graphics_objects.at(p_index)->get_coordinate();
+    }
+
+    return QPointF();
+}
+
 QRectF VisualShaderNodeGraphicsObject::boundingRect() const {
     const std::shared_ptr<VisualShaderNode> n {vs->get_node(n_id)};
 
@@ -1045,6 +1200,12 @@ void VisualShaderNodeGraphicsObject::paint(QPainter *painter, const QStyleOption
     const std::shared_ptr<VisualShaderNode> n {vs->get_node(n_id)};
 
     if (!n) {
+        return;
+    }
+
+    int n_id {vs->find_node_id(n)};
+
+    if (n_id == VisualShader::NODE_ID_INVALID) {
         return;
     }
 
@@ -1153,8 +1314,12 @@ void VisualShaderNodeGraphicsObject::paint(QPainter *painter, const QStyleOption
                 continue;
 
             // Draw the port
-            VisualShaderInputPortGraphicsObject* p_o {new VisualShaderInputPortGraphicsObject(port_rect, i, this)};
+            VisualShaderInputPortGraphicsObject* p_o {new VisualShaderInputPortGraphicsObject(port_rect, n_id, i, this)};
             in_port_graphics_objects[i] = p_o;
+
+            // Connect the signals
+            QObject::connect(p_o, &VisualShaderInputPortGraphicsObject::port_dragged, dynamic_cast<VisualShaderGraphicsScene*>(scene()), &VisualShaderGraphicsScene::on_port_dragged);
+            QObject::connect(p_o, &VisualShaderInputPortGraphicsObject::port_dropped, dynamic_cast<VisualShaderGraphicsScene*>(scene()), &VisualShaderGraphicsScene::on_port_dropped);
         }
     }
 
@@ -1202,8 +1367,12 @@ void VisualShaderNodeGraphicsObject::paint(QPainter *painter, const QStyleOption
                 continue;
 
             // Draw the port
-            VisualShaderOutputPortGraphicsObject* p_o {new VisualShaderOutputPortGraphicsObject(port_rect, i, this)};
+            VisualShaderOutputPortGraphicsObject* p_o {new VisualShaderOutputPortGraphicsObject(port_rect, n_id, i, this)};
             out_port_graphics_objects[i] = p_o;
+
+            // Connect the signals
+            QObject::connect(p_o, &VisualShaderOutputPortGraphicsObject::port_dragged, dynamic_cast<VisualShaderGraphicsScene*>(scene()), &VisualShaderGraphicsScene::on_port_dragged);
+            QObject::connect(p_o, &VisualShaderOutputPortGraphicsObject::port_dropped, dynamic_cast<VisualShaderGraphicsScene*>(scene()), &VisualShaderGraphicsScene::on_port_dropped);
         }
     }    
 }
@@ -1217,30 +1386,18 @@ QVariant VisualShaderNodeGraphicsObject::itemChange(GraphicsItemChange change, c
 	return QGraphicsObject::itemChange(change, value);
 }
 
-void VisualShaderNodeGraphicsObject::mousePressEvent(QGraphicsSceneMouseEvent *event) {
-    QGraphicsObject::mousePressEvent(event);
-}
-
-void VisualShaderNodeGraphicsObject::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
-    QGraphicsObject::mouseMoveEvent(event);
-}
-
-void VisualShaderNodeGraphicsObject::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
-    QGraphicsObject::mouseReleaseEvent(event);
-}
-
-void VisualShaderNodeGraphicsObject::contextMenuEvent(QGraphicsSceneContextMenuEvent *event) {
-    QGraphicsObject::contextMenuEvent(event);
-}
-
 VisualShaderInputPortGraphicsObject::VisualShaderInputPortGraphicsObject(const QRectF& rect,
+                                                                         const int& n_id,
                                                                          const int& p_index, 
                                                                          QGraphicsItem* parent) : QGraphicsObject(parent), 
                                                                                                   rect(rect), 
+                                                                                                  n_id(n_id),
                                                                                                   p_index(p_index) {
     setFlag(QGraphicsItem::ItemDoesntPropagateOpacityToChildren, true);
 	setFlag(QGraphicsItem::ItemIsFocusable, true);
 	setFlag(QGraphicsItem::ItemIsSelectable, true);
+
+    setCursor(Qt::PointingHandCursor);
 
 	setCacheMode(QGraphicsItem::DeviceCoordinateCache);
 
@@ -1255,25 +1412,54 @@ VisualShaderInputPortGraphicsObject::~VisualShaderInputPortGraphicsObject() {
 }
 
 QRectF VisualShaderInputPortGraphicsObject::boundingRect() const {
+    // rect.adjust(-padding, -padding, padding, padding);
+
     return rect;
 }
 
 void VisualShaderInputPortGraphicsObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     painter->setClipRect(option->exposedRect);
+
+    // rect.adjust(padding, padding, -padding, -padding);
     
     painter->setBrush(this->connection_point_color);
 
     painter->drawEllipse(rect);
 }
 
+void VisualShaderInputPortGraphicsObject::mousePressEvent(QGraphicsSceneMouseEvent *event) {
+    is_dragging = true;
+    QGraphicsObject::mousePressEvent(event);
+}
+
+void VisualShaderInputPortGraphicsObject::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
+    if (is_dragging) {
+        emit port_dragged(this, event->scenePos());
+    }
+    QGraphicsObject::mouseMoveEvent(event);
+}
+
+void VisualShaderInputPortGraphicsObject::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
+    if (is_dragging) {
+        emit port_dropped(this, event->scenePos());
+        is_dragging = false;
+    }
+    QGraphicsObject::mouseReleaseEvent(event);
+}
+
 VisualShaderOutputPortGraphicsObject::VisualShaderOutputPortGraphicsObject(const QRectF& rect,
+                                                                           const int& n_id,
                                                                            const int& p_index, 
                                                                            QGraphicsItem* parent) : QGraphicsObject(parent), 
                                                                                                     rect(rect),
-                                                                                                    p_index(p_index) {
+                                                                                                    n_id(n_id),
+                                                                                                    p_index(p_index),
+                                                                                                    start_graphics_object(nullptr) {
     setFlag(QGraphicsItem::ItemDoesntPropagateOpacityToChildren, true);
 	setFlag(QGraphicsItem::ItemIsFocusable, true);
 	setFlag(QGraphicsItem::ItemIsSelectable, true);
+
+    setCursor(Qt::PointingHandCursor);
 
 	setCacheMode(QGraphicsItem::DeviceCoordinateCache);
 
@@ -1288,18 +1474,40 @@ VisualShaderOutputPortGraphicsObject::~VisualShaderOutputPortGraphicsObject() {
 }
 
 QRectF VisualShaderOutputPortGraphicsObject::boundingRect() const {
+    // rect.adjust(-padding, -padding, padding, padding);
+
     return rect;
 }
 
 void VisualShaderOutputPortGraphicsObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     painter->setClipRect(option->exposedRect);
+
+    // rect.adjust(padding, padding, -padding, -padding);
     
     painter->setBrush(this->connection_point_color);
 
     painter->drawEllipse(rect);
 }
 
+void VisualShaderOutputPortGraphicsObject::mousePressEvent(QGraphicsSceneMouseEvent *event) {
+    is_dragging = true;
+    QGraphicsObject::mousePressEvent(event);
+}
 
+void VisualShaderOutputPortGraphicsObject::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
+    if (is_dragging) {
+        emit port_dragged(this, event->scenePos());
+    }
+    QGraphicsObject::mouseMoveEvent(event);
+}
+
+void VisualShaderOutputPortGraphicsObject::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
+    if (is_dragging) {
+        emit port_dropped(this, event->scenePos());
+        is_dragging = false;
+    }
+    QGraphicsObject::mouseReleaseEvent(event);
+}
 
 /**********************************************************************/
 /**********************************************************************/
@@ -1313,12 +1521,14 @@ void VisualShaderOutputPortGraphicsObject::paint(QPainter *painter, const QStyle
 
 VisualShaderConnectionGraphicsObject::VisualShaderConnectionGraphicsObject(const int& from_n_id, 
                                                                            const int& from_p_index, 
+                                                                           const QPointF& start_coordinate, 
                                                                            QGraphicsItem* parent) : QGraphicsObject(parent),
                                                                                                     from_n_id(from_n_id),
                                                                                                     from_p_index(from_p_index),
+                                                                                                    start_coordinate(start_coordinate),
+                                                                                                    end_coordinate(start_coordinate),
                                                                                                     start_graphics_object(nullptr),
                                                                                                     end_graphics_object(nullptr) {
-    setFlag(QGraphicsItem::ItemIsMovable, true);
 	setFlag(QGraphicsItem::ItemIsFocusable, true);
 	setFlag(QGraphicsItem::ItemIsSelectable, true);
 
@@ -1344,35 +1554,9 @@ QRectF VisualShaderConnectionGraphicsObject::boundingRect() const {
 void VisualShaderConnectionGraphicsObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     painter->setClipRect(option->exposedRect);
 
-    // Get the rect without the padding
-    QRectF r {this->boundingRect()};
-
-    // {
-    //     // Draw rect
-    //     QColor rect_color {Qt::red};
-
-    //     QPen p(rect_color, 3.0f);
-    //     painter->setPen(p);
-
-    //     painter->setBrush(Qt::NoBrush);
-
-    //     painter->drawRect(r);
-    // }
-
-    // Add the padding to the rect
-    r.adjust(rect_padding, rect_padding, -rect_padding, -rect_padding);
-
-    float rect_x {(float)r.topLeft().x()};
-    float rect_y {(float)r.topLeft().y()};
-
-    float rect_w {(float)r.width()};
-    float rect_h {(float)r.height()};
-
-    float min_side {qMin(rect_w, rect_h)};
-
     {
         QPen pen;
-        pen.setWidth(min_side * 0.05f);
+        pen.setWidth(this->line_width);
         pen.setColor(this->construction_color);
         pen.setStyle(Qt::DashLine);
 
@@ -1391,7 +1575,7 @@ void VisualShaderConnectionGraphicsObject::paint(QPainter *painter, const QStyle
     {
         // draw normal line
         QPen p;
-        p.setWidth(min_side * 0.05f);
+        p.setWidth(this->line_width);
 
         const bool selected {this->isSelected()};
 
@@ -1415,7 +1599,7 @@ void VisualShaderConnectionGraphicsObject::paint(QPainter *painter, const QStyle
     {
         // Draw start and end points
         if (!start_graphics_object) {
-            QRectF start_rect(start_coordinate.x(), start_coordinate.y(), min_side * 0.2f, min_side * 0.2f);
+            QRectF start_rect(start_coordinate.x(), start_coordinate.y(), this->point_diameter, this->point_diameter);
 
             // Adjust the port rect to be centered
             start_rect.adjust(-start_rect.width() * 0.5f, -start_rect.height() * 0.5f, -start_rect.width() * 0.5f, -start_rect.height() * 0.5f);
@@ -1425,7 +1609,7 @@ void VisualShaderConnectionGraphicsObject::paint(QPainter *painter, const QStyle
         }
 
         if (!end_graphics_object) {
-            QRectF end_rect(end_coordinate.x(), end_coordinate.y(), min_side * 0.2f, min_side * 0.2f);
+            QRectF end_rect(end_coordinate.x(), end_coordinate.y(), this->point_diameter, this->point_diameter);
 
             // Adjust the port rect to be centered
             end_rect.adjust(-end_rect.width() * 0.5f, -end_rect.height() * 0.5f, -end_rect.width() * 0.5f, -end_rect.height() * 0.5f);

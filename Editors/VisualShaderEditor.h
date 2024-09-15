@@ -44,6 +44,7 @@
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QAction>
 #include <QContextMenuEvent>
+#include <QGraphicsSceneMouseEvent>
 
 #include <string>
 #include <vector>
@@ -209,11 +210,15 @@ public:
 
     VisualShader* get_visual_shader() const { return vs; }
 
+public Q_SLOTS:
+    void on_port_dragged(QGraphicsObject* port, const QPointF& coordinate);
+    void on_port_dropped(QGraphicsObject* port, const QPointF& coordinate);
+
 Q_SIGNALS:
-    void node_moved(const int& n_id, const QPointF& new_position);
+    void node_moved(const int& n_id, const QPointF& new_coordinate);
 
 private Q_SLOTS:
-    void on_node_moved(const int& n_id, const QPointF& new_position);
+    void on_node_moved(const int& n_id, const QPointF& new_coordinate);
 
 private:
     VisualShader* vs;
@@ -328,6 +333,12 @@ public:
     VisualShaderNodeGraphicsObject(VisualShader* vs, const int& n_id, QGraphicsItem *parent = nullptr);
     ~VisualShaderNodeGraphicsObject();
 
+    VisualShaderInputPortGraphicsObject* get_input_port_graphics_object(const int& p_index) const;
+    VisualShaderOutputPortGraphicsObject* get_output_port_graphics_object(const int& p_index) const;
+
+    QPointF find_input_port_coordinate(const int& p_index) const;
+    QPointF find_output_port_coordinate(const int& p_index) const;
+
 private:
     VisualShader* vs;
     int n_id;
@@ -338,19 +349,10 @@ private:
     // Style
     QColor normal_boundary_color = QColor(255, 255, 255);
     QColor selected_boundary_color = QColor(255, 165, 0);
-    QColor gradient_color0 = QColor(80, 80, 80);
-    QColor gradient_color1 = QColor(64, 64, 64);
-    QColor gradient_color2 = QColor(58, 58, 58);
-    QColor shadow_color = QColor(20, 20, 20);
     QColor font_color = QColor(255, 255, 255);
-    QColor font_color_faded = QColor(169, 169, 169);
-    QColor filled_connection_point_color = QColor(0, 255, 255);
-    QColor error_color = QColor(255, 0, 0);
-    QColor warning_color = QColor(128, 128, 0);
     QColor fill_color = QColor(0, 0, 0, 0);
 
     float pen_width = 1.0f;
-    float hovered_pen_width = 1.5f;
 
     float opacity = 0.8f;
     float corner_radius = 3.0f;
@@ -360,7 +362,7 @@ private:
 
     mutable float rect_height; // Calculated in boundingRect()
     float body_rect_header_height = 30.0f;
-    float body_rect_port_step = 35.0f;
+    float body_rect_port_step = 40.0f;
     float body_rect_footer_height = 30.0f;
 
     mutable float rect_padding; // Calculated in boundingRect()
@@ -377,22 +379,41 @@ private:
     QRectF boundingRect() const override;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr) override;
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
-	void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-	void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
-	void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
-	void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
 };
 
 class VisualShaderInputPortGraphicsObject : public QGraphicsObject {
+    Q_OBJECT
+
 public:
     VisualShaderInputPortGraphicsObject(const QRectF& rect, 
+                                        const int& n_id,
                                         const int& p_index, 
                                         QGraphicsItem* parent = nullptr);
     ~VisualShaderInputPortGraphicsObject();
 
+    int get_node_id() const { return n_id; }
+    int get_port_index() const { return p_index; }
+    QPointF get_coordinate() const { return rect.center(); }
+    void set_coordinate(const QPointF& coordinate) const { rect.moveCenter(coordinate); }
+
+    bool is_connected() const { return end_graphics_object != nullptr; }
+    VisualShaderConnectionEndGraphicsObject* get_end_graphics_object() const { return end_graphics_object; }
+    void set_end_graphics_object(VisualShaderConnectionEndGraphicsObject* end_graphics_object) const { this->end_graphics_object = end_graphics_object; }
+
+Q_SIGNALS:
+    void port_dragged(VisualShaderInputPortGraphicsObject* port, const QPointF& pos);
+    void port_dropped(VisualShaderInputPortGraphicsObject* port, const QPointF& pos);
+
 private:
+    int n_id;
     int p_index;
-    QRectF rect;
+    mutable QRectF rect;
+
+    float padding = 0.5f;
+
+    mutable VisualShaderConnectionEndGraphicsObject* end_graphics_object;
+
+    float is_dragging = false;
 
     // Style
     QColor font_color = QColor(255, 255, 255);
@@ -402,18 +423,44 @@ private:
 
     QRectF boundingRect() const override;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 };
 
 class VisualShaderOutputPortGraphicsObject : public QGraphicsObject {
+    Q_OBJECT
+
 public:
     VisualShaderOutputPortGraphicsObject(const QRectF& rect, 
+                                         const int& n_id,
                                          const int& p_index, 
                                          QGraphicsItem* parent = nullptr);
     ~VisualShaderOutputPortGraphicsObject();
 
+    int get_node_id() const { return n_id; }
+    int get_port_index() const { return p_index; }
+    QPointF get_coordinate() const { return rect.center(); }
+    void set_coordinate(const QPointF& coordinate) const { rect.moveCenter(coordinate); }
+
+    bool is_connected() const { return start_graphics_object != nullptr; }
+    VisualShaderConnectionStartGraphicsObject* get_start_graphics_object() const { return start_graphics_object; }
+    void set_start_graphics_object(VisualShaderConnectionStartGraphicsObject* start_graphics_object) const { this->start_graphics_object = start_graphics_object; }
+
+Q_SIGNALS:
+    void port_dragged(VisualShaderOutputPortGraphicsObject* port, const QPointF& pos);
+    void port_dropped(VisualShaderOutputPortGraphicsObject* port, const QPointF& pos);
+
 private:
+    int n_id;
     int p_index;
-    QRectF rect;
+    mutable QRectF rect;
+
+    float padding = 0.5f;
+
+    mutable VisualShaderConnectionStartGraphicsObject* start_graphics_object;
+
+    float is_dragging = false;
 
     // Style
     QColor font_color = QColor(255, 255, 255);
@@ -423,6 +470,9 @@ private:
 
     QRectF boundingRect() const override;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 };
 
 /**********************************************************************/
@@ -442,17 +492,33 @@ class VisualShaderConnectionGraphicsObject : public QGraphicsObject {
 	Q_OBJECT
 
 public:
-    VisualShaderConnectionGraphicsObject(const int& from_n_id, const int& from_p_index, QGraphicsItem *parent = nullptr);
+    VisualShaderConnectionGraphicsObject(const int& from_n_id, 
+                                         const int& from_p_index, 
+                                         const QPointF& start_coordinate, 
+                                         QGraphicsItem *parent = nullptr);
     ~VisualShaderConnectionGraphicsObject();
+
+    int get_from_node_id() const { return from_n_id; }
+    int get_from_port_index() const { return from_p_index; }
+
+    void set_to_node_id(const int& to_n_id) const { this->to_n_id = to_n_id; }
+    void set_to_port_index(const int& to_p_index) const { this->to_p_index = to_p_index; }
+
+    QPointF get_start_coordinate() const { return start_coordinate; }
+    
+    void set_end_coordinate(const QPointF& end_coordinate) const { this->end_coordinate = end_coordinate; }
+
+    VisualShaderConnectionStartGraphicsObject* get_start_graphics_object() const { return start_graphics_object; }
+    VisualShaderConnectionEndGraphicsObject* get_end_graphics_object() const { return end_graphics_object; }
 
 private:
     int from_n_id;
-    int to_n_id;
+    mutable int to_n_id;
     int from_p_index;
-    int to_p_index;
+    mutable int to_p_index;
 
-    QPointF start_coordinate = QPointF(100, 100);
-    QPointF end_coordinate = QPointF(200, 200);
+    QPointF start_coordinate;
+    mutable QPointF end_coordinate;
 
     VisualShaderConnectionStartGraphicsObject* start_graphics_object;
     VisualShaderConnectionEndGraphicsObject* end_graphics_object;
@@ -486,11 +552,16 @@ public:
     VisualShaderConnectionStartGraphicsObject(const QRectF& rect, QGraphicsItem* parent = nullptr);
     ~VisualShaderConnectionStartGraphicsObject();
 
+    int get_node_id() const { return n_id; }
+    int get_port_index() const { return p_index; }
+
+    void set_coordinate(const QPointF& coordinate) const { rect.moveCenter(coordinate); }
+
 private:
     int n_id;
     int p_index; // This is an output port index
 
-    QRectF rect;
+    mutable QRectF rect;
 
     // Style
     QColor connection_point_color = QColor(169, 169, 169);
@@ -505,11 +576,16 @@ public:
     VisualShaderConnectionEndGraphicsObject(const QRectF& rect, QGraphicsItem* parent = nullptr);
     ~VisualShaderConnectionEndGraphicsObject();
 
+    int get_node_id() const { return n_id; }
+    int get_port_index() const { return p_index; }
+
+    void set_coordinate(const QPointF& coordinate) const { rect.moveCenter(coordinate); }
+
 private:
     int n_id;
     int p_index; // This is an input port index
 
-    QRectF rect;
+    mutable QRectF rect;
 
     // Style
     QColor connection_point_color = QColor(169, 169, 169);
