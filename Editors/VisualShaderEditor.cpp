@@ -1099,7 +1099,7 @@ void VisualShaderNodeGraphicsObject::paint(QPainter *painter, const QStyleOption
         float x {(float)(caption_rect.center().x() - (float)fm.horizontalAdvance(caption) * 0.5f)};
 
         // Instead of subtracting, add the ascent to properly align text within the rect
-        float y {(float)(caption_rect.center().y() + (float)fm.ascent() * 0.5f)};
+        float y {(float)(caption_rect.center().y() + (float)((fm.ascent() + fm.descent()) * 0.5f - fm.descent()))};
 
         QPointF coordinate {x, y};
 
@@ -1139,7 +1139,7 @@ void VisualShaderNodeGraphicsObject::paint(QPainter *painter, const QStyleOption
 
                 float x {rect_x + 5.0f};
 
-                float y {(float)(port_rect.center().y()) + (float)fm.ascent() * 0.5f};
+                float y {(float)(port_rect.center().y()) + (float)((fm.ascent() + fm.descent()) * 0.5f - fm.descent())};
 
                 QPointF coordinate {x, y};
 
@@ -1186,9 +1186,9 @@ void VisualShaderNodeGraphicsObject::paint(QPainter *painter, const QStyleOption
                 QFontMetrics fm(f);
                 painter->setFont(f);
 
-                float x {rect_x + rect_w - (float)fm.horizontalAdvance(p_n, p_n.length()) - 5.0f};
+                float x {rect_x + rect_w - (float)fm.horizontalAdvance(p_n) - 5.0f};
 
-                float y {(float)(port_rect.center().y()) + (float)fm.ascent() * 0.5f};
+                float y {(float)(port_rect.center().y()) + (float)((fm.ascent() + fm.descent()) * 0.5f - fm.descent())};
 
                 QPointF coordinate {x, y};
 
