@@ -57,6 +57,8 @@ class VisualShaderGraphicsView;
 class VisualShaderNodeGraphicsObject;
 class VisualShaderConnectionGraphicsObject;
 class CreateNodeDialog;
+class VisualShaderInputPortGraphicsObject;
+class VisualShaderOutputPortGraphicsObject;
 
 /**********************************************************************/
 /**********************************************************************/
@@ -199,18 +201,18 @@ public:
 
 	~VisualShaderGraphicsScene();
 
-    bool add_node(const int& n_id);
+    bool add_node(const std::shared_ptr<VisualShaderNode>& node, const QPointF& coordinate);
     bool delete_node();
 
     bool add_connection();
     bool delete_connection();
 
     VisualShaderNodeGraphicsObject* get_node_graphics_object(const int& n_id) const;
-    VisualShaderConnectionGraphicsObject* get_connection_graphics_object(const int& c_id) const;
 
     VisualShader* get_visual_shader() const { return vs; }
 
 public Q_SLOTS:
+    void on_port_pressed(QGraphicsObject* port, const QPointF& coordinate);
     void on_port_dragged(QGraphicsObject* port, const QPointF& coordinate);
     void on_port_dropped(QGraphicsObject* port, const QPointF& coordinate);
 
@@ -224,9 +226,8 @@ private:
     VisualShader* vs;
 
     std::unordered_map<int, VisualShaderNodeGraphicsObject*> node_graphics_objects;
-    std::unordered_map<int, VisualShaderConnectionGraphicsObject*> connection_graphics_objects;
 
-    VisualShaderConnectionGraphicsObject* one_free_end_connection;
+    VisualShaderConnectionGraphicsObject* temporary_connection_graphics_object;
 };
 
 /**********************************************************************/
@@ -323,9 +324,6 @@ private:
 /**********************************************************************/
 /**********************************************************************/
 
-class VisualShaderInputPortGraphicsObject;
-class VisualShaderOutputPortGraphicsObject;
-
 class VisualShaderNodeGraphicsObject : public QGraphicsObject {
 	Q_OBJECT
 
@@ -335,9 +333,6 @@ public:
 
     VisualShaderInputPortGraphicsObject* get_input_port_graphics_object(const int& p_index) const;
     VisualShaderOutputPortGraphicsObject* get_output_port_graphics_object(const int& p_index) const;
-
-    QPointF find_input_port_coordinate(const int& p_index) const;
-    QPointF find_output_port_coordinate(const int& p_index) const;
 
 private:
     VisualShader* vs;
@@ -391,29 +386,29 @@ public:
                                         QGraphicsItem* parent = nullptr);
     ~VisualShaderInputPortGraphicsObject();
 
+    QPointF get_global_coordinate() const { return mapToScene(rect.center()); }
+
     int get_node_id() const { return n_id; }
     int get_port_index() const { return p_index; }
-    QPointF get_coordinate() const { return rect.center(); }
-    void set_coordinate(const QPointF& coordinate) const { rect.moveCenter(coordinate); }
 
-    bool is_connected() const { return end_graphics_object != nullptr; }
-    VisualShaderConnectionEndGraphicsObject* get_end_graphics_object() const { return end_graphics_object; }
-    void set_end_graphics_object(VisualShaderConnectionEndGraphicsObject* end_graphics_object) const { this->end_graphics_object = end_graphics_object; }
+    VisualShaderConnectionGraphicsObject* get_connection_graphics_object() const { return connection_graphics_object; }
+    void connect(VisualShaderConnectionGraphicsObject* c_g_o) const { this->connection_graphics_object = c_g_o; }
+    void detach_connection() const { this->connection_graphics_object = nullptr; }
+    bool is_connected() const { return connection_graphics_object != nullptr; }
 
 Q_SIGNALS:
+    void port_pressed(VisualShaderInputPortGraphicsObject* port, const QPointF& pos);
     void port_dragged(VisualShaderInputPortGraphicsObject* port, const QPointF& pos);
     void port_dropped(VisualShaderInputPortGraphicsObject* port, const QPointF& pos);
 
 private:
     int n_id;
     int p_index;
-    mutable QRectF rect;
+    QRectF rect;
+
+    mutable VisualShaderConnectionGraphicsObject* connection_graphics_object;
 
     float padding = 0.5f;
-
-    mutable VisualShaderConnectionEndGraphicsObject* end_graphics_object;
-
-    float is_dragging = false;
 
     // Style
     QColor font_color = QColor(255, 255, 255);
@@ -438,29 +433,29 @@ public:
                                          QGraphicsItem* parent = nullptr);
     ~VisualShaderOutputPortGraphicsObject();
 
+    QPointF get_global_coordinate() const { return mapToScene(rect.center()); }
+
     int get_node_id() const { return n_id; }
     int get_port_index() const { return p_index; }
-    QPointF get_coordinate() const { return rect.center(); }
-    void set_coordinate(const QPointF& coordinate) const { rect.moveCenter(coordinate); }
 
-    bool is_connected() const { return start_graphics_object != nullptr; }
-    VisualShaderConnectionStartGraphicsObject* get_start_graphics_object() const { return start_graphics_object; }
-    void set_start_graphics_object(VisualShaderConnectionStartGraphicsObject* start_graphics_object) const { this->start_graphics_object = start_graphics_object; }
+    VisualShaderConnectionGraphicsObject* get_connection_graphics_object() const { return connection_graphics_object; }
+    void connect(VisualShaderConnectionGraphicsObject* c_o) const { this->connection_graphics_object = c_o; }
+    void detach_connection() const { this->connection_graphics_object = nullptr; }
+    bool is_connected() const { return connection_graphics_object != nullptr; }
 
 Q_SIGNALS:
+    void port_pressed(VisualShaderOutputPortGraphicsObject* port, const QPointF& pos);
     void port_dragged(VisualShaderOutputPortGraphicsObject* port, const QPointF& pos);
     void port_dropped(VisualShaderOutputPortGraphicsObject* port, const QPointF& pos);
 
 private:
     int n_id;
     int p_index;
-    mutable QRectF rect;
+    QRectF rect;
+
+    mutable VisualShaderConnectionGraphicsObject* connection_graphics_object;
 
     float padding = 0.5f;
-
-    mutable VisualShaderConnectionStartGraphicsObject* start_graphics_object;
-
-    float is_dragging = false;
 
     // Style
     QColor font_color = QColor(255, 255, 255);
@@ -485,9 +480,6 @@ private:
 /**********************************************************************/
 /**********************************************************************/
 
-class VisualShaderConnectionStartGraphicsObject;
-class VisualShaderConnectionEndGraphicsObject;
-
 class VisualShaderConnectionGraphicsObject : public QGraphicsObject {
 	Q_OBJECT
 
@@ -501,15 +493,14 @@ public:
     int get_from_node_id() const { return from_n_id; }
     int get_from_port_index() const { return from_p_index; }
 
+    int get_to_node_id() const { return to_n_id; }
+    int get_to_port_index() const { return to_p_index; }
+
     void set_to_node_id(const int& to_n_id) const { this->to_n_id = to_n_id; }
     void set_to_port_index(const int& to_p_index) const { this->to_p_index = to_p_index; }
-
-    QPointF get_start_coordinate() const { return start_coordinate; }
     
-    void set_end_coordinate(const QPointF& end_coordinate) const { this->end_coordinate = end_coordinate; }
-
-    VisualShaderConnectionStartGraphicsObject* get_start_graphics_object() const { return start_graphics_object; }
-    VisualShaderConnectionEndGraphicsObject* get_end_graphics_object() const { return end_graphics_object; }
+    void set_start_coordinate(const QPointF& start_coordinate) { this->start_coordinate = start_coordinate; update(); }
+    void set_end_coordinate(const QPointF& end_coordinate) { this->end_coordinate = end_coordinate; update(); }
 
 private:
     int from_n_id;
@@ -518,16 +509,14 @@ private:
     mutable int to_p_index;
 
     QPointF start_coordinate;
-    mutable QPointF end_coordinate;
-
-    VisualShaderConnectionStartGraphicsObject* start_graphics_object;
-    VisualShaderConnectionEndGraphicsObject* end_graphics_object;
+    QPointF end_coordinate;
 
     // Style
     QColor construction_color = QColor(169, 169, 169);
     QColor normal_color = QColor(0, 255, 255);
     QColor selected_color = QColor(100, 100, 100);
     QColor selected_halo_color = QColor(255, 165, 0);
+    QColor connection_point_color = QColor(169, 169, 169);
 
     float line_width = 3.0f;
     float construction_line_width = 2.0f;
@@ -545,54 +534,6 @@ private:
     int detect_quadrant(const QPointF& reference, const QPointF& target) const;
     QRectF calculate_bounding_rect_from_coordinates(const QPointF& start_coordinate, const QPointF& end_coordinate) const;
     std::pair<QPointF, QPointF> calculate_control_points(const QPointF& start_coordinate, const QPointF& end_coordinate) const;
-};
-
-class VisualShaderConnectionStartGraphicsObject : public QGraphicsObject {
-public:
-    VisualShaderConnectionStartGraphicsObject(const QRectF& rect, QGraphicsItem* parent = nullptr);
-    ~VisualShaderConnectionStartGraphicsObject();
-
-    int get_node_id() const { return n_id; }
-    int get_port_index() const { return p_index; }
-
-    void set_coordinate(const QPointF& coordinate) const { rect.moveCenter(coordinate); }
-
-private:
-    int n_id;
-    int p_index; // This is an output port index
-
-    mutable QRectF rect;
-
-    // Style
-    QColor connection_point_color = QColor(169, 169, 169);
-    float opacity = 1.0f;
-
-    QRectF boundingRect() const override;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
-};
-
-class VisualShaderConnectionEndGraphicsObject : public QGraphicsObject {
-public:
-    VisualShaderConnectionEndGraphicsObject(const QRectF& rect, QGraphicsItem* parent = nullptr);
-    ~VisualShaderConnectionEndGraphicsObject();
-
-    int get_node_id() const { return n_id; }
-    int get_port_index() const { return p_index; }
-
-    void set_coordinate(const QPointF& coordinate) const { rect.moveCenter(coordinate); }
-
-private:
-    int n_id;
-    int p_index; // This is an input port index
-
-    mutable QRectF rect;
-
-    // Style
-    QColor connection_point_color = QColor(169, 169, 169);
-    float opacity = 1.0f;
-
-    QRectF boundingRect() const override;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 };
 
 /**********************************************************************/

@@ -296,73 +296,61 @@ void VisualShaderEditor::add_node(QTreeWidgetItem* selected_item, const QPointF&
         return;
     }
 
-    int new_node_id {visual_shader->get_valid_node_id()};
-
-    if (new_node_id == VisualShader::NODE_ID_INVALID) {
-        return;
-    }
-
     // Instantiate the node based on the type
-    std::shared_ptr<VisualShaderNode> node;
+    std::shared_ptr<VisualShaderNode> n;
 
     if (type == "VisualShaderNodeInput") {
-        node = std::make_shared<VisualShaderNodeInput>();
+        n = std::make_shared<VisualShaderNodeInput>();
     } else if (type == "VisualShaderNodeColorConstant") {
-        node = std::make_shared<VisualShaderNodeColorConstant>();
+        n = std::make_shared<VisualShaderNodeColorConstant>();
     } else if (type == "VisualShaderNodeBooleanConstant") {
-        node = std::make_shared<VisualShaderNodeBooleanConstant>();
+        n = std::make_shared<VisualShaderNodeBooleanConstant>();
     } else if (type == "VisualShaderNodeFloatConstant") {
-        node = std::make_shared<VisualShaderNodeFloatConstant>();
+        n = std::make_shared<VisualShaderNodeFloatConstant>();
     } else if (type == "VisualShaderNodeIntConstant") {
-        node = std::make_shared<VisualShaderNodeIntConstant>();
+        n = std::make_shared<VisualShaderNodeIntConstant>();
     } else if (type == "VisualShaderNodeUIntConstant") {
-        node = std::make_shared<VisualShaderNodeUIntConstant>();
+        n = std::make_shared<VisualShaderNodeUIntConstant>();
     } else if (type == "VisualShaderNodeVec2Constant") {
-        node = std::make_shared<VisualShaderNodeVec2Constant>();
+        n = std::make_shared<VisualShaderNodeVec2Constant>();
     } else if (type == "VisualShaderNodeVec3Constant") {
-        node = std::make_shared<VisualShaderNodeVec3Constant>();
+        n = std::make_shared<VisualShaderNodeVec3Constant>();
     } else if (type == "VisualShaderNodeVec4Constant") {
-        node = std::make_shared<VisualShaderNodeVec4Constant>();
+        n = std::make_shared<VisualShaderNodeVec4Constant>();
     } else if (type == "VisualShaderNodeFloatFunc") {
-        node = std::make_shared<VisualShaderNodeFloatFunc>();
+        n = std::make_shared<VisualShaderNodeFloatFunc>();
     } else if (type == "VisualShaderNodeIntFunc") {
-        node = std::make_shared<VisualShaderNodeIntFunc>();
+        n = std::make_shared<VisualShaderNodeIntFunc>();
     } else if (type == "VisualShaderNodeUIntFunc") {
-        node = std::make_shared<VisualShaderNodeUIntFunc>();
+        n = std::make_shared<VisualShaderNodeUIntFunc>();
     } else if (type == "VisualShaderNodeDerivativeFunc") {
-        node = std::make_shared<VisualShaderNodeDerivativeFunc>();
+        n = std::make_shared<VisualShaderNodeDerivativeFunc>();
     } else if (type == "VisualShaderNodeFloatOp") {
-        node = std::make_shared<VisualShaderNodeFloatOp>();
+        n = std::make_shared<VisualShaderNodeFloatOp>();
     } else if (type == "VisualShaderNodeIntOp") {
-        node = std::make_shared<VisualShaderNodeIntOp>();
+        n = std::make_shared<VisualShaderNodeIntOp>();
     } else if (type == "VisualShaderNodeUIntOp") {
-        node = std::make_shared<VisualShaderNodeUIntOp>();
+        n = std::make_shared<VisualShaderNodeUIntOp>();
     } else if (type == "VisualShaderNodeValueNoise") {
-        node = std::make_shared<VisualShaderNodeValueNoise>();
+        n = std::make_shared<VisualShaderNodeValueNoise>();
     } else if (type == "VisualShaderNodeCompare") {
-        node = std::make_shared<VisualShaderNodeCompare>();
+        n = std::make_shared<VisualShaderNodeCompare>();
     } else if (type == "VisualShaderNodeIf") {
-        node = std::make_shared<VisualShaderNodeIf>();
+        n = std::make_shared<VisualShaderNodeIf>();
     } else if (type == "VisualShaderNodeIs") {
-        node = std::make_shared<VisualShaderNodeIs>();
+        n = std::make_shared<VisualShaderNodeIs>();
     } else if (type == "VisualShaderNodeSwitch") {
-        node = std::make_shared<VisualShaderNodeSwitch>();
+        n = std::make_shared<VisualShaderNodeSwitch>();
     } else {
         std::cout << "Unknown node type: " << type << std::endl;
     }
 
-    if (!node) {
+    if (!n) {
         std::cout << "Failed to create node of type: " << type << std::endl;
         return;
     }
 
-    bool result {visual_shader->add_node(node, {(float)coordinate.x(), (float)coordinate.y()}, new_node_id)};
-
-    if (!result) {
-        return;
-    }
-
-    scene->add_node(new_node_id);
+    scene->add_node(n, coordinate);
 }
 
 void VisualShaderEditor::show_create_node_dialog(const QPointF& coordinate) {
@@ -556,37 +544,11 @@ void CreateNodeDialog::update_selected_item() {
 //////////////////////////////
 
 VisualShaderGraphicsScene::VisualShaderGraphicsScene(VisualShader* vs, QObject* parent) : QGraphicsScene(parent), 
-                                                                                          vs(vs), 
-                                                                                          one_free_end_connection(nullptr) {
+                                                                                          vs(vs),
+                                                                                          temporary_connection_graphics_object(nullptr) {
 	setItemIndexMethod(QGraphicsScene::NoIndex); // https://doc.qt.io/qt-6/qgraphicsscene.html#ItemIndexMethod-enum
 
-    // Populate the scene with nodes
-    std::vector<int> nodes {vs->get_nodes()};
-
-    for (const int& node_id : nodes) {
-        const std::shared_ptr<VisualShaderNode> node {vs->get_node(node_id)};
-
-        if (!node) {
-            continue;
-        }
-
-        VisualShaderNodeGraphicsObject* n_o {new VisualShaderNodeGraphicsObject(vs, node_id)};
-        node_graphics_objects[node_id] = n_o;
-        this->addItem(n_o);
-    }
-
-    // Populate the scene with connections
-    std::vector<int> connections {vs->get_connections()};
-
-    for (const int& connection_id : connections) {
-        const VisualShader::Connection connection {vs->get_connection(connection_id)};
-
-        VisualShaderNodeGraphicsObject* n_o {get_node_graphics_object(connection.from_node)};
-
-        VisualShaderConnectionGraphicsObject* c_o {new VisualShaderConnectionGraphicsObject(connection.from_node, connection.from_port, n_o->find_output_port_coordinate(connection.from_port))};
-        connection_graphics_objects[connection_id] = c_o;
-        this->addItem(c_o);
-    }
+    // Populate the scene with nodes from the VisualShader
 
     QObject::connect(this, &VisualShaderGraphicsScene::node_moved, this, &VisualShaderGraphicsScene::on_node_moved);
 }
@@ -595,23 +557,27 @@ VisualShaderGraphicsScene::~VisualShaderGraphicsScene() {
     
 }
 
-bool VisualShaderGraphicsScene::add_node(const int& n_id) {
-    // Make sure the node doesn't already exist, we don't want to overwrite a node.
-    if (node_graphics_objects.find(n_id) != node_graphics_objects.end()) {
-        vs->remove_node(n_id);
+bool VisualShaderGraphicsScene::add_node(const std::shared_ptr<VisualShaderNode>& node, const QPointF& coordinate) {
+    int n_id {vs->get_valid_node_id()};
+
+    if (n_id == VisualShader::NODE_ID_INVALID) {
         return false;
     }
 
-    const std::shared_ptr<VisualShaderNode> node {vs->get_node(n_id)};
-    
-    if (!node) {
-        vs->remove_node(n_id);
+    // Make sure the node doesn't already exist, we don't want to overwrite a node.
+    if (node_graphics_objects.find(n_id) != node_graphics_objects.end()) {
         return false;
     }
 
     QList<QGraphicsView *> views {this->views()};
     if (views.isEmpty()) {
         std::cout << "No views available" << std::endl;
+        return false;
+    }
+
+    bool result {vs->add_node(node, {(float)coordinate.x(), (float)coordinate.y()}, n_id)};
+
+    if (!result) {
         return false;
     }
 
@@ -656,17 +622,6 @@ VisualShaderNodeGraphicsObject* VisualShaderGraphicsScene::get_node_graphics_obj
     return n_o;
 }
 
-VisualShaderConnectionGraphicsObject* VisualShaderGraphicsScene::get_connection_graphics_object(const int& c_id) const {
-    VisualShaderConnectionGraphicsObject* c_o {nullptr};
-
-    auto it {connection_graphics_objects.find(c_id)};
-    if (it != connection_graphics_objects.end()) {
-        c_o = it->second;
-    }
-
-    return c_o;
-}
-
 void VisualShaderGraphicsScene::on_node_moved(const int& n_id, const QPointF& new_coordinate) {
     const std::shared_ptr<VisualShaderNode> n {vs->get_node(n_id)};
 
@@ -677,36 +632,47 @@ void VisualShaderGraphicsScene::on_node_moved(const int& n_id, const QPointF& ne
     // Update the node's coordinate in the VisualShader
     vs->set_node_coordinate(n_id, {(float)new_coordinate.x(), (float)new_coordinate.y()});
 
-    VisualShaderNodeGraphicsObject* n_o {get_node_graphics_object(n_id)};
+    // Update coordinates of all connected connections
+    VisualShaderNodeGraphicsObject* n_o {this->get_node_graphics_object(n_id)};
 
-    if (!n_o) {
-        return;
-    }
+    for (int i{0}; i < n->get_input_port_count(); i++) {
+        VisualShaderInputPortGraphicsObject* i_port {n_o->get_input_port_graphics_object(i)};
 
-    // Update input ports
-    for (int i {0}; i < n->get_input_port_count(); i++) {
-        VisualShaderInputPortGraphicsObject* i_p_o {n_o->get_input_port_graphics_object(i)};
-
-        if (!i_p_o) {
+        if (!i_port || !i_port->is_connected()) {
             continue;
         }
 
-        i_p_o->set_coordinate(n_o->find_input_port_coordinate(i));
-    }
+        VisualShaderConnectionGraphicsObject* c_o {i_port->get_connection_graphics_object()};
 
-    // Update output ports
-    for (int i {0}; i < n->get_output_port_count(); i++) {
-        VisualShaderOutputPortGraphicsObject* o_p_o {n_o->get_output_port_graphics_object(i)};
-
-        if (!o_p_o) {
+        if (!c_o) {
             continue;
         }
 
-        o_p_o->set_coordinate(n_o->find_output_port_coordinate(i));
+        c_o->set_end_coordinate(i_port->get_global_coordinate());
+    }
+    
+    for (int i{0}; i < n->get_output_port_count(); i++) {
+        VisualShaderOutputPortGraphicsObject* o_port {n_o->get_output_port_graphics_object(i)};
+
+        if (!o_port || !o_port->is_connected()) {
+            continue;
+        }
+
+        VisualShaderConnectionGraphicsObject* c_o {o_port->get_connection_graphics_object()};
+
+        if (!c_o) {
+            continue;
+        }
+
+        c_o->set_start_coordinate(o_port->get_global_coordinate());
     }
 }
 
+void VisualShaderGraphicsScene::on_port_pressed(QGraphicsObject* port, const QPointF& coordinate) {}
+
 void VisualShaderGraphicsScene::on_port_dragged(QGraphicsObject* port, const QPointF& coordinate) {
+    VisualShaderConnectionGraphicsObject* c_o {nullptr};
+    
     VisualShaderOutputPortGraphicsObject* o_port {dynamic_cast<VisualShaderOutputPortGraphicsObject *>(port)};
 
     if (!o_port) {
@@ -716,27 +682,54 @@ void VisualShaderGraphicsScene::on_port_dragged(QGraphicsObject* port, const QPo
             return;
         }
 
-        // If it is not connected, then we don't need to do anything
-        // If it is connected, however, we will convert the complete connection to a one free end connection
-        if (!i_port->is_connected()) {
-            return;
+        if (i_port->is_connected() && !temporary_connection_graphics_object) {
+            c_o = i_port->get_connection_graphics_object();
+            temporary_connection_graphics_object = c_o; // Store the connection object for access in the next drag call
+            i_port->detach_connection();
+            c_o->set_to_node_id(VisualShader::NODE_ID_INVALID);
+            c_o->set_to_port_index(VisualShader::PORT_INDEX_INVALID);
+        } else if (!i_port->is_connected() && temporary_connection_graphics_object) {
+            c_o = temporary_connection_graphics_object;
         }
+
+        c_o->set_end_coordinate(coordinate);
 
         return;
     }
 
-    if (!one_free_end_connection) {
-        // Create a One Free End Connection
-        QPointF start_coord {o_port->get_coordinate()};
-        one_free_end_connection = new VisualShaderConnectionGraphicsObject(o_port->get_node_id(), o_port->get_port_index(), start_coord);
-        addItem(one_free_end_connection);
+    if (!o_port->is_connected() && !temporary_connection_graphics_object) {
+        c_o = new VisualShaderConnectionGraphicsObject(o_port->get_node_id(), o_port->get_port_index(), o_port->get_global_coordinate());
+        temporary_connection_graphics_object = c_o; // Store the connection object for access in the next drag call
+        o_port->connect(c_o);
+        addItem(c_o);
+    } else if (o_port->is_connected() && temporary_connection_graphics_object) {
+        c_o = temporary_connection_graphics_object;
+    } else if (o_port->is_connected() && !temporary_connection_graphics_object) {
+        c_o = o_port->get_connection_graphics_object();
+        temporary_connection_graphics_object = c_o; // Store the connection object for access in the next drag call
+
+        // Detach the connection from the input port
+        VisualShaderNodeGraphicsObject* n_o {this->get_node_graphics_object(c_o->get_to_node_id())};
+        if (!n_o) {
+            return;
+        }
+        VisualShaderInputPortGraphicsObject* i_port {n_o->get_input_port_graphics_object(c_o->get_to_port_index())};
+        if (!i_port) {
+            return;
+        }
+        i_port->detach_connection();
+        c_o->set_to_node_id(VisualShader::NODE_ID_INVALID);
+        c_o->set_to_port_index(VisualShader::PORT_INDEX_INVALID);
     }
 
-    one_free_end_connection->set_end_coordinate(coordinate);
+    c_o->set_end_coordinate(coordinate);
 }
 
 void VisualShaderGraphicsScene::on_port_dropped(QGraphicsObject* port, const QPointF& coordinate) {
-    if (!one_free_end_connection) {
+    VisualShaderConnectionGraphicsObject* c_o {temporary_connection_graphics_object};
+    temporary_connection_graphics_object = nullptr; // Reset the temporary connection object
+
+    if (!c_o) {
         return;
     }
 
@@ -745,54 +738,155 @@ void VisualShaderGraphicsScene::on_port_dropped(QGraphicsObject* port, const QPo
 
     // Iterate through the items and check if an input port is under the mouse
     VisualShaderInputPortGraphicsObject* in_p_o {nullptr};
+    VisualShaderOutputPortGraphicsObject* out_p_o {nullptr};
     for (QGraphicsItem* item : items_at_coordinate) {
         // Check if the item is an input port
         in_p_o = dynamic_cast<VisualShaderInputPortGraphicsObject *>(item);
+        out_p_o = dynamic_cast<VisualShaderOutputPortGraphicsObject *>(item);
 
-        if (in_p_o) {
+        if (in_p_o || out_p_o) {
             break;
         }
     }
+    
+    VisualShaderOutputPortGraphicsObject* o_port {dynamic_cast<VisualShaderOutputPortGraphicsObject *>(port)};
 
-    if (!in_p_o) {
-        // Delete the connection
-        this->removeItem(one_free_end_connection);
-        delete one_free_end_connection;
-        one_free_end_connection = nullptr;
+    if (!o_port) {
+        VisualShaderInputPortGraphicsObject* i_port {dynamic_cast<VisualShaderInputPortGraphicsObject *>(port)};
+
+        if (!i_port) {
+            return;
+        }
+
+        if (!in_p_o && !out_p_o) {
+            // Get the output port of the connection object and detach it
+            VisualShaderNodeGraphicsObject* n_o {this->get_node_graphics_object(c_o->get_from_node_id())};
+            if (!n_o) {
+                return;
+            }
+            VisualShaderOutputPortGraphicsObject* o_port {n_o->get_output_port_graphics_object(c_o->get_from_port_index())};
+            if (!o_port) {
+                return;
+            }
+            
+            o_port->detach_connection();
+
+            // Delete the connection
+            this->removeItem(c_o);
+            delete c_o;
+            return; // Return because we dragging an input port and dropped on nothing
+        } else if (out_p_o) {
+            // Get the output port of the connection object and detach it
+            VisualShaderNodeGraphicsObject* n_o {this->get_node_graphics_object(c_o->get_from_node_id())};
+            if (!n_o) {
+                return;
+            }
+            VisualShaderOutputPortGraphicsObject* o_port {n_o->get_output_port_graphics_object(c_o->get_from_port_index())};
+            if (!o_port) {
+                return;
+            }
+            
+            o_port->detach_connection();
+
+            // Delete the connection
+            this->removeItem(c_o);
+            delete c_o;
+            return; // Return because we dragging an input port and dropped on an output port
+        }
+
+        bool result {vs->can_connect_nodes(c_o->get_from_node_id(), c_o->get_from_port_index(), in_p_o->get_node_id(), in_p_o->get_port_index())};
+
+        if (!result) {
+            // Get the output port of the connection object and detach it
+            VisualShaderNodeGraphicsObject* n_o {this->get_node_graphics_object(c_o->get_from_node_id())};
+            if (!n_o) {
+                return;
+            }
+            VisualShaderOutputPortGraphicsObject* o_port {n_o->get_output_port_graphics_object(c_o->get_from_port_index())};
+            if (!o_port) {
+                return;
+            }
+            
+            o_port->detach_connection();
+
+            // Delete the connection
+            this->removeItem(c_o);
+            delete c_o;
+            return;
+        }
+
+        // Connect the nodes
+        result = vs->connect_nodes(c_o->get_from_node_id(), c_o->get_from_port_index(), in_p_o->get_node_id(), in_p_o->get_port_index());
+
+        if (!result) {
+            // Get the output port of the connection object and detach it
+            VisualShaderNodeGraphicsObject* n_o {this->get_node_graphics_object(c_o->get_from_node_id())};
+            if (!n_o) {
+                return;
+            }
+            VisualShaderOutputPortGraphicsObject* o_port {n_o->get_output_port_graphics_object(c_o->get_from_port_index())};
+            if (!o_port) {
+                return;
+            }
+            
+            o_port->detach_connection();
+
+            // Delete the connection
+            this->removeItem(c_o);
+            delete c_o;
+            return;
+        }
+
+        c_o->set_to_node_id(in_p_o->get_node_id());
+        c_o->set_to_port_index(in_p_o->get_port_index());
+        c_o->set_end_coordinate(in_p_o->get_global_coordinate());
+        in_p_o->connect(c_o);
         return;
     }
 
-    bool result {vs->can_connect_nodes(one_free_end_connection->get_from_node_id(), one_free_end_connection->get_from_port_index(), in_p_o->get_node_id(), in_p_o->get_port_index())};
+    if (!in_p_o && !out_p_o) {
+        o_port->detach_connection();
+
+        // Delete the connection
+        this->removeItem(c_o);
+        delete c_o;
+        return; // Return because we dragging an input port and dropped on nothing
+    } else if (out_p_o) {
+        o_port->detach_connection();
+
+        // Delete the connection
+        this->removeItem(c_o);
+        delete c_o;
+        return; // Return because we dragging an input port and dropped on an output port
+    }
+
+    bool result {vs->can_connect_nodes(c_o->get_from_node_id(), c_o->get_from_port_index(), in_p_o->get_node_id(), in_p_o->get_port_index())};
 
     if (!result) {
+        o_port->detach_connection();
+
         // Delete the connection
-        this->removeItem(one_free_end_connection);
-        delete one_free_end_connection;
-        one_free_end_connection = nullptr;
-        std::cout << "Failed to connect nodes" << std::endl;
+        this->removeItem(c_o);
+        delete c_o;
         return;
     }
-
-    // Get a connection id before connecting
-    int c_id {vs->get_valid_connection_id()};
 
     // Connect the nodes
-    result = vs->connect_nodes(one_free_end_connection->get_from_node_id(), one_free_end_connection->get_from_port_index(), in_p_o->get_node_id(), in_p_o->get_port_index());
+    result = vs->connect_nodes(c_o->get_from_node_id(), c_o->get_from_port_index(), in_p_o->get_node_id(), in_p_o->get_port_index());
 
     if (!result) {
+        o_port->detach_connection();
+
         // Delete the connection
-        this->removeItem(one_free_end_connection);
-        delete one_free_end_connection;
-        one_free_end_connection = nullptr;
-        std::cout << "Failed to connect nodes" << std::endl;
+        this->removeItem(c_o);
+        delete c_o;
         return;
     }
 
-    // Add the connection to the scene
-    connection_graphics_objects[c_id] = one_free_end_connection;
-
-    // Reset the one free end connection
-    one_free_end_connection = nullptr;
+    c_o->set_to_node_id(in_p_o->get_node_id());
+    c_o->set_to_port_index(in_p_o->get_port_index());
+    c_o->set_end_coordinate(in_p_o->get_global_coordinate());
+    in_p_o->connect(c_o);
 }
 
 /**********************************************************************/
@@ -1096,6 +1190,9 @@ void VisualShaderGraphicsView::move_view_to_fit_items() {
 VisualShaderNodeGraphicsObject::VisualShaderNodeGraphicsObject(VisualShader* vs, const int& n_id, QGraphicsItem* parent) : QGraphicsObject(parent), 
                                                                                                                            vs(vs),
                                                                                                                            n_id(n_id),
+                                                                                                                           rect_width(0.0f),
+                                                                                                                           caption_rect_height(0.0f),
+                                                                                                                           rect_height(0.0f),
                                                                                                                            rect_margin(0.0f),
                                                                                                                            rect_padding(0.0f) {
     setFlag(QGraphicsItem::ItemDoesntPropagateOpacityToChildren, true);
@@ -1134,22 +1231,6 @@ VisualShaderOutputPortGraphicsObject* VisualShaderNodeGraphicsObject::get_output
     }
 
     return nullptr;
-}
-
-QPointF VisualShaderNodeGraphicsObject::find_input_port_coordinate(const int& p_index) const {
-    if (in_port_graphics_objects.find(p_index) != in_port_graphics_objects.end()) {
-        return in_port_graphics_objects.at(p_index)->get_coordinate();
-    }
-
-    return QPointF();
-}
-
-QPointF VisualShaderNodeGraphicsObject::find_output_port_coordinate(const int& p_index) const {
-    if (out_port_graphics_objects.find(p_index) != out_port_graphics_objects.end()) {
-        return out_port_graphics_objects.at(p_index)->get_coordinate();
-    }
-
-    return QPointF();
 }
 
 QRectF VisualShaderNodeGraphicsObject::boundingRect() const {
@@ -1318,6 +1399,7 @@ void VisualShaderNodeGraphicsObject::paint(QPainter *painter, const QStyleOption
             in_port_graphics_objects[i] = p_o;
 
             // Connect the signals
+            // QObject::connect(p_o, &VisualShaderInputPortGraphicsObject::port_pressed, dynamic_cast<VisualShaderGraphicsScene*>(scene()), &VisualShaderGraphicsScene::on_port_pressed);
             QObject::connect(p_o, &VisualShaderInputPortGraphicsObject::port_dragged, dynamic_cast<VisualShaderGraphicsScene*>(scene()), &VisualShaderGraphicsScene::on_port_dragged);
             QObject::connect(p_o, &VisualShaderInputPortGraphicsObject::port_dropped, dynamic_cast<VisualShaderGraphicsScene*>(scene()), &VisualShaderGraphicsScene::on_port_dropped);
         }
@@ -1371,6 +1453,7 @@ void VisualShaderNodeGraphicsObject::paint(QPainter *painter, const QStyleOption
             out_port_graphics_objects[i] = p_o;
 
             // Connect the signals
+            // QObject::connect(p_o, &VisualShaderOutputPortGraphicsObject::port_pressed, dynamic_cast<VisualShaderGraphicsScene*>(scene()), &VisualShaderGraphicsScene::on_port_pressed);
             QObject::connect(p_o, &VisualShaderOutputPortGraphicsObject::port_dragged, dynamic_cast<VisualShaderGraphicsScene*>(scene()), &VisualShaderGraphicsScene::on_port_dragged);
             QObject::connect(p_o, &VisualShaderOutputPortGraphicsObject::port_dropped, dynamic_cast<VisualShaderGraphicsScene*>(scene()), &VisualShaderGraphicsScene::on_port_dropped);
         }
@@ -1392,7 +1475,8 @@ VisualShaderInputPortGraphicsObject::VisualShaderInputPortGraphicsObject(const Q
                                                                          QGraphicsItem* parent) : QGraphicsObject(parent), 
                                                                                                   rect(rect), 
                                                                                                   n_id(n_id),
-                                                                                                  p_index(p_index) {
+                                                                                                  p_index(p_index),
+                                                                                                  connection_graphics_object(nullptr) {
     setFlag(QGraphicsItem::ItemDoesntPropagateOpacityToChildren, true);
 	setFlag(QGraphicsItem::ItemIsFocusable, true);
 	setFlag(QGraphicsItem::ItemIsSelectable, true);
@@ -1428,22 +1512,17 @@ void VisualShaderInputPortGraphicsObject::paint(QPainter *painter, const QStyleO
 }
 
 void VisualShaderInputPortGraphicsObject::mousePressEvent(QGraphicsSceneMouseEvent *event) {
-    is_dragging = true;
+    emit port_pressed(this, event->scenePos());
     QGraphicsObject::mousePressEvent(event);
 }
 
 void VisualShaderInputPortGraphicsObject::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
-    if (is_dragging) {
-        emit port_dragged(this, event->scenePos());
-    }
+    emit port_dragged(this, event->scenePos());
     QGraphicsObject::mouseMoveEvent(event);
 }
 
 void VisualShaderInputPortGraphicsObject::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
-    if (is_dragging) {
-        emit port_dropped(this, event->scenePos());
-        is_dragging = false;
-    }
+    emit port_dropped(this, event->scenePos());
     QGraphicsObject::mouseReleaseEvent(event);
 }
 
@@ -1454,7 +1533,7 @@ VisualShaderOutputPortGraphicsObject::VisualShaderOutputPortGraphicsObject(const
                                                                                                     rect(rect),
                                                                                                     n_id(n_id),
                                                                                                     p_index(p_index),
-                                                                                                    start_graphics_object(nullptr) {
+                                                                                                    connection_graphics_object(nullptr) {
     setFlag(QGraphicsItem::ItemDoesntPropagateOpacityToChildren, true);
 	setFlag(QGraphicsItem::ItemIsFocusable, true);
 	setFlag(QGraphicsItem::ItemIsSelectable, true);
@@ -1490,22 +1569,17 @@ void VisualShaderOutputPortGraphicsObject::paint(QPainter *painter, const QStyle
 }
 
 void VisualShaderOutputPortGraphicsObject::mousePressEvent(QGraphicsSceneMouseEvent *event) {
-    is_dragging = true;
+    emit port_pressed(this, event->scenePos());
     QGraphicsObject::mousePressEvent(event);
 }
 
 void VisualShaderOutputPortGraphicsObject::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
-    if (is_dragging) {
-        emit port_dragged(this, event->scenePos());
-    }
+    emit port_dragged(this, event->scenePos());
     QGraphicsObject::mouseMoveEvent(event);
 }
 
 void VisualShaderOutputPortGraphicsObject::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
-    if (is_dragging) {
-        emit port_dropped(this, event->scenePos());
-        is_dragging = false;
-    }
+    emit port_dropped(this, event->scenePos());
     QGraphicsObject::mouseReleaseEvent(event);
 }
 
@@ -1525,10 +1599,11 @@ VisualShaderConnectionGraphicsObject::VisualShaderConnectionGraphicsObject(const
                                                                            QGraphicsItem* parent) : QGraphicsObject(parent),
                                                                                                     from_n_id(from_n_id),
                                                                                                     from_p_index(from_p_index),
+                                                                                                    to_n_id((int)VisualShader::NODE_ID_INVALID),
+                                                                                                    to_p_index((int)VisualShader::PORT_INDEX_INVALID),
                                                                                                     start_coordinate(start_coordinate),
                                                                                                     end_coordinate(start_coordinate),
-                                                                                                    start_graphics_object(nullptr),
-                                                                                                    end_graphics_object(nullptr) {
+                                                                                                    rect_padding(0.0f) {
 	setFlag(QGraphicsItem::ItemIsFocusable, true);
 	setFlag(QGraphicsItem::ItemIsSelectable, true);
 
@@ -1596,27 +1671,26 @@ void VisualShaderConnectionGraphicsObject::paint(QPainter *painter, const QStyle
         painter->drawPath(cubic);
     }
 
+    painter->setBrush(this->connection_point_color);
+    
     {
-        // Draw start and end points
-        if (!start_graphics_object) {
-            QRectF start_rect(start_coordinate.x(), start_coordinate.y(), this->point_diameter, this->point_diameter);
+        // Draw start point
+        QRectF start_rect(start_coordinate.x(), start_coordinate.y(), this->point_diameter, this->point_diameter);
 
-            // Adjust the port rect to be centered
-            start_rect.adjust(-start_rect.width() * 0.5f, -start_rect.height() * 0.5f, -start_rect.width() * 0.5f, -start_rect.height() * 0.5f);
+        // Adjust the port rect to be centered
+        start_rect.adjust(-start_rect.width() * 0.5f, -start_rect.height() * 0.5f, -start_rect.width() * 0.5f, -start_rect.height() * 0.5f);
 
-            VisualShaderConnectionStartGraphicsObject* s_o {new VisualShaderConnectionStartGraphicsObject(start_rect, this)};
-            start_graphics_object = s_o;
-        }
+        painter->drawEllipse(start_rect);
+    }
 
-        if (!end_graphics_object) {
-            QRectF end_rect(end_coordinate.x(), end_coordinate.y(), this->point_diameter, this->point_diameter);
+    {
+        // Draw end point
+        QRectF end_rect(end_coordinate.x(), end_coordinate.y(), this->point_diameter, this->point_diameter);
 
-            // Adjust the port rect to be centered
-            end_rect.adjust(-end_rect.width() * 0.5f, -end_rect.height() * 0.5f, -end_rect.width() * 0.5f, -end_rect.height() * 0.5f);
+        // Adjust the port rect to be centered
+        end_rect.adjust(-end_rect.width() * 0.5f, -end_rect.height() * 0.5f, -end_rect.width() * 0.5f, -end_rect.height() * 0.5f);
 
-            VisualShaderConnectionEndGraphicsObject* e_o {new VisualShaderConnectionEndGraphicsObject(end_rect, this)};
-            end_graphics_object = e_o;
-        }
+        painter->drawEllipse(end_rect);
     }
 }
 
@@ -1772,56 +1846,6 @@ std::pair<QPointF, QPointF> VisualShaderConnectionGraphicsObject::calculate_cont
     }
 
     return std::make_pair(cp1, cp2);
-}
-
-VisualShaderConnectionStartGraphicsObject::VisualShaderConnectionStartGraphicsObject(const QRectF& rect, QGraphicsItem* parent) : QGraphicsObject(parent), 
-                                                                                                                                  rect(rect) {
-    setFlag(QGraphicsItem::ItemIsMovable, true);
-	setFlag(QGraphicsItem::ItemIsFocusable, true);
-	setFlag(QGraphicsItem::ItemIsSelectable, true);
-
-    setVisible(true);
-    setOpacity(this->opacity);
-
-    setZValue(-1.0f);
-}
-
-VisualShaderConnectionStartGraphicsObject::~VisualShaderConnectionStartGraphicsObject() {}
-
-QRectF VisualShaderConnectionStartGraphicsObject::boundingRect() const {
-    return rect;
-}
-
-void VisualShaderConnectionStartGraphicsObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-    painter->setClipRect(option->exposedRect);
-
-    painter->setBrush(this->connection_point_color);
-    painter->drawEllipse(rect);
-}
-
-VisualShaderConnectionEndGraphicsObject::VisualShaderConnectionEndGraphicsObject(const QRectF& rect, QGraphicsItem* parent) : QGraphicsObject(parent), 
-                                                                                                                              rect(rect) {
-    setFlag(QGraphicsItem::ItemIsMovable, true);
-	setFlag(QGraphicsItem::ItemIsFocusable, true);
-	setFlag(QGraphicsItem::ItemIsSelectable, true);
-
-    setVisible(true);
-    setOpacity(this->opacity);
-
-    setZValue(-1.0f);
-}
-
-VisualShaderConnectionEndGraphicsObject::~VisualShaderConnectionEndGraphicsObject() {}
-
-QRectF VisualShaderConnectionEndGraphicsObject::boundingRect() const {
-    return rect;
-}
-
-void VisualShaderConnectionEndGraphicsObject::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-    painter->setClipRect(option->exposedRect);
-
-    painter->setBrush(this->connection_point_color);
-    painter->drawEllipse(rect);
 }
 
 /**********************************************************************/
