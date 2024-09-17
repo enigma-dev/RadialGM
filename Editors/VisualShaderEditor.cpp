@@ -690,6 +690,8 @@ void VisualShaderGraphicsScene::on_port_dragged(QGraphicsObject* port, const QPo
             c_o->set_to_port_index(VisualShader::PORT_INDEX_INVALID);
         } else if (!i_port->is_connected() && temporary_connection_graphics_object) {
             c_o = temporary_connection_graphics_object;
+        } else {
+            return;
         }
 
         c_o->set_end_coordinate(coordinate);
@@ -720,6 +722,8 @@ void VisualShaderGraphicsScene::on_port_dragged(QGraphicsObject* port, const QPo
         i_port->detach_connection();
         c_o->set_to_node_id(VisualShader::NODE_ID_INVALID);
         c_o->set_to_port_index(VisualShader::PORT_INDEX_INVALID);
+    } else {
+        return;
     }
 
     c_o->set_end_coordinate(coordinate);
