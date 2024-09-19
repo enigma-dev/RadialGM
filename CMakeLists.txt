@@ -7,6 +7,7 @@ project(RadialGM)
 include(CMakeDependentOption)
 
 option(RGM_BUILD_EMAKE "Build Emake and the compiler." ON)
+option(RGM_BUILD_TESTS "Build tests." OFF)
 
 # FIXME: MSVC dynamic linking requires US TO DLLEXPORT our funcs
 # since we currently don't, I'm force disabling the option on MSVC
@@ -347,6 +348,10 @@ target_link_libraries(${EXE} PRIVATE ${LIB_DOUBLE_CONVERSION})
 # nodeeditor
 add_subdirectory(Submodules/nodeeditor)
 target_link_libraries(${EXE} PRIVATE QtNodes::QtNodes)
+
+if(RGM_BUILD_TESTS)
+  add_subdirectory(Tests)
+endif()
 
 if(WIN32)
   # Windows is a turd

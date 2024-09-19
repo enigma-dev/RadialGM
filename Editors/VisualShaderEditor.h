@@ -50,7 +50,7 @@
 #include <vector>
 
 #include "ResourceTransformations/VisualShader/visual_shader.h"
-#include "BaseEditor.h"
+#include "Editors/BaseEditor.h"
 
 class VisualShaderGraphicsScene;
 class VisualShaderGraphicsView;
@@ -201,11 +201,34 @@ public:
 
 	~VisualShaderGraphicsScene();
 
-    bool add_node(const std::shared_ptr<VisualShaderNode>& node, const QPointF& coordinate);
-    bool delete_node();
+    bool add_node(const int& n_id, const std::shared_ptr<VisualShaderNode>& node, const QPointF& coordinate);
+    bool delete_node(const int& n_id);
 
-    bool add_connection();
-    bool delete_connection();
+    /**
+     * @brief 
+     * 
+     * @note This function sets the @c temporary_connection_graphics_object if 
+     *       we have a valid @c from_node_id and @c from_port_index only. Then it 
+     *       resets it again if we have a valid @c to_node_id and @c to_port_index and 
+     *       this is important because inside the drag and drop event, we need to know
+     *       if we have a valid temporary connection or not.
+     * 
+     * @param from_node_id 
+     * @param from_port_index 
+     * @param to_node_id 
+     * @param to_port_index 
+     * @return true 
+     * @return false 
+     */
+    bool add_connection(const int& from_node_id, 
+                        const int& from_port_index, 
+                        const int& to_node_id = (int)VisualShader::NODE_ID_INVALID, 
+                        const int& to_port_index = (int)VisualShader::PORT_INDEX_INVALID);
+                        
+    bool delete_connection(const int& from_node_id, 
+                           const int& from_port_index, 
+                           const int& to_node_id = (int)VisualShader::NODE_ID_INVALID, 
+                           const int& to_port_index = (int)VisualShader::PORT_INDEX_INVALID);
 
     VisualShaderNodeGraphicsObject* get_node_graphics_object(const int& n_id) const;
 
@@ -495,6 +518,8 @@ public:
 
     int get_to_node_id() const { return to_n_id; }
     int get_to_port_index() const { return to_p_index; }
+
+    void detach_end() const { this->set_to_node_id((int)VisualShader::NODE_ID_INVALID); this->set_to_port_index((int)VisualShader::PORT_INDEX_INVALID); }
 
     void set_to_node_id(const int& to_n_id) const { this->to_n_id = to_n_id; }
     void set_to_port_index(const int& to_p_index) const { this->to_p_index = to_p_index; }
