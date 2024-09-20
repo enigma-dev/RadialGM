@@ -25,22 +25,25 @@
 /*                                                                               */
 /*********************************************************************************/
 
-#include "Editors/VisualShaderEditorTests.h"
+#ifndef VISUAL_SHADER_EDITOR_TESTS_H
+#define VISUAL_SHADER_EDITOR_TESTS_H
 
-#include <QtTest/QtTest>
-#include <QSignalSpy>
+#include "Editors/VisualShaderEditor.h"
 
-void TestVisualShaderEditor::initTestCase() {
-  editor = new VisualShaderEditor();
-}
-void TestVisualShaderEditor::init() {  }
+class TestVisualShaderEditor : public QObject {
+  Q_OBJECT
 
-void TestVisualShaderEditor::cleanupTestCase() { delete editor; }
-void TestVisualShaderEditor::cleanup() {  }
+ private slots:
+  void initTestCase();  // Will be called before the first test function is executed.
+  void init();        // Will be called before each test function is executed.
 
-void TestVisualShaderEditor::testCreateFullGraph() {
-  editor->show();
+  void cleanupTestCase();  // Will be called after the last test function was executed.
+  void cleanup();        // Will be called after every test function.
 
-  // Wait for the editor to be shown
-  QVERIFY(QTest::qWaitForWindowExposed(editor));
-}
+  void testCreateFullGraph();
+
+ private:
+  VisualShaderEditor* editor = nullptr;
+};
+
+#endif  // VISUAL_SHADER_EDITOR_TESTS_H

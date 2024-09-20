@@ -20,6 +20,7 @@ class BaseEditor : public QWidget {
   Q_OBJECT
 
  public:
+  explicit BaseEditor(QWidget *parent = nullptr);
   explicit BaseEditor(MessageModel *treeNodeModel, QWidget *parent);
   ~BaseEditor();
   void ReplaceBuffer(google::protobuf::Message *buffer);

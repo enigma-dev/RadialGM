@@ -5,6 +5,8 @@
 #include <QDebug>
 #include <QMessageBox>
 
+BaseEditor::BaseEditor(QWidget* parent) : QWidget(parent) {}
+
 BaseEditor::BaseEditor(MessageModel* resource_model, QWidget* parent)
     : QWidget(parent), _model(resource_model->GetParentModel<MessageModel>()), _nodeMapper(new ModelMapper(_model, this)) {
   _resMapper = new ModelMapper(resource_model, this);

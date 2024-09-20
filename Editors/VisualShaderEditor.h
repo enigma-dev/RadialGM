@@ -1,56 +1,58 @@
-/********************************************************************************\
- **                                                                              **
- **  Copyright (C) 2024 Saif Kandil (k0T0z)                                      **
- **                                                                              **
- **  This file is a part of the ENIGMA Development Environment.                  **
- **                                                                              **
- **                                                                              **
- **  ENIGMA is free software: you can redistribute it and/or modify it under the **
- **  terms of the GNU General Public License as published by the Free Software   **
- **  Foundation, version 3 of the license or any later version.                  **
- **                                                                              **
- **  This application and its source code is distributed AS-IS, WITHOUT ANY      **
- **  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
- **  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
- **  details.                                                                    **
- **                                                                              **
- **  You should have recieved a copy of the GNU General Public License along     **
- **  with this code. If not, see <http://www.gnu.org/licenses/>                  **
- **                                                                              **
- **  ENIGMA is an environment designed to create games and other programs with a **
- **  high-level, fully compilable language. Developers of ENIGMA or anything     **
- **  associated with ENIGMA are in no way responsible for its users or           **
- **  applications created by its users, or damages caused by the environment     **
- **  or programs made in the environment.                                        **
- **                                                                              **
- \********************************************************************************/
+/*********************************************************************************/
+/*                                                                               */
+/*  Copyright (C) 2024 Saif Kandil (k0T0z)                                       */
+/*                                                                               */
+/*  This file is a part of the ENIGMA Development Environment.                   */
+/*                                                                               */
+/*                                                                               */
+/*  ENIGMA is free software: you can redistribute it and/or modify it under the  */
+/*  terms of the GNU General Public License as published by the Free Software    */
+/*  Foundation, version 3 of the license or any later version.                   */
+/*                                                                               */
+/*  This application and its source code is distributed AS-IS, WITHOUT ANY       */
+/*  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS    */
+/*  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more        */
+/*  details.                                                                     */
+/*                                                                               */
+/*  You should have recieved a copy of the GNU General Public License along      */
+/*  with this code. If not, see <http://www.gnu.org/licenses/>                   */
+/*                                                                               */
+/*  ENIGMA is an environment designed to create games and other programs with a  */
+/*  high-level, fully compilable language. Developers of ENIGMA or anything      */
+/*  associated with ENIGMA are in no way responsible for its users or            */
+/*  applications created by its users, or damages caused by the environment      */
+/*  or programs made in the environment.                                         */
+/*                                                                               */
+/*********************************************************************************/
 
 #ifndef ENIGMA_VISUAL_SHADER_EDITOR_H
 #define ENIGMA_VISUAL_SHADER_EDITOR_H
 
+#include <QContextMenuEvent>
+#include <QGraphicsSceneMouseEvent>
 #include <QtCore/QJsonObject>
 #include <QtCore/QPointF>
 #include <QtCore/QSize>
-#include <QtWidgets/QHBoxLayout>
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QDialog>
-#include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QTreeWidget>
-#include <QtWidgets/QTextEdit>
+#include <QtWidgets/QAction>
 #include <QtWidgets/QComboBox>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QGraphicsObject>
 #include <QtWidgets/QGraphicsScene>
 #include <QtWidgets/QGraphicsView>
-#include <QtWidgets/QGraphicsObject>
+#include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QMenu>
-#include <QtWidgets/QAction>
-#include <QContextMenuEvent>
-#include <QGraphicsSceneMouseEvent>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QTextEdit>
+#include <QtWidgets/QTreeWidget>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QPlainTextEdit>
 
 #include <string>
 #include <vector>
 
 #include "ResourceTransformations/VisualShader/visual_shader.h"
 #include "Editors/BaseEditor.h"
+#include "Editors/CodeEditor.h"
 
 class VisualShaderGraphicsScene;
 class VisualShaderGraphicsView;
@@ -73,27 +75,41 @@ class VisualShaderOutputPortGraphicsObject;
 // Add const to any function that does not modify the object.
 
 class VisualShaderEditor : public BaseEditor {
-    Q_OBJECT
+  Q_OBJECT
 
  public:
+  VisualShaderEditor(QWidget* parent = nullptr);
   VisualShaderEditor(MessageModel* model, QWidget* parent = nullptr);
   ~VisualShaderEditor() override;
 
-  void create_node(const QPointF& coordinate);
-
-  void add_node(QTreeWidgetItem* selected_item, const QPointF& coordinate);
-
-  void show_create_node_dialog(const QPointF& coordinate);
-
-  std::vector<std::string> pasre_node_category_path(const std::string& node_category_path);
-  QTreeWidgetItem* find_or_create_category_item(QTreeWidgetItem* parent, const std::string& category, const std::string& category_path, QTreeWidget* create_node_dialog_nodes_tree, std::unordered_map<std::string, QTreeWidgetItem*>& category_path_map);
-
  Q_SIGNALS:
-  void on_create_node_dialog_requested(const QPointF& coordinate = {0, 0}); // {0, 0} is the top-left corner of the scene.
+  /**
+   * @brief Request the dialog that has all kinds of nodes we can
+   *        create.
+   * 
+   * @note This signal is emitted from two sources: 
+   *       @c VisualShaderEditor::on_create_node_button_pressed and
+   *       @c VisualShaderGraphicsView::on_create_node_action_triggered slots 
+   *       and it is connected to the @c VisualShaderEditor::show_create_node_dialog 
+   *       function.
+   * 
+   * @param coordinate 
+   */
+  void on_create_node_dialog_requested(const QPointF& coordinate = {0,
+                                                                    0});  // {0, 0} is the top-left corner of the scene.
 
  private Q_SLOTS:
+  /**
+   * @brief Called when @c VisualShaderEditor::create_node_button is pressed.
+   * 
+   * @note Connected in @c VisualShaderEditor::init function
+   *       to @c QPushButton::pressed signal.
+   * 
+   * @note EMITS @c VisualShaderEditor::on_create_node_dialog_requested signal.
+   * 
+   */
   void on_create_node_button_pressed();
-  void on_create_node_action_triggered();
+  void on_preview_shader_button_pressed();
 
  private:
   VisualShader* visual_shader;
@@ -101,11 +117,11 @@ class VisualShaderEditor : public BaseEditor {
   QHBoxLayout* layout;
 
   QHBoxLayout* scene_layer_layout;
-  QWidget* scene_layer; // Layer having the scene.
+  QWidget* scene_layer;  // Layer having the scene.
   VisualShaderGraphicsScene* scene;
   VisualShaderGraphicsView* view;
 
-  QWidget* top_layer; // Layer having the menu bar.
+  QWidget* top_layer;  // Layer having the menu bar.
   QHBoxLayout* menu_bar;
 
   QPushButton* create_node_button;
@@ -114,7 +130,18 @@ class VisualShaderEditor : public BaseEditor {
   QPushButton* reset_zoom_button;
   QPushButton* zoom_out_button;
 
+  QPushButton* load_image_button;
+  QPushButton* match_image_button;
+
   QAction* create_node_action;
+
+  ////////////////////////////////////
+  // Code Previewer
+  ////////////////////////////////////
+
+  QDialog* code_previewer_dialog;
+  QVBoxLayout* code_previewer_layout;
+  QPlainTextEdit* code_previewer;
 
   ////////////////////////////////////
   // CreateNodeDialog Nodes Tree
@@ -126,19 +153,38 @@ class VisualShaderEditor : public BaseEditor {
     std::string type;
     std::string description;
 
-    CreateNodeDialogNodesTreeItem(const std::string& name = std::string(), 
-                                  const std::string& category_path = std::string(), 
-                                  const std::string& type = std::string(), 
-                                  const std::string& description = std::string()) : name(name), 
-                                                                                    category_path(category_path), 
-                                                                                    type(type), 
-                                                                                    description(description) {}
-
+    CreateNodeDialogNodesTreeItem(const std::string& name = std::string(),
+                                  const std::string& category_path = std::string(),
+                                  const std::string& type = std::string(),
+                                  const std::string& description = std::string())
+        : name(name), category_path(category_path), type(type), description(description) {}
   };
 
   static const VisualShaderEditor::CreateNodeDialogNodesTreeItem create_node_dialog_nodes_tree_items[];
 
   CreateNodeDialog* create_node_dialog;
+
+  /**
+   * @brief Initializes the UI
+   * 
+   * @note To be called from different constructors.
+   * 
+   */
+  void init();
+
+  void init_graph();
+
+  void create_node(const QPointF& coordinate);
+
+  void add_node(QTreeWidgetItem* selected_item, const QPointF& coordinate);
+
+  void show_create_node_dialog(const QPointF& coordinate);
+
+  std::vector<std::string> parse_node_category_path(const std::string& node_category_path);
+  QTreeWidgetItem* find_or_create_category_item(QTreeWidgetItem* parent, const std::string& category,
+                                                const std::string& category_path,
+                                                QTreeWidget* create_node_dialog_nodes_tree,
+                                                std::unordered_map<std::string, QTreeWidgetItem*>& category_path_map);
 };
 
 /**********************************************************************/
@@ -152,7 +198,7 @@ class VisualShaderEditor : public BaseEditor {
 /**********************************************************************/
 
 class CreateNodeDialog : public QDialog {
-    Q_OBJECT
+  Q_OBJECT
 
  public:
   CreateNodeDialog(QWidget* parent = nullptr);
@@ -194,17 +240,21 @@ class CreateNodeDialog : public QDialog {
 /**********************************************************************/
 
 class VisualShaderGraphicsScene : public QGraphicsScene {
-	Q_OBJECT
+  Q_OBJECT
 
-public:
-	VisualShaderGraphicsScene(VisualShader* vs, QObject *parent = nullptr);
+ public:
+  VisualShaderGraphicsScene(VisualShader* vs, QObject* parent = nullptr);
 
-	~VisualShaderGraphicsScene();
+  ~VisualShaderGraphicsScene();
 
-    bool add_node(const int& n_id, const std::shared_ptr<VisualShaderNode>& node, const QPointF& coordinate);
-    bool delete_node(const int& n_id);
+  bool add_node(const std::string& type, const QPointF& coordinate);
+  bool add_node(const int& n_id, const std::shared_ptr<VisualShaderNode>& n, const QPointF& coordinate);
+  bool delete_node(const int& n_id);
 
-    /**
+  VisualShaderEditor* get_editor() const { return editor; }
+  void set_editor(VisualShaderEditor* editor) const { this->editor = editor; }
+
+  /**
      * @brief 
      * 
      * @note This function sets the @c temporary_connection_graphics_object if 
@@ -220,37 +270,73 @@ public:
      * @return true 
      * @return false 
      */
-    bool add_connection(const int& from_node_id, 
-                        const int& from_port_index, 
-                        const int& to_node_id = (int)VisualShader::NODE_ID_INVALID, 
-                        const int& to_port_index = (int)VisualShader::PORT_INDEX_INVALID);
-                        
-    bool delete_connection(const int& from_node_id, 
-                           const int& from_port_index, 
-                           const int& to_node_id = (int)VisualShader::NODE_ID_INVALID, 
-                           const int& to_port_index = (int)VisualShader::PORT_INDEX_INVALID);
+  bool add_connection(const int& from_node_id, const int& from_port_index,
+                      const int& to_node_id = (int)VisualShader::NODE_ID_INVALID,
+                      const int& to_port_index = (int)VisualShader::PORT_INDEX_INVALID);
 
-    VisualShaderNodeGraphicsObject* get_node_graphics_object(const int& n_id) const;
+  bool delete_connection(const int& from_node_id, const int& from_port_index,
+                         const int& to_node_id = (int)VisualShader::NODE_ID_INVALID,
+                         const int& to_port_index = (int)VisualShader::PORT_INDEX_INVALID);
 
-    VisualShader* get_visual_shader() const { return vs; }
+  VisualShaderNodeGraphicsObject* get_node_graphics_object(const int& n_id) const;
 
-public Q_SLOTS:
-    void on_port_pressed(QGraphicsObject* port, const QPointF& coordinate);
-    void on_port_dragged(QGraphicsObject* port, const QPointF& coordinate);
-    void on_port_dropped(QGraphicsObject* port, const QPointF& coordinate);
+ public Q_SLOTS:
+  /**
+   * @brief Called when an interaction with a port is made.
+   * 
+   * @note Connected in @c VisualShaderNodeGraphicsObject::paint function
+   *       to @c VisualShaderInputPortGraphicsObject::port_* signals.
+   * 
+   * @param port 
+   * @param coordinate 
+   */
+  void on_port_pressed(QGraphicsObject* port, const QPointF& coordinate);
+  void on_port_dragged(QGraphicsObject* port, const QPointF& coordinate);
+  void on_port_dropped(QGraphicsObject* port, const QPointF& coordinate);
 
-Q_SIGNALS:
-    void node_moved(const int& n_id, const QPointF& new_coordinate);
+ Q_SIGNALS:
+  /**
+   * @brief Notify the scene that a node has been moved.
+   * 
+   * @note EMITTED from @c VisualShaderNodeGraphicsObject::itemChange function.
+   * 
+   * @note Connected to @c VisualShaderGraphicsScene::on_node_moved slot in 
+   *       @c VisualShaderGraphicsScene::VisualShaderGraphicsScene constructor.
+   * 
+   * @param n_id 
+   * @param new_coordinate 
+   */
+  void node_moved(const int& n_id, const QPointF& new_coordinate);
 
-private Q_SLOTS:
-    void on_node_moved(const int& n_id, const QPointF& new_coordinate);
+ private Q_SLOTS:
+  /**
+   * @brief Called when a node is moved.
+   * 
+   * @note Connected in @c VisualShaderGraphicsScene::VisualShaderGraphicsScene constructor
+   *       to @c VisualShaderGraphicsScene::node_moved signal.
+   * 
+   * @param n_id 
+   * @param new_coordinate 
+   */
+  void on_node_moved(const int& n_id, const QPointF& new_coordinate);
 
-private:
-    VisualShader* vs;
+  /**
+   * @brief Called when a delete node action is triggered.
+   * 
+   * @note Connected in @c VisualShaderGraphicsScene::add_node function
+   *       to @c VisualShaderNodeGraphicsObject::node_deleted signal.
+   * 
+   * @param n_id 
+   */
+  void on_node_deleted(const int& n_id);
 
-    std::unordered_map<int, VisualShaderNodeGraphicsObject*> node_graphics_objects;
+ private:
+  VisualShader* vs;
+  mutable VisualShaderEditor* editor;
 
-    VisualShaderConnectionGraphicsObject* temporary_connection_graphics_object;
+  std::unordered_map<int, VisualShaderNodeGraphicsObject*> node_graphics_objects;
+
+  VisualShaderConnectionGraphicsObject* temporary_connection_graphics_object;
 };
 
 /**********************************************************************/
@@ -264,77 +350,83 @@ private:
 /**********************************************************************/
 
 class VisualShaderGraphicsView : public QGraphicsView {
-	Q_OBJECT
+  Q_OBJECT
 
-public:
-	VisualShaderGraphicsView(VisualShaderGraphicsScene *scene, QWidget *parent = nullptr);
+ public:
+  VisualShaderGraphicsView(VisualShaderGraphicsScene* scene, QWidget* parent = nullptr);
 
-	~VisualShaderGraphicsView();
+  ~VisualShaderGraphicsView();
 
-    float get_x() const { return rect_x; }
-    float get_y() const { return rect_y; }
-    float get_width() const { return rect_width; }
-    float get_height() const { return rect_height; }
+  float get_x() const { return rect_x; }
+  float get_y() const { return rect_y; }
+  float get_width() const { return rect_width; }
+  float get_height() const { return rect_height; }
 
-public Q_SLOTS:
-    /**
-     * @brief 
-     * 
-     * @todo If the button is pressed then zoom in from the center of the view.
-     * 
-     */
-    void zoom_in();
-    void reset_zoom();
-    void zoom_out();
+ public Q_SLOTS:
+  /**
+   * @todo If the button is pressed then zoom in from the center of the view.
+   */
+  void zoom_in();
+  void reset_zoom();
+  void zoom_out();
 
-private Q_SLOTS:
-    void on_create_node_action_triggered();
-    void on_delete_node_action_triggered();
+ private Q_SLOTS:
+  /**
+   * @brief Called when @c VisualShaderGraphicsView::create_node_action is triggered.
+   * 
+   * @note Connected in @c VisualShaderGraphicsView::VisualShaderGraphicsView constructor
+   *       to @c QAction::triggered signal.
+   * 
+   * @note EMITS @c VisualShaderEditor::on_create_node_dialog_requested signal.
+   * 
+   */
+  void on_create_node_action_triggered();
 
-Q_SIGNALS:
-	void zoom_changed(const float& zoom);
+ Q_SIGNALS:
+  void zoom_changed(const float& zoom);
 
-private:
-    // Style
-    QColor background_color = QColor(53, 53, 53);
-    QColor fine_grid_color = QColor(60, 60, 60);
-    QColor coarse_grid_color = QColor(25, 25, 25);
+ private:
+  VisualShaderGraphicsScene* scene;
 
-    // Scene Rect
-    float t_size = std::numeric_limits<short>::max(); // 32767
-    float rect_x = -1.0f * t_size * 0.5f;
-    float rect_y = -1.0f * t_size * 0.5f;
-    float rect_width = t_size;
-    float rect_height = t_size;
+  // Style
+  QColor background_color = QColor(53, 53, 53);
+  QColor fine_grid_color = QColor(60, 60, 60);
+  QColor coarse_grid_color = QColor(25, 25, 25);
 
-    float fit_in_view_margin = 50.0f;
+  // Scene Rect
+  float t_size = std::numeric_limits<short>::max();  // 32767
+  float rect_x = -1.0f * t_size * 0.5f;
+  float rect_y = -1.0f * t_size * 0.5f;
+  float rect_width = t_size;
+  float rect_height = t_size;
 
-    // Zoom
-    float zoom = 1.0f;
-	float zoom_step = 1.2f;
-	float zoom_min;
-	float zoom_max;
+  float fit_in_view_margin = 50.0f;
 
-    QMenu* context_menu;
-    QAction* create_node_action;
+  // Zoom
+  float zoom = 1.0f;
+  float zoom_step = 1.2f;
+  float zoom_min;
+  float zoom_max;
 
-    QAction* delete_node_action;
+  QMenu* context_menu;
+  QPointF last_context_menu_coordinate = {0, 0};
+  QAction* create_node_action;
 
-    QAction* zoom_in_action;
-    QAction* reset_zoom_action;
-    QAction* zoom_out_action;
+  QAction* zoom_in_action;
+  QAction* reset_zoom_action;
+  QAction* zoom_out_action;
 
-    QPointF last_click_coordinate;
+  QPointF last_click_coordinate;
 
-    void drawBackground(QPainter *painter, const QRectF &r) override;
-    void contextMenuEvent(QContextMenuEvent *event) override;
-	void wheelEvent(QWheelEvent *event) override;
-	void mousePressEvent(QMouseEvent *event) override;
-	void mouseMoveEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
-	void showEvent(QShowEvent *event) override;
+  void drawBackground(QPainter* painter, const QRectF& r) override;
+  void contextMenuEvent(QContextMenuEvent* event) override;
+  void wheelEvent(QWheelEvent* event) override;
+  void mousePressEvent(QMouseEvent* event) override;
+  void mouseMoveEvent(QMouseEvent* event) override;
+  void mouseReleaseEvent(QMouseEvent* event) override;
+  void showEvent(QShowEvent* event) override;
 
-    void move_view_to_fit_items();
+  void move_view_to_fit_items();
 };
 
 /**********************************************************************/
@@ -348,149 +440,196 @@ private:
 /**********************************************************************/
 
 class VisualShaderNodeGraphicsObject : public QGraphicsObject {
-	Q_OBJECT
+  Q_OBJECT
 
-public:
-    VisualShaderNodeGraphicsObject(VisualShader* vs, const int& n_id, QGraphicsItem *parent = nullptr);
-    ~VisualShaderNodeGraphicsObject();
+ public:
+  VisualShaderNodeGraphicsObject(const int& n_id, 
+                                 const QPointF& coordinate, 
+                                 const std::shared_ptr<VisualShaderNode>& node,
+                                 QGraphicsItem* parent = nullptr);
+  ~VisualShaderNodeGraphicsObject();
 
-    VisualShaderInputPortGraphicsObject* get_input_port_graphics_object(const int& p_index) const;
-    VisualShaderOutputPortGraphicsObject* get_output_port_graphics_object(const int& p_index) const;
+  VisualShaderInputPortGraphicsObject* get_input_port_graphics_object(const int& p_index) const;
+  VisualShaderOutputPortGraphicsObject* get_output_port_graphics_object(const int& p_index) const;
 
-private:
-    VisualShader* vs;
-    int n_id;
+ Q_SIGNALS:
+  /**
+   * @brief Send a request to delete a node.
+   * 
+   * @note EMITTED from @c VisualShaderNodeGraphicsObject::on_delete_node_action_triggered slot.
+   * 
+   * @note Connected in @c VisualShaderGraphicsScene::add_node function to 
+   *       @c VisualShaderGraphicsScene::on_node_deleted slot.
+   * 
+   * @param n_id 
+   */
+  void node_deleted(const int& n_id);
 
-    std::unordered_map<int, VisualShaderInputPortGraphicsObject*> in_port_graphics_objects;
-    std::unordered_map<int, VisualShaderOutputPortGraphicsObject*> out_port_graphics_objects;
+ private Q_SLOTS:
+  /**
+   * @brief Called when @c VisualShaderNodeGraphicsObject::delete_node_action is triggered.
+   * 
+   * @note Connected in @c VisualShaderNodeGraphicsObject::VisualShaderNodeGraphicsObject constructor
+   *       to @c QAction::triggered signal.
+   * 
+   * @note EMITS @c VisualShaderNodeGraphicsObject::node_deleted signal.
+   * 
+   */
+  void on_delete_node_action_triggered();
 
-    // Style
-    QColor normal_boundary_color = QColor(255, 255, 255);
-    QColor selected_boundary_color = QColor(255, 165, 0);
-    QColor font_color = QColor(255, 255, 255);
-    QColor fill_color = QColor(0, 0, 0, 0);
+ private:
+  int n_id;
+  QPointF coordinate;
+  std::shared_ptr<VisualShaderNode> node;
 
-    float pen_width = 1.0f;
+  QMenu* context_menu;
+  QAction* delete_node_action;
 
-    float opacity = 0.8f;
-    float corner_radius = 3.0f;
+  std::unordered_map<int, VisualShaderInputPortGraphicsObject*> in_port_graphics_objects;
+  std::unordered_map<int, VisualShaderOutputPortGraphicsObject*> out_port_graphics_objects;
 
-    mutable float rect_width; // Calculated in boundingRect()
-    mutable float caption_rect_height; // Calculated in boundingRect()
+  // Style
+  QColor normal_boundary_color = QColor(255, 255, 255);
+  QColor selected_boundary_color = QColor(255, 165, 0);
+  QColor font_color = QColor(255, 255, 255);
+  QColor fill_color = QColor(0, 0, 0, 0);
 
-    mutable float rect_height; // Calculated in boundingRect()
-    float body_rect_header_height = 30.0f;
-    float body_rect_port_step = 40.0f;
-    float body_rect_footer_height = 30.0f;
+  float pen_width = 1.0f;
 
-    mutable float rect_padding; // Calculated in boundingRect()
-    mutable float rect_margin; // Calculated in boundingRect()
+  float opacity = 0.8f;
+  float corner_radius = 3.0f;
 
-    // Ports Style
-    float connected_port_diameter = 8.0f;
-    float unconnected_port_diameter = 6.0f;
+  mutable float rect_width;           // Calculated in boundingRect()
+  mutable float caption_rect_height;  // Calculated in boundingRect()
 
-    // Caption
-    float caption_font_size = 18.0f;
-    float port_caption_font_size = 8.0f;
+  mutable float rect_height;  // Calculated in boundingRect()
+  float body_rect_header_height = 30.0f;
+  float body_rect_port_step = 40.0f;
+  float body_rect_footer_height = 30.0f;
 
-    QRectF boundingRect() const override;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr) override;
-    QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
+  mutable float rect_padding;  // Calculated in boundingRect()
+  mutable float rect_margin;   // Calculated in boundingRect()
+
+  // Ports Style
+  float connected_port_diameter = 8.0f;
+  float unconnected_port_diameter = 6.0f;
+
+  // Caption
+  float caption_font_size = 18.0f;
+  float port_caption_font_size = 8.0f;
+
+  QRectF boundingRect() const override;
+  void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
+  QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
+  void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
 };
 
 class VisualShaderInputPortGraphicsObject : public QGraphicsObject {
-    Q_OBJECT
+  Q_OBJECT
 
-public:
-    VisualShaderInputPortGraphicsObject(const QRectF& rect, 
-                                        const int& n_id,
-                                        const int& p_index, 
-                                        QGraphicsItem* parent = nullptr);
-    ~VisualShaderInputPortGraphicsObject();
+ public:
+  VisualShaderInputPortGraphicsObject(const QRectF& rect, const int& n_id, const int& p_index,
+                                      QGraphicsItem* parent = nullptr);
+  ~VisualShaderInputPortGraphicsObject();
 
-    QPointF get_global_coordinate() const { return mapToScene(rect.center()); }
+  QPointF get_global_coordinate() const { return mapToScene(rect.center()); }
 
-    int get_node_id() const { return n_id; }
-    int get_port_index() const { return p_index; }
+  int get_node_id() const { return n_id; }
+  int get_port_index() const { return p_index; }
 
-    VisualShaderConnectionGraphicsObject* get_connection_graphics_object() const { return connection_graphics_object; }
-    void connect(VisualShaderConnectionGraphicsObject* c_g_o) const { this->connection_graphics_object = c_g_o; }
-    void detach_connection() const { this->connection_graphics_object = nullptr; }
-    bool is_connected() const { return connection_graphics_object != nullptr; }
+  VisualShaderConnectionGraphicsObject* get_connection_graphics_object() const { return connection_graphics_object; }
+  void connect(VisualShaderConnectionGraphicsObject* c_g_o) const { this->connection_graphics_object = c_g_o; }
+  void detach_connection() const { this->connection_graphics_object = nullptr; }
+  bool is_connected() const { return connection_graphics_object != nullptr; }
 
-Q_SIGNALS:
-    void port_pressed(VisualShaderInputPortGraphicsObject* port, const QPointF& pos);
-    void port_dragged(VisualShaderInputPortGraphicsObject* port, const QPointF& pos);
-    void port_dropped(VisualShaderInputPortGraphicsObject* port, const QPointF& pos);
+ Q_SIGNALS:
+  /**
+   * @brief Called when the an interaction with the port is made.
+   * 
+   * @note Connected in @c VisualShaderNodeGraphicsObject::paint function to
+   *       @c VisualShaderGraphicsScene::on_port_* slots.
+   * 
+   * @param port 
+   * @param pos 
+   */
+  void port_pressed(VisualShaderInputPortGraphicsObject* port, const QPointF& pos);
+  void port_dragged(VisualShaderInputPortGraphicsObject* port, const QPointF& pos);
+  void port_dropped(VisualShaderInputPortGraphicsObject* port, const QPointF& pos);
 
-private:
-    int n_id;
-    int p_index;
-    QRectF rect;
+ private:
+  int n_id;
+  int p_index;
+  QRectF rect;
 
-    mutable VisualShaderConnectionGraphicsObject* connection_graphics_object;
+  mutable VisualShaderConnectionGraphicsObject* connection_graphics_object;
 
-    float padding = 0.5f;
+  float padding = 0.5f;
 
-    // Style
-    QColor font_color = QColor(255, 255, 255);
-    QColor connection_point_color = QColor(169, 169, 169);
+  // Style
+  QColor font_color = QColor(255, 255, 255);
+  QColor connection_point_color = QColor(169, 169, 169);
 
-    float opacity = 1.0f;
+  float opacity = 1.0f;
 
-    QRectF boundingRect() const override;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
-    void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-    void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+  QRectF boundingRect() const override;
+  void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+  void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+  void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+  void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
 };
 
 class VisualShaderOutputPortGraphicsObject : public QGraphicsObject {
-    Q_OBJECT
+  Q_OBJECT
 
-public:
-    VisualShaderOutputPortGraphicsObject(const QRectF& rect, 
-                                         const int& n_id,
-                                         const int& p_index, 
-                                         QGraphicsItem* parent = nullptr);
-    ~VisualShaderOutputPortGraphicsObject();
+ public:
+  VisualShaderOutputPortGraphicsObject(const QRectF& rect, const int& n_id, const int& p_index,
+                                       QGraphicsItem* parent = nullptr);
+  ~VisualShaderOutputPortGraphicsObject();
 
-    QPointF get_global_coordinate() const { return mapToScene(rect.center()); }
+  QPointF get_global_coordinate() const { return mapToScene(rect.center()); }
 
-    int get_node_id() const { return n_id; }
-    int get_port_index() const { return p_index; }
+  int get_node_id() const { return n_id; }
+  int get_port_index() const { return p_index; }
 
-    VisualShaderConnectionGraphicsObject* get_connection_graphics_object() const { return connection_graphics_object; }
-    void connect(VisualShaderConnectionGraphicsObject* c_o) const { this->connection_graphics_object = c_o; }
-    void detach_connection() const { this->connection_graphics_object = nullptr; }
-    bool is_connected() const { return connection_graphics_object != nullptr; }
+  VisualShaderConnectionGraphicsObject* get_connection_graphics_object() const { return connection_graphics_object; }
+  void connect(VisualShaderConnectionGraphicsObject* c_o) const { this->connection_graphics_object = c_o; }
+  void detach_connection() const { this->connection_graphics_object = nullptr; }
+  bool is_connected() const { return connection_graphics_object != nullptr; }
 
-Q_SIGNALS:
-    void port_pressed(VisualShaderOutputPortGraphicsObject* port, const QPointF& pos);
-    void port_dragged(VisualShaderOutputPortGraphicsObject* port, const QPointF& pos);
-    void port_dropped(VisualShaderOutputPortGraphicsObject* port, const QPointF& pos);
+ Q_SIGNALS:
+  /**
+   * @brief Called when the an interaction with the port is made.
+   * 
+   * @note Connected in @c VisualShaderNodeGraphicsObject::paint function to
+   *       @c VisualShaderGraphicsScene::on_port_* slots.
+   * 
+   * @param port 
+   * @param pos 
+   */
+  void port_pressed(VisualShaderOutputPortGraphicsObject* port, const QPointF& pos);
+  void port_dragged(VisualShaderOutputPortGraphicsObject* port, const QPointF& pos);
+  void port_dropped(VisualShaderOutputPortGraphicsObject* port, const QPointF& pos);
 
-private:
-    int n_id;
-    int p_index;
-    QRectF rect;
+ private:
+  int n_id;
+  int p_index;
+  QRectF rect;
 
-    mutable VisualShaderConnectionGraphicsObject* connection_graphics_object;
+  mutable VisualShaderConnectionGraphicsObject* connection_graphics_object;
 
-    float padding = 0.5f;
+  float padding = 0.5f;
 
-    // Style
-    QColor font_color = QColor(255, 255, 255);
-    QColor connection_point_color = QColor(169, 169, 169);
+  // Style
+  QColor font_color = QColor(255, 255, 255);
+  QColor connection_point_color = QColor(169, 169, 169);
 
-    float opacity = 1.0f;
+  float opacity = 1.0f;
 
-    QRectF boundingRect() const override;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
-    void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-    void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
+  QRectF boundingRect() const override;
+  void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+  void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+  void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+  void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
 };
 
 /**********************************************************************/
@@ -504,61 +643,69 @@ private:
 /**********************************************************************/
 
 class VisualShaderConnectionGraphicsObject : public QGraphicsObject {
-	Q_OBJECT
+  Q_OBJECT
 
-public:
-    VisualShaderConnectionGraphicsObject(const int& from_n_id, 
-                                         const int& from_p_index, 
-                                         const QPointF& start_coordinate, 
-                                         QGraphicsItem *parent = nullptr);
-    ~VisualShaderConnectionGraphicsObject();
+ public:
+  VisualShaderConnectionGraphicsObject(const int& from_n_id, const int& from_p_index, const QPointF& start_coordinate,
+                                       QGraphicsItem* parent = nullptr);
+  ~VisualShaderConnectionGraphicsObject();
 
-    int get_from_node_id() const { return from_n_id; }
-    int get_from_port_index() const { return from_p_index; }
+  int get_from_node_id() const { return from_n_id; }
+  int get_from_port_index() const { return from_p_index; }
 
-    int get_to_node_id() const { return to_n_id; }
-    int get_to_port_index() const { return to_p_index; }
+  int get_to_node_id() const { return to_n_id; }
+  int get_to_port_index() const { return to_p_index; }
 
-    void detach_end() const { this->set_to_node_id((int)VisualShader::NODE_ID_INVALID); this->set_to_port_index((int)VisualShader::PORT_INDEX_INVALID); }
+  void detach_end() const {
+    this->set_to_node_id((int)VisualShader::NODE_ID_INVALID);
+    this->set_to_port_index((int)VisualShader::PORT_INDEX_INVALID);
+  }
 
-    void set_to_node_id(const int& to_n_id) const { this->to_n_id = to_n_id; }
-    void set_to_port_index(const int& to_p_index) const { this->to_p_index = to_p_index; }
-    
-    void set_start_coordinate(const QPointF& start_coordinate) { this->start_coordinate = start_coordinate; update(); }
-    void set_end_coordinate(const QPointF& end_coordinate) { this->end_coordinate = end_coordinate; update(); }
+  void set_to_node_id(const int& to_n_id) const { this->to_n_id = to_n_id; }
+  void set_to_port_index(const int& to_p_index) const { this->to_p_index = to_p_index; }
 
-private:
-    int from_n_id;
-    mutable int to_n_id;
-    int from_p_index;
-    mutable int to_p_index;
+  void set_start_coordinate(const QPointF& start_coordinate) {
+    this->start_coordinate = start_coordinate;
+    update();
+  }
+  void set_end_coordinate(const QPointF& end_coordinate) {
+    this->end_coordinate = end_coordinate;
+    update();
+  }
 
-    QPointF start_coordinate;
-    QPointF end_coordinate;
+ private:
+  int from_n_id;
+  mutable int to_n_id;
+  int from_p_index;
+  mutable int to_p_index;
 
-    // Style
-    QColor construction_color = QColor(169, 169, 169);
-    QColor normal_color = QColor(0, 255, 255);
-    QColor selected_color = QColor(100, 100, 100);
-    QColor selected_halo_color = QColor(255, 165, 0);
-    QColor connection_point_color = QColor(169, 169, 169);
+  QPointF start_coordinate;
+  QPointF end_coordinate;
 
-    float line_width = 3.0f;
-    float construction_line_width = 2.0f;
-    float point_diameter = 10.0f;
+  // Style
+  QColor construction_color = QColor(169, 169, 169);
+  QColor normal_color = QColor(0, 255, 255);
+  QColor selected_color = QColor(100, 100, 100);
+  QColor selected_halo_color = QColor(255, 165, 0);
+  QColor connection_point_color = QColor(169, 169, 169);
 
-    mutable float rect_padding; // Calculated in boundingRect()
+  float line_width = 3.0f;
+  float construction_line_width = 2.0f;
+  float point_diameter = 10.0f;
 
-    float min_h_distance = 50.0f;
-    float abnormal_face_to_back_control_width_expansion_factor = 0.5f;
-    float abnormal_face_to_back_control_height_expansion_factor = 2.0f;
+  mutable float rect_padding;  // Calculated in boundingRect()
 
-    QRectF boundingRect() const override;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = nullptr) override;
+  float min_h_distance = 50.0f;
+  float abnormal_face_to_back_control_width_expansion_factor = 0.5f;
+  float abnormal_face_to_back_control_height_expansion_factor = 2.0f;
 
-    int detect_quadrant(const QPointF& reference, const QPointF& target) const;
-    QRectF calculate_bounding_rect_from_coordinates(const QPointF& start_coordinate, const QPointF& end_coordinate) const;
-    std::pair<QPointF, QPointF> calculate_control_points(const QPointF& start_coordinate, const QPointF& end_coordinate) const;
+  QRectF boundingRect() const override;
+  void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
+
+  int detect_quadrant(const QPointF& reference, const QPointF& target) const;
+  QRectF calculate_bounding_rect_from_coordinates(const QPointF& start_coordinate, const QPointF& end_coordinate) const;
+  std::pair<QPointF, QPointF> calculate_control_points(const QPointF& start_coordinate,
+                                                       const QPointF& end_coordinate) const;
 };
 
 /**********************************************************************/
@@ -571,21 +718,20 @@ private:
 /**********************************************************************/
 /**********************************************************************/
 
-class NodesCustomWidget : public QWidget
-{
-    Q_OBJECT
+class NodesCustomWidget : public QWidget {
+  Q_OBJECT
 
-public:
-    NodesCustomWidget(const std::shared_ptr<VisualShaderNode>& node, QWidget *parent = nullptr);
-    ~NodesCustomWidget();
+ public:
+  NodesCustomWidget(const std::shared_ptr<VisualShaderNode>& node, QWidget* parent = nullptr);
+  ~NodesCustomWidget();
 
-private Q_SLOTS:
-    void on_combo_box0_current_index_changed(const int& index);
+ private Q_SLOTS:
+  void on_combo_box0_current_index_changed(const int& index);
 
-private:
-    QVBoxLayout* layout;
+ private:
+  QVBoxLayout* layout;
 
-    QComboBox* combo_boxes[2];
+  QComboBox* combo_boxes[2];
 };
 
-#endif // ENIGMA_VISUAL_SHADER_EDITOR_H
+#endif  // ENIGMA_VISUAL_SHADER_EDITOR_H

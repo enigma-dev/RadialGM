@@ -1,4 +1,3 @@
-#include "main.h"
 #include "MainWindow.h"
 
 #include "Dialogs/PreferencesKeys.h"
@@ -7,8 +6,6 @@
 #include <QSettings>
 #include <QStyle>
 #include <QStyleFactory>
-
-QString defaultStyle = "";
 
 int main(int argc, char *argv[]) {
   // must enable high DPI before QApplication constructor

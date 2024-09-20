@@ -25,22 +25,25 @@
 /*                                                                               */
 /*********************************************************************************/
 
+#include <QtTest/QtTest>
+
+#include "MainWindowTests.h"
 #include "Editors/VisualShaderEditorTests.h"
 
-#include <QtTest/QtTest>
-#include <QSignalSpy>
+#define RUN_TEST(CLASS_NAME) \
+    { \
+        ::QTest::Internal::callInitMain<CLASS_NAME>(); \
+        CLASS_NAME t; \
+        int r {QTest::qExec(&t, argc, argv)}; \
+        if (r != 0) return 1; \
+    }
 
-void TestVisualShaderEditor::initTestCase() {
-  editor = new VisualShaderEditor();
-}
-void TestVisualShaderEditor::init() {  }
+int main(int argc, char* argv[]) {  
+    QApplication app(argc, argv); 
+    app.setAttribute(Qt::AA_Use96Dpi, true);  
 
-void TestVisualShaderEditor::cleanupTestCase() { delete editor; }
-void TestVisualShaderEditor::cleanup() {  }
+    RUN_TEST(TestVisualShaderEditor);
+    // RUN_TEST(TestMainWindow);
 
-void TestVisualShaderEditor::testCreateFullGraph() {
-  editor->show();
-
-  // Wait for the editor to be shown
-  QVERIFY(QTest::qWaitForWindowExposed(editor));
+    return 0;
 }

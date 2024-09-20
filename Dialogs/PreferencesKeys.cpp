@@ -25,22 +25,6 @@
 /*                                                                               */
 /*********************************************************************************/
 
-#include "Editors/VisualShaderEditorTests.h"
+#include "Dialogs/PreferencesKeys.h"
 
-#include <QtTest/QtTest>
-#include <QSignalSpy>
-
-void TestVisualShaderEditor::initTestCase() {
-  editor = new VisualShaderEditor();
-}
-void TestVisualShaderEditor::init() {  }
-
-void TestVisualShaderEditor::cleanupTestCase() { delete editor; }
-void TestVisualShaderEditor::cleanup() {  }
-
-void TestVisualShaderEditor::testCreateFullGraph() {
-  editor->show();
-
-  // Wait for the editor to be shown
-  QVERIFY(QTest::qWaitForWindowExposed(editor));
-}
+QString defaultStyle = "";

@@ -3,6 +3,11 @@
 
 #include <QString>
 
+// Qt doesn't have a way of getting the default style
+// so we store it for later when the user restores
+// default settings so we can apply it again
+extern QString defaultStyle;
+
 // these are settings key helpers to prevent typos and promote
 // consistency, or at least turn such mistakes into compile-time
 // errors and not difficult-to-diagnose issues at runtime

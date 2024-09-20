@@ -25,22 +25,22 @@
 /*                                                                               */
 /*********************************************************************************/
 
-#include "Editors/VisualShaderEditorTests.h"
+#include "MainWindowTests.h"
 
 #include <QtTest/QtTest>
 #include <QSignalSpy>
 
-void TestVisualShaderEditor::initTestCase() {
-  editor = new VisualShaderEditor();
+void TestMainWindow::initTestCase() {
+  mw = new MainWindow(nullptr);
 }
-void TestVisualShaderEditor::init() {  }
+void TestMainWindow::init() {  }
 
-void TestVisualShaderEditor::cleanupTestCase() { delete editor; }
-void TestVisualShaderEditor::cleanup() {  }
+void TestMainWindow::cleanupTestCase() { delete mw; }
+void TestMainWindow::cleanup() {  }
 
-void TestVisualShaderEditor::testCreateFullGraph() {
-  editor->show();
+void TestMainWindow::testVisualShaderEditor() {
+  mw->show();
 
-  // Wait for the editor to be shown
-  QVERIFY(QTest::qWaitForWindowExposed(editor));
+  // Wait for the window to be shown
+  QTest::qWait(1000);
 }
