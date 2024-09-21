@@ -28,9 +28,6 @@
 #include "Editors/VisualShaderEditor.h"
 
 #include <QAction>
-#include <QScreen>
-#include <QtWidgets/QGroupBox>
-#include <QtWidgets/QRadioButton>
 
 #include <unordered_map>
 
@@ -564,9 +561,11 @@ VisualShaderGraphicsScene::~VisualShaderGraphicsScene() {}
 bool VisualShaderGraphicsScene::add_node(const std::string& type, const QPointF& coordinate) {
   // Instantiate the node based on the type
   std::shared_ptr<VisualShaderNode> n;
+  QWidget* embed_widget {nullptr};
 
   if (type == "VisualShaderNodeInput") {
     n = std::make_shared<VisualShaderNodeInput>();
+    embed_widget = new VisualShaderNodeInputEmbedWidget(std::dynamic_pointer_cast<VisualShaderNodeInput>(n));
   } else if (type == "VisualShaderNodeColorConstant") {
     n = std::make_shared<VisualShaderNodeColorConstant>();
   } else if (type == "VisualShaderNodeBooleanConstant") {
@@ -622,10 +621,10 @@ bool VisualShaderGraphicsScene::add_node(const std::string& type, const QPointF&
     return false;
   }
 
-  return VisualShaderGraphicsScene::add_node(n_id, n, coordinate);
+  return VisualShaderGraphicsScene::add_node(n_id, n, coordinate, embed_widget);
 }
 
-bool VisualShaderGraphicsScene::add_node(const int& n_id, const std::shared_ptr<VisualShaderNode>& n, const QPointF& coordinate) {
+bool VisualShaderGraphicsScene::add_node(const int& n_id, const std::shared_ptr<VisualShaderNode>& n, const QPointF& coordinate, QWidget* embed_widget) {
   // Make sure the node doesn't already exist, we don't want to overwrite a node.
   if (node_graphics_objects.find(n_id) != node_graphics_objects.end()) {
     return false;
@@ -653,23 +652,30 @@ bool VisualShaderGraphicsScene::add_node(const int& n_id, const std::shared_ptr<
       vs->get_node_coordinate(n_id).y < view->get_y() ||
       vs->get_node_coordinate(n_id).y > view->get_y() + view->get_height()) {
     std::cout << "Node is out of view bounds" << std::endl;
-  }
-
-  // Create the embedded widgets
-  // TODO
+  } 
 
   VisualShaderNodeGraphicsObject* n_o{new VisualShaderNodeGraphicsObject(n_id, coordinate, n)};
+
+  if (embed_widget) {
+    QGraphicsProxyWidget* embed_widget_proxy{new QGraphicsProxyWidget(n_o)};
+    embed_widget_proxy->setWidget(embed_widget);
+    n_o->set_embed_widget(embed_widget);
+  }
 
   QObject::connect(n_o, &VisualShaderNodeGraphicsObject::node_deleted, this, &VisualShaderGraphicsScene::on_node_deleted);
 
   node_graphics_objects[n_id] = n_o;
-
+  
   addItem(n_o);
 
   return true;
 }
 
 bool VisualShaderGraphicsScene::delete_node(const int& n_id) {
+  if (node_graphics_objects.find(n_id) == node_graphics_objects.end()) {
+    return false;
+  }
+
   const std::shared_ptr<VisualShaderNode> n{vs->get_node(n_id)};
 
   if (!n) {
@@ -1457,7 +1463,8 @@ VisualShaderNodeGraphicsObject::VisualShaderNodeGraphicsObject(const int& n_id,
                                                                                         caption_rect_height(0.0f),
                                                                                         rect_height(0.0f),
                                                                                         rect_margin(0.0f),
-                                                                                        rect_padding(0.0f) {
+                                                                                        rect_padding(0.0f),
+                                                                                        embed_widget(nullptr) {
   setFlag(QGraphicsItem::ItemDoesntPropagateOpacityToChildren, true);
   setFlag(QGraphicsItem::ItemIsFocusable, true);
   setFlag(QGraphicsItem::ItemIsMovable, true);
@@ -1516,8 +1523,9 @@ QRectF VisualShaderNodeGraphicsObject::boundingRect() const {
 
   QString caption{QString::fromStdString(node->get_caption())};
 
-  rect_width = (float)(fm.horizontalAdvance(caption, caption.length()) + 20.0f);
-  caption_rect_height = (float)((fm.height()) + 30.0f);
+  rect_width = (float)(fm.horizontalAdvance(caption, caption.length()) + caption_h_padding * 2.0f);
+
+  caption_rect_height = (float)((fm.height()) + caption_v_padding * 2.0f);
 
   int max_num_ports{qMax(node->get_input_port_count(), node->get_output_port_count())};
 
@@ -1532,14 +1540,72 @@ QRectF VisualShaderNodeGraphicsObject::boundingRect() const {
 
   rect_height = t_rect_h;
 
+  // Correct node rect if it has an embed widget (if needed).
+  if (embed_widget) {
+    float embed_widget_width{(float)embed_widget->width()};
+
+    // Find biggest horizontal length of input port names
+    int in_p_count{node->get_input_port_count()};
+    float max_in_p_width{0.0f};
+    for (unsigned i{0}; i < in_p_count; ++i) {
+      QString p_n{QString::fromStdString(node->get_input_port_name(i))};
+
+      if (!p_n.isEmpty()) {
+        QFont f("Arial", port_caption_font_size);
+        QFontMetrics fm(f);
+
+        float w{(float)fm.horizontalAdvance(p_n)};
+
+        if (w > max_in_p_width) {
+          max_in_p_width = w;
+        }
+      }
+    }
+
+    // Find biggest horizontal length of output port names
+    int out_p_count{node->get_output_port_count()};
+    float max_out_p_width{0.0f};
+    for (unsigned i{0}; i < out_p_count; ++i) {
+      QString p_n{QString::fromStdString(node->get_output_port_name(i))};
+
+      if (!p_n.isEmpty()) {
+        QFont f("Arial", port_caption_font_size);
+        QFontMetrics fm(f);
+
+        float w{(float)fm.horizontalAdvance(p_n)};
+
+        if (w > max_out_p_width) {
+          max_out_p_width = w;
+        }
+      }
+    }
+
+    float calculated_rect {max_in_p_width + embed_widget_width + max_out_p_width + embed_widget_padding * 2.0f};
+
+    if (calculated_rect > rect_width) {
+      rect_width = calculated_rect;
+    }
+
+    // Check the height
+    float calculated_height{caption_rect_height + 
+                            body_rect_header_height + 
+                            embed_widget->height() + 
+                            body_rect_footer_height + 
+                            embed_widget_padding * 2.0f};
+
+    if (calculated_height > rect_height) {
+      rect_height = calculated_height;
+    }
+  }
+
   QRectF r({0.0f, 0.0f}, QSizeF(rect_width, rect_height));
 
   // Calculate the margin
-  this->rect_margin = rect_width * 0.1f;
+  this->rect_margin = port_diameter * 0.5f + 5.0f; // 5.0f is the margin between the ports and the port names
 
   // Calculate the rect padding
-  // We add a safe area around the rect to make it easier to get an accurate coordinate of the size
-  this->rect_padding = rect_width * 0.08f;
+  // We add a safe area around the rect to prevent the ports from being cut off
+  this->rect_padding = port_diameter * 0.5f;
 
   r.adjust(-rect_margin - rect_padding, -rect_margin - rect_padding, rect_margin + rect_padding,
            rect_margin + rect_padding);
@@ -1622,7 +1688,7 @@ void VisualShaderNodeGraphicsObject::paint(QPainter* painter, const QStyleOption
     for (unsigned i{0}; i < in_port_count; ++i) {
       QPointF port_coordinate{first_in_port_coordinate.x(), first_in_port_coordinate.y() + body_rect_port_step * i};
 
-      QRectF port_rect(port_coordinate.x(), port_coordinate.y(), min_side * 0.1f, min_side * 0.1f);
+      QRectF port_rect(port_coordinate.x(), port_coordinate.y(), port_diameter, port_diameter);
 
       // Adjust the port rect to be centered
       port_rect.adjust(-port_rect.width() * 0.5f, -port_rect.height() * 0.5f, -port_rect.width() * 0.5f,
@@ -1678,7 +1744,7 @@ void VisualShaderNodeGraphicsObject::paint(QPainter* painter, const QStyleOption
     for (unsigned i{0}; i < out_port_count; ++i) {
       QPointF port_coordinate{first_out_port_coordinate.x(), first_out_port_coordinate.y() + body_rect_port_step * i};
 
-      QRectF port_rect(port_coordinate.x(), port_coordinate.y(), min_side * 0.1f, min_side * 0.1f);
+      QRectF port_rect(port_coordinate.x(), port_coordinate.y(), port_diameter, port_diameter);
 
       // Adjust the port rect to be centered
       port_rect.adjust(-port_rect.width() * 0.5f, -port_rect.height() * 0.5f, -port_rect.width() * 0.5f,
@@ -1718,6 +1784,16 @@ void VisualShaderNodeGraphicsObject::paint(QPainter* painter, const QStyleOption
                        dynamic_cast<VisualShaderGraphicsScene*>(scene()), &VisualShaderGraphicsScene::on_port_dragged);
       QObject::connect(p_o, &VisualShaderOutputPortGraphicsObject::port_dropped,
                        dynamic_cast<VisualShaderGraphicsScene*>(scene()), &VisualShaderGraphicsScene::on_port_dropped);
+    }
+  }
+
+  {
+    // Correct the position of the embed widget
+    if (embed_widget) {
+      float embed_widget_x{rect_x + rect_w * 0.5f - embed_widget->width() * 0.5f};
+      float embed_widget_y{rect_y + caption_rect_height + body_rect_header_height + embed_widget_padding};
+
+      embed_widget->setGeometry(embed_widget_x, embed_widget_y, embed_widget->width(), embed_widget->height());
     }
   }
 }
@@ -1869,7 +1945,8 @@ QRectF VisualShaderConnectionGraphicsObject::boundingRect() const {
   QRectF r{calculate_bounding_rect_from_coordinates(start_coordinate, end_coordinate)};
 
   // Calculate the rect padding
-  // We add a safe area around the rect to make it easier to get an accurate coordinate of the size
+  // We add a safe area around the rect to prevent the ports from being cut off
+  // Due to inaccuracy in the calculation of the bounding rect we use the point diameter not the radius
   this->rect_padding = this->point_diameter;
 
   r.adjust(-rect_padding, -rect_padding, rect_padding, rect_padding);
@@ -1882,25 +1959,7 @@ void VisualShaderConnectionGraphicsObject::paint(QPainter* painter, const QStyle
   painter->setClipRect(option->exposedRect);
 
   {
-    QPen pen;
-    pen.setWidth(this->line_width);
-    pen.setColor(this->construction_color);
-    pen.setStyle(Qt::DashLine);
-
-    painter->setPen(pen);
-    painter->setBrush(Qt::NoBrush);
-
-    std::pair<QPointF, QPointF> control_points{calculate_control_points(start_coordinate, end_coordinate)};
-
-    QPainterPath cubic(start_coordinate);
-    cubic.cubicTo(control_points.first, control_points.second, end_coordinate);
-
-    // cubic spline
-    painter->drawPath(cubic);
-  }
-
-  {
-    // draw normal line
+    // Draw the connection
     QPen p;
     p.setWidth(this->line_width);
 
@@ -1995,22 +2054,27 @@ QRectF VisualShaderConnectionGraphicsObject::calculate_bounding_rect_from_coordi
 
   QRectF r({min_x, min_y}, QSizeF(max_x - min_x, max_y - min_y));
 
-  const bool in_abnormal_region{x2 < (x1 + abnormal_offset)};
+  const bool in_h_abnormal_region{x2 < (x1 + h_abnormal_offset)};
+  const bool in_v_abnormal_region{std::abs(y2 - y1) < v_abnormal_offset};
 
   const int quadrant{detect_quadrant({x1, y1}, {x2, y2})};
 
   // We will expand the bounding rect horizontally so that our connection don't get cut off
-  const float a_width_expansion{((x1 + abnormal_offset) - x2) * abnormal_face_to_back_control_width_expansion_factor};
+  const float a_width_expansion{((x1 + h_abnormal_offset) - x2) * abnormal_face_to_back_control_width_expansion_factor};
   const float a_height_expansion{a_width_expansion * abnormal_face_to_back_control_height_expansion_factor};
 
-  if (in_abnormal_region) {
+  if (in_h_abnormal_region) {
     r.adjust(-a_width_expansion, 0.0f, a_width_expansion, 0.0f);
   }
 
   switch (quadrant) {
+    case 2:  // Quadrant II: Abnormal face to back
+    case 3:  // Quadrant III: Abnormal face to back
     case 6:  // On -ve X-axis: Abnormal face to back
       // Elipse like curve
-      r.adjust(0.0f, -a_height_expansion, 0.0f, a_height_expansion);
+      if (in_v_abnormal_region) {
+        r.adjust(0.0f, -a_height_expansion, 0.0f, a_height_expansion);
+      }
       break;
     default:
       break;
@@ -2031,12 +2095,13 @@ std::pair<QPointF, QPointF> VisualShaderConnectionGraphicsObject::calculate_cont
 
   QRectF r{calculate_bounding_rect_from_coordinates(start_coordinate, end_coordinate)};
 
-  const bool in_abnormal_region{x2 < (x1 + abnormal_offset)};
+  const bool in_h_abnormal_region{x2 < (x1 + h_abnormal_offset)};
+  const bool in_v_abnormal_region{std::abs(y2 - y1) < v_abnormal_offset};
 
   const int quadrant{detect_quadrant({x1, y1}, {x2, y2})};
 
   // We will expand the bounding rect horizontally so that our connection don't get cut off
-  const float a_width_expansion{((x1 + abnormal_offset) - x2) * abnormal_face_to_back_control_width_expansion_factor};
+  const float a_width_expansion{((x1 + h_abnormal_offset) - x2) * abnormal_face_to_back_control_width_expansion_factor};
   const float a_height_expansion{a_width_expansion * abnormal_face_to_back_control_height_expansion_factor};
 
   const float cp_x_delta_factor{0.8f};
@@ -2053,7 +2118,7 @@ std::pair<QPointF, QPointF> VisualShaderConnectionGraphicsObject::calculate_cont
   switch (quadrant) {
     case 1:  // Quadrant I: Normal face to back
       // Find out if the connection is going from left to right normally
-      if (in_abnormal_region) {
+      if (in_h_abnormal_region) {
         // The connection is not going from left to right normally
         // Our control points will be outside the end_coordinate and start_coordinate bounding rect
         // We will expand the bounding rect horizontally to make it easier to get an accurate coordinate of the size
@@ -2064,7 +2129,6 @@ std::pair<QPointF, QPointF> VisualShaderConnectionGraphicsObject::calculate_cont
         // Treated as inside Quadrant II
         cp1 = {x1 + a_cp_x_delta, y1};
         cp2 = {x2 - a_cp_x_delta, y2};
-
       } else {
         // Treated as inside Quadrant I
         cp1 = {x1 + cp_x_delta, y1 - cp_y_delta};
@@ -2072,15 +2136,25 @@ std::pair<QPointF, QPointF> VisualShaderConnectionGraphicsObject::calculate_cont
       }
       break;
     case 2:  // Quadrant II: Abnormal face to back
-      cp1 = {x1 + a_cp_x_delta, y1};
-      cp2 = {x2 - a_cp_x_delta, y2};
+      if (in_v_abnormal_region) {
+        cp1 = {x1 + a_cp_x_delta, y1 - a_cp_y_delta};
+        cp2 = {x2 - a_cp_x_delta, y2 - a_cp_y_delta};
+      } else {
+        cp1 = {x1 + a_cp_x_delta, y1};
+        cp2 = {x2 - a_cp_x_delta, y2};
+      }
       break;
     case 3:  // Quadrant III: Abnormal face to back
-      cp1 = {x1 + a_width_expansion, y1};
-      cp2 = {x2 - a_width_expansion, y2};
+      if (in_v_abnormal_region) {
+        cp1 = {x1 + a_cp_x_delta, y1 - a_cp_y_delta};
+        cp2 = {x2 - a_cp_x_delta, y2 - a_cp_y_delta};
+      } else {
+        cp1 = {x1 + a_width_expansion, y1};
+        cp2 = {x2 - a_width_expansion, y2};
+      }
       break;
     case 4:  // Quadrant IV: Normal face to back
-      if (in_abnormal_region) {
+      if (in_h_abnormal_region) {
         // Treated as inside Quadrant III
         cp1 = {x1 + a_cp_x_delta, y1};
         cp2 = {x2 - a_cp_x_delta, y2};
@@ -2116,77 +2190,41 @@ std::pair<QPointF, QPointF> VisualShaderConnectionGraphicsObject::calculate_cont
 /**********************************************************************/
 /**********************************************************************/
 /*****                                                            *****/
-/*****               NodesCustomWidget                            *****/
+/*****                 Embed Widgets                              *****/
 /*****                                                            *****/
 /**********************************************************************/
 /**********************************************************************/
 /**********************************************************************/
 
-NodesCustomWidget::NodesCustomWidget(const std::shared_ptr<VisualShaderNode>& node, QWidget* parent)
-    : QWidget(parent), layout(nullptr) {
-  // Create the main layout.
-  layout = new QVBoxLayout(this);
-  layout->setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
-  layout->setSizeConstraint(QLayout::SetMinimumSize);
-  layout->setSpacing(0);
-  layout->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+VisualShaderNodeInputEmbedWidget::VisualShaderNodeInputEmbedWidget(const std::shared_ptr<VisualShaderNodeInput>& node) : QComboBox(), 
+                                                                                                                         node(node) {
+  setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
 
-  //////////////// End of Header ////////////////
+  // Add the default item
+  addItem(QString::fromStdString(node->get_input_name()), "");
 
-  combo_boxes[0] = new QComboBox();
-  combo_boxes[0]->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-  combo_boxes[0]->setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
-  combo_boxes[0]->setMaximumSize(combo_boxes[0]->sizeHint());
+  const VisualShaderNodeInput::Port* ps {VisualShaderNodeInput::get_ports()};
 
-  // Add items to the combo box
-  combo_boxes[0]->addItem("Item 1");
-  combo_boxes[0]->addItem("Item 2");
-  combo_boxes[0]->addItem("Item 3");
+  int i{0};
 
-  layout->addWidget(combo_boxes[0]);
-
-  // Connect the combo box signal to the slot
-  QObject::connect(combo_boxes[0], QOverload<int>::of(&QComboBox::currentIndexChanged), this,
-                   &NodesCustomWidget::on_combo_box0_current_index_changed);
-
-  if (std::dynamic_pointer_cast<VisualShaderNodeInput>(node)) {
-  } else if (std::dynamic_pointer_cast<VisualShaderNodeColorConstant>(node)) {
-  } else if (std::dynamic_pointer_cast<VisualShaderNodeBooleanConstant>(node)) {
-  } else if (std::dynamic_pointer_cast<VisualShaderNodeFloatConstant>(node)) {
-  } else if (std::dynamic_pointer_cast<VisualShaderNodeIntConstant>(node)) {
-  } else if (std::dynamic_pointer_cast<VisualShaderNodeUIntConstant>(node)) {
-  } else if (std::dynamic_pointer_cast<VisualShaderNodeVec2Constant>(node)) {
-  } else if (std::dynamic_pointer_cast<VisualShaderNodeVec3Constant>(node)) {
-  } else if (std::dynamic_pointer_cast<VisualShaderNodeVec4Constant>(node)) {
-  } else if (std::dynamic_pointer_cast<VisualShaderNodeFloatFunc>(node)) {
-  } else if (std::dynamic_pointer_cast<VisualShaderNodeIntFunc>(node)) {
-  } else if (std::dynamic_pointer_cast<VisualShaderNodeUIntFunc>(node)) {
-  } else if (std::dynamic_pointer_cast<VisualShaderNodeDerivativeFunc>(node)) {
-  } else if (std::dynamic_pointer_cast<VisualShaderNodeFloatOp>(node)) {
-  } else if (std::dynamic_pointer_cast<VisualShaderNodeIntOp>(node)) {
-  } else if (std::dynamic_pointer_cast<VisualShaderNodeUIntOp>(node)) {
-  } else if (std::dynamic_pointer_cast<VisualShaderNodeValueNoise>(node)) {
-  } else if (std::dynamic_pointer_cast<VisualShaderNodeCompare>(node)) {
-  } else if (std::dynamic_pointer_cast<VisualShaderNodeIf>(node)) {
-  } else if (std::dynamic_pointer_cast<VisualShaderNodeIs>(node)) {
-  } else if (std::dynamic_pointer_cast<VisualShaderNodeSwitch>(node)) {
-  } else if (std::dynamic_pointer_cast<VisualShaderNodeOutput>(node)) {
-  } else {
-    std::cout << "--- Unknown node type ---" << std::endl;
+  while (ps[i].type != VisualShaderNode::PortType::PORT_TYPE_ENUM_SIZE) {
+    addItem(QString::fromStdString(ps[i].name));
+    i++;
   }
 
-  //////////////// Start of Footer ////////////////
-
-  // TODO: Set the size of this widget based on the contents.
-
-  this->setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
-  // this->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-
-  this->setLayout(layout);
+  QObject::connect(this, 
+                   QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                   this,
+                   &VisualShaderNodeInputEmbedWidget::on_current_index_changed);
 }
 
-NodesCustomWidget::~NodesCustomWidget() {}
+VisualShaderNodeInputEmbedWidget::~VisualShaderNodeInputEmbedWidget() {}
 
-void NodesCustomWidget::on_combo_box0_current_index_changed(const int& index) {
-  std::cout << "Combo box index changed: " << index << std::endl;
+void VisualShaderNodeInputEmbedWidget::on_current_index_changed(const int& index) {
+  const std::shared_ptr<VisualShaderNodeInput> n{std::dynamic_pointer_cast<VisualShaderNodeInput>(node)};
+  if (!n) {
+    return;
+  }
+  n->set_input_name(itemText(index).toStdString());
 }

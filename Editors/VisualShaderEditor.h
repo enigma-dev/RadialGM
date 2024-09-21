@@ -46,6 +46,7 @@
 #include <QtWidgets/QTreeWidget>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QPlainTextEdit>
+#include <QtWidgets/QGraphicsProxyWidget>
 
 #include <string>
 #include <vector>
@@ -61,6 +62,7 @@ class VisualShaderConnectionGraphicsObject;
 class CreateNodeDialog;
 class VisualShaderInputPortGraphicsObject;
 class VisualShaderOutputPortGraphicsObject;
+class VisualShaderNodeInputEmbedWidget;
 
 /**********************************************************************/
 /**********************************************************************/
@@ -248,7 +250,7 @@ class VisualShaderGraphicsScene : public QGraphicsScene {
   ~VisualShaderGraphicsScene();
 
   bool add_node(const std::string& type, const QPointF& coordinate);
-  bool add_node(const int& n_id, const std::shared_ptr<VisualShaderNode>& n, const QPointF& coordinate);
+  bool add_node(const int& n_id, const std::shared_ptr<VisualShaderNode>& n, const QPointF& coordinate, QWidget* embed_widget = nullptr);
   bool delete_node(const int& n_id);
 
   VisualShaderEditor* get_editor() const { return editor; }
@@ -452,6 +454,8 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
   VisualShaderInputPortGraphicsObject* get_input_port_graphics_object(const int& p_index) const;
   VisualShaderOutputPortGraphicsObject* get_output_port_graphics_object(const int& p_index) const;
 
+  void set_embed_widget(QWidget* embed_widget) { this->embed_widget = embed_widget; }
+
  Q_SIGNALS:
   /**
    * @brief Send a request to delete a node.
@@ -498,6 +502,10 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
 
   float opacity = 0.8f;
   float corner_radius = 3.0f;
+  float port_diameter = 8.0f;
+
+  float caption_h_padding = 10.0f;
+  float caption_v_padding = 15.0f;
 
   mutable float rect_width;           // Calculated in boundingRect()
   mutable float caption_rect_height;  // Calculated in boundingRect()
@@ -517,6 +525,9 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
   // Caption
   float caption_font_size = 18.0f;
   float port_caption_font_size = 8.0f;
+
+  QWidget* embed_widget;
+  float embed_widget_padding = 5.0f;
 
   QRectF boundingRect() const override;
   void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
@@ -694,9 +705,10 @@ class VisualShaderConnectionGraphicsObject : public QGraphicsObject {
 
   mutable float rect_padding;  // Calculated in boundingRect()
 
-  float abnormal_offset = 50.0f;
+  float h_abnormal_offset = 50.0f;
+  float v_abnormal_offset = 40.0f;
   float abnormal_face_to_back_control_width_expansion_factor = 0.5f;
-  float abnormal_face_to_back_control_height_expansion_factor = 2.0f;
+  float abnormal_face_to_back_control_height_expansion_factor = 1.0f;
 
   QRectF boundingRect() const override;
   void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
@@ -711,26 +723,24 @@ class VisualShaderConnectionGraphicsObject : public QGraphicsObject {
 /**********************************************************************/
 /**********************************************************************/
 /*****                                                            *****/
-/*****               NodesCustomWidget                            *****/
+/*****                 Embed Widgets                              *****/
 /*****                                                            *****/
 /**********************************************************************/
 /**********************************************************************/
 /**********************************************************************/
 
-class NodesCustomWidget : public QWidget {
+class VisualShaderNodeInputEmbedWidget : public QComboBox {
   Q_OBJECT
 
  public:
-  NodesCustomWidget(const std::shared_ptr<VisualShaderNode>& node, QWidget* parent = nullptr);
-  ~NodesCustomWidget();
+  VisualShaderNodeInputEmbedWidget(const std::shared_ptr<VisualShaderNodeInput>& node);
+  ~VisualShaderNodeInputEmbedWidget();
 
  private Q_SLOTS:
-  void on_combo_box0_current_index_changed(const int& index);
+  void on_current_index_changed(const int& index);
 
  private:
-  QVBoxLayout* layout;
-
-  QComboBox* combo_boxes[2];
+  std::shared_ptr<VisualShaderNode> node;
 };
 
 #endif  // ENIGMA_VISUAL_SHADER_EDITOR_H
