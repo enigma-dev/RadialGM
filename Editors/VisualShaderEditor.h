@@ -389,9 +389,9 @@ class VisualShaderGraphicsView : public QGraphicsView {
   VisualShaderGraphicsScene* scene;
 
   // Style
-  QColor background_color = QColor(53, 53, 53);
-  QColor fine_grid_color = QColor(60, 60, 60);
-  QColor coarse_grid_color = QColor(25, 25, 25);
+  QColor background_color = QColor(40, 40, 40); // Dark Charcoal
+  QColor fine_grid_color = QColor(50, 50, 50); // Soft Dark Gray
+  QColor coarse_grid_color = QColor(30, 30, 30); // Muted Deep Gray
 
   // Scene Rect
   float t_size = std::numeric_limits<short>::max();  // 32767
@@ -489,10 +489,10 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
   std::unordered_map<int, VisualShaderOutputPortGraphicsObject*> out_port_graphics_objects;
 
   // Style
-  QColor normal_boundary_color = QColor(255, 255, 255);
-  QColor selected_boundary_color = QColor(255, 165, 0);
-  QColor font_color = QColor(255, 255, 255);
-  QColor fill_color = QColor(0, 0, 0, 0);
+  QColor normal_boundary_color = QColor(220, 20, 60); // Crimson Red
+  QColor selected_boundary_color = QColor(255, 69, 0); // Red-Orange
+  QColor font_color = QColor(255, 255, 255); // Pure White
+  QColor fill_color = QColor(40, 40, 40, 200); // Semi-transparent Dark Gray
 
   float pen_width = 1.0f;
 
@@ -567,7 +567,7 @@ class VisualShaderInputPortGraphicsObject : public QGraphicsObject {
 
   // Style
   QColor font_color = QColor(255, 255, 255);
-  QColor connection_point_color = QColor(169, 169, 169);
+  QColor connection_point_color = QColor(220, 20, 60); // Crimson
 
   float opacity = 1.0f;
 
@@ -621,7 +621,7 @@ class VisualShaderOutputPortGraphicsObject : public QGraphicsObject {
 
   // Style
   QColor font_color = QColor(255, 255, 255);
-  QColor connection_point_color = QColor(169, 169, 169);
+  QColor connection_point_color = QColor(220, 20, 60); // Crimson
 
   float opacity = 1.0f;
 
@@ -683,11 +683,10 @@ class VisualShaderConnectionGraphicsObject : public QGraphicsObject {
   QPointF end_coordinate;
 
   // Style
-  QColor construction_color = QColor(169, 169, 169);
-  QColor normal_color = QColor(0, 255, 255);
-  QColor selected_color = QColor(100, 100, 100);
-  QColor selected_halo_color = QColor(255, 165, 0);
-  QColor connection_point_color = QColor(169, 169, 169);
+  QColor construction_color = QColor(139, 0, 0); // Dark Red
+  QColor normal_color = QColor(178, 34, 34); // Firebrick Red
+  QColor selected_color = QColor(55, 55, 55); // Dark Gray
+  QColor connection_point_color = QColor(211, 211, 211);
 
   float line_width = 3.0f;
   float construction_line_width = 2.0f;
@@ -695,7 +694,7 @@ class VisualShaderConnectionGraphicsObject : public QGraphicsObject {
 
   mutable float rect_padding;  // Calculated in boundingRect()
 
-  float min_h_distance = 50.0f;
+  float abnormal_offset = 50.0f;
   float abnormal_face_to_back_control_width_expansion_factor = 0.5f;
   float abnormal_face_to_back_control_height_expansion_factor = 2.0f;
 

@@ -655,6 +655,9 @@ bool VisualShaderGraphicsScene::add_node(const int& n_id, const std::shared_ptr<
     std::cout << "Node is out of view bounds" << std::endl;
   }
 
+  // Create the embedded widgets
+  // TODO
+
   VisualShaderNodeGraphicsObject* n_o{new VisualShaderNodeGraphicsObject(n_id, coordinate, n)};
 
   QObject::connect(n_o, &VisualShaderNodeGraphicsObject::node_deleted, this, &VisualShaderGraphicsScene::on_node_deleted);
@@ -1536,7 +1539,7 @@ QRectF VisualShaderNodeGraphicsObject::boundingRect() const {
 
   // Calculate the rect padding
   // We add a safe area around the rect to make it easier to get an accurate coordinate of the size
-  this->rect_padding = rect_width * 0.15f;
+  this->rect_padding = rect_width * 0.08f;
 
   r.adjust(-rect_margin - rect_padding, -rect_margin - rect_padding, rect_margin + rect_padding,
            rect_margin + rect_padding);
@@ -1753,16 +1756,14 @@ VisualShaderInputPortGraphicsObject::VisualShaderInputPortGraphicsObject(const Q
 VisualShaderInputPortGraphicsObject::~VisualShaderInputPortGraphicsObject() {}
 
 QRectF VisualShaderInputPortGraphicsObject::boundingRect() const {
-  // rect.adjust(-padding, -padding, padding, padding);
-
-  return rect;
+  QRectF t_rect{rect};
+  t_rect.adjust(-padding, -padding, padding, padding);
+  return t_rect;
 }
 
 void VisualShaderInputPortGraphicsObject::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
                                                 QWidget* widget) {
   painter->setClipRect(option->exposedRect);
-
-  // rect.adjust(padding, padding, -padding, -padding);
 
   painter->setBrush(this->connection_point_color);
 
@@ -1804,16 +1805,14 @@ VisualShaderOutputPortGraphicsObject::VisualShaderOutputPortGraphicsObject(const
 VisualShaderOutputPortGraphicsObject::~VisualShaderOutputPortGraphicsObject() {}
 
 QRectF VisualShaderOutputPortGraphicsObject::boundingRect() const {
-  // rect.adjust(-padding, -padding, padding, padding);
-
-  return rect;
+  QRectF t_rect{rect};
+  t_rect.adjust(-padding, -padding, padding, padding);
+  return t_rect;
 }
 
 void VisualShaderOutputPortGraphicsObject::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
                                                  QWidget* widget) {
   painter->setClipRect(option->exposedRect);
-
-  // rect.adjust(padding, padding, -padding, -padding);
 
   painter->setBrush(this->connection_point_color);
 
@@ -1859,6 +1858,7 @@ VisualShaderConnectionGraphicsObject::VisualShaderConnectionGraphicsObject(const
       rect_padding(0.0f) {
   setFlag(QGraphicsItem::ItemIsFocusable, true);
   setFlag(QGraphicsItem::ItemIsSelectable, true);
+  setAcceptedMouseButtons(Qt::NoButton);
 
   setZValue(-1.0f);
 }
@@ -1870,7 +1870,7 @@ QRectF VisualShaderConnectionGraphicsObject::boundingRect() const {
 
   // Calculate the rect padding
   // We add a safe area around the rect to make it easier to get an accurate coordinate of the size
-  this->rect_padding = 10.0f;
+  this->rect_padding = this->point_diameter;
 
   r.adjust(-rect_padding, -rect_padding, rect_padding, rect_padding);
 
@@ -1982,28 +1982,38 @@ int VisualShaderConnectionGraphicsObject::detect_quadrant(const QPointF& referen
 
 QRectF VisualShaderConnectionGraphicsObject::calculate_bounding_rect_from_coordinates(
     const QPointF& start_coordinate, const QPointF& end_coordinate) const {
-  float x1{(float)start_coordinate.x()};
-  float y1{(float)start_coordinate.y()};
-  float x2{(float)end_coordinate.x()};
-  float y2{(float)end_coordinate.y()};
+  const float x1{(float)start_coordinate.x()};
+  const float y1{(float)start_coordinate.y()};
+  const float x2{(float)end_coordinate.x()};
+  const float y2{(float)end_coordinate.y()};
 
   // Calculate the expanded rect
-  float min_x{qMin(x1, x2)};
-  float min_y{qMin(y1, y2)};
-  float max_x{qMax(x1, x2)};
-  float max_y{qMax(y1, y2)};
+  const float min_x{qMin(x1, x2)};
+  const float min_y{qMin(y1, y2)};
+  const float max_x{qMax(x1, x2)};
+  const float max_y{qMax(y1, y2)};
 
   QRectF r({min_x, min_y}, QSizeF(max_x - min_x, max_y - min_y));
 
-  bool in_abnormal_region{x2 < (x1 + min_h_distance)};
+  const bool in_abnormal_region{x2 < (x1 + abnormal_offset)};
 
-  float a_width_expansion{((x1 + min_h_distance) - x2) * abnormal_face_to_back_control_width_expansion_factor};
+  const int quadrant{detect_quadrant({x1, y1}, {x2, y2})};
+
+  // We will expand the bounding rect horizontally so that our connection don't get cut off
+  const float a_width_expansion{((x1 + abnormal_offset) - x2) * abnormal_face_to_back_control_width_expansion_factor};
+  const float a_height_expansion{a_width_expansion * abnormal_face_to_back_control_height_expansion_factor};
 
   if (in_abnormal_region) {
-    // The connection is not going from left to right normally
-    // Our control points will be outside the end_coordinate and start_coordinate bounding rect
-    // We will expand the bounding rect horizontally to make it easier to get an accurate coordinate of the size
     r.adjust(-a_width_expansion, 0.0f, a_width_expansion, 0.0f);
+  }
+
+  switch (quadrant) {
+    case 6:  // On -ve X-axis: Abnormal face to back
+      // Elipse like curve
+      r.adjust(0.0f, -a_height_expansion, 0.0f, a_height_expansion);
+      break;
+    default:
+      break;
   }
 
   return r;
@@ -2014,28 +2024,31 @@ std::pair<QPointF, QPointF> VisualShaderConnectionGraphicsObject::calculate_cont
   QPointF cp1;
   QPointF cp2;
 
-  float x1{(float)start_coordinate.x()};
-  float y1{(float)start_coordinate.y()};
-  float x2{(float)end_coordinate.x()};
-  float y2{(float)end_coordinate.y()};
+  const float x1{(float)start_coordinate.x()};
+  const float y1{(float)start_coordinate.y()};
+  const float x2{(float)end_coordinate.x()};
+  const float y2{(float)end_coordinate.y()};
 
   QRectF r{calculate_bounding_rect_from_coordinates(start_coordinate, end_coordinate)};
 
-  bool in_abnormal_region{x2 < (x1 + min_h_distance)};
+  const bool in_abnormal_region{x2 < (x1 + abnormal_offset)};
 
-  int quadrant{detect_quadrant({x1, y1}, {x2, y2})};
+  const int quadrant{detect_quadrant({x1, y1}, {x2, y2})};
 
-  float face_to_face_control_width_expansion_factor{0.8f};
-  float face_to_face_control_height_expansion_factor{0.25f};
+  // We will expand the bounding rect horizontally so that our connection don't get cut off
+  const float a_width_expansion{((x1 + abnormal_offset) - x2) * abnormal_face_to_back_control_width_expansion_factor};
+  const float a_height_expansion{a_width_expansion * abnormal_face_to_back_control_height_expansion_factor};
 
-  float width_expansion{(x2 - x1) * face_to_face_control_width_expansion_factor};
+  const float cp_x_delta_factor{0.8f};
+  const float cp_y_delta_factor{0.25f};
 
-  float a_width_expansion{((x1 + min_h_distance) - x2) * abnormal_face_to_back_control_width_expansion_factor};
-  float a_height_expansion{a_width_expansion * abnormal_face_to_back_control_height_expansion_factor};
+  // Normal region control points deltas
+  const float cp_x_delta{(float)r.width() * cp_x_delta_factor};
+  const float cp_y_delta{(float)r.height() * cp_y_delta_factor};
 
-  if (in_abnormal_region) {
-    r.adjust(-a_width_expansion, 0.0f, a_width_expansion, 0.0f);
-  }
+  // Abnormal region control points deltas
+  const float a_cp_x_delta{((float)r.width() - a_width_expansion) * cp_x_delta_factor};
+  const float a_cp_y_delta{((float)r.height() - a_height_expansion) * cp_y_delta_factor};
 
   switch (quadrant) {
     case 1:  // Quadrant I: Normal face to back
@@ -2049,32 +2062,32 @@ std::pair<QPointF, QPointF> VisualShaderConnectionGraphicsObject::calculate_cont
         // This means we can't just send the path straight to the node.
 
         // Treated as inside Quadrant II
-        cp1 = {x1 + a_width_expansion, y1};
-        cp2 = {x2 - a_width_expansion, y2};
+        cp1 = {x1 + a_cp_x_delta, y1};
+        cp2 = {x2 - a_cp_x_delta, y2};
 
       } else {
         // Treated as inside Quadrant I
-        cp1 = {x1 + width_expansion, y1};
-        cp2 = {x2 - width_expansion, y2};
+        cp1 = {x1 + cp_x_delta, y1 - cp_y_delta};
+        cp2 = {x2 - cp_x_delta, y2 + cp_y_delta};
       }
       break;
     case 2:  // Quadrant II: Abnormal face to back
-      cp1 = {x1 + a_width_expansion, y1};
-      cp2 = {x2 - a_width_expansion, y2};
+      cp1 = {x1 + a_cp_x_delta, y1};
+      cp2 = {x2 - a_cp_x_delta, y2};
       break;
     case 3:  // Quadrant III: Abnormal face to back
-      cp1 = {x1 + a_width_expansion, y1 + a_height_expansion};
-      cp2 = {x2 - a_width_expansion, y2 - a_height_expansion};
+      cp1 = {x1 + a_width_expansion, y1};
+      cp2 = {x2 - a_width_expansion, y2};
       break;
     case 4:  // Quadrant IV: Normal face to back
       if (in_abnormal_region) {
         // Treated as inside Quadrant III
-        cp1 = {x1 + a_width_expansion, y1};
-        cp2 = {x2 - a_width_expansion, y2};
+        cp1 = {x1 + a_cp_x_delta, y1};
+        cp2 = {x2 - a_cp_x_delta, y2};
       } else {
         // Treated as inside Quadrant IV
-        cp1 = {x1 + width_expansion, y1};
-        cp2 = {x2 - width_expansion, y2};
+        cp1 = {x1 + cp_x_delta, y1 + cp_y_delta};
+        cp2 = {x2 - cp_x_delta, y2 - cp_y_delta};
       }
       break;
     case 5:  // On +ve X-axis: Normal face to back
@@ -2083,19 +2096,14 @@ std::pair<QPointF, QPointF> VisualShaderConnectionGraphicsObject::calculate_cont
       cp2 = {x2, y2};
       break;
     case 6:  // On -ve X-axis: Abnormal face to back
-      r.adjust(0.0f, -a_height_expansion, 0.0f, a_height_expansion);
-      cp1 = {x1 + a_width_expansion, y1};
-      cp2 = {x2 - a_width_expansion, y2};
+      // Elipse like curve
+      cp1 = {x1 + a_cp_x_delta, y1 - a_cp_y_delta};
+      cp2 = {x2 - a_cp_x_delta, y2 - a_cp_y_delta};
       break;
     case 7:  // On +ve Y-axis: Abnormal face to back
-      r.adjust(0.0f, -a_height_expansion, 0.0f, a_height_expansion);
-      cp1 = {x1 + a_width_expansion, y1};
-      cp2 = {x2 - a_width_expansion, y2};
-      break;
     case 8:  // On -ve Y-axis: Abnormal face to back
-      r.adjust(0.0f, -a_height_expansion, 0.0f, a_height_expansion);
-      cp1 = {x1 + a_width_expansion, y1};
-      cp2 = {x2 - a_width_expansion, y2};
+      cp1 = {x1 + a_cp_x_delta, y1};
+      cp2 = {x2 - a_cp_x_delta, y2};
       break;
     default:
       return std::make_pair(start_coordinate, end_coordinate);
