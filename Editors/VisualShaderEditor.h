@@ -52,6 +52,8 @@
 #include <vector>
 
 #include "ResourceTransformations/VisualShader/visual_shader.h"
+#include "ResourceTransformations/VisualShader/visual_shader_nodes.h"
+#include "ResourceTransformations/VisualShader/vs_noise_nodes.h"
 #include "Editors/BaseEditor.h"
 #include "Editors/CodeEditor.h"
 
@@ -62,7 +64,6 @@ class VisualShaderConnectionGraphicsObject;
 class CreateNodeDialog;
 class VisualShaderInputPortGraphicsObject;
 class VisualShaderOutputPortGraphicsObject;
-class VisualShaderNodeInputEmbedWidget;
 
 /**********************************************************************/
 /**********************************************************************/
@@ -505,7 +506,7 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
   float port_diameter = 8.0f;
 
   float caption_h_padding = 10.0f;
-  float caption_v_padding = 15.0f;
+  float caption_v_padding = 8.0f;
 
   mutable float rect_width;           // Calculated in boundingRect()
   mutable float caption_rect_height;  // Calculated in boundingRect()
@@ -527,7 +528,8 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
   float port_caption_font_size = 8.0f;
 
   QWidget* embed_widget;
-  float embed_widget_padding = 5.0f;
+  float embed_widget_h_padding = 10.0f;
+  float embed_widget_v_padding = 5.0f;
 
   QRectF boundingRect() const override;
   void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
@@ -740,7 +742,151 @@ class VisualShaderNodeInputEmbedWidget : public QComboBox {
   void on_current_index_changed(const int& index);
 
  private:
-  std::shared_ptr<VisualShaderNode> node;
+  std::shared_ptr<VisualShaderNodeInput> node;
+};
+
+/*************************************/
+/* Float Op Node                     */
+/*************************************/
+
+class VisualShaderNodeFloatOpEmbedWidget : public QComboBox {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeFloatOpEmbedWidget(const std::shared_ptr<VisualShaderNodeFloatOp>& node);
+  ~VisualShaderNodeFloatOpEmbedWidget();
+
+ private Q_SLOTS:
+  void on_current_index_changed(const int& index);
+
+ private:
+  std::shared_ptr<VisualShaderNodeFloatOp> node;
+};
+
+/*************************************/
+/* Int Op Node                       */
+/*************************************/
+
+class VisualShaderNodeIntOpEmbedWidget : public QComboBox {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeIntOpEmbedWidget(const std::shared_ptr<VisualShaderNodeIntOp>& node);
+  ~VisualShaderNodeIntOpEmbedWidget();
+
+ private Q_SLOTS:
+  void on_current_index_changed(const int& index);
+
+ private:
+  std::shared_ptr<VisualShaderNodeIntOp> node;
+};
+
+/*************************************/
+/* UInt Op Node                      */
+/*************************************/
+
+class VisualShaderNodeUIntOpEmbedWidget : public QComboBox {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeUIntOpEmbedWidget(const std::shared_ptr<VisualShaderNodeUIntOp>& node);
+  ~VisualShaderNodeUIntOpEmbedWidget();
+
+ private Q_SLOTS:
+  void on_current_index_changed(const int& index);
+
+ private:
+  std::shared_ptr<VisualShaderNodeUIntOp> node;
+};
+
+/*************************************/
+/* Vector Op Node                    */
+/*************************************/
+
+class VisualShaderNodeVectorOpEmbedWidget : public QComboBox {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeVectorOpEmbedWidget(const std::shared_ptr<VisualShaderNodeVectorOp>& node);
+  ~VisualShaderNodeVectorOpEmbedWidget();
+
+ private Q_SLOTS:
+  void on_current_index_changed(const int& index);
+
+ private:
+  std::shared_ptr<VisualShaderNodeVectorOp> node;
+};
+
+/*************************************/
+/* Float Funcs Node                  */
+/*************************************/
+
+class VisualShaderNodeFloatFuncEmbedWidget : public QComboBox {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeFloatFuncEmbedWidget(const std::shared_ptr<VisualShaderNodeFloatFunc>& node);
+  ~VisualShaderNodeFloatFuncEmbedWidget();
+
+ private Q_SLOTS:
+  void on_current_index_changed(const int& index);
+
+ private:
+  std::shared_ptr<VisualShaderNodeFloatFunc> node;
+};
+
+/*************************************/
+/* Int Funcs Node                    */
+/*************************************/
+
+class VisualShaderNodeIntFuncEmbedWidget : public QComboBox {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeIntFuncEmbedWidget(const std::shared_ptr<VisualShaderNodeIntFunc>& node);
+  ~VisualShaderNodeIntFuncEmbedWidget();
+
+ private Q_SLOTS:
+  void on_current_index_changed(const int& index);
+
+ private:
+  std::shared_ptr<VisualShaderNodeIntFunc> node;
+};
+
+/*************************************/
+/* UInt Funcs Node                   */
+/*************************************/
+
+class VisualShaderNodeUIntFuncEmbedWidget : public QComboBox {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeUIntFuncEmbedWidget(const std::shared_ptr<VisualShaderNodeUIntFunc>& node);
+  ~VisualShaderNodeUIntFuncEmbedWidget();
+
+ private Q_SLOTS:
+  void on_current_index_changed(const int& index);
+
+ private:
+  std::shared_ptr<VisualShaderNodeUIntFunc> node;
+};
+
+/*************************************/
+/* Vector Funcs Node                 */
+/*************************************/
+
+class VisualShaderNodeVectorFuncEmbedWidget : public QComboBox {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeVectorFuncEmbedWidget(const std::shared_ptr<VisualShaderNodeVectorFunc>& node);
+  ~VisualShaderNodeVectorFuncEmbedWidget();
+
+ private Q_SLOTS:
+  void on_current_index_changed(const int& index);
+
+ private:
+  std::shared_ptr<VisualShaderNodeVectorFunc> node;
 };
 
 #endif  // ENIGMA_VISUAL_SHADER_EDITOR_H

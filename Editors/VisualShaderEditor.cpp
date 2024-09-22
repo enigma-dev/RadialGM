@@ -31,8 +31,6 @@
 
 #include <unordered_map>
 
-#include "ResourceTransformations/VisualShader/visual_shader_nodes.h"
-#include "ResourceTransformations/VisualShader/vs_noise_nodes.h"
 #include "VisualShader.pb.h"
 
 /**********************************************************************/
@@ -584,18 +582,24 @@ bool VisualShaderGraphicsScene::add_node(const std::string& type, const QPointF&
     n = std::make_shared<VisualShaderNodeVec4Constant>();
   } else if (type == "VisualShaderNodeFloatFunc") {
     n = std::make_shared<VisualShaderNodeFloatFunc>();
+    embed_widget = new VisualShaderNodeFloatFuncEmbedWidget(std::dynamic_pointer_cast<VisualShaderNodeFloatFunc>(n));
   } else if (type == "VisualShaderNodeIntFunc") {
     n = std::make_shared<VisualShaderNodeIntFunc>();
+    embed_widget = new VisualShaderNodeIntFuncEmbedWidget(std::dynamic_pointer_cast<VisualShaderNodeIntFunc>(n));
   } else if (type == "VisualShaderNodeUIntFunc") {
     n = std::make_shared<VisualShaderNodeUIntFunc>();
+    embed_widget = new VisualShaderNodeUIntFuncEmbedWidget(std::dynamic_pointer_cast<VisualShaderNodeUIntFunc>(n));
   } else if (type == "VisualShaderNodeDerivativeFunc") {
     n = std::make_shared<VisualShaderNodeDerivativeFunc>();
   } else if (type == "VisualShaderNodeFloatOp") {
     n = std::make_shared<VisualShaderNodeFloatOp>();
+    embed_widget = new VisualShaderNodeFloatOpEmbedWidget(std::dynamic_pointer_cast<VisualShaderNodeFloatOp>(n));
   } else if (type == "VisualShaderNodeIntOp") {
     n = std::make_shared<VisualShaderNodeIntOp>();
+    embed_widget = new VisualShaderNodeIntOpEmbedWidget(std::dynamic_pointer_cast<VisualShaderNodeIntOp>(n));
   } else if (type == "VisualShaderNodeUIntOp") {
     n = std::make_shared<VisualShaderNodeUIntOp>();
+    embed_widget = new VisualShaderNodeUIntOpEmbedWidget(std::dynamic_pointer_cast<VisualShaderNodeUIntOp>(n));
   } else if (type == "VisualShaderNodeValueNoise") {
     n = std::make_shared<VisualShaderNodeValueNoise>();
   } else if (type == "VisualShaderNodeCompare") {
@@ -1580,7 +1584,7 @@ QRectF VisualShaderNodeGraphicsObject::boundingRect() const {
       }
     }
 
-    float calculated_rect {max_in_p_width + embed_widget_width + max_out_p_width + embed_widget_padding * 2.0f};
+    float calculated_rect {max_in_p_width + embed_widget_width + max_out_p_width + embed_widget_h_padding * 2.0f};
 
     if (calculated_rect > rect_width) {
       rect_width = calculated_rect;
@@ -1591,7 +1595,7 @@ QRectF VisualShaderNodeGraphicsObject::boundingRect() const {
                             body_rect_header_height + 
                             embed_widget->height() + 
                             body_rect_footer_height + 
-                            embed_widget_padding * 2.0f};
+                            embed_widget_v_padding * 2.0f};
 
     if (calculated_height > rect_height) {
       rect_height = calculated_height;
@@ -1704,7 +1708,7 @@ void VisualShaderNodeGraphicsObject::paint(QPainter* painter, const QStyleOption
         QFontMetrics fm(f);
         painter->setFont(f);
 
-        float x{rect_x + 5.0f};
+        float x{rect_x};
 
         float y{(float)(port_rect.center().y()) + (float)((fm.ascent() + fm.descent()) * 0.5f - fm.descent())};
 
@@ -1760,7 +1764,7 @@ void VisualShaderNodeGraphicsObject::paint(QPainter* painter, const QStyleOption
         QFontMetrics fm(f);
         painter->setFont(f);
 
-        float x{rect_x + rect_w - (float)fm.horizontalAdvance(p_n) - 5.0f};
+        float x{rect_x + rect_w - (float)fm.horizontalAdvance(p_n)};
 
         float y{(float)(port_rect.center().y()) + (float)((fm.ascent() + fm.descent()) * 0.5f - fm.descent())};
 
@@ -1791,7 +1795,7 @@ void VisualShaderNodeGraphicsObject::paint(QPainter* painter, const QStyleOption
     // Correct the position of the embed widget
     if (embed_widget) {
       float embed_widget_x{rect_x + rect_w * 0.5f - embed_widget->width() * 0.5f};
-      float embed_widget_y{rect_y + caption_rect_height + body_rect_header_height + embed_widget_padding};
+      float embed_widget_y{rect_y + caption_rect_height + body_rect_header_height + embed_widget_v_padding};
 
       embed_widget->setGeometry(embed_widget_x, embed_widget_y, embed_widget->width(), embed_widget->height());
     }
@@ -2222,9 +2226,298 @@ VisualShaderNodeInputEmbedWidget::VisualShaderNodeInputEmbedWidget(const std::sh
 VisualShaderNodeInputEmbedWidget::~VisualShaderNodeInputEmbedWidget() {}
 
 void VisualShaderNodeInputEmbedWidget::on_current_index_changed(const int& index) {
-  const std::shared_ptr<VisualShaderNodeInput> n{std::dynamic_pointer_cast<VisualShaderNodeInput>(node)};
-  if (!n) {
-    return;
-  }
-  n->set_input_name(itemText(index).toStdString());
+  node->set_input_name(itemText(index).toStdString());
+}
+
+/*************************************/
+/* Float Op Node                     */
+/*************************************/
+
+VisualShaderNodeFloatOpEmbedWidget::VisualShaderNodeFloatOpEmbedWidget(const std::shared_ptr<VisualShaderNodeFloatOp>& node) : QComboBox(), 
+                                                                                                                               node(node) {
+  setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+
+  addItem("Add", (int)VisualShaderNodeFloatOp::OP_ADD);
+  addItem("Subtract", (int)VisualShaderNodeFloatOp::OP_SUB);
+  addItem("Multiply", (int)VisualShaderNodeFloatOp::OP_MUL);
+  addItem("Divide", (int)VisualShaderNodeFloatOp::OP_DIV);
+  addItem("Modulus", (int)VisualShaderNodeFloatOp::OP_MOD);
+  addItem("Power", (int)VisualShaderNodeFloatOp::OP_POW);
+  addItem("Maximum", (int)VisualShaderNodeFloatOp::OP_MAX);
+  addItem("Minimum", (int)VisualShaderNodeFloatOp::OP_MIN);
+  addItem("Arc Tangent 2", (int)VisualShaderNodeFloatOp::OP_ATAN2);
+  addItem("Step", (int)VisualShaderNodeFloatOp::OP_STEP);
+
+  QObject::connect(this, 
+                   QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                   this,
+                   &VisualShaderNodeFloatOpEmbedWidget::on_current_index_changed);
+}
+
+VisualShaderNodeFloatOpEmbedWidget::~VisualShaderNodeFloatOpEmbedWidget() {}
+
+void VisualShaderNodeFloatOpEmbedWidget::on_current_index_changed(const int& index) {
+  node->set_operator((VisualShaderNodeFloatOp::Operator)itemData(index).toInt());
+}
+
+/*************************************/
+/* Int Op Node                       */
+/*************************************/
+
+VisualShaderNodeIntOpEmbedWidget::VisualShaderNodeIntOpEmbedWidget(const std::shared_ptr<VisualShaderNodeIntOp>& node) : QComboBox(), 
+                                                                                                                         node(node) {
+  setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+
+  addItem("Add", (int)VisualShaderNodeIntOp::OP_ADD);
+  addItem("Subtract", (int)VisualShaderNodeIntOp::OP_SUB);
+  addItem("Multiply", (int)VisualShaderNodeIntOp::OP_MUL);
+  addItem("Divide", (int)VisualShaderNodeIntOp::OP_DIV);
+  addItem("Modulus", (int)VisualShaderNodeIntOp::OP_MOD);
+  addItem("Maximum", (int)VisualShaderNodeIntOp::OP_MAX);
+  addItem("Minimum", (int)VisualShaderNodeIntOp::OP_MIN);
+  addItem("Bitwise AND", (int)VisualShaderNodeIntOp::OP_BITWISE_AND);
+  addItem("Bitwise OR", (int)VisualShaderNodeIntOp::OP_BITWISE_OR);
+  addItem("Bitwise XOR", (int)VisualShaderNodeIntOp::OP_BITWISE_XOR);
+  addItem("Bitwise Left Shift", (int)VisualShaderNodeIntOp::OP_BITWISE_LEFT_SHIFT);
+  addItem("Bitwise Right Shift", (int)VisualShaderNodeIntOp::OP_BITWISE_RIGHT_SHIFT);
+
+  QObject::connect(this, 
+                   QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                   this,
+                   &VisualShaderNodeIntOpEmbedWidget::on_current_index_changed);
+}
+
+VisualShaderNodeIntOpEmbedWidget::~VisualShaderNodeIntOpEmbedWidget() {}
+
+void VisualShaderNodeIntOpEmbedWidget::on_current_index_changed(const int& index) {
+  node->set_operator((VisualShaderNodeIntOp::Operator)itemData(index).toInt());
+}
+
+/*************************************/
+/* UInt Op Node                      */
+/*************************************/
+
+VisualShaderNodeUIntOpEmbedWidget::VisualShaderNodeUIntOpEmbedWidget(const std::shared_ptr<VisualShaderNodeUIntOp>& node) : QComboBox(), 
+                                                                                                                            node(node) {
+  setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+
+  addItem("Add", (int)VisualShaderNodeUIntOp::OP_ADD);
+  addItem("Subtract", (int)VisualShaderNodeUIntOp::OP_SUB);
+  addItem("Multiply", (int)VisualShaderNodeUIntOp::OP_MUL);
+  addItem("Divide", (int)VisualShaderNodeUIntOp::OP_DIV);
+  addItem("Modulus", (int)VisualShaderNodeUIntOp::OP_MOD);
+  addItem("Maximum", (int)VisualShaderNodeUIntOp::OP_MAX);
+  addItem("Minimum", (int)VisualShaderNodeUIntOp::OP_MIN);
+  addItem("Bitwise AND", (int)VisualShaderNodeUIntOp::OP_BITWISE_AND);
+  addItem("Bitwise OR", (int)VisualShaderNodeUIntOp::OP_BITWISE_OR);
+  addItem("Bitwise XOR", (int)VisualShaderNodeUIntOp::OP_BITWISE_XOR);
+  addItem("Bitwise Left Shift", (int)VisualShaderNodeUIntOp::OP_BITWISE_LEFT_SHIFT);
+  addItem("Bitwise Right Shift", (int)VisualShaderNodeUIntOp::OP_BITWISE_RIGHT_SHIFT);
+
+  QObject::connect(this, 
+                   QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                   this,
+                   &VisualShaderNodeUIntOpEmbedWidget::on_current_index_changed);
+}
+
+VisualShaderNodeUIntOpEmbedWidget::~VisualShaderNodeUIntOpEmbedWidget() {}
+
+void VisualShaderNodeUIntOpEmbedWidget::on_current_index_changed(const int& index) {
+  node->set_operator((VisualShaderNodeUIntOp::Operator)itemData(index).toInt());
+}
+
+/*************************************/
+/* Vector Op Node                    */
+/*************************************/
+
+VisualShaderNodeVectorOpEmbedWidget::VisualShaderNodeVectorOpEmbedWidget(const std::shared_ptr<VisualShaderNodeVectorOp>& node) : QComboBox(), 
+                                                                                                                               node(node) {
+  setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+
+  addItem("Add", (int)VisualShaderNodeVectorOp::OP_ADD);
+  addItem("Subtract", (int)VisualShaderNodeVectorOp::OP_SUB);
+  addItem("Multiply", (int)VisualShaderNodeVectorOp::OP_MUL);
+  addItem("Divide", (int)VisualShaderNodeVectorOp::OP_DIV);
+  addItem("Modulus", (int)VisualShaderNodeVectorOp::OP_MOD);
+  addItem("Power", (int)VisualShaderNodeVectorOp::OP_POW);
+  addItem("Maximum", (int)VisualShaderNodeVectorOp::OP_MAX);
+  addItem("Minimum", (int)VisualShaderNodeVectorOp::OP_MIN);
+  addItem("Cross Product", (int)VisualShaderNodeVectorOp::OP_CROSS);
+  addItem("Arc Tangent 2", (int)VisualShaderNodeVectorOp::OP_ATAN2);
+  addItem("Reflect", (int)VisualShaderNodeVectorOp::OP_REFLECT);
+  addItem("Step", (int)VisualShaderNodeVectorOp::OP_STEP);
+
+  QObject::connect(this, 
+                   QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                   this,
+                   &VisualShaderNodeVectorOpEmbedWidget::on_current_index_changed);
+}
+
+VisualShaderNodeVectorOpEmbedWidget::~VisualShaderNodeVectorOpEmbedWidget() {}
+
+void VisualShaderNodeVectorOpEmbedWidget::on_current_index_changed(const int& index) {
+  node->set_operator((VisualShaderNodeVectorOp::Operator)itemData(index).toInt());
+}
+
+/*************************************/
+/* Float Funcs Node                  */
+/*************************************/
+
+VisualShaderNodeFloatFuncEmbedWidget::VisualShaderNodeFloatFuncEmbedWidget(const std::shared_ptr<VisualShaderNodeFloatFunc>& node) : QComboBox(), 
+                                                                                                                                   node(node) {
+  setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+
+  addItem("Sin", (int)VisualShaderNodeFloatFunc::FUNC_SIN);
+  addItem("Cos", (int)VisualShaderNodeFloatFunc::FUNC_COS);
+  addItem("Tan", (int)VisualShaderNodeFloatFunc::FUNC_TAN);
+  addItem("Arc Sine", (int)VisualShaderNodeFloatFunc::FUNC_ASIN);
+  addItem("Arc Cosine", (int)VisualShaderNodeFloatFunc::FUNC_ACOS);
+  addItem("Arc Tangent", (int)VisualShaderNodeFloatFunc::FUNC_ATAN);
+  addItem("Sine Hyperbolic", (int)VisualShaderNodeFloatFunc::FUNC_SINH);
+  addItem("Cosine Hyperbolic", (int)VisualShaderNodeFloatFunc::FUNC_COSH);
+  addItem("Tangent Hyperbolic", (int)VisualShaderNodeFloatFunc::FUNC_TANH);
+  addItem("Logarithm", (int)VisualShaderNodeFloatFunc::FUNC_LOG);
+  addItem("Exponential", (int)VisualShaderNodeFloatFunc::FUNC_EXP);
+  addItem("Square Root", (int)VisualShaderNodeFloatFunc::FUNC_SQRT);
+  addItem("Absolute", (int)VisualShaderNodeFloatFunc::FUNC_ABS);
+  addItem("Sign", (int)VisualShaderNodeFloatFunc::FUNC_SIGN);
+  addItem("Floor", (int)VisualShaderNodeFloatFunc::FUNC_FLOOR);
+  addItem("Round", (int)VisualShaderNodeFloatFunc::FUNC_ROUND);
+  addItem("Ceil", (int)VisualShaderNodeFloatFunc::FUNC_CEIL);
+  addItem("Fraction", (int)VisualShaderNodeFloatFunc::FUNC_FRACT);
+  addItem("Saturate", (int)VisualShaderNodeFloatFunc::FUNC_SATURATE);
+  addItem("Negate", (int)VisualShaderNodeFloatFunc::FUNC_NEGATE);
+  addItem("Arc Cosine Hyperbolic", (int)VisualShaderNodeFloatFunc::FUNC_ACOSH);
+  addItem("Arc Sine Hyperbolic", (int)VisualShaderNodeFloatFunc::FUNC_ASINH);
+  addItem("Arc Tangent Hyperbolic", (int)VisualShaderNodeFloatFunc::FUNC_ATANH);
+  addItem("Degrees", (int)VisualShaderNodeFloatFunc::FUNC_DEGREES);
+  addItem("Exponential 2", (int)VisualShaderNodeFloatFunc::FUNC_EXP2);
+  addItem("Inverse Square Root", (int)VisualShaderNodeFloatFunc::FUNC_INVERSE_SQRT);
+  addItem("Logarithm 2", (int)VisualShaderNodeFloatFunc::FUNC_LOG2);
+  addItem("Radians", (int)VisualShaderNodeFloatFunc::FUNC_RADIANS);
+  addItem("Reciprocal", (int)VisualShaderNodeFloatFunc::FUNC_RECIPROCAL);
+  addItem("Round Even", (int)VisualShaderNodeFloatFunc::FUNC_ROUNDEVEN);
+  addItem("Truncate", (int)VisualShaderNodeFloatFunc::FUNC_TRUNC);
+  addItem("One Minus", (int)VisualShaderNodeFloatFunc::FUNC_ONEMINUS);
+
+  QObject::connect(this, 
+                   QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                   this,
+                   &VisualShaderNodeFloatFuncEmbedWidget::on_current_index_changed);
+}
+
+VisualShaderNodeFloatFuncEmbedWidget::~VisualShaderNodeFloatFuncEmbedWidget() {}
+
+void VisualShaderNodeFloatFuncEmbedWidget::on_current_index_changed(const int& index) {
+  node->set_function((VisualShaderNodeFloatFunc::Function)itemData(index).toInt());
+}
+
+/*************************************/
+/* Int Funcs Node                    */
+/*************************************/
+
+VisualShaderNodeIntFuncEmbedWidget::VisualShaderNodeIntFuncEmbedWidget(const std::shared_ptr<VisualShaderNodeIntFunc>& node) : QComboBox(), 
+                                                                                                                         node(node) {
+  setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+
+  addItem("Abs", (int)VisualShaderNodeIntFunc::FUNC_ABS);
+  addItem("Negate", (int)VisualShaderNodeIntFunc::FUNC_NEGATE);
+  addItem("Sign", (int)VisualShaderNodeIntFunc::FUNC_SIGN);
+  addItem("Bitwise NOT", (int)VisualShaderNodeIntFunc::FUNC_BITWISE_NOT);
+
+  QObject::connect(this, 
+                   QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                   this,
+                   &VisualShaderNodeIntFuncEmbedWidget::on_current_index_changed);
+}
+
+VisualShaderNodeIntFuncEmbedWidget::~VisualShaderNodeIntFuncEmbedWidget() {}
+
+void VisualShaderNodeIntFuncEmbedWidget::on_current_index_changed(const int& index) {
+  node->set_function((VisualShaderNodeIntFunc::Function)itemData(index).toInt());
+}
+
+/*************************************/
+/* UInt Funcs Node                   */
+/*************************************/
+
+VisualShaderNodeUIntFuncEmbedWidget::VisualShaderNodeUIntFuncEmbedWidget(const std::shared_ptr<VisualShaderNodeUIntFunc>& node) : QComboBox(), 
+                                                                                                                            node(node) {
+  setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+
+  addItem("Negate", (int)VisualShaderNodeUIntFunc::FUNC_NEGATE);
+  addItem("Bitwise NOT", (int)VisualShaderNodeUIntFunc::FUNC_BITWISE_NOT);
+
+  QObject::connect(this, 
+                   QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                   this,
+                   &VisualShaderNodeUIntFuncEmbedWidget::on_current_index_changed);
+}
+
+VisualShaderNodeUIntFuncEmbedWidget::~VisualShaderNodeUIntFuncEmbedWidget() {}
+
+void VisualShaderNodeUIntFuncEmbedWidget::on_current_index_changed(const int& index) {
+  node->set_function((VisualShaderNodeUIntFunc::Function)itemData(index).toInt());
+}
+
+/*************************************/
+/* Vector Funcs Node                 */
+/*************************************/
+
+VisualShaderNodeVectorFuncEmbedWidget::VisualShaderNodeVectorFuncEmbedWidget(const std::shared_ptr<VisualShaderNodeVectorFunc>& node) : QComboBox(), 
+                                                                                                                                   node(node) {
+  setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+
+  addItem("Normalize", (int)VisualShaderNodeVectorFunc::FUNC_NORMALIZE);
+  addItem("Saturate", (int)VisualShaderNodeVectorFunc::FUNC_SATURATE);
+  addItem("Negate", (int)VisualShaderNodeVectorFunc::FUNC_NEGATE);
+  addItem("Reciprocal", (int)VisualShaderNodeVectorFunc::FUNC_RECIPROCAL);
+  addItem("Abs", (int)VisualShaderNodeVectorFunc::FUNC_ABS);
+  addItem("Arc Cosine", (int)VisualShaderNodeVectorFunc::FUNC_ACOS);
+  addItem("Arc Cosine Hyperbolic", (int)VisualShaderNodeVectorFunc::FUNC_ACOSH);
+  addItem("Arc Sine", (int)VisualShaderNodeVectorFunc::FUNC_ASIN);
+  addItem("Arc Sine Hyperbolic", (int)VisualShaderNodeVectorFunc::FUNC_ASINH);
+  addItem("Arc Tangent", (int)VisualShaderNodeVectorFunc::FUNC_ATAN);
+  addItem("Arc Tangent Hyperbolic", (int)VisualShaderNodeVectorFunc::FUNC_ATANH);
+  addItem("Ceil", (int)VisualShaderNodeVectorFunc::FUNC_CEIL);
+  addItem("Cos", (int)VisualShaderNodeVectorFunc::FUNC_COS);
+  addItem("Cosine Hyperbolic", (int)VisualShaderNodeVectorFunc::FUNC_COSH);
+  addItem("Degrees", (int)VisualShaderNodeVectorFunc::FUNC_DEGREES);
+  addItem("Exp", (int)VisualShaderNodeVectorFunc::FUNC_EXP);
+  addItem("Exp2", (int)VisualShaderNodeVectorFunc::FUNC_EXP2);
+  addItem("Floor", (int)VisualShaderNodeVectorFunc::FUNC_FLOOR);
+  addItem("Fraction", (int)VisualShaderNodeVectorFunc::FUNC_FRACT);
+  addItem("Inverse Square Root", (int)VisualShaderNodeVectorFunc::FUNC_INVERSE_SQRT);
+  addItem("Log", (int)VisualShaderNodeVectorFunc::FUNC_LOG);
+  addItem("Log2", (int)VisualShaderNodeVectorFunc::FUNC_LOG2);
+  addItem("Radians", (int)VisualShaderNodeVectorFunc::FUNC_RADIANS);
+  addItem("Round", (int)VisualShaderNodeVectorFunc::FUNC_ROUND);
+  addItem("Round Even", (int)VisualShaderNodeVectorFunc::FUNC_ROUNDEVEN);
+  addItem("Sign", (int)VisualShaderNodeVectorFunc::FUNC_SIGN);
+  addItem("Sin", (int)VisualShaderNodeVectorFunc::FUNC_SIN);
+  addItem("Sine Hyperbolic", (int)VisualShaderNodeVectorFunc::FUNC_SINH);
+  addItem("Sqrt", (int)VisualShaderNodeVectorFunc::FUNC_SQRT);
+  addItem("Tan", (int)VisualShaderNodeVectorFunc::FUNC_TAN);
+  addItem("Tangent Hyperbolic", (int)VisualShaderNodeVectorFunc::FUNC_TANH);
+  addItem("Truncate", (int)VisualShaderNodeVectorFunc::FUNC_TRUNC);
+  addItem("One Minus", (int)VisualShaderNodeVectorFunc::FUNC_ONEMINUS);
+
+  QObject::connect(this, 
+                   QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                   this,
+                   &VisualShaderNodeVectorFuncEmbedWidget::on_current_index_changed);
+}
+
+VisualShaderNodeVectorFuncEmbedWidget::~VisualShaderNodeVectorFuncEmbedWidget() {}
+
+void VisualShaderNodeVectorFuncEmbedWidget::on_current_index_changed(const int& index) {
+  node->set_function((VisualShaderNodeVectorFunc::Function)itemData(index).toInt());
 }
