@@ -372,10 +372,6 @@ target_link_libraries(${EXE} PRIVATE ${LIB_PCRE2})
 find_library(LIB_DOUBLE_CONVERSION NAMES double-conversion)
 target_link_libraries(${EXE} PRIVATE ${LIB_DOUBLE_CONVERSION})
 
-# nodeeditor
-add_subdirectory(Submodules/nodeeditor)
-target_link_libraries(${EXE} PRIVATE QtNodes::QtNodes)
-
 if(RGM_BUILD_TESTS)
   add_subdirectory(Tests)
 endif()
