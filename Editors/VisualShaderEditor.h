@@ -122,8 +122,10 @@ class VisualShaderEditor : public BaseEditor {
   QHBoxLayout* layout;
 
   QWidget* side_widget;
+  QVBoxLayout* side_outer_layout;
   QVBoxLayout* side_layout;
   QLineEdit* name_edit;
+  QPushButton* save_button;
 
   QHBoxLayout* scene_layer_layout;
   QWidget* scene_layer;  // Layer having the scene.

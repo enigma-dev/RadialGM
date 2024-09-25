@@ -46,8 +46,10 @@ VisualShaderEditor::VisualShaderEditor(QWidget* parent)
       visual_shader(nullptr),
       layout(nullptr),
       side_widget(nullptr),
+      side_outer_layout(nullptr),
       side_layout(nullptr),
       name_edit(nullptr),
+      save_button(nullptr),
       scene_layer_layout(nullptr),
       scene_layer(nullptr),
       scene(nullptr),
@@ -75,8 +77,10 @@ VisualShaderEditor::VisualShaderEditor(MessageModel* model, QWidget* parent)
       visual_shader(nullptr),
       layout(nullptr),
       side_widget(nullptr),
+      side_outer_layout(nullptr),
       side_layout(nullptr),
       name_edit(nullptr),
+      save_button(nullptr),
       scene_layer_layout(nullptr),
       scene_layer(nullptr),
       scene(nullptr),
@@ -99,6 +103,7 @@ VisualShaderEditor::VisualShaderEditor(MessageModel* model, QWidget* parent)
   VisualShaderEditor::init();
 
   _nodeMapper->addMapping(name_edit, TreeNode::kNameFieldNumber);
+  QObject::connect(save_button, &QAbstractButton::pressed, this, &BaseEditor::OnSave);
   // visual_shader_model = _model->GetSubModel<MessageModel*>(TreeNode::kVisualShaderFieldNumber);
 }
 
@@ -124,8 +129,15 @@ void VisualShaderEditor::init() {
   side_widget->setContentsMargins(10, 10, 10, 10);  // Left, top, right, bottom
   side_widget->setVisible(false);
 
-  // Add the vertical layout
-  side_layout = new QVBoxLayout(side_widget);
+  // Create the side outer layout
+  side_outer_layout = new QVBoxLayout(side_widget);
+  side_outer_layout->setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+  side_outer_layout->setSpacing(5);
+  side_outer_layout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+  side_outer_layout->setSizeConstraint(QLayout::SetNoConstraint);
+
+  // Add the side inner layout
+  side_layout = new QVBoxLayout();
   side_layout->setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
   side_layout->setSpacing(5);
   side_layout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
@@ -146,7 +158,16 @@ void VisualShaderEditor::init() {
 
   side_layout->addLayout(name_layout);
 
-  side_widget->setLayout(side_layout);
+  side_outer_layout->addLayout(side_layout);
+
+  save_button = new QPushButton("Save");
+  save_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  save_button->setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+  save_button->setToolTip("Save editor changes including the graph");
+  save_button->setIcon(QIcon(":/actions/accept.png"));
+  side_outer_layout->addWidget(save_button);
+
+  side_widget->setLayout(side_outer_layout);
 
   // Create the scene layer.
   scene_layer = new QWidget();
