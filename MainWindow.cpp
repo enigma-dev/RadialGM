@@ -376,7 +376,7 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   treeConf.UseEditorLauncher<buffers::resources::Font>(Launch<FontEditor>(this));
   treeConf.UseEditorLauncher<buffers::resources::Script>(Launch<ScriptEditor>(this));
   treeConf.UseEditorLauncher<buffers::resources::Shader>(Launch<ShaderEditor>(this));
-  treeConf.UseEditorLauncher<buffers::resources::VisualShader>(Launch<VisualShaderEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::EVisualShader>(Launch<VisualShaderEditor>(this));
   treeConf.UseEditorLauncher<buffers::resources::Timeline>(Launch<TimelineEditor>(this));
   treeConf.UseEditorLauncher<buffers::resources::Object>(Launch<ObjectEditor>(this));
   treeConf.UseEditorLauncher<buffers::resources::Room>(Launch<RoomEditor>(this));
@@ -391,7 +391,7 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   msgConf.SetDefaultIcon<buffers::resources::Path>("path");
   msgConf.SetDefaultIcon<buffers::resources::Script>("script");
   msgConf.SetDefaultIcon<buffers::resources::Shader>("shader");
-  msgConf.SetDefaultIcon<buffers::resources::VisualShader>("visual_shader");
+  msgConf.SetDefaultIcon<buffers::resources::EVisualShader>("visual_shader");
   msgConf.SetDefaultIcon<buffers::resources::Font>("font");
   msgConf.SetDefaultIcon<buffers::resources::Timeline>("timeline");
   msgConf.SetDefaultIcon<buffers::resources::Object>("object");

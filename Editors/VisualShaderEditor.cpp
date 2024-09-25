@@ -27,11 +27,9 @@
 
 #include "Editors/VisualShaderEditor.h"
 
-#include <QAction>
-
 #include <unordered_map>
 
-#include "VisualShader.pb.h"
+#include "EVisualShader.pb.h"
 
 /**********************************************************************/
 /**********************************************************************/
@@ -43,20 +41,20 @@
 /**********************************************************************/
 /**********************************************************************/
 
-VisualShaderEditor::VisualShaderEditor(QWidget* parent) : BaseEditor(parent) {  
-  VisualShaderEditor::init();
-}
-
-VisualShaderEditor::VisualShaderEditor(MessageModel* model, QWidget* parent)
-    : BaseEditor(model, parent),
+VisualShaderEditor::VisualShaderEditor(QWidget* parent)
+  : BaseEditor(parent),
       visual_shader(nullptr),
       layout(nullptr),
+      side_widget(nullptr),
+      side_layout(nullptr),
+      name_edit(nullptr),
       scene_layer_layout(nullptr),
       scene_layer(nullptr),
       scene(nullptr),
       view(nullptr),
       top_layer(nullptr),
       menu_bar(nullptr),
+      menu_button(nullptr),
       create_node_button(nullptr),
       preview_shader_button(nullptr),
       create_node_action(nullptr),
@@ -70,6 +68,38 @@ VisualShaderEditor::VisualShaderEditor(MessageModel* model, QWidget* parent)
       code_previewer_layout(nullptr),
       code_previewer(nullptr) {
   VisualShaderEditor::init();
+}
+
+VisualShaderEditor::VisualShaderEditor(MessageModel* model, QWidget* parent)
+    : BaseEditor(model, parent),
+      visual_shader(nullptr),
+      layout(nullptr),
+      side_widget(nullptr),
+      side_layout(nullptr),
+      name_edit(nullptr),
+      scene_layer_layout(nullptr),
+      scene_layer(nullptr),
+      scene(nullptr),
+      view(nullptr),
+      top_layer(nullptr),
+      menu_bar(nullptr),
+      menu_button(nullptr),
+      create_node_button(nullptr),
+      preview_shader_button(nullptr),
+      create_node_action(nullptr),
+      zoom_in_button(nullptr),
+      reset_zoom_button(nullptr),
+      zoom_out_button(nullptr),
+      load_image_button(nullptr),
+      match_image_button(nullptr),
+      create_node_dialog(nullptr),
+      code_previewer_dialog(nullptr),
+      code_previewer_layout(nullptr),
+      code_previewer(nullptr) {
+  VisualShaderEditor::init();
+
+  _nodeMapper->addMapping(name_edit, TreeNode::kNameFieldNumber);
+  // visual_shader_model = _model->GetSubModel<MessageModel*>(TreeNode::kVisualShaderFieldNumber);
 }
 
 VisualShaderEditor::~VisualShaderEditor() {
@@ -87,6 +117,36 @@ void VisualShaderEditor::init() {
   layout->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
 
   //////////////// End of Header ////////////////
+
+  // Create the side widget
+  side_widget = new QWidget();
+  side_widget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  side_widget->setContentsMargins(10, 10, 10, 10);  // Left, top, right, bottom
+  side_widget->setVisible(false);
+
+  // Add the vertical layout
+  side_layout = new QVBoxLayout(side_widget);
+  side_layout->setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+  side_layout->setSpacing(5);
+  side_layout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+  side_layout->setSizeConstraint(QLayout::SetNoConstraint);
+
+  // Fill in the left layout
+  QHBoxLayout* name_layout = new QHBoxLayout();
+  name_layout->setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+  name_layout->setSpacing(5);
+  name_layout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+  name_layout->setSizeConstraint(QLayout::SetNoConstraint);
+
+  QLabel* name_label = new QLabel("Name");
+  name_layout->addWidget(name_label, 1);
+
+  name_edit = new QLineEdit();
+  name_layout->addWidget(name_edit, 4);
+
+  side_layout->addLayout(name_layout);
+
+  side_widget->setLayout(side_layout);
 
   // Create the scene layer.
   scene_layer = new QWidget();
@@ -126,10 +186,19 @@ void VisualShaderEditor::init() {
   menu_bar->setAlignment(Qt::AlignTop | Qt::AlignLeft);
   menu_bar->setSizeConstraint(QLayout::SetMinimumSize);
 
+  // Create the menu button
+  menu_button = new QPushButton("Show Menu", top_layer);
+  menu_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  menu_button->setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+  menu_button->setToolTip("Toggle Menu");
+  menu_bar->addWidget(menu_button);
+  QObject::connect(menu_button, &QPushButton::pressed, this, &VisualShaderEditor::on_menu_button_pressed);
+
   // Create the create node button.
   create_node_button = new QPushButton("Create Node", top_layer);
   create_node_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   create_node_button->setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+  create_node_button->setToolTip("Create a new node");
   menu_bar->addWidget(create_node_button);
   QObject::connect(create_node_button, &QPushButton::pressed, this, &VisualShaderEditor::on_create_node_button_pressed);
 
@@ -140,42 +209,51 @@ void VisualShaderEditor::init() {
   preview_shader_button = new QPushButton("Preview Shader", top_layer);
   preview_shader_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   preview_shader_button->setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+  preview_shader_button->setToolTip("Preview the expected generated shader code");
   menu_bar->addWidget(preview_shader_button);
   QObject::connect(preview_shader_button, &QPushButton::pressed, this, &VisualShaderEditor::on_preview_shader_button_pressed);
 
   zoom_in_button = new QPushButton("Zoom In", scene_layer);
   zoom_in_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   zoom_in_button->setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+  zoom_in_button->setToolTip("Zoom In");
   menu_bar->addWidget(zoom_in_button);
   QObject::connect(zoom_in_button, &QPushButton::pressed, view, &VisualShaderGraphicsView::zoom_in);
 
   reset_zoom_button = new QPushButton("Reset Zoom", scene_layer);
   reset_zoom_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   reset_zoom_button->setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+  reset_zoom_button->setToolTip("Reset Zoom");
   menu_bar->addWidget(reset_zoom_button);
   QObject::connect(reset_zoom_button, &QPushButton::pressed, view, &VisualShaderGraphicsView::reset_zoom);
 
   zoom_out_button = new QPushButton("Zoom Out", scene_layer);
   zoom_out_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   zoom_out_button->setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+  zoom_out_button->setToolTip("Zoom Out");
   menu_bar->addWidget(zoom_out_button);
   QObject::connect(zoom_out_button, &QPushButton::pressed, view, &VisualShaderGraphicsView::zoom_out);
 
   load_image_button = new QPushButton("Load Image", scene_layer);
   load_image_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   load_image_button->setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+  load_image_button->setToolTip("Load an image to match");
   menu_bar->addWidget(load_image_button);
 
   match_image_button = new QPushButton("Match Image", scene_layer);
   match_image_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   match_image_button->setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+  match_image_button->setToolTip("Match the shader to the loaded image");
   menu_bar->addWidget(match_image_button);
 
   // Set the top layer layout.
   top_layer->setLayout(menu_bar);
 
+  // Add the left layout
+  layout->addWidget(side_widget, 1);
+
   // Add the scene layer to the main layout.
-  layout->addWidget(scene_layer);
+  layout->addWidget(scene_layer, 4);
 
   ////////////////////////////////////
   // Code Previewer
@@ -388,6 +466,12 @@ void VisualShaderEditor::on_preview_shader_button_pressed() {
   code_previewer_dialog->exec();
 }
 
+void VisualShaderEditor::on_menu_button_pressed() {
+  bool is_visible{side_widget->isVisible()};
+  side_widget->setVisible(!is_visible);
+  menu_button->setText(!is_visible ? "Hide Menu" : "Show Menu");
+}
+
 std::vector<std::string> VisualShaderEditor::parse_node_category_path(const std::string& node_category_path) {
   std::vector<std::string> tokens;
   std::stringstream ss(node_category_path);
@@ -495,12 +579,14 @@ CreateNodeDialog::CreateNodeDialog(QWidget* parent)
   QObject::connect(create_button, &QPushButton::pressed, this, &CreateNodeDialog::on_create_node_button_pressed);
   create_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   create_button->setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+  create_button->setToolTip("Create the selected node.");
 
   cancel_button = new QPushButton("Cancel");
   QObject::connect(cancel_button, &QPushButton::pressed, this,
                    &CreateNodeDialog::on_cancel_node_creation_button_pressed);
   cancel_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   cancel_button->setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+  cancel_button->setToolTip("Cancel the node creation.");
 
   // Add the buttons to the buttons layout.
   buttons_layout->addWidget(create_button);

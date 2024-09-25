@@ -30,10 +30,8 @@
 
 #include <QContextMenuEvent>
 #include <QGraphicsSceneMouseEvent>
-#include <QtCore/QJsonObject>
 #include <QtCore/QPointF>
 #include <QtCore/QSize>
-#include <QtWidgets/QAction>
 #include <QtWidgets/QComboBox>
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QGraphicsObject>
@@ -47,6 +45,8 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QPlainTextEdit>
 #include <QtWidgets/QGraphicsProxyWidget>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
 
 #include <string>
 #include <vector>
@@ -55,7 +55,6 @@
 #include "ResourceTransformations/VisualShader/visual_shader_nodes.h"
 #include "ResourceTransformations/VisualShader/vs_noise_nodes.h"
 #include "Editors/BaseEditor.h"
-#include "Editors/CodeEditor.h"
 
 class VisualShaderGraphicsScene;
 class VisualShaderGraphicsView;
@@ -114,10 +113,17 @@ class VisualShaderEditor : public BaseEditor {
   void on_create_node_button_pressed();
   void on_preview_shader_button_pressed();
 
+  void on_menu_button_pressed();
+
  private:
   VisualShader* visual_shader;
+  MessageModel* visual_shader_model;
 
   QHBoxLayout* layout;
+
+  QWidget* side_widget;
+  QVBoxLayout* side_layout;
+  QLineEdit* name_edit;
 
   QHBoxLayout* scene_layer_layout;
   QWidget* scene_layer;  // Layer having the scene.
@@ -127,6 +133,7 @@ class VisualShaderEditor : public BaseEditor {
   QWidget* top_layer;  // Layer having the menu bar.
   QHBoxLayout* menu_bar;
 
+  QPushButton* menu_button;
   QPushButton* create_node_button;
   QPushButton* preview_shader_button;
   QPushButton* zoom_in_button;
@@ -170,7 +177,8 @@ class VisualShaderEditor : public BaseEditor {
   /**
    * @brief Initializes the UI
    * 
-   * @note To be called from different constructors.
+   * @note To be called from different constructors. This function shouldn't contain
+   *       any code related to MessageModel class as this will break the tests.
    * 
    */
   void init();
