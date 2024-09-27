@@ -84,6 +84,9 @@ class VisualShaderEditor : public BaseEditor {
   VisualShaderEditor(MessageModel* model, QWidget* parent = nullptr);
   ~VisualShaderEditor() override;
 
+  VisualShaderGraphicsScene* get_scene() const { return scene; }
+  VisualShaderGraphicsView* get_view() const { return view; }
+
  Q_SIGNALS:
   /**
    * @brief Request the dialog that has all kinds of nodes we can
@@ -465,6 +468,7 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
   VisualShaderInputPortGraphicsObject* get_input_port_graphics_object(const int& p_index) const;
   VisualShaderOutputPortGraphicsObject* get_output_port_graphics_object(const int& p_index) const;
 
+  QWidget* get_embed_widget() const { return embed_widget; }
   void set_embed_widget(QWidget* embed_widget) { this->embed_widget = embed_widget; }
 
  Q_SIGNALS:
@@ -748,6 +752,8 @@ class VisualShaderNodeInputEmbedWidget : public QComboBox {
   VisualShaderNodeInputEmbedWidget(const std::shared_ptr<VisualShaderNodeInput>& node);
   ~VisualShaderNodeInputEmbedWidget();
 
+  void set_current_index(const int& index) { this->setCurrentIndex(index); }
+
  private Q_SLOTS:
   void on_current_index_changed(const int& index);
 
@@ -765,6 +771,8 @@ class VisualShaderNodeFloatOpEmbedWidget : public QComboBox {
  public:
   VisualShaderNodeFloatOpEmbedWidget(const std::shared_ptr<VisualShaderNodeFloatOp>& node);
   ~VisualShaderNodeFloatOpEmbedWidget();
+
+  void set_current_index(const int& index) { this->setCurrentIndex(index); }
 
  private Q_SLOTS:
   void on_current_index_changed(const int& index);
@@ -784,6 +792,8 @@ class VisualShaderNodeIntOpEmbedWidget : public QComboBox {
   VisualShaderNodeIntOpEmbedWidget(const std::shared_ptr<VisualShaderNodeIntOp>& node);
   ~VisualShaderNodeIntOpEmbedWidget();
 
+  void set_current_index(const int& index) { this->setCurrentIndex(index); }
+
  private Q_SLOTS:
   void on_current_index_changed(const int& index);
 
@@ -801,6 +811,8 @@ class VisualShaderNodeUIntOpEmbedWidget : public QComboBox {
  public:
   VisualShaderNodeUIntOpEmbedWidget(const std::shared_ptr<VisualShaderNodeUIntOp>& node);
   ~VisualShaderNodeUIntOpEmbedWidget();
+
+  void set_current_index(const int& index) { this->setCurrentIndex(index); }
 
  private Q_SLOTS:
   void on_current_index_changed(const int& index);
@@ -820,6 +832,8 @@ class VisualShaderNodeVectorOpEmbedWidget : public QComboBox {
   VisualShaderNodeVectorOpEmbedWidget(const std::shared_ptr<VisualShaderNodeVectorOp>& node);
   ~VisualShaderNodeVectorOpEmbedWidget();
 
+  void set_current_index(const int& index) { this->setCurrentIndex(index); }
+
  private Q_SLOTS:
   void on_current_index_changed(const int& index);
 
@@ -837,6 +851,8 @@ class VisualShaderNodeFloatFuncEmbedWidget : public QComboBox {
  public:
   VisualShaderNodeFloatFuncEmbedWidget(const std::shared_ptr<VisualShaderNodeFloatFunc>& node);
   ~VisualShaderNodeFloatFuncEmbedWidget();
+
+  void set_current_index(const int& index) { this->setCurrentIndex(index); }
 
  private Q_SLOTS:
   void on_current_index_changed(const int& index);
@@ -856,6 +872,8 @@ class VisualShaderNodeIntFuncEmbedWidget : public QComboBox {
   VisualShaderNodeIntFuncEmbedWidget(const std::shared_ptr<VisualShaderNodeIntFunc>& node);
   ~VisualShaderNodeIntFuncEmbedWidget();
 
+  void set_current_index(const int& index) { this->setCurrentIndex(index); }
+
  private Q_SLOTS:
   void on_current_index_changed(const int& index);
 
@@ -874,6 +892,8 @@ class VisualShaderNodeUIntFuncEmbedWidget : public QComboBox {
   VisualShaderNodeUIntFuncEmbedWidget(const std::shared_ptr<VisualShaderNodeUIntFunc>& node);
   ~VisualShaderNodeUIntFuncEmbedWidget();
 
+  void set_current_index(const int& index) { this->setCurrentIndex(index); }
+
  private Q_SLOTS:
   void on_current_index_changed(const int& index);
 
@@ -891,6 +911,8 @@ class VisualShaderNodeVectorFuncEmbedWidget : public QComboBox {
  public:
   VisualShaderNodeVectorFuncEmbedWidget(const std::shared_ptr<VisualShaderNodeVectorFunc>& node);
   ~VisualShaderNodeVectorFuncEmbedWidget();
+
+  void set_current_index(const int& index) { this->setCurrentIndex(index); }
 
  private Q_SLOTS:
   void on_current_index_changed(const int& index);

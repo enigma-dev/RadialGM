@@ -40,7 +40,7 @@ class TestVisualShaderEditor : public QObject {
   void cleanupTestCase();  // Will be called after the last test function was executed.
   void cleanup();        // Will be called after every test function.
 
-  void testCreateFullGraph();
+  void test_create_full_graph();
 
  private:
   VisualShaderEditor* editor = nullptr;
