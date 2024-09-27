@@ -260,6 +260,7 @@ void VisualShaderEditor::init() {
   load_image_button->setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
   load_image_button->setToolTip("Load an image to match");
   menu_bar->addWidget(load_image_button);
+  QObject::connect(load_image_button, &QPushButton::pressed, this, &VisualShaderEditor::on_load_image_button_pressed);
 
   match_image_button = new QPushButton("Match Image", scene_layer);
   match_image_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
@@ -493,6 +494,13 @@ void VisualShaderEditor::on_menu_button_pressed() {
   menu_button->setText(!is_visible ? "Hide Menu" : "Show Menu");
 }
 
+void VisualShaderEditor::on_load_image_button_pressed() {
+  // TODO: Decide on how to load an image
+  // For example, use QFileDialog to open an image file or
+  // load an existing sprite or background from the project.
+  // Then, send the image to OriginalMatchingImageWidget widget to display it.
+}
+
 std::vector<std::string> VisualShaderEditor::parse_node_category_path(const std::string& node_category_path) {
   std::vector<std::string> tokens;
   std::stringstream ss(node_category_path);
@@ -666,11 +674,9 @@ VisualShaderGraphicsScene::~VisualShaderGraphicsScene() {}
 bool VisualShaderGraphicsScene::add_node(const std::string& type, const QPointF& coordinate) {
   // Instantiate the node based on the type
   std::shared_ptr<VisualShaderNode> n;
-  QWidget* embed_widget {nullptr};
 
   if (type == "VisualShaderNodeInput") {
     n = std::make_shared<VisualShaderNodeInput>();
-    embed_widget = new VisualShaderNodeInputEmbedWidget(std::dynamic_pointer_cast<VisualShaderNodeInput>(n));
   } else if (type == "VisualShaderNodeColorConstant") {
     n = std::make_shared<VisualShaderNodeColorConstant>();
   } else if (type == "VisualShaderNodeBooleanConstant") {
@@ -689,24 +695,18 @@ bool VisualShaderGraphicsScene::add_node(const std::string& type, const QPointF&
     n = std::make_shared<VisualShaderNodeVec4Constant>();
   } else if (type == "VisualShaderNodeFloatFunc") {
     n = std::make_shared<VisualShaderNodeFloatFunc>();
-    embed_widget = new VisualShaderNodeFloatFuncEmbedWidget(std::dynamic_pointer_cast<VisualShaderNodeFloatFunc>(n));
   } else if (type == "VisualShaderNodeIntFunc") {
     n = std::make_shared<VisualShaderNodeIntFunc>();
-    embed_widget = new VisualShaderNodeIntFuncEmbedWidget(std::dynamic_pointer_cast<VisualShaderNodeIntFunc>(n));
   } else if (type == "VisualShaderNodeUIntFunc") {
     n = std::make_shared<VisualShaderNodeUIntFunc>();
-    embed_widget = new VisualShaderNodeUIntFuncEmbedWidget(std::dynamic_pointer_cast<VisualShaderNodeUIntFunc>(n));
   } else if (type == "VisualShaderNodeDerivativeFunc") {
     n = std::make_shared<VisualShaderNodeDerivativeFunc>();
   } else if (type == "VisualShaderNodeFloatOp") {
     n = std::make_shared<VisualShaderNodeFloatOp>();
-    embed_widget = new VisualShaderNodeFloatOpEmbedWidget(std::dynamic_pointer_cast<VisualShaderNodeFloatOp>(n));
   } else if (type == "VisualShaderNodeIntOp") {
     n = std::make_shared<VisualShaderNodeIntOp>();
-    embed_widget = new VisualShaderNodeIntOpEmbedWidget(std::dynamic_pointer_cast<VisualShaderNodeIntOp>(n));
   } else if (type == "VisualShaderNodeUIntOp") {
     n = std::make_shared<VisualShaderNodeUIntOp>();
-    embed_widget = new VisualShaderNodeUIntOpEmbedWidget(std::dynamic_pointer_cast<VisualShaderNodeUIntOp>(n));
   } else if (type == "VisualShaderNodeValueNoise") {
     n = std::make_shared<VisualShaderNodeValueNoise>();
   } else if (type == "VisualShaderNodeCompare") {
@@ -732,10 +732,10 @@ bool VisualShaderGraphicsScene::add_node(const std::string& type, const QPointF&
     return false;
   }
 
-  return VisualShaderGraphicsScene::add_node(n_id, n, coordinate, embed_widget);
+  return VisualShaderGraphicsScene::add_node(n_id, n, coordinate);
 }
 
-bool VisualShaderGraphicsScene::add_node(const int& n_id, const std::shared_ptr<VisualShaderNode>& n, const QPointF& coordinate, QWidget* embed_widget) {
+bool VisualShaderGraphicsScene::add_node(const int& n_id, const std::shared_ptr<VisualShaderNode>& n, const QPointF& coordinate) {
   // Make sure the node doesn't already exist, we don't want to overwrite a node.
   if (node_graphics_objects.find(n_id) != node_graphics_objects.end()) {
     return false;
@@ -767,10 +767,14 @@ bool VisualShaderGraphicsScene::add_node(const int& n_id, const std::shared_ptr<
 
   VisualShaderNodeGraphicsObject* n_o{new VisualShaderNodeGraphicsObject(n_id, coordinate, n)};
 
-  if (embed_widget) {
+  if (n_id != (int)VisualShader::NODE_ID_OUTPUT) {
+    VisualShaderNodeEmbedWidget* embed_widget {new VisualShaderNodeEmbedWidget(n)};
     QGraphicsProxyWidget* embed_widget_proxy{new QGraphicsProxyWidget(n_o)};
     embed_widget_proxy->setWidget(embed_widget);
     n_o->set_embed_widget(embed_widget);
+
+    // Send the shader previewer widget
+    embed_widget->set_shader_previewer_widget(n_o->get_shader_previewer_widget());
   }
 
   QObject::connect(n_o, &VisualShaderNodeGraphicsObject::node_deleted, this, &VisualShaderGraphicsScene::on_node_deleted);
@@ -1502,7 +1506,9 @@ VisualShaderNodeGraphicsObject::VisualShaderNodeGraphicsObject(const int& n_id,
                                                                                         rect_height(0.0f),
                                                                                         rect_margin(0.0f),
                                                                                         rect_padding(0.0f),
-                                                                                        embed_widget(nullptr) {
+                                                                                        embed_widget(nullptr),
+                                                                                        matching_image_widget(nullptr),
+                                                                                        shader_previewer_widget(nullptr) {
   setFlag(QGraphicsItem::ItemDoesntPropagateOpacityToChildren, true);
   setFlag(QGraphicsItem::ItemIsFocusable, true);
   setFlag(QGraphicsItem::ItemIsMovable, true);
@@ -1517,6 +1523,19 @@ VisualShaderNodeGraphicsObject::VisualShaderNodeGraphicsObject(const int& n_id,
   setZValue(0);
 
   setPos(coordinate.x(), coordinate.y());
+
+  // Output node should have a matching image widget
+  if (n_id == (int)VisualShader::NODE_ID_OUTPUT) {
+    QGraphicsProxyWidget* matching_image_widget_proxy{new QGraphicsProxyWidget(this)};
+    matching_image_widget = new OriginalMatchingImageWidget();
+    matching_image_widget_proxy->setWidget(matching_image_widget);
+  } else {
+    // Create the shader previewer widget
+    QGraphicsProxyWidget* shader_previewer_widget_proxy{new QGraphicsProxyWidget(this)};
+    shader_previewer_widget = new ShaderPreviewerWidget();
+    shader_previewer_widget->setVisible(false);
+    shader_previewer_widget_proxy->setWidget(shader_previewer_widget);
+  }
 
   // Set the context menu
   context_menu = new QMenu();
@@ -1639,7 +1658,7 @@ QRectF VisualShaderNodeGraphicsObject::boundingRect() const {
   QRectF r({0.0f, 0.0f}, QSizeF(rect_width, rect_height));
 
   // Calculate the margin
-  this->rect_margin = port_diameter * 0.5f + 5.0f; // 5.0f is the margin between the ports and the port names
+  this->rect_margin = port_diameter * 0.5f;
 
   // Calculate the rect padding
   // We add a safe area around the rect to prevent the ports from being cut off
@@ -1656,6 +1675,15 @@ void VisualShaderNodeGraphicsObject::paint(QPainter* painter, const QStyleOption
 
   // Get the rect without the padding
   QRectF r{this->boundingRect()};
+
+  // {
+  //   // Draw Node Rect
+  //   painter->setPen(Qt::red);
+  //   painter->setBrush(Qt::NoBrush);
+  //   painter->drawRect(r);
+  // }
+
+  // Add the padding to the rect
   r.adjust(rect_padding, rect_padding, -rect_padding, -rect_padding);
 
   {
@@ -1675,16 +1703,34 @@ void VisualShaderNodeGraphicsObject::paint(QPainter* painter, const QStyleOption
     painter->drawRoundedRect(r, this->corner_radius, this->corner_radius);
   }
 
+  // Draw Matching Image Widget
+  if (n_id == (int)VisualShader::NODE_ID_OUTPUT) {
+    float matching_image_widget_x{(float)r.x() + (float)r.width() + spacing_between_output_node_and_matching_image};
+    float matching_image_widget_y{(float)r.y()};
+
+    matching_image_widget->setGeometry(matching_image_widget_x, matching_image_widget_y, matching_image_widget->width(), matching_image_widget->height());
+  } else {
+    // Draw Shader Previewer Widget
+    float shader_previewer_widget_x{(float)r.x()};
+    float shader_previewer_widget_y{(float)r.y() + (float)r.height() + spacing_between_current_node_and_shader_previewer};
+    shader_previewer_widget->setGeometry(shader_previewer_widget_x, shader_previewer_widget_y, shader_previewer_widget->width(), shader_previewer_widget->height());
+  }
+
   // Add the margin to the rect
   r.adjust(rect_margin, rect_margin, -rect_margin, -rect_margin);
+
+  // {
+  //   // Draw Node Rect
+  //   painter->setPen(Qt::red);
+  //   painter->setBrush(Qt::NoBrush);
+  //   painter->drawRect(r);
+  // }
 
   float rect_x{(float)r.topLeft().x()};
   float rect_y{(float)r.topLeft().y()};
 
   float rect_w{(float)r.width()};
   float rect_h{(float)r.height()};
-
-  float min_side{qMin(rect_w, rect_h)};
 
   QRectF caption_rect(rect_x, rect_y, rect_w, caption_rect_height);
 
@@ -1742,7 +1788,7 @@ void VisualShaderNodeGraphicsObject::paint(QPainter* painter, const QStyleOption
         QFontMetrics fm(f);
         painter->setFont(f);
 
-        float x{rect_x};
+        float x{rect_x + port_caption_spacing};
 
         float y{(float)(port_rect.center().y()) + (float)((fm.ascent() + fm.descent()) * 0.5f - fm.descent())};
 
@@ -1798,7 +1844,7 @@ void VisualShaderNodeGraphicsObject::paint(QPainter* painter, const QStyleOption
         QFontMetrics fm(f);
         painter->setFont(f);
 
-        float x{rect_x + rect_w - (float)fm.horizontalAdvance(p_n)};
+        float x{rect_x + rect_w - (float)fm.horizontalAdvance(p_n) - port_caption_spacing};
 
         float y{(float)(port_rect.center().y()) + (float)((fm.ascent() + fm.descent()) * 0.5f - fm.descent())};
 
@@ -2233,6 +2279,59 @@ std::pair<QPointF, QPointF> VisualShaderConnectionGraphicsObject::calculate_cont
 /**********************************************************************/
 /**********************************************************************/
 /**********************************************************************/
+
+VisualShaderNodeEmbedWidget::VisualShaderNodeEmbedWidget(const std::shared_ptr<VisualShaderNode>& node, 
+                                                         QWidget* parent) : QWidget(parent),
+                                                                            layout(nullptr), 
+                                                                            preview_shader_button(nullptr),
+                                                                            shader_previewer_widget(nullptr) {
+  layout = new QVBoxLayout(this);
+  layout->setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+  layout->setSizeConstraint(QLayout::SetNoConstraint);
+  layout->setSpacing(2);
+  layout->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+
+  if (auto p {std::dynamic_pointer_cast<VisualShaderNodeInput>(node)}) {
+    VisualShaderNodeInputEmbedWidget* embed_widget = new VisualShaderNodeInputEmbedWidget(p);
+    layout->addWidget(embed_widget);
+  } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeFloatFunc>(node)}) {
+    VisualShaderNodeFloatFuncEmbedWidget* embed_widget = new VisualShaderNodeFloatFuncEmbedWidget(p);
+    layout->addWidget(embed_widget);
+  } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeIntFunc>(node)}) {
+    VisualShaderNodeIntFuncEmbedWidget* embed_widget = new VisualShaderNodeIntFuncEmbedWidget(p);
+    layout->addWidget(embed_widget);
+  } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeUIntFunc>(node)}) {
+    VisualShaderNodeUIntFuncEmbedWidget* embed_widget = new VisualShaderNodeUIntFuncEmbedWidget(p);
+    layout->addWidget(embed_widget);
+  } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeFloatOp>(node)}) {
+    VisualShaderNodeFloatOpEmbedWidget* embed_widget = new VisualShaderNodeFloatOpEmbedWidget(p);
+    layout->addWidget(embed_widget);
+  } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeIntOp>(node)}) {
+    VisualShaderNodeIntOpEmbedWidget* embed_widget = new VisualShaderNodeIntOpEmbedWidget(p);
+    layout->addWidget(embed_widget);
+  } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeUIntOp>(node)}) {
+    VisualShaderNodeUIntOpEmbedWidget* embed_widget = new VisualShaderNodeUIntOpEmbedWidget(p);
+    layout->addWidget(embed_widget);
+  }
+
+  // Create the button that will show/hide the shader previewer
+  preview_shader_button = new QPushButton("Show Preview", this);
+  preview_shader_button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+  preview_shader_button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  preview_shader_button->setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+  preview_shader_button->setToolTip("Create a new node");
+  layout->addWidget(preview_shader_button);
+  QObject::connect(preview_shader_button, &QPushButton::pressed, this, &VisualShaderNodeEmbedWidget::on_preview_shader_button_pressed);
+
+  this->setContentsMargins(10, 10, 10, 10);  // Left, top, right, bottom
+  setLayout(layout);
+}
+
+VisualShaderNodeEmbedWidget::~VisualShaderNodeEmbedWidget() {}
+
+/*************************************/
+/* Input Node                        */
+/*************************************/
 
 VisualShaderNodeInputEmbedWidget::VisualShaderNodeInputEmbedWidget(const std::shared_ptr<VisualShaderNodeInput>& node) : QComboBox(), 
                                                                                                                          node(node) {

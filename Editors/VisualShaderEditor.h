@@ -117,6 +117,7 @@ class VisualShaderEditor : public BaseEditor {
   void on_preview_shader_button_pressed();
 
   void on_menu_button_pressed();
+  void on_load_image_button_pressed();
 
  private:
   VisualShader* visual_shader;
@@ -249,6 +250,70 @@ class CreateNodeDialog : public QDialog {
 /**********************************************************************/
 /**********************************************************************/
 /*****                                                            *****/
+/*****               OriginalMatchingImageWidget                  *****/
+/*****                                                            *****/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+
+class OriginalMatchingImageWidget : public QWidget {
+public:
+    OriginalMatchingImageWidget(QWidget* parent = nullptr) : QWidget(parent) {
+        // Set the fixed size to 100x100 pixels
+        setFixedSize(100, 100);
+
+        // Create a red pixmap of 100x100 pixels
+        pixmap = QPixmap(100, 100);
+        pixmap.fill(Qt::red);  // Fill it with the red color
+    }
+
+protected:
+    // Override the paintEvent to display the pixmap
+    void paintEvent(QPaintEvent* event) override {
+        QPainter painter(this);
+        painter.drawPixmap(0, 0, pixmap);  // Draw the pixmap starting at (0, 0)
+    }
+
+private:
+    QPixmap pixmap;
+};
+
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/*****                                                            *****/
+/*****                  ShaderPreviewerWidget                     *****/
+/*****                                                            *****/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+
+class ShaderPreviewerWidget : public QWidget {
+ public:
+    ShaderPreviewerWidget(QWidget* parent = nullptr) : QWidget(parent) {
+        // Set the fixed size to 100x100 pixels
+        setFixedSize(100, 100);
+
+        // Create a red pixmap of 100x100 pixels
+        pixmap = QPixmap(100, 100);
+        pixmap.fill(Qt::blue);  // Fill it with the red color
+    }
+
+protected:
+    // Override the paintEvent to display the pixmap
+    void paintEvent(QPaintEvent* event) override {
+        QPainter painter(this);
+        painter.drawPixmap(0, 0, pixmap);  // Draw the pixmap starting at (0, 0)
+    }
+
+private:
+    QPixmap pixmap;
+};
+
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/*****                                                            *****/
 /*****               VisualShaderGraphicsScene                    *****/
 /*****                                                            *****/
 /**********************************************************************/
@@ -264,7 +329,7 @@ class VisualShaderGraphicsScene : public QGraphicsScene {
   ~VisualShaderGraphicsScene();
 
   bool add_node(const std::string& type, const QPointF& coordinate);
-  bool add_node(const int& n_id, const std::shared_ptr<VisualShaderNode>& n, const QPointF& coordinate, QWidget* embed_widget = nullptr);
+  bool add_node(const int& n_id, const std::shared_ptr<VisualShaderNode>& n, const QPointF& coordinate);
   bool delete_node(const int& n_id);
 
   VisualShaderEditor* get_editor() const { return editor; }
@@ -471,6 +536,8 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
   QWidget* get_embed_widget() const { return embed_widget; }
   void set_embed_widget(QWidget* embed_widget) { this->embed_widget = embed_widget; }
 
+  ShaderPreviewerWidget* get_shader_previewer_widget() const { return shader_previewer_widget; }
+
  Q_SIGNALS:
   /**
    * @brief Send a request to delete a node.
@@ -533,6 +600,8 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
   mutable float rect_padding;  // Calculated in boundingRect()
   mutable float rect_margin;   // Calculated in boundingRect()
 
+  float port_caption_spacing = 4.0f; // Distance between the port and its caption
+
   // Ports Style
   float connected_port_diameter = 8.0f;
   float unconnected_port_diameter = 6.0f;
@@ -542,8 +611,14 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
   float port_caption_font_size = 8.0f;
 
   QWidget* embed_widget;
-  float embed_widget_h_padding = 10.0f;
+  float embed_widget_h_padding = 15.0f;
   float embed_widget_v_padding = 5.0f;
+
+  OriginalMatchingImageWidget* matching_image_widget;
+  float spacing_between_output_node_and_matching_image = 10.0f;
+
+  ShaderPreviewerWidget* shader_previewer_widget;
+  float spacing_between_current_node_and_shader_previewer = 10.0f;
 
   QRectF boundingRect() const override;
   void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
@@ -744,6 +819,34 @@ class VisualShaderConnectionGraphicsObject : public QGraphicsObject {
 /**********************************************************************/
 /**********************************************************************/
 /**********************************************************************/
+
+class VisualShaderNodeEmbedWidget : public QWidget {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeEmbedWidget(const std::shared_ptr<VisualShaderNode>& node, QWidget* parent = nullptr);
+  ~VisualShaderNodeEmbedWidget();
+
+  void set_shader_previewer_widget(QWidget* shader_previewer_widget) { this->shader_previewer_widget = shader_previewer_widget; }
+
+  private Q_SLOTS:
+  void on_preview_shader_button_pressed() {
+    bool is_visible{shader_previewer_widget->isVisible()};
+    shader_previewer_widget->setVisible(!is_visible);
+    preview_shader_button->setText(!is_visible ? "Hide Preview" : "Show Preview");
+  }
+
+  private:
+  QVBoxLayout* layout;
+
+  QPushButton* preview_shader_button;
+
+  QWidget* shader_previewer_widget;
+};
+
+/*************************************/
+/* Input Node                        */
+/*************************************/
 
 class VisualShaderNodeInputEmbedWidget : public QComboBox {
   Q_OBJECT
