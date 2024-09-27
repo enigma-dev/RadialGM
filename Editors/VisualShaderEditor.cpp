@@ -500,6 +500,10 @@ void VisualShaderEditor::on_load_image_button_pressed() {
   // For example, use QFileDialog to open an image file or
   // load an existing sprite or background from the project.
   // Then, send the image to OriginalMatchingImageWidget widget to display it.
+  // R0bert — 27/09/2024 at 22:10
+  // i would use resource picker and let user pick a sprite or background that exists in the project
+  // Josh — 27/09/2024 at 22:13
+  // sprites have multiple frames, which is a headache for this project because it's a lot more behavior we need to define
 }
 
 std::vector<std::string> VisualShaderEditor::parse_node_category_path(const std::string& node_category_path) {
