@@ -104,7 +104,8 @@ VisualShaderEditor::VisualShaderEditor(MessageModel* model, QWidget* parent)
 
   _nodeMapper->addMapping(name_edit, TreeNode::kNameFieldNumber);
   QObject::connect(save_button, &QAbstractButton::pressed, this, &BaseEditor::OnSave);
-  // visual_shader_model = _model->GetSubModel<MessageModel*>(TreeNode::kVisualShaderFieldNumber);
+  RebindSubModels();
+  visual_shader_model = _model->GetSubModel<MessageModel*>(TreeNode::kVisualShaderFieldNumber);
 }
 
 VisualShaderEditor::~VisualShaderEditor() {
@@ -1760,6 +1761,12 @@ void VisualShaderNodeGraphicsObject::paint(QPainter* painter, const QStyleOption
     // Instead of subtracting, add the ascent to properly align text within the rect
     float y{(float)(caption_rect.center().y() + (float)((fm.ascent() + fm.descent()) * 0.5f - fm.descent()))};
 
+    // {
+    //   painter->setPen(Qt::red);
+    //   painter->setBrush(Qt::NoBrush);
+    //   painter->drawRect(QRectF(x,y, (float)fm.horizontalAdvance(caption), (float)(fm.ascent() + fm.descent())));
+    // }
+
     QPointF coordinate{x, y};
 
     painter->setPen(this->font_color);
@@ -1800,6 +1807,12 @@ void VisualShaderNodeGraphicsObject::paint(QPainter* painter, const QStyleOption
         float x{rect_x + port_caption_spacing};
 
         float y{(float)(port_rect.center().y()) + (float)((fm.ascent() + fm.descent()) * 0.5f - fm.descent())};
+
+        // {
+        //   painter->setPen(Qt::red);
+        //   painter->setBrush(Qt::NoBrush);
+        //   painter->drawRect(QRectF(x,y, (float)fm.horizontalAdvance(p_n), (float)(fm.ascent() + fm.descent())));
+        // }
 
         QPointF coordinate{x, y};
 
@@ -1856,6 +1869,12 @@ void VisualShaderNodeGraphicsObject::paint(QPainter* painter, const QStyleOption
         float x{rect_x + rect_w - (float)fm.horizontalAdvance(p_n) - port_caption_spacing};
 
         float y{(float)(port_rect.center().y()) + (float)((fm.ascent() + fm.descent()) * 0.5f - fm.descent())};
+
+        // {
+        //   painter->setPen(Qt::red);
+        //   painter->setBrush(Qt::NoBrush);
+        //   painter->drawRect(QRectF(x,y, (float)fm.horizontalAdvance(p_n), (float)(fm.ascent() + fm.descent())));
+        // }
 
         QPointF coordinate{x, y};
 
