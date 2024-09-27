@@ -892,6 +892,7 @@ bool VisualShaderGraphicsScene::add_connection(const int& from_node_id, const in
         new VisualShaderConnectionGraphicsObject(from_node_id, from_port_index, from_o_port->get_global_coordinate());
     from_o_port->connect(this->temporary_connection_graphics_object);
     addItem(this->temporary_connection_graphics_object);
+    return true;
   }
 
   if (to_node_id != (int)VisualShader::NODE_ID_INVALID && to_port_index != (int)VisualShader::PORT_INDEX_INVALID) {
@@ -931,9 +932,11 @@ bool VisualShaderGraphicsScene::add_connection(const int& from_node_id, const in
     this->temporary_connection_graphics_object->set_to_node_id(to_node_id);
     this->temporary_connection_graphics_object->set_to_port_index(to_port_index);
     this->temporary_connection_graphics_object = nullptr;  // Make sure to reset the temporary connection object
+
+    return true;
   }
 
-  return true;
+  return false;
 }
 
 bool VisualShaderGraphicsScene::delete_connection(const int& from_node_id, const int& from_port_index,
@@ -949,9 +952,17 @@ bool VisualShaderGraphicsScene::delete_connection(const int& from_node_id, const
   if (!from_o_port) {
     return false;
   }
+
+  if (this->temporary_connection_graphics_object) {
+    from_o_port->detach_connection();
+    removeItem(this->temporary_connection_graphics_object);
+    delete this->temporary_connection_graphics_object;
+    this->temporary_connection_graphics_object = nullptr;
+    return true;
+  }
   
   // If we have a complete connection, then we can disconnect the nodes
-  if (to_node_id != (int)VisualShader::NODE_ID_INVALID && to_port_index != (int)VisualShader::PORT_INDEX_INVALID && !this->temporary_connection_graphics_object) {
+  if (to_node_id != (int)VisualShader::NODE_ID_INVALID && to_port_index != (int)VisualShader::PORT_INDEX_INVALID) {
     VisualShaderConnectionGraphicsObject* c_o{from_o_port->get_connection_graphics_object()};
 
     if (!c_o) {
@@ -980,12 +991,6 @@ bool VisualShaderGraphicsScene::delete_connection(const int& from_node_id, const
     from_o_port->detach_connection();
     removeItem(c_o);
     delete c_o;
-    return true;
-  } else if (to_node_id != (int)VisualShader::NODE_ID_INVALID && to_port_index != (int)VisualShader::PORT_INDEX_INVALID) {
-    from_o_port->detach_connection();
-    removeItem(this->temporary_connection_graphics_object);
-    delete this->temporary_connection_graphics_object;
-    this->temporary_connection_graphics_object = nullptr;
     return true;
   }
 
@@ -1131,6 +1136,10 @@ void VisualShaderGraphicsScene::on_port_dragged(QGraphicsObject* port, const QPo
 }
 
 void VisualShaderGraphicsScene::on_port_dropped(QGraphicsObject* port, const QPointF& coordinate) {
+  if (!temporary_connection_graphics_object) {
+    return;
+  }
+
   // Find all items under the coordinate
   QList<QGraphicsItem*> items_at_coordinate{this->items(coordinate)};
 
