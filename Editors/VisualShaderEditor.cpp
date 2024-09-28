@@ -657,6 +657,183 @@ void CreateNodeDialog::update_selected_item() {
 /**********************************************************************/
 /**********************************************************************/
 /*****                                                            *****/
+/*****                  ShaderPreviewerWidget                     *****/
+/*****                                                            *****/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+
+ShaderPreviewerWidget::ShaderPreviewerWidget(QWidget* parent) 
+    : QOpenGLWidget(parent), shader_program(nullptr), VAO(0), VBO(0), EBO(0) {
+  setFixedSize(100, 100);
+}
+
+ShaderPreviewerWidget::~ShaderPreviewerWidget() {
+  makeCurrent();
+  cleanup_buffers();
+  doneCurrent();
+}
+
+void ShaderPreviewerWidget::set_code(const std::string& new_code) {
+  if (new_code == code) return;
+
+  code = new_code;
+  shader_needs_update = true;
+  if (isVisible()) {
+    update_shader_program();
+    timer.restart();
+    update();
+  }
+}
+
+void ShaderPreviewerWidget::initializeGL() {
+  initializeOpenGLFunctions();
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);  // Black background
+  init_buffers();
+  init_shaders();
+  timer.start();  // Start the timer once OpenGL is initialized
+}
+
+void ShaderPreviewerWidget::resizeGL(int w, int h) {
+  glViewport(0, 0, w, h);
+}
+
+void ShaderPreviewerWidget::paintGL() {
+  if (!isVisible()) return;
+
+  if (shader_needs_update) {
+    update_shader_program();
+  }
+
+  if (!shader_program) return;
+
+  float time_value {timer.elapsed() * 0.001f};
+
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  shader_program->bind();
+  shader_program->setUniformValue("uTime", time_value);
+
+  glBindVertexArray(VAO);
+  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+  glBindVertexArray(0);
+
+  shader_program->release();
+
+  update();  // Request a repaint
+  Q_EMIT scene_update_requested(); // Update the scene
+}
+
+void ShaderPreviewerWidget::init_buffers() {
+  float vertices[] = {
+    // positions    // texCoords
+    -1.0f,  1.0f,   0.0f, 1.0f,
+    -1.0f, -1.0f,   0.0f, 0.0f,
+     1.0f, -1.0f,   1.0f, 0.0f,
+     1.0f,  1.0f,   1.0f, 1.0f
+  };
+
+  unsigned int indices[] = { 0, 1, 2, 0, 2, 3 };
+
+  glGenVertexArrays(1, &VAO);
+  glGenBuffers(1, &VBO);
+  glGenBuffers(1, &EBO);
+
+  glBindVertexArray(VAO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+
+  glBindVertexArray(0);
+}
+
+void ShaderPreviewerWidget::cleanup_buffers() {
+  makeCurrent();
+  glDeleteVertexArrays(1, &VAO);
+  glDeleteBuffers(1, &VBO);
+  glDeleteBuffers(1, &EBO);
+  doneCurrent();
+}
+
+void ShaderPreviewerWidget::update_shader_program() {
+  shader_program.reset(new QOpenGLShaderProgram(this));
+
+  const char* vertex_shader_source = R"(
+      #version 330 core
+      layout(location = 0) in vec2 aPos;
+      layout(location = 1) in vec2 aTexCoord;
+
+      out vec2 TexCoord;
+
+      void main() {
+        gl_Position = vec4(aPos, 0.0, 1.0);
+        TexCoord = aTexCoord;
+      }
+  )";
+
+  std::string fragment_shader_source = code.empty() ? R"(
+      #version 330 core
+      out vec4 FragColor;
+      in vec2 TexCoord;
+
+      uniform float uTime;
+
+      void main() {
+        FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+      }
+  )" : "#version 330 core\n\n" + code;
+
+  if (!shader_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertex_shader_source)) {
+    qWarning() << "Vertex shader compilation failed:" << shader_program->log();
+  }
+
+  if (!shader_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fragment_shader_source.c_str())) {
+    qWarning() << "Fragment shader compilation failed:" << shader_program->log();
+  }
+
+  if (!shader_program->link()) {
+    qWarning() << "Shader program linking failed:" << shader_program->log();
+  }
+
+  shader_needs_update = false;
+}
+
+void ShaderPreviewerWidget::init_shaders() {
+  update_shader_program();
+}
+
+void ShaderPreviewerWidget::showEvent(QShowEvent* event) {
+  QOpenGLWidget::showEvent(event);
+  if (!timer.isValid()) {
+      timer.start();  // Start the timer on first show
+  } else {
+      timer.restart();
+  }
+  update();  // Trigger repaint when the widget becomes visible
+}
+
+void ShaderPreviewerWidget::hideEvent(QHideEvent* event) {
+  QOpenGLWidget::hideEvent(event);
+  makeCurrent();
+  cleanup_buffers();
+  doneCurrent();
+}
+
+
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/*****                                                            *****/
 /*****               VisualShaderGraphicsScene                    *****/
 /*****                                                            *****/
 /**********************************************************************/
@@ -670,8 +847,6 @@ void CreateNodeDialog::update_selected_item() {
 VisualShaderGraphicsScene::VisualShaderGraphicsScene(VisualShader* vs, QObject* parent)
     : QGraphicsScene(parent), vs(vs), temporary_connection_graphics_object(nullptr) {
   setItemIndexMethod(QGraphicsScene::NoIndex);  // https://doc.qt.io/qt-6/qgraphicsscene.html#ItemIndexMethod-enum
-
-  QObject::connect(this, &VisualShaderGraphicsScene::node_moved, this, &VisualShaderGraphicsScene::on_node_moved);
 }
 
 VisualShaderGraphicsScene::~VisualShaderGraphicsScene() {}
@@ -753,7 +928,7 @@ bool VisualShaderGraphicsScene::add_node(const int& n_id, const std::shared_ptr<
   }
 
   // The output node cannot be removed or added by the user
-  if (n_id >= VisualShader::NODE_ID_OUTPUT + 1) {
+  if (n_id >= (int)VisualShader::NODE_ID_OUTPUT + 1) {
     bool result{vs->add_node(n, {(float)coordinate.x(), (float)coordinate.y()}, n_id)};
 
     if (!result) {
@@ -772,14 +947,30 @@ bool VisualShaderGraphicsScene::add_node(const int& n_id, const std::shared_ptr<
 
   VisualShaderNodeGraphicsObject* n_o{new VisualShaderNodeGraphicsObject(n_id, coordinate, n)};
 
+  QObject::connect(n_o, &VisualShaderNodeGraphicsObject::node_moved, this, &VisualShaderGraphicsScene::on_node_moved);
+  QObject::connect(n_o, &VisualShaderNodeGraphicsObject::in_port_pressed, this, &VisualShaderGraphicsScene::on_port_pressed);
+  QObject::connect(n_o, &VisualShaderNodeGraphicsObject::in_port_dragged, this, &VisualShaderGraphicsScene::on_port_dragged);
+  QObject::connect(n_o, &VisualShaderNodeGraphicsObject::in_port_dropped, this, &VisualShaderGraphicsScene::on_port_dropped);
+  QObject::connect(n_o, &VisualShaderNodeGraphicsObject::out_port_pressed, this, &VisualShaderGraphicsScene::on_port_pressed);
+  QObject::connect(n_o, &VisualShaderNodeGraphicsObject::out_port_dragged, this, &VisualShaderGraphicsScene::on_port_dragged);
+  QObject::connect(n_o, &VisualShaderNodeGraphicsObject::out_port_dropped, this, &VisualShaderGraphicsScene::on_port_dropped);
+
   if (n_id != (int)VisualShader::NODE_ID_OUTPUT) {
     VisualShaderNodeEmbedWidget* embed_widget {new VisualShaderNodeEmbedWidget(n)};
     QGraphicsProxyWidget* embed_widget_proxy{new QGraphicsProxyWidget(n_o)};
     embed_widget_proxy->setWidget(embed_widget);
     n_o->set_embed_widget(embed_widget);
+    QObject::connect(embed_widget, 
+                     &VisualShaderNodeEmbedWidget::shader_preview_update_requested, 
+                     this,
+                     &VisualShaderGraphicsScene::on_update_shader_previewer_widgets_requested);
 
     // Send the shader previewer widget
     embed_widget->set_shader_previewer_widget(n_o->get_shader_previewer_widget());
+  }
+
+  if (ShaderPreviewerWidget* spw{n_o->get_shader_previewer_widget()}) {
+    QObject::connect(spw, &ShaderPreviewerWidget::scene_update_requested, this, &VisualShaderGraphicsScene::on_scene_update_requested);
   }
 
   QObject::connect(n_o, &VisualShaderNodeGraphicsObject::node_deleted, this, &VisualShaderGraphicsScene::on_node_deleted);
@@ -864,6 +1055,25 @@ bool VisualShaderGraphicsScene::delete_node(const int& n_id) {
   return true;
 }
 
+void VisualShaderGraphicsScene::on_update_shader_previewer_widgets_requested() {
+  for (auto& [n_id, n_o] : node_graphics_objects) {
+    if (n_id == (int)VisualShader::NODE_ID_OUTPUT) {
+      continue;
+    }
+
+    ShaderPreviewerWidget* spw{n_o->get_shader_previewer_widget()};
+    if (!spw) {
+      continue;
+    }
+
+    spw->set_code(vs->generate_preview_shader(n_id, 0)); // 0 is the output port index
+  }
+}
+
+void VisualShaderGraphicsScene::on_scene_update_requested() {
+  update();
+}
+
 bool VisualShaderGraphicsScene::add_connection(const int& from_node_id, const int& from_port_index,
                                                const int& to_node_id, const int& to_port_index) {
   QList<QGraphicsView*> views{this->views()};
@@ -938,6 +1148,8 @@ bool VisualShaderGraphicsScene::add_connection(const int& from_node_id, const in
     this->temporary_connection_graphics_object->set_to_port_index(to_port_index);
     this->temporary_connection_graphics_object = nullptr;  // Make sure to reset the temporary connection object
 
+    on_update_shader_previewer_widgets_requested();
+
     return true;
   }
 
@@ -996,6 +1208,9 @@ bool VisualShaderGraphicsScene::delete_connection(const int& from_node_id, const
     from_o_port->detach_connection();
     removeItem(c_o);
     delete c_o;
+
+    on_update_shader_previewer_widgets_requested();
+
     return true;
   }
 
@@ -1093,6 +1308,8 @@ void VisualShaderGraphicsScene::on_port_dragged(QGraphicsObject* port, const QPo
       }
       i_port->detach_connection();
       c_o->detach_end();
+
+      on_update_shader_previewer_widgets_requested();
     } else if (!i_port->is_connected() && temporary_connection_graphics_object) {
       c_o = temporary_connection_graphics_object;
     } else {
@@ -1133,6 +1350,12 @@ void VisualShaderGraphicsScene::on_port_dragged(QGraphicsObject* port, const QPo
     }
     i_port->detach_connection();
     c_o->detach_end();
+
+    on_update_shader_previewer_widgets_requested();
+
+    // Here we must request a repaint as this connection will be drawn some where else.
+    // I know this doesn't make any sense, just comment it and try to dray an output port that is already connected.
+    update(); // Request a repaint
   } else {
     return;
   }
@@ -1833,11 +2056,9 @@ void VisualShaderNodeGraphicsObject::paint(QPainter* painter, const QStyleOption
       in_port_graphics_objects[i] = p_o;
 
       // Connect the signals
-      QObject::connect(p_o, &VisualShaderInputPortGraphicsObject::port_pressed, dynamic_cast<VisualShaderGraphicsScene*>(scene()), &VisualShaderGraphicsScene::on_port_pressed);
-      QObject::connect(p_o, &VisualShaderInputPortGraphicsObject::port_dragged,
-                       dynamic_cast<VisualShaderGraphicsScene*>(scene()), &VisualShaderGraphicsScene::on_port_dragged);
-      QObject::connect(p_o, &VisualShaderInputPortGraphicsObject::port_dropped,
-                       dynamic_cast<VisualShaderGraphicsScene*>(scene()), &VisualShaderGraphicsScene::on_port_dropped);
+      QObject::connect(p_o, &VisualShaderInputPortGraphicsObject::port_pressed, this, &VisualShaderNodeGraphicsObject::on_in_port_pressed);
+      QObject::connect(p_o, &VisualShaderInputPortGraphicsObject::port_dragged, this, &VisualShaderNodeGraphicsObject::on_in_port_dragged);
+      QObject::connect(p_o, &VisualShaderInputPortGraphicsObject::port_dropped, this, &VisualShaderNodeGraphicsObject::on_in_port_dropped);
     }
   }
 
@@ -1895,11 +2116,9 @@ void VisualShaderNodeGraphicsObject::paint(QPainter* painter, const QStyleOption
       out_port_graphics_objects[i] = p_o;
 
       // Connect the signals
-      QObject::connect(p_o, &VisualShaderOutputPortGraphicsObject::port_pressed, dynamic_cast<VisualShaderGraphicsScene*>(scene()), &VisualShaderGraphicsScene::on_port_pressed);
-      QObject::connect(p_o, &VisualShaderOutputPortGraphicsObject::port_dragged,
-                       dynamic_cast<VisualShaderGraphicsScene*>(scene()), &VisualShaderGraphicsScene::on_port_dragged);
-      QObject::connect(p_o, &VisualShaderOutputPortGraphicsObject::port_dropped,
-                       dynamic_cast<VisualShaderGraphicsScene*>(scene()), &VisualShaderGraphicsScene::on_port_dropped);
+      QObject::connect(p_o, &VisualShaderOutputPortGraphicsObject::port_pressed, this, &VisualShaderNodeGraphicsObject::on_out_port_pressed);
+      QObject::connect(p_o, &VisualShaderOutputPortGraphicsObject::port_dragged, this, &VisualShaderNodeGraphicsObject::on_out_port_dragged);
+      QObject::connect(p_o, &VisualShaderOutputPortGraphicsObject::port_dropped, this, &VisualShaderNodeGraphicsObject::on_out_port_dropped);
     }
   }
 
@@ -1916,7 +2135,7 @@ void VisualShaderNodeGraphicsObject::paint(QPainter* painter, const QStyleOption
 
 QVariant VisualShaderNodeGraphicsObject::itemChange(GraphicsItemChange change, const QVariant& value) {
   if (scene() && change == ItemScenePositionHasChanged) {
-    Q_EMIT dynamic_cast<VisualShaderGraphicsScene*>(scene())->node_moved(n_id, pos());
+    Q_EMIT node_moved(n_id, pos());
   }
 
   return QGraphicsObject::itemChange(change, value);
@@ -1963,17 +2182,17 @@ void VisualShaderInputPortGraphicsObject::paint(QPainter* painter, const QStyleO
 }
 
 void VisualShaderInputPortGraphicsObject::mousePressEvent(QGraphicsSceneMouseEvent* event) {
-  emit port_pressed(this, event->scenePos());
+  Q_EMIT port_pressed(this, event->scenePos());
   QGraphicsObject::mousePressEvent(event);
 }
 
 void VisualShaderInputPortGraphicsObject::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
-  emit port_dragged(this, event->scenePos());
+  Q_EMIT port_dragged(this, event->scenePos());
   QGraphicsObject::mouseMoveEvent(event);
 }
 
 void VisualShaderInputPortGraphicsObject::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
-  emit port_dropped(this, event->scenePos());
+  Q_EMIT port_dropped(this, event->scenePos());
   QGraphicsObject::mouseReleaseEvent(event);
 }
 
@@ -2012,17 +2231,17 @@ void VisualShaderOutputPortGraphicsObject::paint(QPainter* painter, const QStyle
 }
 
 void VisualShaderOutputPortGraphicsObject::mousePressEvent(QGraphicsSceneMouseEvent* event) {
-  emit port_pressed(this, event->scenePos());
+  Q_EMIT port_pressed(this, event->scenePos());
   QGraphicsObject::mousePressEvent(event);
 }
 
 void VisualShaderOutputPortGraphicsObject::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
-  emit port_dragged(this, event->scenePos());
+  Q_EMIT port_dragged(this, event->scenePos());
   QGraphicsObject::mouseMoveEvent(event);
 }
 
 void VisualShaderOutputPortGraphicsObject::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
-  emit port_dropped(this, event->scenePos());
+  Q_EMIT port_dropped(this, event->scenePos());
   QGraphicsObject::mouseReleaseEvent(event);
 }
 
@@ -2326,24 +2545,52 @@ VisualShaderNodeEmbedWidget::VisualShaderNodeEmbedWidget(const std::shared_ptr<V
   if (auto p {std::dynamic_pointer_cast<VisualShaderNodeInput>(node)}) {
     VisualShaderNodeInputEmbedWidget* embed_widget = new VisualShaderNodeInputEmbedWidget(p);
     layout->addWidget(embed_widget);
+    QObject::connect(embed_widget, 
+                     QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
   } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeFloatFunc>(node)}) {
     VisualShaderNodeFloatFuncEmbedWidget* embed_widget = new VisualShaderNodeFloatFuncEmbedWidget(p);
     layout->addWidget(embed_widget);
+    QObject::connect(embed_widget, 
+                     QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
   } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeIntFunc>(node)}) {
     VisualShaderNodeIntFuncEmbedWidget* embed_widget = new VisualShaderNodeIntFuncEmbedWidget(p);
     layout->addWidget(embed_widget);
+    QObject::connect(embed_widget, 
+                     QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
   } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeUIntFunc>(node)}) {
     VisualShaderNodeUIntFuncEmbedWidget* embed_widget = new VisualShaderNodeUIntFuncEmbedWidget(p);
     layout->addWidget(embed_widget);
+    QObject::connect(embed_widget, 
+                     QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
   } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeFloatOp>(node)}) {
     VisualShaderNodeFloatOpEmbedWidget* embed_widget = new VisualShaderNodeFloatOpEmbedWidget(p);
     layout->addWidget(embed_widget);
+    QObject::connect(embed_widget, 
+                     QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
   } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeIntOp>(node)}) {
     VisualShaderNodeIntOpEmbedWidget* embed_widget = new VisualShaderNodeIntOpEmbedWidget(p);
     layout->addWidget(embed_widget);
+    QObject::connect(embed_widget, 
+                     QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
   } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeUIntOp>(node)}) {
     VisualShaderNodeUIntOpEmbedWidget* embed_widget = new VisualShaderNodeUIntOpEmbedWidget(p);
     layout->addWidget(embed_widget);
+    QObject::connect(embed_widget, 
+                     QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
   }
 
   // Create the button that will show/hide the shader previewer

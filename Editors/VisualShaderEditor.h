@@ -47,6 +47,11 @@
 #include <QtWidgets/QGraphicsProxyWidget>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
+#include <QOpenGLWidget>
+// #include <QOpenGLFunctions>
+#include <QOpenGLFunctions_3_3_Core> // https://stackoverflow.com/a/64288966/14629018 explains why we need this.
+#include <QOpenGLShaderProgram>
+#include <QElapsedTimer>
 
 #include <string>
 #include <vector>
@@ -288,26 +293,38 @@ private:
 /**********************************************************************/
 /**********************************************************************/
 
-class ShaderPreviewerWidget : public QWidget {
- public:
-    ShaderPreviewerWidget(QWidget* parent = nullptr) : QWidget(parent) {
-        // Set the fixed size to 100x100 pixels
-        setFixedSize(100, 100);
+class ShaderPreviewerWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core {
+    Q_OBJECT
 
-        // Create a red pixmap of 100x100 pixels
-        pixmap = QPixmap(100, 100);
-        pixmap.fill(Qt::blue);  // Fill it with the red color
-    }
+public:
+    ShaderPreviewerWidget(QWidget* parent = nullptr);
+    ~ShaderPreviewerWidget() override;
+
+    void set_code(const std::string& code);
+
+Q_SIGNALS:
+    void scene_update_requested();
 
 protected:
-    // Override the paintEvent to display the pixmap
-    void paintEvent(QPaintEvent* event) override {
-        QPainter painter(this);
-        painter.drawPixmap(0, 0, pixmap);  // Draw the pixmap starting at (0, 0)
-    }
+    void initializeGL() override;
+    void resizeGL(int w, int h) override;
+    void paintGL() override;
+
+    void showEvent(QShowEvent* event) override;
+    void hideEvent(QHideEvent* event) override;
 
 private:
-    QPixmap pixmap;
+    std::unique_ptr<QOpenGLShaderProgram> shader_program;
+    GLuint VAO, VBO, EBO;
+    QElapsedTimer timer;
+
+    std::string code;
+    bool shader_needs_update {false};  // Track if the shader needs recompiling
+
+    void init_shaders();
+    void init_buffers();
+    void update_shader_program();
+    void cleanup_buffers();
 };
 
 /**********************************************************************/
@@ -375,20 +392,6 @@ class VisualShaderGraphicsScene : public QGraphicsScene {
   void on_port_dragged(QGraphicsObject* port, const QPointF& coordinate);
   void on_port_dropped(QGraphicsObject* port, const QPointF& coordinate);
 
- Q_SIGNALS:
-  /**
-   * @brief Notify the scene that a node has been moved.
-   * 
-   * @note EMITTED from @c VisualShaderNodeGraphicsObject::itemChange function.
-   * 
-   * @note Connected to @c VisualShaderGraphicsScene::on_node_moved slot in 
-   *       @c VisualShaderGraphicsScene::VisualShaderGraphicsScene constructor.
-   * 
-   * @param n_id 
-   * @param new_coordinate 
-   */
-  void node_moved(const int& n_id, const QPointF& new_coordinate);
-
  private Q_SLOTS:
   /**
    * @brief Called when a node is moved.
@@ -410,6 +413,14 @@ class VisualShaderGraphicsScene : public QGraphicsScene {
    * @param n_id 
    */
   void on_node_deleted(const int& n_id);
+
+  /**
+   * @brief Updates the code inside all the nodes except the output node.
+   * 
+   */
+  void on_update_shader_previewer_widgets_requested();
+
+  void on_scene_update_requested();
 
  private:
   VisualShader* vs;
@@ -551,6 +562,27 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
    */
   void node_deleted(const int& n_id);
 
+  /**
+   * @brief Notify the scene that a node has been moved.
+   * 
+   * @note EMITTED from @c VisualShaderNodeGraphicsObject::itemChange function.
+   * 
+   * @note Connected to @c VisualShaderGraphicsScene::on_node_moved slot in 
+   *       @c VisualShaderGraphicsScene::VisualShaderGraphicsScene constructor.
+   * 
+   * @param n_id 
+   * @param new_coordinate 
+   */
+  void node_moved(const int& n_id, const QPointF& new_coordinate);
+
+  void in_port_pressed(VisualShaderInputPortGraphicsObject* port, const QPointF& coordinate);
+  void in_port_dragged(VisualShaderInputPortGraphicsObject* port, const QPointF& coordinate);
+  void in_port_dropped(VisualShaderInputPortGraphicsObject* port, const QPointF& coordinate);
+
+  void out_port_pressed(VisualShaderOutputPortGraphicsObject* port, const QPointF& coordinate);
+  void out_port_dragged(VisualShaderOutputPortGraphicsObject* port, const QPointF& coordinate);
+  void out_port_dropped(VisualShaderOutputPortGraphicsObject* port, const QPointF& coordinate);
+
  private Q_SLOTS:
   /**
    * @brief Called when @c VisualShaderNodeGraphicsObject::delete_node_action is triggered.
@@ -562,6 +594,26 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
    * 
    */
   void on_delete_node_action_triggered();
+
+  void on_in_port_pressed(VisualShaderInputPortGraphicsObject* port, const QPointF& coordinate) {
+    Q_EMIT in_port_pressed(port, coordinate);
+  }
+  void on_in_port_dragged(VisualShaderInputPortGraphicsObject* port, const QPointF& coordinate) {
+    Q_EMIT in_port_dragged(port, coordinate);
+  }
+  void on_in_port_dropped(VisualShaderInputPortGraphicsObject* port, const QPointF& coordinate) {
+    Q_EMIT in_port_dropped(port, coordinate);
+  }
+
+  void on_out_port_pressed(VisualShaderOutputPortGraphicsObject* port, const QPointF& coordinate) {
+    Q_EMIT out_port_pressed(port, coordinate);
+  }
+  void on_out_port_dragged(VisualShaderOutputPortGraphicsObject* port, const QPointF& coordinate) {
+    Q_EMIT out_port_dragged(port, coordinate);
+  }
+  void on_out_port_dropped(VisualShaderOutputPortGraphicsObject* port, const QPointF& coordinate) {
+    Q_EMIT out_port_dropped(port, coordinate);
+  }
 
  private:
   int n_id;
@@ -829,12 +881,17 @@ class VisualShaderNodeEmbedWidget : public QWidget {
 
   void set_shader_previewer_widget(QWidget* shader_previewer_widget) { this->shader_previewer_widget = shader_previewer_widget; }
 
+ Q_SIGNALS:
+  void shader_preview_update_requested();
+
   private Q_SLOTS:
   void on_preview_shader_button_pressed() {
     bool is_visible{shader_previewer_widget->isVisible()};
     shader_previewer_widget->setVisible(!is_visible);
     preview_shader_button->setText(!is_visible ? "Hide Preview" : "Show Preview");
   }
+
+  void on_shader_preview_update_requested() { Q_EMIT shader_preview_update_requested(); }
 
   private:
   QVBoxLayout* layout;
