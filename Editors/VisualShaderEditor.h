@@ -1090,4 +1090,72 @@ class VisualShaderNodeVectorFuncEmbedWidget : public QComboBox {
   std::shared_ptr<VisualShaderNodeVectorFunc> node;
 };
 
+/*************************************/
+/* Value Noise Node                  */
+/*************************************/
+
+class VisualShaderNodeValueNoiseEmbedWidget : public QLineEdit {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeValueNoiseEmbedWidget(const std::shared_ptr<VisualShaderNodeValueNoise>& node);
+  ~VisualShaderNodeValueNoiseEmbedWidget();
+
+ private Q_SLOTS:
+  void on_text_changed(const QString& text);
+
+ private:
+  std::shared_ptr<VisualShaderNodeValueNoise> node;
+};
+
+/*************************************/
+/* Perlin Noise Node                 */
+/*************************************/
+
+class VisualShaderNodePerlinNoiseEmbedWidget : public QLineEdit {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodePerlinNoiseEmbedWidget(const std::shared_ptr<VisualShaderNodePerlinNoise>& node);
+  ~VisualShaderNodePerlinNoiseEmbedWidget();
+
+ private Q_SLOTS:
+  void on_text_changed(const QString& text);
+
+ private:
+  std::shared_ptr<VisualShaderNodePerlinNoise> node;
+};
+
+/*************************************/
+/* Voronoi Noise Node                */
+/*************************************/
+
+class VisualShaderNodeVoronoiNoiseAngleOffsetEmbedWidget : public QLineEdit {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeVoronoiNoiseAngleOffsetEmbedWidget(const std::shared_ptr<VisualShaderNodeVoronoiNoise>& node);
+  ~VisualShaderNodeVoronoiNoiseAngleOffsetEmbedWidget();
+
+ private Q_SLOTS:
+  void on_text_changed(const QString& text);
+
+ private:
+  std::shared_ptr<VisualShaderNodeVoronoiNoise> node;
+};
+
+class VisualShaderNodeVoronoiNoiseCellDensityEmbedWidget : public QLineEdit {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeVoronoiNoiseCellDensityEmbedWidget(const std::shared_ptr<VisualShaderNodeVoronoiNoise>& node);
+  ~VisualShaderNodeVoronoiNoiseCellDensityEmbedWidget();
+
+ private Q_SLOTS:
+  void on_text_changed(const QString& text);
+
+ private:
+  std::shared_ptr<VisualShaderNodeVoronoiNoise> node;
+};
+
 #endif  // ENIGMA_VISUAL_SHADER_EDITOR_H
