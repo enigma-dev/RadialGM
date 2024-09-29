@@ -1972,12 +1972,12 @@ void VisualShaderNodeGraphicsObject::paint(QPainter* painter, const QStyleOption
     float matching_image_widget_x{(float)r.x() + (float)r.width() + spacing_between_output_node_and_matching_image};
     float matching_image_widget_y{(float)r.y()};
 
-    matching_image_widget->setGeometry(matching_image_widget_x, matching_image_widget_y, matching_image_widget_width, r.height());
+    matching_image_widget->setGeometry(matching_image_widget_x, matching_image_widget_y, r.height(), r.height());
   } else {
     // Draw Shader Previewer Widget
     float shader_previewer_widget_x{(float)r.x()};
     float shader_previewer_widget_y{(float)r.y() + (float)r.height() + spacing_between_current_node_and_shader_previewer};
-    shader_previewer_widget->setGeometry(shader_previewer_widget_x, shader_previewer_widget_y, r.width(), shader_previewer_widget_height);
+    shader_previewer_widget->setGeometry(shader_previewer_widget_x, shader_previewer_widget_y, r.width(), r.width());
   }
 
   // Add the margin to the rect

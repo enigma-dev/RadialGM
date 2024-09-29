@@ -264,8 +264,7 @@ class CreateNodeDialog : public QDialog {
 class OriginalMatchingImageWidget : public QWidget {
 public:
     OriginalMatchingImageWidget(QWidget* parent = nullptr) : QWidget(parent) {
-        // Create a red pixmap of 100x100 pixels
-        pixmap = QPixmap(100, 100);
+        pixmap = QPixmap(size());
         pixmap.fill(Qt::red);  // Fill it with the red color
     }
 
@@ -681,9 +680,6 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
 
   ShaderPreviewerWidget* shader_previewer_widget;
   float spacing_between_current_node_and_shader_previewer = 10.0f;
-
-  const float matching_image_widget_width = 100.0f;
-  const float shader_previewer_widget_height = 100.0f;
 
   QRectF boundingRect() const override;
   void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
