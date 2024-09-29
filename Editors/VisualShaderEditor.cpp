@@ -663,16 +663,10 @@ void CreateNodeDialog::update_selected_item() {
 /**********************************************************************/
 /**********************************************************************/
 
-ShaderPreviewerWidget::ShaderPreviewerWidget(QWidget* parent) 
-    : QOpenGLWidget(parent), shader_program(nullptr), VAO(0), VBO(0), EBO(0) {
-  setFixedSize(100, 100);
-}
+ShaderPreviewerWidget::ShaderPreviewerWidget(QWidget* parent)
+    : QOpenGLWidget(parent), shader_program(nullptr), VAO(0), VBO(0) {}
 
-ShaderPreviewerWidget::~ShaderPreviewerWidget() {
-  makeCurrent();
-  cleanup_buffers();
-  doneCurrent();
-}
+ShaderPreviewerWidget::~ShaderPreviewerWidget() {}
 
 void ShaderPreviewerWidget::set_code(const std::string& new_code) {
   if (new_code == code) return;
@@ -682,24 +676,54 @@ void ShaderPreviewerWidget::set_code(const std::string& new_code) {
   if (isVisible()) {
     update_shader_program();
     timer.restart();
-    update();
   }
 }
 
 void ShaderPreviewerWidget::initializeGL() {
-  initializeOpenGLFunctions();
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);  // Black background
+  QOpenGLFunctions_4_3_Core* f {QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_4_3_Core>()};
+
+  if (!f) {
+    qWarning() << "Failed to get OpenGL 4.3 functions";
+    return;
+  }
+
+  if (!f->initializeOpenGLFunctions()) {
+    qWarning() << "Failed to initialize OpenGL functions";
+    return;
+  }
+
+  f->glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Black background
   init_buffers();
   init_shaders();
-  timer.start();  // Start the timer once OpenGL is initialized
+
+  timer.start();
+
+  connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &ShaderPreviewerWidget::cleanup);
 }
 
 void ShaderPreviewerWidget::resizeGL(int w, int h) {
-  glViewport(0, 0, w, h);
+  QOpenGLFunctions_4_3_Core* f {QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_4_3_Core>()};
+
+  if (!f) {
+    qWarning() << "Failed to get OpenGL 4.3 functions";
+    return;
+  }
+
+  f->glViewport(0, 0, w, h);
 }
 
 void ShaderPreviewerWidget::paintGL() {
-  if (!isVisible()) return;
+  // Check https://doc.qt.io/qt-5/qopenglwidget.html#isValid
+  // At start, the widget is hidden so this call returns false which results
+  // in returning (no painting happens).
+  if (!isValid()) return;
+
+  QOpenGLFunctions_4_3_Core* f {QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_4_3_Core>()};
+
+  if (!f) {
+    qWarning() << "Failed to get OpenGL 4.3 functions";
+    return;
+  }
 
   if (shader_needs_update) {
     update_shader_program();
@@ -709,64 +733,71 @@ void ShaderPreviewerWidget::paintGL() {
 
   float time_value {timer.elapsed() * 0.001f};
 
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
+  f->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  f->glClear(GL_COLOR_BUFFER_BIT);
 
   shader_program->bind();
   shader_program->setUniformValue("uTime", time_value);
 
-  glBindVertexArray(VAO);
-  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-  glBindVertexArray(0);
+  f->glBindVertexArray(VAO);
+  f->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+  f->glBindVertexArray(0);
 
   shader_program->release();
 
   update();  // Request a repaint
-  Q_EMIT scene_update_requested(); // Update the scene
+  Q_EMIT scene_update_requested();
+}
+
+void ShaderPreviewerWidget::cleanup() {
+  makeCurrent();
+
+  QOpenGLFunctions_4_3_Core* f {QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_4_3_Core>()};
+
+  if (!f) {
+    qWarning() << "Failed to get OpenGL 4.3 functions";
+    return;
+  }
+  
+  f->glDeleteVertexArrays(1, &VAO);
+  f->glDeleteBuffers(1, &VBO);
 }
 
 void ShaderPreviewerWidget::init_buffers() {
+  QOpenGLFunctions_4_3_Core* f {QOpenGLContext::currentContext()->versionFunctions<QOpenGLFunctions_4_3_Core>()};
+
+  if (!f) {
+    qWarning() << "Failed to get OpenGL 4.3 functions";
+    return;
+  }
+
   float vertices[] = {
     // positions    // texCoords
     -1.0f,  1.0f,   0.0f, 1.0f,
     -1.0f, -1.0f,   0.0f, 0.0f,
-     1.0f, -1.0f,   1.0f, 0.0f,
-     1.0f,  1.0f,   1.0f, 1.0f
+     1.0f,  1.0f,   1.0f, 1.0f,
+     1.0f, -1.0f,   1.0f, 0.0f
   };
 
-  unsigned int indices[] = { 0, 1, 2, 0, 2, 3 };
+  f->glGenVertexArrays(1, &VAO);
+  f->glGenBuffers(1, &VBO);
 
-  glGenVertexArrays(1, &VAO);
-  glGenBuffers(1, &VBO);
-  glGenBuffers(1, &EBO);
+  f->glBindVertexArray(VAO);
 
-  glBindVertexArray(VAO);
+  f->glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  f->glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  f->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+  f->glEnableVertexAttribArray(0);
 
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+  f->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+  f->glEnableVertexAttribArray(1);
 
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);
-
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-
-  glBindVertexArray(0);
-}
-
-void ShaderPreviewerWidget::cleanup_buffers() {
-  makeCurrent();
-  glDeleteVertexArrays(1, &VAO);
-  glDeleteBuffers(1, &VBO);
-  glDeleteBuffers(1, &EBO);
-  doneCurrent();
+  f->glBindVertexArray(0);
 }
 
 void ShaderPreviewerWidget::update_shader_program() {
-  shader_program.reset(new QOpenGLShaderProgram(this));
+  shader_program.reset(new QOpenGLShaderProgram());
 
   const char* vertex_shader_source = R"(
       #version 330 core
@@ -815,20 +846,16 @@ void ShaderPreviewerWidget::init_shaders() {
 void ShaderPreviewerWidget::showEvent(QShowEvent* event) {
   QOpenGLWidget::showEvent(event);
   if (!timer.isValid()) {
-      timer.start();  // Start the timer on first show
-  } else {
-      timer.restart();
+    // See https://doc.qt.io/qt-5/qelapsedtimer.html#start.
+    timer.start();  // Start the timer on first show
   }
-  update();  // Trigger repaint when the widget becomes visible
 }
 
 void ShaderPreviewerWidget::hideEvent(QHideEvent* event) {
   QOpenGLWidget::hideEvent(event);
-  makeCurrent();
-  cleanup_buffers();
-  doneCurrent();
+  // See https://doc.qt.io/qt-5/qelapsedtimer.html#invalidate.
+  timer.invalidate();
 }
-
 
 /**********************************************************************/
 /**********************************************************************/
@@ -1945,12 +1972,12 @@ void VisualShaderNodeGraphicsObject::paint(QPainter* painter, const QStyleOption
     float matching_image_widget_x{(float)r.x() + (float)r.width() + spacing_between_output_node_and_matching_image};
     float matching_image_widget_y{(float)r.y()};
 
-    matching_image_widget->setGeometry(matching_image_widget_x, matching_image_widget_y, matching_image_widget->width(), matching_image_widget->height());
+    matching_image_widget->setGeometry(matching_image_widget_x, matching_image_widget_y, matching_image_widget_width, r.height());
   } else {
     // Draw Shader Previewer Widget
     float shader_previewer_widget_x{(float)r.x()};
     float shader_previewer_widget_y{(float)r.y() + (float)r.height() + spacing_between_current_node_and_shader_previewer};
-    shader_previewer_widget->setGeometry(shader_previewer_widget_x, shader_previewer_widget_y, shader_previewer_widget->width(), shader_previewer_widget->height());
+    shader_previewer_widget->setGeometry(shader_previewer_widget_x, shader_previewer_widget_y, r.width(), shader_previewer_widget_height);
   }
 
   // Add the margin to the rect

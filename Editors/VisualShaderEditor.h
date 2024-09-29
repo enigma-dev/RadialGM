@@ -49,7 +49,7 @@
 #include <QtWidgets/QLineEdit>
 #include <QOpenGLWidget>
 // #include <QOpenGLFunctions>
-#include <QOpenGLFunctions_3_3_Core> // https://stackoverflow.com/a/64288966/14629018 explains why we need this.
+#include <QOpenGLFunctions_4_3_Core> // https://stackoverflow.com/a/64288966/14629018 explains why we need this.
 #include <QOpenGLShaderProgram>
 #include <QElapsedTimer>
 
@@ -264,9 +264,6 @@ class CreateNodeDialog : public QDialog {
 class OriginalMatchingImageWidget : public QWidget {
 public:
     OriginalMatchingImageWidget(QWidget* parent = nullptr) : QWidget(parent) {
-        // Set the fixed size to 100x100 pixels
-        setFixedSize(100, 100);
-
         // Create a red pixmap of 100x100 pixels
         pixmap = QPixmap(100, 100);
         pixmap.fill(Qt::red);  // Fill it with the red color
@@ -293,7 +290,7 @@ private:
 /**********************************************************************/
 /**********************************************************************/
 
-class ShaderPreviewerWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core {
+class ShaderPreviewerWidget : public QOpenGLWidget {
     Q_OBJECT
 
 public:
@@ -315,16 +312,29 @@ protected:
 
 private:
     std::unique_ptr<QOpenGLShaderProgram> shader_program;
-    GLuint VAO, VBO, EBO;
+    GLuint VAO, VBO;
     QElapsedTimer timer;
 
     std::string code;
-    bool shader_needs_update {false};  // Track if the shader needs recompiling
+    bool shader_needs_update {false};
 
     void init_shaders();
     void init_buffers();
     void update_shader_program();
-    void cleanup_buffers();
+
+    /**
+     * @brief Cleans up the OpenGL resources.
+     * 
+     * @note This function is called automatically when the widget is destroyed.
+     *       It is connected @c QOpenGLContext::aboutToBeDestroyed signal.
+     * 
+     * @note DON'T call this function in the destructor as it is 
+     *       called automatically. If you call it from the destructor,
+     *       it will crash as @c makeCurrent() won't be able to make the
+     *       context current.
+     * 
+     */
+    void cleanup();
 };
 
 /**********************************************************************/
@@ -671,6 +681,9 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
 
   ShaderPreviewerWidget* shader_previewer_widget;
   float spacing_between_current_node_and_shader_previewer = 10.0f;
+
+  const float matching_image_widget_width = 100.0f;
+  const float shader_previewer_widget_height = 100.0f;
 
   QRectF boundingRect() const override;
   void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
