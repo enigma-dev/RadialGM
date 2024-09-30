@@ -998,26 +998,6 @@ class VisualShaderNodeUIntOpEmbedWidget : public QComboBox {
 };
 
 /*************************************/
-/* Vector Op Node                    */
-/*************************************/
-
-class VisualShaderNodeVectorOpEmbedWidget : public QComboBox {
-  Q_OBJECT
-
- public:
-  VisualShaderNodeVectorOpEmbedWidget(const std::shared_ptr<VisualShaderNodeVectorOp>& node);
-  ~VisualShaderNodeVectorOpEmbedWidget();
-
-  void set_current_index(const int& index) { this->setCurrentIndex(index); }
-
- private Q_SLOTS:
-  void on_current_index_changed(const int& index);
-
- private:
-  std::shared_ptr<VisualShaderNodeVectorOp> node;
-};
-
-/*************************************/
 /* Float Funcs Node                  */
 /*************************************/
 
@@ -1075,6 +1055,46 @@ class VisualShaderNodeUIntFuncEmbedWidget : public QComboBox {
 
  private:
   std::shared_ptr<VisualShaderNodeUIntFunc> node;
+};
+
+/*************************************/
+/* Vector Base                       */
+/*************************************/
+
+class VisualShaderNodeVectorBaseEmbedWidget : public QComboBox {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeVectorBaseEmbedWidget(const std::shared_ptr<VisualShaderNodeVectorBase>& node);
+  ~VisualShaderNodeVectorBaseEmbedWidget();
+
+  void set_current_index(const int& index) { this->setCurrentIndex(index); }
+
+ private Q_SLOTS:
+  void on_current_index_changed(const int& index);
+
+ private:
+  std::shared_ptr<VisualShaderNodeVectorBase> node;
+};
+
+/*************************************/
+/* Vector Op Node                    */
+/*************************************/
+
+class VisualShaderNodeVectorOpEmbedWidget : public QComboBox {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeVectorOpEmbedWidget(const std::shared_ptr<VisualShaderNodeVectorOp>& node);
+  ~VisualShaderNodeVectorOpEmbedWidget();
+
+  void set_current_index(const int& index) { this->setCurrentIndex(index); }
+
+ private Q_SLOTS:
+  void on_current_index_changed(const int& index);
+
+ private:
+  std::shared_ptr<VisualShaderNodeVectorOp> node;
 };
 
 /*************************************/
