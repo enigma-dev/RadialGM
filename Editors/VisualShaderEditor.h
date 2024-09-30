@@ -715,11 +715,11 @@ class VisualShaderInputPortGraphicsObject : public QGraphicsObject {
    *       @c VisualShaderGraphicsScene::on_port_* slots.
    * 
    * @param port 
-   * @param pos 
+   * @param coordinate 
    */
-  void port_pressed(VisualShaderInputPortGraphicsObject* port, const QPointF& pos);
-  void port_dragged(VisualShaderInputPortGraphicsObject* port, const QPointF& pos);
-  void port_dropped(VisualShaderInputPortGraphicsObject* port, const QPointF& pos);
+  void port_pressed(VisualShaderInputPortGraphicsObject* port, const QPointF& coordinate);
+  void port_dragged(VisualShaderInputPortGraphicsObject* port, const QPointF& coordinate);
+  void port_dropped(VisualShaderInputPortGraphicsObject* port, const QPointF& coordinate);
 
  private:
   int n_id;
@@ -756,10 +756,14 @@ class VisualShaderOutputPortGraphicsObject : public QGraphicsObject {
   int get_node_id() const { return n_id; }
   int get_port_index() const { return p_index; }
 
-  VisualShaderConnectionGraphicsObject* get_connection_graphics_object() const { return connection_graphics_object; }
-  void connect(VisualShaderConnectionGraphicsObject* c_o) const { this->connection_graphics_object = c_o; }
-  void detach_connection() const { this->connection_graphics_object = nullptr; }
-  bool is_connected() const { return connection_graphics_object != nullptr; }
+  std::vector<VisualShaderConnectionGraphicsObject*> get_connection_graphics_objects() const { return connection_graphics_objects; }
+  VisualShaderConnectionGraphicsObject* get_connection_graphics_object(const int& to_node_id, const int& to_port_index) const;
+  void connect(VisualShaderConnectionGraphicsObject* c_o) { this->connection_graphics_objects.emplace_back(c_o); }
+  void detach_connection(VisualShaderConnectionGraphicsObject* c_o) {
+    connection_graphics_objects.erase(std::remove(connection_graphics_objects.begin(), connection_graphics_objects.end(), c_o),
+                                      connection_graphics_objects.end());
+  }
+  bool is_connected() const { return connection_graphics_objects.size() > 0; }
 
  Q_SIGNALS:
   /**
@@ -769,18 +773,19 @@ class VisualShaderOutputPortGraphicsObject : public QGraphicsObject {
    *       @c VisualShaderGraphicsScene::on_port_* slots.
    * 
    * @param port 
-   * @param pos 
+   * @param coordinate 
    */
-  void port_pressed(VisualShaderOutputPortGraphicsObject* port, const QPointF& pos);
-  void port_dragged(VisualShaderOutputPortGraphicsObject* port, const QPointF& pos);
-  void port_dropped(VisualShaderOutputPortGraphicsObject* port, const QPointF& pos);
+  void port_pressed(VisualShaderOutputPortGraphicsObject* port, const QPointF& coordinate);
+  void port_dragged(VisualShaderOutputPortGraphicsObject* port, const QPointF& coordinate);
+  void port_dropped(VisualShaderOutputPortGraphicsObject* port, const QPointF& coordinate);
 
  private:
   int n_id;
   int p_index;
   QRectF rect;
 
-  mutable VisualShaderConnectionGraphicsObject* connection_graphics_object;
+  // An output port can have multiple connections.
+  std::vector<VisualShaderConnectionGraphicsObject*> connection_graphics_objects;
 
   float padding = 0.5f;
 

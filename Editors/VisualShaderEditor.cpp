@@ -731,7 +731,10 @@ void ShaderPreviewerWidget::paintGL() {
     update_shader_program();
   }
 
-  if (!shader_program) return;
+  if (!shader_program || !shader_program->isLinked()) {
+      qWarning() << "Shader program is not linked.";
+      return;
+  }
 
   float time_value {timer.elapsed() * 0.001f};
 
@@ -774,11 +777,11 @@ void ShaderPreviewerWidget::init_buffers() {
   }
 
   float vertices[] = {
-    // positions    // texCoords
-    -1.0f,  1.0f,   0.0f, 1.0f,
-    -1.0f, -1.0f,   0.0f, 0.0f,
-     1.0f,  1.0f,   1.0f, 1.0f,
-     1.0f, -1.0f,   1.0f, 0.0f
+    // coordinates    // texCoords
+    -1.0f,  1.0f,     0.0f, 1.0f,
+    -1.0f, -1.0f,     0.0f, 0.0f,
+     1.0f,  1.0f,     1.0f, 1.0f,
+     1.0f, -1.0f,     1.0f, 0.0f
   };
 
   f->glGenVertexArrays(1, &VAO);
@@ -1066,18 +1069,19 @@ bool VisualShaderGraphicsScene::delete_node(const int& n_id) {
       continue;
     }
 
-    // Get the input port of the connection
-    VisualShaderConnectionGraphicsObject* c_o{o_port->get_connection_graphics_object()};
+    std::vector<VisualShaderConnectionGraphicsObject*> c_os{o_port->get_connection_graphics_objects()};
 
-    if (!c_o) {
-      continue;
-    }
+    for (VisualShaderConnectionGraphicsObject* c_o : c_os) {
+      if (!c_o) {
+        continue;
+      }
 
-    bool result{this->delete_connection(n_id, i, c_o->get_to_node_id(), c_o->get_to_port_index())};
+      bool result{this->delete_connection(n_id, i, c_o->get_to_node_id(), c_o->get_to_port_index())};
 
-    if (!result) {
-      std::cout << "Failed to delete connection" << std::endl;
-      continue;
+      if (!result) {
+        std::cout << "Failed to delete connection" << std::endl;
+        continue;
+      }
     }
   }
 
@@ -1212,7 +1216,7 @@ bool VisualShaderGraphicsScene::delete_connection(const int& from_node_id, const
   }
 
   if (this->temporary_connection_graphics_object) {
-    from_o_port->detach_connection();
+    from_o_port->detach_connection(this->temporary_connection_graphics_object);
     removeItem(this->temporary_connection_graphics_object);
     delete this->temporary_connection_graphics_object;
     this->temporary_connection_graphics_object = nullptr;
@@ -1221,7 +1225,7 @@ bool VisualShaderGraphicsScene::delete_connection(const int& from_node_id, const
   
   // If we have a complete connection, then we can disconnect the nodes
   if (to_node_id != (int)VisualShader::NODE_ID_INVALID && to_port_index != (int)VisualShader::PORT_INDEX_INVALID) {
-    VisualShaderConnectionGraphicsObject* c_o{from_o_port->get_connection_graphics_object()};
+    VisualShaderConnectionGraphicsObject* c_o{from_o_port->get_connection_graphics_object(to_node_id, to_port_index)};
 
     if (!c_o) {
       return false;
@@ -1246,7 +1250,7 @@ bool VisualShaderGraphicsScene::delete_connection(const int& from_node_id, const
     }
 
     to_i_port->detach_connection();
-    from_o_port->detach_connection();
+    from_o_port->detach_connection(c_o);
     removeItem(c_o);
     delete c_o;
 
@@ -1305,13 +1309,15 @@ void VisualShaderGraphicsScene::on_node_moved(const int& n_id, const QPointF& ne
       continue;
     }
 
-    VisualShaderConnectionGraphicsObject* c_o{o_port->get_connection_graphics_object()};
+    std::vector<VisualShaderConnectionGraphicsObject*> c_os{o_port->get_connection_graphics_objects()};
 
-    if (!c_o) {
-      continue;
+    for (VisualShaderConnectionGraphicsObject* c_o : c_os) {
+      if (!c_o) {
+        continue;
+      }
+
+      c_o->set_start_coordinate(o_port->get_global_coordinate());
     }
-
-    c_o->set_start_coordinate(o_port->get_global_coordinate());
   }
 }
 
@@ -1362,41 +1368,15 @@ void VisualShaderGraphicsScene::on_port_dragged(QGraphicsObject* port, const QPo
     return;
   }
 
-  if (!o_port->is_connected() && !temporary_connection_graphics_object) {
+  if (o_port->is_connected() && temporary_connection_graphics_object) {
+    c_o = temporary_connection_graphics_object;
+  } else if (!temporary_connection_graphics_object) {
     bool result{this->add_connection(o_port->get_node_id(), o_port->get_port_index())};
     if (!result) {
       std::cout << "Failed to add connection" << std::endl;
       return;
     }
     c_o = temporary_connection_graphics_object;
-  } else if (o_port->is_connected() && temporary_connection_graphics_object) {
-    c_o = temporary_connection_graphics_object;
-  } else if (o_port->is_connected() && !temporary_connection_graphics_object) {
-    c_o = o_port->get_connection_graphics_object();
-    temporary_connection_graphics_object = c_o;  // Store the connection object for access in the next drag call
-
-    // Detach the connection from the input port
-    VisualShaderNodeGraphicsObject* n_o{this->get_node_graphics_object(c_o->get_to_node_id())};
-    if (!n_o) {
-      return;
-    }
-    VisualShaderInputPortGraphicsObject* i_port{n_o->get_input_port_graphics_object(c_o->get_to_port_index())};
-    if (!i_port) {
-      return;
-    }
-    bool result{vs->disconnect_nodes(c_o->get_from_node_id(), c_o->get_from_port_index(), c_o->get_to_node_id(),
-                                     c_o->get_to_port_index())};
-    if (!result) {
-      std::cout << "Failed to disconnect nodes" << std::endl;
-    }
-    i_port->detach_connection();
-    c_o->detach_end();
-
-    on_update_shader_previewer_widgets_requested();
-
-    // Here we must request a repaint as this connection will be drawn some where else.
-    // I know this doesn't make any sense, just comment it and try to dray an output port that is already connected.
-    update(); // Request a repaint
   } else {
     return;
   }
@@ -2164,7 +2144,7 @@ void VisualShaderNodeGraphicsObject::paint(QPainter* painter, const QStyleOption
   }
 
   {
-    // Correct the position of the embed widget
+    // Correct the coordinate of the embed widget
     if (embed_widget) {
       float embed_widget_x{rect_x + rect_w * 0.5f - embed_widget->width() * 0.5f};
       float embed_widget_y{rect_y + caption_rect_height + body_rect_header_height + embed_widget_v_padding};
@@ -2239,7 +2219,7 @@ void VisualShaderInputPortGraphicsObject::mouseReleaseEvent(QGraphicsSceneMouseE
 
 VisualShaderOutputPortGraphicsObject::VisualShaderOutputPortGraphicsObject(const QRectF& rect, const int& n_id,
                                                                            const int& p_index, QGraphicsItem* parent)
-    : QGraphicsObject(parent), rect(rect), n_id(n_id), p_index(p_index), connection_graphics_object(nullptr) {
+    : QGraphicsObject(parent), rect(rect), n_id(n_id), p_index(p_index) {
   setFlag(QGraphicsItem::ItemDoesntPropagateOpacityToChildren, true);
   setFlag(QGraphicsItem::ItemIsFocusable, true);
   setFlag(QGraphicsItem::ItemIsSelectable, true);
@@ -2255,6 +2235,15 @@ VisualShaderOutputPortGraphicsObject::VisualShaderOutputPortGraphicsObject(const
 }
 
 VisualShaderOutputPortGraphicsObject::~VisualShaderOutputPortGraphicsObject() {}
+
+VisualShaderConnectionGraphicsObject* VisualShaderOutputPortGraphicsObject::get_connection_graphics_object(const int& to_node_id, const int& to_port_index) const { 
+  for (auto c_g_o : connection_graphics_objects) {
+    if (c_g_o->get_to_node_id() == to_node_id && c_g_o->get_to_port_index() == to_port_index) {
+      return c_g_o;
+    }
+  }
+  return nullptr;
+}
 
 QRectF VisualShaderOutputPortGraphicsObject::boundingRect() const {
   QRectF t_rect{rect};
