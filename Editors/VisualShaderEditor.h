@@ -52,6 +52,8 @@
 #include <QOpenGLFunctions_4_3_Core> // https://stackoverflow.com/a/64288966/14629018 explains why we need this.
 #include <QOpenGLShaderProgram>
 #include <QElapsedTimer>
+#include <QColorDialog>
+#include <QCheckBox>
 
 #include <string>
 #include <vector>
@@ -1088,6 +1090,186 @@ class VisualShaderNodeVectorFuncEmbedWidget : public QComboBox {
 
  private:
   std::shared_ptr<VisualShaderNodeVectorFunc> node;
+};
+
+/*************************************/
+/* Color Constant Node               */
+/*************************************/
+
+class VisualShaderNodeColorConstantEmbedWidget : public QPushButton {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeColorConstantEmbedWidget(const std::shared_ptr<VisualShaderNodeColorConstant>& node);
+  ~VisualShaderNodeColorConstantEmbedWidget();
+
+ Q_SIGNALS:
+  void color_changed();
+
+ private Q_SLOTS:
+  void on_pressed();
+
+ private:
+  std::shared_ptr<VisualShaderNodeColorConstant> node;
+};
+
+/*************************************/
+/* Boolean Constant Node             */
+/*************************************/
+
+class VisualShaderNodeBooleanConstantEmbedWidget : public QCheckBox {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeBooleanConstantEmbedWidget(const std::shared_ptr<VisualShaderNodeBooleanConstant>& node);
+  ~VisualShaderNodeBooleanConstantEmbedWidget();
+
+ private Q_SLOTS:
+  void on_state_changed(const int& state);
+
+ private:
+  std::shared_ptr<VisualShaderNodeBooleanConstant> node;
+};
+
+/*************************************/
+/* Float Constant                    */
+/*************************************/
+
+class VisualShaderNodeFloatConstantEmbedWidget : public QLineEdit {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeFloatConstantEmbedWidget(const std::shared_ptr<VisualShaderNodeFloatConstant>& node);
+  ~VisualShaderNodeFloatConstantEmbedWidget();
+
+ private Q_SLOTS:
+  void on_text_changed(const QString& text);
+
+ private:
+  std::shared_ptr<VisualShaderNodeFloatConstant> node;
+};
+
+/*************************************/
+/* Int Constant                      */
+/*************************************/
+
+class VisualShaderNodeIntConstantEmbedWidget : public QLineEdit {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeIntConstantEmbedWidget(const std::shared_ptr<VisualShaderNodeIntConstant>& node);
+  ~VisualShaderNodeIntConstantEmbedWidget();
+
+ private Q_SLOTS:
+  void on_text_changed(const QString& text);
+
+ private:
+  std::shared_ptr<VisualShaderNodeIntConstant> node;
+};
+
+/*************************************/
+/* UInt Constant                     */
+/*************************************/
+
+class VisualShaderNodeUIntConstantEmbedWidget : public QLineEdit {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeUIntConstantEmbedWidget(const std::shared_ptr<VisualShaderNodeUIntConstant>& node);
+  ~VisualShaderNodeUIntConstantEmbedWidget();
+
+ private Q_SLOTS:
+  void on_text_changed(const QString& text);
+
+ private:
+  std::shared_ptr<VisualShaderNodeUIntConstant> node;
+};
+
+/*************************************/
+/* Vec2 Constant Node                */
+/*************************************/
+
+class VisualShaderNodeVec2ConstantEmbedWidget : public QVBoxLayout {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeVec2ConstantEmbedWidget(const std::shared_ptr<VisualShaderNodeVec2Constant>& node);
+  ~VisualShaderNodeVec2ConstantEmbedWidget();
+
+  QLineEdit* get_x_edit_widget() const { return x_edit_widget; }
+  QLineEdit* get_y_edit_widget() const { return y_edit_widget; }
+
+ private Q_SLOTS:
+
+  void on_x_text_changed(const QString& text);
+  void on_y_text_changed(const QString& text);
+
+ private:
+  std::shared_ptr<VisualShaderNodeVec2Constant> node;
+
+  QLineEdit* x_edit_widget;
+  QLineEdit* y_edit_widget;
+};
+
+/*************************************/
+/* Vec3 Constant Node                */
+/*************************************/
+
+class VisualShaderNodeVec3ConstantEmbedWidget : public QVBoxLayout {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeVec3ConstantEmbedWidget(const std::shared_ptr<VisualShaderNodeVec3Constant>& node);
+  ~VisualShaderNodeVec3ConstantEmbedWidget();
+
+  QLineEdit* get_x_edit_widget() const { return x_edit_widget; }
+  QLineEdit* get_y_edit_widget() const { return y_edit_widget; }
+  QLineEdit* get_z_edit_widget() const { return z_edit_widget; }
+
+ private Q_SLOTS:
+
+  void on_x_text_changed(const QString& text);
+  void on_y_text_changed(const QString& text);
+  void on_z_text_changed(const QString& text);
+
+ private:
+  std::shared_ptr<VisualShaderNodeVec3Constant> node;
+
+  QLineEdit* x_edit_widget;
+  QLineEdit* y_edit_widget;
+  QLineEdit* z_edit_widget;
+};
+
+/*************************************/
+/* Vec4 Constant Node                */
+/*************************************/
+
+class VisualShaderNodeVec4ConstantEmbedWidget : public QVBoxLayout {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeVec4ConstantEmbedWidget(const std::shared_ptr<VisualShaderNodeVec4Constant>& node);
+  ~VisualShaderNodeVec4ConstantEmbedWidget();
+
+  QLineEdit* get_x_edit_widget() const { return x_edit_widget; }
+  QLineEdit* get_y_edit_widget() const { return y_edit_widget; }
+  QLineEdit* get_z_edit_widget() const { return z_edit_widget; }
+  QLineEdit* get_w_edit_widget() const { return w_edit_widget; }
+
+ private Q_SLOTS:
+
+  void on_x_text_changed(const QString& text);
+  void on_y_text_changed(const QString& text);
+  void on_z_text_changed(const QString& text);
+  void on_w_text_changed(const QString& text);
+
+ private:
+  std::shared_ptr<VisualShaderNodeVec4Constant> node;
+
+  QLineEdit* x_edit_widget;
+  QLineEdit* y_edit_widget;
+  QLineEdit* z_edit_widget;
+  QLineEdit* w_edit_widget;
 };
 
 /*************************************/

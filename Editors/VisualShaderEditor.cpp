@@ -2659,6 +2659,86 @@ VisualShaderNodeEmbedWidget::VisualShaderNodeEmbedWidget(const std::shared_ptr<V
                       &QLineEdit::textChanged,
                       this,
                       &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
+  } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeColorConstant>(node)}) {
+    VisualShaderNodeColorConstantEmbedWidget* embed_widget = new VisualShaderNodeColorConstantEmbedWidget(p);
+    layout->addWidget(embed_widget);
+    QObject::connect(embed_widget, 
+                     &VisualShaderNodeColorConstantEmbedWidget::color_changed,
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
+  } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeBooleanConstant>(node)}) {
+    VisualShaderNodeBooleanConstantEmbedWidget* embed_widget = new VisualShaderNodeBooleanConstantEmbedWidget(p);
+    layout->addWidget(embed_widget);
+    QObject::connect(embed_widget, 
+                     &QCheckBox::stateChanged, 
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
+  } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeFloatConstant>(node)}) {
+    VisualShaderNodeFloatConstantEmbedWidget* embed_widget = new VisualShaderNodeFloatConstantEmbedWidget(p);
+    layout->addWidget(embed_widget);
+    QObject::connect(embed_widget, 
+                     &QLineEdit::textChanged, 
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
+  } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeIntConstant>(node)}) {
+    VisualShaderNodeIntConstantEmbedWidget* embed_widget = new VisualShaderNodeIntConstantEmbedWidget(p);
+    layout->addWidget(embed_widget);
+    QObject::connect(embed_widget, 
+                     &QLineEdit::textChanged, 
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
+  } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeUIntConstant>(node)}) {
+    VisualShaderNodeUIntConstantEmbedWidget* embed_widget = new VisualShaderNodeUIntConstantEmbedWidget(p);
+    layout->addWidget(embed_widget);
+    QObject::connect(embed_widget, 
+                     &QLineEdit::textChanged, 
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
+  } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeVec2Constant>(node)}) {
+    VisualShaderNodeVec2ConstantEmbedWidget* embed_widget = new VisualShaderNodeVec2ConstantEmbedWidget(p);
+    layout->addLayout(embed_widget);
+    QObject::connect(embed_widget->get_x_edit_widget(), 
+                     &QLineEdit::textChanged, 
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
+    QObject::connect(embed_widget->get_y_edit_widget(),
+                      &QLineEdit::textChanged,
+                      this,
+                      &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
+  } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeVec3Constant>(node)}) {
+    VisualShaderNodeVec3ConstantEmbedWidget* embed_widget = new VisualShaderNodeVec3ConstantEmbedWidget(p);
+    layout->addLayout(embed_widget);
+    QObject::connect(embed_widget->get_x_edit_widget(), 
+                     &QLineEdit::textChanged, 
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
+    QObject::connect(embed_widget->get_y_edit_widget(),
+                      &QLineEdit::textChanged,
+                      this,
+                      &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
+    QObject::connect(embed_widget->get_z_edit_widget(),
+                      &QLineEdit::textChanged,
+                      this,
+                      &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
+  } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeVec4Constant>(node)}) {
+    VisualShaderNodeVec4ConstantEmbedWidget* embed_widget = new VisualShaderNodeVec4ConstantEmbedWidget(p);
+    layout->addLayout(embed_widget);
+    QObject::connect(embed_widget->get_x_edit_widget(), 
+                     &QLineEdit::textChanged, 
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
+    QObject::connect(embed_widget->get_y_edit_widget(),
+                      &QLineEdit::textChanged,
+                      this,
+                      &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
+    QObject::connect(embed_widget->get_z_edit_widget(),
+                      &QLineEdit::textChanged,
+                      this,
+                      &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
+    QObject::connect(embed_widget->get_w_edit_widget(),
+                      &QLineEdit::textChanged,
+                      this,
+                      &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
   }
 
   // Create the button that will show/hide the shader previewer
@@ -3003,6 +3083,420 @@ void VisualShaderNodeVectorFuncEmbedWidget::on_current_index_changed(const int& 
 }
 
 /*************************************/
+/* Color Constant Node               */
+/*************************************/
+
+VisualShaderNodeColorConstantEmbedWidget::VisualShaderNodeColorConstantEmbedWidget(const std::shared_ptr<VisualShaderNodeColorConstant>& node) : QPushButton(), 
+                                                                                                                                         node(node) {
+  setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+
+  QObject::connect(this, 
+                   &QPushButton::pressed,
+                   this,
+                   &VisualShaderNodeColorConstantEmbedWidget::on_pressed);
+}
+
+VisualShaderNodeColorConstantEmbedWidget::~VisualShaderNodeColorConstantEmbedWidget() {}
+
+void VisualShaderNodeColorConstantEmbedWidget::on_pressed() {
+  TColor c{node->get_constant()};
+  QColor color {QColorDialog::getColor(QColor(c.r, c.g, c.b, c.a), this, "Select Color")};
+        
+  // If a valid color is picked, update the button and store the color
+  if (color.isValid()) {
+      node->set_constant({(float)color.red(), (float)color.green(), (float)color.blue(), (float)color.alpha()});
+      QPalette palette {this->palette()};
+      palette.setColor(QPalette::Button, color);
+      this->setPalette(palette);
+      this->update();
+      Q_EMIT color_changed();
+  } else {
+      // If the user cancels the color dialog, reset the button to the previous color
+      QColor previous_color {QColor(c.r, c.g, c.b, c.a)};
+      QPalette palette {this->palette()};
+      palette.setColor(QPalette::Button, previous_color);
+      this->setPalette(palette);
+      this->update();
+  }
+}
+
+/*************************************/
+/* Boolean Constant Node             */
+/*************************************/
+
+VisualShaderNodeBooleanConstantEmbedWidget::VisualShaderNodeBooleanConstantEmbedWidget(const std::shared_ptr<VisualShaderNodeBooleanConstant>& node) : QCheckBox(), 
+                                                                                                                                         node(node) {
+  setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+
+  QObject::connect(this, 
+                   &QCheckBox::stateChanged,
+                   this,
+                   &VisualShaderNodeBooleanConstantEmbedWidget::on_state_changed);
+}
+
+VisualShaderNodeBooleanConstantEmbedWidget::~VisualShaderNodeBooleanConstantEmbedWidget() {}
+
+void VisualShaderNodeBooleanConstantEmbedWidget::on_state_changed(const int& state) {
+  node->set_constant(state == Qt::Checked);
+}
+
+/*************************************/
+/* Float Constant                    */
+/*************************************/
+
+VisualShaderNodeFloatConstantEmbedWidget::VisualShaderNodeFloatConstantEmbedWidget(const std::shared_ptr<VisualShaderNodeFloatConstant>& node) : QLineEdit(), 
+                                                                                                                                         node(node) {
+  setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+
+  setPlaceholderText("Value");
+
+  QObject::connect(this, 
+                   &QLineEdit::textChanged,
+                   this,
+                   &VisualShaderNodeFloatConstantEmbedWidget::on_text_changed);
+}
+
+VisualShaderNodeFloatConstantEmbedWidget::~VisualShaderNodeFloatConstantEmbedWidget() {}
+
+void VisualShaderNodeFloatConstantEmbedWidget::on_text_changed(const QString& text) {
+  if (text.isEmpty()) {
+    node->set_constant(0.0f);
+  } else {
+    bool ok;
+    text.toFloat(&ok);
+    if (ok) {
+      node->set_constant(text.toFloat());
+    } else {
+      node->set_constant(0.0f);
+      setText("");
+    }
+  }
+}
+
+/*************************************/
+/* Int Constant                      */
+/*************************************/
+
+VisualShaderNodeIntConstantEmbedWidget::VisualShaderNodeIntConstantEmbedWidget(const std::shared_ptr<VisualShaderNodeIntConstant>& node) : QLineEdit(), 
+                                                                                                                                         node(node) {
+  setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+
+  setPlaceholderText("Value");
+
+  QObject::connect(this, 
+                   &QLineEdit::textChanged,
+                   this,
+                   &VisualShaderNodeIntConstantEmbedWidget::on_text_changed);
+}
+
+VisualShaderNodeIntConstantEmbedWidget::~VisualShaderNodeIntConstantEmbedWidget() {}
+
+void VisualShaderNodeIntConstantEmbedWidget::on_text_changed(const QString& text) {
+  if (text.isEmpty()) {
+    node->set_constant(0);
+  } else {
+    bool ok;
+    text.toInt(&ok);
+    if (ok) {
+      node->set_constant(text.toInt());
+    } else {
+      node->set_constant(0);
+      setText("");
+    }
+  }
+}
+
+/*************************************/
+/* UInt Constant                     */
+/*************************************/
+
+VisualShaderNodeUIntConstantEmbedWidget::VisualShaderNodeUIntConstantEmbedWidget(const std::shared_ptr<VisualShaderNodeUIntConstant>& node) : QLineEdit(), 
+                                                                                                                                         node(node) {
+  setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+
+  setPlaceholderText("Value");
+
+  QObject::connect(this, 
+                   &QLineEdit::textChanged,
+                   this,
+                   &VisualShaderNodeUIntConstantEmbedWidget::on_text_changed);
+}
+
+VisualShaderNodeUIntConstantEmbedWidget::~VisualShaderNodeUIntConstantEmbedWidget() {}
+
+void VisualShaderNodeUIntConstantEmbedWidget::on_text_changed(const QString& text) {
+  if (text.isEmpty()) {
+    node->set_constant(0);
+  } else {
+    bool ok;
+    text.toUInt(&ok);
+    if (ok) {
+      node->set_constant(text.toUInt());
+    } else {
+      node->set_constant(0);
+      setText("");
+    }
+  }
+}
+
+/*************************************/
+/* Vec2 Constant Node                */
+/*************************************/
+
+VisualShaderNodeVec2ConstantEmbedWidget::VisualShaderNodeVec2ConstantEmbedWidget(const std::shared_ptr<VisualShaderNodeVec2Constant>& node) : QVBoxLayout(), 
+                                                                                                                                       node(node) {
+  setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+  setSizeConstraint(QLayout::SetNoConstraint);
+  setSpacing(2);
+  setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+
+  x_edit_widget = new QLineEdit();
+  y_edit_widget = new QLineEdit();
+
+  x_edit_widget->setPlaceholderText("X");
+  y_edit_widget->setPlaceholderText("Y");
+
+  QObject::connect(x_edit_widget, 
+                   &QLineEdit::textChanged, 
+                   this,
+                   &VisualShaderNodeVec2ConstantEmbedWidget::on_x_text_changed);
+  QObject::connect(y_edit_widget, 
+                   &QLineEdit::textChanged, 
+                   this,
+                   &VisualShaderNodeVec2ConstantEmbedWidget::on_y_text_changed);
+
+  addWidget(x_edit_widget);
+  addWidget(y_edit_widget);
+}
+
+VisualShaderNodeVec2ConstantEmbedWidget::~VisualShaderNodeVec2ConstantEmbedWidget() {}  
+
+void VisualShaderNodeVec2ConstantEmbedWidget::on_x_text_changed(const QString& text) {
+  if (text.isEmpty()) {
+    node->set_constant({0.0f, node->get_constant().y});
+  } else {
+    bool ok;
+    text.toFloat(&ok);
+    if (ok) {
+      node->set_constant({text.toFloat(), node->get_constant().y});
+    } else {
+      node->set_constant({0.0f, node->get_constant().y});
+      x_edit_widget->setText("");
+    }
+  }
+}
+
+void VisualShaderNodeVec2ConstantEmbedWidget::on_y_text_changed(const QString& text) {
+  if (text.isEmpty()) {
+    node->set_constant({node->get_constant().x, 0.0f});
+  } else {
+    bool ok;
+    text.toFloat(&ok);
+    if (ok) {
+      node->set_constant({node->get_constant().x, text.toFloat()});
+    } else {
+      node->set_constant({node->get_constant().x, 0.0f});
+      y_edit_widget->setText("");
+    }
+  }
+}
+
+/*************************************/
+/* Vec3 Constant Node                */
+/*************************************/
+
+VisualShaderNodeVec3ConstantEmbedWidget::VisualShaderNodeVec3ConstantEmbedWidget(const std::shared_ptr<VisualShaderNodeVec3Constant>& node) : QVBoxLayout(), 
+                                                                                                                                       node(node) {
+  setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+  setSizeConstraint(QLayout::SetNoConstraint);
+  setSpacing(2);
+  setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+
+  x_edit_widget = new QLineEdit();
+  y_edit_widget = new QLineEdit();
+  z_edit_widget = new QLineEdit();
+
+  x_edit_widget->setPlaceholderText("X");
+  y_edit_widget->setPlaceholderText("Y");
+  z_edit_widget->setPlaceholderText("Z");
+
+  QObject::connect(x_edit_widget, 
+                   &QLineEdit::textChanged, 
+                   this,
+                   &VisualShaderNodeVec3ConstantEmbedWidget::on_x_text_changed);
+  QObject::connect(y_edit_widget, 
+                   &QLineEdit::textChanged, 
+                   this,
+                   &VisualShaderNodeVec3ConstantEmbedWidget::on_y_text_changed);
+  QObject::connect(z_edit_widget, 
+                   &QLineEdit::textChanged, 
+                   this,
+                   &VisualShaderNodeVec3ConstantEmbedWidget::on_z_text_changed);
+
+  addWidget(x_edit_widget);
+  addWidget(y_edit_widget);
+  addWidget(z_edit_widget);
+}
+
+VisualShaderNodeVec3ConstantEmbedWidget::~VisualShaderNodeVec3ConstantEmbedWidget() {}
+
+void VisualShaderNodeVec3ConstantEmbedWidget::on_x_text_changed(const QString& text) {
+  if (text.isEmpty()) {
+    node->set_constant({0.0f, node->get_constant().y, node->get_constant().z});
+  } else {
+    bool ok;
+    text.toFloat(&ok);
+    if (ok) {
+      node->set_constant({text.toFloat(), node->get_constant().y, node->get_constant().z});
+    } else {
+      node->set_constant({0.0f, node->get_constant().y, node->get_constant().z});
+      x_edit_widget->setText("");
+    }
+  }
+}
+
+void VisualShaderNodeVec3ConstantEmbedWidget::on_y_text_changed(const QString& text) {
+  if (text.isEmpty()) {
+    node->set_constant({node->get_constant().x, 0.0f, node->get_constant().z});
+  } else {
+    bool ok;
+    text.toFloat(&ok);
+    if (ok) {
+      node->set_constant({node->get_constant().x, text.toFloat(), node->get_constant().z});
+    } else {
+      node->set_constant({node->get_constant().x, 0.0f, node->get_constant().z});
+      y_edit_widget->setText("");
+    }
+  }
+}
+
+void VisualShaderNodeVec3ConstantEmbedWidget::on_z_text_changed(const QString& text) {
+  if (text.isEmpty()) {
+    node->set_constant({node->get_constant().x, node->get_constant().y, 0.0f});
+  } else {
+    bool ok;
+    text.toFloat(&ok);
+    if (ok) {
+      node->set_constant({node->get_constant().x, node->get_constant().y, text.toFloat()});
+    } else {
+      node->set_constant({node->get_constant().x, node->get_constant().y, 0.0f});
+      z_edit_widget->setText("");
+    }
+  }
+}
+
+/*************************************/
+/* Vec4 Constant Node                */
+/*************************************/
+
+VisualShaderNodeVec4ConstantEmbedWidget::VisualShaderNodeVec4ConstantEmbedWidget(const std::shared_ptr<VisualShaderNodeVec4Constant>& node) : QVBoxLayout(), 
+                                                                                                                                       node(node) {
+  setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+  setSizeConstraint(QLayout::SetNoConstraint);
+  setSpacing(2);
+  setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+
+  x_edit_widget = new QLineEdit();
+  y_edit_widget = new QLineEdit();
+  z_edit_widget = new QLineEdit();
+  w_edit_widget = new QLineEdit();
+
+  x_edit_widget->setPlaceholderText("X");
+  y_edit_widget->setPlaceholderText("Y");
+  z_edit_widget->setPlaceholderText("Z");
+  w_edit_widget->setPlaceholderText("W");
+
+  QObject::connect(x_edit_widget, 
+                   &QLineEdit::textChanged, 
+                   this,
+                   &VisualShaderNodeVec4ConstantEmbedWidget::on_x_text_changed);
+  QObject::connect(y_edit_widget, 
+                   &QLineEdit::textChanged, 
+                   this,
+                   &VisualShaderNodeVec4ConstantEmbedWidget::on_y_text_changed);
+  QObject::connect(z_edit_widget, 
+                   &QLineEdit::textChanged, 
+                   this,
+                   &VisualShaderNodeVec4ConstantEmbedWidget::on_z_text_changed);
+  QObject::connect(w_edit_widget, 
+                   &QLineEdit::textChanged, 
+                   this,
+                   &VisualShaderNodeVec4ConstantEmbedWidget::on_w_text_changed);
+
+  addWidget(x_edit_widget);
+  addWidget(y_edit_widget);
+  addWidget(z_edit_widget);
+  addWidget(w_edit_widget);
+}
+
+VisualShaderNodeVec4ConstantEmbedWidget::~VisualShaderNodeVec4ConstantEmbedWidget() {}
+
+void VisualShaderNodeVec4ConstantEmbedWidget::on_x_text_changed(const QString& text) {
+  if (text.isEmpty()) {
+    node->set_constant({0.0f, node->get_constant().y, node->get_constant().z, node->get_constant().w});
+  } else {
+    bool ok;
+    text.toFloat(&ok);
+    if (ok) {
+      node->set_constant({text.toFloat(), node->get_constant().y, node->get_constant().z, node->get_constant().w});
+    } else {
+      node->set_constant({0.0f, node->get_constant().y, node->get_constant().z, node->get_constant().w});
+      x_edit_widget->setText("");
+    }
+  }
+}
+
+void VisualShaderNodeVec4ConstantEmbedWidget::on_y_text_changed(const QString& text) {
+  if (text.isEmpty()) {
+    node->set_constant({node->get_constant().x, 0.0f, node->get_constant().z, node->get_constant().w});
+  } else {
+    bool ok;
+    text.toFloat(&ok);
+    if (ok) {
+      node->set_constant({node->get_constant().x, text.toFloat(), node->get_constant().z, node->get_constant().w});
+    } else {
+      node->set_constant({node->get_constant().x, 0.0f, node->get_constant().z, node->get_constant().w});
+      y_edit_widget->setText("");
+    }
+  }
+}
+
+void VisualShaderNodeVec4ConstantEmbedWidget::on_z_text_changed(const QString& text) {
+  if (text.isEmpty()) {
+    node->set_constant({node->get_constant().x, node->get_constant().y, 0.0f, node->get_constant().w});
+  } else {
+    bool ok;
+    text.toFloat(&ok);
+    if (ok) {
+      node->set_constant({node->get_constant().x, node->get_constant().y, text.toFloat(), node->get_constant().w});
+    } else {
+      node->set_constant({node->get_constant().x, node->get_constant().y, 0.0f, node->get_constant().w});
+      z_edit_widget->setText("");
+    }
+  }
+}
+
+void VisualShaderNodeVec4ConstantEmbedWidget::on_w_text_changed(const QString& text) {
+  if (text.isEmpty()) {
+    node->set_constant({node->get_constant().x, node->get_constant().y, node->get_constant().z, 0.0f});
+  } else {
+    bool ok;
+    text.toFloat(&ok);
+    if (ok) {
+      node->set_constant({node->get_constant().x, node->get_constant().y, node->get_constant().z, text.toFloat()});
+    } else {
+      node->set_constant({node->get_constant().x, node->get_constant().y, node->get_constant().z, 0.0f});
+      w_edit_widget->setText("");
+    }
+  }
+}
+
+/*************************************/
 /* Value Noise Node                  */
 /*************************************/
 
@@ -3026,6 +3520,9 @@ void VisualShaderNodeValueNoiseEmbedWidget::on_text_changed(const QString& text)
     text.toFloat(&ok);
     if (ok) {
       node->set_scale(text.toFloat());
+    } else {
+      node->set_scale(0.0f);
+      setText("");
     }
   }
 }
@@ -3054,6 +3551,9 @@ void VisualShaderNodePerlinNoiseEmbedWidget::on_text_changed(const QString& text
     text.toFloat(&ok);
     if (ok) {
       node->set_scale(text.toFloat());
+    } else {
+      node->set_scale(0.0f);
+      setText("");
     }
   }
 }
@@ -3082,6 +3582,9 @@ void VisualShaderNodeVoronoiNoiseAngleOffsetEmbedWidget::on_text_changed(const Q
     text.toFloat(&ok);
     if (ok) {
       node->set_angle_offset(text.toFloat());
+    } else {
+      node->set_angle_offset(0.0f);
+      setText("");
     }
   }
 }
@@ -3106,6 +3609,9 @@ void VisualShaderNodeVoronoiNoiseCellDensityEmbedWidget::on_text_changed(const Q
     text.toFloat(&ok);
     if (ok) {
       node->set_cell_density(text.toFloat());
+    } else {
+      node->set_cell_density(0.0f);
+      setText("");
     }
   }
 }
