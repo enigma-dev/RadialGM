@@ -817,7 +817,7 @@ void ShaderPreviewerWidget::update_shader_program() {
       }
   )";
 
-  std::string fragment_shader_source = code.empty() ? R"(
+  std::string fragment_shader_source {code.empty() ? R"(
       #version 330 core
       out vec4 FragColor;
       in vec2 TexCoord;
@@ -827,7 +827,7 @@ void ShaderPreviewerWidget::update_shader_program() {
       void main() {
         FragColor = vec4(0.0, 0.0, 0.0, 1.0);
       }
-  )" : "#version 330 core\n\n" + code;
+  )" : "#version 330 core\n\n" + code};
 
   if (!shader_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertex_shader_source)) {
     qWarning() << "Vertex shader compilation failed:" << shader_program->log();
