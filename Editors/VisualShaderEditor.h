@@ -291,6 +291,13 @@ private:
 /**********************************************************************/
 /**********************************************************************/
 
+/**
+ * @brief This class is meant to be a temporary solution to preview the shader
+ *        code. We should preview the shader code using ENIGMA's Graphics System.
+ * 
+ * @todo Replace this class with ENIGMA's Graphics System.
+ * 
+ */
 class ShaderPreviewerWidget : public QOpenGLWidget {
     Q_OBJECT
 
