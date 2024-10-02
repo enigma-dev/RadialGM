@@ -21,6 +21,12 @@ class RoomEditor : public BaseEditor {
 
   void setZoom(qreal zoom);
 
+  void MouseMoved(int x, int y);
+
+  void MousePressed(Qt::MouseButton button);
+
+  void MouseReleased(Qt::MouseButton button);
+
  public slots:
   void RebindSubModels() override;
 

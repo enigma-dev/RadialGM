@@ -1,4 +1,4 @@
-#include "KeybindingPreferences.h"
+#include "KeyBindingPreferences.h"
 
 #include "ui_MainWindow.h"
 #include "ui_SpriteEditor.h"
