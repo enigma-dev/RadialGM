@@ -2,6 +2,3 @@
 	path = Submodules/enigma-dev
 	url = ../enigma-dev.git
 	branch = master
-[submodule "Submodules/nodeeditor"]
-	path = Submodules/nodeeditor
-	url = https://github.com/k0T0z/nodeeditor.git
