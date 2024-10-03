@@ -224,7 +224,7 @@ void VisualShaderEditor::init() {
   menu_bar->addWidget(create_node_button);
   QObject::connect(create_node_button, &QPushButton::pressed, this, &VisualShaderEditor::on_create_node_button_pressed);
 
-  this->connect(this, &VisualShaderEditor::on_create_node_dialog_requested, this,
+  this->connect(this, &VisualShaderEditor::create_node_dialog_requested, this,
                 &VisualShaderEditor::show_create_node_dialog);
 
   // Create the preview shader button.
@@ -411,6 +411,8 @@ const VisualShaderEditor::CreateNodeDialogNodesTreeItem VisualShaderEditor::crea
     {"UIntFunc", "Functions/Scalar", "VisualShaderNodeUIntFunc", "Unsigned integer function."},
     {"VectorFunc", "Functions/Vector", "VisualShaderNodeVectorFunc", "Vector function."},
     {"DerivativeFunc", "Functions/Others", "VisualShaderNodeDerivativeFunc", "Derivative function."},
+	  {"Step", "Functions/Others", "VisualShaderNodeStep", "Step function( scalar(edge), scalar(x) ).\n\nReturns 0.0 if 'x' is smaller than 'edge' and otherwise 1.0."},
+    {"SmoothStep", "Functions/Others", "VisualShaderNodeSmoothStep", "SmoothStep function( scalar(edge0), scalar(edge1), scalar(x) ).\n\nReturns 0.0 if 'x' is smaller than 'edge0' and 1.0 if x is larger than 'edge1'. Otherwise the return value is interpolated between 0.0 and 1.0 using Hermite polynomials."},
 
     // Operators
 
@@ -479,7 +481,12 @@ void VisualShaderEditor::show_create_node_dialog(const QPointF& coordinate) {
   }
 }
 
-void VisualShaderEditor::on_create_node_button_pressed() { Q_EMIT on_create_node_dialog_requested(); }
+void VisualShaderEditor::on_create_node_button_pressed() {
+  // Send the center of the current view port
+  QPointF coordinate{view->mapToScene(view->viewport()->rect().center())};
+
+  Q_EMIT create_node_dialog_requested(coordinate);
+}
 
 void VisualShaderEditor::on_preview_shader_button_pressed() {
   bool result{visual_shader->generate_shader()};
@@ -941,6 +948,10 @@ bool VisualShaderGraphicsScene::add_node(const std::string& type, const QPointF&
     n = std::make_shared<VisualShaderNodeIs>();
   } else if (type == "VisualShaderNodeSwitch") {
     n = std::make_shared<VisualShaderNodeSwitch>();
+  } else if (type == "VisualShaderNodeStep") {
+    n = std::make_shared<VisualShaderNodeStep>();
+  } else if (type == "VisualShaderNodeSmoothStep") {
+    n = std::make_shared<VisualShaderNodeSmoothStep>();
   } else {
     std::cout << "Unknown node type: " << type << std::endl;
   }
@@ -1544,7 +1555,7 @@ VisualShaderGraphicsView::~VisualShaderGraphicsView() {}
 void VisualShaderGraphicsView::on_create_node_action_triggered() {
   VisualShaderEditor* editor {scene->get_editor()};
 
-  Q_EMIT editor->on_create_node_dialog_requested(this->last_context_menu_coordinate);
+  Q_EMIT editor->create_node_dialog_requested(this->last_context_menu_coordinate);
 }
 
 void VisualShaderGraphicsView::zoom_in() {
@@ -1623,16 +1634,20 @@ void VisualShaderGraphicsView::drawBackground(QPainter* painter, const QRectF& r
 }
 
 void VisualShaderGraphicsView::contextMenuEvent(QContextMenuEvent* event) {
-  QGraphicsView::contextMenuEvent(event);
+  QGraphicsItem* item {itemAt(event->pos())};
 
-  // TODO: Make sure to not show the context menu if an item is under the mouse
-  if (itemAt(event->pos())) {
+  // If there is an item and this item is a node object, pass the event to the
+  // children
+  if (item && dynamic_cast<VisualShaderNodeGraphicsObject*>(item)) {
+    QGraphicsView::contextMenuEvent(event);
+    return;
+  } else if (item) {
     return;
   }
 
-  this->last_context_menu_coordinate = (QPointF)event->globalPos();
+  this->last_context_menu_coordinate = mapToScene(event->pos());
 
-  context_menu->exec({(int)last_context_menu_coordinate.x(), (int)last_context_menu_coordinate.y()});
+  context_menu->exec(event->globalPos());
 }
 
 void VisualShaderGraphicsView::wheelEvent(QWheelEvent* event) {
@@ -1865,15 +1880,22 @@ QRectF VisualShaderNodeGraphicsObject::boundingRect() const {
     for (unsigned i{0}; i < in_p_count; ++i) {
       QString p_n{QString::fromStdString(node->get_input_port_name(i))};
 
+      QFont f("Arial", port_caption_font_size);
+      QFontMetrics fm(f);
+
+      float w{0.0f};
+
       if (!p_n.isEmpty()) {
-        QFont f("Arial", port_caption_font_size);
-        QFontMetrics fm(f);
+        w = (float)fm.horizontalAdvance(p_n);
+      } else {
+        // If the port name is empty, use a default name
+        // This is because the horizontal advance of an empty string is 0 and 
+        // this will wrong the calculation of the rect width
+        w = (float)fm.horizontalAdvance("Input");
+      }
 
-        float w{(float)fm.horizontalAdvance(p_n)};
-
-        if (w > max_in_p_width) {
-          max_in_p_width = w;
-        }
+      if ((w + port_caption_spacing) > max_in_p_width) {
+        max_in_p_width = w + port_caption_spacing;
       }
     }
 
@@ -1883,15 +1905,22 @@ QRectF VisualShaderNodeGraphicsObject::boundingRect() const {
     for (unsigned i{0}; i < out_p_count; ++i) {
       QString p_n{QString::fromStdString(node->get_output_port_name(i))};
 
+      QFont f("Arial", port_caption_font_size);
+      QFontMetrics fm(f);
+
+      float w{0.0f};
+
       if (!p_n.isEmpty()) {
-        QFont f("Arial", port_caption_font_size);
-        QFontMetrics fm(f);
+        w = (float)fm.horizontalAdvance(p_n);
+      } else {
+        // If the port name is empty, use a default name
+        // This is because the horizontal advance of an empty string is 0 and 
+        // this will wrong the calculation of the rect width
+        w = (float)fm.horizontalAdvance("Output");
+      }
 
-        float w{(float)fm.horizontalAdvance(p_n)};
-
-        if (w > max_out_p_width) {
-          max_out_p_width = w;
-        }
+      if ((w + port_caption_spacing) > max_out_p_width) {
+        max_out_p_width = w + port_caption_spacing;
       }
     }
 
@@ -2150,21 +2179,26 @@ void VisualShaderNodeGraphicsObject::paint(QPainter* painter, const QStyleOption
       float embed_widget_y{rect_y + caption_rect_height + body_rect_header_height + embed_widget_v_padding};
 
       embed_widget->setGeometry(embed_widget_x, embed_widget_y, embed_widget->width(), embed_widget->height());
+
+      // {
+      //   // Draw Embed Widget
+      //   painter->setPen(Qt::red);
+      //   painter->setBrush(Qt::NoBrush);
+      //   painter->drawRect(embed_widget_x, embed_widget_y, embed_widget->width(), embed_widget->height());
+      // }
     }
   }
 }
 
 QVariant VisualShaderNodeGraphicsObject::itemChange(GraphicsItemChange change, const QVariant& value) {
   if (scene() && change == ItemScenePositionHasChanged) {
-    Q_EMIT node_moved(n_id, pos());
+    Q_EMIT node_moved(n_id, scenePos());
   }
 
   return QGraphicsObject::itemChange(change, value);
 }
 
 void VisualShaderNodeGraphicsObject::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
-  QGraphicsObject::contextMenuEvent(event);
-
   context_menu->exec(event->screenPos());
 }
 

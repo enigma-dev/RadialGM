@@ -107,8 +107,7 @@ class VisualShaderEditor : public BaseEditor {
    * 
    * @param coordinate 
    */
-  void on_create_node_dialog_requested(const QPointF& coordinate = {0,
-                                                                    0});  // {0, 0} is the top-left corner of the scene.
+  void create_node_dialog_requested(const QPointF& coordinate);
 
  private Q_SLOTS:
   /**
@@ -117,7 +116,7 @@ class VisualShaderEditor : public BaseEditor {
    * @note Connected in @c VisualShaderEditor::init function
    *       to @c QPushButton::pressed signal.
    * 
-   * @note EMITS @c VisualShaderEditor::on_create_node_dialog_requested signal.
+   * @note EMITS @c VisualShaderEditor::create_node_dialog_requested signal.
    * 
    */
   void on_create_node_button_pressed();
@@ -487,7 +486,7 @@ class VisualShaderGraphicsView : public QGraphicsView {
    * @note Connected in @c VisualShaderGraphicsView::VisualShaderGraphicsView constructor
    *       to @c QAction::triggered signal.
    * 
-   * @note EMITS @c VisualShaderEditor::on_create_node_dialog_requested signal.
+   * @note EMITS @c VisualShaderEditor::create_node_dialog_requested signal.
    * 
    */
   void on_create_node_action_triggered();
@@ -691,6 +690,17 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
   float spacing_between_current_node_and_shader_previewer = 10.0f;
 
   QRectF boundingRect() const override;
+
+  /**
+   * @brief 
+   * 
+   * @note This function contains some commented code that is meant to be used
+   *       for debugging purposes.
+   * 
+   * @param painter 
+   * @param option 
+   * @param widget 
+   */
   void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
   QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
   void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
