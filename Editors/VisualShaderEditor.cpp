@@ -413,6 +413,7 @@ const VisualShaderEditor::CreateNodeDialogNodesTreeItem VisualShaderEditor::crea
     {"DerivativeFunc", "Functions/Others", "VisualShaderNodeDerivativeFunc", "Derivative function."},
 	  {"Step", "Functions/Others", "VisualShaderNodeStep", "Step function( scalar(edge), scalar(x) ).\n\nReturns 0.0 if 'x' is smaller than 'edge' and otherwise 1.0."},
     {"SmoothStep", "Functions/Others", "VisualShaderNodeSmoothStep", "SmoothStep function( scalar(edge0), scalar(edge1), scalar(x) ).\n\nReturns 0.0 if 'x' is smaller than 'edge0' and 1.0 if x is larger than 'edge1'. Otherwise the return value is interpolated between 0.0 and 1.0 using Hermite polynomials."},
+    {"Dot", "Functions/Others", "VisualShaderNodeDotProduct", "Calculates the dot product of two vectors."},
 
     // Operators
 
@@ -952,6 +953,8 @@ bool VisualShaderGraphicsScene::add_node(const std::string& type, const QPointF&
     n = std::make_shared<VisualShaderNodeStep>();
   } else if (type == "VisualShaderNodeSmoothStep") {
     n = std::make_shared<VisualShaderNodeSmoothStep>();
+  } else if (type == "VisualShaderNodeDotProduct") {
+    n = std::make_shared<VisualShaderNodeDotProduct>();
   } else {
     std::cout << "Unknown node type: " << type << std::endl;
   }
