@@ -268,6 +268,7 @@ void VisualShaderEditor::init() {
   match_image_button->setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
   match_image_button->setToolTip("Match the shader to the loaded image");
   menu_bar->addWidget(match_image_button);
+  QObject::connect(match_image_button, &QPushButton::pressed, this, &VisualShaderEditor::on_match_image_button_pressed);
 
   // Set the top layer layout.
   top_layer->setLayout(menu_bar);
@@ -515,6 +516,8 @@ void VisualShaderEditor::on_load_image_button_pressed() {
   // Josh — 27/09/2024 at 22:13
   // sprites have multiple frames, which is a headache for this project because it's a lot more behavior we need to define
 }
+
+void VisualShaderEditor::on_match_image_button_pressed() {}
 
 std::vector<std::string> VisualShaderEditor::parse_node_category_path(const std::string& node_category_path) {
   std::vector<std::string> tokens;
@@ -1013,6 +1016,9 @@ bool VisualShaderGraphicsScene::add_node(const int& n_id, const std::shared_ptr<
   QObject::connect(n_o, &VisualShaderNodeGraphicsObject::out_port_dragged, this, &VisualShaderGraphicsScene::on_port_dragged);
   QObject::connect(n_o, &VisualShaderNodeGraphicsObject::out_port_dropped, this, &VisualShaderGraphicsScene::on_port_dropped);
 
+  QObject::connect(n_o, &VisualShaderNodeGraphicsObject::scene_update_requested, this, &VisualShaderGraphicsScene::on_scene_update_requested);
+  QObject::connect(n_o, &VisualShaderNodeGraphicsObject::scene_item_remove_requested, this, &VisualShaderGraphicsScene::on_scene_item_remove_requested);
+
   if (n_id != (int)VisualShader::NODE_ID_OUTPUT) {
     VisualShaderNodeEmbedWidget* embed_widget {new VisualShaderNodeEmbedWidget(n)};
     QGraphicsProxyWidget* embed_widget_proxy{new QGraphicsProxyWidget(n_o)};
@@ -1022,6 +1028,11 @@ bool VisualShaderGraphicsScene::add_node(const int& n_id, const std::shared_ptr<
                      &VisualShaderNodeEmbedWidget::shader_preview_update_requested, 
                      this,
                      &VisualShaderGraphicsScene::on_update_shader_previewer_widgets_requested);
+
+    QObject::connect(embed_widget, 
+                     &VisualShaderNodeEmbedWidget::node_update_requested, 
+                     n_o,
+                     &VisualShaderNodeGraphicsObject::on_node_update_requested);
 
     // Send the shader previewer widget
     embed_widget->set_shader_previewer_widget(n_o->get_shader_previewer_widget());
@@ -1106,10 +1117,8 @@ bool VisualShaderGraphicsScene::delete_node(const int& n_id) {
   }
 
   // Remove the node from the scene
-  removeItem(n_o);
   this->node_graphics_objects.erase(n_id);
-
-  delete n_o;  // Make sure to delete the node object to delete all child ports
+  on_scene_item_remove_requested(n_o);
 
   return true;
 }
@@ -1127,10 +1136,17 @@ void VisualShaderGraphicsScene::on_update_shader_previewer_widgets_requested() {
 
     spw->set_code(vs->generate_preview_shader(n_id, 0)); // 0 is the output port index
   }
+
+  on_scene_update_requested();
 }
 
 void VisualShaderGraphicsScene::on_scene_update_requested() {
   update();
+}
+
+void VisualShaderGraphicsScene::on_scene_item_remove_requested(QGraphicsItem* item) {
+  removeItem(item);
+  delete item;
 }
 
 bool VisualShaderGraphicsScene::add_connection(const int& from_node_id, const int& from_port_index,
@@ -1231,8 +1247,7 @@ bool VisualShaderGraphicsScene::delete_connection(const int& from_node_id, const
 
   if (this->temporary_connection_graphics_object) {
     from_o_port->detach_connection(this->temporary_connection_graphics_object);
-    removeItem(this->temporary_connection_graphics_object);
-    delete this->temporary_connection_graphics_object;
+    on_scene_item_remove_requested(this->temporary_connection_graphics_object);
     this->temporary_connection_graphics_object = nullptr;
     return true;
   }
@@ -1265,8 +1280,7 @@ bool VisualShaderGraphicsScene::delete_connection(const int& from_node_id, const
 
     to_i_port->detach_connection();
     from_o_port->detach_connection(c_o);
-    removeItem(c_o);
-    delete c_o;
+    on_scene_item_remove_requested(c_o);
 
     on_update_shader_previewer_widgets_requested();
 
@@ -1336,6 +1350,10 @@ void VisualShaderGraphicsScene::on_node_moved(const int& n_id, const QPointF& ne
 }
 
 void VisualShaderGraphicsScene::on_node_deleted(const int& n_id) {
+  if (n_id == (int)VisualShader::NODE_ID_OUTPUT) {
+    return;
+  }
+
   bool result{this->delete_node(n_id)};
 
   if (!result) {
@@ -1373,6 +1391,7 @@ void VisualShaderGraphicsScene::on_port_dragged(QGraphicsObject* port, const QPo
       on_update_shader_previewer_widgets_requested();
     } else if (!i_port->is_connected() && temporary_connection_graphics_object) {
       c_o = temporary_connection_graphics_object;
+      on_scene_update_requested();
     } else {
       return;
     }
@@ -1849,6 +1868,22 @@ VisualShaderOutputPortGraphicsObject* VisualShaderNodeGraphicsObject::get_output
   return nullptr;
 }
 
+void VisualShaderNodeGraphicsObject::on_node_update_requested() {
+  for (auto& [p_index, i_port] : in_port_graphics_objects) {
+    Q_EMIT scene_item_remove_requested(i_port);
+  }
+
+  for (auto& [p_index, o_port] : out_port_graphics_objects) {
+    Q_EMIT scene_item_remove_requested(o_port);
+  }
+
+  in_port_graphics_objects.clear();
+  out_port_graphics_objects.clear();
+
+  update();
+  Q_EMIT scene_update_requested();
+}
+
 QRectF VisualShaderNodeGraphicsObject::boundingRect() const {
   QFont f("Arial", caption_font_size);
   f.setBold(true);
@@ -2194,7 +2229,7 @@ void VisualShaderNodeGraphicsObject::paint(QPainter* painter, const QStyleOption
 }
 
 QVariant VisualShaderNodeGraphicsObject::itemChange(GraphicsItemChange change, const QVariant& value) {
-  if (scene() && change == ItemScenePositionHasChanged) {
+  if (change == ItemScenePositionHasChanged) {
     Q_EMIT node_moved(n_id, scenePos());
   }
 
@@ -2783,6 +2818,20 @@ VisualShaderNodeEmbedWidget::VisualShaderNodeEmbedWidget(const std::shared_ptr<V
                      QOverload<int>::of(&QComboBox::currentIndexChanged), 
                      this,
                      &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
+  } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeVectorCompose>(node)}) {
+    VisualShaderNodeVectorBaseEmbedWidget* embed_widget = new VisualShaderNodeVectorBaseEmbedWidget(p);
+    layout->addWidget(embed_widget);
+    QObject::connect(embed_widget, 
+                    QOverload<int>::of(&QComboBox::currentIndexChanged),
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_node_update_requested);
+  } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeVectorDecompose>(node)}) {
+    VisualShaderNodeVectorBaseEmbedWidget* embed_widget = new VisualShaderNodeVectorBaseEmbedWidget(p);
+    layout->addWidget(embed_widget);
+    QObject::connect(embed_widget, 
+                    QOverload<int>::of(&QComboBox::currentIndexChanged),
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_node_update_requested);
   }
 
   // Create the button that will show/hide the shader previewer
@@ -3049,6 +3098,9 @@ VisualShaderNodeVectorBaseEmbedWidget::VisualShaderNodeVectorBaseEmbedWidget(con
   addItem("Vector 2D", (int)VisualShaderNodeVectorBase::OP_TYPE_VECTOR_2D);
   addItem("Vector 3D", (int)VisualShaderNodeVectorBase::OP_TYPE_VECTOR_3D);
   addItem("Vector 4D", (int)VisualShaderNodeVectorBase::OP_TYPE_VECTOR_4D);
+
+  // set the current index
+  setCurrentIndex((int)node->get_op_type());
 
   QObject::connect(this, 
                    QOverload<int>::of(&QComboBox::currentIndexChanged), 

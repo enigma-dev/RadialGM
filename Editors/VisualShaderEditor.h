@@ -87,6 +87,12 @@ class VisualShaderEditor : public BaseEditor {
   Q_OBJECT
 
  public:
+  /**
+   * @brief This constructor is meant to be used for testing purposes. As
+   *        it doesn't require a MessageModel object.
+   * 
+   * @param parent 
+   */
   VisualShaderEditor(QWidget* parent = nullptr);
   VisualShaderEditor(MessageModel* model, QWidget* parent = nullptr);
   ~VisualShaderEditor() override;
@@ -124,6 +130,7 @@ class VisualShaderEditor : public BaseEditor {
 
   void on_menu_button_pressed();
   void on_load_image_button_pressed();
+  void on_match_image_button_pressed();
 
  private:
   VisualShader* visual_shader;
@@ -195,6 +202,11 @@ class VisualShaderEditor : public BaseEditor {
    */
   void init();
 
+  /**
+   * @brief The VisualShader class may have some nodes at the beginning. This function
+   *        is meant to add those nodes to the scene.
+   * 
+   */
   void init_graph();
 
   void create_node(const QPointF& coordinate);
@@ -395,7 +407,7 @@ class VisualShaderGraphicsScene : public QGraphicsScene {
 
   VisualShaderNodeGraphicsObject* get_node_graphics_object(const int& n_id) const;
 
- public Q_SLOTS:
+ private Q_SLOTS:
   /**
    * @brief Called when an interaction with a port is made.
    * 
@@ -409,7 +421,6 @@ class VisualShaderGraphicsScene : public QGraphicsScene {
   void on_port_dragged(QGraphicsObject* port, const QPointF& coordinate);
   void on_port_dropped(QGraphicsObject* port, const QPointF& coordinate);
 
- private Q_SLOTS:
   /**
    * @brief Called when a node is moved.
    * 
@@ -438,6 +449,8 @@ class VisualShaderGraphicsScene : public QGraphicsScene {
   void on_update_shader_previewer_widgets_requested();
 
   void on_scene_update_requested();
+
+  void on_scene_item_remove_requested(QGraphicsItem* item);
 
  private:
   VisualShader* vs;
@@ -566,6 +579,9 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
 
   ShaderPreviewerWidget* get_shader_previewer_widget() const { return shader_previewer_widget; }
 
+ public Q_SLOTS:
+  void on_node_update_requested();
+
  Q_SIGNALS:
   /**
    * @brief Send a request to delete a node.
@@ -599,6 +615,10 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
   void out_port_pressed(VisualShaderOutputPortGraphicsObject* port, const QPointF& coordinate);
   void out_port_dragged(VisualShaderOutputPortGraphicsObject* port, const QPointF& coordinate);
   void out_port_dropped(VisualShaderOutputPortGraphicsObject* port, const QPointF& coordinate);
+
+  void scene_update_requested();
+
+  void scene_item_remove_requested(QGraphicsItem* item);
 
  private Q_SLOTS:
   /**
@@ -916,6 +936,7 @@ class VisualShaderNodeEmbedWidget : public QWidget {
 
  Q_SIGNALS:
   void shader_preview_update_requested();
+  void node_update_requested();
 
   private Q_SLOTS:
   void on_preview_shader_button_pressed() {
@@ -925,6 +946,8 @@ class VisualShaderNodeEmbedWidget : public QWidget {
   }
 
   void on_shader_preview_update_requested() { Q_EMIT shader_preview_update_requested(); }
+
+  void on_node_update_requested() { Q_EMIT node_update_requested(); }
 
   private:
   QVBoxLayout* layout;
