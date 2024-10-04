@@ -2832,6 +2832,51 @@ VisualShaderNodeEmbedWidget::VisualShaderNodeEmbedWidget(const std::shared_ptr<V
                     QOverload<int>::of(&QComboBox::currentIndexChanged),
                      this,
                      &VisualShaderNodeEmbedWidget::on_node_update_requested);
+  } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeDerivativeFunc>(node)}) {
+    VisualShaderNodeDerivativeFuncEmbedWidget* embed_widget = new VisualShaderNodeDerivativeFuncEmbedWidget(p);
+    layout->addLayout(embed_widget);
+    QObject::connect(embed_widget->get_op_type_combo_box(), 
+                     QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
+
+    QObject::connect(embed_widget->get_function_combo_box(),
+                      QOverload<int>::of(&QComboBox::currentIndexChanged),
+                      this,
+                      &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
+    QObject::connect(embed_widget->get_precision_combo_box(),
+                      QOverload<int>::of(&QComboBox::currentIndexChanged),
+                      this,
+                      &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
+  } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeCompare>(node)}) {
+    VisualShaderNodeCompareEmbedWidget* embed_widget = new VisualShaderNodeCompareEmbedWidget(p);
+    layout->addLayout(embed_widget);
+    QObject::connect(embed_widget->get_comparison_type_combo_box(), 
+                     QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
+    QObject::connect(embed_widget->get_func_combo_box(), 
+                     QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
+    QObject::connect(embed_widget->get_condition_combo_box(), 
+                     QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
+  } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeSwitch>(node)}) {
+    VisualShaderNodeSwitchEmbedWidget* embed_widget = new VisualShaderNodeSwitchEmbedWidget(p);
+    layout->addWidget(embed_widget);
+    QObject::connect(embed_widget, 
+                     QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
+  } else if (auto p {std::dynamic_pointer_cast<VisualShaderNodeIs>(node)}) {
+    VisualShaderNodeIsEmbedWidget* embed_widget = new VisualShaderNodeIsEmbedWidget(p);
+    layout->addWidget(embed_widget);
+    QObject::connect(embed_widget, 
+                     QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                     this,
+                     &VisualShaderNodeEmbedWidget::on_shader_preview_update_requested);
   }
 
   // Create the button that will show/hide the shader previewer
@@ -2902,6 +2947,8 @@ VisualShaderNodeFloatOpEmbedWidget::VisualShaderNodeFloatOpEmbedWidget(const std
   addItem("Arc Tangent 2", (int)VisualShaderNodeFloatOp::OP_ATAN2);
   addItem("Step", (int)VisualShaderNodeFloatOp::OP_STEP);
 
+  setCurrentIndex((int)node->get_operator());
+
   QObject::connect(this, 
                    QOverload<int>::of(&QComboBox::currentIndexChanged), 
                    this,
@@ -2936,6 +2983,8 @@ VisualShaderNodeIntOpEmbedWidget::VisualShaderNodeIntOpEmbedWidget(const std::sh
   addItem("Bitwise Left Shift", (int)VisualShaderNodeIntOp::OP_BITWISE_LEFT_SHIFT);
   addItem("Bitwise Right Shift", (int)VisualShaderNodeIntOp::OP_BITWISE_RIGHT_SHIFT);
 
+  setCurrentIndex((int)node->get_operator());
+
   QObject::connect(this, 
                    QOverload<int>::of(&QComboBox::currentIndexChanged), 
                    this,
@@ -2969,6 +3018,8 @@ VisualShaderNodeUIntOpEmbedWidget::VisualShaderNodeUIntOpEmbedWidget(const std::
   addItem("Bitwise XOR", (int)VisualShaderNodeUIntOp::OP_BITWISE_XOR);
   addItem("Bitwise Left Shift", (int)VisualShaderNodeUIntOp::OP_BITWISE_LEFT_SHIFT);
   addItem("Bitwise Right Shift", (int)VisualShaderNodeUIntOp::OP_BITWISE_RIGHT_SHIFT);
+
+  setCurrentIndex((int)node->get_operator());
 
   QObject::connect(this, 
                    QOverload<int>::of(&QComboBox::currentIndexChanged), 
@@ -3024,6 +3075,8 @@ VisualShaderNodeFloatFuncEmbedWidget::VisualShaderNodeFloatFuncEmbedWidget(const
   addItem("Truncate", (int)VisualShaderNodeFloatFunc::FUNC_TRUNC);
   addItem("One Minus", (int)VisualShaderNodeFloatFunc::FUNC_ONEMINUS);
 
+  setCurrentIndex((int)node->get_function());
+
   QObject::connect(this, 
                    QOverload<int>::of(&QComboBox::currentIndexChanged), 
                    this,
@@ -3050,6 +3103,8 @@ VisualShaderNodeIntFuncEmbedWidget::VisualShaderNodeIntFuncEmbedWidget(const std
   addItem("Sign", (int)VisualShaderNodeIntFunc::FUNC_SIGN);
   addItem("Bitwise NOT", (int)VisualShaderNodeIntFunc::FUNC_BITWISE_NOT);
 
+  setCurrentIndex((int)node->get_function());
+
   QObject::connect(this, 
                    QOverload<int>::of(&QComboBox::currentIndexChanged), 
                    this,
@@ -3073,6 +3128,8 @@ VisualShaderNodeUIntFuncEmbedWidget::VisualShaderNodeUIntFuncEmbedWidget(const s
 
   addItem("Negate", (int)VisualShaderNodeUIntFunc::FUNC_NEGATE);
   addItem("Bitwise NOT", (int)VisualShaderNodeUIntFunc::FUNC_BITWISE_NOT);
+
+  setCurrentIndex((int)node->get_function());
 
   QObject::connect(this, 
                    QOverload<int>::of(&QComboBox::currentIndexChanged), 
@@ -3136,6 +3193,8 @@ VisualShaderNodeVectorOpEmbedWidget::VisualShaderNodeVectorOpEmbedWidget(const s
   addItem("Reflect", (int)VisualShaderNodeVectorOp::OP_REFLECT);
   addItem("Step", (int)VisualShaderNodeVectorOp::OP_STEP);
 
+  setCurrentIndex((int)node->get_operator());
+
   QObject::connect(this, 
                    QOverload<int>::of(&QComboBox::currentIndexChanged), 
                    this,
@@ -3191,6 +3250,8 @@ VisualShaderNodeVectorFuncEmbedWidget::VisualShaderNodeVectorFuncEmbedWidget(con
   addItem("Truncate", (int)VisualShaderNodeVectorFunc::FUNC_TRUNC);
   addItem("One Minus", (int)VisualShaderNodeVectorFunc::FUNC_ONEMINUS);
 
+  setCurrentIndex((int)node->get_function());
+
   QObject::connect(this, 
                    QOverload<int>::of(&QComboBox::currentIndexChanged), 
                    this,
@@ -3211,6 +3272,13 @@ VisualShaderNodeColorConstantEmbedWidget::VisualShaderNodeColorConstantEmbedWidg
                                                                                                                                          node(node) {
   setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+
+  {
+    QPalette palette {this->palette()};
+    TColor c{node->get_constant()};
+    palette.setColor(QPalette::Button, QColor(c.r, c.g, c.b, c.a));
+    this->setPalette(palette);
+  }
 
   QObject::connect(this, 
                    &QPushButton::pressed,
@@ -3251,6 +3319,8 @@ VisualShaderNodeBooleanConstantEmbedWidget::VisualShaderNodeBooleanConstantEmbed
   setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
 
+  setCheckState(node->get_constant() ? Qt::Checked : Qt::Unchecked);
+
   QObject::connect(this, 
                    &QCheckBox::stateChanged,
                    this,
@@ -3273,6 +3343,8 @@ VisualShaderNodeFloatConstantEmbedWidget::VisualShaderNodeFloatConstantEmbedWidg
   setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
 
   setPlaceholderText("Value");
+
+  setText(QString::number(node->get_constant()));
 
   QObject::connect(this, 
                    &QLineEdit::textChanged,
@@ -3308,6 +3380,8 @@ VisualShaderNodeIntConstantEmbedWidget::VisualShaderNodeIntConstantEmbedWidget(c
 
   setPlaceholderText("Value");
 
+  setText(QString::number(node->get_constant()));
+
   QObject::connect(this, 
                    &QLineEdit::textChanged,
                    this,
@@ -3341,6 +3415,8 @@ VisualShaderNodeUIntConstantEmbedWidget::VisualShaderNodeUIntConstantEmbedWidget
   setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
 
   setPlaceholderText("Value");
+
+  setText(QString::number(node->get_constant()));
 
   QObject::connect(this, 
                    &QLineEdit::textChanged,
@@ -3381,6 +3457,9 @@ VisualShaderNodeVec2ConstantEmbedWidget::VisualShaderNodeVec2ConstantEmbedWidget
 
   x_edit_widget->setPlaceholderText("X");
   y_edit_widget->setPlaceholderText("Y");
+
+  x_edit_widget->setText(QString::number(node->get_constant().x));
+  y_edit_widget->setText(QString::number(node->get_constant().y));
 
   QObject::connect(x_edit_widget, 
                    &QLineEdit::textChanged, 
@@ -3445,6 +3524,10 @@ VisualShaderNodeVec3ConstantEmbedWidget::VisualShaderNodeVec3ConstantEmbedWidget
   x_edit_widget->setPlaceholderText("X");
   y_edit_widget->setPlaceholderText("Y");
   z_edit_widget->setPlaceholderText("Z");
+
+  x_edit_widget->setText(QString::number(node->get_constant().x));
+  y_edit_widget->setText(QString::number(node->get_constant().y));
+  z_edit_widget->setText(QString::number(node->get_constant().z));
 
   QObject::connect(x_edit_widget, 
                    &QLineEdit::textChanged, 
@@ -3532,6 +3615,11 @@ VisualShaderNodeVec4ConstantEmbedWidget::VisualShaderNodeVec4ConstantEmbedWidget
   z_edit_widget->setPlaceholderText("Z");
   w_edit_widget->setPlaceholderText("W");
 
+  x_edit_widget->setText(QString::number(node->get_constant().x));
+  y_edit_widget->setText(QString::number(node->get_constant().y));
+  z_edit_widget->setText(QString::number(node->get_constant().z));
+  w_edit_widget->setText(QString::number(node->get_constant().w));
+
   QObject::connect(x_edit_widget, 
                    &QLineEdit::textChanged, 
                    this,
@@ -3618,6 +3706,72 @@ void VisualShaderNodeVec4ConstantEmbedWidget::on_w_text_changed(const QString& t
 }
 
 /*************************************/
+/* Derivative Func Node              */
+/*************************************/
+
+VisualShaderNodeDerivativeFuncEmbedWidget::VisualShaderNodeDerivativeFuncEmbedWidget(const std::shared_ptr<VisualShaderNodeDerivativeFunc>& node) : QVBoxLayout(), 
+                                                                                                                             node(node) {
+  setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+  setSizeConstraint(QLayout::SetNoConstraint);
+  setSpacing(2);
+  setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+
+  op_type_combo_box = new QComboBox();
+  function_combo_box = new QComboBox();
+  precision_combo_box = new QComboBox();
+  
+  op_type_combo_box->addItem("Scalar", (int)VisualShaderNodeDerivativeFunc::OP_TYPE_SCALAR);
+  op_type_combo_box->addItem("Vector 2D", (int)VisualShaderNodeDerivativeFunc::OP_TYPE_VECTOR_2D);
+  op_type_combo_box->addItem("Vector 3D", (int)VisualShaderNodeDerivativeFunc::OP_TYPE_VECTOR_3D);
+  op_type_combo_box->addItem("Vector 4D", (int)VisualShaderNodeDerivativeFunc::OP_TYPE_VECTOR_4D);
+
+  op_type_combo_box->setCurrentIndex((int)node->get_op_type());
+
+  function_combo_box->addItem("Sum", (int)VisualShaderNodeDerivativeFunc::FUNC_SUM);
+  function_combo_box->addItem("X", (int)VisualShaderNodeDerivativeFunc::FUNC_X);
+  function_combo_box->addItem("Y", (int)VisualShaderNodeDerivativeFunc::FUNC_Y);
+
+  function_combo_box->setCurrentIndex((int)node->get_function());
+
+  precision_combo_box->addItem("None", (int)VisualShaderNodeDerivativeFunc::PRECISION_NONE);
+  precision_combo_box->addItem("Coarse", (int)VisualShaderNodeDerivativeFunc::PRECISION_COARSE);
+  precision_combo_box->addItem("Fine", (int)VisualShaderNodeDerivativeFunc::PRECISION_FINE);
+
+  precision_combo_box->setCurrentIndex((int)node->get_precision());
+
+  QObject::connect(op_type_combo_box, 
+                   QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                   this,
+                   &VisualShaderNodeDerivativeFuncEmbedWidget::on_op_type_current_index_changed);
+  QObject::connect(function_combo_box, 
+                   QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                   this,
+                   &VisualShaderNodeDerivativeFuncEmbedWidget::on_function_current_index_changed);
+  QObject::connect(precision_combo_box, 
+                   QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                   this,
+                   &VisualShaderNodeDerivativeFuncEmbedWidget::on_precision_current_index_changed);
+
+  addWidget(op_type_combo_box);
+  addWidget(function_combo_box);
+  addWidget(precision_combo_box);
+}
+
+VisualShaderNodeDerivativeFuncEmbedWidget::~VisualShaderNodeDerivativeFuncEmbedWidget() {}
+
+void VisualShaderNodeDerivativeFuncEmbedWidget::on_op_type_current_index_changed(const int& index) {
+  node->set_op_type((VisualShaderNodeDerivativeFunc::OpType)op_type_combo_box->itemData(index).toInt());
+}
+
+void VisualShaderNodeDerivativeFuncEmbedWidget::on_function_current_index_changed(const int& index) {
+  node->set_function((VisualShaderNodeDerivativeFunc::Function)function_combo_box->itemData(index).toInt());
+}
+
+void VisualShaderNodeDerivativeFuncEmbedWidget::on_precision_current_index_changed(const int& index) {
+  node->set_precision((VisualShaderNodeDerivativeFunc::Precision)precision_combo_box->itemData(index).toInt());
+}
+
+/*************************************/
 /* Value Noise Node                  */
 /*************************************/
 
@@ -3627,6 +3781,8 @@ VisualShaderNodeValueNoiseEmbedWidget::VisualShaderNodeValueNoiseEmbedWidget(con
   setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
 
   setPlaceholderText("Scale");
+
+  setText(QString::number(node->get_scale()));
 
   QObject::connect(this, &QLineEdit::textChanged, this, &VisualShaderNodeValueNoiseEmbedWidget::on_text_changed);
 }
@@ -3659,6 +3815,8 @@ VisualShaderNodePerlinNoiseEmbedWidget::VisualShaderNodePerlinNoiseEmbedWidget(c
 
   setPlaceholderText("Scale");
 
+  setText(QString::number(node->get_scale()));
+
   QObject::connect(this, &QLineEdit::textChanged, this, &VisualShaderNodePerlinNoiseEmbedWidget::on_text_changed);
 }
 
@@ -3690,6 +3848,8 @@ VisualShaderNodeVoronoiNoiseAngleOffsetEmbedWidget::VisualShaderNodeVoronoiNoise
 
   setPlaceholderText("Angle Offset");
 
+  setText(QString::number(node->get_angle_offset()));
+
   QObject::connect(this, &QLineEdit::textChanged, this, &VisualShaderNodeVoronoiNoiseAngleOffsetEmbedWidget::on_text_changed);
 }
 
@@ -3717,6 +3877,8 @@ VisualShaderNodeVoronoiNoiseCellDensityEmbedWidget::VisualShaderNodeVoronoiNoise
 
   setPlaceholderText("Cell Density");
 
+  setText(QString::number(node->get_cell_density()));
+
   QObject::connect(this, &QLineEdit::textChanged, this, &VisualShaderNodeVoronoiNoiseCellDensityEmbedWidget::on_text_changed);
 }
 
@@ -3735,4 +3897,121 @@ void VisualShaderNodeVoronoiNoiseCellDensityEmbedWidget::on_text_changed(const Q
       setText("");
     }
   }
+}
+
+/*************************************/
+/* Logic                             */
+/*************************************/
+
+/*************************************/
+/* Compare Node                      */
+/*************************************/
+
+VisualShaderNodeCompareEmbedWidget::VisualShaderNodeCompareEmbedWidget(const std::shared_ptr<VisualShaderNodeCompare>& node) : QVBoxLayout(), 
+                                                                                                                                       node(node) {
+  setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+  setSizeConstraint(QLayout::SetNoConstraint);
+  setSpacing(2);
+  setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+
+  comparison_type_combo_box = new QComboBox();
+  func_combo_box = new QComboBox();
+  condition_combo_box = new QComboBox();
+
+  comparison_type_combo_box->addItem("Scalar", (int)VisualShaderNodeCompare::CMP_TYPE_SCALAR);
+  comparison_type_combo_box->addItem("Scalar Int", (int)VisualShaderNodeCompare::CMP_TYPE_SCALAR_INT);
+  comparison_type_combo_box->addItem("Scalar UInt", (int)VisualShaderNodeCompare::CMP_TYPE_SCALAR_UINT);
+  comparison_type_combo_box->addItem("Vector 2D", (int)VisualShaderNodeCompare::CMP_TYPE_VECTOR_2D);
+  comparison_type_combo_box->addItem("Vector 3D", (int)VisualShaderNodeCompare::CMP_TYPE_VECTOR_3D);
+  comparison_type_combo_box->addItem("Vector 4D", (int)VisualShaderNodeCompare::CMP_TYPE_VECTOR_4D);
+  comparison_type_combo_box->addItem("Boolean", (int)VisualShaderNodeCompare::CMP_TYPE_BOOLEAN);
+
+  comparison_type_combo_box->setCurrentIndex((int)node->get_comparison_type());
+
+  func_combo_box->addItem("==", (int)VisualShaderNodeCompare::FUNC_EQUAL);
+  func_combo_box->addItem("!=", (int)VisualShaderNodeCompare::FUNC_NOT_EQUAL);
+  func_combo_box->addItem(">", (int)VisualShaderNodeCompare::FUNC_GREATER_THAN);
+  func_combo_box->addItem(">=", (int)VisualShaderNodeCompare::FUNC_GREATER_THAN_EQUAL);
+  func_combo_box->addItem("<", (int)VisualShaderNodeCompare::FUNC_LESS_THAN);
+  func_combo_box->addItem("<=", (int)VisualShaderNodeCompare::FUNC_LESS_THAN_EQUAL);
+
+  func_combo_box->setCurrentIndex((int)node->get_function());
+
+  condition_combo_box->addItem("All", (int)VisualShaderNodeCompare::COND_ALL);
+  condition_combo_box->addItem("Any", (int)VisualShaderNodeCompare::COND_ANY);
+
+  condition_combo_box->setCurrentIndex((int)node->get_condition());
+
+  addWidget(comparison_type_combo_box);
+  addWidget(func_combo_box);
+  addWidget(condition_combo_box);
+}
+
+VisualShaderNodeCompareEmbedWidget::~VisualShaderNodeCompareEmbedWidget() {}
+
+void VisualShaderNodeCompareEmbedWidget::on_comparison_type_current_index_changed(const int& index) {
+  node->set_comparison_type((VisualShaderNodeCompare::ComparisonType)comparison_type_combo_box->itemData(index).toInt());
+}
+void VisualShaderNodeCompareEmbedWidget::on_func_current_index_changed(const int& index) {
+  node->set_function((VisualShaderNodeCompare::Function)func_combo_box->itemData(index).toInt());
+}
+void VisualShaderNodeCompareEmbedWidget::on_condition_current_index_changed(const int& index) {
+  node->set_condition((VisualShaderNodeCompare::Condition)condition_combo_box->itemData(index).toInt());
+}
+
+/*************************************/
+/* Switch Node                       */
+/*************************************/
+
+VisualShaderNodeSwitchEmbedWidget::VisualShaderNodeSwitchEmbedWidget(const std::shared_ptr<VisualShaderNodeSwitch>& node) : QComboBox(), 
+                                                                                                                         node(node) {
+  setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+
+  addItem("Float", (int)VisualShaderNodeSwitch::OP_TYPE_FLOAT);
+  addItem("Int", (int)VisualShaderNodeSwitch::OP_TYPE_INT);
+  addItem("UInt", (int)VisualShaderNodeSwitch::OP_TYPE_UINT);
+  addItem("Vector 2D", (int)VisualShaderNodeSwitch::OP_TYPE_VECTOR_2D);
+  addItem("Vector 3D", (int)VisualShaderNodeSwitch::OP_TYPE_VECTOR_3D);
+  addItem("Vector 4D", (int)VisualShaderNodeSwitch::OP_TYPE_VECTOR_4D);
+  addItem("Boolean", (int)VisualShaderNodeSwitch::OP_TYPE_BOOLEAN);
+
+  setCurrentIndex((int)node->get_op_type());
+
+  QObject::connect(this, 
+                   QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                   this,
+                   &VisualShaderNodeSwitchEmbedWidget::on_current_index_changed);
+}
+
+VisualShaderNodeSwitchEmbedWidget::~VisualShaderNodeSwitchEmbedWidget() {}
+
+void VisualShaderNodeSwitchEmbedWidget::on_current_index_changed(const int& index) {
+  node->set_op_type((VisualShaderNodeSwitch::OpType)itemData(index).toInt());
+}
+
+/*************************************/
+/* Is Node                           */
+/*************************************/
+
+VisualShaderNodeIsEmbedWidget::VisualShaderNodeIsEmbedWidget(const std::shared_ptr<VisualShaderNodeIs>& node) : QComboBox(), 
+                                                                                                             node(node) {
+  setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  setContentsMargins(0, 0, 0, 0);  // Left, top, right, bottom
+  
+  addItem("Is Inf", (int)VisualShaderNodeIs::FUNC_IS_INF);
+  addItem("Is NaN", (int)VisualShaderNodeIs::FUNC_IS_NAN);
+
+  setCurrentIndex((int)node->get_function());
+
+  QObject::connect(this, 
+                   QOverload<int>::of(&QComboBox::currentIndexChanged), 
+                   this,
+                   &VisualShaderNodeIsEmbedWidget::on_current_index_changed);
+}
+
+VisualShaderNodeIsEmbedWidget::~VisualShaderNodeIsEmbedWidget() {}
+
+void VisualShaderNodeIsEmbedWidget::on_current_index_changed(const int& index) {
+  node->set_function((VisualShaderNodeIs::Function)itemData(index).toInt());
 }

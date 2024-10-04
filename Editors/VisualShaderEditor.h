@@ -1338,6 +1338,34 @@ class VisualShaderNodeVec4ConstantEmbedWidget : public QVBoxLayout {
 };
 
 /*************************************/
+/* Derivative Func Node              */
+/*************************************/
+
+class VisualShaderNodeDerivativeFuncEmbedWidget : public QVBoxLayout {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeDerivativeFuncEmbedWidget(const std::shared_ptr<VisualShaderNodeDerivativeFunc>& node);
+  ~VisualShaderNodeDerivativeFuncEmbedWidget();
+
+  QComboBox* get_op_type_combo_box() const { return op_type_combo_box; }
+  QComboBox* get_function_combo_box() const { return function_combo_box; }
+  QComboBox* get_precision_combo_box() const { return precision_combo_box; }
+
+ private Q_SLOTS:
+  void on_op_type_current_index_changed(const int& index);
+  void on_function_current_index_changed(const int& index);
+  void on_precision_current_index_changed(const int& index);
+
+ private:
+  std::shared_ptr<VisualShaderNodeDerivativeFunc> node;
+
+  QComboBox* op_type_combo_box;
+  QComboBox* function_combo_box;
+  QComboBox* precision_combo_box;
+};
+
+/*************************************/
 /* Value Noise Node                  */
 /*************************************/
 
@@ -1403,6 +1431,78 @@ class VisualShaderNodeVoronoiNoiseCellDensityEmbedWidget : public QLineEdit {
 
  private:
   std::shared_ptr<VisualShaderNodeVoronoiNoise> node;
+};
+
+/*************************************/
+/* Logic                             */
+/*************************************/
+
+/*************************************/
+/* Compare Node                      */
+/*************************************/
+
+class VisualShaderNodeCompareEmbedWidget : public QVBoxLayout {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeCompareEmbedWidget(const std::shared_ptr<VisualShaderNodeCompare>& node);
+  ~VisualShaderNodeCompareEmbedWidget();
+
+  QComboBox* get_comparison_type_combo_box() const { return comparison_type_combo_box; }
+  QComboBox* get_func_combo_box() const { return func_combo_box; }
+  QComboBox* get_condition_combo_box() const { return condition_combo_box; }
+
+ private Q_SLOTS:
+  void on_comparison_type_current_index_changed(const int& index);
+  void on_func_current_index_changed(const int& index);
+  void on_condition_current_index_changed(const int& index);
+
+ private:
+  std::shared_ptr<VisualShaderNodeCompare> node;
+
+  QComboBox* comparison_type_combo_box;
+  QComboBox* func_combo_box;
+  QComboBox* condition_combo_box;
+};
+
+/*************************************/
+/* Switch Node                       */
+/*************************************/
+
+class VisualShaderNodeSwitchEmbedWidget : public QComboBox {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeSwitchEmbedWidget(const std::shared_ptr<VisualShaderNodeSwitch>& node);
+  ~VisualShaderNodeSwitchEmbedWidget();
+
+  void set_current_index(const int& index) { this->setCurrentIndex(index); }
+
+ private Q_SLOTS:
+  void on_current_index_changed(const int& index);
+
+ private:
+  std::shared_ptr<VisualShaderNodeSwitch> node;
+};
+
+/*************************************/
+/* Is Node                           */
+/*************************************/
+
+class VisualShaderNodeIsEmbedWidget : public QComboBox {
+  Q_OBJECT
+
+ public:
+  VisualShaderNodeIsEmbedWidget(const std::shared_ptr<VisualShaderNodeIs>& node);
+  ~VisualShaderNodeIsEmbedWidget();
+
+  void set_current_index(const int& index) { this->setCurrentIndex(index); }
+
+ private Q_SLOTS:
+  void on_current_index_changed(const int& index);
+
+ private:
+  std::shared_ptr<VisualShaderNodeIs> node;
 };
 
 #endif  // ENIGMA_VISUAL_SHADER_EDITOR_H
