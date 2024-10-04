@@ -788,7 +788,7 @@ void ShaderPreviewerWidget::init_buffers() {
   }
 
   float vertices[] = {
-    // coordinates    // texCoords
+    // coordinates    // frag coords
     -1.0f,  1.0f,     0.0f, 1.0f,
     -1.0f, -1.0f,     0.0f, 0.0f,
      1.0f,  1.0f,     1.0f, 1.0f,
@@ -818,20 +818,20 @@ void ShaderPreviewerWidget::update_shader_program() {
   const char* vertex_shader_source = R"(
       #version 330 core
       layout(location = 0) in vec2 aPos;
-      layout(location = 1) in vec2 aTexCoord;
+      layout(location = 1) in vec2 aFragCoord;
 
-      out vec2 TexCoord;
+      out vec2 FragCoord;
 
       void main() {
         gl_Position = vec4(aPos, 0.0, 1.0);
-        TexCoord = aTexCoord;
+        FragCoord = aFragCoord;
       }
   )";
 
   std::string fragment_shader_source {code.empty() ? R"(
       #version 330 core
       out vec4 FragColor;
-      in vec2 TexCoord;
+      in vec2 FragCoord;
 
       uniform float uTime;
 
