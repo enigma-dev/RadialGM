@@ -1882,6 +1882,7 @@ void VisualShaderNodeGraphicsObject::on_node_update_requested() {
         Q_EMIT scene_item_remove_requested(i_port->get_connection_graphics_object());
       }
       Q_EMIT scene_item_remove_requested(i_port);
+      start_index++;
     }
   }
 
@@ -1898,6 +1899,7 @@ void VisualShaderNodeGraphicsObject::on_node_update_requested() {
         }
       }
       Q_EMIT scene_item_remove_requested(o_port);
+      start_index++;
     }
   }
 
