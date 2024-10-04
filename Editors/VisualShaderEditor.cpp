@@ -1869,16 +1869,37 @@ VisualShaderOutputPortGraphicsObject* VisualShaderNodeGraphicsObject::get_output
 }
 
 void VisualShaderNodeGraphicsObject::on_node_update_requested() {
-  for (auto& [p_index, i_port] : in_port_graphics_objects) {
-    Q_EMIT scene_item_remove_requested(i_port);
+  // Here if the number of ports changed, for example, changing the operation type in a decompose node,
+  // we need to remove any extra ports that are not needed anymore. Don't forget to remove the connections 
+  // as well.
+  if (in_port_graphics_objects.size() > node->get_input_port_count()) {
+    int start_index{node->get_input_port_count()};
+    int size{(int)in_port_graphics_objects.size() - start_index};
+    for (int i{0}; i < size; ++i) {
+      VisualShaderInputPortGraphicsObject* i_port{in_port_graphics_objects.at(start_index)};
+      in_port_graphics_objects.erase(start_index);
+      if (i_port->is_connected()) {
+        Q_EMIT scene_item_remove_requested(i_port->get_connection_graphics_object());
+      }
+      Q_EMIT scene_item_remove_requested(i_port);
+    }
   }
 
-  for (auto& [p_index, o_port] : out_port_graphics_objects) {
-    Q_EMIT scene_item_remove_requested(o_port);
+  if (out_port_graphics_objects.size() > node->get_output_port_count()) {
+    int start_index{node->get_output_port_count()};
+    int size{(int)out_port_graphics_objects.size() - start_index};
+    for (int i{0}; i < size; ++i) {
+      VisualShaderOutputPortGraphicsObject* o_port{out_port_graphics_objects.at(start_index)};
+      out_port_graphics_objects.erase(start_index);
+      if (o_port->is_connected()) {
+        std::vector<VisualShaderConnectionGraphicsObject*> c_os{o_port->get_connection_graphics_objects()};
+        for (VisualShaderConnectionGraphicsObject* c_o : c_os) {
+          Q_EMIT scene_item_remove_requested(c_o);
+        }
+      }
+      Q_EMIT scene_item_remove_requested(o_port);
+    }
   }
-
-  in_port_graphics_objects.clear();
-  out_port_graphics_objects.clear();
 
   update();
   Q_EMIT scene_update_requested();
