@@ -2,8 +2,7 @@
 #include "ui_PreferencesDialog.h"
 
 #include "PreferencesKeys.h"
-#include "KeybindingPreferences.h"
-#include "main.h"
+#include "KeyBindingPreferences.h"
 #include "Components/Logger.h"
 
 #include <QFileDialog>

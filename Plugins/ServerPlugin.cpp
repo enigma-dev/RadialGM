@@ -249,18 +249,17 @@ void CompilerClient::UpdateLoop(void* got_tag, bool ok) {
 }
 
 ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
+  // TODO: Check if emake is already running and connect to it instead of starting a new one.
+
   // create a new child process for us to launch an emake server
   process = new QProcess(this);
 
-  connect(process, &QProcess::errorOccurred, [&](QProcess::ProcessError error) {
-    qDebug() << "QProcess error: " << error << endl;
-  });
-  connect(process, &QProcess::readyReadStandardOutput, [&]() {
-    emit LogOutput(process->readAllStandardOutput());
-  });
-  connect(process, &QProcess::readyReadStandardError, [&]() {
-    emit LogOutput(process->readAllStandardError());
-  });
+  connect(process, &QProcess::errorOccurred, this, &ServerPlugin::onErrorOccurred);
+  connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &ServerPlugin::onProcessFinished);
+  connect(process, &QProcess::readyReadStandardError, this, &ServerPlugin::onReadyReadStandardError);
+  connect(process, &QProcess::readyReadStandardOutput, this, &ServerPlugin::onReadyReadStandardOutput);
+  connect(process, &QProcess::started, this, &ServerPlugin::onProcessStarted);
+  connect(process, &QProcess::stateChanged, this, &ServerPlugin::onStateChanged);
 
   #ifdef _WIN32
   //TODO: Make all this stuff configurable in IDE
@@ -296,19 +295,19 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
   }
 
   if (emakeFileInfo.filePath().isEmpty()) {
-    qDebug() << "Error: Failed to locate emake. Compiling and syntax check will not work.\n" << "Search Paths:\n" << MainWindow::EnigmaSearchPaths;
+    qDebug() << "Error: Failed to locate emake. Compiling and syntax check will not work.\n" << "Search Paths:\n" << MainWindow::EnigmaSearchPaths << Qt::endl;
     return;
   }
 
   if (MainWindow::EnigmaRoot.filePath().isEmpty()) {
-    qDebug() << "Error: Failed to locate ENIGMA sources. Compiling and syntax check will not work.\n" << "Search Paths:\n" << MainWindow::EnigmaSearchPaths;
+    qDebug() << "Error: Failed to locate ENIGMA sources. Compiling and syntax check will not work.\n" << "Search Paths:\n" << MainWindow::EnigmaSearchPaths << Qt::endl;
     return;
   }
 
   // use the closest matching emake file we found and launch it in a child process
-  qDebug() << "Using emake exe at: " << emakeFileInfo.absolutePath();
-  qDebug() << "Using ENIGMA sources at: " << MainWindow::EnigmaRoot.absolutePath();
-  process->setWorkingDirectory(emakeFileInfo.absolutePath());
+  qDebug() << "Using emake exe at: " << emakeFileInfo.absolutePath() << Qt::endl;
+  qDebug() << "Using ENIGMA sources at: " << MainWindow::EnigmaRoot.absolutePath() << Qt::endl;
+  process->setWorkingDirectory(emakeFileInfo.absolutePath()); // Since emake depends on other libraries in the same directory.
   QString program = emakeFileInfo.fileName();
   QStringList arguments;
   arguments << "--server"
@@ -321,8 +320,14 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
 
   qDebug() << "Running: " << program << " " << arguments;
 
-  process->start(program, arguments);
-  process->waitForStarted();
+  process->start(emakeFileInfo.filePath(), arguments);
+
+  // TODO: This blocks the main thread, we should probably move this to a separate thread.
+  if (!process->waitForStarted(-1)) {
+    qDebug() << "Failed to start the emake server!" << Qt::endl;
+    qDebug() << process->errorString() << Qt::endl;
+    return;
+  }
 
   // construct the channel and connect to the server running in the process
   // Note: gRPC is too dumb to resolve localhost on linux
@@ -340,7 +345,15 @@ ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
 
 ServerPlugin::~ServerPlugin() {
   compilerClient->TearDown();
-  process->waitForFinished();
+
+  if (!process->waitForFinished(-1)) {
+    qDebug() << "Failed to stop the emake server!" << Qt::endl;
+    qDebug() << process->errorString() << Qt::endl;
+    return;
+  }
+
+  if (compilerClient) delete compilerClient;
+  if (process) delete process;
 }
 
 void ServerPlugin::Run() { compilerClient->CompileBuffer(mainWindow.Game(), CompileRequest::RUN); }
@@ -352,8 +365,81 @@ void ServerPlugin::CreateExecutable() {
       QFileDialog::getSaveFileName(&mainWindow, tr("Create Executable"), "", tr("Executable (*.exe);;All Files (*)"));
   if (!fileName.isEmpty())
     compilerClient->CompileBuffer(mainWindow.Game(), CompileRequest::COMPILE, fileName.toStdString());
-};
+}
 
 void ServerPlugin::SetCurrentConfig(const resources::Settings& settings) {
   compilerClient->SetCurrentConfig(settings);
-};
+}
+
+void ServerPlugin::onErrorOccurred(QProcess::ProcessError error) {
+  qDebug() << "QProcess error: " << error << Qt::endl;
+  switch (error) {
+      case QProcess::FailedToStart:
+          qDebug() << "Error: The emake server failed to start. Either the invoked program is missing, or you may have insufficient permissions to invoke the program." << Qt::endl;
+          break;
+      case QProcess::Crashed:
+          qDebug() << "Error: The emake server crashed some time after starting successfully." << Qt::endl;
+          break;
+      case QProcess::Timedout:
+          qDebug() << "Error: The last waitFor...() function timed out. The state of QProcess is unchanged, and you can try calling waitFor...() again." << Qt::endl;
+          break;
+      case QProcess::WriteError:
+          qDebug() << "Error: An error occurred when attempting to write to the emake server. For example, the emake server may not be running, or it may have closed its input channel." << Qt::endl;
+          break;
+      case QProcess::ReadError:
+          qDebug() << "Error: An error occurred when attempting to read from the emake server. For example, the emake server may not be running." << Qt::endl;
+          break;
+      case QProcess::UnknownError:
+          qDebug() << "Error: An unknown error occurred. This is the default return value of error()." << Qt::endl;
+          break;
+      default:
+          qDebug() << "Error: Unrecognized error code." << Qt::endl;
+          break;
+  }
+}
+
+void ServerPlugin::onProcessFinished(int exit_code, QProcess::ExitStatus exit_status) {
+  qDebug() << "Exit Code: " << exit_code << Qt::endl;
+  switch (exit_status) {
+      case QProcess::NormalExit:
+          qDebug() << "Exit Status: The emake server exited normally." << Qt::endl;
+          break;
+      case QProcess::CrashExit:
+          qDebug() << "Exit Status: The emake server crashed." << Qt::endl;
+          break;
+      default:
+          qDebug() << "Exit Status: Unrecognized exit status code." << Qt::endl;
+          break;
+  }
+}
+
+void ServerPlugin::onReadyReadStandardError() {
+  qDebug() << "Standard Error: " << process->readAllStandardError().constData() << Qt::endl;
+  emit LogOutput(process->readAllStandardError());
+}
+
+void ServerPlugin::onReadyReadStandardOutput() {
+  qDebug() << "Standard Output: " << process->readAllStandardOutput().constData() << Qt::endl;
+  emit LogOutput(process->readAllStandardOutput());
+}
+
+void ServerPlugin::onProcessStarted() {
+  qDebug() << "The emake server started successfully!" << Qt::endl;
+}
+
+void ServerPlugin::onStateChanged(QProcess::ProcessState state) {
+  switch (state) {
+      case QProcess::NotRunning:
+          qDebug() << "State: The emake server is not running." << Qt::endl;
+          break;
+      case QProcess::Starting:
+          qDebug() << "State: The emake server is starting, but the program has not yet been invoked." << Qt::endl;
+          break;
+      case QProcess::Running:
+          qDebug() << "State: The emake server is running and is ready for reading and writing." << Qt::endl;
+          break;
+      default:
+          qDebug() << "State: Unrecognized state code." << Qt::endl;
+          break;
+  }
+}

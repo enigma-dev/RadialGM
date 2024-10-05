@@ -12,6 +12,7 @@
 #include "Editors/ScriptEditor.h"
 #include "Editors/SettingsEditor.h"
 #include "Editors/ShaderEditor.h"
+#include "Editors/VisualShaderEditor.h"
 #include "Editors/SoundEditor.h"
 #include "Editors/SpriteEditor.h"
 #include "Editors/TimelineEditor.h"
@@ -35,13 +36,13 @@
 
 #undef GetMessage
 
-QList<QString> MainWindow::EnigmaSearchPaths = {QDir::currentPath(), "./enigma-dev", "../enigma-dev",
-                                                "../RadialGM/Submodules/enigma-dev", "/opt/enigma-dev/", "/usr/lib/enigma-dev"};
+QList<QString> MainWindow::EnigmaSearchPaths = {"/opt/enigma-dev/", "/usr/lib/enigma-dev", ENIGMA_DIR};
 QFileInfo MainWindow::EnigmaRoot = MainWindow::getEnigmaRoot();
 QList<buffers::SystemType> MainWindow::systemCache;
 MainWindow *MainWindow::_instance = nullptr;
 ResourceModelMap *MainWindow::resourceMap = nullptr;
 TreeModel *MainWindow::treeModel = nullptr;
+MessageModel *MainWindow::protoModel = nullptr;
 std::unique_ptr<EventData> MainWindow::_event_data;
 
 static QTextEdit *diagnosticTextEdit = nullptr;
@@ -168,15 +169,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
   settingsButton->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextBesideIcon);
   _ui->actionSettings->setMenu(_ui->menuChangeGameSettings);
 
+  /////////////////////////////
+  // Create the server plugin
+  /////////////////////////////
+
   RGMPlugin *pluginServer = new ServerPlugin(*this);
   auto outputTextBrowser = this->_ui->outputTextBrowser;
   connect(pluginServer, &RGMPlugin::LogOutput, outputTextBrowser, &QTextBrowser::append);
-  connect(pluginServer, &RGMPlugin::CompileStatusChanged, [=](bool finished) {
-    _ui->outputDockWidget->show();
-    _ui->actionRun->setEnabled(finished);
-    _ui->actionDebug->setEnabled(finished);
-    _ui->actionCreateExecutable->setEnabled(finished);
-  });
+  connect(pluginServer, &RGMPlugin::CompileStatusChanged, this, &MainWindow::on_compileStatusChanged);
   connect(this, &MainWindow::CurrentConfigChanged, pluginServer, &RGMPlugin::SetCurrentConfig);
   connect(_ui->actionRun, &QAction::triggered, pluginServer, &RGMPlugin::Run);
   connect(_ui->actionDebug, &QAction::triggered, pluginServer, &RGMPlugin::Debug);
@@ -186,6 +186,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
 }
 
 MainWindow::~MainWindow() {
+  if (protoModel) delete protoModel;
+  if (treeModel) delete treeModel;
+  if (resourceMap) delete resourceMap;
+  if (toggleDiagnosticsAction) delete toggleDiagnosticsAction;
+  // if (this->pluginServer) delete this->pluginServer;
   diagnosticTextEdit = nullptr;
   delete _ui;
 }
@@ -300,7 +305,7 @@ void MainWindow::openNewProject() {
   auto newProject = std::make_unique<buffers::Project>();
   auto *root = newProject->mutable_game()->mutable_root();
   QList<QString> defaultGroups = {tr("Sprites"), tr("Sounds"),  tr("Backgrounds"), tr("Paths"),
-                                  tr("Scripts"), tr("Shaders"), tr("Fonts"),       tr("Timelines"),
+                                  tr("Scripts"), tr("Shaders"), tr("Visual Shaders"), tr("Fonts"),       tr("Timelines"),
                                   tr("Objects"), tr("Rooms"),   tr("Includes"),    tr("Configs")};
   // We can edit the proto directly, here, since the model doesn't exist, yet.
   for (const auto &groupName : defaultGroups) {
@@ -371,6 +376,7 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   treeConf.UseEditorLauncher<buffers::resources::Font>(Launch<FontEditor>(this));
   treeConf.UseEditorLauncher<buffers::resources::Script>(Launch<ScriptEditor>(this));
   treeConf.UseEditorLauncher<buffers::resources::Shader>(Launch<ShaderEditor>(this));
+  treeConf.UseEditorLauncher<buffers::resources::EVisualShader>(Launch<VisualShaderEditor>(this));
   treeConf.UseEditorLauncher<buffers::resources::Timeline>(Launch<TimelineEditor>(this));
   treeConf.UseEditorLauncher<buffers::resources::Object>(Launch<ObjectEditor>(this));
   treeConf.UseEditorLauncher<buffers::resources::Room>(Launch<RoomEditor>(this));
@@ -385,6 +391,7 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   msgConf.SetDefaultIcon<buffers::resources::Path>("path");
   msgConf.SetDefaultIcon<buffers::resources::Script>("script");
   msgConf.SetDefaultIcon<buffers::resources::Shader>("shader");
+  msgConf.SetDefaultIcon<buffers::resources::EVisualShader>("visual_shader");
   msgConf.SetDefaultIcon<buffers::resources::Font>("font");
   msgConf.SetDefaultIcon<buffers::resources::Timeline>("timeline");
   msgConf.SetDefaultIcon<buffers::resources::Object>("object");
@@ -416,13 +423,14 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   treeConf.SetMessagePassthrough<buffers::TreeNode::Folder>();
   treeConf.DisableOneofReassignment<buffers::TreeNode>();
 
-  delete resourceMap;
+  if (resourceMap) delete resourceMap;
   resourceMap = new ResourceModelMap(this);
 
-  auto pm = new MessageModel(ProtoModel::NonProtoParent{this}, _project->mutable_game()->mutable_root());
+  if (protoModel) delete protoModel;
+  protoModel = new MessageModel(ProtoModel::NonProtoParent{this}, _project->mutable_game()->mutable_root());
 
   // Connect methods to auto update fields with extensions
-  connect(pm, &ProtoModel::ModelConstructed, [](ProtoModel *model) {
+  connect(protoModel, &ProtoModel::ModelConstructed, [](ProtoModel *model) {
     PrimitiveModel *primitive_model = model->TryCastAsPrimitiveModel();
     if (primitive_model) {
       const FieldDescriptor *const field = primitive_model->GetFieldDescriptor();
@@ -437,13 +445,14 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
     }
   });
 
-  pm->RebuildSubModels();
+  protoModel->RebuildSubModels();
 
-  pm->SetDisplayConfig(msgConf);
+  protoModel->SetDisplayConfig(msgConf);
 
-  resourceMap->TreeChanged(pm);
-  delete treeModel;
-  treeModel = new TreeModel(pm, nullptr, treeConf);
+  resourceMap->TreeChanged(protoModel);
+
+  if (treeModel) delete treeModel;
+  treeModel = new TreeModel(protoModel, nullptr, treeConf);
 
   _ui->treeView->setModel(treeModel);
   connect(treeModel, &TreeModel::ItemRenamed, resourceMap,
@@ -451,7 +460,7 @@ void MainWindow::openProject(std::unique_ptr<buffers::Project> openedProject) {
   connect(treeModel, &TreeModel::TreeChanged, resourceMap, &ResourceModelMap::TreeChanged);
   connect(treeModel, &TreeModel::ItemRemoved, resourceMap, &ResourceModelMap::ResourceRemoved,
           Qt::DirectConnection);
-  connect(pm, &ProtoModel::dataChanged, resourceMap, &ResourceModelMap::dataChanged,
+  connect(protoModel, &ProtoModel::dataChanged, resourceMap, &ResourceModelMap::dataChanged,
           Qt::DirectConnection);
   connect(treeModel, &TreeModel::ModelAboutToBeDeleted, this, &MainWindow::ResourceModelDeleted,
           Qt::DirectConnection);
@@ -639,6 +648,8 @@ void MainWindow::on_actionCreateScript_triggered() { CreateResource(TypeCase::kS
 
 void MainWindow::on_actionCreateShader_triggered() { CreateResource(TypeCase::kShader); }
 
+void MainWindow::on_actionCreateVisualShader_triggered() { CreateResource(TypeCase::kVisualShader); }
+
 void MainWindow::on_actionCreateFont_triggered() { CreateResource(TypeCase::kFont); }
 
 void MainWindow::on_actionCreateTimeline_triggered() { CreateResource(TypeCase::kTimeline); }
@@ -716,4 +727,11 @@ void MainWindow::on_actionSortByName_triggered() {
 
 void MainWindow::on_treeView_customContextMenuRequested(const QPoint &pos) {
   _ui->menuEdit->exec(_ui->treeView->mapToGlobal(pos));
+}
+
+void MainWindow::on_compileStatusChanged(bool finished) {
+  _ui->outputDockWidget->show();
+  _ui->actionRun->setEnabled(finished);
+  _ui->actionDebug->setEnabled(finished);
+  _ui->actionCreateExecutable->setEnabled(finished);
 }

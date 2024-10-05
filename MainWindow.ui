@@ -229,6 +229,7 @@
     <addaction name="actionCreatePath"/>
     <addaction name="actionCreateScript"/>
     <addaction name="actionCreateShader"/>
+    <addaction name="actionCreateVisualShader"/>
     <addaction name="actionCreateFont"/>
     <addaction name="actionCreateTimeline"/>
     <addaction name="actionCreateObject"/>
@@ -979,6 +980,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+G</string>
+   </property>
+  </action>
+  <action name="actionCreateVisualShader">
+   <property name="text">
+    <string>Create Visual Shader</string>
    </property>
   </action>
   <actiongroup name="configActionGroup">

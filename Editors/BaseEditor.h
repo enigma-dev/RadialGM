@@ -13,12 +13,14 @@ static const QHash<int, int> ResTypeFields = {
     {TypeCase::kPath, TreeNode::kPathFieldNumber},         {TypeCase::kFont, TreeNode::kFontFieldNumber},
     {TypeCase::kScript, TreeNode::kScriptFieldNumber},     {TypeCase::kTimeline, TreeNode::kTimelineFieldNumber},
     {TypeCase::kObject, TreeNode::kObjectFieldNumber},     {TypeCase::kRoom, TreeNode::kRoomFieldNumber},
-    {TypeCase::kSettings, TreeNode::kSettingsFieldNumber}, {TypeCase::kShader, TreeNode::kShaderFieldNumber}};
+    {TypeCase::kSettings, TreeNode::kSettingsFieldNumber}, {TypeCase::kShader, TreeNode::kShaderFieldNumber},
+    {TypeCase::kVisualShader, TreeNode::kVisualShaderFieldNumber}};
 
 class BaseEditor : public QWidget {
   Q_OBJECT
 
  public:
+  explicit BaseEditor(QWidget *parent = nullptr);
   explicit BaseEditor(MessageModel *treeNodeModel, QWidget *parent);
   ~BaseEditor();
   void ReplaceBuffer(google::protobuf::Message *buffer);

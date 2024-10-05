@@ -21,6 +21,10 @@ class MainWindow;
 #include <QProcess>
 #include <QFileInfo>
 
+#ifndef ENIGMA_DIR
+#error "ENIGMA_DIR not defined"
+#endif
+
 namespace Ui {
 class MainWindow;
 }
@@ -32,6 +36,7 @@ class MainWindow : public QMainWindow {
   static ResourceModelMap* resourceMap;
   static MessageModel* resourceModel;
   static TreeModel* treeModel;
+  static MessageModel* protoModel;
   static QList<buffers::SystemType> systemCache;
 
   explicit MainWindow(QWidget *parent);
@@ -82,6 +87,7 @@ class MainWindow : public QMainWindow {
   void on_actionCreatePath_triggered();
   void on_actionCreateScript_triggered();
   void on_actionCreateShader_triggered();
+  void on_actionCreateVisualShader_triggered();
   void on_actionCreateFont_triggered();
   void on_actionCreateTimeline_triggered();
   void on_actionCreateObject_triggered();
@@ -108,6 +114,8 @@ class MainWindow : public QMainWindow {
 
   void on_treeView_doubleClicked(const QModelIndex &index);
   void on_treeView_customContextMenuRequested(const QPoint &pos);
+
+  void on_compileStatusChanged(bool finished);
 
  private:
   void closeEvent(QCloseEvent *event) override;
