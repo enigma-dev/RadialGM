@@ -35,10 +35,10 @@ class TestVisualShaderEditor : public QObject {
 
  private slots:
   void initTestCase();  // Will be called before the first test function is executed.
-  void init();        // Will be called before each test function is executed.
+  void init();          // Will be called before each test function is executed.
 
   void cleanupTestCase();  // Will be called after the last test function was executed.
-  void cleanup();        // Will be called after every test function.
+  void cleanup();          // Will be called after every test function.
 
   void test_create_full_graph();
 

@@ -30,38 +30,38 @@
 
 #include <QContextMenuEvent>
 #include <QGraphicsSceneMouseEvent>
+#include <QOpenGLWidget>
 #include <QtCore/QPointF>
 #include <QtCore/QSize>
 #include <QtWidgets/QComboBox>
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QGraphicsObject>
+#include <QtWidgets/QGraphicsProxyWidget>
 #include <QtWidgets/QGraphicsScene>
 #include <QtWidgets/QGraphicsView>
 #include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMenu>
+#include <QtWidgets/QPlainTextEdit>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QTextEdit>
 #include <QtWidgets/QTreeWidget>
 #include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QPlainTextEdit>
-#include <QtWidgets/QGraphicsProxyWidget>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QLineEdit>
-#include <QOpenGLWidget>
 // #include <QOpenGLFunctions>
-#include <QOpenGLFunctions_4_3_Core> // https://stackoverflow.com/a/64288966/14629018 explains why we need this.
-#include <QOpenGLShaderProgram>
-#include <QElapsedTimer>
-#include <QColorDialog>
 #include <QCheckBox>
+#include <QColorDialog>
+#include <QElapsedTimer>
+#include <QOpenGLFunctions_4_3_Core>  // https://stackoverflow.com/a/64288966/14629018 explains why we need this.
+#include <QOpenGLShaderProgram>
 
 #include <string>
 #include <vector>
 
+#include "Editors/BaseEditor.h"
 #include "ResourceTransformations/VisualShader/visual_shader.h"
 #include "ResourceTransformations/VisualShader/visual_shader_nodes.h"
 #include "ResourceTransformations/VisualShader/vs_noise_nodes.h"
-#include "Editors/BaseEditor.h"
 
 class VisualShaderGraphicsScene;
 class VisualShaderGraphicsView;
@@ -275,21 +275,21 @@ class CreateNodeDialog : public QDialog {
 /**********************************************************************/
 
 class OriginalMatchingImageWidget : public QWidget {
-public:
-    OriginalMatchingImageWidget(QWidget* parent = nullptr) : QWidget(parent) {
-        pixmap = QPixmap(size());
-        pixmap.fill(Qt::red);  // Fill it with the red color
-    }
+ public:
+  OriginalMatchingImageWidget(QWidget* parent = nullptr) : QWidget(parent) {
+    pixmap = QPixmap(size());
+    pixmap.fill(Qt::red);  // Fill it with the red color
+  }
 
-protected:
-    // Override the paintEvent to display the pixmap
-    void paintEvent(QPaintEvent* event) override {
-        QPainter painter(this);
-        painter.drawPixmap(0, 0, pixmap);  // Draw the pixmap starting at (0, 0)
-    }
+ protected:
+  // Override the paintEvent to display the pixmap
+  void paintEvent(QPaintEvent* event) override {
+    QPainter painter(this);
+    painter.drawPixmap(0, 0, pixmap);  // Draw the pixmap starting at (0, 0)
+  }
 
-private:
-    QPixmap pixmap;
+ private:
+  QPixmap pixmap;
 };
 
 /**********************************************************************/
@@ -310,38 +310,38 @@ private:
  * 
  */
 class ShaderPreviewerWidget : public QOpenGLWidget {
-    Q_OBJECT
+  Q_OBJECT
 
-public:
-    ShaderPreviewerWidget(QWidget* parent = nullptr);
-    ~ShaderPreviewerWidget() override;
+ public:
+  ShaderPreviewerWidget(QWidget* parent = nullptr);
+  ~ShaderPreviewerWidget() override;
 
-    void set_code(const std::string& code);
+  void set_code(const std::string& code);
 
-Q_SIGNALS:
-    void scene_update_requested();
+ Q_SIGNALS:
+  void scene_update_requested();
 
-protected:
-    void initializeGL() override;
-    void resizeGL(int w, int h) override;
-    void paintGL() override;
+ protected:
+  void initializeGL() override;
+  void resizeGL(int w, int h) override;
+  void paintGL() override;
 
-    void showEvent(QShowEvent* event) override;
-    void hideEvent(QHideEvent* event) override;
+  void showEvent(QShowEvent* event) override;
+  void hideEvent(QHideEvent* event) override;
 
-private:
-    std::unique_ptr<QOpenGLShaderProgram> shader_program;
-    GLuint VAO, VBO;
-    QElapsedTimer timer;
+ private:
+  std::unique_ptr<QOpenGLShaderProgram> shader_program;
+  GLuint VAO, VBO;
+  QElapsedTimer timer;
 
-    std::string code;
-    bool shader_needs_update {false};
+  std::string code;
+  bool shader_needs_update{false};
 
-    void init_shaders();
-    void init_buffers();
-    void update_shader_program();
+  void init_shaders();
+  void init_buffers();
+  void update_shader_program();
 
-    /**
+  /**
      * @brief Cleans up the OpenGL resources.
      * 
      * @note This function is called automatically when the widget is destroyed.
@@ -353,7 +353,7 @@ private:
      *       context current.
      * 
      */
-    void cleanup();
+  void cleanup();
 };
 
 /**********************************************************************/
@@ -514,9 +514,9 @@ class VisualShaderGraphicsView : public QGraphicsView {
   VisualShaderGraphicsScene* scene;
 
   // Style
-  QColor background_color = QColor(40, 40, 40); // Dark Charcoal
-  QColor fine_grid_color = QColor(50, 50, 50); // Soft Dark Gray
-  QColor coarse_grid_color = QColor(30, 30, 30); // Muted Deep Gray
+  QColor background_color = QColor(40, 40, 40);   // Dark Charcoal
+  QColor fine_grid_color = QColor(50, 50, 50);    // Soft Dark Gray
+  QColor coarse_grid_color = QColor(30, 30, 30);  // Muted Deep Gray
 
   // Scene Rect
   float t_size = std::numeric_limits<short>::max();  // 32767
@@ -568,10 +568,8 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
   Q_OBJECT
 
  public:
-  VisualShaderNodeGraphicsObject(const int& n_id, 
-                                 const QPointF& coordinate, 
-                                 const std::shared_ptr<VisualShaderNode>& node,
-                                 QGraphicsItem* parent = nullptr);
+  VisualShaderNodeGraphicsObject(const int& n_id, const QPointF& coordinate,
+                                 const std::shared_ptr<VisualShaderNode>& node, QGraphicsItem* parent = nullptr);
   ~VisualShaderNodeGraphicsObject();
 
   VisualShaderInputPortGraphicsObject* get_input_port_graphics_object(const int& p_index) const;
@@ -668,10 +666,10 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
   std::unordered_map<int, VisualShaderOutputPortGraphicsObject*> out_port_graphics_objects;
 
   // Style
-  QColor normal_boundary_color = QColor(220, 20, 60); // Crimson Red
-  QColor selected_boundary_color = QColor(255, 69, 0); // Red-Orange
-  QColor font_color = QColor(255, 255, 255); // Pure White
-  QColor fill_color = QColor(40, 40, 40, 200); // Semi-transparent Dark Gray
+  QColor normal_boundary_color = QColor(220, 20, 60);   // Crimson Red
+  QColor selected_boundary_color = QColor(255, 69, 0);  // Red-Orange
+  QColor font_color = QColor(255, 255, 255);            // Pure White
+  QColor fill_color = QColor(40, 40, 40, 200);          // Semi-transparent Dark Gray
 
   float pen_width = 1.0f;
 
@@ -693,7 +691,7 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
   mutable float rect_padding;  // Calculated in boundingRect()
   mutable float rect_margin;   // Calculated in boundingRect()
 
-  float port_caption_spacing = 4.0f; // Distance between the port and its caption
+  float port_caption_spacing = 4.0f;  // Distance between the port and its caption
 
   // Ports Style
   float connected_port_diameter = 8.0f;
@@ -727,7 +725,7 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
    */
   void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
   QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
-  void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
+  void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 };
 
 class VisualShaderInputPortGraphicsObject : public QGraphicsObject {
@@ -773,7 +771,7 @@ class VisualShaderInputPortGraphicsObject : public QGraphicsObject {
 
   // Style
   QColor font_color = QColor(255, 255, 255);
-  QColor connection_point_color = QColor(220, 20, 60); // Crimson
+  QColor connection_point_color = QColor(220, 20, 60);  // Crimson
 
   float opacity = 1.0f;
 
@@ -797,12 +795,16 @@ class VisualShaderOutputPortGraphicsObject : public QGraphicsObject {
   int get_node_id() const { return n_id; }
   int get_port_index() const { return p_index; }
 
-  std::vector<VisualShaderConnectionGraphicsObject*> get_connection_graphics_objects() const { return connection_graphics_objects; }
-  VisualShaderConnectionGraphicsObject* get_connection_graphics_object(const int& to_node_id, const int& to_port_index) const;
+  std::vector<VisualShaderConnectionGraphicsObject*> get_connection_graphics_objects() const {
+    return connection_graphics_objects;
+  }
+  VisualShaderConnectionGraphicsObject* get_connection_graphics_object(const int& to_node_id,
+                                                                       const int& to_port_index) const;
   void connect(VisualShaderConnectionGraphicsObject* c_o) { this->connection_graphics_objects.emplace_back(c_o); }
   void detach_connection(VisualShaderConnectionGraphicsObject* c_o) {
-    connection_graphics_objects.erase(std::remove(connection_graphics_objects.begin(), connection_graphics_objects.end(), c_o),
-                                      connection_graphics_objects.end());
+    connection_graphics_objects.erase(
+        std::remove(connection_graphics_objects.begin(), connection_graphics_objects.end(), c_o),
+        connection_graphics_objects.end());
   }
   bool is_connected() const { return connection_graphics_objects.size() > 0; }
 
@@ -832,7 +834,7 @@ class VisualShaderOutputPortGraphicsObject : public QGraphicsObject {
 
   // Style
   QColor font_color = QColor(255, 255, 255);
-  QColor connection_point_color = QColor(220, 20, 60); // Crimson
+  QColor connection_point_color = QColor(220, 20, 60);  // Crimson
 
   float opacity = 1.0f;
 
@@ -894,9 +896,9 @@ class VisualShaderConnectionGraphicsObject : public QGraphicsObject {
   QPointF end_coordinate;
 
   // Style
-  QColor construction_color = QColor(139, 0, 0); // Dark Red
-  QColor normal_color = QColor(178, 34, 34); // Firebrick Red
-  QColor selected_color = QColor(55, 55, 55); // Dark Gray
+  QColor construction_color = QColor(139, 0, 0);  // Dark Red
+  QColor normal_color = QColor(178, 34, 34);      // Firebrick Red
+  QColor selected_color = QColor(55, 55, 55);     // Dark Gray
   QColor connection_point_color = QColor(211, 211, 211);
 
   float line_width = 3.0f;
@@ -936,13 +938,15 @@ class VisualShaderNodeEmbedWidget : public QWidget {
   VisualShaderNodeEmbedWidget(const std::shared_ptr<VisualShaderNode>& node, QWidget* parent = nullptr);
   ~VisualShaderNodeEmbedWidget();
 
-  void set_shader_previewer_widget(QWidget* shader_previewer_widget) { this->shader_previewer_widget = shader_previewer_widget; }
+  void set_shader_previewer_widget(QWidget* shader_previewer_widget) {
+    this->shader_previewer_widget = shader_previewer_widget;
+  }
 
  Q_SIGNALS:
   void shader_preview_update_requested();
   void node_update_requested();
 
-  private Q_SLOTS:
+ private Q_SLOTS:
   void on_preview_shader_button_pressed() {
     bool is_visible{shader_previewer_widget->isVisible()};
     shader_previewer_widget->setVisible(!is_visible);
@@ -953,7 +957,7 @@ class VisualShaderNodeEmbedWidget : public QWidget {
 
   void on_node_update_requested() { Q_EMIT node_update_requested(); }
 
-  private:
+ private:
   QVBoxLayout* layout;
 
   QPushButton* preview_shader_button;
