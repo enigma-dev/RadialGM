@@ -1017,7 +1017,8 @@ bool VisualShaderGraphicsScene::add_node(const int& n_id, const std::shared_ptr<
   QObject::connect(n_o, &VisualShaderNodeGraphicsObject::out_port_dropped, this, &VisualShaderGraphicsScene::on_port_dropped);
 
   QObject::connect(n_o, &VisualShaderNodeGraphicsObject::scene_update_requested, this, &VisualShaderGraphicsScene::on_scene_update_requested);
-  QObject::connect(n_o, &VisualShaderNodeGraphicsObject::scene_item_remove_requested, this, &VisualShaderGraphicsScene::on_scene_item_remove_requested);
+  QObject::connect(n_o, &VisualShaderNodeGraphicsObject::in_port_remove_requested, this, &VisualShaderGraphicsScene::on_in_port_remove_requested);
+  QObject::connect(n_o, &VisualShaderNodeGraphicsObject::out_port_remove_requested, this, &VisualShaderGraphicsScene::on_out_port_remove_requested);
 
   if (n_id != (int)VisualShader::NODE_ID_OUTPUT) {
     VisualShaderNodeEmbedWidget* embed_widget {new VisualShaderNodeEmbedWidget(n)};
@@ -1117,8 +1118,9 @@ bool VisualShaderGraphicsScene::delete_node(const int& n_id) {
   }
 
   // Remove the node from the scene
+  // TODO: Why if we exchange the order of these two lines, the program crashes?
   this->node_graphics_objects.erase(n_id);
-  on_scene_item_remove_requested(n_o);
+  remove_item(n_o);
 
   return true;
 }
@@ -1144,9 +1146,30 @@ void VisualShaderGraphicsScene::on_scene_update_requested() {
   update();
 }
 
-void VisualShaderGraphicsScene::on_scene_item_remove_requested(QGraphicsItem* item) {
-  removeItem(item);
-  delete item;
+void VisualShaderGraphicsScene::on_in_port_remove_requested(VisualShaderInputPortGraphicsObject* in_port) {
+  if (in_port->is_connected()) {
+    VisualShaderConnectionGraphicsObject* c_o{in_port->get_connection_graphics_object()};
+    delete_connection(c_o->get_from_node_id(),
+                      c_o->get_from_port_index(),
+                      c_o->get_to_node_id(),
+                      c_o->get_to_port_index());
+  }
+
+  remove_item(in_port);
+}
+
+void VisualShaderGraphicsScene::on_out_port_remove_requested(VisualShaderOutputPortGraphicsObject* out_port) {
+  if (out_port->is_connected()) {
+    std::vector<VisualShaderConnectionGraphicsObject*> c_os{out_port->get_connection_graphics_objects()};
+    for (VisualShaderConnectionGraphicsObject* c_o : c_os) {
+      delete_connection(c_o->get_from_node_id(),
+                    c_o->get_from_port_index(),
+                    c_o->get_to_node_id(),
+                    c_o->get_to_port_index());
+    }
+  }
+
+  remove_item(out_port);
 }
 
 bool VisualShaderGraphicsScene::add_connection(const int& from_node_id, const int& from_port_index,
@@ -1247,7 +1270,7 @@ bool VisualShaderGraphicsScene::delete_connection(const int& from_node_id, const
 
   if (this->temporary_connection_graphics_object) {
     from_o_port->detach_connection(this->temporary_connection_graphics_object);
-    on_scene_item_remove_requested(this->temporary_connection_graphics_object);
+    remove_item(this->temporary_connection_graphics_object);
     this->temporary_connection_graphics_object = nullptr;
     return true;
   }
@@ -1280,7 +1303,7 @@ bool VisualShaderGraphicsScene::delete_connection(const int& from_node_id, const
 
     to_i_port->detach_connection();
     from_o_port->detach_connection(c_o);
-    on_scene_item_remove_requested(c_o);
+    remove_item(c_o);
 
     on_update_shader_previewer_widgets_requested();
 
@@ -1498,6 +1521,11 @@ void VisualShaderGraphicsScene::on_port_dropped(QGraphicsObject* port, const QPo
 
     return;
   }
+}
+
+void VisualShaderGraphicsScene::remove_item(QGraphicsItem* item) {
+  removeItem(item);
+  delete item;
 }
 
 /**********************************************************************/
@@ -1873,33 +1901,22 @@ void VisualShaderNodeGraphicsObject::on_node_update_requested() {
   // we need to remove any extra ports that are not needed anymore. Don't forget to remove the connections 
   // as well.
   if (in_port_graphics_objects.size() > node->get_input_port_count()) {
-    int start_index{node->get_input_port_count()};
-    int size{(int)in_port_graphics_objects.size() - start_index};
+    int p_index{node->get_input_port_count()};
+    int size{(int)in_port_graphics_objects.size() - p_index};
     for (int i{0}; i < size; ++i) {
-      VisualShaderInputPortGraphicsObject* i_port{in_port_graphics_objects.at(start_index)};
-      in_port_graphics_objects.erase(start_index);
-      if (i_port->is_connected()) {
-        Q_EMIT scene_item_remove_requested(i_port->get_connection_graphics_object());
-      }
-      Q_EMIT scene_item_remove_requested(i_port);
-      start_index++;
+      Q_EMIT in_port_remove_requested(in_port_graphics_objects.at(p_index));
+      in_port_graphics_objects.erase(p_index);
+      p_index++;
     }
   }
 
   if (out_port_graphics_objects.size() > node->get_output_port_count()) {
-    int start_index{node->get_output_port_count()};
-    int size{(int)out_port_graphics_objects.size() - start_index};
+    int p_index{node->get_output_port_count()};
+    int size{(int)out_port_graphics_objects.size() - p_index};
     for (int i{0}; i < size; ++i) {
-      VisualShaderOutputPortGraphicsObject* o_port{out_port_graphics_objects.at(start_index)};
-      out_port_graphics_objects.erase(start_index);
-      if (o_port->is_connected()) {
-        std::vector<VisualShaderConnectionGraphicsObject*> c_os{o_port->get_connection_graphics_objects()};
-        for (VisualShaderConnectionGraphicsObject* c_o : c_os) {
-          Q_EMIT scene_item_remove_requested(c_o);
-        }
-      }
-      Q_EMIT scene_item_remove_requested(o_port);
-      start_index++;
+      Q_EMIT out_port_remove_requested(out_port_graphics_objects.at(p_index));
+      out_port_graphics_objects.erase(p_index);
+      p_index++;
     }
   }
 

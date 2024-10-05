@@ -450,7 +450,8 @@ class VisualShaderGraphicsScene : public QGraphicsScene {
 
   void on_scene_update_requested();
 
-  void on_scene_item_remove_requested(QGraphicsItem* item);
+  void on_in_port_remove_requested(VisualShaderInputPortGraphicsObject* in_port);
+  void on_out_port_remove_requested(VisualShaderOutputPortGraphicsObject* out_port);
 
  private:
   VisualShader* vs;
@@ -459,6 +460,8 @@ class VisualShaderGraphicsScene : public QGraphicsScene {
   std::unordered_map<int, VisualShaderNodeGraphicsObject*> node_graphics_objects;
 
   VisualShaderConnectionGraphicsObject* temporary_connection_graphics_object;
+
+  void remove_item(QGraphicsItem* item);
 };
 
 /**********************************************************************/
@@ -618,7 +621,8 @@ class VisualShaderNodeGraphicsObject : public QGraphicsObject {
 
   void scene_update_requested();
 
-  void scene_item_remove_requested(QGraphicsItem* item);
+  void in_port_remove_requested(VisualShaderInputPortGraphicsObject* in_port);
+  void out_port_remove_requested(VisualShaderOutputPortGraphicsObject* out_port);
 
  private Q_SLOTS:
   /**
