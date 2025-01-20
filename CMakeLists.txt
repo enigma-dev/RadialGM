@@ -160,6 +160,7 @@ set(RGM_SOURCES
   Editors/ScriptEditor.cpp
   Editors/CodeEditor.cpp
   Editors/TimelineEditor.cpp
+  Editors/VisualShaderEditor.cpp
   main.cpp
   Plugins/RGMPlugin.cpp
   Dialogs/EventArgumentsDialog.cpp
@@ -368,6 +369,14 @@ target_link_libraries(${EXE} PRIVATE ${LIB_PCRE2})
 # Find double-conversion
 find_library(LIB_DOUBLE_CONVERSION NAMES double-conversion)
 target_link_libraries(${EXE} PRIVATE ${LIB_DOUBLE_CONVERSION})
+
+# nodeeditor
+# FIXME: In order for BUILD_DEBUG_POSTFIX_D and USE_QT6 to be set correctly, you will need to configure the project twice: https://cmake.org/cmake/help/latest/policy/CMP0077.html
+if (CMAKE_BUILD_TYPE MATCHES "Debug")
+  set(BUILD_DEBUG_POSTFIX_D ON)
+endif()
+set(USE_QT6 OFF) # We use Qt5
+add_subdirectory(Submodules/nodeeditor)
 
 if(WIN32)
   # Windows is a turd
