@@ -18,7 +18,6 @@ AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: true
 AlwaysBreakTemplateDeclarations: true
-AllowShortCaseLabelsOnASingleLine: true
 BinPackArguments: true
 BinPackParameters: true
 BraceWrapping:   

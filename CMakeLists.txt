@@ -1,3 +1,30 @@
+###################################################################################
+##                                                                               ##
+##  Copyright (C) 2024 Saif Kandil (k0T0z)                                       ##
+##                                                                               ##
+##  This file is a part of the ENIGMA Development Environment.                   ##
+##                                                                               ##
+##                                                                               ##
+##  ENIGMA is free software: you can redistribute it and/or modify it under the  ##
+##  terms of the GNU General Public License as published by the Free Software    ##
+##  Foundation, version 3 of the license or any later version.                   ##
+##                                                                               ##
+##  This application and its source code is distributed AS-IS, WITHOUT ANY       ##
+##  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS    ##
+##  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more        ##
+##  details.                                                                     ##
+##                                                                               ##
+##  You should have recieved a copy of the GNU General Public License along      ##
+##  with this code. If not, see <http://www.gnu.org/licenses/>                   ##
+##                                                                               ##
+##  ENIGMA is an environment designed to create games and other programs with a  ##
+##  high-level, fully compilable language. Developers of ENIGMA or anything      ##
+##  associated with ENIGMA are in no way responsible for its users or            ##
+##  applications created by its users, or damages caused by the environment      ##
+##  or programs made in the environment.                                         ##
+##                                                                               ##
+###################################################################################
+
 cmake_minimum_required(VERSION 3.14)
 project(RadialGM)
 
@@ -30,15 +57,27 @@ if(NOT CMAKE_BUILD_TYPE)
     CMAKE_BUILD_TYPE "Debug"
     CACHE
       STRING
-      "Choose the type of build from:  Debug Release RelWithDebInfo MinSizeRel."
+      "Choose the type of build from:  Debug Release MinSizeRel RelWithDebInfo."
     FORCE)
+else()
+  if (NOT CMAKE_BUILD_TYPE MATCHES "Debug" AND NOT CMAKE_BUILD_TYPE MATCHES "Release" AND NOT CMAKE_BUILD_TYPE MATCHES "MinSizeRel" AND NOT CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo")
+    message(FATAL_ERROR "Invalid build type: ${CMAKE_BUILD_TYPE}")
+  endif()
 endif()
+
+set(CMAKE_DEBUG_POSTFIX "d")
+set(CMAKE_RELEASE_POSTFIX "")
+set(CMAKE_MINSIZEREL_POSTFIX "s")
+set(CMAKE_RELWITHDEBINFO_POSTFIX "rd")
 
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
   set(EXE "RadialGM-Debug" CACHE STRING "RGM Executable name")
   add_definitions(-DRGM_DEBUG)
-  set(CMAKE_DEBUG_POSTFIX d)
-else()
+elseif(CMAKE_BUILD_TYPE MATCHES "MinSizeRel")
+  set(EXE "RadialGM-MinSizeRel" CACHE STRING "RGM Executable name")
+elseif(CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo")
+  set(EXE "RadialGM-RelWithDebInfo" CACHE STRING "RGM Executable name")
+else() # Release
   set(EXE "RadialGM" CACHE STRING "RGM Executable name")
 endif()
 
@@ -60,13 +99,30 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# TODO: Do we need to disable exceptions in RGM like we do in ENIGMA?
+# if(MSVC)
+#     string(APPEND CMAKE_CXX_FLAGS " /EHsc /wd26812")
+#     string(APPEND CMAKE_C_FLAGS " /EHsc /wd26812")
+# endif()
+
+# # Disable C++ exceptions.
+# if(MSVC)
+#     string(REGEX REPLACE "/EHsc" "/EHs-c-" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+#     add_definitions(-D_HAS_EXCEPTIONS=0)
+# else()
+#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-unwind-tables -fno-asynchronous-unwind-tables")
+# endif()
+
 set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/" "${CMAKE_CURRENT_SOURCE_DIR}/Dialogs" "${CMAKE_CURRENT_SOURCE_DIR}/Editors")
 
 # Uncomment to be able to use local grpc_cpp_plugin
 # set(GRPC_EXE "/usr/local/bin/grpc_cpp_plugin")
 
+set(RGM_ROOTDIR "${CMAKE_CURRENT_SOURCE_DIR}")
+
+# The ENIGMA_DIR is sent to the C++ code as a define
 # Include ENIGMA things
-set(ENIGMA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/enigma-dev CACHE PATH "ENIGMA directory")
+set(ENIGMA_DIR ${RGM_ROOTDIR}/Submodules/enigma-dev CACHE PATH "ENIGMA directory")
 include_directories("${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/protos/" "${ENIGMA_DIR}/CommandLine/libEGM" "${ENIGMA_DIR}/shared")
 
 # Populate a CMake variable with the sources
@@ -110,6 +166,7 @@ set(RGM_SOURCES
   Dialogs/EventArgumentsDialog.cpp
   Dialogs/TimelineChangeMoment.cpp
   Dialogs/PreferencesDialog.cpp
+  Dialogs/PreferencesKeys.cpp
   Dialogs/KeyBindingPreferences.cpp
   Utils/ProtoManip.cpp
   Utils/FieldPath.cpp
@@ -141,7 +198,6 @@ set(RGM_HEADERS
   Models/ModelMapper.h
   Models/RepeatedSortFilterProxyModel.h
   Models/TreeSortFilterProxyModel.h
-  main.h
   Components/RecentFiles.h
   Components/QMenuView_p.h
   Components/Utility.h
@@ -163,7 +219,6 @@ set(RGM_HEADERS
   Editors/FontEditor.h
   Editors/SpriteEditor.h
   Editors/BackgroundEditor.h
-  Editors/VisualShaderEditor.h
   Plugins/RGMPlugin.h
   MainWindow.h
   Dialogs/EventArgumentsDialog.h
@@ -228,7 +283,7 @@ set(RGM_HEADERS ${RGM_HEADERS} Plugins/ServerPlugin.h)
 add_executable(${EXE} WIN32 ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${EDITOR_SOURCES} ${RGM_RC})
 
 # we do this even in release mode for "Editor Diagnostics"
-target_compile_definitions(${EXE} PUBLIC QT_MESSAGELOGCONTEXT)
+target_compile_definitions(${EXE} PUBLIC QT_MESSAGELOGCONTEXT ENIGMA_DIR="${ENIGMA_DIR}")
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT WIN32)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
@@ -288,9 +343,9 @@ target_link_libraries(${EXE} PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintS
 # LibProto
 # Arrangement of these is important: shared depends on proto and emake depends on all of them
 # We need to cache the library names first so we can build on top of them
-add_subdirectory(Submodules/enigma-dev/shared/protos)
-add_subdirectory(Submodules/enigma-dev/shared)
-add_subdirectory(Submodules/enigma-dev/CommandLine/libEGM)
+add_subdirectory(${ENIGMA_DIR}/shared/protos)
+add_subdirectory(${ENIGMA_DIR}/shared)
+add_subdirectory(${ENIGMA_DIR}/CommandLine/libEGM)
 add_dependencies(${EXE} ${LIB_EGM})
 target_link_libraries(${EXE} PRIVATE ${LIB_EGM} ${LIB_PROTO} ${SHARED_LIB})
 
@@ -334,8 +389,8 @@ if(MSVC)
 endif()
 
 if (RGM_BUILD_EMAKE)
-  add_subdirectory(Submodules/enigma-dev/CompilerSource)
-  add_subdirectory(Submodules/enigma-dev/CommandLine/emake)
+  add_subdirectory(${ENIGMA_DIR}/CompilerSource)
+  add_subdirectory(${ENIGMA_DIR}/CommandLine/emake)
   add_dependencies(${EXE} ${CLI_TARGET})
 endif()
 
@@ -344,12 +399,12 @@ add_custom_command(
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/emake/${CLI_TARGET}${CMAKE_EXECUTABLE_SUFFIX}
-        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/libEGM/${CMAKE_SHARED_LIBRARY_PREFIX}${LIB_EGM}${CMAKE_DEBUG_POSTFIX}${CMAKE_SHARED_LIBRARY_SUFFIX}
-        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CompilerSource/${CMAKE_SHARED_LIBRARY_PREFIX}${COMPILER_LIB}${CMAKE_DEBUG_POSTFIX}${CMAKE_SHARED_LIBRARY_SUFFIX}
-        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/protos/${CMAKE_SHARED_LIBRARY_PREFIX}${LIB_PROTO}${CMAKE_DEBUG_POSTFIX}${CMAKE_SHARED_LIBRARY_SUFFIX}
-        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/${CMAKE_SHARED_LIBRARY_PREFIX}${SHARED_LIB}${CMAKE_DEBUG_POSTFIX}${CMAKE_SHARED_LIBRARY_SUFFIX}
-        ${CMAKE_CURRENT_SOURCE_DIR}/Submodules/enigma-dev
-    COMMENT "Copying exes to ENIGMA's root directory"
+        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CommandLine/libEGM/${CMAKE_SHARED_LIBRARY_PREFIX}${LIB_EGM}$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>,${CMAKE_DEBUG_POSTFIX},$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},MinSizeRel>,${CMAKE_MINSIZEREL_POSTFIX},$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},RelWithDebInfo>,${CMAKE_RELWITHDEBINFO_POSTFIX},>>>${CMAKE_SHARED_LIBRARY_SUFFIX}
+        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/CompilerSource/${CMAKE_SHARED_LIBRARY_PREFIX}${COMPILER_LIB}$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>,${CMAKE_DEBUG_POSTFIX},$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},MinSizeRel>,${CMAKE_MINSIZEREL_POSTFIX},$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},RelWithDebInfo>,${CMAKE_RELWITHDEBINFO_POSTFIX},>>>${CMAKE_SHARED_LIBRARY_SUFFIX}
+        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/protos/${CMAKE_SHARED_LIBRARY_PREFIX}${LIB_PROTO}$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>,${CMAKE_DEBUG_POSTFIX},$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},MinSizeRel>,${CMAKE_MINSIZEREL_POSTFIX},$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},RelWithDebInfo>,${CMAKE_RELWITHDEBINFO_POSTFIX},>>>${CMAKE_SHARED_LIBRARY_SUFFIX}
+        ${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/${CMAKE_SHARED_LIBRARY_PREFIX}${SHARED_LIB}$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>,${CMAKE_DEBUG_POSTFIX},$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},MinSizeRel>,${CMAKE_MINSIZEREL_POSTFIX},$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},RelWithDebInfo>,${CMAKE_RELWITHDEBINFO_POSTFIX},>>>${CMAKE_SHARED_LIBRARY_SUFFIX}
+        ${ENIGMA_DIR}
+    COMMENT "Copying exes to ${ENIGMA_DIR}"
 )
 
 install(TARGETS ${EXE} RUNTIME DESTINATION .)
