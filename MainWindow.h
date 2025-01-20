@@ -32,6 +32,7 @@ class MainWindow : public QMainWindow {
   static ResourceModelMap* resourceMap;
   static MessageModel* resourceModel;
   static TreeModel* treeModel;
+  static MessageModel* protoModel;
   static QList<buffers::SystemType> systemCache;
 
   explicit MainWindow(QWidget *parent);
@@ -108,6 +109,8 @@ class MainWindow : public QMainWindow {
 
   void on_treeView_doubleClicked(const QModelIndex &index);
   void on_treeView_customContextMenuRequested(const QPoint &pos);
+
+  void on_compileStatus_changed(bool finished);
 
  private:
   void closeEvent(QCloseEvent *event) override;
