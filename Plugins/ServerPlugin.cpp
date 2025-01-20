@@ -249,6 +249,8 @@ void CompilerClient::UpdateLoop(void* got_tag, bool ok) {
 }
 
 ServerPlugin::ServerPlugin(MainWindow& mainWindow) : RGMPlugin(mainWindow) {
+  // TODO: Check if emake is already running and connect to it instead of starting a new one.
+
   // create a new child process for us to launch an emake server
   process = new QProcess(this);
 

@@ -3,7 +3,6 @@
 
 #include "PreferencesKeys.h"
 #include "KeyBindingPreferences.h"
-#include "main.h"
 #include "Components/Logger.h"
 
 #include <QFileDialog>
