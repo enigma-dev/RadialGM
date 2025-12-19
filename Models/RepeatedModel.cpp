@@ -40,8 +40,8 @@ QVariant RepeatedModel::data(const QModelIndex& index, int role) const {
 
 const ProtoModel *RepeatedModel::GetSubModel(const FieldPath &field_path) const {
   if (!field_path.fields.empty()) {
-    qDebug() << "Attempting to access sub-field `" << field_path.front()->full_name().c_str()
-             << "` of scalar repeated field `" << field_->full_name().c_str() << "`";
+    qDebug() << "Attempting to access sub-field `" << std::string(field_path.front()->full_name()).c_str()
+             << "` of scalar repeated field `" << std::string(field_->full_name()).c_str() << "`";
     return nullptr;
   }
   if (field_path.repeated_field_index != -1) {
@@ -49,7 +49,7 @@ const ProtoModel *RepeatedModel::GetSubModel(const FieldPath &field_path) const 
       return GetSubModel(field_path.repeated_field_index);
     }
     qDebug() << "Attempting to access out-of-bounds index " << field_path.repeated_field_index
-             << " of field `" << field_->full_name().c_str() << "`";
+             << " of field `" << std::string(field_->full_name()).c_str() << "`";
     return nullptr;
   }
   return this;
@@ -114,12 +114,15 @@ QVariant RepeatedModel::headerData(int section, Qt::Orientation /*orientation*/,
   switch (role) {
     case Qt::DisplayRole:  {
       const auto field = field_->message_type()->field(section);
-      const auto& fd = GetFieldDisplay(field->full_name());
+      const auto& fd = GetFieldDisplay(std::string(field->full_name()));
       if (!fd.name.isEmpty()) return fd.name;
-      else return QString::fromStdString(field->name());
+      else {
+        auto field_name_sv = field->name();
+        return QString::fromUtf8(field_name_sv.data(), field_name_sv.size());
+      }
     }
     case Qt::DecorationRole: {
-      const auto& fd = GetFieldDisplay(field_->message_type()->field(section)->full_name());
+      const auto& fd = GetFieldDisplay(std::string(field_->message_type()->field(section)->full_name()));
       if (!fd.header_icon.isEmpty()) return ArtManager::GetIcon(fd.header_icon);
       else return {};
     }

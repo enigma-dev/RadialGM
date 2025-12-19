@@ -10,6 +10,8 @@ class TreeSortFilterProxyModel : public QSortFilterProxyModel
 public:
   TreeSortFilterProxyModel(QObject *parent = nullptr);
   void SetFilterType(TreeNode::TypeCase type);
+  
+  Qt::ItemFlags flags(const QModelIndex &index) const override;
 
 protected:
   TreeNode::TypeCase filterType = TreeNode::TypeCase::TYPE_NOT_SET;

@@ -144,7 +144,8 @@ QString ResourceModelMap::CreateResourceName(TreeNode* node) {
   auto fieldNum = ResTypeFields[node->type_case()];
   const Descriptor* desc = node->GetDescriptor();
   const FieldDescriptor* field = desc->FindFieldByNumber(fieldNum);
-  const QString fieldName = node->has_folder() ? "group" : QString::fromStdString(field->name());
+  auto field_name_sv = field->name();
+  const QString fieldName = node->has_folder() ? "group" : QString::fromUtf8(field_name_sv.data(), field_name_sv.size());
   return CreateResourceName(node->type_case(), fieldName);
 }
 
@@ -178,8 +179,8 @@ MessageModel* ResourceModelMap::GetResourceByName(int type, const std::string& n
 }
 
 template <typename Message>
-const std::string& FullName() {
-  return Message::descriptor()->full_name();
+std::string FullName() {
+  return std::string(Message::descriptor()->full_name());
 }
 
 TypeCase Type(TreeModel::Node* node) {

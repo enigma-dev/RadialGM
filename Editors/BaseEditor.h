@@ -38,6 +38,7 @@ class BaseEditor : public QWidget {
   MessageModel *_model;
   ModelMapper *_nodeMapper;
   ModelMapper *_resMapper;
+  QMetaObject::Connection _modelResetConnection;
 };
 
 #endif  // BASEEDTIOR_H

@@ -46,12 +46,27 @@ SpriteEditor::SpriteEditor(MessageModel* model, QWidget* parent)
   SpriteEditor::RebindSubModels();
 }
 
-SpriteEditor::~SpriteEditor() { delete _ui; }
+SpriteEditor::~SpriteEditor() {
+  // Disconnect the signal connection before deleting _ui to prevent use-after-free
+  if (_dataChangedConnection) {
+    disconnect(_dataChangedConnection);
+  }
+  delete _ui;
+}
 
 void SpriteEditor::RebindSubModels() {
+  // Disconnect previous connection if it exists
+  if (_dataChangedConnection) {
+    disconnect(_dataChangedConnection);
+    _dataChangedConnection = QMetaObject::Connection();
+  }
+
   _spriteModel = _model->GetSubModel<MessageModel*>(TreeNode::kSpriteFieldNumber);
   _subimagesModel = _spriteModel->GetSubModel<RepeatedStringModel*>(Sprite::kSubimagesFieldNumber);
-  connect(_spriteModel, &ProtoModel::DataChanged, this, [this]() { _ui->subimagePreview->update(); });
+  _dataChangedConnection = connect(_spriteModel, &ProtoModel::DataChanged, this, [this]() {
+    if (!_ui) return;  // Guard against use-after-free
+    _ui->subimagePreview->update();
+  });
 
   _ui->subImageList->setIconSize(QSize(64, 64));
 

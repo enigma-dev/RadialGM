@@ -26,7 +26,7 @@ CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), _font(QFont("Courier"
   });
 
   QVBoxLayout* rootLayout = new QVBoxLayout(this);
-  rootLayout->setMargin(0);
+  rootLayout->setContentsMargins(0, 0, 0, 0);
   rootLayout->addWidget(plainTextEdit);
   this->setLayout(rootLayout);
 }
@@ -65,7 +65,7 @@ void CodeWidget::printSource() {
   QPrinter printer;
   QPrintDialog printDialog(&printer, this);
   auto plainTextEdit = static_cast<QPlainTextEdit*>(this->_textWidget);
-  if (plainTextEdit->textCursor().hasSelection()) printDialog.addEnabledOption(QAbstractPrintDialog::PrintSelection);
+  if (plainTextEdit->textCursor().hasSelection()) printDialog.setOptions(QAbstractPrintDialog::PrintSelection);
   if (printDialog.exec() == QDialog::Accepted) this->print(&printer);
 }
 

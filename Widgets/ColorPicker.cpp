@@ -6,7 +6,7 @@
 
 ColorPicker::ColorPicker(QWidget *parent) : QWidget(parent), _color(Qt::black), _alpha_enabled(true) {
   QHBoxLayout *layout = new QHBoxLayout(this);
-  layout->setMargin(0);
+  layout->setContentsMargins(0, 0, 0, 0);
   _button = new QToolButton(this);
   layout->addWidget(_button);
   this->setLayout(layout);

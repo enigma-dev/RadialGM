@@ -390,8 +390,8 @@ void TreeModel::Node::RebuildFromAnyModel(ProtoModel *model, Node *parent, int r
 void TreeModel::Node::RebuildFromModel(MessageModel *model, Node *parent, int row_in_parent) {
   // qDebug() << "Rebuild " << DebugPath();
   Reset(model, parent, row_in_parent);
-  const auto &tree_meta = backing_tree->GetTreeDisplay(model->GetDescriptor()->full_name());
-  const auto &msg_meta = BackingModel()->GetMessageDisplay(model->GetDescriptor()->full_name());
+  const auto &tree_meta = backing_tree->GetTreeDisplay(std::string(model->GetDescriptor()->full_name()));
+  const auto &msg_meta = BackingModel()->GetMessageDisplay(std::string(model->GetDescriptor()->full_name()));
   if (tree_meta.custom_editor) {
     // Leaf node; connect the data change handler.
     RegisterDataListener();
@@ -638,7 +638,7 @@ QString TreeModel::GetItemName(const Node *item) const { return item ? item->dis
 QVariant TreeModel::GetItemIcon(const Node *item) const { return item ? item->display_icon : QVariant(); }
 TreeModel::Node *TreeModel::GetNthChild(Node *item, int n) const { return item ? item->NthChild(n) : nullptr; }
 int TreeModel::GetChildCount(Node *item) const { return item ? item->children.size() : 0; }
-const std::string &TreeModel::GetMessageType(const Node *node) { return node ? node->GetMessageType() : kEmptyString; }
+std::string TreeModel::GetMessageType(const Node *node) { return node ? node->GetMessageType() : std::string(); }
 TreeNode TreeModel::Node::GetMessage() const {
   auto *const model = passthrough_model ? passthrough_model : backing_model;
   auto *const message_model = model->TryCastAsMessageModel();
@@ -651,7 +651,7 @@ TreeModel::Node *TreeModel::Node::NthChild(int n) const {
       << "Accessing row " << n << " of a " << children.size() << "-row tree node `" << DebugPath() << "`";
   return children[n].get();
 }
-const std::string &TreeModel::Node::GetMessageType() const { return backing_model->GetDescriptor()->full_name(); }
+std::string TreeModel::Node::GetMessageType() const { return std::string(backing_model->GetDescriptor()->full_name()); }
 
 void TreeModel::DisplayConfig::SetMessagePassthrough(const std::string &message) {
   tree_display_configs_[message].is_passthrough = true;

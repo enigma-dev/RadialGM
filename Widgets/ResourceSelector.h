@@ -13,8 +13,8 @@ class ResourceSelector : public QToolButton {
       : QToolButton(parent) {
     _menu = new QMenuView(this);
     _treeProxy = new TreeSortFilterProxyModel(this);
-    _treeProxy->SetFilterType(type);
     _treeProxy->setSourceModel(MainWindow::treeModel);
+    _treeProxy->SetFilterType(type);  // Set filter AFTER source model
     _menu->setModel(_treeProxy);
     setMenu(_menu);
   }

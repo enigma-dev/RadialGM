@@ -43,6 +43,7 @@ class PathEditor : public BaseEditor {
   MessageModel* _pathModel = nullptr;
   RepeatedMessageModel* _pointsModel = nullptr;
   bool _draggingPoint = false;
+  QMetaObject::Connection _dataChangedConnection;
 };
 
 #endif  // PATHEDITOR_H

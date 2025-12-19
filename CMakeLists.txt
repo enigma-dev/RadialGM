@@ -70,6 +70,17 @@ set(CMAKE_RELEASE_POSTFIX "")
 set(CMAKE_MINSIZEREL_POSTFIX "s")
 set(CMAKE_RELWITHDEBINFO_POSTFIX "rd")
 
+# Enable AddressSanitizer for debug builds on non-Windows platforms (GCC and Clang)
+# This must be set before add_subdirectory() calls so it applies to all subdirectories
+if(CMAKE_BUILD_TYPE MATCHES "Debug" AND NOT WIN32)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+    set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+    message(STATUS "AddressSanitizer enabled for Debug builds (Compiler: ${CMAKE_CXX_COMPILER_ID})")
+  endif()
+endif()
+
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
   set(EXE "RadialGM-Debug" CACHE STRING "RGM Executable name")
   add_definitions(-DRGM_DEBUG)
@@ -84,8 +95,14 @@ endif()
 set(EXE_DESCRIPTION "ENIGMA IDE")
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-SET(CMAKE_SKIP_BUILD_RPATH ON)
-set(CMAKE_INSTALL_RPATH $ORIGIN)
+# On macOS, use @executable_path instead of $ORIGIN
+if(APPLE)
+  set(CMAKE_BUILD_RPATH "@executable_path")
+  set(CMAKE_INSTALL_RPATH "@executable_path")
+else()
+  SET(CMAKE_SKIP_BUILD_RPATH ON)
+  set(CMAKE_INSTALL_RPATH $ORIGIN)
+endif()
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -282,13 +299,17 @@ set(RGM_HEADERS ${RGM_HEADERS} Plugins/ServerPlugin.h)
 # Tell CMake to create the RadialGM executable
 add_executable(${EXE} WIN32 ${RGM_UI} ${RGM_HEADERS} ${RGM_SOURCES} ${EDITOR_SOURCES} ${RGM_RC})
 
+# Set RPATH for macOS to find libraries in the same directory as the executable
+if(APPLE)
+  set_target_properties(${EXE} PROPERTIES
+    BUILD_WITH_INSTALL_RPATH FALSE
+    INSTALL_RPATH "@executable_path"
+    BUILD_RPATH "@executable_path"
+  )
+endif()
+
 # we do this even in release mode for "Editor Diagnostics"
 target_compile_definitions(${EXE} PUBLIC QT_MESSAGELOGCONTEXT ENIGMA_DIR="${ENIGMA_DIR}")
-
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND NOT WIN32)
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
-  set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
-endif()
 
 message(STATUS "Initial build flags:")
 set(CompilerFlags
@@ -322,7 +343,7 @@ include_directories(${EXE} PRIVATE ${RAPIDJSON_INCLUDE_DIRS})
 
 # Find yaml-cpp
 find_package(yaml-cpp CONFIG REQUIRED)
-target_link_libraries(${EXE} PRIVATE yaml-cpp)
+target_link_libraries(${EXE} PRIVATE yaml-cpp::yaml-cpp)
 
 # Find gRPC
 find_package(gRPC CONFIG REQUIRED)
@@ -337,8 +358,8 @@ find_package(OpenSSL REQUIRED)
 target_link_libraries(${EXE} PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 
 # Find Qt
-find_package(Qt5 COMPONENTS Core Widgets Gui PrintSupport Multimedia REQUIRED)
-target_link_libraries(${EXE} PRIVATE Qt5::Core Qt5::Widgets Qt5::Gui Qt5::PrintSupport Qt5::Multimedia)
+find_package(Qt6 COMPONENTS Core Widgets Gui PrintSupport Multimedia REQUIRED)
+target_link_libraries(${EXE} PRIVATE Qt6::Core Qt6::Widgets Qt6::Gui Qt6::PrintSupport Qt6::Multimedia)
 
 # LibProto
 # Arrangement of these is important: shared depends on proto and emake depends on all of them
@@ -375,8 +396,8 @@ target_link_libraries(${EXE} PRIVATE ${LIB_DOUBLE_CONVERSION})
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
   set(BUILD_DEBUG_POSTFIX_D ON)
 endif()
-set(USE_QT6 OFF) # We use Qt5
-add_subdirectory(Submodules/nodeeditor)
+set(USE_QT6 ON) # We use Qt5
+#add_subdirectory(Submodules/nodeeditor)
 
 if(WIN32)
   # Windows is a turd

@@ -87,13 +87,13 @@ const ProtoModel *RepeatedMessageModel::GetSubModel(const FieldPath &field_path)
     if (field_path.repeated_field_index < _subModels.size())
       return _subModels[field_path.repeated_field_index]->GetSubModel(field_path.SkipIndex());
     qDebug() << "Attempting to access out-of-bounds repeated index " << field_path.repeated_field_index
-             << " of repeated field `" << field_path.fields[0]->full_name().c_str()
+             << " of repeated field `" << std::string(field_path.fields[0]->full_name()).c_str()
              << "` of size " << _subModels.size();
     return nullptr;
   }
   if (field_path) {
-    qDebug() << "Attempting to access sub-field `" << field_path.front()->full_name().c_str()
-             << "` of repeated field `" << field_->full_name().c_str() << "` without an index";
+    qDebug() << "Attempting to access sub-field `" << std::string(field_path.front()->full_name()).c_str()
+             << "` of repeated field `" << std::string(field_->full_name()).c_str() << "` without an index";
     return nullptr;
   }
   return this;
@@ -127,12 +127,11 @@ Qt::ItemFlags RepeatedMessageModel::flags(const QModelIndex &index) const {
   return _subModels[index.row()]->flags(_subModels[index.row()]->index(index.column()));
 }
 
-const std::string &RepeatedMessageModel::MessageName() const {
+std::string RepeatedMessageModel::MessageName() const {
   auto *msg = field_->message_type();
   if (!msg) {
-    static const std::string kSentinel;
     qDebug() << "Message type of RepeatedMessageField is null! This should never happen!";
-    return kSentinel;
+    return std::string();
   }
-  return msg->full_name();
+  return std::string(msg->full_name());
 }

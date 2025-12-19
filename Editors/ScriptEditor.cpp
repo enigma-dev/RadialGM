@@ -10,7 +10,7 @@ ScriptEditor::ScriptEditor(MessageModel* model, QWidget* parent)
   this->setWindowIcon(QIcon(":/resources/script.png"));
   QLayout* layout = new QVBoxLayout(this);
   layout->addWidget(_codeEditor);
-  layout->setMargin(0);
+  layout->setContentsMargins(0, 0, 0, 0);
   setLayout(layout);
   resize(_codeEditor->geometry().width(), _codeEditor->geometry().height());
 

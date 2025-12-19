@@ -4,6 +4,8 @@
 #include "RepeatedPrimitiveModel.h"
 
 #include <QIcon>
+#include <QDebug>
+#include <string_view>
 
 Event EventsListModel::GetEvent(const QModelIndex &index) const {
   std::string name =
@@ -46,7 +48,8 @@ QVariant EventsListModel::data(const QModelIndex &index, int role) const {
   switch (role) {
     case Qt::DisplayRole: return QString::fromStdString(event.HumanName());
     case Qt::DecorationRole: {
-      QIcon icon(":/events/" + QString::fromStdString(event.bare_id()).toLower() + ".png");
+      std::string_view bareId = event.bare_id();
+      QIcon icon(":/events/" + QString::fromUtf8(bareId.data(), bareId.size()).toLower() + ".png");
       if (!icon.availableSizes().empty()) return icon;
       return QIcon(":/events/other.png");
     }

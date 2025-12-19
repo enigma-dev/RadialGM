@@ -1,6 +1,7 @@
 #ifndef REPEATEDMESSAGEMODEL_H
 #define REPEATEDMESSAGEMODEL_H
 
+#include <string>
 #include "RepeatedPrimitiveModel.h"
 
 class RepeatedMessageModel : public BasicRepeatedModel<Message> {
@@ -25,7 +26,7 @@ class RepeatedMessageModel : public BasicRepeatedModel<Message> {
     const FieldDescriptor *field = field_->message_type()->FindFieldByNumber(field_number);
     if (field) return field->index();
     qDebug() << "Looking up bad field number " << field_number
-             << " in RepeatedMessageModel " << GetDescriptor()->full_name().c_str();
+             << " in RepeatedMessageModel " << std::string(GetDescriptor()->full_name()).c_str();
     return -1;
   }
 
@@ -45,10 +46,11 @@ class RepeatedMessageModel : public BasicRepeatedModel<Message> {
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   Qt::ItemFlags flags(const QModelIndex &index) const override;
 
-  const std::string &MessageName() const;
+  std::string MessageName() const;
 
   QString DebugName() const override {
-    return QString::fromStdString("RepeatedMessageModel<" + field_->full_name() + ">");
+    auto full_name_sv = field_->full_name();
+    return QString::fromStdString("RepeatedMessageModel<" + std::string(full_name_sv) + ">");
   }
   RepeatedMessageModel *TryCastAsRepeatedMessageModel() override { return this; }
 

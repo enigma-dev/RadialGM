@@ -31,6 +31,7 @@ class CodeEditor : public QWidget {
 
  private:
   QLabel *_cursorPositionLabel, *_lineCountLabel;
+  QMetaObject::Connection _currentChangedConnection;
 };
 
 #endif  // CODEEDITOR_H

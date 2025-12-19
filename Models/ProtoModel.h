@@ -169,38 +169,38 @@ class ProtoModel : public QAbstractItemModel {
   struct DisplayConfig {
     /// Set the icon that will be used to display a given message node when no icon field is set on it.
     template<typename T> void SetDefaultIcon(const QString &icon_name) {
-      SetDefaultIcon(T::descriptor()->full_name(), icon_name);
+      SetDefaultIcon(std::string(T::descriptor()->full_name()), icon_name);
     }
     /// Associates a string field with the label of a given message.
     template<typename T, typename... Fields> void SetMessageLabelField(Fields... field_path) {
-      SetMessageLabelField(T::descriptor()->full_name(), FieldPath::Of<T>(field_path...));
+      SetMessageLabelField(std::string(T::descriptor()->full_name()), FieldPath::Of<T>(field_path...));
     }
     /// Associates a string field with the icon of a given message. The field must contain a path to an image file.
     template<typename T, typename... Fields> void SetMessageIconPathField(Fields... field_path) {
-      SetMessageIconPathField(T::descriptor()->full_name(), FieldPath::Of<T>(field_path...));
+      SetMessageIconPathField(std::string(T::descriptor()->full_name()), FieldPath::Of<T>(field_path...));
     }
     /// Associates a string field with the icon name of a given message.
     /// The field must contain the icon name to be looked up in the ArtManager.
     template<typename T, typename... Fields> void SetMessageIconIdField(Fields... field_path) {
-      SetMessageIconIdField(T::descriptor()->full_name(), FieldPath::Of<T>(field_path...));
+      SetMessageIconIdField(std::string(T::descriptor()->full_name()), FieldPath::Of<T>(field_path...));
     }
     /// Associates a string field with the icon name of a given message.
     /// The field can contain any identifying information that can be mapped to an icon by the specified function.
     template<typename T, typename... Fields>
     void SetMessageIconIdLookup(FieldDisplayConfig::IconLookupFn icon_lookup_function, Fields... field_path) {
-      SetMessageIconIdField(T::descriptor()->full_name(), FieldPath::Of<T>(field_path...), icon_lookup_function);
+      SetMessageIconIdField(std::string(T::descriptor()->full_name()), FieldPath::Of<T>(field_path...), icon_lookup_function);
     }
 
     /// Set the icon to be used for field's header data.
     template<typename T, typename... Fields>
     void SetFieldHeaderIcon(const QString &icon_name, Fields... field_path) {
-      SetFieldHeaderIcon(T::descriptor()->full_name(), FieldPath::Of<T>(field_path...), icon_name);
+      SetFieldHeaderIcon(std::string(T::descriptor()->full_name()), FieldPath::Of<T>(field_path...), icon_name);
     }
 
     /// Set the label to be used for field's header data.
     template<typename T, typename... Fields>
     void SetFieldHeaderLabel(const QString &label, Fields... field_path) {
-      SetFieldHeaderLabel(T::descriptor()->full_name(), FieldPath::Of<T>(field_path...), label);
+      SetFieldHeaderLabel(std::string(T::descriptor()->full_name()), FieldPath::Of<T>(field_path...), label);
     }
 
     /// Associates a field with a lambda to fetch an icon from its value.

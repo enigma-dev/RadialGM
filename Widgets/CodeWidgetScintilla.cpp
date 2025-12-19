@@ -100,7 +100,7 @@ CodeWidget::CodeWidget(QWidget* parent) : QWidget(parent), _font(QFont("Courier"
           [=](int line, int index) { emit cursorPositionChanged(line + 1, index + 1); });
 
   QVBoxLayout* rootLayout = new QVBoxLayout(this);
-  rootLayout->setMargin(0);
+  rootLayout->setContentsMargins(0, 0, 0, 0);
   rootLayout->addWidget(codeEdit);
   this->setLayout(rootLayout);
 }
@@ -136,7 +136,7 @@ void CodeWidget::printSource() {
   QsciPrinter sciPrinter;
   QPrintDialog printDialog(&sciPrinter, this);
   auto codeEdit = static_cast<QsciScintilla*>(this->_textWidget);
-  if (codeEdit->hasSelectedText()) printDialog.addEnabledOption(QAbstractPrintDialog::PrintSelection);
+  if (codeEdit->hasSelectedText()) printDialog.setOptions(QAbstractPrintDialog::PrintSelection);
   if (printDialog.exec() == QDialog::Accepted) this->print(&sciPrinter);
 }
 

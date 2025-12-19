@@ -24,7 +24,8 @@ CodeEditor::CodeEditor(QWidget* /*parent*/, bool removeSaveBtn) : _ui(new Ui::Co
   _cursorPositionLabel = new QLabel(_ui->statusBar);
   _lineCountLabel = new QLabel(_ui->statusBar);
 
-  connect(_ui->stackedWidget, &QStackedWidget::currentChanged, [this]() {
+  _currentChangedConnection = connect(_ui->stackedWidget, &QStackedWidget::currentChanged, [this]() {
+    if (!_ui) return;  // Guard against use-after-free
     if (_ui->stackedWidget->count() > 0) {
       this->updateCursorPositionLabel();
       this->updateLineCountLabel();
@@ -35,7 +36,13 @@ CodeEditor::CodeEditor(QWidget* /*parent*/, bool removeSaveBtn) : _ui(new Ui::Co
   _ui->statusBar->addWidget(_lineCountLabel);
 }
 
-CodeEditor::~CodeEditor() { delete _ui; }
+CodeEditor::~CodeEditor() {
+  // Disconnect the signal connection before deleting _ui to prevent use-after-free
+  if (_currentChangedConnection) {
+    disconnect(_currentChangedConnection);
+  }
+  delete _ui;
+}
 
 void CodeEditor::SetDisabled(bool disabled) {
   (disabled) ? _ui->stackedWidget->hide() : _ui->stackedWidget->show();

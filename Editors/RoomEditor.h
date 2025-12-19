@@ -42,6 +42,7 @@ class RoomEditor : public BaseEditor {
   QLabel *cursorPositionLabel, *_assetNameLabel;
   MessageModel* _roomModel;
   ImmediateDataWidgetMapper* _viewMapper;
+  QMetaObject::Connection _resourceMapConnection;
 };
 
 #endif  // ROOMEDITOR_H

@@ -55,7 +55,7 @@ class RepeatedPrimitiveModel : public BasicRepeatedModel<T> {
           : RepeatedPrimitiveModel<model_type>(parent, message, field) {}               \
                                                                                         \
       QString DebugName() const override {                                              \
-        return QString::fromStdString(#ModelName "<" + field_->full_name() + ">");      \
+        return QString::fromStdString(#ModelName "<" + std::string(field_->full_name()) + ">");      \
       }                                                                                 \
       ModelName *TryCastAs ## ModelName() override { return this; }                     \
     }

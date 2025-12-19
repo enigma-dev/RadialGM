@@ -101,7 +101,10 @@ QFileInfo MainWindow::getEnigmaRoot() {
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainWindow) {
   if (!EnigmaRoot.filePath().isEmpty()) {
-    _event_data = std::make_unique<EventData>(ParseEventFile((EnigmaRoot.absolutePath() + "/events.ey").toStdString()));
+    QString eventsPath = EnigmaRoot.absolutePath() + "/events.ey";
+    qDebug() << "Loading events.ey from:" << eventsPath;
+    _event_data = std::make_unique<EventData>(ParseEventFile(eventsPath.toStdString()));
+    qDebug() << "Loaded" << _event_data->events().size() << "events";
   } else {
     qDebug() << "Error: Failed to locate ENIGMA sources. Loading internal events.ey.\n"
              << "Search Paths:\n"
@@ -111,6 +114,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), _ui(new Ui::MainW
     std::stringstream ss;
     ss << internal_events.readAll().toStdString();
     _event_data = std::make_unique<EventData>(ParseEventFile(ss));
+    qDebug() << "Loaded" << _event_data->events().size() << "events from internal resource";
   }
 
   egm::LibEGMInit(_event_data.get());

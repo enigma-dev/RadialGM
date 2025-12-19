@@ -60,14 +60,14 @@ class MessageModel : public ProtoModel {
     const FieldDescriptor *field = descriptor_->FindFieldByNumber(field_number);
     if (field) return field->index();
     qDebug() << "Looking up bad field number " << field_number
-             << " in MessageModel " << GetDescriptor()->full_name().c_str();
+             << " in MessageModel " << std::string(GetDescriptor()->full_name()).c_str();
     return -1;
   }
 
   ProtoModel *SubModelForRow(int row) const {
     if (!_protobuf) return nullptr;
     if (row < 0 || row >= submodels_by_row_.size()) {
-      qDebug() << "Accessing bad row " << row << " of " << descriptor_->name().c_str()
+      qDebug() << "Accessing bad row " << row << " of " << std::string(descriptor_->name()).c_str()
                << " (" << submodels_by_row_.size() << " rows)";
       return nullptr;
     }
@@ -96,7 +96,10 @@ class MessageModel : public ProtoModel {
   Qt::ItemFlags flags(const QModelIndex &index) const override;
 
   // Casting.
-  QString DebugName() const override { return QString::fromStdString("MessageModel<" + descriptor_->name() + ">"); }
+  QString DebugName() const override {
+    auto name_sv = descriptor_->name();
+    return QString::fromStdString("MessageModel<" + std::string(name_sv) + ">");
+  }
   MessageModel *TryCastAsMessageModel() override { return this; }
 
  protected:

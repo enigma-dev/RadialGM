@@ -84,8 +84,8 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   });
   QMenuView* objMenu = new QMenuView(this);
   TreeSortFilterProxyModel* treeProxy = new TreeSortFilterProxyModel(this);
-  treeProxy->SetFilterType(TreeNode::TypeCase::kObject);
   treeProxy->setSourceModel(MainWindow::treeModel);
+  treeProxy->SetFilterType(TreeNode::TypeCase::kObject);  // Set filter AFTER source model
   objMenu->setModel(treeProxy);
   _ui->objectSelectButton->setMenu(objMenu);
   _ui->objectSelectButton->setPopupMode(QToolButton::MenuButtonPopup);
@@ -115,7 +115,8 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   _ui->statusBar->addWidget(_assetNameLabel);
 
   // This updates all the model views in the event of a sprite is changed
-  connect(MainWindow::resourceMap, &ResourceModelMap::DataChanged, this, [this]() {
+  _resourceMapConnection = connect(MainWindow::resourceMap, &ResourceModelMap::DataChanged, this, [this]() {
+    if (!_ui) return;  // Guard against use-after-free
     // _ui->entitiesListView->reset();
     _ui->elementsListView->reset();
     _ui->layersListView->reset();
@@ -125,7 +126,13 @@ RoomEditor::RoomEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   RoomEditor::RebindSubModels();
 }
 
-RoomEditor::~RoomEditor() { delete _ui; }
+RoomEditor::~RoomEditor() {
+  // Disconnect the signal connection before deleting _ui to prevent use-after-free
+  if (_resourceMapConnection) {
+    disconnect(_resourceMapConnection);
+  }
+  delete _ui;
+}
 
 void RoomEditor::RebindSubModels() {
   _roomModel = _model->GetSubModel<MessageModel*>(TreeNode::kRoomFieldNumber);

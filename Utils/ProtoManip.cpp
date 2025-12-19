@@ -34,8 +34,10 @@ QVariant GetField(const google::protobuf::Message &message, const google::protob
       return QString::fromStdString(message.GetReflection()->GetString(message, field));
     case google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE:
       return QVariant::fromValue(AbstractMessage(message.GetReflection()->GetMessage(message, field)));
-    case google::protobuf::FieldDescriptor::CPPTYPE_ENUM:
-      return QString::fromStdString(message.GetReflection()->GetEnum(message, field)->name());
+    case google::protobuf::FieldDescriptor::CPPTYPE_ENUM: {
+      auto enum_name = message.GetReflection()->GetEnum(message, field)->name();
+      return QString::fromUtf8(enum_name.data(), enum_name.size());
+    }
   }
   return {};
 }
@@ -62,8 +64,10 @@ T GetNumeric(const google::protobuf::Message &message, const google::protobuf::F
       return QString::fromStdString(message.GetReflection()->GetString(message, field));
     case google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE:
       return QString::fromStdString(message.GetReflection()->GetString(message, field));
-    case google::protobuf::FieldDescriptor::CPPTYPE_ENUM:
-      return QString::fromStdString(message.GetReflection()->GetEnum(message, field)->name());
+    case google::protobuf::FieldDescriptor::CPPTYPE_ENUM: {
+      auto enum_name = message.GetReflection()->GetEnum(message, field)->name();
+      return QString::fromUtf8(enum_name.data(), enum_name.size());
+    }
   }
   return {};
 }
@@ -123,7 +127,7 @@ bool SetField(google::protobuf::MutableRepeatedFieldRef<google::protobuf::Messag
 }
 
 static QString MessageMimeType(const google::protobuf::Descriptor *desc) {
-  return QString::fromStdString("application/x-protobuf; messageType=\"" + desc->full_name() + "\"");
+  return QString::fromStdString("application/x-protobuf; messageType=\"" + std::string(desc->full_name()) + "\"");
 }
 
 QString GetMimeType(const google::protobuf::FieldDescriptor *desc) {

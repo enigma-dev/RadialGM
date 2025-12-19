@@ -77,7 +77,7 @@ class TreeModel : public QAbstractItemModel {
 
     bool SetName(const QString &name, const ProtoModel::MessageDisplayConfig &meta);
     Node *NthChild(int n) const;
-    const std::string &GetMessageType() const;
+    std::string GetMessageType() const;
     TreeNode GetMessage() const;
     QModelIndex mapFromSource(const QModelIndex &index) const;
     void sort();
@@ -153,12 +153,12 @@ class TreeModel : public QAbstractItemModel {
     /// Hides a node when it only has one child, displaying the child instead.
     /// If both parent and child have a name, the namae is composited with /. Otherwise, only one name is displyed.
     template<typename T> void SetMessagePassthrough() {
-      SetMessagePassthrough(T::descriptor()->full_name());
+      SetMessagePassthrough(std::string(T::descriptor()->full_name()));
     }
     /// Disables reassignment of oneof values for nodes which already have a oneof choice selected.
     /// Effectively, this hides oneof values except for the one that is present.
     template<typename T> void DisableOneofReassignment() {
-      DisableOneofReassignment(T::descriptor()->full_name());
+      DisableOneofReassignment(std::string(T::descriptor()->full_name()));
     }
 
     /// Instead of editing each field in a given message, launch a special editor when trying to open it.
@@ -168,14 +168,14 @@ class TreeModel : public QAbstractItemModel {
     /// display_config.UseEditorWidget<MessageToEdit, MyEditor>(my_argument, my_other_argument);
     template<typename Message, typename Editor, typename... ConstructionParams>
     void UseEditorWidget(ConstructionParams... construction_args) {
-      UseEditorWidget(Message::descriptor()->full_name(), [=](MessageModel *model) {
+      UseEditorWidget(std::string(Message::descriptor()->full_name()), [=](MessageModel *model) {
         new Editor(model, construction_args...);
       });
     }
 
     /// Similar to UseEditorWidget, but the given function is invoked with the model to be edited.
     template<typename Message> void UseEditorLauncher(EditorLauncher editor_launcher) {
-      UseEditorWidget(Message::descriptor()->full_name(), editor_launcher);
+      UseEditorWidget(std::string(Message::descriptor()->full_name()), editor_launcher);
     }
 
     // Fetch metadata (or the default instance) by its qualified message name.
@@ -269,7 +269,7 @@ class TreeModel : public QAbstractItemModel {
   QVariant GetItemIcon(const Node *item) const;
   Node *GetNthChild(Node *item, int n) const;
   int GetChildCount(Node *item) const;
-  const std::string &GetMessageType(const Node *node);
+  std::string GetMessageType(const Node *node);
 
   void RebuildModelMapping();
 

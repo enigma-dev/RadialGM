@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QString>
 #include <google/protobuf/descriptor.h>
+#include <string>
 #include <vector>
 
 class FieldPath {
@@ -64,11 +65,11 @@ class FieldPath {
       }
       const FieldDescriptor *fd = md->FindFieldByNumber(fct.field_number);
       if (!fd) {
-        qDebug() << "Could not locate field " << fct.field_number << " in message " << md->full_name().c_str() << "!";
+        qDebug() << "Could not locate field " << fct.field_number << " in message " << std::string(md->full_name()).c_str() << "!";
         break;
       }
       if (fct.repeated_field_index != -1 && !fd->is_repeated()) {
-        qDebug() << "Attempting to treat field " << fd->name().c_str() << " in message " << md->full_name().c_str()
+        qDebug() << "Attempting to treat field " << std::string(fd->name()).c_str() << " in message " << std::string(md->full_name()).c_str()
                  << " as a repeated field!";
         break;
       }
@@ -89,10 +90,10 @@ class FieldPath {
 
   std::string str() const {
     if (this->size() <= 0) return "";
-    std::string field = fields.front()->full_name();
+    std::string field = std::string(fields.front()->full_name());
     for (size_t i = 1; i < fields.size(); ++i) {
       const auto &fcomp = fields[i];
-      field += fcomp->name();
+      field += std::string(fcomp->name());
     }
     return field;
   }

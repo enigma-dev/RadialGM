@@ -13,7 +13,7 @@
 class RepeatedModel : public ProtoModel {
  public:
   RepeatedModel(ProtoModel *parent, Message *message, const FieldDescriptor *field)
-      : ProtoModel(parent, message->GetDescriptor()->name(), message->GetDescriptor(), field->index()),
+      : ProtoModel(parent, std::string(message->GetDescriptor()->name()), message->GetDescriptor(), field->index()),
         _protobuf(message), field_(field) {}
 
   bool Empty() { return rowCount() == 0; }
@@ -34,7 +34,8 @@ class RepeatedModel : public ProtoModel {
   virtual ProtoModel *GetSubModel(int index) const = 0;
 
   QString DebugName() const override {
-    return QString::fromStdString("RepeatedModel<" + field_->full_name() + ">");
+    auto full_name_sv = field_->full_name();
+    return QString::fromStdString("RepeatedModel<" + std::string(full_name_sv) + ">");
   }
   RepeatedModel *TryCastAsRepeatedModel() override { return this; }
 

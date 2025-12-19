@@ -5,7 +5,7 @@
 #include <QIcon>
 
 PrimitiveModel::PrimitiveModel(MessageModel *parent, const FieldDescriptor *field)
-    : ProtoModel(parent, parent->GetDescriptor()->name(), parent->GetDescriptor(), field->index()),
+    : ProtoModel(parent, std::string(parent->GetDescriptor()->name()), parent->GetDescriptor(), field->index()),
       field_or_null_(field) {
   ProtoModel* p = this;
   while (p) {
@@ -29,14 +29,20 @@ const FieldDescriptor *PrimitiveModel::GetRowDescriptor(int row) const {
 }
 
 QString PrimitiveModel::GetDisplayName() const {
-  if (field_or_null_) return QString::fromStdString(field_or_null_->name());
-  if (const auto *fd = _parentModel->GetRowDescriptor(row_in_parent_)) return QString::fromStdString(fd->full_name());
+  if (field_or_null_) {
+    auto name_sv = field_or_null_->name();
+    return QString::fromUtf8(name_sv.data(), name_sv.size());
+  }
+  if (const auto *fd = _parentModel->GetRowDescriptor(row_in_parent_)) {
+    auto full_name_sv = fd->full_name();
+    return QString::fromUtf8(full_name_sv.data(), full_name_sv.size());
+  }
   return "Error";
 }
 
 QIcon PrimitiveModel::GetDisplayIcon() const {
   const FieldDescriptor *field = GetRowDescriptor(0);
-  auto &display = GetFieldDisplay(field->full_name());
+  auto &display = GetFieldDisplay(std::string(field->full_name()));
   QIcon ret;
   if (display.icon_lookup_function) ret = display.icon_lookup_function(GetDirect());
   if (!ret.isNull()) return ret;

@@ -8,21 +8,21 @@
 static constexpr int CCP_TYPE_ROLE = Qt::UserRole + 1;
 
 MessageModel::MessageModel(ProtoModel *parent, Message *protobuf, int row_in_parent)
-    : ProtoModel(parent, protobuf->GetDescriptor()->name(), protobuf->GetDescriptor(), row_in_parent),
+    : ProtoModel(parent, std::string(protobuf->GetDescriptor()->name()), protobuf->GetDescriptor(), row_in_parent),
       _protobuf(protobuf) { RebuildSubModels(); }
 
 MessageModel::MessageModel(ProtoModel::NonProtoParent parent, Message *protobuf)
-    : ProtoModel(parent, protobuf->GetDescriptor()->name(), protobuf->GetDescriptor()),
+    : ProtoModel(parent, std::string(protobuf->GetDescriptor()->name()), protobuf->GetDescriptor()),
       _protobuf(protobuf) {
   // Call RebuildSubModels manually after hooking up ProtoModel::MoedelConstructed signal
 }
 
 MessageModel::MessageModel(ProtoModel *parent, const Descriptor *descriptor, int row_in_parent)
-    : ProtoModel(parent, descriptor->name(), descriptor, row_in_parent), _protobuf(nullptr) {}
+    : ProtoModel(parent, std::string(descriptor->name()), descriptor, row_in_parent), _protobuf(nullptr) {}
 
 QString MessageModel::GetDisplayName() const {
   QString name;
-  auto& display = GetMessageDisplay(GetDescriptor()->full_name());
+  auto& display = GetMessageDisplay(std::string(GetDescriptor()->full_name()));
   if (display.isValid) {
     if (const ProtoModel *holder = GetSubModel(display.label_field)) {
       if (const auto *primitive = holder->TryCast<PrimitiveModel>()) {
@@ -36,7 +36,7 @@ QString MessageModel::GetDisplayName() const {
 }
 
 QIcon MessageModel::GetDisplayIcon() const {
-  auto& display = GetMessageDisplay(GetDescriptor()->full_name());
+  auto& display = GetMessageDisplay(std::string(GetDescriptor()->full_name()));
   QIcon ret;
   if (display.isValid) {
     if (display.icon_field) {
@@ -55,7 +55,7 @@ QIcon MessageModel::GetDisplayIcon() const {
 const FieldDescriptor *MessageModel::GetRowDescriptor(int row) const {
   if (row < 0 || row >= descriptor_->field_count()) {
     qDebug() << "Requesting descriptor of invalid row " << row
-             << " of MessageModel " << descriptor_->full_name().c_str();
+             << " of MessageModel " << std::string(descriptor_->full_name()).c_str();
     return nullptr;
   }
   return descriptor_->field(row);
@@ -219,7 +219,10 @@ QString MessageModel::FastGetQString(const FieldDescriptor *field) const {
     case CppType::CPPTYPE_DOUBLE:  return QString::number(refl->GetDouble(*_protobuf, field));
     case CppType::CPPTYPE_FLOAT:   return QString::number(refl->GetFloat(*_protobuf, field));
     case CppType::CPPTYPE_BOOL:    return refl->GetBool(*_protobuf, field) ? "true" : "false";
-    case CppType::CPPTYPE_ENUM:    return QString::fromStdString(refl->GetEnum(*_protobuf, field)->name());
+    case CppType::CPPTYPE_ENUM:    {
+      auto enum_name = refl->GetEnum(*_protobuf, field)->name();
+      return QString::fromUtf8(enum_name.data(), enum_name.size());
+    }
     case CppType::CPPTYPE_STRING:  return QString::fromStdString(refl->GetString(*_protobuf, field));
   }
   qDebug() << "Unknown field type: " << field->DebugString().c_str();
@@ -260,7 +263,7 @@ QVariant MessageModel::dataInternal(const QModelIndex &index, int role) const {
 
   // The logic below will kill proto if the field is repeated. Abort now.
   if (field->is_repeated()) {
-     qDebug() << "The requested field " << index.row() << " (" << field->name().c_str() << ") is repeated...";
+     qDebug() << "The requested field " << index.row() << " (" << std::string(field->name()).c_str() << ") is repeated...";
      return QVariant();
   }
   // If the field has't been initialized return an invalid QVariant. (see QVariant.isValid())
@@ -300,7 +303,10 @@ QVariant MessageModel::headerData(int section, Qt::Orientation /*orientation*/, 
   const Descriptor *desc = _protobuf->GetDescriptor();
   const FieldDescriptor *field = desc->field(section);
 
-  if (field != nullptr) return QString::fromStdString(field->name());
+  if (field != nullptr) {
+    auto field_name_sv = field->name();
+    return QString::fromUtf8(field_name_sv.data(), field_name_sv.size());
+  }
 
   return "";
 }

@@ -63,12 +63,12 @@ void ObjectEditor::AddChangeFromMenuEvent(const QModelIndex &index, bool add) {
 
     connect(dialog, &QDialog::accepted, [=]() {
       if (dialog->result() == QDialog::Accepted) {
+        QString eventId = _eventsTypesModel->data(index, EventTypesListModel::UserRoles::EventBareIDRole).toString();
+        
         Object::EgmEvent event;
-        event.set_id(
-            _eventsTypesModel->data(index, EventTypesListModel::UserRoles::EventBareIDRole).toString().toStdString());
+        event.set_id(eventId.toStdString());
         for (const QString &arg : dialog->GetArguments()) {
-          std::string *s = event.add_arguments();
-          s->assign(arg.toStdString());
+          event.add_arguments(arg.toStdString());
         }
 
         AddChangeEventHelper(event, add);
@@ -123,25 +123,30 @@ void ObjectEditor::AddEvent(Object::EgmEvent event) {
   int idx = eventsModel->rowCount();
 
   if (IndexOf(event) == -1) {
-    bool insert = eventsModel->insertRow(idx);
-    if (insert) {
+    // Use insert() method which sets the message data atomically before endInsertRows()
+    // This prevents race condition where Qt queries the model before data is set
+    google::protobuf::Message *eventMsg = &event;
+    QModelIndex newIndex = eventsModel->insert(*eventMsg, idx);
+    if (newIndex.isValid()) {
       BindEventEditor(idx);
-      ChangeEvent(idx, event);
+      SetCurrentEditor(idx);
     }
-  } else
-    qDebug() << "Event already exists";
+  }
 }
 
 void ObjectEditor::ChangeEvent(int idx, Object::EgmEvent event, bool changeCode) {
   RepeatedMessageModel *eventsModel = _objectModel->GetSubModel<RepeatedMessageModel *>(Object::kEgmEventsFieldNumber);
 
+  std::string eventId(event.id());
   eventsModel->SetData(FieldPath::Of<Object::EgmEvent>(FieldPath::StartingAt(idx), Object::EgmEvent::kIdFieldNumber),
-                       QString::fromStdString(event.id()));
+                       QString::fromStdString(eventId));
 
-  if (changeCode)
+  if (changeCode) {
+    std::string eventCode(event.code());
     eventsModel->SetData(
         FieldPath::Of<Object::EgmEvent>(FieldPath::StartingAt(idx), Object::EgmEvent::kCodeFieldNumber),
-        QString::fromStdString(event.code()));
+        QString::fromStdString(eventCode));
+  }
 
   RepeatedStringModel *argsModel = eventsModel->GetSubModel<MessageModel *>(idx)->GetSubModel<RepeatedStringModel *>(
       Object::EgmEvent::kArgumentsFieldNumber);
@@ -169,8 +174,12 @@ void ObjectEditor::RemoveEvent(int idx) {
 }
 
 int ObjectEditor::IndexOf(Object::EgmEvent event) {
-  std::vector<std::string> args(event.arguments().begin(), event.arguments().end());
-  Event e = MainWindow::GetEventData()->get_event(event.id(), args);
+  std::vector<std::string> args;
+  args.reserve(event.arguments_size());
+  for (const auto& arg : event.arguments()) {
+    args.push_back(std::string(arg));
+  }
+  Event e = MainWindow::GetEventData()->get_event(std::string(event.id()), args);
   for (int i = 0; i < _eventsModel->rowCount(); ++i) {
     if (_eventsModel->data(_eventsModel->index(i, 0)).toString() == QString::fromStdString(e.HumanName())) return i;
   }

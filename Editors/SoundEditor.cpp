@@ -16,7 +16,8 @@ SoundEditor::SoundEditor(MessageModel* model, QWidget* parent)
     : BaseEditor(model, parent),
       _ui(new Ui::SoundEditor),
       _mediaPlayer(new QMediaPlayer(this)),
-      _playlist(new QMediaPlaylist(_mediaPlayer)),
+      _audioOutput(new QAudioOutput(this)),
+      _looping(false),
       _userPaused(false) {
   _ui->setupUi(this);
 
@@ -25,10 +26,16 @@ SoundEditor::SoundEditor(MessageModel* model, QWidget* parent)
 
   connect(_ui->saveButton, &QAbstractButton::pressed, this, &BaseEditor::OnSave);
 
-  _playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
-  _mediaPlayer->setPlaylist(_playlist);
-  // Update the signals every 50ms instead of Qt's default 1000ms to keep slider up to date
-  _mediaPlayer->setNotifyInterval(50);
+  // Set audio output for Qt6
+  _mediaPlayer->setAudioOutput(_audioOutput);
+  
+  // Handle looping when media ends
+  connect(_mediaPlayer, &QMediaPlayer::mediaStatusChanged, [=](QMediaPlayer::MediaStatus status) {
+    if (status == QMediaPlayer::EndOfMedia && _looping) {
+      _mediaPlayer->setPosition(0);
+      _mediaPlayer->play();
+    }
+  });
 
   connect(_mediaPlayer, &QMediaPlayer::positionChanged, [=]() {
     if (_mediaPlayer->duration() > 0) {
@@ -41,20 +48,12 @@ SoundEditor::SoundEditor(MessageModel* model, QWidget* parent)
     _ui->playbackPositionLabel->setText(timestamp.addMSecs(static_cast<int>(_mediaPlayer->position())).toString());
   });
 
-  connect(_mediaPlayer, &QMediaPlayer::mediaChanged, [=]() {
-    _playlist->clear();
-    _playlist->addMedia(
-        QUrl::fromLocalFile(_soundModel->Data(FieldPath::Of<Sound>(Sound::kDataFieldNumber)).toString()));
-  });
-
-  connect(_mediaPlayer, &QMediaPlayer::stateChanged, [=]() {
-    if (_mediaPlayer->state() == QMediaPlayer::PausedState || _mediaPlayer->state() == QMediaPlayer::StoppedState)
+  connect(_mediaPlayer, &QMediaPlayer::playbackStateChanged, [=]() {
+    if (_mediaPlayer->playbackState() == QMediaPlayer::PausedState || _mediaPlayer->playbackState() == QMediaPlayer::StoppedState)
       _ui->playButton->setIcon(ArtManager::GetIcon(":/actions/play.png"));
     else
       _ui->playButton->setIcon(ArtManager::GetIcon(":/actions/pause.png"));
   });
-
-  _mediaPlayer->setPlaylist(_playlist);
 
   SoundEditor::RebindSubModels();
 }
@@ -62,16 +61,15 @@ SoundEditor::SoundEditor(MessageModel* model, QWidget* parent)
 SoundEditor::~SoundEditor() { delete _ui; }
 
 void SoundEditor::RebindSubModels() {
-  _playlist->clear();
   _soundModel = _model->GetSubModel<MessageModel*>(TreeNode::kSoundFieldNumber);
-  _playlist->addMedia(QUrl::fromLocalFile(_soundModel->Data(FieldPath::Of<Sound>(Sound::kDataFieldNumber)).toString()));
+  _mediaPlayer->setSource(QUrl::fromLocalFile(_soundModel->Data(FieldPath::Of<Sound>(Sound::kDataFieldNumber)).toString()));
   BaseEditor::RebindSubModels();
   // sync volume slider to model after rebind (e.g, for .sound.gmx)
   _ui->volumeSlider->setValue(static_cast<int>(_ui->volumeSpinBox->value() * 100));
 }
 
 void SoundEditor::on_playButton_clicked() {
-  if (_mediaPlayer->state() == QMediaPlayer::PausedState || _mediaPlayer->state() == QMediaPlayer::StoppedState) {
+  if (_mediaPlayer->playbackState() == QMediaPlayer::PausedState || _mediaPlayer->playbackState() == QMediaPlayer::StoppedState) {
     _mediaPlayer->play();
     _userPaused = false;
   } else {
@@ -81,29 +79,26 @@ void SoundEditor::on_playButton_clicked() {
 }
 
 void SoundEditor::on_loopButton_clicked() {
-  if (_playlist->playbackMode() == QMediaPlaylist::CurrentItemOnce)
-    _playlist->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
-  else
-    _playlist->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
+  _looping = !_looping;
 }
 
 void SoundEditor::on_playbackSlider_sliderPressed() {
-  if (_mediaPlayer->state() == QMediaPlayer::PlayingState) _mediaPlayer->pause();
+  if (_mediaPlayer->playbackState() == QMediaPlayer::PlayingState) _mediaPlayer->pause();
 }
 
 void SoundEditor::on_playbackSlider_sliderReleased() {
   _mediaPlayer->setPosition(static_cast<int>((_ui->playbackSlider->value() / 100.f) * _mediaPlayer->duration()));
-  if (_mediaPlayer->state() == QMediaPlayer::PausedState && !_userPaused) _mediaPlayer->play();
+  if (_mediaPlayer->playbackState() == QMediaPlayer::PausedState && !_userPaused) _mediaPlayer->play();
 }
 
 void SoundEditor::on_volumeSlider_sliderMoved(int position) {
   _ui->volumeSpinBox->setValue(position / 100.0);
-  _mediaPlayer->setVolume(position);
+  _audioOutput->setVolume(position / 100.0);
 }
 
 void SoundEditor::on_volumeSpinBox_valueChanged(double arg1) {
   _ui->volumeSlider->setValue(static_cast<int>(arg1 * 100));
-  _mediaPlayer->setVolume(static_cast<int>(arg1 * 100));
+  _audioOutput->setVolume(arg1);
 }
 
 void SoundEditor::on_saveAsButton_clicked() {
@@ -128,7 +123,7 @@ void SoundEditor::on_loadButton_clicked() {
     } else {
       // TODO: Copy data into our egm
       _soundModel->SetData(FieldPath::Of<Sound>(Sound::kDataFieldNumber), fName);
-      emit _mediaPlayer->mediaChanged(_mediaPlayer->media());
+      _mediaPlayer->setSource(QUrl::fromLocalFile(fName));
     }
   }
 }

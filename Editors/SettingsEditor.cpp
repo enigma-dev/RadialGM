@@ -13,7 +13,7 @@ Q_DECLARE_METATYPE(buffers::SystemInfo);
 static std::string get_combo_system_id(const QComboBox* combo) {
   auto data = combo->currentData();
   auto subsystem = data.value<buffers::SystemInfo>();
-  return subsystem.id();
+  return std::string(subsystem.id());
 }
 
 SettingsEditor::SettingsEditor(MessageModel* model, QWidget* parent)
@@ -50,7 +50,7 @@ SettingsEditor::SettingsEditor(MessageModel* model, QWidget* parent)
       {QString("Network"), ui->networkCombo},     {QString("Extensions"), ui->extensionsList},
   };
   for (const auto& system : qAsConst(MainWindow::systemCache)) {
-    const QString systemName = QString::fromStdString(system.name());
+    const QString systemName = QString::fromUtf8(system.name().data(), system.name().size());
     auto it = systemUIMap.find(systemName);
     if (it == systemUIMap.end()) continue;
     auto widget = it.value();
@@ -64,16 +64,16 @@ SettingsEditor::SettingsEditor(MessageModel* model, QWidget* parent)
       connect(combo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), [=]() {
         auto data = combo->currentData();
         auto subsystem = data.value<buffers::SystemInfo>();
-        const QString subsystemDesc = QString::fromStdString(subsystem.description());
-        const QString subsystemAuthor = QString::fromStdString(subsystem.author());
+        const QString subsystemDesc = QString::fromUtf8(subsystem.description().data(), subsystem.description().size());
+        const QString subsystemAuthor = QString::fromUtf8(subsystem.author().data(), subsystem.author().size());
         ui->authorName->setText(subsystemAuthor);
         ui->systemDesc->setPlainText(subsystemDesc);
       });
     }
     for (const auto &subsystem : system.subsystems()) {
-      const QString subsystemName = QString::fromStdString(subsystem.name());
-      const QString subsystemId = QString::fromStdString(subsystem.id());
-      const QString subsystemDesc = QString::fromStdString(subsystem.description());
+      const QString subsystemName = QString::fromUtf8(subsystem.name().data(), subsystem.name().size());
+      const QString subsystemId = QString::fromUtf8(subsystem.id().data(), subsystem.id().size());
+      const QString subsystemDesc = QString::fromUtf8(subsystem.description().data(), subsystem.description().size());
       if (combo) {
         QVariant data;
         data.setValue(subsystem);

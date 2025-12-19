@@ -4,7 +4,7 @@
 #include "BaseEditor.h"
 
 #include <QMediaPlayer>
-#include <QMediaPlaylist>
+#include <QAudioOutput>
 
 namespace Ui {
 class SoundEditor;
@@ -35,7 +35,8 @@ class SoundEditor : public BaseEditor {
  private:
   Ui::SoundEditor* _ui;
   QMediaPlayer* _mediaPlayer;
-  QMediaPlaylist* _playlist;  //it's only one song but Qt puts looping stuff here
+  QAudioOutput* _audioOutput;
+  bool _looping;
   bool _userPaused;
   MessageModel* _soundModel;
 };

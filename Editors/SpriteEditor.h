@@ -43,6 +43,7 @@ class SpriteEditor : public BaseEditor {
   Ui::SpriteEditor* _ui;
   MessageModel* _spriteModel;
   RepeatedStringModel* _subimagesModel;
+  QMetaObject::Connection _dataChangedConnection;
 };
 
 #endif  // SPRITEEDITOR_H

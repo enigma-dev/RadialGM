@@ -87,12 +87,12 @@ struct ResourceReader : public AsyncReadWorker<Resource> {
   virtual ~ResourceReader() {}
   virtual void started() final { CodeWidget::prepareKeywordStore(); }
   virtual void process(const Resource& resource) final {
-    const QString& name = QString::fromStdString(resource.name().c_str());
+    const QString& name = QString::fromUtf8(resource.name().data(), resource.name().size());
     KeywordType type = KeywordType::UNKNOWN;
     if (resource.is_function()) {
       type = KeywordType::FUNCTION;
       for (int i = 0; i < resource.overload_count(); ++i) {
-        QString overload = QString::fromStdString(resource.parameters(i));
+        QString overload = QString::fromUtf8(resource.parameters(i).data(), resource.parameters(i).size());
         const QString signature = overload.mid(overload.indexOf("(") + 1, overload.lastIndexOf(")"));
         CodeWidget::addCalltip(name, signature, type);
       }
@@ -109,7 +109,7 @@ struct SystemReader : public AsyncReadWorker<SystemType> {
   virtual ~SystemReader() {}
   virtual void process(const SystemType& system) final {
     static auto& systemCache = MainWindow::systemCache;
-    const QString systemName = QString::fromStdString(system.name());
+    const QString systemName = QString::fromUtf8(system.name().data(), system.name().size());
     systemCache.append(system);
   }
 };
@@ -118,7 +118,7 @@ struct CompileReader : public AsyncReadWorker<CompileReply> {
   virtual ~CompileReader() {}
   virtual void process(const CompileReply& reply) final {
     for (auto log : reply.message()) {
-      emit LogOutput(log.message().c_str());
+      emit LogOutput(std::string(log.message()).c_str());
     }
   }
   virtual void finished() final { emit CompileStatusChanged(true); }

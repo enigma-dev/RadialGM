@@ -14,7 +14,7 @@ class PrimitiveModel : public ProtoModel {
  public:
   // Construct a repeated field index.
   PrimitiveModel(RepeatedModel *parent, int row_in_parent)
-      : ProtoModel(parent, parent->GetDescriptor()->name(), parent->GetDescriptor(), row_in_parent),
+      : ProtoModel(parent, std::string(parent->GetDescriptor()->name()), parent->GetDescriptor(), row_in_parent),
         field_or_null_(nullptr) {}
   PrimitiveModel(MessageModel *parent, const FieldDescriptor *field);
 
@@ -51,7 +51,10 @@ class PrimitiveModel : public ProtoModel {
   }
 
   QString DebugName() const override {
-    if (field_or_null_) return QString::fromStdString("PrimitiveModel<" + field_or_null_->full_name() + ">");
+    if (field_or_null_) {
+      auto full_name_sv = field_or_null_->full_name();
+      return QString::fromStdString("PrimitiveModel<" + std::string(full_name_sv) + ">");
+    }
     return _parentModel->DebugName() + "[" + QString::number(row_in_parent_) + "]";
   }
   PrimitiveModel *TryCastAsPrimitiveModel() override { return this; }

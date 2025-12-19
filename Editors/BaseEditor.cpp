@@ -12,10 +12,17 @@ BaseEditor::BaseEditor(MessageModel* resource_model, QWidget* parent)
   // Backup should be deleted by Qt's garbage collector when this editor is closed
   _resMapper->GetModel()->BackupModel(this);
 
-  connect(_model, &QAbstractItemModel::modelReset, [this]() { this->RebindSubModels(); });
+  _modelResetConnection = connect(_model, &QAbstractItemModel::modelReset, [this]() { this->RebindSubModels(); });
 }
 
 BaseEditor::~BaseEditor() {
+  // Disconnect the modelReset signal before RestoreBackup to prevent use-after-free
+  // in derived editors' RebindSubModels() when _ui may have already been deleted
+  if (_modelResetConnection) {
+    disconnect(_modelResetConnection);
+    _modelResetConnection = QMetaObject::Connection();
+  }
+
   if (_reset_model_on_close) {
     _nodeMapper->clearMapping();
     if (!_resMapper->RestoreBackup()) {

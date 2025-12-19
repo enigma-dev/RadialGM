@@ -96,11 +96,26 @@ PathEditor::PathEditor(MessageModel* model, QWidget* parent) : BaseEditor(model,
   PathEditor::RebindSubModels();
 }
 
-PathEditor::~PathEditor() { delete _ui; }
+PathEditor::~PathEditor() {
+  // Disconnect the signal connection before deleting _ui to prevent use-after-free
+  if (_dataChangedConnection) {
+    disconnect(_dataChangedConnection);
+  }
+  delete _ui;
+}
 
 void PathEditor::RebindSubModels() {
+  // Disconnect previous connection if it exists (RebindSubModels can be called multiple times)
+  if (_dataChangedConnection) {
+    disconnect(_dataChangedConnection);
+    _dataChangedConnection = QMetaObject::Connection();
+  }
+
   _pathModel = _model->GetSubModel<MessageModel*>(TreeNode::kPathFieldNumber);
-  connect(_pathModel, &ProtoModel::DataChanged, this, [this]() { _ui->roomView->update(); });
+  _dataChangedConnection = connect(_pathModel, &ProtoModel::DataChanged, this, [this]() {
+    if (!_ui) return;  // Guard against use-after-free
+    _ui->roomView->update();
+  });
 
   _ui->roomView->SetPathModel(_pathModel);
   _pointsModel = _pathModel->GetSubModel<RepeatedMessageModel*>(Path::kPointsFieldNumber);

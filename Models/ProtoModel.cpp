@@ -79,11 +79,11 @@ void ProtoModel::DisplayConfig::SetMessageIconIdField(const std::string &message
 
 void ProtoModel::DisplayConfig::SetFieldIconLookup(const FieldDescriptor *field,
                                                    FieldDisplayConfig::IconLookupFn icon_lookup_function) {
-  field_display_configs_[field->full_name()].icon_lookup_function = icon_lookup_function;
+  field_display_configs_[std::string(field->full_name())].icon_lookup_function = icon_lookup_function;
 }
 
 void ProtoModel::DisplayConfig::SetFieldDefaultIcon(const FieldDescriptor *field, const QString &icon_name) {
-  field_display_configs_[field->full_name()].default_icon_name = icon_name;
+  field_display_configs_[std::string(field->full_name())].default_icon_name = icon_name;
 }
 
 void ProtoModel::DisplayConfig::SetFieldHeaderIcon(const std::string &message, const FieldPath &field_path,
@@ -139,15 +139,19 @@ void ProtoModel::SetDisplayConfig(const DisplayConfig &display_config) { display
 QVariant ProtoModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int /*role*/) const { return {}; }
 
 QString ProtoModel::GetDisplayName() const {
-  QString name = GetFieldDisplay(GetDescriptor()->full_name()).name;
+  QString name = GetFieldDisplay(std::string(GetDescriptor()->full_name())).name;
   if (!name.isEmpty()) return name;
   // Require Message to avoid grabbing Nth field name for Nth item in a RepeatedMessageModel...
   if (auto *parent = _parentModel ? _parentModel->TryCastAsMessageModel() : nullptr) {
-    if (const auto *fd = parent->GetRowDescriptor(row_in_parent_))
-      name = QString::fromStdString(fd->name());
+    if (const auto *fd = parent->GetRowDescriptor(row_in_parent_)) {
+      auto fd_name_sv = fd->name();
+      name = QString::fromUtf8(fd_name_sv.data(), fd_name_sv.size());
+    }
   }
-  if (name.isEmpty())
-    name = QString::fromStdString(GetDescriptor()->name());
+  if (name.isEmpty()) {
+    auto desc_name_sv = GetDescriptor()->name();
+    name = QString::fromUtf8(desc_name_sv.data(), desc_name_sv.size());
+  }
   if (name.isEmpty())
     name = DebugName();
   return name;
